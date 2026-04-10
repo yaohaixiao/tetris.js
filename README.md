@@ -30,6 +30,7 @@ tetris.js - 一款 JavaScript 开发的仿 FC 经典俄罗斯方块游戏
 
 ## License
 
-- tetris.js - Licensed under [MIT License](http://opensource.org/licenses/mit-license.html).
+- tetris.js - Licensed under
+  [MIT License](http://opensource.org/licenses/mit-license.html).
 
 - Press Start 2P fonts (GOOGLE) - Licensed under [OFL License](./font/OFL.txt)
