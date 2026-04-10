@@ -1,0 +1,60 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import chalk from 'chalk';
+
+import isFileExists from './is-file-exists.js';
+import isFunction from './is-function.js';
+
+/**
+ * # （同步）读取文本文件数据
+ *
+ * @function readFile
+ * @param {string} filePath - 读取文件的路径
+ * @param {object | string | Function} [options='utf8'] -
+ *   可选，读取文件的配置信息或者文件读取完成后的处理函数. Default is `'utf8'`
+ * @param {Function} [callback=null] - 可选，文件读取完成后的处理函数. Default is `null`
+ * @returns {Buffer | string} - 返回读取文件的文本字符串或者Buffer数据
+ */
+const readFile = (filePath, options = 'utf8', callback = null) => {
+  const { resolve } = path;
+  const finalFilePath = resolve(filePath);
+  const defaultOptions = {
+    encoding: 'utf8',
+    flag: 'r',
+  };
+  let finalOptions = {};
+  let content = '';
+  let afterRead = callback;
+
+  if (!isFileExists(finalFilePath)) {
+    console.log(
+      chalk.yellowBright('警告：'),
+      chalk.blueBright(finalFilePath),
+      chalk.yellow('文件不存在或已被删除。'),
+    );
+    return content;
+  }
+
+  if (isFunction(options)) {
+    afterRead = options;
+    finalOptions = { ...defaultOptions };
+  } else {
+    finalOptions =
+      typeof options === 'string'
+        ? {
+            ...defaultOptions,
+            encoding: options,
+          }
+        : { ...defaultOptions, ...options };
+  }
+
+  content = fs.readFileSync(finalFilePath, finalOptions);
+
+  if (isFunction(afterRead)) {
+    afterRead(content);
+  }
+
+  return content;
+};
+
+export default readFile;

@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+npm run format:es
+npm run format:prettier
+npx commitlint --edit
