@@ -1,6 +1,6 @@
 # tetris.js
 
-tetris.js - JavaScript 开发的基于浏览器的仿FC俄罗斯方块游戏
+tetris.js - 一款 JavaScript 开发的仿 FC 经典俄罗斯方块游戏
 
 ![俄罗斯方块游戏截图](./img/screen-shot.png)
 

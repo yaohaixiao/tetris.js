@@ -1,8 +1,8 @@
 {
-  "name": "@yaohaixiao/tetris",
+  "name": "@yaohaixiao/tetris.js",
   "version": "0.1.0",
-  "description": "tetris - 一款 JavaScript 开发的仿 FC 经典俄罗斯方块游戏",
-  "main": "dist/js/tetris.js",
+  "description": "tetris.js - 一款 JavaScript 开发的仿 FC 经典俄罗斯方块游戏",
+  "main": "tetris.html",
   "scripts": {
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "build:formatted": "node build/build.js action=format",
