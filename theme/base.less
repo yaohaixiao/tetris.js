@@ -1,8 +1,10 @@
+@import './variable.less';
+
 html, body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  color: #fff;
+  color: @white;
   image-rendering: pixelated;
   display: flex;
   align-items: center;
@@ -10,6 +12,6 @@ html, body {
 }
 
 body {
-  background: url(./img/bg.jpg);
+  background:@black url(./img/bg.jpg);
   background-size: cover;
 }
