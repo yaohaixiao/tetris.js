@@ -459,7 +459,7 @@ var tetris = (() => {
     }
     return false;
   }
-  function drawClearEffects() {
+  function drawClearEffect() {
     for (const line of gameState.clearEffects) {
       ctx.save();
       ctx.globalAlpha = line.alpha;
@@ -472,8 +472,8 @@ var tetris = (() => {
   function triggerClearEffect() {
     drawBoard(gameState.board);
     drawCurr(gameState.curr, gameState.cx, gameState.cy);
-    drawClearEffects();
-    if (updateClearEffects()) {
+    drawClearEffect();
+    if (updateClearEffect()) {
       let clear = 0;
       for (let y = BOARD_ROWS - 1; y >= 0; y--) {
         const isFullLine = gameState.board[y].every((cell) => !!cell);
@@ -506,7 +506,7 @@ var tetris = (() => {
       requestAnimationFrame(triggerClearEffect);
     }
   }
-  function updateClearEffects() {
+  function updateClearEffect() {
     let allDone = true;
     for (const line of gameState.clearEffects) {
       const phase = Math.floor(line.timer / 0.12);
@@ -694,7 +694,7 @@ var tetris = (() => {
     playBGM();
     updateSpeed();
   };
-  var executeResetGameCommand = () => {
+  var executeDrawLevelSelectCommand = () => {
     stopBGM();
     clearInterval(gameState.gameInterval);
     resetBoard();
@@ -791,7 +791,7 @@ var tetris = (() => {
     }
     if (gameState.isGameOver) {
       if (key === "Enter") {
-        executeResetGameCommand();
+        executeDrawLevelSelectCommand();
       }
       return false;
     }
