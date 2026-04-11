@@ -14,6 +14,14 @@ var tetris = (() => {
   var COLOR_BLACK = "#444";
   var COLOR_RGBA_BLACK = "rgba(0,0,0,.8)";
   var COLOR_WHITE = "#fff";
+  var FIREWORKS_COLORS = [
+    COLOR_TEAL,
+    COLOR_YELLOW,
+    COLOR_PURPLE,
+    COLOR_ORANGE,
+    COLOR_GREEN,
+    COLOR_RED
+  ];
   var TETROMINOES = [
     // I型方块（长条）：1行4列
     { shape: [[1, 1, 1, 1]], color: COLOR_TEAL },
@@ -66,14 +74,6 @@ var tetris = (() => {
       color: COLOR_RED
     }
   ];
-  var FIREWORKS_COLORS = [
-    COLOR_TEAL,
-    COLOR_YELLOW,
-    COLOR_PURPLE,
-    COLOR_ORANGE,
-    COLOR_GREEN,
-    COLOR_RED
-  ];
 
   // lib/state.js
   var gameState = {
@@ -100,39 +100,28 @@ var tetris = (() => {
     gameInterval: null,
     holdP: null
   };
-  var resetBoard = () => {
+  function resetBoard() {
     gameState.board = Array.from(
       { length: BOARD_ROWS },
       () => Array.from({ length: BOARD_COLS }).fill(0)
     );
-  };
-  var loadHighScore = () => {
+  }
+  function loadHighScore() {
     gameState.highScore = Number.parseInt(localStorage.getItem("tetris-high-score"), 10) || 0;
-  };
-  var saveHighScore = () => {
+  }
+  function saveHighScore() {
     const { score } = gameState;
     if (score > gameState.highScore) {
       gameState.highScore = score;
       localStorage.setItem("tetris-high-score", gameState.highScore.toString());
     }
-  };
+  }
 
   // lib/audio.js
   var AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext;
   var audioCtx = new AudioContext();
   var bgmTimer = null;
   var bgmEnabled = true;
-  var playTone = (freq, dur, vol = 0.1, wave = "square") => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = wave;
-    osc.frequency.value = freq;
-    gain.gain.value = vol;
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    setTimeout(() => osc.stop(), dur);
-  };
   var sounds = {
     // 左右移动
     move: () => playTone(330, 60),
@@ -177,6 +166,17 @@ var tetris = (() => {
     // 背景音乐开关
     bgmToggle: () => playTone(440, 100)
   };
+  function playTone(freq, dur, vol = 0.1, wave = "square") {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = wave;
+    osc.frequency.value = freq;
+    gain.gain.value = vol;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    setTimeout(() => osc.stop(), dur);
+  }
   var loopPlayBGM = (i, m) => {
     if (i >= m.length) {
       i = 0;
@@ -184,13 +184,13 @@ var tetris = (() => {
     playTone(m[i], 110, 0.05);
     bgmTimer = setTimeout(() => loopPlayBGM(i + 1, m), 130);
   };
-  var stopBGM = () => {
+  function stopBGM() {
     if (bgmTimer) {
       clearTimeout(bgmTimer);
     }
     bgmTimer = null;
-  };
-  var playBGM = () => {
+  }
+  function playBGM() {
     if (!bgmEnabled) {
       return false;
     }
@@ -230,8 +230,8 @@ var tetris = (() => {
       587
     ];
     loopPlayBGM(0, m);
-  };
-  var toggleBGM = () => {
+  }
+  function toggleBGM() {
     bgmEnabled = !bgmEnabled;
     sounds.bgmToggle();
     if (bgmEnabled) {
@@ -239,10 +239,153 @@ var tetris = (() => {
     } else {
       stopBGM();
     }
-  };
+  }
 
   // lib/utils.js
   var pad = (n, len) => n.toString().padStart(len, "0");
+
+  // lib/game.js
+  function randomTetromino() {
+    const randomIndex = Math.floor(Math.random() * TETROMINOES.length);
+    return TETROMINOES[randomIndex];
+  }
+  var getSpeed = () => (
+    // 计算速度：基础值1000ms，每升一级减少80ms，最低不低于100ms
+    Math.max(100, 1e3 - (gameState.level - 1) * 80)
+  );
+  function updateSpeed() {
+    clearInterval(gameState.gameInterval);
+    gameState.gameInterval = setInterval(loop, getSpeed());
+  }
+  function gameOver() {
+    if (gameState.isGameOver) {
+      return false;
+    }
+    gameState.isGameOver = true;
+    stopBGM();
+    clearInterval(gameState.gameInterval);
+    sounds.gameOver();
+    saveHighScore();
+    setTimeout(drawOver, 20);
+  }
+  function clearLines() {
+    let clear = 0;
+    const linesToClear = [];
+    for (let y = BOARD_ROWS - 1; y >= 0; y--) {
+      const isLineFull = gameState.board[y].every((cell) => !!cell);
+      if (isLineFull) {
+        linesToClear.push(y);
+        clear++;
+      }
+    }
+    if (clear === 0) {
+      updateUI(
+        gameState.score,
+        gameState.lines,
+        gameState.level,
+        gameState.highScore
+      );
+      saveHighScore();
+      return false;
+    }
+    for (const y of linesToClear) {
+      addClearEffect(y);
+    }
+    sounds.clear();
+    triggerClearEffect();
+    return true;
+  }
+  function spawn() {
+    gameState.curr = gameState.next || randomTetromino();
+    gameState.next = randomTetromino();
+    gameState.cx = Math.floor(BOARD_COLS / 2) - Math.floor(gameState.curr.shape[0].length / 2);
+    gameState.cy = 0;
+    drawNext(gameState.next);
+    if (collision(0, 0)) {
+      gameOver();
+    }
+  }
+  function lock() {
+    const s = gameState.curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          gameState.board[gameState.cy + y][gameState.cx + x] = gameState.curr.color;
+        }
+      }
+    }
+  }
+  function loop() {
+    if (gameState.levelUpEffect.show) {
+      updateLevelUpEffect();
+      drawBoard(gameState.board);
+      drawCurr(gameState.curr, gameState.cx, gameState.cy);
+      drawLevelUpEffect();
+      return true;
+    }
+    if (gameState.isGameOver || gameState.isPaused) {
+      return false;
+    }
+    if (!move(0, 1)) {
+      lock();
+      sounds.fall();
+      clearLines();
+      spawn();
+      if (gameState.isGameOver) {
+        return false;
+      }
+    }
+    drawBoard(gameState.board);
+    drawCurr(gameState.curr, gameState.cx, gameState.cy);
+    return true;
+  }
+  function collision(ox, oy) {
+    const s = gameState.curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          const nx = gameState.cx + x + ox;
+          const ny = gameState.cy + y + oy;
+          if (nx < 0 || nx >= BOARD_COLS || ny >= BOARD_ROWS || ny >= 0 && gameState.board[ny][nx]) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+  function move(ox, oy) {
+    if (!collision(ox, oy)) {
+      gameState.cx += ox;
+      gameState.cy += oy;
+      sounds.move();
+      return true;
+    }
+    return false;
+  }
+  var rotate = () => {
+    const prev = gameState.curr.shape;
+    gameState.curr.shape = prev[0].map(
+      (_, i) => prev.map((r) => r[i]).toReversed()
+    );
+    if (collision(0, 0)) {
+      gameState.curr.shape = prev;
+    } else {
+      sounds.rotate();
+    }
+  };
+  function drop() {
+    while (true) {
+      if (!move(0, 1)) {
+        break;
+      }
+    }
+    lock();
+    sounds.fall();
+    clearLines();
+    spawn();
+    sounds.drop();
+  }
 
   // lib/ui.js
   var canvas = document.querySelector("#game-board");
@@ -283,7 +426,7 @@ var tetris = (() => {
     ctx.restore();
     return true;
   }
-  function triggerLevelUp() {
+  function triggerLevelUpEffect() {
     const { width, height } = canvas;
     const fireworks = [];
     gameState.levelUpEffect.show = true;
@@ -306,7 +449,7 @@ var tetris = (() => {
     stopBGM();
     sounds.levelUp();
   }
-  function updateLevelUpAnim() {
+  function updateLevelUpEffect() {
     gameState.levelUpEffect.timer++;
     if (gameState.levelUpEffect.timer > 3) {
       gameState.levelUpEffect.show = false;
@@ -316,7 +459,72 @@ var tetris = (() => {
     }
     return false;
   }
-  var drawBlock = (ctx2, x, y, color) => {
+  function drawClearEffects() {
+    for (const line of gameState.clearEffects) {
+      ctx.save();
+      ctx.globalAlpha = line.alpha;
+      for (let x = 0; x < BOARD_COLS; x++) {
+        drawBlock(ctx, x, line.y, line.color);
+      }
+      ctx.restore();
+    }
+  }
+  function triggerClearEffect() {
+    drawBoard(gameState.board);
+    drawCurr(gameState.curr, gameState.cx, gameState.cy);
+    drawClearEffects();
+    if (updateClearEffects()) {
+      let clear = 0;
+      for (let y = BOARD_ROWS - 1; y >= 0; y--) {
+        const isFullLine = gameState.board[y].every((cell) => !!cell);
+        if (isFullLine) {
+          gameState.board.splice(y, 1);
+          gameState.board.unshift(Array.from({ length: BOARD_COLS }).fill(0));
+          clear++;
+          y++;
+        }
+      }
+      gameState.lines += clear;
+      gameState.score += CLEAR_SCORES[clear] * gameState.level;
+      const totalLines = gameState.baseLines + gameState.lines;
+      const newLevel = Math.floor(totalLines / 10) + 1;
+      const oldLevel = gameState.level;
+      if (newLevel > oldLevel) {
+        triggerLevelUpEffect();
+      }
+      gameState.level = Math.min(Math.max(gameState.level, newLevel), MAX_LEVEL);
+      updateSpeed();
+      updateUI(
+        gameState.score,
+        gameState.lines,
+        gameState.level,
+        gameState.highScore
+      );
+      saveHighScore();
+      gameState.clearEffects = [];
+    } else {
+      requestAnimationFrame(triggerClearEffect);
+    }
+  }
+  function updateClearEffects() {
+    let allDone = true;
+    for (const line of gameState.clearEffects) {
+      const phase = Math.floor(line.timer / 0.12);
+      line.alpha = phase % 2 === 0 ? 1 : 0;
+      line.timer += 0.016;
+      if (line.timer < 0.72) {
+        allDone = false;
+      }
+    }
+    return allDone;
+  }
+  function addClearEffect(y) {
+    const isLineContains = gameState.clearEffects.some((line) => line.y === y);
+    if (!isLineContains) {
+      gameState.clearEffects.push({ y, alpha: 1, timer: 0 });
+    }
+  }
+  function drawBlock(ctx2, x, y, color) {
     const bs = BLOCK_SIZE;
     const gap = 1;
     const size = bs - gap * 2;
@@ -326,18 +534,8 @@ var tetris = (() => {
     ctx2.fillRect(px, py, size, size);
     ctx2.strokeStyle = COLOR_BLACK;
     ctx2.strokeRect(px, py, size, size);
-  };
-  var drawClearEffects = () => {
-    for (const line of gameState.clearEffects) {
-      ctx.save();
-      ctx.globalAlpha = line.alpha;
-      for (let x = 0; x < BOARD_COLS; x++) {
-        drawBlock(ctx, x, line.y, line.color);
-      }
-      ctx.restore();
-    }
-  };
-  var drawBoard = (board) => {
+  }
+  function drawBoard(board) {
     const { width, height } = canvas;
     ctx.clearRect(0, 0, width, height);
     for (let y = 0; y < BOARD_ROWS; y++) {
@@ -347,8 +545,8 @@ var tetris = (() => {
         }
       }
     }
-  };
-  var drawCurr = (curr, cx, cy) => {
+  }
+  function drawCurr(curr, cx, cy) {
     const { shape, color } = curr;
     const { length } = shape;
     for (let y = 0; y < length; y++) {
@@ -358,8 +556,8 @@ var tetris = (() => {
         }
       }
     }
-  };
-  var drawNext = (next) => {
+  }
+  function drawNext(next) {
     const { shape } = next;
     const { width, height } = nextCanvas;
     const gridSize = 5;
@@ -379,8 +577,8 @@ var tetris = (() => {
         }
       }
     }
-  };
-  var drawLevelSelect = (level) => {
+  }
+  function drawLevelSelect(level) {
     const { width, height } = canvas;
     ctx.clearRect(0, 0, width, height);
     ctx.textAlign = "center";
@@ -392,8 +590,8 @@ var tetris = (() => {
     ctx.fillText("1-9 KEY", width / 2, height * 0.55);
     ctx.fillText("P 3SEC: HIDDEN", width / 2, height * 0.68);
     ctx.fillText("ENTER START", width / 2, height * 0.81);
-  };
-  var drawPause = () => {
+  }
+  function drawPause() {
     const { width, height } = canvas;
     ctx.fillStyle = COLOR_RGBA_BLACK;
     ctx.fillRect(0, 0, width, height);
@@ -401,8 +599,8 @@ var tetris = (() => {
     ctx.textAlign = "center";
     ctx.font = `${baseFontSize}px "Press Start 2P"`;
     ctx.fillText("PAUSED", width / 2, height / 2);
-  };
-  var drawOver = () => {
+  }
+  function drawOver() {
     const { width, height } = canvas;
     const { board } = gameState;
     drawBoard(board);
@@ -412,8 +610,8 @@ var tetris = (() => {
     ctx.textAlign = "center";
     ctx.font = `${baseFontSize}px "Press Start 2P"`;
     ctx.fillText("GAME OVER", width / 2, height / 2);
-  };
-  var forceOver = () => {
+  }
+  function forceOver() {
     stopBGM();
     gameState.isGameOver = true;
     clearInterval(gameState.gameInterval);
@@ -422,8 +620,8 @@ var tetris = (() => {
     setTimeout(() => {
       drawOver();
     }, 10);
-  };
-  var resize = () => {
+  }
+  function resize() {
     const { isSelectLevel, isGameOver, board, curr, cx, cy, level, next } = gameState;
     const h = globalThis.innerHeight * 0.9;
     BLOCK_SIZE = Math.floor(h / BOARD_ROWS);
@@ -445,213 +643,12 @@ var tetris = (() => {
         drawCurr(curr, cx, cy);
       }
     }
-  };
-  var updateUI = (score, lines, level, highScore) => {
+  }
+  function updateUI(score, lines, level, highScore) {
     document.querySelector("#score").textContent = pad(score, 5);
     document.querySelector("#lines").textContent = pad(lines, 2);
     document.querySelector("#level").textContent = pad(level, 2);
     document.querySelector("#highScore").textContent = pad(highScore, 5);
-  };
-  var updateClearEffects = () => {
-    let allDone = true;
-    for (const line of gameState.clearEffects) {
-      const phase = Math.floor(line.timer / 0.12);
-      line.alpha = phase % 2 === 0 ? 1 : 0;
-      line.timer += 0.016;
-      if (line.timer < 0.72) {
-        allDone = false;
-      }
-    }
-    return allDone;
-  };
-  var addClearEffect = (y) => {
-    const isLineContains = gameState.clearEffects.some((line) => line.y === y);
-    if (!isLineContains) {
-      gameState.clearEffects.push({ y, alpha: 1, timer: 0 });
-    }
-  };
-
-  // lib/game.js
-  var getSpeed = () => (
-    // 计算速度：基础值1000ms，每升一级减少80ms，最低不低于100ms
-    Math.max(100, 1e3 - (gameState.level - 1) * 80)
-  );
-  var randomTetromino = () => {
-    const randomIndex = Math.floor(Math.random() * TETROMINOES.length);
-    return TETROMINOES[randomIndex];
-  };
-  var collision = (ox, oy) => {
-    const s = gameState.curr.shape;
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          const nx = gameState.cx + x + ox;
-          const ny = gameState.cy + y + oy;
-          if (nx < 0 || nx >= BOARD_COLS || ny >= BOARD_ROWS || ny >= 0 && gameState.board[ny][nx]) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  };
-  var rotate = () => {
-    const prev = gameState.curr.shape;
-    gameState.curr.shape = prev[0].map(
-      (_, i) => prev.map((r) => r[i]).toReversed()
-    );
-    if (collision(0, 0)) {
-      gameState.curr.shape = prev;
-    } else {
-      sounds.rotate();
-    }
-  };
-  function updateSpeed() {
-    clearInterval(gameState.gameInterval);
-    gameState.gameInterval = setInterval(loop, getSpeed());
-  }
-  var drawClearFlash = () => {
-    drawBoard(gameState.board);
-    drawCurr(gameState.curr, gameState.cx, gameState.cy);
-    drawClearEffects();
-    if (updateClearEffects()) {
-      let clear = 0;
-      for (let y = BOARD_ROWS - 1; y >= 0; y--) {
-        const isFullLine = gameState.board[y].every((cell) => !!cell);
-        if (isFullLine) {
-          gameState.board.splice(y, 1);
-          gameState.board.unshift(Array.from({ length: BOARD_COLS }).fill(0));
-          clear++;
-          y++;
-        }
-      }
-      gameState.lines += clear;
-      gameState.score += CLEAR_SCORES[clear] * gameState.level;
-      const totalLines = gameState.baseLines + gameState.lines;
-      const newLevel = Math.floor(totalLines / 10) + 1;
-      const oldLevel = gameState.level;
-      if (newLevel > oldLevel) {
-        triggerLevelUp();
-      }
-      gameState.level = Math.min(Math.max(gameState.level, newLevel), MAX_LEVEL);
-      updateSpeed();
-      updateUI(
-        gameState.score,
-        gameState.lines,
-        gameState.level,
-        gameState.highScore
-      );
-      saveHighScore();
-      gameState.clearEffects = [];
-      updateSpeed();
-    } else {
-      requestAnimationFrame(drawClearFlash);
-    }
-  };
-  function gameOver() {
-    if (gameState.isGameOver) {
-      return false;
-    }
-    gameState.isGameOver = true;
-    stopBGM();
-    clearInterval(gameState.gameInterval);
-    sounds.gameOver();
-    saveHighScore();
-    setTimeout(drawOver, 20);
-  }
-  function spawn() {
-    gameState.curr = gameState.next || randomTetromino();
-    gameState.next = randomTetromino();
-    gameState.cx = Math.floor(BOARD_COLS / 2) - Math.floor(gameState.curr.shape[0].length / 2);
-    gameState.cy = 0;
-    drawNext(gameState.next);
-    if (collision(0, 0)) {
-      gameOver();
-    }
-  }
-  function move(ox, oy) {
-    if (!collision(ox, oy)) {
-      gameState.cx += ox;
-      gameState.cy += oy;
-      sounds.move();
-      return true;
-    }
-    return false;
-  }
-  function lock() {
-    const s = gameState.curr.shape;
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          gameState.board[gameState.cy + y][gameState.cx + x] = gameState.curr.color;
-        }
-      }
-    }
-  }
-  function clearLines() {
-    let clear = 0;
-    const linesToClear = [];
-    for (let y = BOARD_ROWS - 1; y >= 0; y--) {
-      const isLineFull = gameState.board[y].every((cell) => !!cell);
-      if (isLineFull) {
-        linesToClear.push(y);
-        clear++;
-      }
-    }
-    if (clear === 0) {
-      updateUI(
-        gameState.score,
-        gameState.lines,
-        gameState.level,
-        gameState.highScore
-      );
-      saveHighScore();
-      return false;
-    }
-    for (const y of linesToClear) {
-      addClearEffect(y);
-    }
-    sounds.clear();
-    gameState.lines += clear;
-    gameState.score += CLEAR_SCORES[clear] * gameState.level;
-    drawClearFlash();
-    return true;
-  }
-  function loop() {
-    if (gameState.levelUpEffect.show) {
-      updateLevelUpAnim();
-      drawBoard(gameState.board);
-      drawCurr(gameState.curr, gameState.cx, gameState.cy);
-      drawLevelUpEffect();
-      return true;
-    }
-    if (gameState.isGameOver || gameState.isPaused) {
-      return false;
-    }
-    if (!move(0, 1)) {
-      lock();
-      sounds.fall();
-      clearLines();
-      spawn();
-      if (gameState.isGameOver) {
-        return false;
-      }
-    }
-    drawBoard(gameState.board);
-    drawCurr(gameState.curr, gameState.cx, gameState.cy);
-    return true;
-  }
-  function drop() {
-    while (true) {
-      if (!move(0, 1)) {
-        break;
-      }
-    }
-    lock();
-    sounds.fall();
-    clearLines();
-    spawn();
-    sounds.drop();
   }
 
   // lib/tetris.js
@@ -697,7 +694,7 @@ var tetris = (() => {
     playBGM();
     updateSpeed();
   };
-  var backToMenu = () => {
+  var executeResetGameCommand = () => {
     stopBGM();
     clearInterval(gameState.gameInterval);
     resetBoard();
@@ -728,7 +725,7 @@ var tetris = (() => {
     clearTimeout(gameState.holdP);
     gameState.holdP = null;
   };
-  var handleLevelSelect = (key, lowerKey) => {
+  var executeLevelSelectionCommand = (key, lowerKey) => {
     if (key >= "1" && key <= "9") {
       gameState.level = Number.parseInt(key, 10);
       sounds.levelSelect();
@@ -741,8 +738,8 @@ var tetris = (() => {
       start();
     }
   };
-  var handleGlobalShortcuts = (lowerKey) => {
-    const actions = {
+  var executeShortcutsCommand = (lowerKey) => {
+    const commands = {
       m: toggleBGM,
       // M: 切换背景音乐
       r: restartGame,
@@ -752,14 +749,14 @@ var tetris = (() => {
       p: togglePause
       // P: 暂停/继续游戏
     };
-    const action = actions[lowerKey];
-    if (action) {
-      action();
+    const command = commands[lowerKey];
+    if (command) {
+      command();
       return true;
     }
     return false;
   };
-  function handleDirectionalControls(key) {
+  function executeDirectionControlCommand(key) {
     const controls = {
       ArrowLeft: () => move(-1, 0),
       // 左移
@@ -777,38 +774,41 @@ var tetris = (() => {
       action();
     }
   }
-  var handleStopHold = (e) => {
+  function onResize() {
+    resize();
+  }
+  var onPauseStop = (e) => {
     if (e.key.toLowerCase() === "p") {
       stopHold();
     }
   };
-  var handleGameControls = (e) => {
+  var onControlButtonsPress = (e) => {
     const { key } = e;
     const lowerKey = key.toLowerCase();
     if (gameState.isSelectLevel) {
-      handleLevelSelect(key, lowerKey);
+      executeLevelSelectionCommand(key, lowerKey);
       return false;
     }
     if (gameState.isGameOver) {
       if (key === "Enter") {
-        backToMenu();
+        executeResetGameCommand();
       }
       return false;
     }
-    if (handleGlobalShortcuts(lowerKey)) {
+    if (executeShortcutsCommand(lowerKey)) {
       return false;
     }
-    if (gameState.isPaused || gameState.levelUpEffect.show) {
+    if (gameState.isPaused) {
       return false;
     }
-    handleDirectionalControls(key);
+    executeDirectionControlCommand(key);
     drawBoard(gameState.board);
     drawCurr(gameState.curr, gameState.cx, gameState.cy);
   };
   var bindEvents = () => {
-    globalThis.addEventListener("resize", resize);
-    document.addEventListener("keydown", handleGameControls);
-    document.addEventListener("keyup", handleStopHold);
+    globalThis.addEventListener("resize", onResize);
+    document.addEventListener("keydown", onControlButtonsPress);
+    document.addEventListener("keyup", onPauseStop);
   };
   var init = () => {
     resetBoard();
