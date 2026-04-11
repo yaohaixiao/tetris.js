@@ -17,13 +17,13 @@ const HtmlTemplate = `
         <h3 class="next-title">NEXT</h3>
         <canvas id="next-piece" class="next-piece"></canvas>
       </section>
-      <section class="panel info">
+      <section class="panel data">
         <p class="panel-text">SCORE:<br><span id="score">00000</span></p>
         <p class="panel-text">LINE:<br><span id="lines">00</span></p>
         <p class="panel-text">LEVEL:<br><span id="level">01</span></p>
         <p class="panel-text highlight">HI-SCORE:<br><span id="highScore">00000</span></p>
       </section>
-      <section class="panel help">
+      <section class="panel shutcuts">
         <p class="panel-text">Enter START</p>
         <p class="panel-text">↑ ROTATE</p>
         <p class="panel-text">← → MOVE</p>
