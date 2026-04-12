@@ -4,23 +4,23 @@ var tetris = (() => {
   var BOARD_ROWS = 20;
   var CLEAR_SCORES = [0, 100, 300, 500, 800];
   var MAX_LEVEL = 99;
-  var COLOR_TEAL = "#0ff";
-  var COLOR_YELLOW = "#ff0";
-  var COLOR_PURPLE = "#a0a";
-  var COLOR_BLUE = "#00f";
-  var COLOR_ORANGE = "#f80";
-  var COLOR_GREEN = "#0f0";
-  var COLOR_RED = "#f00";
-  var COLOR_BLACK = "#444";
-  var COLOR_RGBA_BLACK = "rgba(0,0,0,.5)";
-  var COLOR_WHITE = "#fff";
+  var COLOR_TEAL = '#0ff';
+  var COLOR_YELLOW = '#ff0';
+  var COLOR_PURPLE = '#a0a';
+  var COLOR_BLUE = '#00f';
+  var COLOR_ORANGE = '#f80';
+  var COLOR_GREEN = '#0f0';
+  var COLOR_RED = '#f00';
+  var COLOR_BLACK = '#444';
+  var COLOR_RGBA_BLACK = 'rgba(0,0,0,.5)';
+  var COLOR_WHITE = '#fff';
   var FIREWORKS_COLORS = [
     COLOR_TEAL,
     COLOR_YELLOW,
     COLOR_PURPLE,
     COLOR_ORANGE,
     COLOR_GREEN,
-    COLOR_RED
+    COLOR_RED,
   ];
   var TETROMINOES = [
     // I型方块（长条）：1行4列
@@ -29,55 +29,55 @@ var tetris = (() => {
     {
       shape: [
         [1, 1],
-        [1, 1]
+        [1, 1],
       ],
-      color: COLOR_YELLOW
+      color: COLOR_YELLOW,
     },
     // T型方块
     {
       shape: [
         [0, 1, 0],
-        [1, 1, 1]
+        [1, 1, 1],
       ],
-      color: COLOR_PURPLE
+      color: COLOR_PURPLE,
     },
     // L型方块
     {
       shape: [
         [1, 0, 0],
-        [1, 1, 1]
+        [1, 1, 1],
       ],
-      color: COLOR_BLUE
+      color: COLOR_BLUE,
     },
     // J型方块
     {
       shape: [
         [0, 0, 1],
-        [1, 1, 1]
+        [1, 1, 1],
       ],
-      color: COLOR_ORANGE
+      color: COLOR_ORANGE,
     },
     // S型方块（右斜）
     {
       shape: [
         [0, 1, 1],
-        [1, 1, 0]
+        [1, 1, 0],
       ],
-      color: COLOR_GREEN
+      color: COLOR_GREEN,
     },
     // Z型方块（左斜）
     {
       shape: [
         [1, 1, 0],
-        [0, 1, 1]
+        [0, 1, 1],
       ],
-      color: COLOR_RED
-    }
+      color: COLOR_RED,
+    },
   ];
   var GAME_FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
 
   // lib/utils.js
-  var pad = (n, len) => n.toString().padStart(len, "0");
+  var pad = (n, len) => n.toString().padStart(len, '0');
   var setStorage = (key, value) => {
     localStorage.setItem(key, value);
   };
@@ -96,7 +96,7 @@ var tetris = (() => {
       scale: 4,
       count: 0,
       rafId: null,
-      timestamp: 0
+      timestamp: 0,
     },
     board: [],
     curr: null,
@@ -109,7 +109,7 @@ var tetris = (() => {
     levelUpEffect: {
       show: false,
       timer: 0,
-      fireworks: []
+      fireworks: [],
     },
     score: 0,
     lines: 0,
@@ -119,22 +119,22 @@ var tetris = (() => {
     isHiddenMode: false,
     isPaused: false,
     isGameOver: false,
-    holdP: null
+    holdP: null,
   };
   function resetBoard() {
-    gameState.board = Array.from(
-      { length: BOARD_ROWS },
-      () => Array.from({ length: BOARD_COLS }).fill(0)
+    gameState.board = Array.from({ length: BOARD_ROWS }, () =>
+      Array.from({ length: BOARD_COLS }).fill(0),
     );
   }
   function loadHighScore() {
-    gameState.highScore = Number.parseInt(getStorage("tetris-high-score"), 10) || 0;
+    gameState.highScore =
+      Number.parseInt(getStorage('tetris-high-score'), 10) || 0;
   }
   function saveHighScore() {
     const { score } = gameState;
     if (score > gameState.highScore) {
       gameState.highScore = score;
-      setStorage("tetris-high-score", gameState.highScore.toString());
+      setStorage('tetris-high-score', gameState.highScore.toString());
     }
   }
 
@@ -145,11 +145,11 @@ var tetris = (() => {
   var bgmEnabled = true;
   var sounds = {
     // 等级选择界面（正弦波柔和音效）
-    levelSelect: () => playTone(523, 80, 0.1, "sine"),
+    levelSelect: () => playTone(523, 80, 0.1, 'sine'),
     // 倒计时音效
-    countdown: () => playTone(784, 180, 0.3, "sine"),
+    countdown: () => playTone(784, 180, 0.3, 'sine'),
     // 等级开始 / 升级
-    levelStart: () => playTone(1319, 160, 0.22, "sine"),
+    levelStart: () => playTone(1319, 160, 0.22, 'sine'),
     // 背景音乐开关
     bgmToggle: () => playTone(440, 100),
     // 左右移动
@@ -162,10 +162,10 @@ var tetris = (() => {
     fall: () => playTone(180, 200),
     // 消除行（三连音旋律）
     clear: () => {
-      playTone(587, 220, 0.35, "square");
-      setTimeout(() => playTone(698, 260, 0.32, "square"), 160);
-      setTimeout(() => playTone(880, 300, 0.3, "square"), 320);
-      setTimeout(() => playTone(1174, 380, 0.25, "square"), 480);
+      playTone(587, 220, 0.35, 'square');
+      setTimeout(() => playTone(698, 260, 0.32, 'square'), 160);
+      setTimeout(() => playTone(880, 300, 0.3, 'square'), 320);
+      setTimeout(() => playTone(1174, 380, 0.25, 'square'), 480);
     },
     // 升级清除界面音效
     levelUp: () => {
@@ -187,9 +187,9 @@ var tetris = (() => {
       playTone(330, 200);
       setTimeout(() => playTone(294, 300), 210);
       setTimeout(() => playTone(262, 500), 520);
-    }
+    },
   };
-  function playTone(freq, dur, vol = 0.1, wave = "square") {
+  function playTone(freq, dur, vol = 0.1, wave = 'square') {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = wave;
@@ -219,38 +219,9 @@ var tetris = (() => {
     }
     stopBGM();
     const m = [
-      659,
-      659,
-      587,
-      659,
-      784,
-      880,
-      523,
-      523,
-      440,
-      523,
-      659,
-      784,
-      659,
-      659,
-      587,
-      659,
-      784,
-      880,
-      988,
-      880,
-      784,
-      659,
-      880,
-      784,
-      659,
-      587,
-      523,
-      587,
-      659,
-      784,
-      659,
-      587
+      659, 659, 587, 659, 784, 880, 523, 523, 440, 523, 659, 784, 659, 659, 587,
+      659, 784, 880, 988, 880, 784, 659, 880, 784, 659, 587, 523, 587, 659, 784,
+      659, 587,
     ];
     loopPlayBGM(0, m);
   }
@@ -270,6 +241,10 @@ var tetris = (() => {
     return TETROMINOES[randomIndex];
   }
   var startGame = () => {
+    const $level = document.querySelector('#level');
+    if ($level) {
+      $level.textContent = pad(gameState.level, 2);
+    }
     spawn();
     sounds.levelStart();
     setTimeout(() => {
@@ -277,13 +252,15 @@ var tetris = (() => {
     }, 250);
     updateSpeed();
   };
-  var getSpeed = () => (
+  var getSpeed = () =>
     // 计算速度：基础值1000ms，每升一级减少80ms，最低不低于100ms
-    Math.max(100, 1e3 - (gameState.level - 1) * 80)
-  );
+    Math.max(100, 1e3 - (gameState.level - 1) * 80);
   var gameSpeedLoop = (timestamp) => {
     const dropInterval = getSpeed();
-    if (!gameState.gameTimestamp || timestamp - gameState.gameTimestamp > dropInterval) {
+    if (
+      !gameState.gameTimestamp ||
+      timestamp - gameState.gameTimestamp > dropInterval
+    ) {
       loop();
       gameState.gameTimestamp = timestamp;
     }
@@ -319,7 +296,7 @@ var tetris = (() => {
         gameState.score,
         gameState.lines,
         gameState.level,
-        gameState.highScore
+        gameState.highScore,
       );
       saveHighScore();
       return false;
@@ -334,7 +311,9 @@ var tetris = (() => {
   function spawn() {
     gameState.curr = gameState.next || randomTetromino();
     gameState.next = randomTetromino();
-    gameState.cx = Math.floor(BOARD_COLS / 2) - Math.floor(gameState.curr.shape[0].length / 2);
+    gameState.cx =
+      Math.floor(BOARD_COLS / 2) -
+      Math.floor(gameState.curr.shape[0].length / 2);
     gameState.cy = 0;
     drawNext(gameState.next);
     if (collision(0, 0)) {
@@ -346,7 +325,8 @@ var tetris = (() => {
     for (let y = 0; y < s.length; y++) {
       for (let x = 0; x < s[y].length; x++) {
         if (s[y][x]) {
-          gameState.board[gameState.cy + y][gameState.cx + x] = gameState.curr.color;
+          gameState.board[gameState.cy + y][gameState.cx + x] =
+            gameState.curr.color;
         }
       }
     }
@@ -382,7 +362,12 @@ var tetris = (() => {
         if (s[y][x]) {
           const nx = gameState.cx + x + ox;
           const ny = gameState.cy + y + oy;
-          if (nx < 0 || nx >= BOARD_COLS || ny >= BOARD_ROWS || ny >= 0 && gameState.board[ny][nx]) {
+          if (
+            nx < 0 ||
+            nx >= BOARD_COLS ||
+            ny >= BOARD_ROWS ||
+            (ny >= 0 && gameState.board[ny][nx])
+          ) {
             return true;
           }
         }
@@ -401,8 +386,8 @@ var tetris = (() => {
   }
   var rotate = () => {
     const prev = gameState.curr.shape;
-    gameState.curr.shape = prev[0].map(
-      (_, i) => prev.map((r) => r[i]).toReversed()
+    gameState.curr.shape = prev[0].map((_, i) =>
+      prev.map((r) => r[i]).toReversed(),
     );
     if (collision(0, 0)) {
       gameState.curr.shape = prev;
@@ -424,19 +409,19 @@ var tetris = (() => {
   }
 
   // lib/ui.js
-  var canvas = document.querySelector("#game-board");
-  var ctx = canvas.getContext("2d");
-  var nextCanvas = document.querySelector("#next-piece");
-  var nextCtx = nextCanvas.getContext("2d");
+  var canvas = document.querySelector('#game-board');
+  var ctx = canvas.getContext('2d');
+  var nextCanvas = document.querySelector('#next-piece');
+  var nextCtx = nextCanvas.getContext('2d');
   var BLOCK_SIZE;
   var baseFontSize;
   var drawTetrisText = () => {
     const { width, height } = canvas;
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize * 1.1}px ${GAME_FONT_FAMILY}`;
     ctx.fillStyle = COLOR_GREEN;
-    ctx.fillText("TETRIS.JS", width / 2, height * 0.1);
+    ctx.fillText('TETRIS.JS', width / 2, height * 0.1);
     ctx.restore();
   };
   var drawFireworksEffect = () => {
@@ -461,8 +446,8 @@ var tetris = (() => {
     ctx.fillRect(0, 0, width, height);
     drawTetrisText();
     ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.translate(width / 2, height / 2);
     ctx.scale(cd.scale, cd.scale);
     ctx.font = `${baseFontSize * 3.25}px ${GAME_FONT_FAMILY}`;
@@ -473,13 +458,13 @@ var tetris = (() => {
     ctx.fillText(cd.number.toString(), 0, 0);
     ctx.restore();
     ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
     ctx.font = `${baseFontSize * 1.1}px ${GAME_FONT_FAMILY}`;
     ctx.fillStyle = COLOR_GREEN;
     ctx.strokeStyle = COLOR_BLACK;
-    ctx.strokeText("GET READY!", width / 2, height / 2 + 120);
-    ctx.fillText("GET READY!", width / 2, height / 2 + 120);
+    ctx.strokeText('GET READY!', width / 2, height / 2 + 120);
+    ctx.fillText('GET READY!', width / 2, height / 2 + 120);
     ctx.restore();
     ctx.restore();
   }
@@ -490,7 +475,7 @@ var tetris = (() => {
       scale: 4,
       count: 0,
       rafId: null,
-      timestamp: null
+      timestamp: null,
     };
     gameState.countdown.rafId = requestAnimationFrame(updateCountdownEffect);
     sounds.countdown();
@@ -534,25 +519,25 @@ var tetris = (() => {
     ctx.fillRect(0, 0, width, height);
     drawTetrisText();
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize * 1.2}px ${GAME_FONT_FAMILY}`;
     ctx.fillStyle = COLOR_GREEN;
     ctx.fillText(`LEVEL UP`, width / 2, height / 2.5);
     ctx.restore();
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize * 2.5}px ${GAME_FONT_FAMILY}`;
     ctx.fillStyle = COLOR_GREEN;
     ctx.fillText(`${gameState.level}`, width / 2, height / 1.85);
     ctx.restore();
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize * 1.3}px ${GAME_FONT_FAMILY}`;
     ctx.fillStyle = COLOR_YELLOW;
     ctx.strokeStyle = COLOR_BLACK;
     ctx.lineWidth = 3;
-    ctx.strokeText("CONGRATS!", width / 2, height / 1.6);
-    ctx.fillText("CONGRATS!", width / 2, height / 1.6);
+    ctx.strokeText('CONGRATS!', width / 2, height / 1.6);
+    ctx.fillText('CONGRATS!', width / 2, height / 1.6);
     ctx.restore();
     drawFireworksEffect();
     ctx.restore();
@@ -574,7 +559,7 @@ var tetris = (() => {
         color: FIREWORKS_COLORS[Math.floor(Math.random() * 6)],
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        alpha: 1
+        alpha: 1,
       });
     }
     gameState.levelUpEffect.fireworks = fireworks;
@@ -624,13 +609,16 @@ var tetris = (() => {
       if (newLevel > oldLevel) {
         triggerLevelUpEffect();
       }
-      gameState.level = Math.min(Math.max(gameState.level, newLevel), MAX_LEVEL);
+      gameState.level = Math.min(
+        Math.max(gameState.level, newLevel),
+        MAX_LEVEL,
+      );
       updateSpeed();
       updateUI(
         gameState.score,
         gameState.lines,
         gameState.level,
-        gameState.highScore
+        gameState.highScore,
       );
       saveHighScore();
       gameState.clearEffects = [];
@@ -723,34 +711,34 @@ var tetris = (() => {
     ctx.fillRect(0, 0, width, height);
     drawTetrisText();
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize}px ${GAME_FONT_FAMILY}`;
     ctx.fillStyle = COLOR_GREEN;
-    ctx.fillText("LEVEL", width / 2, height * 0.35);
+    ctx.fillText('LEVEL', width / 2, height * 0.35);
     ctx.restore();
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize * 3}px "Press Start 2P"`;
     ctx.fillStyle = COLOR_GREEN;
     ctx.fillText(level.toString(), width / 2, height * 0.5);
     ctx.restore();
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize}px "Press Start 2P"`;
     ctx.fillStyle = COLOR_WHITE;
-    ctx.fillText("1-9 KEY", width / 2, height * 0.58);
+    ctx.fillText('1-9 KEY', width / 2, height * 0.58);
     ctx.restore();
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize * 1.15}px "Press Start 2P"`;
     ctx.fillStyle = COLOR_TEAL;
-    ctx.fillText("ENTER START", width / 2, height * 0.7);
+    ctx.fillText('ENTER START', width / 2, height * 0.7);
     ctx.restore();
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize * 0.9}px "Press Start 2P"`;
     ctx.fillStyle = COLOR_WHITE;
-    ctx.fillText("P 3SEC: HIDDEN", width / 2, height * 0.8);
+    ctx.fillText('P 3SEC: HIDDEN', width / 2, height * 0.8);
     ctx.restore();
   }
   function drawPause() {
@@ -760,9 +748,9 @@ var tetris = (() => {
     drawTetrisText();
     ctx.save();
     ctx.fillStyle = COLOR_YELLOW;
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize * 1.6}px "Press Start 2P"`;
-    ctx.fillText("PAUSED", width / 2, height / 2);
+    ctx.fillText('PAUSED', width / 2, height / 2);
     ctx.restore();
   }
   function drawOver() {
@@ -772,9 +760,9 @@ var tetris = (() => {
     drawTetrisText();
     ctx.save();
     ctx.fillStyle = COLOR_RED;
-    ctx.textAlign = "center";
+    ctx.textAlign = 'center';
     ctx.font = `${baseFontSize * 1.45}px "Press Start 2P"`;
-    ctx.fillText("GAME OVER", width / 2, height / 2);
+    ctx.fillText('GAME OVER', width / 2, height / 2);
     ctx.restore();
   }
   function forceOver() {
@@ -795,7 +783,8 @@ var tetris = (() => {
     return true;
   }
   function resize() {
-    const { isSelectLevel, isGameOver, board, curr, cx, cy, level, next } = gameState;
+    const { isSelectLevel, isGameOver, board, curr, cx, cy, level, next } =
+      gameState;
     const h = globalThis.innerHeight * 0.9;
     BLOCK_SIZE = Math.floor(h / BOARD_ROWS);
     canvas.width = BLOCK_SIZE * BOARD_COLS;
@@ -803,7 +792,7 @@ var tetris = (() => {
     baseFontSize = Math.floor(canvas.height * 0.032);
     const nextSize = Math.min(
       globalThis.innerWidth * 0.1,
-      globalThis.innerHeight * 0.18
+      globalThis.innerHeight * 0.18,
     );
     nextCanvas.width = nextSize;
     nextCanvas.height = nextSize;
@@ -818,10 +807,10 @@ var tetris = (() => {
     }
   }
   function updateUI(score, lines, level, highScore) {
-    document.querySelector("#score").textContent = pad(score, 5);
-    document.querySelector("#lines").textContent = pad(lines, 2);
-    document.querySelector("#level").textContent = pad(level, 2);
-    document.querySelector("#highScore").textContent = pad(highScore, 5);
+    document.querySelector('#score').textContent = pad(score, 5);
+    document.querySelector('#lines').textContent = pad(lines, 2);
+    document.querySelector('#level').textContent = pad(level, 2);
+    document.querySelector('#highScore').textContent = pad(highScore, 5);
   }
 
   // lib/tetris.js
@@ -858,7 +847,7 @@ var tetris = (() => {
       gameState.score,
       gameState.lines,
       gameState.level,
-      gameState.highScore
+      gameState.highScore,
     );
     spawn();
     playBGM();
@@ -890,20 +879,20 @@ var tetris = (() => {
       gameState.score,
       gameState.lines,
       gameState.level,
-      gameState.highScore
+      gameState.highScore,
     );
     drawLevelSelect(gameState.level);
   };
   var executeLevelSelectionCommand = (key, lowerKey) => {
-    if (key >= "1" && key <= "9") {
+    if (key >= '1' && key <= '9') {
       gameState.level = Number.parseInt(key, 10);
       sounds.levelSelect();
       drawLevelSelect(gameState.level);
     }
-    if (lowerKey === "p") {
+    if (lowerKey === 'p') {
       startHold();
     }
-    if (key === "Enter") {
+    if (key === 'Enter') {
       start();
     }
   };
@@ -915,7 +904,7 @@ var tetris = (() => {
       // R: 重新开始游戏
       q: forceOver,
       // Q: 强制结束游戏
-      p: togglePause
+      p: togglePause,
       // P: 暂停/继续游戏
     };
     const command = commands[lowerKey];
@@ -935,7 +924,7 @@ var tetris = (() => {
       // 下移
       ArrowUp: rotate,
       // 旋转方块
-      " ": drop
+      ' ': drop,
       // 空格：直接落地
     };
     const action = controls[key];
@@ -947,7 +936,7 @@ var tetris = (() => {
     resize();
   }
   var onPauseStop = (e) => {
-    if (e.key.toLowerCase() === "p") {
+    if (e.key.toLowerCase() === 'p') {
       stopHold();
     }
   };
@@ -962,7 +951,7 @@ var tetris = (() => {
       return false;
     }
     if (gameState.isGameOver) {
-      if (key === "Enter") {
+      if (key === 'Enter') {
         executeDrawLevelSelectCommand();
       }
       return false;
@@ -989,9 +978,9 @@ var tetris = (() => {
     }
   };
   var bindEvents = () => {
-    globalThis.addEventListener("resize", onResize);
-    document.addEventListener("keydown", onControlButtonsPress);
-    document.addEventListener("keyup", onPauseStop);
+    globalThis.addEventListener('resize', onResize);
+    document.addEventListener('keydown', onControlButtonsPress);
+    document.addEventListener('keyup', onPauseStop);
   };
   var init = () => {
     resetBoard();
@@ -1008,7 +997,7 @@ var tetris = (() => {
       gameState.score,
       gameState.lines,
       gameState.level,
-      gameState.highScore
+      gameState.highScore,
     );
     lazyDrawLevelSelect();
     bindEvents();
