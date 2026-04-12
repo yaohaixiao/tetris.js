@@ -1,2 +1,1017 @@
-var tetris=(()=>{var ee=[0,100,300,500,800],te=99,B="#0ff",R="#ff0",oe="#a0a",Oe="#00f",re="#f80",p="#0f0",D="#f00",C="#444",A="rgba(0,0,0,.5)",q="#fff",le=[B,R,oe,re,p,D],W=[{shape:[[1,1,1,1]],color:B},{shape:[[1,1],[1,1]],color:R},{shape:[[0,1,0],[1,1,1]],color:oe},{shape:[[1,0,0],[1,1,1]],color:Oe},{shape:[[0,0,1],[1,1,1]],color:re},{shape:[[0,1,1],[1,1,0]],color:p},{shape:[[1,1,0],[0,1,1]],color:D}],v='"Press Start 2P", monospace, sans-serif';var e={board:[],curr:null,cx:0,cy:0,next:null,baseLines:0,clearEffects:[],levelUpEffect:{show:!1,timer:0,fireworks:[]},countDown:{show:!1,number:3,scale:4,count:0,timer:null},score:0,lines:0,level:1,highScore:0,isGameOver:!1,isPaused:!1,isSelectLevel:!0,isHiddenMode:!1,gameInterval:null,holdP:null};function $(){e.board=Array.from({length:20},()=>Array.from({length:10}).fill(0))}function ne(){e.highScore=Number.parseInt(localStorage.getItem("tetris-high-score"),10)||0}function M(){let{score:o}=e;o>e.highScore&&(e.highScore=o,localStorage.setItem("tetris-high-score",e.highScore.toString()))}var Le=globalThis.AudioContext||globalThis.webkitAudioContext,F=new Le,U=null,k=!0,f={move:()=>a(330,60),rotate:()=>a(440,60),drop:()=>a(220,100),fall:()=>a(180,200),clear:()=>{a(587,220,.35,"square"),setTimeout(()=>a(698,260,.32,"square"),160),setTimeout(()=>a(880,300,.3,"square"),320),setTimeout(()=>a(1174,380,.25,"square"),480)},gameOver:()=>{a(330,200),setTimeout(()=>a(294,300),210),setTimeout(()=>a(262,500),520)},pause:()=>a(300,150),resume:()=>a(400,150),levelStart:()=>a(1319,160,.22,"sine"),levelSelect:()=>a(523,80,.1,"sine"),levelUp:()=>{a(523,220),setTimeout(()=>a(587,220),260),setTimeout(()=>a(659,240),520),setTimeout(()=>a(784,260),780),setTimeout(()=>a(880,280),1060),setTimeout(()=>a(1047,320),1360),setTimeout(()=>a(1175,360),1700),setTimeout(()=>a(1319,480),2080)},countDown:()=>a(784,180,.3,"sine"),bgmToggle:()=>a(440,100)};function a(o,r,l=.1,n="square"){let s=F.createOscillator(),i=F.createGain();s.type=n,s.frequency.value=o,i.gain.value=l,s.connect(i),i.connect(F.destination),s.start(),setTimeout(()=>s.stop(),r)}var se=(o,r)=>{o>=r.length&&(o=0),a(r[o],110,.05),U=setTimeout(()=>se(o+1,r),130)};function m(){U&&clearTimeout(U),U=null}function E(){if(!k)return!1;m(),se(0,[659,659,587,659,784,880,523,523,440,523,659,784,659,659,587,659,784,880,988,880,784,659,880,784,659,587,523,587,659,784,659,587])}function ie(){k=!k,f.bgmToggle(),k?E():m()}var G=(o,r)=>o.toString().padStart(r,"0");function ae(){let o=Math.floor(Math.random()*W.length);return W[o]}var ce=()=>{_(),f.levelStart(),setTimeout(()=>{E()},250),P()},Te=()=>Math.max(100,1e3-(e.level-1)*80);function P(){clearInterval(e.gameInterval),e.gameInterval=setInterval(we,Te())}function ye(){if(e.isGameOver)return!1;e.isGameOver=!0,m(),clearInterval(e.gameInterval),f.gameOver(),M(),setTimeout(J,20)}function fe(){let o=0,r=[];for(let l=19;l>=0;l--)e.board[l].every(s=>!!s)&&(r.push(l),o++);if(o===0)return y(e.score,e.lines,e.level,e.highScore),M(),!1;for(let l of r)he(l);return f.clear(),K(),!0}function _(){e.curr=e.next||ae(),e.next=ae(),e.cx=Math.floor(10/2)-Math.floor(e.curr.shape[0].length/2),e.cy=0,Y(e.next),z(0,0)&&ye()}function ue(){let o=e.curr.shape;for(let r=0;r<o.length;r++)for(let l=0;l<o[r].length;l++)o[r][l]&&(e.board[e.cy+r][e.cx+l]=e.curr.color)}function we(){return e.levelUpEffect.show?(de(),L(e.board),T(e.curr,e.cx,e.cy),me(),!0):e.isGameOver||e.isPaused||!b(0,1)&&(ue(),f.fall(),fe(),_(),e.isGameOver)?!1:(L(e.board),T(e.curr,e.cx,e.cy),!0)}function z(o,r){let l=e.curr.shape;for(let n=0;n<l.length;n++)for(let s=0;s<l[n].length;s++)if(l[n][s]){let i=e.cx+s+o,c=e.cy+n+r;if(i<0||i>=10||c>=20||c>=0&&e.board[c][i])return!0}return!1}function b(o,r){return z(o,r)?!1:(e.cx+=o,e.cy+=r,f.move(),!0)}var pe=()=>{let o=e.curr.shape;e.curr.shape=o[0].map((r,l)=>o.map(n=>n[l]).toReversed()),z(0,0)?e.curr.shape=o:f.rotate()};function xe(){for(;b(0,1););ue(),f.fall(),fe(),_(),f.drop()}var d=document.querySelector("#game-board"),t=d.getContext("2d"),N=document.querySelector("#next-piece"),I=N.getContext("2d"),H,u;function Re(){let{width:o,height:r}=d,l=e.countDown;X(),t.save(),t.fillStyle=A,t.fillRect(0,0,o,r),t.save(),t.textAlign="center",t.font=`${u*1.1}px ${v}`,t.fillStyle=p,t.fillText("TETRIS.JS",o/2,r*.1),t.restore(),t.save(),t.textAlign="center",t.textBaseline="middle",t.translate(o/2,r/2),t.scale(l.scale,l.scale),t.font=`${u*3.25}px ${v}`,t.fillStyle=R,t.strokeStyle=C,t.lineWidth=6,t.strokeText(l.number.toString(),0,0),t.fillText(l.number.toString(),0,0),t.restore(),t.save(),t.textAlign="center",t.textBaseline="top",t.font=`${u*1.1}px ${v}`,t.fillStyle=p,t.strokeStyle=C,t.strokeText("GET READY!",o/2,r/2+120),t.fillText("GET READY!",o/2,r/2+120),t.restore(),t.restore()}function ve(){e.countDown={show:!0,number:3,scale:4,timer:null,count:0},Se(),f.countDown()}function Se(){let o=e.countDown;if(o.timer&&clearTimeout(o.timer),Re(),o.count+=1,o.scale=Math.max(1,o.scale-.4),o.count>=20&&(o.count=0,o.number--,o.scale=4,o.number>=1&&f.countDown()),o.number<=0)return clearTimeout(o.timer),o.show=!1,o.number=3,o.scale=4,o.timer=null,o.count=0,ce(),!0;o.timer=setTimeout(()=>{Se()},50)}function me(){let o=e.levelUpEffect,{width:r,height:l}=d;if(!o.show)return!1;t.save(),t.fillStyle=A,t.fillRect(0,0,r,l),t.save(),t.textAlign="center",t.font=`${u*1.1}px ${v}`,t.fillStyle=p,t.fillText("TETRIS.JS",r/2,l*.1),t.restore(),t.save(),t.textAlign="center",t.font=`${u*1.2}px ${v}`,t.fillStyle=p,t.fillText("LEVEL UP",r/2,l/2.5),t.restore(),t.save(),t.textAlign="center",t.font=`${u*2.5}px ${v}`,t.fillStyle=p,t.fillText(`${e.level}`,r/2,l/1.85),t.restore(),t.save(),t.textAlign="center",t.font=`${u*1.3}px ${v}`,t.fillStyle=R,t.strokeStyle=C,t.lineWidth=3,t.strokeText("CONGRATS!",r/2,l/1.6),t.fillText("CONGRATS!",r/2,l/1.6),t.restore();for(let n of o.fireworks)t.globalAlpha=n.alpha,t.fillStyle=n.color,t.beginPath(),t.arc(n.x,n.y,n.radius,0,Math.PI*2),t.fill(),n.x+=n.vx,n.y+=n.vy,n.alpha-=.024;return t.restore(),!0}function Ce(){let{width:o,height:r}=d,l=[];e.levelUpEffect.show=!0,e.levelUpEffect.timer=0;for(let n=0;n<30;n++){let s=Math.random()*Math.PI*2,i=1+Math.random()*240;l.push({x:o/2,y:r/2-60,radius:2+Math.random()*4,color:le[Math.floor(Math.random()*6)],vx:Math.cos(s)*i,vy:Math.sin(s)*i,alpha:1})}e.levelUpEffect.fireworks=l,m(),f.levelUp()}function de(){return e.levelUpEffect.timer++,e.levelUpEffect.timer>3?(e.levelUpEffect.show=!1,e.levelUpEffect.fireworks=[],E(),!0):!1}function Ae(){for(let o of e.clearEffects){t.save(),t.globalAlpha=o.alpha;for(let r=0;r<10;r++)V(t,r,o.y,o.color);t.restore()}}function K(){if(L(e.board),T(e.curr,e.cx,e.cy),Ae(),Me()){let o=0;for(let s=19;s>=0;s--)e.board[s].every(c=>!!c)&&(e.board.splice(s,1),e.board.unshift(Array.from({length:10}).fill(0)),o++,s++);e.lines+=o,e.score+=ee[o]*e.level;let r=e.baseLines+e.lines,l=Math.floor(r/10)+1,n=e.level;l>n&&Ce(),e.level=Math.min(Math.max(e.level,l),te),P(),y(e.score,e.lines,e.level,e.highScore),M(),e.clearEffects=[]}else requestAnimationFrame(K)}function Me(){let o=!0;for(let r of e.clearEffects){let l=Math.floor(r.timer/.12);r.alpha=l%2===0?1:0,r.timer+=.016,r.timer<.72&&(o=!1)}return o}function he(o){e.clearEffects.some(l=>l.y===o)||e.clearEffects.push({y:o,alpha:1,timer:0})}function V(o,r,l,n){let s=H,i=1,c=s-i*2,x=r*s+i,h=l*s+i;o.fillStyle=n,o.fillRect(x,h,c,c),o.strokeStyle=C,o.strokeRect(x,h,c,c)}function X(){let{width:o,height:r}=d;t.clearRect(0,0,o,r)}function L(o){X();for(let r=0;r<20;r++)for(let l=0;l<10;l++)o[r][l]&&V(t,l,r,o[r][l])}function T(o,r,l){let{shape:n,color:s}=o,{length:i}=n;for(let c=0;c<i;c++)for(let x=0;x<n[c].length;x++)n[c][x]&&V(t,r+x,l+c,s)}function Y(o){let{shape:r}=o,{width:l,height:n}=N,i=Math.floor(l/5),c=Math.floor((l-r[0].length*i)/2),x=Math.floor((n-r.length*i)/2);I.clearRect(0,0,l,n);for(let h=0;h<r.length;h++)for(let O=0;O<r[h].length;O++)if(r[h][O]){let j=c+O*i,Q=x+h*i;I.fillStyle=o.color,I.fillRect(j,Q,i-2,i-2),I.strokeStyle=C,I.strokeRect(j,Q,i-2,i-2)}}function w(o){let{width:r,height:l}=d;X(),t.save(),t.fillStyle=A,t.fillRect(0,0,r,l),t.save(),t.textAlign="center",t.font=`${u*1.1}px "Press Start 2P"`,t.fillStyle=p,t.fillText("TETRIS.JS",r/2,l*.1),t.restore(),t.save(),t.textAlign="center",t.font=`${u}px "Press Start 2P"`,t.fillStyle=p,t.fillText("LEVEL",r/2,l*.35),t.restore(),t.save(),t.textAlign="center",t.font=`${u*3}px "Press Start 2P"`,t.fillStyle=p,t.fillText(o.toString(),r/2,l*.5),t.restore(),t.save(),t.textAlign="center",t.font=`${u}px "Press Start 2P"`,t.fillStyle=q,t.fillText("1-9 KEY",r/2,l*.58),t.restore(),t.save(),t.textAlign="center",t.font=`${u*1.15}px "Press Start 2P"`,t.fillStyle=B,t.fillText("ENTER START",r/2,l*.7),t.restore(),t.save(),t.textAlign="center",t.font=`${u*.9}px "Press Start 2P"`,t.fillStyle=q,t.fillText("P 3SEC: HIDDEN",r/2,l*.8),t.restore()}function ge(){let{width:o,height:r}=d;t.fillStyle=A,t.fillRect(0,0,o,r),t.save(),t.textAlign="center",t.font=`${u*1.1}px ${v}`,t.fillStyle=p,t.fillText("TETRIS.JS",o/2,r*.1),t.restore(),t.save(),t.fillStyle=R,t.textAlign="center",t.font=`${u*1.6}px "Press Start 2P"`,t.fillText("PAUSED",o/2,r/2),t.restore()}function J(){let{width:o,height:r}=d;t.fillStyle=A,t.fillRect(0,0,o,r),t.save(),t.textAlign="center",t.font=`${u*1.1}px ${v}`,t.fillStyle=p,t.fillText("TETRIS.JS",o/2,r*.1),t.restore(),t.save(),t.fillStyle=D,t.textAlign="center",t.font=`${u*1.45}px "Press Start 2P"`,t.fillText("GAME OVER",o/2,r/2),t.restore()}function Ee(){return e.isPaused?!1:(m(),e.isGameOver=!0,e.isPaused=!1,e.countDown.show=!1,e.isHiddenMode=!1,clearInterval(e.gameInterval),f.gameOver(),M(),setTimeout(()=>{J()},10),!0)}function Z(){let{isSelectLevel:o,isGameOver:r,board:l,curr:n,cx:s,cy:i,level:c,next:x}=e,h=globalThis.innerHeight*.9;H=Math.floor(h/20),d.width=H*10,d.height=H*20,u=Math.floor(d.height*.032);let O=Math.min(globalThis.innerWidth*.1,globalThis.innerHeight*.18);N.width=O,N.height=O,o||r?w(c):(L(l),Y(x),n&&T(n,s,i))}function y(o,r,l,n){document.querySelector("#score").textContent=G(o,5),document.querySelector("#lines").textContent=G(r,2),document.querySelector("#level").textContent=G(l,2),document.querySelector("#highScore").textContent=G(n,5)}var Pe=()=>{e.isSelectLevel=!1,e.baseLines=(e.level-1)*10,ve()},be=()=>{if(e.isGameOver||e.isSelectLevel)return!1;e.isPaused=!e.isPaused,e.isPaused?(clearInterval(e.gameInterval),m(),f.pause(),ge()):(f.resume(),E(),P())},Ge=()=>{m(),e.isGameOver=!1,e.isPaused=!1,e.score=0,e.lines=0,e.level=1,$(),y(e.score,e.lines,e.level,e.highScore),_(),E(),P()},_e=()=>{e.holdP=setTimeout(()=>{e.isHiddenMode=!0,e.level=5,w(e.level)},3e3)},Ie=()=>{clearTimeout(e.holdP),e.holdP=null},Be=()=>{m(),clearInterval(e.gameInterval),$(),e.isGameOver=!1,e.isHiddenMode=!1,e.isSelectLevel=!0,e.score=0,e.lines=0,e.level=1,e.curr=null,e.next=null,y(e.score,e.lines,e.level,e.highScore),w(e.level)},De=(o,r)=>{o>="1"&&o<="9"&&(e.level=Number.parseInt(o,10),f.levelSelect(),w(e.level)),r==="p"&&_e(),o==="Enter"&&Pe()},$e=o=>{let l={m:ie,r:Ge,q:Ee,p:be}[o];return l?(l(),!0):!1};function Ue(o){let l={ArrowLeft:()=>b(-1,0),ArrowRight:()=>b(1,0),ArrowDown:()=>b(0,1),ArrowUp:pe," ":xe}[o];l&&l()}function ke(){Z()}var He=o=>{o.key.toLowerCase()==="p"&&Ie()},Ne=o=>{let{key:r}=o,l=r.toLowerCase();if(e.countDown.show||e.levelUpEffect.show)return!1;if(e.isSelectLevel)return De(r,l),!1;if(e.isGameOver)return r==="Enter"&&Be(),!1;if($e(l)||e.isPaused)return!1;Ue(r),L(e.board),T(e.curr,e.cx,e.cy)},qe=()=>{document?.fonts?.load?document.fonts.load('40px "Press Start 2P"').then(()=>{w(e.level)}):setTimeout(()=>{w(e.level)},150)},We=()=>{globalThis.addEventListener("resize",ke),document.addEventListener("keydown",Ne),document.addEventListener("keyup",He)},Fe=()=>{$(),ne(),e.score=0,e.lines=0,e.level=1,e.isGameOver=!1,e.isPaused=!1,e.isHiddenMode=!1,e.isSelectLevel=!0,Z(),y(e.score,e.lines,e.level,e.highScore),qe(),We()};Fe();})();
-//# sourceMappingURL=tetris.js.map
+var tetris = (() => {
+  // lib/constants.js
+  var BOARD_COLS = 10;
+  var BOARD_ROWS = 20;
+  var CLEAR_SCORES = [0, 100, 300, 500, 800];
+  var MAX_LEVEL = 99;
+  var COLOR_TEAL = "#0ff";
+  var COLOR_YELLOW = "#ff0";
+  var COLOR_PURPLE = "#a0a";
+  var COLOR_BLUE = "#00f";
+  var COLOR_ORANGE = "#f80";
+  var COLOR_GREEN = "#0f0";
+  var COLOR_RED = "#f00";
+  var COLOR_BLACK = "#444";
+  var COLOR_RGBA_BLACK = "rgba(0,0,0,.5)";
+  var COLOR_WHITE = "#fff";
+  var FIREWORKS_COLORS = [
+    COLOR_TEAL,
+    COLOR_YELLOW,
+    COLOR_PURPLE,
+    COLOR_ORANGE,
+    COLOR_GREEN,
+    COLOR_RED
+  ];
+  var TETROMINOES = [
+    // I型方块（长条）：1行4列
+    { shape: [[1, 1, 1, 1]], color: COLOR_TEAL },
+    // O型方块（正方形）：2x2
+    {
+      shape: [
+        [1, 1],
+        [1, 1]
+      ],
+      color: COLOR_YELLOW
+    },
+    // T型方块
+    {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1]
+      ],
+      color: COLOR_PURPLE
+    },
+    // L型方块
+    {
+      shape: [
+        [1, 0, 0],
+        [1, 1, 1]
+      ],
+      color: COLOR_BLUE
+    },
+    // J型方块
+    {
+      shape: [
+        [0, 0, 1],
+        [1, 1, 1]
+      ],
+      color: COLOR_ORANGE
+    },
+    // S型方块（右斜）
+    {
+      shape: [
+        [0, 1, 1],
+        [1, 1, 0]
+      ],
+      color: COLOR_GREEN
+    },
+    // Z型方块（左斜）
+    {
+      shape: [
+        [1, 1, 0],
+        [0, 1, 1]
+      ],
+      color: COLOR_RED
+    }
+  ];
+  var GAME_FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
+
+  // lib/utils.js
+  var pad = (n, len) => n.toString().padStart(len, "0");
+  var setStorage = (key, value) => {
+    localStorage.setItem(key, value);
+  };
+  var getStorage = (key) => {
+    return localStorage.getItem(key);
+  };
+
+  // lib/state.js
+  var gameState = {
+    gameRafId: null,
+    gameTimestamp: null,
+    // 倒计时状态
+    countdown: {
+      show: false,
+      number: 3,
+      scale: 4,
+      count: 0,
+      rafId: null,
+      timestamp: 0
+    },
+    board: [],
+    curr: null,
+    cx: 0,
+    cy: 0,
+    next: null,
+    baseLines: 0,
+    clearEffectsRafId: null,
+    clearEffects: [],
+    levelUpEffect: {
+      show: false,
+      timer: 0,
+      fireworks: []
+    },
+    score: 0,
+    lines: 0,
+    level: 1,
+    highScore: 0,
+    isSelectLevel: true,
+    isHiddenMode: false,
+    isPaused: false,
+    isGameOver: false,
+    holdP: null
+  };
+  function resetBoard() {
+    gameState.board = Array.from(
+      { length: BOARD_ROWS },
+      () => Array.from({ length: BOARD_COLS }).fill(0)
+    );
+  }
+  function loadHighScore() {
+    gameState.highScore = Number.parseInt(getStorage("tetris-high-score"), 10) || 0;
+  }
+  function saveHighScore() {
+    const { score } = gameState;
+    if (score > gameState.highScore) {
+      gameState.highScore = score;
+      setStorage("tetris-high-score", gameState.highScore.toString());
+    }
+  }
+
+  // lib/audio.js
+  var AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext;
+  var audioCtx = new AudioContext();
+  var bgmTimer = null;
+  var bgmEnabled = true;
+  var sounds = {
+    // 等级选择界面（正弦波柔和音效）
+    levelSelect: () => playTone(523, 80, 0.1, "sine"),
+    // 倒计时音效
+    countdown: () => playTone(784, 180, 0.3, "sine"),
+    // 等级开始 / 升级
+    levelStart: () => playTone(1319, 160, 0.22, "sine"),
+    // 背景音乐开关
+    bgmToggle: () => playTone(440, 100),
+    // 左右移动
+    move: () => playTone(330, 60),
+    // 旋转方块
+    rotate: () => playTone(440, 60),
+    // 快速下落
+    drop: () => playTone(220, 100),
+    // 方块落地
+    fall: () => playTone(180, 200),
+    // 消除行（三连音旋律）
+    clear: () => {
+      playTone(587, 220, 0.35, "square");
+      setTimeout(() => playTone(698, 260, 0.32, "square"), 160);
+      setTimeout(() => playTone(880, 300, 0.3, "square"), 320);
+      setTimeout(() => playTone(1174, 380, 0.25, "square"), 480);
+    },
+    // 升级清除界面音效
+    levelUp: () => {
+      playTone(523, 220);
+      setTimeout(() => playTone(587, 220), 260);
+      setTimeout(() => playTone(659, 240), 520);
+      setTimeout(() => playTone(784, 260), 780);
+      setTimeout(() => playTone(880, 280), 1060);
+      setTimeout(() => playTone(1047, 320), 1360);
+      setTimeout(() => playTone(1175, 360), 1700);
+      setTimeout(() => playTone(1319, 480), 2080);
+    },
+    // 暂停
+    pause: () => playTone(300, 150),
+    // 恢复游戏
+    resume: () => playTone(400, 150),
+    // 游戏结束（悲伤旋律）
+    gameOver: () => {
+      playTone(330, 200);
+      setTimeout(() => playTone(294, 300), 210);
+      setTimeout(() => playTone(262, 500), 520);
+    }
+  };
+  function playTone(freq, dur, vol = 0.1, wave = "square") {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = wave;
+    osc.frequency.value = freq;
+    gain.gain.value = vol;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    setTimeout(() => osc.stop(), dur);
+  }
+  var loopPlayBGM = (i, m) => {
+    if (i >= m.length) {
+      i = 0;
+    }
+    playTone(m[i], 110, 0.05);
+    bgmTimer = setTimeout(() => loopPlayBGM(i + 1, m), 130);
+  };
+  function stopBGM() {
+    if (bgmTimer) {
+      clearTimeout(bgmTimer);
+    }
+    bgmTimer = null;
+  }
+  function playBGM() {
+    if (!bgmEnabled) {
+      return false;
+    }
+    stopBGM();
+    const m = [
+      659,
+      659,
+      587,
+      659,
+      784,
+      880,
+      523,
+      523,
+      440,
+      523,
+      659,
+      784,
+      659,
+      659,
+      587,
+      659,
+      784,
+      880,
+      988,
+      880,
+      784,
+      659,
+      880,
+      784,
+      659,
+      587,
+      523,
+      587,
+      659,
+      784,
+      659,
+      587
+    ];
+    loopPlayBGM(0, m);
+  }
+  function toggleBGM() {
+    bgmEnabled = !bgmEnabled;
+    sounds.bgmToggle();
+    if (bgmEnabled) {
+      playBGM();
+    } else {
+      stopBGM();
+    }
+  }
+
+  // lib/game.js
+  function randomTetromino() {
+    const randomIndex = Math.floor(Math.random() * TETROMINOES.length);
+    return TETROMINOES[randomIndex];
+  }
+  var startGame = () => {
+    spawn();
+    sounds.levelStart();
+    setTimeout(() => {
+      playBGM();
+    }, 250);
+    updateSpeed();
+  };
+  var getSpeed = () => (
+    // 计算速度：基础值1000ms，每升一级减少80ms，最低不低于100ms
+    Math.max(100, 1e3 - (gameState.level - 1) * 80)
+  );
+  var gameSpeedLoop = (timestamp) => {
+    const dropInterval = getSpeed();
+    if (!gameState.gameTimestamp || timestamp - gameState.gameTimestamp > dropInterval) {
+      loop();
+      gameState.gameTimestamp = timestamp;
+    }
+    gameState.gameRafId = requestAnimationFrame(gameSpeedLoop);
+  };
+  function updateSpeed() {
+    cancelAnimationFrame(gameState.gameRafId);
+    gameState.gameRafId = requestAnimationFrame(gameSpeedLoop);
+  }
+  function gameOver() {
+    if (gameState.isGameOver) {
+      return false;
+    }
+    gameState.isGameOver = true;
+    stopBGM();
+    cancelAnimationFrame(gameState.gameRafId);
+    sounds.gameOver();
+    saveHighScore();
+    setTimeout(drawOver, 20);
+  }
+  function clearLines() {
+    let clear = 0;
+    const linesToClear = [];
+    for (let y = BOARD_ROWS - 1; y >= 0; y--) {
+      const isLineFull = gameState.board[y].every((cell) => !!cell);
+      if (isLineFull) {
+        linesToClear.push(y);
+        clear++;
+      }
+    }
+    if (clear === 0) {
+      updateUI(
+        gameState.score,
+        gameState.lines,
+        gameState.level,
+        gameState.highScore
+      );
+      saveHighScore();
+      return false;
+    }
+    for (const y of linesToClear) {
+      addClearEffect(y);
+    }
+    sounds.clear();
+    triggerClearEffect();
+    return true;
+  }
+  function spawn() {
+    gameState.curr = gameState.next || randomTetromino();
+    gameState.next = randomTetromino();
+    gameState.cx = Math.floor(BOARD_COLS / 2) - Math.floor(gameState.curr.shape[0].length / 2);
+    gameState.cy = 0;
+    drawNext(gameState.next);
+    if (collision(0, 0)) {
+      gameOver();
+    }
+  }
+  function lock() {
+    const s = gameState.curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          gameState.board[gameState.cy + y][gameState.cx + x] = gameState.curr.color;
+        }
+      }
+    }
+  }
+  function loop() {
+    if (gameState.levelUpEffect.show) {
+      updateLevelUpEffect();
+      drawBoard(gameState.board);
+      drawCurr(gameState.curr, gameState.cx, gameState.cy);
+      drawLevelUpEffect();
+      return true;
+    }
+    if (gameState.isGameOver || gameState.isPaused) {
+      return false;
+    }
+    if (!move(0, 1)) {
+      lock();
+      sounds.fall();
+      clearLines();
+      spawn();
+      if (gameState.isGameOver) {
+        return false;
+      }
+    }
+    drawBoard(gameState.board);
+    drawCurr(gameState.curr, gameState.cx, gameState.cy);
+    return true;
+  }
+  function collision(ox, oy) {
+    const s = gameState.curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          const nx = gameState.cx + x + ox;
+          const ny = gameState.cy + y + oy;
+          if (nx < 0 || nx >= BOARD_COLS || ny >= BOARD_ROWS || ny >= 0 && gameState.board[ny][nx]) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+  function move(ox, oy) {
+    if (!collision(ox, oy)) {
+      gameState.cx += ox;
+      gameState.cy += oy;
+      sounds.move();
+      return true;
+    }
+    return false;
+  }
+  var rotate = () => {
+    const prev = gameState.curr.shape;
+    gameState.curr.shape = prev[0].map(
+      (_, i) => prev.map((r) => r[i]).toReversed()
+    );
+    if (collision(0, 0)) {
+      gameState.curr.shape = prev;
+    } else {
+      sounds.rotate();
+    }
+  };
+  function drop() {
+    while (true) {
+      if (!move(0, 1)) {
+        break;
+      }
+    }
+    lock();
+    sounds.fall();
+    clearLines();
+    spawn();
+    sounds.drop();
+  }
+
+  // lib/ui.js
+  var canvas = document.querySelector("#game-board");
+  var ctx = canvas.getContext("2d");
+  var nextCanvas = document.querySelector("#next-piece");
+  var nextCtx = nextCanvas.getContext("2d");
+  var BLOCK_SIZE;
+  var baseFontSize;
+  var drawTetrisText = () => {
+    const { width, height } = canvas;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize * 1.1}px ${GAME_FONT_FAMILY}`;
+    ctx.fillStyle = COLOR_GREEN;
+    ctx.fillText("TETRIS.JS", width / 2, height * 0.1);
+    ctx.restore();
+  };
+  var drawFireworksEffect = () => {
+    const { fireworks } = gameState.levelUpEffect;
+    for (const fire of fireworks) {
+      ctx.globalAlpha = fire.alpha;
+      ctx.fillStyle = fire.color;
+      ctx.beginPath();
+      ctx.arc(fire.x, fire.y, fire.radius, 0, Math.PI * 2);
+      ctx.fill();
+      fire.x += fire.vx;
+      fire.y += fire.vy;
+      fire.alpha -= 0.024;
+    }
+  };
+  function drawCountdownEffect() {
+    const { width, height } = canvas;
+    const cd = gameState.countdown;
+    clearBoard();
+    ctx.save();
+    ctx.fillStyle = COLOR_RGBA_BLACK;
+    ctx.fillRect(0, 0, width, height);
+    drawTetrisText();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.translate(width / 2, height / 2);
+    ctx.scale(cd.scale, cd.scale);
+    ctx.font = `${baseFontSize * 3.25}px ${GAME_FONT_FAMILY}`;
+    ctx.fillStyle = COLOR_YELLOW;
+    ctx.strokeStyle = COLOR_BLACK;
+    ctx.lineWidth = 6;
+    ctx.strokeText(cd.number.toString(), 0, 0);
+    ctx.fillText(cd.number.toString(), 0, 0);
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.font = `${baseFontSize * 1.1}px ${GAME_FONT_FAMILY}`;
+    ctx.fillStyle = COLOR_GREEN;
+    ctx.strokeStyle = COLOR_BLACK;
+    ctx.strokeText("GET READY!", width / 2, height / 2 + 120);
+    ctx.fillText("GET READY!", width / 2, height / 2 + 120);
+    ctx.restore();
+    ctx.restore();
+  }
+  function triggerCountdownEffect() {
+    gameState.countdown = {
+      show: true,
+      number: 3,
+      scale: 4,
+      count: 0,
+      rafId: null,
+      timestamp: null
+    };
+    gameState.countdown.rafId = requestAnimationFrame(updateCountdownEffect);
+    sounds.countdown();
+  }
+  function updateCountdownEffect(timestamp) {
+    const cd = gameState.countdown;
+    if (!cd.timestamp || timestamp - cd.timestamp > 100) {
+      drawCountdownEffect();
+      cd.count += 1;
+      cd.scale = Math.max(1, cd.scale - 0.4);
+      if (cd.count >= 50) {
+        cd.count = 0;
+        cd.number--;
+        cd.scale = 4;
+        if (cd.number >= 1) {
+          sounds.countdown();
+        }
+      }
+      if (cd.number <= 0) {
+        cancelAnimationFrame(cd.rafId);
+        cd.show = false;
+        cd.number = 3;
+        cd.scale = 4;
+        cd.count = 0;
+        cd.rafId = null;
+        cd.timestamp = 0;
+        startGame();
+        return true;
+      }
+    }
+    cd.rafId = requestAnimationFrame(updateCountdownEffect);
+  }
+  function drawLevelUpEffect() {
+    const effect = gameState.levelUpEffect;
+    const { width, height } = canvas;
+    if (!effect.show) {
+      return false;
+    }
+    ctx.save();
+    ctx.fillStyle = COLOR_RGBA_BLACK;
+    ctx.fillRect(0, 0, width, height);
+    drawTetrisText();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize * 1.2}px ${GAME_FONT_FAMILY}`;
+    ctx.fillStyle = COLOR_GREEN;
+    ctx.fillText(`LEVEL UP`, width / 2, height / 2.5);
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize * 2.5}px ${GAME_FONT_FAMILY}`;
+    ctx.fillStyle = COLOR_GREEN;
+    ctx.fillText(`${gameState.level}`, width / 2, height / 1.85);
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize * 1.3}px ${GAME_FONT_FAMILY}`;
+    ctx.fillStyle = COLOR_YELLOW;
+    ctx.strokeStyle = COLOR_BLACK;
+    ctx.lineWidth = 3;
+    ctx.strokeText("CONGRATS!", width / 2, height / 1.6);
+    ctx.fillText("CONGRATS!", width / 2, height / 1.6);
+    ctx.restore();
+    drawFireworksEffect();
+    ctx.restore();
+    return true;
+  }
+  function triggerLevelUpEffect() {
+    const { width, height } = canvas;
+    const fireworks = [];
+    gameState.levelUpEffect.show = true;
+    gameState.levelUpEffect.timer = 0;
+    for (let i = 0; i < 30; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1 + Math.random() * 240;
+      fireworks.push({
+        // 全部从中心点出发
+        x: width / 2,
+        y: height / 2 - 60,
+        radius: 2 + Math.random() * 4,
+        color: FIREWORKS_COLORS[Math.floor(Math.random() * 6)],
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        alpha: 1
+      });
+    }
+    gameState.levelUpEffect.fireworks = fireworks;
+    stopBGM();
+    sounds.levelUp();
+  }
+  function updateLevelUpEffect() {
+    gameState.levelUpEffect.timer++;
+    if (gameState.levelUpEffect.timer > 3) {
+      gameState.levelUpEffect.show = false;
+      gameState.levelUpEffect.fireworks = [];
+      playBGM();
+      return true;
+    }
+    return false;
+  }
+  function drawClearEffect() {
+    for (const line of gameState.clearEffects) {
+      ctx.save();
+      ctx.globalAlpha = line.alpha;
+      for (let x = 0; x < BOARD_COLS; x++) {
+        drawBlock(ctx, x, line.y, line.color);
+      }
+      ctx.restore();
+    }
+  }
+  function triggerClearEffect() {
+    drawBoard(gameState.board);
+    drawCurr(gameState.curr, gameState.cx, gameState.cy);
+    drawClearEffect();
+    if (updateClearEffect()) {
+      let clear = 0;
+      for (let y = BOARD_ROWS - 1; y >= 0; y--) {
+        const isFullLine = gameState.board[y].every((cell) => !!cell);
+        if (isFullLine) {
+          gameState.board.splice(y, 1);
+          gameState.board.unshift(Array.from({ length: BOARD_COLS }).fill(0));
+          clear++;
+          y++;
+        }
+      }
+      gameState.lines += clear;
+      gameState.score += CLEAR_SCORES[clear] * gameState.level;
+      const totalLines = gameState.baseLines + gameState.lines;
+      const newLevel = Math.floor(totalLines / 10) + 1;
+      const oldLevel = gameState.level;
+      if (newLevel > oldLevel) {
+        triggerLevelUpEffect();
+      }
+      gameState.level = Math.min(Math.max(gameState.level, newLevel), MAX_LEVEL);
+      updateSpeed();
+      updateUI(
+        gameState.score,
+        gameState.lines,
+        gameState.level,
+        gameState.highScore
+      );
+      saveHighScore();
+      gameState.clearEffects = [];
+      cancelAnimationFrame(gameState.clearEffectsRafId);
+    } else {
+      gameState.clearEffectsRafId = requestAnimationFrame(triggerClearEffect);
+    }
+  }
+  function updateClearEffect() {
+    let allDone = true;
+    for (const line of gameState.clearEffects) {
+      const phase = Math.floor(line.timer / 0.12);
+      line.alpha = phase % 2 === 0 ? 1 : 0;
+      line.timer += 0.016;
+      if (line.timer < 0.72) {
+        allDone = false;
+      }
+    }
+    return allDone;
+  }
+  function addClearEffect(y) {
+    const isLineContains = gameState.clearEffects.some((line) => line.y === y);
+    if (!isLineContains) {
+      gameState.clearEffects.push({ y, alpha: 1, timer: 0 });
+    }
+  }
+  function drawBlock(ctx2, x, y, color) {
+    const bs = BLOCK_SIZE;
+    const gap = 1;
+    const size = bs - gap * 2;
+    const px = x * bs + gap;
+    const py = y * bs + gap;
+    ctx2.fillStyle = color;
+    ctx2.fillRect(px, py, size, size);
+    ctx2.strokeStyle = COLOR_BLACK;
+    ctx2.strokeRect(px, py, size, size);
+  }
+  function clearBoard() {
+    const { width, height } = canvas;
+    ctx.clearRect(0, 0, width, height);
+  }
+  function drawBoard(board) {
+    clearBoard();
+    for (let y = 0; y < BOARD_ROWS; y++) {
+      for (let x = 0; x < BOARD_COLS; x++) {
+        if (board[y][x]) {
+          drawBlock(ctx, x, y, board[y][x]);
+        }
+      }
+    }
+  }
+  function drawCurr(curr, cx, cy) {
+    const { shape, color } = curr;
+    const { length } = shape;
+    for (let y = 0; y < length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (shape[y][x]) {
+          drawBlock(ctx, cx + x, cy + y, color);
+        }
+      }
+    }
+    return true;
+  }
+  function drawNext(next) {
+    const { shape } = next;
+    const { width, height } = nextCanvas;
+    const gridSize = 5;
+    const blockSize = Math.floor(width / gridSize);
+    const ox = Math.floor((width - shape[0].length * blockSize) / 2);
+    const oy = Math.floor((height - shape.length * blockSize) / 2);
+    nextCtx.clearRect(0, 0, width, height);
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (shape[y][x]) {
+          const px = ox + x * blockSize;
+          const py = oy + y * blockSize;
+          nextCtx.fillStyle = next.color;
+          nextCtx.fillRect(px, py, blockSize - 2, blockSize - 2);
+          nextCtx.strokeStyle = COLOR_BLACK;
+          nextCtx.strokeRect(px, py, blockSize - 2, blockSize - 2);
+        }
+      }
+    }
+  }
+  function drawLevelSelect(level) {
+    const { width, height } = canvas;
+    clearBoard();
+    ctx.save();
+    ctx.fillStyle = COLOR_RGBA_BLACK;
+    ctx.fillRect(0, 0, width, height);
+    drawTetrisText();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize}px ${GAME_FONT_FAMILY}`;
+    ctx.fillStyle = COLOR_GREEN;
+    ctx.fillText("LEVEL", width / 2, height * 0.35);
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize * 3}px "Press Start 2P"`;
+    ctx.fillStyle = COLOR_GREEN;
+    ctx.fillText(level.toString(), width / 2, height * 0.5);
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize}px "Press Start 2P"`;
+    ctx.fillStyle = COLOR_WHITE;
+    ctx.fillText("1-9 KEY", width / 2, height * 0.58);
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize * 1.15}px "Press Start 2P"`;
+    ctx.fillStyle = COLOR_TEAL;
+    ctx.fillText("ENTER START", width / 2, height * 0.7);
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize * 0.9}px "Press Start 2P"`;
+    ctx.fillStyle = COLOR_WHITE;
+    ctx.fillText("P 3SEC: HIDDEN", width / 2, height * 0.8);
+    ctx.restore();
+  }
+  function drawPause() {
+    const { width, height } = canvas;
+    ctx.fillStyle = COLOR_RGBA_BLACK;
+    ctx.fillRect(0, 0, width, height);
+    drawTetrisText();
+    ctx.save();
+    ctx.fillStyle = COLOR_YELLOW;
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize * 1.6}px "Press Start 2P"`;
+    ctx.fillText("PAUSED", width / 2, height / 2);
+    ctx.restore();
+  }
+  function drawOver() {
+    const { width, height } = canvas;
+    ctx.fillStyle = COLOR_RGBA_BLACK;
+    ctx.fillRect(0, 0, width, height);
+    drawTetrisText();
+    ctx.save();
+    ctx.fillStyle = COLOR_RED;
+    ctx.textAlign = "center";
+    ctx.font = `${baseFontSize * 1.45}px "Press Start 2P"`;
+    ctx.fillText("GAME OVER", width / 2, height / 2);
+    ctx.restore();
+  }
+  function forceOver() {
+    if (gameState.isPaused) {
+      return false;
+    }
+    stopBGM();
+    gameState.isGameOver = true;
+    gameState.isPaused = false;
+    gameState.countdown.show = false;
+    gameState.isHiddenMode = false;
+    cancelAnimationFrame(gameState.gameRafId);
+    sounds.gameOver();
+    saveHighScore();
+    setTimeout(() => {
+      drawOver();
+    }, 10);
+    return true;
+  }
+  function resize() {
+    const { isSelectLevel, isGameOver, board, curr, cx, cy, level, next } = gameState;
+    const h = globalThis.innerHeight * 0.9;
+    BLOCK_SIZE = Math.floor(h / BOARD_ROWS);
+    canvas.width = BLOCK_SIZE * BOARD_COLS;
+    canvas.height = BLOCK_SIZE * BOARD_ROWS;
+    baseFontSize = Math.floor(canvas.height * 0.032);
+    const nextSize = Math.min(
+      globalThis.innerWidth * 0.1,
+      globalThis.innerHeight * 0.18
+    );
+    nextCanvas.width = nextSize;
+    nextCanvas.height = nextSize;
+    if (isSelectLevel || isGameOver) {
+      drawLevelSelect(level);
+    } else {
+      drawBoard(board);
+      drawNext(next);
+      if (curr) {
+        drawCurr(curr, cx, cy);
+      }
+    }
+  }
+  function updateUI(score, lines, level, highScore) {
+    document.querySelector("#score").textContent = pad(score, 5);
+    document.querySelector("#lines").textContent = pad(lines, 2);
+    document.querySelector("#level").textContent = pad(level, 2);
+    document.querySelector("#highScore").textContent = pad(highScore, 5);
+  }
+
+  // lib/tetris.js
+  var start = () => {
+    gameState.isSelectLevel = false;
+    gameState.baseLines = (gameState.level - 1) * 10;
+    triggerCountdownEffect();
+  };
+  var togglePause = () => {
+    if (gameState.isGameOver || gameState.isSelectLevel) {
+      return false;
+    }
+    gameState.isPaused = !gameState.isPaused;
+    if (gameState.isPaused) {
+      cancelAnimationFrame(gameState.gameRafId);
+      stopBGM();
+      sounds.pause();
+      drawPause();
+    } else {
+      sounds.resume();
+      playBGM();
+      updateSpeed();
+    }
+  };
+  var restartGame = () => {
+    stopBGM();
+    gameState.isGameOver = false;
+    gameState.isPaused = false;
+    gameState.score = 0;
+    gameState.lines = 0;
+    gameState.level = 1;
+    resetBoard();
+    updateUI(
+      gameState.score,
+      gameState.lines,
+      gameState.level,
+      gameState.highScore
+    );
+    spawn();
+    playBGM();
+    updateSpeed();
+  };
+  var startHold = () => {
+    gameState.holdP = setTimeout(() => {
+      gameState.isHiddenMode = true;
+      gameState.level = 5;
+      drawLevelSelect(gameState.level);
+    }, 3e3);
+  };
+  var stopHold = () => {
+    clearTimeout(gameState.holdP);
+    gameState.holdP = null;
+  };
+  var executeDrawLevelSelectCommand = () => {
+    stopBGM();
+    cancelAnimationFrame(gameState.gameRafId);
+    resetBoard();
+    gameState.isGameOver = false;
+    gameState.isHiddenMode = false;
+    gameState.isSelectLevel = true;
+    gameState.score = 0;
+    gameState.lines = 0;
+    gameState.level = 1;
+    gameState.next = null;
+    updateUI(
+      gameState.score,
+      gameState.lines,
+      gameState.level,
+      gameState.highScore
+    );
+    drawLevelSelect(gameState.level);
+  };
+  var executeLevelSelectionCommand = (key, lowerKey) => {
+    if (key >= "1" && key <= "9") {
+      gameState.level = Number.parseInt(key, 10);
+      sounds.levelSelect();
+      drawLevelSelect(gameState.level);
+    }
+    if (lowerKey === "p") {
+      startHold();
+    }
+    if (key === "Enter") {
+      start();
+    }
+  };
+  var executeShortcutsCommand = (lowerKey) => {
+    const commands = {
+      m: toggleBGM,
+      // M: 切换背景音乐
+      r: restartGame,
+      // R: 重新开始游戏
+      q: forceOver,
+      // Q: 强制结束游戏
+      p: togglePause
+      // P: 暂停/继续游戏
+    };
+    const command = commands[lowerKey];
+    if (command) {
+      command();
+      return true;
+    }
+    return false;
+  };
+  function executeDirectionControlCommand(key) {
+    const controls = {
+      ArrowLeft: () => move(-1, 0),
+      // 左移
+      ArrowRight: () => move(1, 0),
+      // 右移
+      ArrowDown: () => move(0, 1),
+      // 下移
+      ArrowUp: rotate,
+      // 旋转方块
+      " ": drop
+      // 空格：直接落地
+    };
+    const action = controls[key];
+    if (action) {
+      action();
+    }
+  }
+  function onResize() {
+    resize();
+  }
+  var onPauseStop = (e) => {
+    if (e.key.toLowerCase() === "p") {
+      stopHold();
+    }
+  };
+  var onControlButtonsPress = (e) => {
+    const { key } = e;
+    const lowerKey = key.toLowerCase();
+    if (gameState.countdown.show || gameState.levelUpEffect.show) {
+      return false;
+    }
+    if (gameState.isSelectLevel) {
+      executeLevelSelectionCommand(key, lowerKey);
+      return false;
+    }
+    if (gameState.isGameOver) {
+      if (key === "Enter") {
+        executeDrawLevelSelectCommand();
+      }
+      return false;
+    }
+    if (executeShortcutsCommand(lowerKey)) {
+      return false;
+    }
+    if (gameState.isPaused) {
+      return false;
+    }
+    executeDirectionControlCommand(key);
+    drawBoard(gameState.board);
+    drawCurr(gameState.curr, gameState.cx, gameState.cy);
+  };
+  var lazyDrawLevelSelect = () => {
+    if (document?.fonts?.load) {
+      document.fonts.load('40px "Press Start 2P"').then(() => {
+        drawLevelSelect(gameState.level);
+      });
+    } else {
+      setTimeout(() => {
+        drawLevelSelect(gameState.level);
+      }, 150);
+    }
+  };
+  var bindEvents = () => {
+    globalThis.addEventListener("resize", onResize);
+    document.addEventListener("keydown", onControlButtonsPress);
+    document.addEventListener("keyup", onPauseStop);
+  };
+  var init = () => {
+    resetBoard();
+    loadHighScore();
+    gameState.score = 0;
+    gameState.lines = 0;
+    gameState.level = 1;
+    gameState.isGameOver = false;
+    gameState.isPaused = false;
+    gameState.isHiddenMode = false;
+    gameState.isSelectLevel = true;
+    resize();
+    updateUI(
+      gameState.score,
+      gameState.lines,
+      gameState.level,
+      gameState.highScore
+    );
+    lazyDrawLevelSelect();
+    bindEvents();
+  };
+  init();
+})();
