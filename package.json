@@ -1,6 +1,6 @@
 {
   "name": "@yaohaixiao/tetris.js",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "tetris.js - 一款 JavaScript 开发的仿 FC 经典俄罗斯方块游戏",
   "main": "tetris.html",
   "scripts": {
