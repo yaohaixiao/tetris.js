@@ -8,6 +8,8 @@ import { defineConfig } from 'eslint/config';
 // Added for .gitignore
 import { includeIgnoreFile } from '@eslint/compat';
 
+import compatPlugin from 'eslint-plugin-compat';
+
 // Added for .gitignore path
 import { fileURLToPath } from 'node:url';
 import globals from 'globals';
@@ -196,6 +198,22 @@ export default defineConfig(
     },
   },
 
-  // 10. Prettier - must be the last configuration to override styling rules
+  // 10. 浏览器兼容性检测 eslint-plugin-compat
+  {
+    plugins: {
+      compat: compatPlugin,
+    },
+    rules: {
+      // 忽略 op_mini all
+      'compat/compat': ['error'],
+    },
+    settings: {
+      compat: {
+        browsers: ['defaults'],
+      },
+    },
+  },
+
+  // 11. Prettier - must be the last configuration to override styling rules
   eslintConfigPrettier,
 );

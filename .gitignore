@@ -2,3 +2,5 @@
 /node_modules
 --fix
 report
+/jsco-output/
+/compat-issues.json
