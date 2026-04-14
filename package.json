@@ -13,7 +13,7 @@
     "format:prettier": "npm run format:prettier:raw -- --write",
     "format:prettier:raw": "prettier \"**/*.{{m,c,}{j,t}s{x,},md{x,},json,y{a,}ml}\" --ignore-path .gitignore",
     "lint": "npm run lint:es && npm run lint:prettier",
-    "lint:es": "eslint . --rule \"compat/compat:error\" --format json > compat-issues.json",
+    "lint:es": "eslint .",
     "lint:prettier": "npm run format:prettier:raw -- --check",
     "test": "npm run format && npm run test:unit",
     "test:unit": "jest --config jest.config.js",
@@ -73,7 +73,7 @@
     "node": ">=20.18.1"
   },
   "browserslist": [
-    "last 10 versions",
+    "last 2 versions",
     "> 1%",
     "not dead",
     "not IE 11",
