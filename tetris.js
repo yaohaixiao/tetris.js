@@ -1443,7 +1443,7 @@ var tetris = (() => {
   // lib/core/restart-game.js
   var restartGame = () => {
     const mode = get_game_state_mode_default();
-    if (mode === "paused") {
+    if (mode === "paused" || mode === "game-over" || mode === "main-menu") {
       return;
     }
     stop_bgm_default();
@@ -1681,6 +1681,10 @@ var tetris = (() => {
   // lib/audio/toggle-bgm.js
   var toggleBGM = () => {
     let { bgmEnabled } = audio_state_default;
+    const mode = get_game_state_mode_default();
+    if (mode === "main-menu" || mode === "paused" || mode === "game-over") {
+      return;
+    }
     bgmEnabled = !bgmEnabled;
     sounds_default.bgmToggle();
     if (bgmEnabled) {
