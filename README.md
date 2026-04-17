@@ -4,7 +4,7 @@
 [![prettier code style](https://img.shields.io/badge/code_style-prettier-07b759.svg)](https://prettier.io)
 [![MIT License](https://img.shields.io/github/license/yaohaixiao/tetris.js.svg)](https://github.com/yaohaixiao/tetris.js/blob/master/LICENSE)
 
-tetris.js - 一款 JavaScript 开发的仿 FC 经典俄罗斯方块游戏
+tetris.js - 基于原生 JavaScript 开发的纯前端俄罗斯方块游戏，无任何外部依赖，可直接在浏览器中运行。游戏实现了经典俄罗斯方块的全部核心功能，包括方块生成、移动、旋转、下落、碰撞检测、消行、升级、分数统计等，同时添加了丰富的 UI 渲染、动画特效和交互反馈，整体架构分层清晰、模块化程度高，易于维护和扩展。
 
 ![俄罗斯方块游戏截图](./img/screen-shot.png)
 
@@ -57,6 +57,21 @@ tetris.js - 一款 JavaScript 开发的仿 FC 经典俄罗斯方块游戏
     - 最好分数；
   - 游戏快捷键（右侧下方）：显示游戏常用的快捷键说明；
 - 数据存储：本地缓存最高分数；
+
+## Architecture
+
+![System Architecture Diagram](./img/architecture-diagram.png)
+
+tetris.js 项目采用分层架构设计，整体结构清晰、模块化程度高、可维护性强。不仅适用于俄罗斯方块游戏，也可作为小型前端游戏的通用架构参考，通过轻微调整，可扩展到其他类型的 2D 画布游戏开发中。
+
+## Highlights
+
+- 原生 JavaScript 开发，无任何外部依赖；
+- 模块化清晰：各层职责明确，模块间耦合度低，便于维护和修改；
+- 状态集中管理：所有核心状态统一存储，避免状态分散导致的混乱，便于调试和扩展；
+- 逻辑与渲染分离：核心游戏逻辑不依赖渲染实现，可后续扩展为 WebGL 渲染或其他渲染方式；
+- 交互反馈丰富：添加了完整的音效、动画，提升用户体验；
+- 轻量无依赖：纯原生 JS 实现，可直接运行，适配各种浏览器环境，部署简单；
 
 ## Browsers support
 
