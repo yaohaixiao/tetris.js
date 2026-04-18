@@ -315,10 +315,7 @@ var tetris = (() => {
   // lib/ui/render-scene.js
   var renderScene = () => {
     const mode = get_game_state_mode_default();
-    const {
-      level,
-      next
-    } = game_state_default;
+    const { level, next } = game_state_default;
     if (mode === "main-menu") {
       render_main_menu_default(level);
       return;
@@ -687,7 +684,9 @@ var tetris = (() => {
         if (s[y][x]) {
           const nx = game_state_default.cx + x + ox;
           const ny = game_state_default.cy + y + oy;
-          if (nx < 0 || nx >= COLS2 || ny >= ROWS2 || ny >= 0 && game_state_default.board[ny][nx]) {
+          const outOfBounds = nx < 0 || nx >= COLS2 || ny >= ROWS2;
+          const hitBlock = ny >= 0 && ny < ROWS2 && game_state_default.board[ny][nx];
+          if (outOfBounds || hitBlock) {
             return true;
           }
         }
