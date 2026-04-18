@@ -468,10 +468,6 @@ var tetris = (() => {
   };
   var set_game_state_mode_default = setGameStateMode;
 
-  // lib/utils/pad-start.js
-  var padStart = (n, len) => n.toString().padStart(len, "0");
-  var pad_start_default = padStart;
-
   // lib/audio/state/audio-state.js
   var AudioState = {
     bgmEnabled: true,
@@ -771,6 +767,10 @@ var tetris = (() => {
     }
   };
   var render_clear_default = renderClear;
+
+  // lib/utils/pad-start.js
+  var padStart = (n, len) => n.toString().padStart(len, "0");
+  var pad_start_default = padStart;
 
   // lib/ui/hud/hud-dom.js
   var HudDom = {
