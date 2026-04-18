@@ -1,18 +1,18 @@
 # [0.4.0](https://github.com/yaohaixiao/tetris.js/compare/0.3.1...0.4.0) (2026-04-18)
 
-
 ### Bug Fixes
 
-* 修复 updateHUD 动画缓存的问题 ([cb0b3b3](https://github.com/yaohaixiao/tetris.js/commit/cb0b3b30e7d99c334aa2ad2a8a5593d2006eb2e8))
-* 修复3个界面（主菜单、暂停、游戏结束），全局快捷键的禁用问题； ([bb11d82](https://github.com/yaohaixiao/tetris.js/commit/bb11d821fe5ed607aa4e041270bb377fcf13cae4))
-* 修复碰撞检测 game-over 没有显示结束界面的问题； ([f397d29](https://github.com/yaohaixiao/tetris.js/commit/f397d2901fa9092d54a9d5f7bf33182edcad5e74))
-
+- 修复 updateHUD 动画缓存的问题 ([cb0b3b3](https://github.com/yaohaixiao/tetris.js/commit/cb0b3b30e7d99c334aa2ad2a8a5593d2006eb2e8))
+- 修复3个界面（主菜单、暂停、游戏结束），全局快捷键的禁用问题； ([bb11d82](https://github.com/yaohaixiao/tetris.js/commit/bb11d821fe5ed607aa4e041270bb377fcf13cae4))
+- 修复碰撞检测 game-over 没有显示结束界面的问题； ([f397d29](https://github.com/yaohaixiao/tetris.js/commit/f397d2901fa9092d54a9d5f7bf33182edcad5e74))
 
 ### Features
 
-* 更新动画，优化升级庆祝动画的显示 ([1b44308](https://github.com/yaohaixiao/tetris.js/commit/1b443088b162d749f383681e15dc1678e3343620))
-* 添加 animation system 处理动画渲染； ([ba9bc9f](https://github.com/yaohaixiao/tetris.js/commit/ba9bc9f396c93e8400f881010d5a525662f925cf))
-* 添加游戏核心 engine 层，控制游戏整体逻辑；添加 inout 层，处理输入输出，解耦控制和UI的逻辑； ([9520086](https://github.com/yaohaixiao/tetris.js/commit/9520086f798b1cec0c2866c043592c415830acc4))
+- 更新动画，优化升级庆祝动画的显示 ([1b44308](https://github.com/yaohaixiao/tetris.js/commit/1b443088b162d749f383681e15dc1678e3343620))
+- 添加 animation
+  system 处理动画渲染； ([ba9bc9f](https://github.com/yaohaixiao/tetris.js/commit/ba9bc9f396c93e8400f881010d5a525662f925cf))
+- 添加游戏核心 engine 层，控制游戏整体逻辑；添加 inout 层，处理输入输出，解耦控制和UI的逻辑； ([9520086](https://github.com/yaohaixiao/tetris.js/commit/9520086f798b1cec0c2866c043592c415830acc4))
+
 # [0.3.1](https://github.com/yaohaixiao/tetris.js/compare/0.3.0...0.4.0) (2026-04-13)
 
 ### Bug Fixes
