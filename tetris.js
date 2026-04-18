@@ -1,2 +1,1228 @@
-var tetris=(()=>{var At={board:[],curr:null,cx:0,cy:0,next:null,score:0,baseLines:0,lines:0,level:1,highScore:0,mode:"main-menu"},o=At;var Mt={rafId:null,accumulator:0,lastTimestamp:0},g=Mt;var Ot={COLS:10,ROWS:20},E=Ot;var yt=()=>{let{COLS:e,ROWS:t}=E;o.board=Array.from({length:t},()=>Array.from({length:e}).fill(0))},F=yt;var Gt=e=>localStorage.getItem(e),pe=Gt;var Ct=()=>{o.highScore=Number.parseInt(pe("tetris-high-score"),10)||0},de=Ct;var Rt=e=>{o.mode=e},L=Rt;var ue=document.querySelector("#game-board"),Bt=ue.getContext("2d"),he=document.querySelector("#next-piece"),wt=he.getContext("2d"),bt=0,It=0,kt={gameBoard:ue,gameBoardContext:Bt,nextPiece:he,nextPieceContext:wt,fontSize:bt,blockSize:It},f=kt;var Pt=()=>{let{ROWS:e,COLS:t}=E,{gameBoard:n,nextPiece:a}=f,m=globalThis.innerHeight*.9;f.blockSize=Math.floor(m/e),n.width=f.blockSize*t,n.height=f.blockSize*e,f.fontSize=Math.floor(n.height*.032);let s=Math.min(globalThis.innerWidth*.1,globalThis.innerHeight*.18);a.width=s,a.height=s},K=Pt;var ge="#18c8fa",_t="rgba(50, 190, 239, 0.3)",Se="#ff0",xe="#a0a",Nt="#00f",Ee="#ff7f00",ve="#0f0",Le="#f00",Ft="#444",Ht="rgba(0,0,0,.5)",Vt="#fff",Dt=[ge,Se,xe,Ee,ve,Le],Wt={TEAL:ge,RGBA_TEAL:_t,YELLOW:Se,PURPLE:xe,BLUE:Nt,ORANGE:Ee,GREEN:ve,RED:Le,BLACK:Ft,RGBA_BLACK:Ht,WHITE:Vt,FIREWORKS:Dt},u=Wt;var $t=[0,100,300,500,800],zt='"Press Start 2P", monospace, sans-serif',Ut=99,Yt={CLEAR_SCORES:$t,MAX_LEVEL:Ut,FONT_FAMILY:zt},S=Yt;function qt(){let{gameBoard:e,gameBoardContext:t}=f,{width:n,height:a}=e;t.clearRect(0,0,n,a)}var b=qt;var Kt=()=>{let{GREEN:e}=u,{FONT_FAMILY:t}=S,{gameBoard:n,gameBoardContext:a,fontSize:m}=f,{width:s,height:l}=n;a.save(),a.textAlign="center",a.font=`${m*1.1}px ${t}`,a.fillStyle=e,a.fillText("TETRIS.JS",s/2,l*.1),a.restore()},y=Kt;var Xt=()=>{let{TEAL:e}=u,{FONT_FAMILY:t}=S,{gameBoard:n,gameBoardContext:a,fontSize:m}=f,{width:s,height:l}=n;a.save(),a.textAlign="center",a.font=`${m*1.15}px ${t}`,a.fillStyle=e,a.fillText("ENTER START",s/2,l*.7),a.restore()},X=Xt;var Qt=e=>{let{RGBA_BLACK:t,GREEN:n,WHITE:a}=u,{FONT_FAMILY:m}=S,{gameBoard:s,gameBoardContext:l,fontSize:i}=f,{width:r,height:c}=s;b(),l.save(),l.fillStyle=t,l.fillRect(0,0,r,c),y(),l.save(),l.textAlign="center",l.font=`${i}px ${m}`,l.fillStyle=n,l.fillText("LEVEL",r/2,c*.35),l.restore(),l.save(),l.textAlign="center",l.font=`${i*3}px ${m}`,l.fillStyle=n,l.fillText(e.toString(),r/2,c*.5),l.restore(),l.save(),l.textAlign="center",l.font=`${i}px ${m}`,l.fillStyle=a,l.fillText("1-9 or T KEY",r/2,c*.58),l.restore(),X(),l.restore()},B=Qt;var jt=(e,t,n,a)=>{let{BLACK:m}=u,{blockSize:s}=f,l=s,i=1,r=l-i*2,c=t*l+i,h=n*l+i;e.fillStyle=a,e.fillRect(c,h,r,r),e.strokeStyle=m,e.strokeRect(c,h,r,r)},H=jt;function Jt(e){let{ROWS:t,COLS:n}=E,{gameBoardContext:a}=f;b();for(let m=0;m<t;m++)for(let s=0;s<n;s++)e[m][s]&&H(a,s,m,e[m][s])}var Te=Jt;var Zt=(e,t,n)=>{let{gameBoardContext:a}=f,{shape:m,color:s}=e,{length:l}=m;for(let i=0;i<l;i++)for(let r=0;r<m[i].length;r++)m[i][r]&&H(a,t+r,n+i,s);return!0},Ae=Zt;var eo=()=>{Te(o.board),o.curr&&Ae(o.curr,o.cx,o.cy)},A=eo;var to=()=>{let{nextPiece:e,nextPieceContext:t}=f,{width:n,height:a}=e;t.clearRect(0,0,n,a)},Me=to;var oo=e=>{let{BLACK:t}=u,{nextPiece:n,nextPieceContext:a}=f,{width:m,height:s}=n,i=Math.floor(m/5);if(!e)return;let{shape:r}=e,c=Math.floor((m-r[0].length*i)/2),h=Math.floor((s-r.length*i)/2);Me();for(let x=0;x<r.length;x++)for(let T=0;T<r[x].length;T++)if(r[x][T]){let R=c+T*i,q=h+x*i;a.fillStyle=e.color,a.fillRect(R,q,i-2,i-2),a.strokeStyle=t,a.strokeRect(R,q,i-2,i-2)}},V=oo;var ro=()=>o.mode,v=ro;var no=()=>{let e=v(),{level:t,next:n}=o;e==="game-over"||e==="main-menu"?B(t):(A(),V(n))},D=no;var io=(e,t)=>e.toString().padStart(t,"0"),G=io;var ao={score:document.querySelector("#score"),lines:document.querySelector("#lines"),level:document.querySelector("#level"),highScore:document.querySelector("#highScore")},w=ao;var so=(e,t,n,a,m)=>{let s=null;if(e===t)return;let l=0,i=0,r=c=>{i||(i=c);let h=c-i;i=c,l+=h;let x=Math.min(l/n,1),T=Math.floor(e+(t-e)*x);a(T,s),x<1?s=requestAnimationFrame(r):m?.()};return s=requestAnimationFrame(r),{cancel:()=>cancelAnimationFrame(s)}},Oe=so;var I=(e,t,n=0)=>e.textContent=n?G(t,n):String(t),mo=()=>{let e={score:0,lines:0,level:1,highScore:0},t={score:0},n={score:!1},a=c=>{t.score=c,!n.score&&(n.score=!0,Oe(e.score,t.score,300,h=>{I(w.score,h,5)},()=>{e.score=t.score,n.score=!1,e.score!==t.score&&a(t.score)}))},m=c=>{c!==e.lines&&(I(w.lines,c,2),e.lines=c)},s=c=>{c!==e.level&&(I(w.level,c,2),e.level=c)},l=c=>{c!==e.highScore&&(I(w.highScore,c,5),e.highScore=c)};return{update:c=>{a(c.score),m(c.lines),s(c.level),l(c.highScore)},reset:()=>{e.score=e.lines=e.level=e.highScore=0,n.score=!1,I(w.score,0,5),I(w.lines,0,2),I(w.level,1,2),I(w.highScore,0,5)}}},ye=mo;var lo=(e,t,n,a,m=!1)=>{let s=ye();(v()==="main-menu"||m)&&s.reset(),s.update({score:e,lines:t,level:n,highScore:a})},k=lo;var co=()=>{document?.fonts?.load?document.fonts.load('40px "Press Start 2P"').then(()=>{B(o.level)}):setTimeout(()=>{B(o.level)},150)},Ge=co;var fo=()=>{K(),D()},Ce=fo;var po={arrowleft:"MOVE_LEFT",arrowright:"MOVE_RIGHT",arrowdown:"MOVE_DOWN",arrowup:"ROTATE"," ":"DROP",m:"TOGGLE_MUSIC",p:"TOGGLE_PAUSE",r:"RESTART",q:"QUIT",1:"LEVEL_ONE",2:"LEVEL_TWO",3:"LEVEL_THREE",4:"LEVEL_FOUR",5:"LEVEL_FIVE",6:"LEVEL_SIX",7:"LEVEL_SEVEN",8:"LEVEL_EIGHT",9:"LEVEL_NINE",t:"LEVEL_TEN",enter:"CONFIRM"},uo=e=>{let t=po[e];return t&&t||null},Re=uo;var W=[],P=e=>{W.push(e)},Be=e=>{for(let t=W.length-1;t>=0;t--)W[t].update(e)||W.splice(t,1)},we=()=>{let e=W.slice().toSorted((t,n)=>t.layer-n.layer);for(let t of e)t.render()},Q=e=>W.some(t=>{let n=t.blocking;return e&&e.length>0?n&&e.includes(t.name):t.blocking});var ne=new AudioContext,ho=(e,t,n=.1,a="square")=>{let m=ne.createOscillator(),s=ne.createGain();m.type=a,m.frequency.value=e,s.gain.value=n,m.connect(s),s.connect(ne.destination),m.start(),setTimeout(()=>{m.stop()},t)},p=ho;var go={levelSelect:()=>p(523,80,.1,"sine"),levelStart:()=>p(1319,160,.22,"sine"),countdown:()=>p(784,180,.3,"sine"),move:()=>p(330,60),rotate:()=>p(440,60),drop:()=>p(220,100),fall:()=>p(180,200),clear:()=>{p(587,220,.35,"square"),setTimeout(()=>p(698,260,.32,"square"),160),setTimeout(()=>p(880,300,.3,"square"),320),setTimeout(()=>p(1174,380,.25,"square"),480)},levelUp:()=>{p(523,220),setTimeout(()=>p(587,220),260),setTimeout(()=>p(659,240),520),setTimeout(()=>p(784,260),780),setTimeout(()=>p(880,280),1060),setTimeout(()=>p(1047,320),1360),setTimeout(()=>p(1175,360),1700),setTimeout(()=>p(1319,480),2080)},pause:()=>p(300,150),secondTick:()=>p(880,50,.085,"sine"),resume:()=>p(400,150),gameOver:()=>{p(330,200),setTimeout(()=>p(294,300),210),setTimeout(()=>p(262,500),520)},bgmToggle:()=>p(440,100)},d=go;var So=e=>{let{YELLOW:t,BLACK:n,RGBA_BLACK:a,GREEN:m}=u,{FONT_FAMILY:s}=S,{gameBoard:l,gameBoardContext:i,fontSize:r}=f,{width:c,height:h}=l,{scale:x,number:T}=e;b(),i.save(),i.fillStyle=a,i.fillRect(0,0,c,h),y(),i.save(),i.textAlign="center",i.textBaseline="middle",i.translate(c/2,h/2),i.scale(x,x),i.font=`${r*3.25}px ${s}`,i.fillStyle=t,i.strokeStyle=n,i.lineWidth=6,i.strokeText(T.toString(),0,0),i.fillText(T.toString(),0,0),i.restore(),i.save(),i.textAlign="center",i.textBaseline="top",i.font=`${r*1.1}px ${s}`,i.fillStyle=m,i.strokeStyle=n,i.strokeText("GET READY!",c/2,h/1.46),i.fillText("GET READY!",c/2,h/1.46),i.restore(),i.restore()},ie=So;var xo={bgmEnabled:!0,bgmTimer:null},j=xo;var be=(e,t)=>{e>=t.length&&(e=0),p(t[e],110,.05),o.bgmTimer=setTimeout(()=>{be(e+1,t)},130)},Ie=be;var Eo=()=>{o.bgmTimer&&clearTimeout(o.bgmTimer),o.bgmTimer=null},M=Eo;var vo=()=>{let{bgmEnabled:e}=j,t=[659,659,587,659,784,880,523,523,440,523,659,784,659,659,587,659,784,880,988,880,784,659,880,784,659,587,523,587,659,784,659,587];if(!e)return!1;M(),Ie(0,t)},C=vo;var{BLUE:Lo,TEAL:To,YELLOW:Ao,PURPLE:Mo,ORANGE:Oo,GREEN:yo,RED:Go}=u,Co=[{shape:[[1,1,1,1]],color:To},{shape:[[1,1],[1,1]],color:Ao},{shape:[[0,1,0],[1,1,1]],color:Mo},{shape:[[1,0,0],[1,1,1]],color:Lo},{shape:[[0,0,1],[1,1,1]],color:Oo},{shape:[[0,1,1],[1,1,0]],color:yo},{shape:[[1,1,0],[0,1,1]],color:Go}],ae=Co;function Ro(){let e=Math.floor(Math.random()*ae.length),t=ae[e];return{...t,shape:t.shape.map(n=>[...n])}}var se=Ro;var Bo=(e,t)=>{let{ROWS:n,COLS:a}=E;if(!o.curr)return!1;let m=o.curr.shape;for(let s=0;s<m.length;s++)for(let l=0;l<m[s].length;l++)if(m[s][l]){let i=o.cx+l+e,r=o.cy+s+t;if(i<0||i>=a||r>=n||r>=0&&o.board[r][i])return!0}return!1},$=Bo;var wo=(e,t)=>{localStorage.setItem(e,t)},ke=wo;var bo=()=>{let{score:e}=o;e>o.highScore&&(o.highScore=e,ke("tetris-high-score",o.highScore.toString()))},J=bo;var Io=()=>{let{RGBA_BLACK:e,RED:t,YELLOW:n}=u,{FONT_FAMILY:a}=S,{gameBoard:m,gameBoardContext:s,fontSize:l}=f,{width:i,height:r}=m;b(),A(),V(o.next),s.fillStyle=e,s.fillRect(0,0,i,r),y(),s.save(),s.fillStyle=t,s.strokeStyle=n,s.textAlign="center",s.font=`${l*2.3}px ${a}`,s.strokeText("GAME",i/2,r/2.2),s.fillText("GAME",i/2,r/2.2),s.restore(),s.save(),s.fillStyle=t,s.strokeStyle=n,s.textAlign="center",s.font=`${l*2.3}px ${a}`,s.strokeText("OVER",i/2,r/1.8),s.fillText("OVER",i/2,r/1.8),s.restore(),X()},Pe=Io;var ko=()=>{g.rafId&&(cancelAnimationFrame(g.rafId),g.rafId=null,g.timestamp=0)},Z=ko;var Po=()=>{let e=v();if(e==="game-over"||e==="paused"||e==="main-menu")return!1;L("game-over"),J(),M(),d.gameOver(),Pe(),Z()},ee=Po;var _o=()=>{let{COLS:e}=E;o.curr=o.next?{...o.next,shape:o.next.shape.map(t=>[...t])}:se(),o.next=se(),o.cx=Math.floor(e/2)-Math.floor(o.curr.shape[0].length/2),o.cy=0,V(o.next),$(0,0)&&ee()},_=_o;var No=()=>Math.max(100,1e3-(o.level-1)*80),_e=No;var Fo=(e,t)=>$(e,t)?!1:(o.cx+=e,o.cy+=t,d.move(),!0),N=Fo;var Ho=()=>{let{curr:e}=o,t=e.shape;for(let n=0;n<t.length;n++)for(let a=0;a<t[n].length;a++)t[n][a]&&(o.board[o.cy+n][o.cx+a]=e.color)},te=Ho;var Vo=e=>{let{COLS:t}=E,{gameBoardContext:n}=f;for(let a of e.lines){n.save(),n.globalAlpha=a.alpha;for(let m=0;m<t;m++)H(n,m,a.y,a.color);n.restore()}},Ne=Vo;var Do=e=>{let{gameBoardContext:t}=f;for(let n of e.fireworks)t.globalAlpha=n.alpha,t.fillStyle=n.color,t.beginPath(),t.arc(n.x,n.y,n.radius,0,Math.PI*2),t.fill(),n.x+=n.vx,n.y+=n.vy,n.alpha-=.024},Fe=Do;function Wo(e){let{RGBA_BLACK:t,BLACK:n,GREEN:a,YELLOW:m}=u,{FONT_FAMILY:s}=S,{gameBoard:l,gameBoardContext:i,fontSize:r}=f,{width:c,height:h}=l;return e.show?(i.save(),i.fillStyle=t,i.fillRect(0,0,c,h),y(),i.save(),i.textAlign="center",i.font=`${r*1.2}px ${s}`,i.fillStyle=a,i.fillText("LEVEL UP",c/2,h/2.5),i.restore(),i.save(),i.textAlign="center",i.font=`${r*2.5}px ${s}`,i.fillStyle=a,i.fillText(`${o.level}`,c/2,h/1.85),i.restore(),i.save(),i.textAlign="center",i.font=`${r*1.3}px ${s}`,i.fillStyle=m,i.strokeStyle=n,i.lineWidth=3,i.strokeText("CONGRATS!",c/2,h/1.6),i.fillText("CONGRATS!",c/2,h/1.6),i.restore(),Fe(e),i.restore(),!0):!1}var He=Wo;var me=class{constructor({onComplete:t}){this.fireworks=this.createFireworks(),this.onComplete=t,this.name="level-up",this.timer=0,this.duration=3,this.spawnTimer=0,this.layer=100,this.blocking=!0}createFireworks(){let{FIREWORKS:t}=u,{width:n,height:a}=f.gameBoard,m=[];for(let s=0;s<40;s++){let l=Math.random()*Math.PI*2,i=5+Math.random()*15;m.push({x:n/2,y:a/2-60,vx:Math.cos(l)*i,vy:Math.sin(l)*i,radius:3+Math.random()*4,color:t[Math.floor(Math.random()*t.length)],alpha:1})}return m}update(t){return this.timer+=t,this.spawnTimer+=t,this.updateFireworks(t),this.spawnTimer>.6&&(this.fireworks.push(...this.createFireworks()),this.spawnTimer=0),this.timer>=this.duration?(this.onComplete?.(),!1):!0}updateFireworks(t){for(let a of this.fireworks)a.vx*=.98,a.vy*=.98,a.vy+=.01*t,a.x+=a.vx*t*.008,a.y+=a.vy*t&.008,a.alpha-=t*.024,a.radius+=t*10;this.fireworks=this.fireworks.filter(a=>a.alpha>0)}render(){He({show:!0,fireworks:this.fireworks})}},Ve=me;var $o=()=>{M(),d.levelUp(),P(new Ve({onComplete:()=>{C()}}))},De=$o;var le=class{constructor(t){this.lines=t.map(n=>({y:n,alpha:1,timer:0})),this.name="clear-lines",this.layer=200,this.blocking=!0}update(t){let n=!0;for(let a of this.lines){let m=Math.floor(a.timer/.12);a.alpha=m%2===0?1:0,a.timer+=t,a.timer<.72&&(n=!1)}return n?(this.finish(),!1):!0}render(){A(),Ne({lines:this.lines})}finish(){let{ROWS:t,COLS:n}=E,{CLEAR_SCORES:a,MAX_LEVEL:m}=S,s=0;for(let r=t-1;r>=0;r--)o.board[r].every(Boolean)&&(o.board.splice(r,1),o.board.unshift(Array.from({length:n}).fill(0)),s++,r++);o.lines+=s,o.score+=a[s]*o.level;let l=o.baseLines+o.lines,i=Math.floor(l/10)+1;i>o.level&&De(),o.level=Math.min(Math.max(o.level,i),m),k(o.score,o.lines,o.level,o.highScore)}},We=le;var zo=e=>{P(new We(e))},$e=zo;var Uo=()=>{let{ROWS:e}=E,t=0,n=[];for(let a=e-1;a>=0;a--)o.board[a].every(s=>!!s)&&(n.push(a),t++);return t===0?(J(),!1):(d.clear(),$e(n),!0)},oe=Uo;var Yo=()=>{let e=v();return e==="game-over"||e==="main-menu"||Q()||!N(0,1)&&(te(),d.fall(),oe(),_(),e==="game-over")?!1:(A(),!0)},ze=Yo;var Ue=e=>{g.timestamp||(g.timestamp=e);let t=(e-g.timestamp)/1e3;g.timestamp=e,Be(t);let n=_e();(!g.accumulator||e-g.accumulator>n)&&(ze(),g.accumulator=e),D(),we(),g.rafId=requestAnimationFrame(Ue)},z=Ue;var qo=()=>{Z(),g.rafId=requestAnimationFrame(z)},U=qo;var Ko=()=>{let e=document.querySelector("#level");e&&(e.textContent=G(o.level,2)),L("playing"),_(),d.levelStart(),setTimeout(()=>{C()},250),g.rafId=requestAnimationFrame(U)},Ye=Ko;var Xo=()=>{let e={show:!0,number:3,scale:4,count:0,acc:0};return{layer:100,blocking:!0,name:"countdown",update(t){return e.acc+=t,e.acc<.01?!0:(e.acc=0,ie(e),e.count++,e.scale=Math.max(1,e.scale-.4),e.count>=50&&(e.count=0,e.number--,e.scale=4,e.number>=1&&d.countdown()),e.number<=0?(L("playing"),Ye(),!1):!0)},render(){ie(e)}}},qe=Xo;var Qo=()=>{P(qe())},Ke=Qo;var jo=()=>{o.baseLines=(o.level-1)*10,Ke()},Xe=jo;var Jo=e=>{o.level=e,d.levelSelect(),B(e)},O=Jo;var Zo={LEVEL_ONE:()=>{O(1)},LEVEL_TWO:()=>{O(2)},LEVEL_THREE:()=>{O(3)},LEVEL_FOUR:()=>{O(4)},LEVEL_FIVE:()=>{O(5)},LEVEL_SIX:()=>{O(6)},LEVEL_SEVEN:()=>{O(7)},LEVEL_EIGHT:()=>{O(8)},LEVEL_NINE:()=>{O(9)},LEVEL_TEN:()=>{O(10)},CONFIRM:Xe},er=e=>{let t=Zo[e];t?.()},Qe=er;var tr=()=>{let{curr:e}=o,t=e.shape;e.shape=t[0].map((n,a)=>t.map(m=>m[a]).toReversed()),$(0,0)?e.shape=t:d.rotate()},je=tr;var or=()=>{for(;N(0,1););te(),d.fall(),oe(),_(),d.drop()},Je=or;var rr={MOVE_LEFT:()=>{N(-1,0),A()},MOVE_RIGHT:()=>{N(1,0),A()},MOVE_DOWN:()=>{N(0,1),A()},ROTATE:()=>{je(),A()},DROP:()=>{Je(),A()}},nr=e=>{let t=rr[e];t?.()},Ze=nr;var ir=()=>{M(),o.rafId=requestAnimationFrame(z),F(),L("main-menu"),o.score=0,o.lines=0,o.level=1,o.next=null,B(o.level),k(o.score,o.lines,o.level,o.highScore)},et=ir;var ar={CONFIRM:et},sr=e=>{let t=ar[e];t?.()},tt=sr;var mr={"main-menu":Qe,playing:Ze,paused:()=>{},"game-over":tt},ot=mr;var lr=()=>{let e=v();e==="paused"||e==="game-over"||e==="main-menu"||(M(),L("playing"),o.score=0,o.lines=0,o.level=1,F(),k(o.score,o.lines,o.level,o.highScore,!0),_(),C(),U())},rt=lr;var cr=(e,t="yyyy-MM-dd HH:mm:ss")=>{let n=e.getFullYear(),a=e.getMonth()+1,m=e.getDate(),s=e.getHours(),l=e.getMinutes(),i=e.getSeconds(),r=()=>s>12?"PM":"AM",c=t.includes("a"),h={yyyy:n,MM:G(a,2),dd:G(m,2),HH:G(s,2),hh:c&&s>12?s-12:s,mm:G(l,2),ss:G(i,2),a:r()},x=t;for(let T of Object.keys(h))x=x.replace(T,h[T]);return x},nt=cr;var fr=()=>{let{GREEN:e,WHITE:t}=u,{FONT_FAMILY:n}=S,{gameBoard:a,gameBoardContext:m,fontSize:s}=f,{width:l,height:i}=a,r=nt(new Date,"HH:mm:ss");m.save(),m.fillStyle=e,m.textAlign="center",m.font=`${s*.86}px ${n}`,m.fillText(`${r}`,l/2,i/3.65),m.shadowColor=t,m.shadowBlur=13,m.shadowOffsetX=2,m.shadowOffsetY=2,m.restore()},it=fr;var pr=()=>{let e=new Date,t=e.getHours(),n=e.getMinutes(),a=e.getSeconds(),{TEAL:m,RGBA_TEAL:s,ORANGE:l}=u,{gameBoard:i,gameBoardContext:r}=f,{width:c,height:h}=i,x=c/2,T=h/2.2,R=Math.floor(c*.25);r.save(),r.translate(x,T),r.lineCap="round",r.strokeStyle=m,r.fillStyle=m,r.save(),r.beginPath(),r.arc(0,0,R,0,Math.PI*2),r.lineWidth=Math.floor(c*.064),r.stroke(),r.restore(),r.save(),r.beginPath(),r.arc(0,0,R,0,Math.PI*2),r.fillStyle=s,r.fill(),r.restore();let q=Math.floor(c*.016),St=Math.floor(c*.08),xt=R-St;for(let re=0;re<12;re++)r.save(),r.rotate(re*Math.PI/6),r.beginPath(),r.arc(0,-xt,q,0,Math.PI*2),r.fill(),r.restore();let Et=(t%12+n/60+a/3600)*(2*Math.PI/12);r.save(),r.rotate(Et),r.lineWidth=5,r.beginPath(),r.moveTo(0,0),r.lineTo(0,-R*.4),r.stroke(),r.restore();let vt=(n+a/60)*(2*Math.PI/60);r.save(),r.rotate(vt),r.lineWidth=4,r.beginPath(),r.moveTo(0,0),r.lineTo(0,-R*.65),r.stroke(),r.restore();let Lt=a*(2*Math.PI/60);r.save(),r.rotate(Lt),r.strokeStyle=l,r.lineWidth=2,r.beginPath(),r.moveTo(0,0),r.lineTo(0,-R*.75),r.stroke(),r.restore();let Tt=Math.floor(c*.014);r.save(),r.fillStyle=l,r.beginPath(),r.arc(0,0,Tt,0,Math.PI*2),r.fill(),r.restore(),r.restore()},at=pr;var dr=()=>{let{RGBA_BLACK:e,YELLOW:t,WHITE:n}=u,{FONT_FAMILY:a}=S,{gameBoard:m,gameBoardContext:s,fontSize:l}=f,{width:i,height:r}=m;s.fillStyle=e,s.fillRect(0,0,i,r),y(),it(),at(),s.save(),s.fillStyle=t,s.textAlign="center",s.font=`${l*1.6}px ${a}`,s.fillText("PAUSED",i/2,r/1.45),s.shadowColor=n,s.shadowBlur=13,s.shadowOffsetX=2,s.shadowOffsetY=2,s.restore()},ce=dr;var fe=class{constructor(t=500){this.layer=t,this.name="paused",this.timer=0,this.blocking=!0}update(t){return this.timer+=t,ce(),this.timer>=1&&(d.secondTick(),this.timer=0),!0}render(){ce()}},st=fe;var Y=null,mt=()=>{Y||(Y=new st,P(Y))},lt=()=>{Y&&(Y.update=()=>!1,Y=null)};var ur=()=>{let e=v();if(e==="game-over"||e==="main-menu")return!1;e==="playing"?(L("paused"),M(),d.pause(),mt()):(lt(),L("playing"),d.resume(),C(),U())},ct=ur;var hr=()=>{let{bgmEnabled:e}=j,t=v();t==="main-menu"||t==="paused"||t==="game-over"||(e=!e,d.bgmToggle(),e?C():M())},ft=hr;var gr={RESTART:rt,QUIT:ee,TOGGLE_PAUSE:ct,TOGGLE_MUSIC:ft},Sr=e=>{let t=gr[e];return t?(t(),!0):!1},pt=Sr;var xr=e=>{let{action:t}=e,n=v();if(Q(["countdown","level-up"])||!t||pt(t))return;let a=ot[n];a?.(t)},dt=xr;var Er=e=>{let t=e.key.toLowerCase(),n=Re(t);n&&dt({type:"keydown",key:t,action:n})},ut=Er;var vr=()=>{globalThis.addEventListener("resize",Ce),document.addEventListener("keydown",ut)},ht=vr;var Lr=()=>{F(),de(),L("main-menu"),o.score=0,o.lines=0,o.level=1,D(),K(),k(o.score,o.lines,o.level,o.highScore),Ge(),ht(),g.rafId=requestAnimationFrame(z)},gt=Lr;gt();})();
+var tetris = (() => {
+  var At = {
+      board: [],
+      curr: null,
+      cx: 0,
+      cy: 0,
+      next: null,
+      score: 0,
+      baseLines: 0,
+      lines: 0,
+      level: 1,
+      highScore: 0,
+      mode: 'main-menu',
+    },
+    o = At;
+  var Mt = { rafId: null, accumulator: 0, lastTimestamp: 0 },
+    g = Mt;
+  var Ot = { COLS: 10, ROWS: 20 },
+    E = Ot;
+  var yt = () => {
+      let { COLS: e, ROWS: t } = E;
+      o.board = Array.from({ length: t }, () =>
+        Array.from({ length: e }).fill(0),
+      );
+    },
+    F = yt;
+  var Gt = (e) => localStorage.getItem(e),
+    pe = Gt;
+  var Ct = () => {
+      o.highScore = Number.parseInt(pe('tetris-high-score'), 10) || 0;
+    },
+    de = Ct;
+  var Rt = (e) => {
+      o.mode = e;
+    },
+    L = Rt;
+  var ue = document.querySelector('#game-board'),
+    Bt = ue.getContext('2d'),
+    he = document.querySelector('#next-piece'),
+    wt = he.getContext('2d'),
+    bt = 0,
+    It = 0,
+    kt = {
+      gameBoard: ue,
+      gameBoardContext: Bt,
+      nextPiece: he,
+      nextPieceContext: wt,
+      fontSize: bt,
+      blockSize: It,
+    },
+    f = kt;
+  var Pt = () => {
+      let { ROWS: e, COLS: t } = E,
+        { gameBoard: n, nextPiece: a } = f,
+        m = globalThis.innerHeight * 0.9;
+      ((f.blockSize = Math.floor(m / e)),
+        (n.width = f.blockSize * t),
+        (n.height = f.blockSize * e),
+        (f.fontSize = Math.floor(n.height * 0.032)));
+      let s = Math.min(
+        globalThis.innerWidth * 0.1,
+        globalThis.innerHeight * 0.18,
+      );
+      ((a.width = s), (a.height = s));
+    },
+    K = Pt;
+  var ge = '#18c8fa',
+    _t = 'rgba(50, 190, 239, 0.3)',
+    Se = '#ff0',
+    xe = '#a0a',
+    Nt = '#00f',
+    Ee = '#ff7f00',
+    ve = '#0f0',
+    Le = '#f00',
+    Ft = '#444',
+    Ht = 'rgba(0,0,0,.5)',
+    Vt = '#fff',
+    Dt = [ge, Se, xe, Ee, ve, Le],
+    Wt = {
+      TEAL: ge,
+      RGBA_TEAL: _t,
+      YELLOW: Se,
+      PURPLE: xe,
+      BLUE: Nt,
+      ORANGE: Ee,
+      GREEN: ve,
+      RED: Le,
+      BLACK: Ft,
+      RGBA_BLACK: Ht,
+      WHITE: Vt,
+      FIREWORKS: Dt,
+    },
+    u = Wt;
+  var $t = [0, 100, 300, 500, 800],
+    zt = '"Press Start 2P", monospace, sans-serif',
+    Ut = 99,
+    Yt = { CLEAR_SCORES: $t, MAX_LEVEL: Ut, FONT_FAMILY: zt },
+    S = Yt;
+  function qt() {
+    let { gameBoard: e, gameBoardContext: t } = f,
+      { width: n, height: a } = e;
+    t.clearRect(0, 0, n, a);
+  }
+  var b = qt;
+  var Kt = () => {
+      let { GREEN: e } = u,
+        { FONT_FAMILY: t } = S,
+        { gameBoard: n, gameBoardContext: a, fontSize: m } = f,
+        { width: s, height: l } = n;
+      (a.save(),
+        (a.textAlign = 'center'),
+        (a.font = `${m * 1.1}px ${t}`),
+        (a.fillStyle = e),
+        a.fillText('TETRIS.JS', s / 2, l * 0.1),
+        a.restore());
+    },
+    y = Kt;
+  var Xt = () => {
+      let { TEAL: e } = u,
+        { FONT_FAMILY: t } = S,
+        { gameBoard: n, gameBoardContext: a, fontSize: m } = f,
+        { width: s, height: l } = n;
+      (a.save(),
+        (a.textAlign = 'center'),
+        (a.font = `${m * 1.15}px ${t}`),
+        (a.fillStyle = e),
+        a.fillText('ENTER START', s / 2, l * 0.7),
+        a.restore());
+    },
+    X = Xt;
+  var Qt = (e) => {
+      let { RGBA_BLACK: t, GREEN: n, WHITE: a } = u,
+        { FONT_FAMILY: m } = S,
+        { gameBoard: s, gameBoardContext: l, fontSize: i } = f,
+        { width: r, height: c } = s;
+      (b(),
+        l.save(),
+        (l.fillStyle = t),
+        l.fillRect(0, 0, r, c),
+        y(),
+        l.save(),
+        (l.textAlign = 'center'),
+        (l.font = `${i}px ${m}`),
+        (l.fillStyle = n),
+        l.fillText('LEVEL', r / 2, c * 0.35),
+        l.restore(),
+        l.save(),
+        (l.textAlign = 'center'),
+        (l.font = `${i * 3}px ${m}`),
+        (l.fillStyle = n),
+        l.fillText(e.toString(), r / 2, c * 0.5),
+        l.restore(),
+        l.save(),
+        (l.textAlign = 'center'),
+        (l.font = `${i}px ${m}`),
+        (l.fillStyle = a),
+        l.fillText('1-9 or T KEY', r / 2, c * 0.58),
+        l.restore(),
+        X(),
+        l.restore());
+    },
+    B = Qt;
+  var jt = (e, t, n, a) => {
+      let { BLACK: m } = u,
+        { blockSize: s } = f,
+        l = s,
+        i = 1,
+        r = l - i * 2,
+        c = t * l + i,
+        h = n * l + i;
+      ((e.fillStyle = a),
+        e.fillRect(c, h, r, r),
+        (e.strokeStyle = m),
+        e.strokeRect(c, h, r, r));
+    },
+    H = jt;
+  function Jt(e) {
+    let { ROWS: t, COLS: n } = E,
+      { gameBoardContext: a } = f;
+    b();
+    for (let m = 0; m < t; m++)
+      for (let s = 0; s < n; s++) e[m][s] && H(a, s, m, e[m][s]);
+  }
+  var Te = Jt;
+  var Zt = (e, t, n) => {
+      let { gameBoardContext: a } = f,
+        { shape: m, color: s } = e,
+        { length: l } = m;
+      for (let i = 0; i < l; i++)
+        for (let r = 0; r < m[i].length; r++) m[i][r] && H(a, t + r, n + i, s);
+      return !0;
+    },
+    Ae = Zt;
+  var eo = () => {
+      (Te(o.board), o.curr && Ae(o.curr, o.cx, o.cy));
+    },
+    A = eo;
+  var to = () => {
+      let { nextPiece: e, nextPieceContext: t } = f,
+        { width: n, height: a } = e;
+      t.clearRect(0, 0, n, a);
+    },
+    Me = to;
+  var oo = (e) => {
+      let { BLACK: t } = u,
+        { nextPiece: n, nextPieceContext: a } = f,
+        { width: m, height: s } = n,
+        i = Math.floor(m / 5);
+      if (!e) return;
+      let { shape: r } = e,
+        c = Math.floor((m - r[0].length * i) / 2),
+        h = Math.floor((s - r.length * i) / 2);
+      Me();
+      for (let x = 0; x < r.length; x++)
+        for (let T = 0; T < r[x].length; T++)
+          if (r[x][T]) {
+            let R = c + T * i,
+              q = h + x * i;
+            ((a.fillStyle = e.color),
+              a.fillRect(R, q, i - 2, i - 2),
+              (a.strokeStyle = t),
+              a.strokeRect(R, q, i - 2, i - 2));
+          }
+    },
+    V = oo;
+  var ro = () => o.mode,
+    v = ro;
+  var no = () => {
+      let e = v(),
+        { level: t, next: n } = o;
+      e === 'game-over' || e === 'main-menu' ? B(t) : (A(), V(n));
+    },
+    D = no;
+  var io = (e, t) => e.toString().padStart(t, '0'),
+    G = io;
+  var ao = {
+      score: document.querySelector('#score'),
+      lines: document.querySelector('#lines'),
+      level: document.querySelector('#level'),
+      highScore: document.querySelector('#highScore'),
+    },
+    w = ao;
+  var so = (e, t, n, a, m) => {
+      let s = null;
+      if (e === t) return;
+      let l = 0,
+        i = 0,
+        r = (c) => {
+          i || (i = c);
+          let h = c - i;
+          ((i = c), (l += h));
+          let x = Math.min(l / n, 1),
+            T = Math.floor(e + (t - e) * x);
+          (a(T, s), x < 1 ? (s = requestAnimationFrame(r)) : m?.());
+        };
+      return (
+        (s = requestAnimationFrame(r)),
+        { cancel: () => cancelAnimationFrame(s) }
+      );
+    },
+    Oe = so;
+  var I = (e, t, n = 0) => (e.textContent = n ? G(t, n) : String(t)),
+    mo = () => {
+      let e = { score: 0, lines: 0, level: 1, highScore: 0 },
+        t = { score: 0 },
+        n = { score: !1 },
+        a = (c) => {
+          ((t.score = c),
+            !n.score &&
+              ((n.score = !0),
+              Oe(
+                e.score,
+                t.score,
+                300,
+                (h) => {
+                  I(w.score, h, 5);
+                },
+                () => {
+                  ((e.score = t.score),
+                    (n.score = !1),
+                    e.score !== t.score && a(t.score));
+                },
+              )));
+        },
+        m = (c) => {
+          c !== e.lines && (I(w.lines, c, 2), (e.lines = c));
+        },
+        s = (c) => {
+          c !== e.level && (I(w.level, c, 2), (e.level = c));
+        },
+        l = (c) => {
+          c !== e.highScore && (I(w.highScore, c, 5), (e.highScore = c));
+        };
+      return {
+        update: (c) => {
+          (a(c.score), m(c.lines), s(c.level), l(c.highScore));
+        },
+        reset: () => {
+          ((e.score = e.lines = e.level = e.highScore = 0),
+            (n.score = !1),
+            I(w.score, 0, 5),
+            I(w.lines, 0, 2),
+            I(w.level, 1, 2),
+            I(w.highScore, 0, 5));
+        },
+      };
+    },
+    ye = mo;
+  var lo = (e, t, n, a, m = !1) => {
+      let s = ye();
+      ((v() === 'main-menu' || m) && s.reset(),
+        s.update({ score: e, lines: t, level: n, highScore: a }));
+    },
+    k = lo;
+  var co = () => {
+      document?.fonts?.load
+        ? document.fonts.load('40px "Press Start 2P"').then(() => {
+            B(o.level);
+          })
+        : setTimeout(() => {
+            B(o.level);
+          }, 150);
+    },
+    Ge = co;
+  var fo = () => {
+      (K(), D());
+    },
+    Ce = fo;
+  var po = {
+      arrowleft: 'MOVE_LEFT',
+      arrowright: 'MOVE_RIGHT',
+      arrowdown: 'MOVE_DOWN',
+      arrowup: 'ROTATE',
+      ' ': 'DROP',
+      m: 'TOGGLE_MUSIC',
+      p: 'TOGGLE_PAUSE',
+      r: 'RESTART',
+      q: 'QUIT',
+      1: 'LEVEL_ONE',
+      2: 'LEVEL_TWO',
+      3: 'LEVEL_THREE',
+      4: 'LEVEL_FOUR',
+      5: 'LEVEL_FIVE',
+      6: 'LEVEL_SIX',
+      7: 'LEVEL_SEVEN',
+      8: 'LEVEL_EIGHT',
+      9: 'LEVEL_NINE',
+      t: 'LEVEL_TEN',
+      enter: 'CONFIRM',
+    },
+    uo = (e) => {
+      let t = po[e];
+      return (t && t) || null;
+    },
+    Re = uo;
+  var W = [],
+    P = (e) => {
+      W.push(e);
+    },
+    Be = (e) => {
+      for (let t = W.length - 1; t >= 0; t--) W[t].update(e) || W.splice(t, 1);
+    },
+    we = () => {
+      let e = W.slice().toSorted((t, n) => t.layer - n.layer);
+      for (let t of e) t.render();
+    },
+    Q = (e) =>
+      W.some((t) => {
+        let n = t.blocking;
+        return e && e.length > 0 ? n && e.includes(t.name) : t.blocking;
+      });
+  var ne = new AudioContext(),
+    ho = (e, t, n = 0.1, a = 'square') => {
+      let m = ne.createOscillator(),
+        s = ne.createGain();
+      ((m.type = a),
+        (m.frequency.value = e),
+        (s.gain.value = n),
+        m.connect(s),
+        s.connect(ne.destination),
+        m.start(),
+        setTimeout(() => {
+          m.stop();
+        }, t));
+    },
+    p = ho;
+  var go = {
+      levelSelect: () => p(523, 80, 0.1, 'sine'),
+      levelStart: () => p(1319, 160, 0.22, 'sine'),
+      countdown: () => p(784, 180, 0.3, 'sine'),
+      move: () => p(330, 60),
+      rotate: () => p(440, 60),
+      drop: () => p(220, 100),
+      fall: () => p(180, 200),
+      clear: () => {
+        (p(587, 220, 0.35, 'square'),
+          setTimeout(() => p(698, 260, 0.32, 'square'), 160),
+          setTimeout(() => p(880, 300, 0.3, 'square'), 320),
+          setTimeout(() => p(1174, 380, 0.25, 'square'), 480));
+      },
+      levelUp: () => {
+        (p(523, 220),
+          setTimeout(() => p(587, 220), 260),
+          setTimeout(() => p(659, 240), 520),
+          setTimeout(() => p(784, 260), 780),
+          setTimeout(() => p(880, 280), 1060),
+          setTimeout(() => p(1047, 320), 1360),
+          setTimeout(() => p(1175, 360), 1700),
+          setTimeout(() => p(1319, 480), 2080));
+      },
+      pause: () => p(300, 150),
+      secondTick: () => p(880, 50, 0.085, 'sine'),
+      resume: () => p(400, 150),
+      gameOver: () => {
+        (p(330, 200),
+          setTimeout(() => p(294, 300), 210),
+          setTimeout(() => p(262, 500), 520));
+      },
+      bgmToggle: () => p(440, 100),
+    },
+    d = go;
+  var So = (e) => {
+      let { YELLOW: t, BLACK: n, RGBA_BLACK: a, GREEN: m } = u,
+        { FONT_FAMILY: s } = S,
+        { gameBoard: l, gameBoardContext: i, fontSize: r } = f,
+        { width: c, height: h } = l,
+        { scale: x, number: T } = e;
+      (b(),
+        i.save(),
+        (i.fillStyle = a),
+        i.fillRect(0, 0, c, h),
+        y(),
+        i.save(),
+        (i.textAlign = 'center'),
+        (i.textBaseline = 'middle'),
+        i.translate(c / 2, h / 2),
+        i.scale(x, x),
+        (i.font = `${r * 3.25}px ${s}`),
+        (i.fillStyle = t),
+        (i.strokeStyle = n),
+        (i.lineWidth = 6),
+        i.strokeText(T.toString(), 0, 0),
+        i.fillText(T.toString(), 0, 0),
+        i.restore(),
+        i.save(),
+        (i.textAlign = 'center'),
+        (i.textBaseline = 'top'),
+        (i.font = `${r * 1.1}px ${s}`),
+        (i.fillStyle = m),
+        (i.strokeStyle = n),
+        i.strokeText('GET READY!', c / 2, h / 1.46),
+        i.fillText('GET READY!', c / 2, h / 1.46),
+        i.restore(),
+        i.restore());
+    },
+    ie = So;
+  var xo = { bgmEnabled: !0, bgmTimer: null },
+    j = xo;
+  var be = (e, t) => {
+      (e >= t.length && (e = 0),
+        p(t[e], 110, 0.05),
+        (o.bgmTimer = setTimeout(() => {
+          be(e + 1, t);
+        }, 130)));
+    },
+    Ie = be;
+  var Eo = () => {
+      (o.bgmTimer && clearTimeout(o.bgmTimer), (o.bgmTimer = null));
+    },
+    M = Eo;
+  var vo = () => {
+      let { bgmEnabled: e } = j,
+        t = [
+          659, 659, 587, 659, 784, 880, 523, 523, 440, 523, 659, 784, 659, 659,
+          587, 659, 784, 880, 988, 880, 784, 659, 880, 784, 659, 587, 523, 587,
+          659, 784, 659, 587,
+        ];
+      if (!e) return !1;
+      (M(), Ie(0, t));
+    },
+    C = vo;
+  var {
+      BLUE: Lo,
+      TEAL: To,
+      YELLOW: Ao,
+      PURPLE: Mo,
+      ORANGE: Oo,
+      GREEN: yo,
+      RED: Go,
+    } = u,
+    Co = [
+      { shape: [[1, 1, 1, 1]], color: To },
+      {
+        shape: [
+          [1, 1],
+          [1, 1],
+        ],
+        color: Ao,
+      },
+      {
+        shape: [
+          [0, 1, 0],
+          [1, 1, 1],
+        ],
+        color: Mo,
+      },
+      {
+        shape: [
+          [1, 0, 0],
+          [1, 1, 1],
+        ],
+        color: Lo,
+      },
+      {
+        shape: [
+          [0, 0, 1],
+          [1, 1, 1],
+        ],
+        color: Oo,
+      },
+      {
+        shape: [
+          [0, 1, 1],
+          [1, 1, 0],
+        ],
+        color: yo,
+      },
+      {
+        shape: [
+          [1, 1, 0],
+          [0, 1, 1],
+        ],
+        color: Go,
+      },
+    ],
+    ae = Co;
+  function Ro() {
+    let e = Math.floor(Math.random() * ae.length),
+      t = ae[e];
+    return { ...t, shape: t.shape.map((n) => [...n]) };
+  }
+  var se = Ro;
+  var Bo = (e, t) => {
+      let { ROWS: n, COLS: a } = E;
+      if (!o.curr) return !1;
+      let m = o.curr.shape;
+      for (let s = 0; s < m.length; s++)
+        for (let l = 0; l < m[s].length; l++)
+          if (m[s][l]) {
+            let i = o.cx + l + e,
+              r = o.cy + s + t;
+            if (i < 0 || i >= a || r >= n || (r >= 0 && o.board[r][i]))
+              return !0;
+          }
+      return !1;
+    },
+    $ = Bo;
+  var wo = (e, t) => {
+      localStorage.setItem(e, t);
+    },
+    ke = wo;
+  var bo = () => {
+      let { score: e } = o;
+      e > o.highScore &&
+        ((o.highScore = e), ke('tetris-high-score', o.highScore.toString()));
+    },
+    J = bo;
+  var Io = () => {
+      let { RGBA_BLACK: e, RED: t, YELLOW: n } = u,
+        { FONT_FAMILY: a } = S,
+        { gameBoard: m, gameBoardContext: s, fontSize: l } = f,
+        { width: i, height: r } = m;
+      (b(),
+        A(),
+        V(o.next),
+        (s.fillStyle = e),
+        s.fillRect(0, 0, i, r),
+        y(),
+        s.save(),
+        (s.fillStyle = t),
+        (s.strokeStyle = n),
+        (s.textAlign = 'center'),
+        (s.font = `${l * 2.3}px ${a}`),
+        s.strokeText('GAME', i / 2, r / 2.2),
+        s.fillText('GAME', i / 2, r / 2.2),
+        s.restore(),
+        s.save(),
+        (s.fillStyle = t),
+        (s.strokeStyle = n),
+        (s.textAlign = 'center'),
+        (s.font = `${l * 2.3}px ${a}`),
+        s.strokeText('OVER', i / 2, r / 1.8),
+        s.fillText('OVER', i / 2, r / 1.8),
+        s.restore(),
+        X());
+    },
+    Pe = Io;
+  var ko = () => {
+      g.rafId &&
+        (cancelAnimationFrame(g.rafId), (g.rafId = null), (g.timestamp = 0));
+    },
+    Z = ko;
+  var Po = () => {
+      let e = v();
+      if (e === 'game-over' || e === 'paused' || e === 'main-menu') return !1;
+      (L('game-over'), J(), M(), d.gameOver(), Pe(), Z());
+    },
+    ee = Po;
+  var _o = () => {
+      let { COLS: e } = E;
+      ((o.curr = o.next
+        ? { ...o.next, shape: o.next.shape.map((t) => [...t]) }
+        : se()),
+        (o.next = se()),
+        (o.cx = Math.floor(e / 2) - Math.floor(o.curr.shape[0].length / 2)),
+        (o.cy = 0),
+        V(o.next),
+        $(0, 0) && ee());
+    },
+    _ = _o;
+  var No = () => Math.max(100, 1e3 - (o.level - 1) * 80),
+    _e = No;
+  var Fo = (e, t) => ($(e, t) ? !1 : ((o.cx += e), (o.cy += t), d.move(), !0)),
+    N = Fo;
+  var Ho = () => {
+      let { curr: e } = o,
+        t = e.shape;
+      for (let n = 0; n < t.length; n++)
+        for (let a = 0; a < t[n].length; a++)
+          t[n][a] && (o.board[o.cy + n][o.cx + a] = e.color);
+    },
+    te = Ho;
+  var Vo = (e) => {
+      let { COLS: t } = E,
+        { gameBoardContext: n } = f;
+      for (let a of e.lines) {
+        (n.save(), (n.globalAlpha = a.alpha));
+        for (let m = 0; m < t; m++) H(n, m, a.y, a.color);
+        n.restore();
+      }
+    },
+    Ne = Vo;
+  var Do = (e) => {
+      let { gameBoardContext: t } = f;
+      for (let n of e.fireworks)
+        ((t.globalAlpha = n.alpha),
+          (t.fillStyle = n.color),
+          t.beginPath(),
+          t.arc(n.x, n.y, n.radius, 0, Math.PI * 2),
+          t.fill(),
+          (n.x += n.vx),
+          (n.y += n.vy),
+          (n.alpha -= 0.024));
+    },
+    Fe = Do;
+  function Wo(e) {
+    let { RGBA_BLACK: t, BLACK: n, GREEN: a, YELLOW: m } = u,
+      { FONT_FAMILY: s } = S,
+      { gameBoard: l, gameBoardContext: i, fontSize: r } = f,
+      { width: c, height: h } = l;
+    return e.show
+      ? (i.save(),
+        (i.fillStyle = t),
+        i.fillRect(0, 0, c, h),
+        y(),
+        i.save(),
+        (i.textAlign = 'center'),
+        (i.font = `${r * 1.2}px ${s}`),
+        (i.fillStyle = a),
+        i.fillText('LEVEL UP', c / 2, h / 2.5),
+        i.restore(),
+        i.save(),
+        (i.textAlign = 'center'),
+        (i.font = `${r * 2.5}px ${s}`),
+        (i.fillStyle = a),
+        i.fillText(`${o.level}`, c / 2, h / 1.85),
+        i.restore(),
+        i.save(),
+        (i.textAlign = 'center'),
+        (i.font = `${r * 1.3}px ${s}`),
+        (i.fillStyle = m),
+        (i.strokeStyle = n),
+        (i.lineWidth = 3),
+        i.strokeText('CONGRATS!', c / 2, h / 1.6),
+        i.fillText('CONGRATS!', c / 2, h / 1.6),
+        i.restore(),
+        Fe(e),
+        i.restore(),
+        !0)
+      : !1;
+  }
+  var He = Wo;
+  var me = class {
+      constructor({ onComplete: t }) {
+        ((this.fireworks = this.createFireworks()),
+          (this.onComplete = t),
+          (this.name = 'level-up'),
+          (this.timer = 0),
+          (this.duration = 3),
+          (this.spawnTimer = 0),
+          (this.layer = 100),
+          (this.blocking = !0));
+      }
+      createFireworks() {
+        let { FIREWORKS: t } = u,
+          { width: n, height: a } = f.gameBoard,
+          m = [];
+        for (let s = 0; s < 40; s++) {
+          let l = Math.random() * Math.PI * 2,
+            i = 5 + Math.random() * 15;
+          m.push({
+            x: n / 2,
+            y: a / 2 - 60,
+            vx: Math.cos(l) * i,
+            vy: Math.sin(l) * i,
+            radius: 3 + Math.random() * 4,
+            color: t[Math.floor(Math.random() * t.length)],
+            alpha: 1,
+          });
+        }
+        return m;
+      }
+      update(t) {
+        return (
+          (this.timer += t),
+          (this.spawnTimer += t),
+          this.updateFireworks(t),
+          this.spawnTimer > 0.6 &&
+            (this.fireworks.push(...this.createFireworks()),
+            (this.spawnTimer = 0)),
+          this.timer >= this.duration ? (this.onComplete?.(), !1) : !0
+        );
+      }
+      updateFireworks(t) {
+        for (let a of this.fireworks)
+          ((a.vx *= 0.98),
+            (a.vy *= 0.98),
+            (a.vy += 0.01 * t),
+            (a.x += a.vx * t * 0.008),
+            (a.y += (a.vy * t) & 0.008),
+            (a.alpha -= t * 0.024),
+            (a.radius += t * 10));
+        this.fireworks = this.fireworks.filter((a) => a.alpha > 0);
+      }
+      render() {
+        He({ show: !0, fireworks: this.fireworks });
+      }
+    },
+    Ve = me;
+  var $o = () => {
+      (M(),
+        d.levelUp(),
+        P(
+          new Ve({
+            onComplete: () => {
+              C();
+            },
+          }),
+        ));
+    },
+    De = $o;
+  var le = class {
+      constructor(t) {
+        ((this.lines = t.map((n) => ({ y: n, alpha: 1, timer: 0 }))),
+          (this.name = 'clear-lines'),
+          (this.layer = 200),
+          (this.blocking = !0));
+      }
+      update(t) {
+        let n = !0;
+        for (let a of this.lines) {
+          let m = Math.floor(a.timer / 0.12);
+          ((a.alpha = m % 2 === 0 ? 1 : 0),
+            (a.timer += t),
+            a.timer < 0.72 && (n = !1));
+        }
+        return n ? (this.finish(), !1) : !0;
+      }
+      render() {
+        (A(), Ne({ lines: this.lines }));
+      }
+      finish() {
+        let { ROWS: t, COLS: n } = E,
+          { CLEAR_SCORES: a, MAX_LEVEL: m } = S,
+          s = 0;
+        for (let r = t - 1; r >= 0; r--)
+          o.board[r].every(Boolean) &&
+            (o.board.splice(r, 1),
+            o.board.unshift(Array.from({ length: n }).fill(0)),
+            s++,
+            r++);
+        ((o.lines += s), (o.score += a[s] * o.level));
+        let l = o.baseLines + o.lines,
+          i = Math.floor(l / 10) + 1;
+        (i > o.level && De(),
+          (o.level = Math.min(Math.max(o.level, i), m)),
+          k(o.score, o.lines, o.level, o.highScore));
+      }
+    },
+    We = le;
+  var zo = (e) => {
+      P(new We(e));
+    },
+    $e = zo;
+  var Uo = () => {
+      let { ROWS: e } = E,
+        t = 0,
+        n = [];
+      for (let a = e - 1; a >= 0; a--)
+        o.board[a].every((s) => !!s) && (n.push(a), t++);
+      return t === 0 ? (J(), !1) : (d.clear(), $e(n), !0);
+    },
+    oe = Uo;
+  var Yo = () => {
+      let e = v();
+      return e === 'game-over' ||
+        e === 'main-menu' ||
+        Q() ||
+        (!N(0, 1) && (te(), d.fall(), oe(), _(), e === 'game-over'))
+        ? !1
+        : (A(), !0);
+    },
+    ze = Yo;
+  var Ue = (e) => {
+      g.timestamp || (g.timestamp = e);
+      let t = (e - g.timestamp) / 1e3;
+      ((g.timestamp = e), Be(t));
+      let n = _e();
+      ((!g.accumulator || e - g.accumulator > n) && (ze(), (g.accumulator = e)),
+        D(),
+        we(),
+        (g.rafId = requestAnimationFrame(Ue)));
+    },
+    z = Ue;
+  var qo = () => {
+      (Z(), (g.rafId = requestAnimationFrame(z)));
+    },
+    U = qo;
+  var Ko = () => {
+      let e = document.querySelector('#level');
+      (e && (e.textContent = G(o.level, 2)),
+        L('playing'),
+        _(),
+        d.levelStart(),
+        setTimeout(() => {
+          C();
+        }, 250),
+        (g.rafId = requestAnimationFrame(U)));
+    },
+    Ye = Ko;
+  var Xo = () => {
+      let e = { show: !0, number: 3, scale: 4, count: 0, acc: 0 };
+      return {
+        layer: 100,
+        blocking: !0,
+        name: 'countdown',
+        update(t) {
+          return (
+            (e.acc += t),
+            e.acc < 0.01
+              ? !0
+              : ((e.acc = 0),
+                ie(e),
+                e.count++,
+                (e.scale = Math.max(1, e.scale - 0.4)),
+                e.count >= 50 &&
+                  ((e.count = 0),
+                  e.number--,
+                  (e.scale = 4),
+                  e.number >= 1 && d.countdown()),
+                e.number <= 0 ? (L('playing'), Ye(), !1) : !0)
+          );
+        },
+        render() {
+          ie(e);
+        },
+      };
+    },
+    qe = Xo;
+  var Qo = () => {
+      P(qe());
+    },
+    Ke = Qo;
+  var jo = () => {
+      ((o.baseLines = (o.level - 1) * 10), Ke());
+    },
+    Xe = jo;
+  var Jo = (e) => {
+      ((o.level = e), d.levelSelect(), B(e));
+    },
+    O = Jo;
+  var Zo = {
+      LEVEL_ONE: () => {
+        O(1);
+      },
+      LEVEL_TWO: () => {
+        O(2);
+      },
+      LEVEL_THREE: () => {
+        O(3);
+      },
+      LEVEL_FOUR: () => {
+        O(4);
+      },
+      LEVEL_FIVE: () => {
+        O(5);
+      },
+      LEVEL_SIX: () => {
+        O(6);
+      },
+      LEVEL_SEVEN: () => {
+        O(7);
+      },
+      LEVEL_EIGHT: () => {
+        O(8);
+      },
+      LEVEL_NINE: () => {
+        O(9);
+      },
+      LEVEL_TEN: () => {
+        O(10);
+      },
+      CONFIRM: Xe,
+    },
+    er = (e) => {
+      let t = Zo[e];
+      t?.();
+    },
+    Qe = er;
+  var tr = () => {
+      let { curr: e } = o,
+        t = e.shape;
+      ((e.shape = t[0].map((n, a) => t.map((m) => m[a]).toReversed())),
+        $(0, 0) ? (e.shape = t) : d.rotate());
+    },
+    je = tr;
+  var or = () => {
+      for (; N(0, 1); );
+      (te(), d.fall(), oe(), _(), d.drop());
+    },
+    Je = or;
+  var rr = {
+      MOVE_LEFT: () => {
+        (N(-1, 0), A());
+      },
+      MOVE_RIGHT: () => {
+        (N(1, 0), A());
+      },
+      MOVE_DOWN: () => {
+        (N(0, 1), A());
+      },
+      ROTATE: () => {
+        (je(), A());
+      },
+      DROP: () => {
+        (Je(), A());
+      },
+    },
+    nr = (e) => {
+      let t = rr[e];
+      t?.();
+    },
+    Ze = nr;
+  var ir = () => {
+      (M(),
+        (o.rafId = requestAnimationFrame(z)),
+        F(),
+        L('main-menu'),
+        (o.score = 0),
+        (o.lines = 0),
+        (o.level = 1),
+        (o.next = null),
+        B(o.level),
+        k(o.score, o.lines, o.level, o.highScore));
+    },
+    et = ir;
+  var ar = { CONFIRM: et },
+    sr = (e) => {
+      let t = ar[e];
+      t?.();
+    },
+    tt = sr;
+  var mr = { 'main-menu': Qe, playing: Ze, paused: () => {}, 'game-over': tt },
+    ot = mr;
+  var lr = () => {
+      let e = v();
+      e === 'paused' ||
+        e === 'game-over' ||
+        e === 'main-menu' ||
+        (M(),
+        L('playing'),
+        (o.score = 0),
+        (o.lines = 0),
+        (o.level = 1),
+        F(),
+        k(o.score, o.lines, o.level, o.highScore, !0),
+        _(),
+        C(),
+        U());
+    },
+    rt = lr;
+  var cr = (e, t = 'yyyy-MM-dd HH:mm:ss') => {
+      let n = e.getFullYear(),
+        a = e.getMonth() + 1,
+        m = e.getDate(),
+        s = e.getHours(),
+        l = e.getMinutes(),
+        i = e.getSeconds(),
+        r = () => (s > 12 ? 'PM' : 'AM'),
+        c = t.includes('a'),
+        h = {
+          yyyy: n,
+          MM: G(a, 2),
+          dd: G(m, 2),
+          HH: G(s, 2),
+          hh: c && s > 12 ? s - 12 : s,
+          mm: G(l, 2),
+          ss: G(i, 2),
+          a: r(),
+        },
+        x = t;
+      for (let T of Object.keys(h)) x = x.replace(T, h[T]);
+      return x;
+    },
+    nt = cr;
+  var fr = () => {
+      let { GREEN: e, WHITE: t } = u,
+        { FONT_FAMILY: n } = S,
+        { gameBoard: a, gameBoardContext: m, fontSize: s } = f,
+        { width: l, height: i } = a,
+        r = nt(new Date(), 'HH:mm:ss');
+      (m.save(),
+        (m.fillStyle = e),
+        (m.textAlign = 'center'),
+        (m.font = `${s * 0.86}px ${n}`),
+        m.fillText(`${r}`, l / 2, i / 3.65),
+        (m.shadowColor = t),
+        (m.shadowBlur = 13),
+        (m.shadowOffsetX = 2),
+        (m.shadowOffsetY = 2),
+        m.restore());
+    },
+    it = fr;
+  var pr = () => {
+      let e = new Date(),
+        t = e.getHours(),
+        n = e.getMinutes(),
+        a = e.getSeconds(),
+        { TEAL: m, RGBA_TEAL: s, ORANGE: l } = u,
+        { gameBoard: i, gameBoardContext: r } = f,
+        { width: c, height: h } = i,
+        x = c / 2,
+        T = h / 2.2,
+        R = Math.floor(c * 0.25);
+      (r.save(),
+        r.translate(x, T),
+        (r.lineCap = 'round'),
+        (r.strokeStyle = m),
+        (r.fillStyle = m),
+        r.save(),
+        r.beginPath(),
+        r.arc(0, 0, R, 0, Math.PI * 2),
+        (r.lineWidth = Math.floor(c * 0.064)),
+        r.stroke(),
+        r.restore(),
+        r.save(),
+        r.beginPath(),
+        r.arc(0, 0, R, 0, Math.PI * 2),
+        (r.fillStyle = s),
+        r.fill(),
+        r.restore());
+      let q = Math.floor(c * 0.016),
+        St = Math.floor(c * 0.08),
+        xt = R - St;
+      for (let re = 0; re < 12; re++)
+        (r.save(),
+          r.rotate((re * Math.PI) / 6),
+          r.beginPath(),
+          r.arc(0, -xt, q, 0, Math.PI * 2),
+          r.fill(),
+          r.restore());
+      let Et = ((t % 12) + n / 60 + a / 3600) * ((2 * Math.PI) / 12);
+      (r.save(),
+        r.rotate(Et),
+        (r.lineWidth = 5),
+        r.beginPath(),
+        r.moveTo(0, 0),
+        r.lineTo(0, -R * 0.4),
+        r.stroke(),
+        r.restore());
+      let vt = (n + a / 60) * ((2 * Math.PI) / 60);
+      (r.save(),
+        r.rotate(vt),
+        (r.lineWidth = 4),
+        r.beginPath(),
+        r.moveTo(0, 0),
+        r.lineTo(0, -R * 0.65),
+        r.stroke(),
+        r.restore());
+      let Lt = a * ((2 * Math.PI) / 60);
+      (r.save(),
+        r.rotate(Lt),
+        (r.strokeStyle = l),
+        (r.lineWidth = 2),
+        r.beginPath(),
+        r.moveTo(0, 0),
+        r.lineTo(0, -R * 0.75),
+        r.stroke(),
+        r.restore());
+      let Tt = Math.floor(c * 0.014);
+      (r.save(),
+        (r.fillStyle = l),
+        r.beginPath(),
+        r.arc(0, 0, Tt, 0, Math.PI * 2),
+        r.fill(),
+        r.restore(),
+        r.restore());
+    },
+    at = pr;
+  var dr = () => {
+      let { RGBA_BLACK: e, YELLOW: t, WHITE: n } = u,
+        { FONT_FAMILY: a } = S,
+        { gameBoard: m, gameBoardContext: s, fontSize: l } = f,
+        { width: i, height: r } = m;
+      ((s.fillStyle = e),
+        s.fillRect(0, 0, i, r),
+        y(),
+        it(),
+        at(),
+        s.save(),
+        (s.fillStyle = t),
+        (s.textAlign = 'center'),
+        (s.font = `${l * 1.6}px ${a}`),
+        s.fillText('PAUSED', i / 2, r / 1.45),
+        (s.shadowColor = n),
+        (s.shadowBlur = 13),
+        (s.shadowOffsetX = 2),
+        (s.shadowOffsetY = 2),
+        s.restore());
+    },
+    ce = dr;
+  var fe = class {
+      constructor(t = 500) {
+        ((this.layer = t),
+          (this.name = 'paused'),
+          (this.timer = 0),
+          (this.blocking = !0));
+      }
+      update(t) {
+        return (
+          (this.timer += t),
+          ce(),
+          this.timer >= 1 && (d.secondTick(), (this.timer = 0)),
+          !0
+        );
+      }
+      render() {
+        ce();
+      }
+    },
+    st = fe;
+  var Y = null,
+    mt = () => {
+      Y || ((Y = new st()), P(Y));
+    },
+    lt = () => {
+      Y && ((Y.update = () => !1), (Y = null));
+    };
+  var ur = () => {
+      let e = v();
+      if (e === 'game-over' || e === 'main-menu') return !1;
+      e === 'playing'
+        ? (L('paused'), M(), d.pause(), mt())
+        : (lt(), L('playing'), d.resume(), C(), U());
+    },
+    ct = ur;
+  var hr = () => {
+      let { bgmEnabled: e } = j,
+        t = v();
+      t === 'main-menu' ||
+        t === 'paused' ||
+        t === 'game-over' ||
+        ((e = !e), d.bgmToggle(), e ? C() : M());
+    },
+    ft = hr;
+  var gr = { RESTART: rt, QUIT: ee, TOGGLE_PAUSE: ct, TOGGLE_MUSIC: ft },
+    Sr = (e) => {
+      let t = gr[e];
+      return t ? (t(), !0) : !1;
+    },
+    pt = Sr;
+  var xr = (e) => {
+      let { action: t } = e,
+        n = v();
+      if (Q(['countdown', 'level-up']) || !t || pt(t)) return;
+      let a = ot[n];
+      a?.(t);
+    },
+    dt = xr;
+  var Er = (e) => {
+      let t = e.key.toLowerCase(),
+        n = Re(t);
+      n && dt({ type: 'keydown', key: t, action: n });
+    },
+    ut = Er;
+  var vr = () => {
+      (globalThis.addEventListener('resize', Ce),
+        document.addEventListener('keydown', ut));
+    },
+    ht = vr;
+  var Lr = () => {
+      (F(),
+        de(),
+        L('main-menu'),
+        (o.score = 0),
+        (o.lines = 0),
+        (o.level = 1),
+        D(),
+        K(),
+        k(o.score, o.lines, o.level, o.highScore),
+        Ge(),
+        ht(),
+        (g.rafId = requestAnimationFrame(z)));
+    },
+    gt = Lr;
+  gt();
+})();
 //# sourceMappingURL=tetris.js.map
