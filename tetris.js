@@ -21,11 +21,77 @@ var tetris = (() => {
   };
   var engine_state_default = EngineState;
 
-  // lib/game/logic/get-speed.js
-  var getSpeed = (state = engine_state_default) =>
-    // 计算速度：基础值1000ms，每升一级减少80ms，最低不低于100ms
-    Math.max(100, 1e3 - (state.level - 1) * 80);
-  var get_speed_default = getSpeed;
+  // lib/engine/replay.js
+  var Replay = {
+    recording: false,
+    playing: false,
+    frame: 0,
+    data: [],
+    cursor: 0,
+    startRecord() {
+      this.recording = true;
+      this.data = [];
+      this.frame = 0;
+    },
+    stopRecord() {
+      this.recording = false;
+    },
+    startPlay() {
+      this.playing = true;
+      this.frame = 0;
+    },
+    stopPlay() {
+      this.playing = false;
+    },
+  };
+  var replay_default = Replay;
+
+  // lib/command/command-queue.js
+  var CommandQueue = {
+    queue: [],
+    enqueue(command) {
+      this.queue.push(command);
+    },
+    flush(engine) {
+      const { queue } = this;
+      while (queue.length > 0) {
+        const cmd = queue.shift();
+        cmd.execute(engine);
+      }
+    },
+    clear() {
+      this.queue.length = 0;
+    },
+  };
+  var command_queue_default = CommandQueue;
+
+  // lib/animations/system.js
+  var system = [];
+  var registerAnimation = (anim) => {
+    system.push(anim);
+  };
+  var updateAnimations = (delta) => {
+    for (let i = system.length - 1; i >= 0; i--) {
+      const anim = system[i];
+      const active = anim.update(delta);
+      if (!active) {
+        system.splice(i, 1);
+      }
+    }
+  };
+  var renderAnimations = () => {
+    const sorted = system.slice().toSorted((a, b) => a.layer - b.layer);
+    for (const anim of sorted) {
+      anim.render();
+    }
+  };
+  var hasBlockingAnimation = (names) =>
+    system.some((a) => {
+      const isBlocking = a.blocking;
+      return names && names.length > 0
+        ? isBlocking && names.includes(a.name)
+        : a.blocking;
+    });
 
   // lib/audio/play-tone.js
   var audioCtx = new AudioContext();
@@ -95,112 +161,32 @@ var tetris = (() => {
   };
   var sounds_default = Sounds;
 
-  // lib/ui/constants/board.js
-  var COLS = 10;
-  var ROWS = 20;
-  var BOARD = {
-    COLS,
-    ROWS,
+  // lib/constants/colors.js
+  var TEAL = '#18c8fa';
+  var RGBA_TEAL = 'rgba(50, 190, 239, 0.3)';
+  var YELLOW = '#ff0';
+  var PURPLE = '#a0a';
+  var BLUE = '#00f';
+  var ORANGE = '#ff7f00';
+  var GREEN = '#0f0';
+  var RED = '#f00';
+  var BLACK = '#444';
+  var RGBA_BLACK = 'rgba(0,0,0,.5)';
+  var WHITE = '#fff';
+  var COLORS = {
+    TEAL,
+    RGBA_TEAL,
+    YELLOW,
+    PURPLE,
+    BLUE,
+    ORANGE,
+    GREEN,
+    RED,
+    BLACK,
+    RGBA_BLACK,
+    WHITE,
   };
-  var board_default = BOARD;
-
-  // lib/game/logic/collision.js
-  var collision = (ox, oy, state = engine_state_default) => {
-    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
-    const { curr, cx, cy, board } = state;
-    if (!curr) {
-      return false;
-    }
-    const s = curr.shape;
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          const nx = cx + x + ox;
-          const ny = cy + y + oy;
-          const outOfBounds = nx < 0 || nx >= COLS2 || ny >= ROWS2;
-          const hitBlock = ny >= 0 && ny < ROWS2 && board[ny][nx];
-          if (outOfBounds || hitBlock) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  };
-  var collision_default = collision;
-
-  // lib/game/logic/move.js
-  var move = (ox, oy, state = engine_state_default) => {
-    if (!collision_default(ox, oy, state)) {
-      state.cx += ox;
-      state.cy += oy;
-      sounds_default.move();
-      return true;
-    }
-    return false;
-  };
-  var move_default = move;
-
-  // lib/game/logic/lock.js
-  var lock = (state = engine_state_default) => {
-    const { curr } = state;
-    const s = curr.shape;
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          state.board[state.cy + y][state.cx + x] = curr.color;
-        }
-      }
-    }
-  };
-  var lock_default = lock;
-
-  // lib/utils/set-storage.js
-  var setStorage = (key, value) => {
-    localStorage.setItem(key, value);
-  };
-  var set_storage_default = setStorage;
-
-  // lib/engine/state/save-high-score.js
-  var saveHighScore = () => {
-    const { score } = engine_state_default;
-    if (score > engine_state_default.highScore) {
-      engine_state_default.highScore = score;
-      set_storage_default(
-        'tetris-high-score',
-        engine_state_default.highScore.toString(),
-      );
-    }
-  };
-  var save_high_score_default = saveHighScore;
-
-  // lib/animations/system.js
-  var system = [];
-  var registerAnimation = (anim) => {
-    system.push(anim);
-  };
-  var updateAnimations = (delta) => {
-    for (let i = system.length - 1; i >= 0; i--) {
-      const anim = system[i];
-      const active = anim.update(delta);
-      if (!active) {
-        system.splice(i, 1);
-      }
-    }
-  };
-  var renderAnimations = () => {
-    const sorted = system.slice().toSorted((a, b) => a.layer - b.layer);
-    for (const anim of sorted) {
-      anim.render();
-    }
-  };
-  var hasBlockingAnimation = (names) =>
-    system.some((a) => {
-      const isBlocking = a.blocking;
-      return names && names.length > 0
-        ? isBlocking && names.includes(a.name)
-        : a.blocking;
-    });
+  var colors_default = COLORS;
 
   // lib/game/constants/game.js
   var CLEAR_SCORES = [0, 100, 300, 500, 800, 1200];
@@ -230,32 +216,491 @@ var tetris = (() => {
   };
   var canvas_default = Canvas;
 
-  // lib/constants/colors.js
-  var TEAL = '#18c8fa';
-  var RGBA_TEAL = 'rgba(50, 190, 239, 0.3)';
-  var YELLOW = '#ff0';
-  var PURPLE = '#a0a';
-  var BLUE = '#00f';
-  var ORANGE = '#ff7f00';
-  var GREEN = '#0f0';
-  var RED = '#f00';
-  var BLACK = '#444';
-  var RGBA_BLACK = 'rgba(0,0,0,.5)';
-  var WHITE = '#fff';
-  var COLORS = {
-    TEAL,
-    RGBA_TEAL,
-    YELLOW,
-    PURPLE,
-    BLUE,
-    ORANGE,
-    GREEN,
-    RED,
-    BLACK,
-    RGBA_BLACK,
-    WHITE,
+  // lib/ui/board/clear-board.js
+  function clearBoard() {
+    const { gameBoard: gameBoard2, gameBoardContext: gameBoardContext2 } =
+      canvas_default;
+    const { width, height } = gameBoard2;
+    gameBoardContext2.clearRect(0, 0, width, height);
+  }
+  var clear_board_default = clearBoard;
+
+  // lib/ui/text/render-tetris-text.js
+  var renderTetrisText = () => {
+    const { GREEN: GREEN4 } = colors_default;
+    const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
+    const {
+      gameBoard: gameBoard2,
+      gameBoardContext: ctx,
+      fontSize: fontSize2,
+    } = canvas_default;
+    const { width, height } = gameBoard2;
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.font = `${fontSize2 * 1.1}px ${FONT_FAMILY2}`;
+    ctx.fillStyle = GREEN4;
+    ctx.fillText('TETRIS.JS', width / 2, height * 0.1);
+    ctx.restore();
   };
-  var colors_default = COLORS;
+  var render_tetris_text_default = renderTetrisText;
+
+  // lib/ui/effects/render-countdown.js
+  var renderCountdown = (state) => {
+    const {
+      YELLOW: YELLOW4,
+      BLACK: BLACK2,
+      RGBA_BLACK: RGBA_BLACK2,
+      GREEN: GREEN4,
+    } = colors_default;
+    const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
+    const {
+      gameBoard: gameBoard2,
+      gameBoardContext: ctx,
+      fontSize: fontSize2,
+    } = canvas_default;
+    const { width, height } = gameBoard2;
+    const { scale, number } = state;
+    clear_board_default();
+    ctx.save();
+    ctx.fillStyle = RGBA_BLACK2;
+    ctx.fillRect(0, 0, width, height);
+    render_tetris_text_default();
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.translate(width / 2, height / 2);
+    ctx.scale(scale, scale);
+    ctx.font = `${fontSize2 * 3.25}px ${FONT_FAMILY2}`;
+    ctx.fillStyle = YELLOW4;
+    ctx.strokeStyle = BLACK2;
+    ctx.lineWidth = 6;
+    ctx.strokeText(number.toString(), 0, 0);
+    ctx.fillText(number.toString(), 0, 0);
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.font = `${fontSize2 * 1.1}px ${FONT_FAMILY2}`;
+    ctx.fillStyle = GREEN4;
+    ctx.strokeStyle = BLACK2;
+    ctx.strokeText('GET READY!', width / 2, height / 1.46);
+    ctx.fillText('GET READY!', width / 2, height / 1.46);
+    ctx.restore();
+    ctx.restore();
+  };
+  var render_countdown_default = renderCountdown;
+
+  // lib/engine/state/set-mode.js
+  var setMode = (mode) => {
+    engine_state_default.mode = mode;
+  };
+  var set_mode_default = setMode;
+
+  // lib/audio/state/audio-state.js
+  var AudioState = {
+    bgmEnabled: true,
+    bgmTimer: null,
+  };
+  var audio_state_default = AudioState;
+
+  // lib/audio/loop-play-bgm.js
+  var loopPlayBGM = (i, m) => {
+    if (i >= m.length) {
+      i = 0;
+    }
+    play_tone_default(m[i], 110, 0.05);
+    audio_state_default.bgmTimer = setTimeout(() => {
+      loopPlayBGM(i + 1, m);
+    }, 130);
+  };
+  var loop_play_bgm_default = loopPlayBGM;
+
+  // lib/audio/stop-bgm.js
+  var stopBGM = () => {
+    if (audio_state_default.bgmTimer) {
+      clearTimeout(audio_state_default.bgmTimer);
+    }
+    audio_state_default.bgmTimer = null;
+  };
+  var stop_bgm_default = stopBGM;
+
+  // lib/audio/play-bgm.js
+  var playBGM = () => {
+    const m = [
+      659, 659, 587, 659, 784, 880, 523, 523, 440, 523, 659, 784, 659, 659, 587,
+      659, 784, 880, 988, 880, 784, 659, 880, 784, 659, 587, 523, 587, 659, 784,
+      659, 587,
+    ];
+    if (!audio_state_default.bgmEnabled) {
+      return false;
+    }
+    stop_bgm_default();
+    loop_play_bgm_default(0, m);
+  };
+  var play_bgm_default = playBGM;
+
+  // lib/ui/constants/board.js
+  var COLS = 10;
+  var ROWS = 20;
+  var BOARD = {
+    COLS,
+    ROWS,
+  };
+  var board_default = BOARD;
+
+  // lib/ui/constants/tetrominoes.js
+  var {
+    BLUE: BLUE2,
+    TEAL: TEAL2,
+    YELLOW: YELLOW2,
+    PURPLE: PURPLE2,
+    ORANGE: ORANGE2,
+    GREEN: GREEN2,
+    RED: RED2,
+  } = colors_default;
+  var TETROMINOES = [
+    // I型方块（长条）：1行4列
+    { shape: [[1, 1, 1, 1]], color: TEAL2 },
+    // I型方块（长条）：1行5列
+    { shape: [[1, 1, 1, 1, 1]], color: TEAL2 },
+    // O型方块（正方形）：2x2
+    {
+      shape: [
+        [1, 1],
+        [1, 1],
+      ],
+      color: YELLOW2,
+    },
+    // T型方块
+    {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1],
+      ],
+      color: PURPLE2,
+    },
+    // L型方块
+    {
+      shape: [
+        [1, 0, 0],
+        [1, 1, 1],
+      ],
+      color: BLUE2,
+    },
+    // J型方块
+    {
+      shape: [
+        [0, 0, 1],
+        [1, 1, 1],
+      ],
+      color: ORANGE2,
+    },
+    // S型方块（右斜）
+    {
+      shape: [
+        [0, 1, 1],
+        [1, 1, 0],
+      ],
+      color: GREEN2,
+    },
+    // Z型方块（左斜）
+    {
+      shape: [
+        [1, 1, 0],
+        [0, 1, 1],
+      ],
+      color: RED2,
+    },
+  ];
+  var tetrominoes_default = TETROMINOES;
+
+  // lib/game/logic/random-tetromino.js
+  function randomTetromino() {
+    const randomIndex = Math.floor(Math.random() * tetrominoes_default.length);
+    const piece = tetrominoes_default[randomIndex];
+    return {
+      ...piece,
+      shape: piece.shape.map((row) => [...row]),
+    };
+  }
+  var random_tetromino_default = randomTetromino;
+
+  // lib/game/logic/collision.js
+  var collision = (ox, oy, state) => {
+    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
+    const { curr, cx, cy, board } = state;
+    if (!curr) {
+      return false;
+    }
+    const s = curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          const nx = cx + x + ox;
+          const ny = cy + y + oy;
+          const outOfBounds = nx < 0 || nx >= COLS2 || ny >= ROWS2;
+          const hitBlock = ny >= 0 && ny < ROWS2 && board[ny][nx];
+          if (outOfBounds || hitBlock) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+  var collision_default = collision;
+
+  // lib/game/core/game-over.js
+  var gameOver = () => {
+    const mode = engine_default.getMode();
+    if (mode === 'game-over' || mode === 'paused' || mode === 'main-menu') {
+      return false;
+    }
+    engine_default.setMode('game-over');
+    engine_default.saveHighScore();
+    stop_bgm_default();
+    sounds_default.gameOver();
+  };
+  var game_over_default = gameOver;
+
+  // lib/ui/next/clear-next-piece.js
+  var clearNextPiece = () => {
+    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } =
+      canvas_default;
+    const { width, height } = nextPiece2;
+    nextPieceContext2.clearRect(0, 0, width, height);
+  };
+  var clear_next_piece_default = clearNextPiece;
+
+  // lib/ui/next/render-next-piece.js
+  var renderNextPiece = (next) => {
+    const { BLACK: BLACK2 } = colors_default;
+    const { nextPiece: nextPiece2, nextPieceContext: ctx } = canvas_default;
+    const { width, height } = nextPiece2;
+    const gridSize = 5;
+    const blockSize2 = Math.floor(width / gridSize);
+    if (!next) {
+      return;
+    }
+    const { shape } = next;
+    const ox = Math.floor((width - shape[0].length * blockSize2) / 2);
+    const oy = Math.floor((height - shape.length * blockSize2) / 2);
+    clear_next_piece_default();
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (shape[y][x]) {
+          const px = ox + x * blockSize2;
+          const py = oy + y * blockSize2;
+          ctx.fillStyle = next.color;
+          ctx.fillRect(px, py, blockSize2 - 2, blockSize2 - 2);
+          ctx.strokeStyle = BLACK2;
+          ctx.strokeRect(px, py, blockSize2 - 2, blockSize2 - 2);
+        }
+      }
+    }
+  };
+  var render_next_piece_default = renderNextPiece;
+
+  // lib/game/logic/spawn.js
+  var spawn = (state) => {
+    const { COLS: COLS2 } = board_default;
+    state.curr = state.next
+      ? {
+          ...state.next,
+          shape: state.next.shape.map((row) => [...row]),
+        }
+      : random_tetromino_default();
+    state.next = random_tetromino_default();
+    state.cx =
+      Math.floor(COLS2 / 2) - Math.floor(state.curr.shape[0].length / 2);
+    state.cy = 0;
+    render_next_piece_default(state.next);
+    if (collision_default(0, 0, state)) {
+      game_over_default();
+    }
+  };
+  var spawn_default = spawn;
+
+  // lib/engine/restart-game-loop.js
+  var restartGameLoop = () => {
+    engine_default.stop();
+    engine_default.rafId = requestAnimationFrame(start_game_loop_default);
+  };
+  var restart_game_loop_default = restartGameLoop;
+
+  // lib/utils/pad-start.js
+  var padStart = (n, len) => n.toString().padStart(len, '0');
+  var pad_start_default = padStart;
+
+  // lib/game/core/begin-playing.js
+  var beginPlaying = (state) => {
+    const $level = document.querySelector('#level');
+    if ($level) {
+      $level.textContent = pad_start_default(state.level, 2);
+    }
+    engine_default.setMode('playing');
+    spawn_default(state);
+    sounds_default.levelStart();
+    setTimeout(() => {
+      play_bgm_default();
+    }, 250);
+    engine_default.rafId = requestAnimationFrame(restart_game_loop_default);
+  };
+  var begin_playing_default = beginPlaying;
+
+  // lib/animations/countdown-animation.js
+  var CountdownAnimation = (gameState) => {
+    const state = {
+      show: true,
+      number: 3,
+      scale: 4,
+      count: 0,
+      acc: 0,
+    };
+    return {
+      name: 'countdown',
+      // 动画名称标识
+      layer: 100,
+      // 渲染层级（UI 层，显示在最前面）
+      blocking: true,
+      // 是否阻塞用户输入（倒计时期间禁止操作）
+      /**
+       * ## 更新倒计时动画状态
+       *
+       * @param {number} delta - 距离上一帧的时间差（秒）
+       * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
+       */
+      update(delta) {
+        state.acc += delta;
+        if (state.acc < 0.01) {
+          return true;
+        }
+        state.acc = 0;
+        render_countdown_default(state);
+        state.count++;
+        state.scale = Math.max(1, state.scale - 0.4);
+        if (state.count >= 50) {
+          state.count = 0;
+          state.number--;
+          state.scale = 4;
+          if (state.number >= 1) {
+            sounds_default.countdown();
+          }
+        }
+        if (state.number <= 0) {
+          set_mode_default('playing');
+          begin_playing_default(gameState);
+          return false;
+        }
+        return true;
+      },
+      // 渲染倒计时动画：将当前状态传递给渲染函数
+      render() {
+        render_countdown_default(state);
+      },
+    };
+  };
+  var countdown_animation_default = CountdownAnimation;
+
+  // lib/controllers/countdown-controller.js
+  var startCountdown = () => {
+    registerAnimation(countdown_animation_default(engine_default.state));
+  };
+  var countdown_controller_default = startCountdown;
+
+  // lib/game/core/start-game.js
+  var startGame = (state) => {
+    state.baseLines = (state.level - 1) * 10;
+    countdown_controller_default();
+  };
+  var start_game_default = startGame;
+
+  // lib/game/actions/select-level.js
+  var selectLevel = (level, state) => {
+    state.level = level;
+    sounds_default.levelSelect();
+  };
+  var select_level_default = selectLevel;
+
+  // lib/command/actions/main-menu-actions.js
+  var MAIN_MENU_ACTIONS = {
+    LEVEL_ONE: (_, engine) => {
+      select_level_default(1, engine.state);
+    },
+    LEVEL_TWO: (_, engine) => {
+      select_level_default(2, engine.state);
+    },
+    LEVEL_THREE: (_, engine) => {
+      select_level_default(3, engine.state);
+    },
+    LEVEL_FOUR: (_, engine) => {
+      select_level_default(4, engine.state);
+    },
+    LEVEL_FIVE: (_, engine) => {
+      select_level_default(5, engine.state);
+    },
+    LEVEL_SIX: (_, engine) => {
+      select_level_default(6, engine.state);
+    },
+    LEVEL_SEVEN: (_, engine) => {
+      select_level_default(7, engine.state);
+    },
+    LEVEL_EIGHT: (_, engine) => {
+      select_level_default(8, engine.state);
+    },
+    LEVEL_NINE: (_, engine) => {
+      select_level_default(9, engine.state);
+    },
+    LEVEL_TEN: (_, engine) => {
+      select_level_default(10, engine.state);
+    },
+    CONFIRM: (_, engine) => {
+      start_game_default(engine.state);
+    },
+  };
+  var main_menu_actions_default = MAIN_MENU_ACTIONS;
+
+  // lib/game/logic/move.js
+  var move = (ox, oy, state) => {
+    if (!collision_default(ox, oy, state)) {
+      state.cx += ox;
+      state.cy += oy;
+      sounds_default.move();
+      return true;
+    }
+    return false;
+  };
+  var move_default = move;
+
+  // lib/game/logic/rotate.js
+  var rotate = (state) => {
+    const { curr } = state;
+    if (!curr) {
+      return;
+    }
+    const prev = curr.shape;
+    curr.shape = prev[0].map((_, i) => prev.map((r) => r[i]).toReversed());
+    if (collision_default(0, 0, state)) {
+      curr.shape = prev;
+    } else {
+      sounds_default.rotate();
+    }
+  };
+  var rotate_default = rotate;
+
+  // lib/game/logic/lock.js
+  var lock = (state) => {
+    const { curr } = state;
+    const s = curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          state.board[state.cy + y][state.cx + x] = curr.color;
+        }
+      }
+    }
+  };
+  var lock_default = lock;
 
   // lib/ui/core/render-block.js
   var renderBlock = (ctx, x, y, color) => {
@@ -287,10 +732,6 @@ var tetris = (() => {
     }
   };
   var render_clear_default = renderClear;
-
-  // lib/utils/pad-start.js
-  var padStart = (n, len) => n.toString().padStart(len, '0');
-  var pad_start_default = padStart;
 
   // lib/ui/hud/hud-dom.js
   var HudDom = {
@@ -430,79 +871,17 @@ var tetris = (() => {
   };
   var render_hud_default = renderHud;
 
-  // lib/audio/state/audio-state.js
-  var AudioState = {
-    bgmEnabled: true,
-    bgmTimer: null,
-  };
-  var audio_state_default = AudioState;
-
-  // lib/audio/stop-bgm.js
-  var stopBGM = () => {
-    if (audio_state_default.bgmTimer) {
-      clearTimeout(audio_state_default.bgmTimer);
-    }
-    audio_state_default.bgmTimer = null;
-  };
-  var stop_bgm_default = stopBGM;
-
-  // lib/audio/loop-play-bgm.js
-  var loopPlayBGM = (i, m) => {
-    if (i >= m.length) {
-      i = 0;
-    }
-    play_tone_default(m[i], 110, 0.05);
-    audio_state_default.bgmTimer = setTimeout(() => {
-      loopPlayBGM(i + 1, m);
-    }, 130);
-  };
-  var loop_play_bgm_default = loopPlayBGM;
-
-  // lib/audio/play-bgm.js
-  var playBGM = () => {
-    const m = [
-      659, 659, 587, 659, 784, 880, 523, 523, 440, 523, 659, 784, 659, 659, 587,
-      659, 784, 880, 988, 880, 784, 659, 880, 784, 659, 587, 523, 587, 659, 784,
-      659, 587,
-    ];
-    if (!audio_state_default.bgmEnabled) {
-      return false;
-    }
-    stop_bgm_default();
-    loop_play_bgm_default(0, m);
-  };
-  var play_bgm_default = playBGM;
-
   // lib/ui/constants/firework-colors.js
   var {
-    TEAL: TEAL2,
-    YELLOW: YELLOW2,
-    PURPLE: PURPLE2,
-    ORANGE: ORANGE2,
-    GREEN: GREEN2,
-    RED: RED2,
+    TEAL: TEAL3,
+    YELLOW: YELLOW3,
+    PURPLE: PURPLE3,
+    ORANGE: ORANGE3,
+    GREEN: GREEN3,
+    RED: RED3,
   } = colors_default;
-  var FIREWORK_COLORS = [TEAL2, YELLOW2, PURPLE2, ORANGE2, GREEN2, RED2];
+  var FIREWORK_COLORS = [TEAL3, YELLOW3, PURPLE3, ORANGE3, GREEN3, RED3];
   var firework_colors_default = FIREWORK_COLORS;
-
-  // lib/ui/text/render-tetris-text.js
-  var renderTetrisText = () => {
-    const { GREEN: GREEN4 } = colors_default;
-    const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
-    const {
-      gameBoard: gameBoard2,
-      gameBoardContext: ctx,
-      fontSize: fontSize2,
-    } = canvas_default;
-    const { width, height } = gameBoard2;
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.font = `${fontSize2 * 1.1}px ${FONT_FAMILY2}`;
-    ctx.fillStyle = GREEN4;
-    ctx.fillText('TETRIS.JS', width / 2, height * 0.1);
-    ctx.restore();
-  };
-  var render_tetris_text_default = renderTetrisText;
 
   // lib/ui/effects/render-fireworks.js
   var renderFireworks = (state) => {
@@ -521,7 +900,7 @@ var tetris = (() => {
   var render_fireworks_default = renderFireworks;
 
   // lib/ui/effects/render-level-up.js
-  function renderLevelUp(state, engineState = engine_state_default) {
+  function renderLevelUp(state, engineState) {
     const {
       RGBA_BLACK: RGBA_BLACK2,
       BLACK: BLACK2,
@@ -685,6 +1064,7 @@ var tetris = (() => {
 
   // lib/controllers/level-up-controller.js
   var startLevelUp = () => {
+    const { state } = engine_default;
     stop_bgm_default();
     sounds_default.levelUp();
     registerAnimation(
@@ -692,6 +1072,7 @@ var tetris = (() => {
         onComplete: () => {
           play_bgm_default();
         },
+        state,
       }),
     );
   };
@@ -703,9 +1084,9 @@ var tetris = (() => {
      * ## 创建消除行动画实例
      *
      * @param {number[]} lines - 需要消除的行索引数组
-     * @param {object} [state=EngineState] - 游戏状态. Default is `EngineState`
+     * @param {object} state - 游戏状态. Default is `EngineState`
      */
-    constructor(lines, state = engine_state_default) {
+    constructor(lines, state) {
       this.lines = lines.map((y) => ({
         y,
         // 行的Y坐标（行号）
@@ -789,12 +1170,14 @@ var tetris = (() => {
 
   // lib/controllers/clear-lines-controller.js
   var startClearLines = (lines) => {
-    registerAnimation(new clear_lines_animation_default(lines));
+    registerAnimation(
+      new clear_lines_animation_default(lines, engine_default.state),
+    );
   };
   var clear_lines_controller_default = startClearLines;
 
   // lib/game/logic/clear-lines.js
-  var clearLines = (state = engine_state_default) => {
+  var clearLines = (state) => {
     const { ROWS: ROWS2 } = board_default;
     let clear = 0;
     const linesToClear = [];
@@ -806,7 +1189,7 @@ var tetris = (() => {
       }
     }
     if (clear === 0) {
-      save_high_score_default();
+      engine_default.saveHighScore();
       return false;
     }
     sounds_default.clear();
@@ -814,449 +1197,6 @@ var tetris = (() => {
     return true;
   };
   var clear_lines_default = clearLines;
-
-  // lib/ui/constants/tetrominoes.js
-  var {
-    BLUE: BLUE2,
-    TEAL: TEAL3,
-    YELLOW: YELLOW3,
-    PURPLE: PURPLE3,
-    ORANGE: ORANGE3,
-    GREEN: GREEN3,
-    RED: RED3,
-  } = colors_default;
-  var TETROMINOES = [
-    // I型方块（长条）：1行4列
-    { shape: [[1, 1, 1, 1]], color: TEAL3 },
-    // I型方块（长条）：1行5列
-    { shape: [[1, 1, 1, 1, 1]], color: TEAL3 },
-    // O型方块（正方形）：2x2
-    {
-      shape: [
-        [1, 1],
-        [1, 1],
-      ],
-      color: YELLOW3,
-    },
-    // T型方块
-    {
-      shape: [
-        [0, 1, 0],
-        [1, 1, 1],
-      ],
-      color: PURPLE3,
-    },
-    // L型方块
-    {
-      shape: [
-        [1, 0, 0],
-        [1, 1, 1],
-      ],
-      color: BLUE2,
-    },
-    // J型方块
-    {
-      shape: [
-        [0, 0, 1],
-        [1, 1, 1],
-      ],
-      color: ORANGE3,
-    },
-    // S型方块（右斜）
-    {
-      shape: [
-        [0, 1, 1],
-        [1, 1, 0],
-      ],
-      color: GREEN3,
-    },
-    // Z型方块（左斜）
-    {
-      shape: [
-        [1, 1, 0],
-        [0, 1, 1],
-      ],
-      color: RED3,
-    },
-  ];
-  var tetrominoes_default = TETROMINOES;
-
-  // lib/game/logic/random-tetromino.js
-  function randomTetromino() {
-    const randomIndex = Math.floor(Math.random() * tetrominoes_default.length);
-    const piece = tetrominoes_default[randomIndex];
-    return {
-      ...piece,
-      shape: piece.shape.map((row) => [...row]),
-    };
-  }
-  var random_tetromino_default = randomTetromino;
-
-  // lib/game/core/game-over.js
-  var gameOver = () => {
-    const mode = engine_default.getMode();
-    if (mode === 'game-over' || mode === 'paused' || mode === 'main-menu') {
-      return false;
-    }
-    engine_default.setMode('game-over');
-    engine_default.saveHighScore();
-    stop_bgm_default();
-    sounds_default.gameOver();
-  };
-  var game_over_default = gameOver;
-
-  // lib/ui/next/clear-next-piece.js
-  var clearNextPiece = () => {
-    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } =
-      canvas_default;
-    const { width, height } = nextPiece2;
-    nextPieceContext2.clearRect(0, 0, width, height);
-  };
-  var clear_next_piece_default = clearNextPiece;
-
-  // lib/ui/next/render-next-piece.js
-  var renderNextPiece = (next) => {
-    const { BLACK: BLACK2 } = colors_default;
-    const { nextPiece: nextPiece2, nextPieceContext: ctx } = canvas_default;
-    const { width, height } = nextPiece2;
-    const gridSize = 5;
-    const blockSize2 = Math.floor(width / gridSize);
-    if (!next) {
-      return;
-    }
-    const { shape } = next;
-    const ox = Math.floor((width - shape[0].length * blockSize2) / 2);
-    const oy = Math.floor((height - shape.length * blockSize2) / 2);
-    clear_next_piece_default();
-    for (let y = 0; y < shape.length; y++) {
-      for (let x = 0; x < shape[y].length; x++) {
-        if (shape[y][x]) {
-          const px = ox + x * blockSize2;
-          const py = oy + y * blockSize2;
-          ctx.fillStyle = next.color;
-          ctx.fillRect(px, py, blockSize2 - 2, blockSize2 - 2);
-          ctx.strokeStyle = BLACK2;
-          ctx.strokeRect(px, py, blockSize2 - 2, blockSize2 - 2);
-        }
-      }
-    }
-  };
-  var render_next_piece_default = renderNextPiece;
-
-  // lib/game/logic/spawn.js
-  var spawn = (state = engine_state_default) => {
-    const { COLS: COLS2 } = board_default;
-    state.curr = state.next
-      ? {
-          ...state.next,
-          shape: state.next.shape.map((row) => [...row]),
-        }
-      : random_tetromino_default();
-    state.next = random_tetromino_default();
-    state.cx =
-      Math.floor(COLS2 / 2) - Math.floor(state.curr.shape[0].length / 2);
-    state.cy = 0;
-    render_next_piece_default(state.next);
-    if (collision_default(0, 0)) {
-      game_over_default();
-    }
-  };
-  var spawn_default = spawn;
-
-  // lib/game/core/step-game.js
-  var stepGame = (state) => {
-    const mode = engine_default.getMode();
-    if (
-      mode === 'game-over' ||
-      mode === 'main-menu' ||
-      hasBlockingAnimation()
-    ) {
-      return false;
-    }
-    if (!move_default(0, 1, state)) {
-      lock_default();
-      sounds_default.fall();
-      clear_lines_default(state);
-      spawn_default(state);
-      if (mode === 'game-over') {
-        return false;
-      }
-    }
-    return true;
-  };
-  var step_game_default = stepGame;
-
-  // lib/command/command-queue.js
-  var CommandQueue = {
-    queue: [],
-    enqueue(command) {
-      this.queue.push(command);
-    },
-    flush(engine) {
-      const { queue } = this;
-      while (queue.length > 0) {
-        const cmd = queue.shift();
-        cmd.execute(engine);
-      }
-    },
-    clear() {
-      this.queue.length = 0;
-    },
-  };
-  var command_queue_default = CommandQueue;
-
-  // lib/engine/start-game-loop.js
-  var startGameLoop = (timestamp) => {
-    if (!engine_default.timestamp) {
-      engine_default.timestamp = timestamp;
-    }
-    const delta = (timestamp - engine_default.timestamp) / 1e3;
-    const dropInterval = get_speed_default(engine_default.state);
-    engine_default.timestamp = timestamp;
-    command_queue_default.flush(engine_default);
-    engine_default.update(delta);
-    if (
-      !engine_default.accumulator ||
-      timestamp - engine_default.accumulator > dropInterval
-    ) {
-      step_game_default(engine_default.state);
-      engine_default.accumulator = timestamp;
-    }
-    engine_default.render();
-    engine_default.animate();
-    engine_default.rafId = requestAnimationFrame(startGameLoop);
-  };
-  var start_game_loop_default = startGameLoop;
-
-  // lib/engine/restart-game-loop.js
-  var restartGameLoop = () => {
-    engine_default.stop();
-    engine_default.rafId = requestAnimationFrame(start_game_loop_default);
-  };
-  var restart_game_loop_default = restartGameLoop;
-
-  // lib/engine/stop-game-loop.js
-  var stopGameLoop = () => {
-    if (!engine_default.rafId) {
-      return;
-    }
-    cancelAnimationFrame(engine_default.rafId);
-    engine_default.rafId = null;
-    engine_default.timestamp = 0;
-    engine_default.accumulator = 0;
-  };
-  var stop_game_loop_default = stopGameLoop;
-
-  // lib/input/on-resize.js
-  var onResize = () => {
-    engine_default.resize();
-  };
-  var on_resize_default = onResize;
-
-  // lib/ui/board/clear-board.js
-  function clearBoard() {
-    const { gameBoard: gameBoard2, gameBoardContext: gameBoardContext2 } =
-      canvas_default;
-    const { width, height } = gameBoard2;
-    gameBoardContext2.clearRect(0, 0, width, height);
-  }
-  var clear_board_default = clearBoard;
-
-  // lib/ui/effects/render-countdown.js
-  var renderCountdown = (state) => {
-    const {
-      YELLOW: YELLOW4,
-      BLACK: BLACK2,
-      RGBA_BLACK: RGBA_BLACK2,
-      GREEN: GREEN4,
-    } = colors_default;
-    const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
-    const {
-      gameBoard: gameBoard2,
-      gameBoardContext: ctx,
-      fontSize: fontSize2,
-    } = canvas_default;
-    const { width, height } = gameBoard2;
-    const { scale, number } = state;
-    clear_board_default();
-    ctx.save();
-    ctx.fillStyle = RGBA_BLACK2;
-    ctx.fillRect(0, 0, width, height);
-    render_tetris_text_default();
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.translate(width / 2, height / 2);
-    ctx.scale(scale, scale);
-    ctx.font = `${fontSize2 * 3.25}px ${FONT_FAMILY2}`;
-    ctx.fillStyle = YELLOW4;
-    ctx.strokeStyle = BLACK2;
-    ctx.lineWidth = 6;
-    ctx.strokeText(number.toString(), 0, 0);
-    ctx.fillText(number.toString(), 0, 0);
-    ctx.restore();
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.font = `${fontSize2 * 1.1}px ${FONT_FAMILY2}`;
-    ctx.fillStyle = GREEN4;
-    ctx.strokeStyle = BLACK2;
-    ctx.strokeText('GET READY!', width / 2, height / 1.46);
-    ctx.fillText('GET READY!', width / 2, height / 1.46);
-    ctx.restore();
-    ctx.restore();
-  };
-  var render_countdown_default = renderCountdown;
-
-  // lib/engine/state/set-mode.js
-  var setMode = (mode) => {
-    engine_state_default.mode = mode;
-  };
-  var set_mode_default = setMode;
-
-  // lib/game/core/begin-playing.js
-  var beginPlaying = (state = engine_state_default) => {
-    const $level = document.querySelector('#level');
-    if ($level) {
-      $level.textContent = pad_start_default(state.level, 2);
-    }
-    engine_default.setMode('playing');
-    spawn_default(state);
-    sounds_default.levelStart();
-    setTimeout(() => {
-      play_bgm_default();
-    }, 250);
-    engine_default.rafId = requestAnimationFrame(restart_game_loop_default);
-  };
-  var begin_playing_default = beginPlaying;
-
-  // lib/animations/countdown-animation.js
-  var CountdownAnimation = (gameState) => {
-    const state = {
-      show: true,
-      number: 3,
-      scale: 4,
-      count: 0,
-      acc: 0,
-    };
-    return {
-      name: 'countdown',
-      // 动画名称标识
-      layer: 100,
-      // 渲染层级（UI 层，显示在最前面）
-      blocking: true,
-      // 是否阻塞用户输入（倒计时期间禁止操作）
-      /**
-       * ## 更新倒计时动画状态
-       *
-       * @param {number} delta - 距离上一帧的时间差（秒）
-       * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
-       */
-      update(delta) {
-        state.acc += delta;
-        if (state.acc < 0.01) {
-          return true;
-        }
-        state.acc = 0;
-        render_countdown_default(state);
-        state.count++;
-        state.scale = Math.max(1, state.scale - 0.4);
-        if (state.count >= 50) {
-          state.count = 0;
-          state.number--;
-          state.scale = 4;
-          if (state.number >= 1) {
-            sounds_default.countdown();
-          }
-        }
-        if (state.number <= 0) {
-          set_mode_default('playing');
-          begin_playing_default(gameState);
-          return false;
-        }
-        return true;
-      },
-      // 渲染倒计时动画：将当前状态传递给渲染函数
-      render() {
-        render_countdown_default(state);
-      },
-    };
-  };
-  var countdown_animation_default = CountdownAnimation;
-
-  // lib/controllers/countdown-controller.js
-  var startCountdown = () => {
-    registerAnimation(countdown_animation_default(engine_default.state));
-  };
-  var countdown_controller_default = startCountdown;
-
-  // lib/game/core/start-game.js
-  var startGame = (state = engine_state_default) => {
-    state.baseLines = (state.level - 1) * 10;
-    countdown_controller_default();
-  };
-  var start_game_default = startGame;
-
-  // lib/game/actions/select-level.js
-  var selectLevel = (level, state = engine_state_default) => {
-    state.level = level;
-    sounds_default.levelSelect();
-  };
-  var select_level_default = selectLevel;
-
-  // lib/command/actions/main-menu-actions.js
-  var MAIN_MENU_ACTIONS = {
-    LEVEL_ONE: (_, engine) => {
-      select_level_default(1, engine.state);
-    },
-    LEVEL_TWO: (_, engine) => {
-      select_level_default(2, engine.state);
-    },
-    LEVEL_THREE: (_, engine) => {
-      select_level_default(3, engine.state);
-    },
-    LEVEL_FOUR: (_, engine) => {
-      select_level_default(4, engine.state);
-    },
-    LEVEL_FIVE: (_, engine) => {
-      select_level_default(5, engine.state);
-    },
-    LEVEL_SIX: (_, engine) => {
-      select_level_default(6, engine.state);
-    },
-    LEVEL_SEVEN: (_, engine) => {
-      select_level_default(7, engine.state);
-    },
-    LEVEL_EIGHT: (_, engine) => {
-      select_level_default(8, engine.state);
-    },
-    LEVEL_NINE: (_, engine) => {
-      select_level_default(9, engine.state);
-    },
-    LEVEL_TEN: (_, engine) => {
-      select_level_default(10, engine.state);
-    },
-    CONFIRM: (_, engine) => {
-      start_game_default(engine.state);
-    },
-  };
-  var main_menu_actions_default = MAIN_MENU_ACTIONS;
-
-  // lib/game/logic/rotate.js
-  var rotate = (state = engine_state_default) => {
-    const { curr } = state;
-    if (!curr) {
-      return;
-    }
-    const prev = curr.shape;
-    curr.shape = prev[0].map((_, i) => prev.map((r) => r[i]).toReversed());
-    if (collision_default(0, 0)) {
-      curr.shape = prev;
-    } else {
-      sounds_default.rotate();
-    }
-  };
-  var rotate_default = rotate;
 
   // lib/game/logic/drop.js
   var drop = (state) => {
@@ -1274,7 +1214,7 @@ var tetris = (() => {
   var drop_default = drop;
 
   // lib/game/core/restart-game.js
-  var restartGame = (state = engine_state_default) => {
+  var restartGame = (state) => {
     const mode = engine_default.getMode();
     if (mode === 'paused' || mode === 'game-over' || mode === 'main-menu') {
       return;
@@ -1443,7 +1383,7 @@ var tetris = (() => {
   var reset_board_default = resetBoard;
 
   // lib/game/core/reset-to-main-menu.js
-  var resetToMainMenu = (state = engine_state_default) => {
+  var resetToMainMenu = (state) => {
     stop_bgm_default();
     engine_default.start();
     reset_board_default();
@@ -1495,13 +1435,105 @@ var tetris = (() => {
   };
   var command_default = Command;
 
+  // lib/game/logic/get-speed.js
+  var getSpeed = (state) =>
+    // 计算速度：基础值1000ms，每升一级减少80ms，最低不低于100ms
+    Math.max(100, 1e3 - (state.level - 1) * 80);
+  var get_speed_default = getSpeed;
+
+  // lib/game/core/step-game.js
+  var stepGame = (state) => {
+    const mode = engine_default.getMode();
+    if (
+      mode === 'game-over' ||
+      mode === 'main-menu' ||
+      hasBlockingAnimation()
+    ) {
+      return false;
+    }
+    if (!move_default(0, 1, state)) {
+      lock_default(state);
+      sounds_default.fall();
+      clear_lines_default(state);
+      spawn_default(state);
+      if (mode === 'game-over') {
+        return false;
+      }
+    }
+    return true;
+  };
+  var step_game_default = stepGame;
+
+  // lib/engine/start-game-loop.js
+  var startGameLoop = (timestamp) => {
+    if (!engine_default.timestamp) {
+      engine_default.timestamp = timestamp;
+    }
+    const delta = (timestamp - engine_default.timestamp) / 1e3;
+    const dropInterval = get_speed_default(engine_default.state);
+    engine_default.timestamp = timestamp;
+    if (replay_default.playing) {
+      const data = replay_default.data;
+      while (
+        replay_default.cursor < data.length &&
+        data[replay_default.cursor].frame === replay_default.frame
+      ) {
+        const item = data[replay_default.cursor];
+        command_queue_default.enqueue(
+          new command_default(item.cmd.type, item.cmd.payload),
+        );
+        replay_default.cursor++;
+      }
+    }
+    command_queue_default.flush(engine_default);
+    engine_default.update(delta);
+    replay_default.frame++;
+    if (
+      !engine_default.accumulator ||
+      timestamp - engine_default.accumulator > dropInterval
+    ) {
+      step_game_default(engine_default.state);
+      engine_default.accumulator = timestamp;
+    }
+    engine_default.render();
+    engine_default.animate();
+    engine_default.rafId = requestAnimationFrame(startGameLoop);
+  };
+  var start_game_loop_default = startGameLoop;
+
+  // lib/engine/stop-game-loop.js
+  var stopGameLoop = () => {
+    if (!engine_default.rafId) {
+      return;
+    }
+    cancelAnimationFrame(engine_default.rafId);
+    engine_default.rafId = null;
+    engine_default.timestamp = 0;
+    engine_default.accumulator = 0;
+  };
+  var stop_game_loop_default = stopGameLoop;
+
+  // lib/input/on-resize.js
+  var onResize = () => {
+    engine_default.resize();
+  };
+  var on_resize_default = onResize;
+
   // lib/input/dispatch-input.js
   var dispatchInput = (event) => {
     const { action } = event;
     if (hasBlockingAnimation(['countdown', 'level-up']) || !action) {
       return;
     }
-    command_queue_default.enqueue(new command_default(action));
+    const cmd = new command_default(action);
+    const { type, payload } = cmd;
+    command_queue_default.enqueue(cmd);
+    if (replay_default.recording) {
+      replay_default.data.push({
+        frame: replay_default.frame,
+        cmd: { type, payload },
+      });
+    }
   };
   var dispatch_input_default = dispatchInput;
 
@@ -1570,6 +1602,25 @@ var tetris = (() => {
   };
   var load_high_score_default = loadHighScore;
 
+  // lib/utils/set-storage.js
+  var setStorage = (key, value) => {
+    localStorage.setItem(key, value);
+  };
+  var set_storage_default = setStorage;
+
+  // lib/engine/state/save-high-score.js
+  var saveHighScore = () => {
+    const { score } = engine_state_default;
+    if (score > engine_state_default.highScore) {
+      engine_state_default.highScore = score;
+      set_storage_default(
+        'tetris-high-score',
+        engine_state_default.highScore.toString(),
+      );
+    }
+  };
+  var save_high_score_default = saveHighScore;
+
   // lib/engine/state/get-mode.js
   var getMode = () => engine_state_default.mode;
   var get_mode_default = getMode;
@@ -1636,7 +1687,7 @@ var tetris = (() => {
   var render_main_menu_default = renderMainMenu;
 
   // lib/ui/scenes/main-menu-scene/lazy-render-main-menu.js
-  var lazyRenderMainMenu = (state = engine_state_default) => {
+  var lazyRenderMainMenu = (state) => {
     if (document?.fonts?.load) {
       document.fonts.load('40px "Press Start 2P"').then(() => {
         render_main_menu_default(state.level);
@@ -1650,7 +1701,7 @@ var tetris = (() => {
   var lazy_render_main_menu_default = lazyRenderMainMenu;
 
   // lib/ui/scenes/main-menu-scene/index.js
-  var mainMenuScene = (state = engine_state_default) => {
+  var mainMenuScene = (state) => {
     render_main_menu_default(state.level);
   };
   var main_menu_scene_default = mainMenuScene;
@@ -1823,7 +1874,7 @@ var tetris = (() => {
   var render_active_pieces_default = renderActivePieces;
 
   // lib/ui/board/render-active-only.js
-  var renderActiveOnly = (state = engine_state_default) => {
+  var renderActiveOnly = (state) => {
     const { board, curr, cx, cy } = state;
     if (board) {
       render_board_default(board);
@@ -1835,7 +1886,7 @@ var tetris = (() => {
   var render_active_only_default = renderActiveOnly;
 
   // lib/ui/scenes/paused-scene/render-paused.js
-  var renderPaused = () => {
+  var renderPaused = (state) => {
     const {
       RGBA_BLACK: RGBA_BLACK2,
       YELLOW: YELLOW4,
@@ -1849,7 +1900,7 @@ var tetris = (() => {
     } = canvas_default;
     const { width, height } = gameBoard2;
     clear_board_default();
-    render_active_only_default();
+    render_active_only_default(state);
     ctx.fillStyle = RGBA_BLACK2;
     ctx.fillRect(0, 0, width, height);
     render_tetris_text_default();
@@ -1875,7 +1926,7 @@ var tetris = (() => {
   var paused_scene_default = pausedScene;
 
   // lib/ui/scenes/game-over-scene/render-game-over.js
-  var renderGameOver = (state = engine_state_default) => {
+  var renderGameOver = (state) => {
     const {
       RGBA_BLACK: RGBA_BLACK2,
       RED: RED4,
@@ -1920,7 +1971,7 @@ var tetris = (() => {
   var game_over_scene_default = gameOverScene;
 
   // lib/ui/scenes/playing-scene/render-playing.js
-  var renderPlaying = (state = engine_state_default) => {
+  var renderPlaying = (state) => {
     render_active_only_default(state);
     render_next_piece_default(state.next);
   };
@@ -1950,7 +2001,7 @@ var tetris = (() => {
   var scenes_default = scenes;
 
   // lib/ui/scene-manager/render-scene.js
-  var renderScene = (state = engine_state_default) => {
+  var renderScene = (state) => {
     const mode = engine_default.getMode();
     const scene = scenes_default[mode];
     if (!scene) {
@@ -2011,11 +2062,11 @@ var tetris = (() => {
     start: () => {
       Engine.rafId = requestAnimationFrame(start_game_loop_default);
     },
-    restart: () => {
-      restart_game_loop_default();
-    },
     stop: () => {
       stop_game_loop_default();
+    },
+    restart: () => {
+      restart_game_loop_default();
     },
     render: () => {
       render_scene_default(Engine.state);
