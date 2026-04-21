@@ -1,3 +1,20 @@
+# [0.5.0](https://github.com/yaohaixiao/tetris.js/compare/0.4.0...0.5.0) (2026-04-21)
+
+
+### Bug Fixes
+
+* 修复 formatTime 方法，hh 表示时没有补0； ([12a7627](https://github.com/yaohaixiao/tetris.js/commit/12a76278477b87336c856dfdd7737e64e03aab45))
+* 修复 PausedAnimation 动画中 active 属性初始化错误导致的问题； ([9ab0057](https://github.com/yaohaixiao/tetris.js/commit/9ab0057df8cf9f7f1a400de5b5f6ce6d0c40fd76))
+* 修复切换BGM失败的问题； ([570ff69](https://github.com/yaohaixiao/tetris.js/commit/570ff6926285887744c669a9abc782699ebbbe91))
+
+
+### Features
+
+* 添加 replay.js 模块，准备添加回放功能； ([5e1aa68](https://github.com/yaohaixiao/tetris.js/commit/5e1aa682018ed6676c35df66f3086f1694e0f75c))
+* 添加玩法，支持重力消减，即消减后，方块可以掉落到缝隙； ([4ba4025](https://github.com/yaohaixiao/tetris.js/commit/4ba402502a2c1c5af3b0219f4ce4353eeaaa2116))
+* 添加长度5的长条，并且添加1次减5层奖励1200分； ([04a2f1c](https://github.com/yaohaixiao/tetris.js/commit/04a2f1ce73e92c4701c814c0465912f89cc1c31c))
+* 优化代码架构，引入 Command Queue，解耦 input 输出与 action 行为的耦合； ([9566e22](https://github.com/yaohaixiao/tetris.js/commit/9566e22478b3f1885d2decc490746d56c867d4c0))
+* n 如果是 null / undefined / NaN 会直接炸或输出 "NaN"；len <= 0 或不是整数时没有保护；负数时补零行为不一定符合预期（比如 -3 → "-03"？） ([743c6d7](https://github.com/yaohaixiao/tetris.js/commit/743c6d746a14c744e4c1208b88982cc8c4b6c545))
 # [0.4.0](https://github.com/yaohaixiao/tetris.js/compare/0.3.1...0.4.0) (2026-04-18)
 
 ### Bug Fixes
