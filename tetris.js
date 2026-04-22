@@ -1,44 +1,47 @@
 var tetris = (() => {
-  var c3 = '#18c8fa',
-    g3 = 'rgba(50, 190, 239, 0.3)',
-    l3 = '#ff0',
-    s3 = 'rgba(255, 255, 0, 0.5)',
-    n3 = '#a0a',
-    a3 = '#00f',
-    v3 = '#ffa500',
-    m3 = 'rgba(255, 127, 0, 0.4)',
-    d3 = '#0f0',
-    p3 = 'rgba(0, 255, 0, 0.2)',
-    f3 = '#f00',
-    x3 = 'rgba(255, 0, 0, 0.4)',
-    w3 = '#444',
-    y3 = 'rgba(0,0,0,.5)',
-    u3 = '#fff',
-    M3 = 'rgba(255,255,255,.3)',
-    C3 = '#ff4fa3',
-    z3 = {
-      TEAL: c3,
-      RGBA_TEAL: g3,
-      YELLOW: l3,
-      RGBA_YELLOW: s3,
-      PURPLE: n3,
-      BLUE: a3,
-      ORANGE: v3,
-      RGBA_ORANGE: m3,
-      GREEN: d3,
-      RGBA_GREEN: p3,
-      RED: f3,
-      RGBA_RED: x3,
-      BLACK: w3,
-      RGBA_BLACK: y3,
-      WHITE: u3,
-      RGBA_WHITE: M3,
-      PINK: C3,
-    },
-    v = z3;
-  var { RGBA_ORANGE: V3 } = v,
-    H3 = {
-      tetris: `<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><rect x="16.568" y="367.165" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="16.568" y="418.472" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="16.568" y="367.165" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="84.977" y="367.165" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="84.977" y="418.472" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="84.977" y="367.165" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="84.977" y="298.756" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="84.977" y="350.063" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="84.977" y="298.756" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="16.568" y="298.756" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="16.568" y="350.063" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="16.568" y="298.756" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="16.568" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="16.568" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="16.568" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="16.568" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="84.977" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="84.977" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="84.977" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="84.977" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="153.386" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="153.386" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="153.386" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="153.386" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="221.795" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="221.795" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="221.795" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="221.795" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="221.795" y="367.165" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="221.795" y="418.472" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="221.795" y="367.165" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="290.205" y="367.165" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="290.205" y="418.472" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="290.205" y="367.165" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="290.205" y="435.574" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="290.205" y="486.881" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="290.205" y="435.574" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="358.614" y="435.574" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="358.614" y="486.881" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="358.614" y="435.574" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="256" y="8.017" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="256" y="59.324" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="256" y="8.017" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="324.409" y="8.017" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="324.409" y="59.324" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="324.409" y="8.017" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="324.409" y="76.426" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="324.409" y="127.733" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="324.409" y="76.426" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="392.818" y="76.426" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="392.818" y="127.733" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="392.818" y="76.426" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="358.614" y="367.165" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="358.614" y="418.472" style="fill:#60a333" width="68.409" height="17.102"/><rect x="358.614" y="367.165" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="427.023" y="367.165" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="427.023" y="418.472" style="fill:#60a333" width="68.409" height="17.102"/><rect x="427.023" y="367.165" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="427.023" y="435.574" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="427.023" y="486.881" style="fill:#60a333" width="68.409" height="17.102"/><rect x="427.023" y="435.574" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="358.614" y="298.756" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="358.614" y="350.063" style="fill:#60a333" width="68.409" height="17.102"/><rect x="358.614" y="298.756" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="153.386" y="127.733" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="153.386" y="179.04" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="153.386" y="127.733" style="fill:#0aadbf" width="17.102" height="68.409"/></g><rect x="153.386" y="196.142" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="153.386" y="247.449" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="153.386" y="196.142" style="fill:#0aadbf" width="17.102" height="68.409"/></g><rect x="221.795" y="196.142" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="221.795" y="247.449" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="221.795" y="196.142" style="fill:#0aadbf" width="17.102" height="68.409"/></g><rect x="153.386" y="264.551" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="153.386" y="315.858" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="153.386" y="264.551" style="fill:#0aadbf" width="17.102" height="68.409"/></g><path d="M256,84.443h60.392v60.392c0,4.428,3.588,8.017,8.017,8.017h136.818c4.428,0,8.017-3.588,8.017-8.017V76.426
+  // lib/constants/colors.js
+  var TEAL = "#18c8fa";
+  var RGBA_TEAL = "rgba(50, 190, 239, 0.3)";
+  var YELLOW = "#ff0";
+  var RGBA_YELLOW = "rgba(255, 255, 0, 0.5)";
+  var PURPLE = "#a0a";
+  var BLUE = "#00f";
+  var ORANGE = "#ffa500";
+  var RGBA_ORANGE = "rgba(255, 127, 0, 0.4)";
+  var GREEN = "#0f0";
+  var RGBA_GREEN = "rgba(0, 255, 0, 0.2)";
+  var RED = "#f00";
+  var RGBA_RED = "rgba(255, 0, 0, 0.4)";
+  var BLACK = "#444";
+  var RGBA_BLACK = "rgba(0,0,0,.5)";
+  var WHITE = "#fff";
+  var RGBA_WHITE = "rgba(255,255,255,.3)";
+  var PINK = "#ff4fa3";
+  var COLORS = {
+    TEAL,
+    RGBA_TEAL,
+    YELLOW,
+    RGBA_YELLOW,
+    PURPLE,
+    BLUE,
+    ORANGE,
+    RGBA_ORANGE,
+    GREEN,
+    RGBA_GREEN,
+    RED,
+    RGBA_RED,
+    BLACK,
+    RGBA_BLACK,
+    WHITE,
+    RGBA_WHITE,
+    PINK
+  };
+  var colors_default = COLORS;
+
+  // lib/ui/constants/images/scenes-background.js
+  var { RGBA_ORANGE: RGBA_ORANGE2 } = colors_default;
+  var ScenesBackground = {
+    tetris: `<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><rect x="16.568" y="367.165" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="16.568" y="418.472" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="16.568" y="367.165" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="84.977" y="367.165" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="84.977" y="418.472" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="84.977" y="367.165" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="84.977" y="298.756" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="84.977" y="350.063" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="84.977" y="298.756" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="16.568" y="298.756" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="16.568" y="350.063" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="16.568" y="298.756" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="16.568" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="16.568" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="16.568" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="16.568" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="84.977" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="84.977" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="84.977" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="84.977" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="153.386" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="153.386" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="153.386" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="153.386" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="221.795" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="221.795" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="221.795" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="221.795" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="221.795" y="367.165" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="221.795" y="418.472" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="221.795" y="367.165" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="290.205" y="367.165" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="290.205" y="418.472" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="290.205" y="367.165" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="290.205" y="435.574" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="290.205" y="486.881" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="290.205" y="435.574" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="358.614" y="435.574" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="358.614" y="486.881" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="358.614" y="435.574" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="256" y="8.017" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="256" y="59.324" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="256" y="8.017" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="324.409" y="8.017" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="324.409" y="59.324" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="324.409" y="8.017" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="324.409" y="76.426" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="324.409" y="127.733" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="324.409" y="76.426" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="392.818" y="76.426" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="392.818" y="127.733" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="392.818" y="76.426" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="358.614" y="367.165" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="358.614" y="418.472" style="fill:#60a333" width="68.409" height="17.102"/><rect x="358.614" y="367.165" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="427.023" y="367.165" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="427.023" y="418.472" style="fill:#60a333" width="68.409" height="17.102"/><rect x="427.023" y="367.165" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="427.023" y="435.574" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="427.023" y="486.881" style="fill:#60a333" width="68.409" height="17.102"/><rect x="427.023" y="435.574" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="358.614" y="298.756" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="358.614" y="350.063" style="fill:#60a333" width="68.409" height="17.102"/><rect x="358.614" y="298.756" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="153.386" y="127.733" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="153.386" y="179.04" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="153.386" y="127.733" style="fill:#0aadbf" width="17.102" height="68.409"/></g><rect x="153.386" y="196.142" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="153.386" y="247.449" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="153.386" y="196.142" style="fill:#0aadbf" width="17.102" height="68.409"/></g><rect x="221.795" y="196.142" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="221.795" y="247.449" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="221.795" y="196.142" style="fill:#0aadbf" width="17.102" height="68.409"/></g><rect x="153.386" y="264.551" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="153.386" y="315.858" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="153.386" y="264.551" style="fill:#0aadbf" width="17.102" height="68.409"/></g><path d="M256,84.443h60.392v60.392c0,4.428,3.588,8.017,8.017,8.017h136.818c4.428,0,8.017-3.588,8.017-8.017V76.426
 	c0-4.428-3.588-8.017-8.017-8.017h-60.392V8.017c0-4.428-3.588-8.017-8.017-8.017H256c-4.427,0-8.017,3.588-8.017,8.017v68.409
 	C247.983,80.854,251.573,84.443,256,84.443z M332.426,84.443h52.376v52.376h-52.376V84.443z M453.211,136.818h-52.376V84.443h52.376
 	V136.818z M384.802,68.409h-52.376V16.033h52.376V68.409z M264.017,16.033h52.376v52.376h-52.376V16.033z"/><path d="M495.432,359.148H435.04v-60.392c0-4.428-3.588-8.017-8.017-8.017h-68.409c-4.428,0-8.017,3.588-8.017,8.017v60.392h-9.086
@@ -57,9 +60,9 @@ var tetris = (() => {
 	v-52.376H76.96z M24.585,443.591H76.96v52.376H24.585V443.591z M92.994,443.591h52.376v52.376H92.994V443.591z M161.403,443.591
 	h52.376v52.376h-52.376V443.591z M229.812,443.591h52.376v52.376h-52.376V443.591z M298.221,443.591h52.376v52.376h-52.376V443.591z
 	 M366.63,443.591h52.376v52.376H366.63V443.591z M487.415,495.967H435.04v-52.376h52.376V495.967z"/></svg>`,
-      game: '<svg width="800px" height="800px" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 30L19 33C19 36.866 15.866 40 12 40V40C8.13401 40 5 36.866 5 33L5 19" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 30L29 33C29 36.866 32.134 40 36 40V40C39.866 40 43 36.866 43 33L43 19" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="8" width="38" height="22" rx="11" fill="#2F88FF" stroke="#000000" stroke-width="4"/><path d="M21 19H13" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 15V23" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="32" y="15" width="4" height="4" rx="2" fill="white"/><rect x="28" y="20" width="4" height="4" rx="2" fill="white"/></svg>',
-      coffee: `<svg fill="${V3}" width="800px" height="800px" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M15.427734 3C14.062745 3 12.859456 3.9323872 12.521484 5.2558594L12.074219 7L12 7C11.133553 7 10.343298 7.2932543 9.7636719 7.7890625C9.1840453 8.2848707 8.8153921 8.9380401 8.5664062 9.625C8.0684347 10.99892 8 12.57785 8 14 A 1.0001 1.0001 0 0 0 9 15L10.119141 15L13.970703 45.017578 A 1.0001 1.0001 0 0 0 13.974609 45.042969C14.160517 46.237774 15.204427 47 16.367188 47L33.630859 47C34.794193 47 35.83786 46.235688 36.023438 45.042969 A 1.0001 1.0001 0 0 0 36.027344 45.017578L39.880859 15L41 15 A 1.0001 1.0001 0 0 0 42 14C42 12.57785 41.931565 10.99892 41.433594 9.625C41.184608 8.9380401 40.815955 8.2848707 40.236328 7.7890625C39.656702 7.2932543 38.866447 7 38 7L37.90625 7L37.474609 5.2734375 A 1.0001 1.0001 0 0 0 37.474609 5.2714844C37.141393 3.9416023 35.934385 3 34.5625 3L15.427734 3 z M 15.427734 5L34.5625 5C35.026615 5 35.42042 5.3076915 35.533203 5.7578125L35.84375 7L14.138672 7L14.458984 5.7519531C14.573013 5.3054253 14.966724 5 15.427734 5 z M 12.912109 8.9960938 A 1.0001 1.0001 0 0 0 13 9L37 9 A 1.0001 1.0001 0 0 0 37.064453 8.9980469 A 1.0001 1.0001 0 0 0 37.125 9L38 9C38.459053 9 38.706095 9.1106518 38.9375 9.3085938C39.168905 9.5065356 39.385047 9.8386001 39.554688 10.306641C39.802098 10.989256 39.830025 12.022136 39.878906 13L11.166016 13 A 1.0001 1.0001 0 0 0 10.955078 12.986328 A 1.0001 1.0001 0 0 0 10.835938 13L10.121094 13C10.169974 12.022136 10.197905 10.989256 10.445312 10.306641C10.614953 9.8386001 10.831095 9.5065355 11.0625 9.3085938C11.293905 9.1106518 11.540947 9 12 9L12.849609 9 A 1.0001 1.0001 0 0 0 12.912109 8.9960938 z M 12.136719 15L37.863281 15L36.708984 24L31.984375 24C30.659565 21.085293 28.095496 19.012008 24.992188 19.003906C24.945978 19.002306 24.902818 19.004791 24.857422 19.007812C21.786193 19.059813 19.278095 21.123031 17.988281 24L13.291016 24L12.136719 15 z M 24.945312 20.998047C24.966323 20.999147 24.947809 21 24.974609 21C27.392834 21 29.474358 22.682557 30.451172 25.34375 A 1.0001 1.0001 0 0 0 31.388672 26L31.490234 26L36.451172 26L35.810547 31L31.527344 31L31.388672 31 A 1.0001 1.0001 0 0 0 30.447266 31.660156C30.227471 32.270178 29.97672 32.828834 29.671875 33.296875C28.538498 35.034193 26.884731 35.976012 25.087891 35.998047L25.021484 35.998047C23.246013 35.998047 21.592289 35.09639 20.431641 33.398438 A 1.0001 1.0001 0 0 0 20.431641 33.396484C20.091871 32.900328 19.8123 32.306572 19.574219 31.65625 A 1.0001 1.0001 0 0 0 18.634766 31L18.521484 31L14.189453 31L13.548828 26L18.484375 26L18.589844 26 A 1.0001 1.0001 0 0 0 19.529297 25.339844C20.477663 22.708373 22.511851 21.026828 24.917969 21 A 1.0001 1.0001 0 0 0 24.945312 20.998047 z M 24.939453 23C23.705063 23.01347 22.665152 23.777929 22.001953 24.794922C21.338753 25.811913 20.978618 27.119966 20.994141 28.542969C21.009661 29.965972 21.398756 31.267249 22.083984 32.269531C22.769211 33.271814 23.826157 34.013466 25.060547 34C26.294937 33.98654 27.334848 33.22207 27.998047 32.205078C28.661247 31.188086 29.021382 29.880035 29.005859 28.457031C28.990339 27.034028 28.601244 25.732752 27.916016 24.730469C27.230789 23.728186 26.173843 22.986534 24.939453 23 z M 24.960938 25C25.386064 24.9954 25.843602 25.244939 26.263672 25.859375C26.683742 26.473812 26.994273 27.416385 27.005859 28.478516C27.017449 29.540646 26.728831 30.489827 26.322266 31.113281C25.915699 31.736734 25.464189 31.995363 25.039062 32C24.613936 32.0046 24.156399 31.755062 23.736328 31.140625C23.316259 30.526189 23.005727 29.583615 22.994141 28.521484C22.982551 27.459353 23.271169 26.510173 23.677734 25.886719C24.084301 25.263265 24.535811 25.004637 24.960938 25 z M 14.445312 33L18.021484 33C18.24578 33.51991 18.454188 34.047503 18.78125 34.525391C20.264602 36.695438 22.552956 37.998047 25.021484 37.998047L25.091797 37.998047 A 1.0001 1.0001 0 0 0 25.101562 37.998047C27.60154 37.971307 29.89481 36.614655 31.345703 34.390625 A 1.0001 1.0001 0 0 0 31.347656 34.390625C31.635588 33.948746 31.81459 33.471059 32.013672 33L35.554688 33L34.048828 44.736328C34.042405 44.777609 33.827526 45 33.630859 45L16.367188 45C16.173946 45 15.95727 44.775524 15.951172 44.736328L14.445312 33 z"/></svg>`,
-      happy: `<svg height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.003 512.003" xml:space="preserve"><circle style="fill:#fddf6d" cx="256.001" cy="256.001" r="256.001"/><path style="fill:#fcc56b" d="M310.859,474.208c-141.385,0-256-114.615-256-256c0-75.537,32.722-143.422,84.757-190.281
+    game: `<svg width="800px" height="800px" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 30L19 33C19 36.866 15.866 40 12 40V40C8.13401 40 5 36.866 5 33L5 19" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 30L29 33C29 36.866 32.134 40 36 40V40C39.866 40 43 36.866 43 33L43 19" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="8" width="38" height="22" rx="11" fill="#2F88FF" stroke="#000000" stroke-width="4"/><path d="M21 19H13" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 15V23" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="32" y="15" width="4" height="4" rx="2" fill="white"/><rect x="28" y="20" width="4" height="4" rx="2" fill="white"/></svg>`,
+    coffee: `<svg fill="${RGBA_ORANGE2}" width="800px" height="800px" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M15.427734 3C14.062745 3 12.859456 3.9323872 12.521484 5.2558594L12.074219 7L12 7C11.133553 7 10.343298 7.2932543 9.7636719 7.7890625C9.1840453 8.2848707 8.8153921 8.9380401 8.5664062 9.625C8.0684347 10.99892 8 12.57785 8 14 A 1.0001 1.0001 0 0 0 9 15L10.119141 15L13.970703 45.017578 A 1.0001 1.0001 0 0 0 13.974609 45.042969C14.160517 46.237774 15.204427 47 16.367188 47L33.630859 47C34.794193 47 35.83786 46.235688 36.023438 45.042969 A 1.0001 1.0001 0 0 0 36.027344 45.017578L39.880859 15L41 15 A 1.0001 1.0001 0 0 0 42 14C42 12.57785 41.931565 10.99892 41.433594 9.625C41.184608 8.9380401 40.815955 8.2848707 40.236328 7.7890625C39.656702 7.2932543 38.866447 7 38 7L37.90625 7L37.474609 5.2734375 A 1.0001 1.0001 0 0 0 37.474609 5.2714844C37.141393 3.9416023 35.934385 3 34.5625 3L15.427734 3 z M 15.427734 5L34.5625 5C35.026615 5 35.42042 5.3076915 35.533203 5.7578125L35.84375 7L14.138672 7L14.458984 5.7519531C14.573013 5.3054253 14.966724 5 15.427734 5 z M 12.912109 8.9960938 A 1.0001 1.0001 0 0 0 13 9L37 9 A 1.0001 1.0001 0 0 0 37.064453 8.9980469 A 1.0001 1.0001 0 0 0 37.125 9L38 9C38.459053 9 38.706095 9.1106518 38.9375 9.3085938C39.168905 9.5065356 39.385047 9.8386001 39.554688 10.306641C39.802098 10.989256 39.830025 12.022136 39.878906 13L11.166016 13 A 1.0001 1.0001 0 0 0 10.955078 12.986328 A 1.0001 1.0001 0 0 0 10.835938 13L10.121094 13C10.169974 12.022136 10.197905 10.989256 10.445312 10.306641C10.614953 9.8386001 10.831095 9.5065355 11.0625 9.3085938C11.293905 9.1106518 11.540947 9 12 9L12.849609 9 A 1.0001 1.0001 0 0 0 12.912109 8.9960938 z M 12.136719 15L37.863281 15L36.708984 24L31.984375 24C30.659565 21.085293 28.095496 19.012008 24.992188 19.003906C24.945978 19.002306 24.902818 19.004791 24.857422 19.007812C21.786193 19.059813 19.278095 21.123031 17.988281 24L13.291016 24L12.136719 15 z M 24.945312 20.998047C24.966323 20.999147 24.947809 21 24.974609 21C27.392834 21 29.474358 22.682557 30.451172 25.34375 A 1.0001 1.0001 0 0 0 31.388672 26L31.490234 26L36.451172 26L35.810547 31L31.527344 31L31.388672 31 A 1.0001 1.0001 0 0 0 30.447266 31.660156C30.227471 32.270178 29.97672 32.828834 29.671875 33.296875C28.538498 35.034193 26.884731 35.976012 25.087891 35.998047L25.021484 35.998047C23.246013 35.998047 21.592289 35.09639 20.431641 33.398438 A 1.0001 1.0001 0 0 0 20.431641 33.396484C20.091871 32.900328 19.8123 32.306572 19.574219 31.65625 A 1.0001 1.0001 0 0 0 18.634766 31L18.521484 31L14.189453 31L13.548828 26L18.484375 26L18.589844 26 A 1.0001 1.0001 0 0 0 19.529297 25.339844C20.477663 22.708373 22.511851 21.026828 24.917969 21 A 1.0001 1.0001 0 0 0 24.945312 20.998047 z M 24.939453 23C23.705063 23.01347 22.665152 23.777929 22.001953 24.794922C21.338753 25.811913 20.978618 27.119966 20.994141 28.542969C21.009661 29.965972 21.398756 31.267249 22.083984 32.269531C22.769211 33.271814 23.826157 34.013466 25.060547 34C26.294937 33.98654 27.334848 33.22207 27.998047 32.205078C28.661247 31.188086 29.021382 29.880035 29.005859 28.457031C28.990339 27.034028 28.601244 25.732752 27.916016 24.730469C27.230789 23.728186 26.173843 22.986534 24.939453 23 z M 24.960938 25C25.386064 24.9954 25.843602 25.244939 26.263672 25.859375C26.683742 26.473812 26.994273 27.416385 27.005859 28.478516C27.017449 29.540646 26.728831 30.489827 26.322266 31.113281C25.915699 31.736734 25.464189 31.995363 25.039062 32C24.613936 32.0046 24.156399 31.755062 23.736328 31.140625C23.316259 30.526189 23.005727 29.583615 22.994141 28.521484C22.982551 27.459353 23.271169 26.510173 23.677734 25.886719C24.084301 25.263265 24.535811 25.004637 24.960938 25 z M 14.445312 33L18.021484 33C18.24578 33.51991 18.454188 34.047503 18.78125 34.525391C20.264602 36.695438 22.552956 37.998047 25.021484 37.998047L25.091797 37.998047 A 1.0001 1.0001 0 0 0 25.101562 37.998047C27.60154 37.971307 29.89481 36.614655 31.345703 34.390625 A 1.0001 1.0001 0 0 0 31.347656 34.390625C31.635588 33.948746 31.81459 33.471059 32.013672 33L35.554688 33L34.048828 44.736328C34.042405 44.777609 33.827526 45 33.630859 45L16.367188 45C16.173946 45 15.95727 44.775524 15.951172 44.736328L14.445312 33 z"/></svg>`,
+    happy: `<svg height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.003 512.003" xml:space="preserve"><circle style="fill:#fddf6d" cx="256.001" cy="256.001" r="256.001"/><path style="fill:#fcc56b" d="M310.859,474.208c-141.385,0-256-114.615-256-256c0-75.537,32.722-143.422,84.757-190.281
 	C56.738,70.303,0,156.525,0,256c0,141.385,114.615,256,256,256c65.849,0,125.883-24.87,171.243-65.718
 	C392.325,464.135,352.77,474.208,310.859,474.208z"/><g><path style="fill:#7f184c" d="M245.899,187.172c-5.752,0-10.414-4.663-10.414-10.414c0-13.433-10.928-24.362-24.362-24.362
 		c-13.433,0-24.362,10.93-24.362,24.362c0,5.752-4.663,10.414-10.414,10.414c-5.752,0-10.414-4.663-10.414-10.414
@@ -69,286 +72,493 @@ var tetris = (() => {
 	C427.243,383.088,367.251,443.08,293.248,443.08z"/><path style="fill:#e6e6e6" d="M172.426,367.092c3.531,7.341,7.718,14.305,12.472,20.829h216.699
 	c4.755-6.524,8.941-13.487,12.472-20.829H172.426z"/><g><path style="fill:#f9a880" d="M145.987,240.152c-19.011,0-34.423,15.412-34.423,34.423h68.848
 		C180.41,255.564,164.998,240.152,145.987,240.152z"/><path style="fill:#f9a880" d="M446.251,240.152c-19.011,0-34.423,15.412-34.423,34.423h68.848
-		C480.676,255.564,465.264,240.152,446.251,240.152z"/></g><ellipse transform="matrix(0.2723 -0.9622 0.9622 0.2723 142.573 335.222)" style="fill:#fceb88" cx="292.913" cy="73.351" rx="29.854" ry="53.46"/></svg>`,
+		C480.676,255.564,465.264,240.152,446.251,240.152z"/></g><ellipse transform="matrix(0.2723 -0.9622 0.9622 0.2723 142.573 335.222)" style="fill:#fceb88" cx="292.913" cy="73.351" rx="29.854" ry="53.46"/></svg>`
+  };
+  var scenes_background_default = ScenesBackground;
+
+  // lib/engine/state/engine-state.js
+  var EngineState = {
+    board: [],
+    curr: null,
+    cx: 0,
+    cy: 0,
+    next: null,
+    score: 0,
+    baseLines: 0,
+    lines: 0,
+    clearLines: [],
+    level: 1,
+    highScore: 0,
+    /*
+     * main-menu：等级选择（主菜单）
+     * playing：游戏中
+     * paused：游戏暂停
+     * game-over：游戏结束
+     */
+    mode: "main-menu"
+  };
+  var engine_state_default = EngineState;
+
+  // lib/engine/replay.js
+  var Replay = {
+    /**
+     * ## 是否正在录制
+     *
+     * @type {boolean}
+     */
+    recording: false,
+    /**
+     * ## 是否正在播放
+     *
+     * @type {boolean}
+     */
+    playing: false,
+    /**
+     * ## 当前帧计数（用于标记时间轴）
+     *
+     * @type {number}
+     */
+    frame: 0,
+    /**
+     * ## 录制的数据列表：
+     *
+     * 一般结构类似：[{ frame: number, command: Command }]
+     *
+     * @type {Array}
+     */
+    data: [],
+    /**
+     * ## 播放游标（当前播放到 data 的位置）
+     *
+     * @type {number}
+     */
+    cursor: 0,
+    /**
+     * ## 开始录制
+     *
+     * 行为：
+     *
+     * - 打开 recording 状态
+     * - 清空已有数据
+     * - 重置 frame
+     */
+    startRecord() {
+      this.recording = true;
+      this.data = [];
+      this.frame = 0;
     },
-    G = H3;
-  var L3 = {
-      board: [],
-      curr: null,
-      cx: 0,
-      cy: 0,
-      next: null,
-      score: 0,
-      baseLines: 0,
-      lines: 0,
-      clearLines: [],
-      level: 1,
-      highScore: 0,
-      mode: 'main-menu',
+    /** ## 停止录制 */
+    stopRecord() {
+      this.recording = false;
     },
-    u = L3;
-  var S3 = {
-      recording: !1,
-      playing: !1,
-      frame: 0,
-      data: [],
-      cursor: 0,
-      startRecord() {
-        ((this.recording = !0), (this.data = []), (this.frame = 0));
-      },
-      stopRecord() {
-        this.recording = !1;
-      },
-      startPlay() {
-        ((this.playing = !0), (this.frame = 0), (this.cursor = 0));
-      },
-      stopPlay() {
-        this.playing = !1;
-      },
+    /**
+     * ## 开始播放
+     *
+     * 行为：
+     *
+     * - 打开 playing 状态
+     * - 重置 frame
+     * - 重置 cursor
+     */
+    startPlay() {
+      this.playing = true;
+      this.frame = 0;
+      this.cursor = 0;
     },
-    z = S3;
-  var E3 = {
-      queue: [],
-      enqueue(t) {
-        this.queue.push(t);
-      },
-      flush(t) {
-        let { queue: e } = this;
-        for (; e.length > 0; ) e.shift().execute(t);
-      },
-      clear() {
-        this.queue.length = 0;
-      },
+    /** ## 停止播放 */
+    stopPlay() {
+      this.playing = false;
+    }
+  };
+  var replay_default = Replay;
+
+  // lib/command/command-queue.js
+  var CommandQueue = {
+    /**
+     * ## 命令队列（FIFO）
+     *
+     * @type {object[]}
+     */
+    queue: [],
+    /**
+     * ## 入队一个 Command
+     *
+     * @param {object} command - 要执行的命令
+     */
+    enqueue(command) {
+      this.queue.push(command);
     },
-    J = E3;
-  var K = [],
-    I = (t) => {
-      K.push(t);
+    /**
+     * ## 执行并清空队列中的所有 Command
+     *
+     * 当前行为：
+     *
+     * - 一次性执行全部 command
+     * - 不做时间分帧控制
+     *
+     * @param {object} engine - 游戏引擎实例
+     */
+    flush(engine) {
+      const { queue } = this;
+      while (queue.length > 0) {
+        const cmd = queue.shift();
+        cmd.execute(engine);
+      }
     },
-    A1 = (t) => {
-      for (let e = K.length - 1; e >= 0; e--) K[e].update(t) || K.splice(e, 1);
+    /** ## 清空队列（丢弃所有未执行命令） */
+    clear() {
+      this.queue.length = 0;
+    }
+  };
+  var command_queue_default = CommandQueue;
+
+  // lib/animations/animations-system.js
+  var animations = [];
+  var registerAnimation = (animation2) => {
+    animations.push(animation2);
+  };
+  var updateAnimations = (delta) => {
+    for (let i = animations.length - 1; i >= 0; i--) {
+      const anim = animations[i];
+      const active = anim.update(delta);
+      if (!active) {
+        animations.splice(i, 1);
+      }
+    }
+  };
+  var renderAnimations = () => {
+    const sorted = animations.slice().toSorted((a, b) => a.layer - b.layer);
+    for (const animation2 of sorted) {
+      animation2.render();
+    }
+  };
+  var hasBlockingAnimation = (names = []) => animations.some((animation2) => {
+    const isBlocking = animation2.blocking;
+    return names && names.length > 0 ? isBlocking && names.includes(animation2.name) : isBlocking;
+  });
+
+  // lib/audio/play-tone.js
+  var audioCtx = new AudioContext();
+  var playTone = (freq, dur, vol = 0.1, wave = "square") => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = wave;
+    osc.frequency.value = freq;
+    gain.gain.value = vol;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    setTimeout(() => {
+      osc.stop();
+      osc.disconnect();
+      gain.disconnect();
+    }, dur);
+  };
+  var play_tone_default = playTone;
+
+  // lib/audio/sounds.js
+  var MOTIFS = {
+    combo: {
+      shift: 0,
+      speed: 1,
+      volume: 1
     },
-    B1 = () => {
-      let t = K.slice().toSorted((e, r) => e.layer - r.layer);
-      for (let e of t) e.render();
+    tetris: {
+      shift: 2,
+      speed: 1.2,
+      volume: 1.1
     },
-    i1 = (t = []) =>
-      K.some((e) => {
-        let r = e.blocking;
-        return t && t.length > 0 ? r && t.includes(e.name) : r;
-      });
-  var w1 = new AudioContext(),
-    A3 = (t, e, r = 0.1, o = 'square') => {
-      let h = w1.createOscillator(),
-        c = w1.createGain();
-      ((h.type = o),
-        (h.frequency.value = t),
-        (c.gain.value = r),
-        h.connect(c),
-        c.connect(w1.destination),
-        h.start(),
+    perfect: {
+      shift: 5,
+      speed: 0.9,
+      volume: 1.3
+    }
+  };
+  var getMotif = (lines, isPerfectClear = false) => {
+    if (isPerfectClear) return "perfect";
+    if (lines === 4) return "tetris";
+    return "combo";
+  };
+  var Sounds = {
+    // 等级选择音效（正弦波柔和音效）
+    levelSelect: () => play_tone_default(523, 80, 0.1, "sine"),
+    // 等级开始音效
+    levelStart: () => play_tone_default(1319, 160, 0.22, "sine"),
+    // 开始倒计时音效
+    countdown: () => play_tone_default(784, 180, 0.3, "sine"),
+    // 方块移动音效
+    move: () => play_tone_default(330, 60),
+    // 方块旋转音效
+    rotate: () => play_tone_default(440, 60),
+    // 方块快速下落音效
+    drop: () => play_tone_default(220, 100),
+    // 方块落地音效
+    fall: () => play_tone_default(180, 200),
+    /**
+     * ## 消行动效音播放（基于和弦 + 动机系统）
+     *
+     * 根据消除行数生成不同音乐动机，并播放对应和弦音效
+     *
+     * @param {number} lines - 消除行数
+     * @param {boolean} isPerfectClear - 是否全清
+     */
+    clear: (lines = 1, isPerfectClear = false) => {
+      const frequencies = [
+        [440, 587, 698],
+        [587, 698, 880],
+        [698, 880, 1174],
+        [587, 880, 1174],
+        [440, 880, 1174]
+      ];
+      const speeds = [260, 300, 380];
+      const volumes = [0.32, 0.3, 0.25];
+      const timeouts = [160, 320, 480];
+      const motif = getMotif(lines, isPerfectClear);
+      const cfg = MOTIFS[motif];
+      const index = Math.min(lines, frequencies.length - 1);
+      const baseChord = frequencies[index];
+      const chord = baseChord.map((freq) => freq + cfg.shift * 12);
+      for (const [i, freq] of chord.entries()) {
         setTimeout(() => {
-          (h.stop(), h.disconnect(), c.disconnect());
-        }, e));
+          play_tone_default(
+            freq,
+            speeds[i] * cfg.speed,
+            volumes[i] * cfg.volume,
+            "square"
+          );
+        }, timeouts[i]);
+      }
     },
-    x = A3;
-  var B3 = {
-      combo: { shift: 0, speed: 1, volume: 1 },
-      tetris: { shift: 2, speed: 1.2, volume: 1.1 },
-      perfect: { shift: 5, speed: 0.9, volume: 1.3 },
+    // 升级庆祝音效
+    levelUp: () => {
+      play_tone_default(523, 220);
+      setTimeout(() => play_tone_default(587, 220), 260);
+      setTimeout(() => play_tone_default(659, 240), 520);
+      setTimeout(() => play_tone_default(784, 260), 780);
+      setTimeout(() => play_tone_default(880, 280), 1060);
+      setTimeout(() => play_tone_default(1047, 320), 1360);
+      setTimeout(() => play_tone_default(1175, 360), 1700);
+      setTimeout(() => play_tone_default(1319, 480), 2080);
     },
-    O3 = (t, e = !1) => (e ? 'perfect' : t === 4 ? 'tetris' : 'combo'),
-    T3 = {
-      levelSelect: () => x(523, 80, 0.1, 'sine'),
-      levelStart: () => x(1319, 160, 0.22, 'sine'),
-      countdown: () => x(784, 180, 0.3, 'sine'),
-      move: () => x(330, 60),
-      rotate: () => x(440, 60),
-      drop: () => x(220, 100),
-      fall: () => x(180, 200),
-      clear: (t = 1, e = !1) => {
-        let r = [
-            [440, 587, 698],
-            [587, 698, 880],
-            [698, 880, 1174],
-            [587, 880, 1174],
-            [440, 880, 1174],
-          ],
-          o = [260, 300, 380],
-          h = [0.32, 0.3, 0.25],
-          c = [160, 320, 480],
-          a = O3(t, e),
-          s = B3[a],
-          i = Math.min(t, r.length - 1),
-          m = r[i].map((p) => p + s.shift * 12);
-        for (let [p, d] of m.entries())
-          setTimeout(() => {
-            x(d, o[p] * s.speed, h[p] * s.volume, 'square');
-          }, c[p]);
-      },
-      levelUp: () => {
-        (x(523, 220),
-          setTimeout(() => x(587, 220), 260),
-          setTimeout(() => x(659, 240), 520),
-          setTimeout(() => x(784, 260), 780),
-          setTimeout(() => x(880, 280), 1060),
-          setTimeout(() => x(1047, 320), 1360),
-          setTimeout(() => x(1175, 360), 1700),
-          setTimeout(() => x(1319, 480), 2080));
-      },
-      pause: () => x(300, 150),
-      secondTick: () => x(880, 50, 0.085, 'sine'),
-      resume: () => x(400, 150),
-      gameOver: () => {
-        (x(330, 200),
-          setTimeout(() => x(294, 300), 210),
-          setTimeout(() => x(262, 500), 520));
-      },
-      bgmToggle: () => x(440, 100),
+    // 暂停游戏音效
+    pause: () => play_tone_default(300, 150),
+    // 秒针走动音效
+    secondTick: () => play_tone_default(880, 50, 0.085, "sine"),
+    // 恢复游戏音效
+    resume: () => play_tone_default(400, 150),
+    // 游戏结束音效（悲伤旋律）
+    gameOver: () => {
+      play_tone_default(330, 200);
+      setTimeout(() => play_tone_default(294, 300), 210);
+      setTimeout(() => play_tone_default(262, 500), 520);
     },
-    f = T3;
-  var O1 = document.querySelector('#game-board'),
-    b3 = O1.getContext('2d'),
-    T1 = document.querySelector('#next-piece'),
-    R3 = T1.getContext('2d'),
-    k3 = 0,
-    G3 = 0,
-    I3 = {
-      gameBoard: O1,
-      gameBoardContext: b3,
-      nextPiece: T1,
-      nextPieceContext: R3,
-      fontSize: k3,
-      blockSize: G3,
-    },
-    l = I3;
-  function _3() {
-    let { gameBoard: t, gameBoardContext: e } = l,
-      { width: r, height: o } = t;
-    e.clearRect(0, 0, r, o);
+    // 背景音乐开关音效
+    bgmToggle: () => play_tone_default(440, 100)
+  };
+  var sounds_default = Sounds;
+
+  // lib/ui/core/canvas.js
+  var gameBoard = document.querySelector("#game-board");
+  var gameBoardContext = gameBoard.getContext("2d");
+  var nextPiece = document.querySelector("#next-piece");
+  var nextPieceContext = nextPiece.getContext("2d");
+  var fontSize = 0;
+  var blockSize = 0;
+  var Canvas = {
+    gameBoard,
+    gameBoardContext,
+    nextPiece,
+    nextPieceContext,
+    fontSize,
+    blockSize
+  };
+  var canvas_default = Canvas;
+
+  // lib/ui/board/clear-board.js
+  function clearBoard() {
+    const { gameBoard: gameBoard2, gameBoardContext: gameBoardContext2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    gameBoardContext2.clearRect(0, 0, width, height);
   }
-  var B = _3;
-  var P3 = [0, 100, 300, 500, 800, 1200],
-    N3 = '"Press Start 2P", monospace, sans-serif',
-    $3 = 99,
-    F3 = { CLEAR_SCORES: P3, MAX_LEVEL: $3, FONT_FAMILY: N3 },
-    j = F3;
-  var D3 = (t) => {
-      let {
-          text: e,
-          x: r,
-          y: o,
-          color: h,
-          strokeColor: c,
-          size: a = 1,
-          center: s = !0,
-          baseline: i = '',
-          stroke: g = !1,
-          lineWidth: m = 2,
-        } = t,
-        { FONT_FAMILY: p } = j,
-        { gameBoardContext: d, fontSize: y } = l;
-      (d.save(),
-        s && (d.textAlign = 'center'),
-        i && (d.textBaseline = i),
-        (d.font = `${y * a}px ${p}`),
-        g &&
-          ((d.strokeStyle = c || h), (d.lineWidth = m), d.strokeText(e, r, o)),
-        (d.fillStyle = h),
-        d.fillText(e, r, o),
-        d.restore());
-    },
-    w = D3;
-  var W3 = () => {
-      let { GREEN: t } = v,
-        { gameBoard: e } = l,
-        { width: r, height: o } = e;
-      w({ text: 'TETRIS.JS', x: r / 2, y: o * 0.1, color: t, size: 1.1 });
-    },
-    O = W3;
-  var U3 = (t) => {
-      let { RGBA_BLACK: e } = v,
-        { gameBoard: r, gameBoardContext: o } = l,
-        { width: h, height: c } = r;
-      (o.save(), (o.fillStyle = t || e), o.fillRect(0, 0, h, c), o.restore());
-    },
-    T = U3;
-  var q3 = (t, e = 1) => {
-      let { YELLOW: r, BLACK: o } = v,
-        { FONT_FAMILY: h } = j,
-        { gameBoard: c, gameBoardContext: a, fontSize: s } = l,
-        { width: i, height: g } = c;
-      (a.save(),
-        (a.textAlign = 'center'),
-        (a.textBaseline = 'middle'),
-        a.translate(i / 2, g / 2),
-        a.scale(e, e),
-        (a.font = `${s * 3.25}px ${h}`),
-        (a.fillStyle = r),
-        (a.strokeStyle = o),
-        (a.lineWidth = 6));
-      let m = String(t);
-      (a.strokeText(m, 0, 0), a.fillText(m, 0, 0), a.restore());
-    },
-    b1 = q3;
-  var Y3 = () => {
-      let { GREEN: t, BLACK: e } = v,
-        { gameBoard: r } = l,
-        { width: o, height: h } = r;
-      w({
-        text: 'GET READY!',
-        x: o / 2,
-        y: h / 1.46,
-        color: t,
-        stroke: !0,
-        strokeColor: e,
-        size: 1.1,
-        center: !0,
-        baseline: 'top',
-      });
-    },
-    R1 = Y3;
-  var t1 = new Map(),
-    V = (t) => {
-      if (t1.has(t)) return t1.get(t);
-      let e = new Image(),
-        r = new Blob([t], { type: 'image/svg+xml' });
-      return ((e.src = URL.createObjectURL(r)), t1.set(t, e), e);
-    },
-    K3 = () => {
-      for (let { url: t } of t1.values()) URL.revokeObjectURL(t);
-      t1.clear();
-    },
-    k1 = (t) => {
-      let e = Object.values(t);
-      K3();
-      for (let r of e) V(r);
-    };
-  var j3 = (t, e, r, o, h) => {
-      e.complete && (t.save(), t.drawImage(e, r, o, h, h), t.restore());
-    },
-    _ = j3;
-  var Z3 = () => {
-      let { gameBoard: t, gameBoardContext: e } = l,
-        { width: r, height: o } = t,
-        h = V(G.game),
-        c = Math.floor(r * 0.54),
-        a = r / 2 - c / 2,
-        s = o / 2 - c * 1.2;
-      _(e, h, a, s, c);
-    },
-    G1 = Z3;
+  var clear_board_default = clearBoard;
+
+  // lib/game/constants/game.js
+  var CLEAR_SCORES = [0, 100, 300, 500, 800, 1200];
+  var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
+  var MAX_LEVEL = 99;
+  var GAME = {
+    CLEAR_SCORES,
+    MAX_LEVEL,
+    FONT_FAMILY
+  };
+  var game_default = GAME;
+
+  // lib/ui/text/render-text.js
+  var renderText = (options) => {
+    const {
+      text,
+      x,
+      y,
+      color,
+      strokeColor,
+      size = 1,
+      center = true,
+      baseline = "",
+      stroke = false,
+      lineWidth = 2
+    } = options;
+    const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
+    const { gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
+    ctx.save();
+    if (center) {
+      ctx.textAlign = "center";
+    }
+    if (baseline) {
+      ctx.textBaseline = baseline;
+    }
+    ctx.font = `${fontSize2 * size}px ${FONT_FAMILY2}`;
+    if (stroke) {
+      ctx.strokeStyle = strokeColor || color;
+      ctx.lineWidth = lineWidth;
+      ctx.strokeText(text, x, y);
+    }
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  };
+  var render_text_default = renderText;
+
+  // lib/ui/text/render-tetris-text.js
+  var renderTetrisText = () => {
+    const { GREEN: GREEN4 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "TETRIS.JS",
+      x: width / 2,
+      y: height * 0.1,
+      color: GREEN4,
+      size: 1.1
+    });
+  };
+  var render_tetris_text_default = renderTetrisText;
+
+  // lib/ui/overlay/render-overlay.js
+  var renderOverlay = (color) => {
+    const { RGBA_BLACK: RGBA_BLACK3 } = colors_default;
+    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
+    const { width, height } = gameBoard2;
+    ctx.save();
+    ctx.fillStyle = color || RGBA_BLACK3;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  };
+  var render_overlay_default = renderOverlay;
+
+  // lib/ui/text/render-countdown-text.js
+  var renderCountdownText = (count, scale = 1) => {
+    const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
+    const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
+    const { gameBoard: gameBoard2, gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.translate(width / 2, height / 2);
+    ctx.scale(scale, scale);
+    ctx.font = `${fontSize2 * 3.25}px ${FONT_FAMILY2}`;
+    ctx.fillStyle = YELLOW4;
+    ctx.strokeStyle = BLACK2;
+    ctx.lineWidth = 6;
+    const text = String(count);
+    ctx.strokeText(text, 0, 0);
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+  };
+  var render_countdown_text_default = renderCountdownText;
+
+  // lib/ui/text/render-get-ready-text.js
+  var renderGetReadyText = () => {
+    const { GREEN: GREEN4, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "GET READY!",
+      x: width / 2,
+      y: height / 1.46,
+      color: GREEN4,
+      stroke: true,
+      strokeColor: BLACK2,
+      // 固定字号
+      size: 1.1,
+      center: true,
+      // 对齐方式与你原逻辑一致
+      baseline: "top"
+    });
+  };
+  var render_get_ready_text_default = renderGetReadyText;
+
+  // lib/ui/image/image-manager.js
+  var ImagesCache = /* @__PURE__ */ new Map();
+  var getImage = (svg) => {
+    if (ImagesCache.has(svg)) {
+      return ImagesCache.get(svg);
+    }
+    const img = new Image();
+    const blob = new Blob([svg], { type: "image/svg+xml" });
+    img.src = URL.createObjectURL(blob);
+    ImagesCache.set(svg, img);
+    return img;
+  };
+  var clearImagesCache = () => {
+    for (const { url } of ImagesCache.values()) {
+      URL.revokeObjectURL(url);
+    }
+    ImagesCache.clear();
+  };
+  var preloadImages = (images) => {
+    const svgs = Object.values(images);
+    clearImagesCache();
+    for (const svg of svgs) {
+      getImage(svg);
+    }
+  };
+
+  // lib/ui/image/render-image.js
+  var renderImage = (ctx, img, x, y, size) => {
+    if (!img.complete) {
+      return;
+    }
+    ctx.save();
+    ctx.drawImage(img, x, y, size, size);
+    ctx.restore();
+  };
+  var render_image_default = renderImage;
+
+  // lib/ui/image/render-game-image.js
+  var renderGameImage = () => {
+    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
+    const { width, height } = gameBoard2;
+    const img = getImage(scenes_background_default.game);
+    const size = Math.floor(width * 0.54);
+    const x = width / 2 - size / 2;
+    const y = height / 2 - size * 1.2;
+    render_image_default(ctx, img, x, y, size);
+  };
+  var render_game_image_default = renderGameImage;
+
+  // lib/ui/constants/images/famous-buildings.js
   var {
-      RGBA_TEAL: Q3,
-      RGBA_YELLOW: I1,
-      RGBA_RED: e1,
-      RGBA_ORANGE: c1,
-      RGBA_GREEN: y1,
-      RGBA_BLACK: X3,
-      RGBA_WHITE: D,
-    } = v,
-    J3 = {
-      Tower: `<svg fill="${D}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M341.512,495.967h-11.975l-33.221-71.978c6.644-8.584,10.613-19.341,10.613-31.012c0-18.862-10.346-35.341-25.653-44.095
+    RGBA_TEAL: RGBA_TEAL2,
+    RGBA_YELLOW: RGBA_YELLOW2,
+    RGBA_RED: RGBA_RED2,
+    RGBA_ORANGE: RGBA_ORANGE3,
+    RGBA_GREEN: RGBA_GREEN2,
+    RGBA_BLACK: RGBA_BLACK2,
+    RGBA_WHITE: RGBA_WHITE2
+  } = colors_default;
+  var FamousBuildings = {
+    Tower: `<svg fill="${RGBA_WHITE2}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M341.512,495.967h-11.975l-33.221-71.978c6.644-8.584,10.613-19.341,10.613-31.012c0-18.862-10.346-35.341-25.653-44.095
 			v-134.14c15.308-8.754,25.653-25.234,25.653-44.095c0-25.268-18.556-46.278-42.756-50.133v-11.736
 			c9.93-3.354,17.102-12.752,17.102-23.8s-7.172-20.446-17.102-23.8V8.017c0-4.427-3.589-8.017-8.017-8.017
 			c-4.427,0-8.017,3.589-8.017,8.017v53.16c-9.93,3.354-17.102,12.752-17.102,23.8s7.172,20.446,17.102,23.8v11.736
@@ -367,7 +577,7 @@ var tetris = (() => {
 			h-18.171v-18.844c2.95,0.536,5.984,0.831,9.086,0.831c3.102,0,6.135-0.295,9.086-0.831V461.762z M256.158,427.716
 			c-16.524,0-30.381-11.601-33.879-27.084h67.757C286.539,416.115,272.682,427.716,256.158,427.716z M281.277,495.967v-58.895
 			c0.906-0.518,1.797-1.061,2.667-1.633l27.936,60.528H281.277z"/></g></g></svg>`,
-      Temple: `<svg fill="${c1}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="495.837" width="512" height="15.642"/></g></g><g><g><rect x="49.01" y="471.853" width="413.98" height="15.642"/></g></g><g><g><polygon points="159.544,359.234 159.544,439.527 175.185,439.527 175.185,374.876 336.815,374.876 336.815,439.527
+    Temple: `<svg fill="${RGBA_ORANGE3}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="495.837" width="512" height="15.642"/></g></g><g><g><rect x="49.01" y="471.853" width="413.98" height="15.642"/></g></g><g><g><polygon points="159.544,359.234 159.544,439.527 175.185,439.527 175.185,374.876 336.815,374.876 336.815,439.527
 			352.456,439.527 352.456,359.234 		"/></g></g><g><g><rect x="159.544" y="336.293" width="192.912" height="15.642"/></g></g><g><g><rect x="208.554" y="311.267" width="94.892" height="15.642"/></g></g><g><g><rect x="224.196" y="407.202" width="15.642" height="15.642"/></g></g><g><g><rect x="272.163" y="407.202" width="15.642" height="15.642"/></g></g><g><g><polygon points="208.554,96.456 208.554,136.081 224.196,136.081 224.196,112.098 287.805,112.098 287.805,136.081
 			303.446,136.081 303.446,96.456 		"/></g></g><g><g><path d="M368.098,32.847v15.642h14.391c-3.395,9.011-12.413,15.642-22.685,15.642h-24.032v-0.014
 			c-13.556,0-23.984-10.82-23.984-24.119V0.521H200.212v39.476c0,13.299-10.428,24.119-23.984,24.119v0.014h-24.035
@@ -390,7 +600,7 @@ var tetris = (() => {
 			H262.778v-63.609h-15.642v63.609H136.603V302.925h-15.642v96.978h-16.684V295.625h303.446V399.902z"/></g></g><g><g><path d="M471.332,311.653v-8.728H455.69v8.728h-15.873v79.522h15.873v16.027h15.642v-16.027h16.067v-79.522H471.332z
 			 M471.757,375.533h-16.298v-48.239h16.298V375.533z"/></g></g><g><g><path d="M56.31,311.653v-8.728H40.668v8.728H24.597v79.522h16.071v16.027H56.31v-16.027h15.869v-79.522H56.31z M56.537,375.533
 			H40.238v-48.239h16.299V375.533z"/></g></g></svg>`,
-      Forbidden: `<svg fill="${e1}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M509.785,263.294c-2.588-2.715-6.712-3.272-9.927-1.341c-15.193,9.118-32.312,9.407-50.876,0.864
+    Forbidden: `<svg fill="${RGBA_RED2}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M509.785,263.294c-2.588-2.715-6.712-3.272-9.927-1.341c-15.193,9.118-32.312,9.407-50.876,0.864
 			c-10.547-4.854-18.698-11.327-22.494-14.626v-24.586c29.522-4.606,46.838-15.917,47.737-16.516
 			c2.818-1.878,4.151-5.323,3.332-8.608c-0.819-3.286-3.612-5.701-6.981-6.039c-0.801-0.08-79.651-8.571-103.946-62.151v-15.386
 			c0-4.427-3.589-8.017-8.017-8.017s-8.017,3.589-8.017,8.017v9.086H161.403v-9.086c0-4.427-3.589-8.017-8.017-8.017
@@ -423,7 +633,7 @@ var tetris = (() => {
 			c8.328-0.943,16.852-3.42,25.455-7.434c12.633-5.896,22.157-13.597,26.471-17.419h134.213v0.534c0,4.427,3.589,8.017,8.017,8.017
 			h34.205c4.427,0,8.017-3.589,8.017-8.017v-0.535h134.213c4.314,3.821,13.838,11.524,26.471,17.419
 			c8.591,4.008,17.102,6.485,25.417,7.432C462.847,285.755,458,286.464,452.675,286.464z"/></g></g></svg>`,
-      Heaven: `<svg fill="${I1}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M503.983,453.211h-9.086v-26.188c0-4.427-3.589-8.017-8.017-8.017h-77.495v-35.273h26.188
+    Heaven: `<svg fill="${RGBA_YELLOW2}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M503.983,453.211h-9.086v-26.188c0-4.427-3.589-8.017-8.017-8.017h-77.495v-35.273h26.188
 			c3.635,0,6.815-2.446,7.748-5.959c0.933-3.513-0.615-7.215-3.77-9.018l-55.82-31.896v-26.232l31.856-31.856
 			c2.293-2.293,2.979-5.741,1.738-8.736c-0.803-1.938-2.314-3.428-4.156-4.247l0.005-0.011l-72.2-32.09v-25.675l31.856-31.856
 			c2.293-2.293,2.979-5.741,1.738-8.736c-0.98-2.368-3.017-4.065-5.427-4.681l0.004-0.018
@@ -445,12 +655,12 @@ var tetris = (() => {
 			h-18.171v-26.188c0-4.427-3.589-8.017-8.017-8.017h-34.739v-9.086c0-4.427-3.589-8.017-8.017-8.017s-8.017,3.589-8.017,8.017
 			v9.086h-52.376v-35.273h274.706v35.273h-52.376v-9.086c0-4.427-3.589-8.017-8.017-8.017s-8.017,3.589-8.017,8.017v9.086h-34.739
 			C285.777,419.006,282.188,422.596,282.188,427.023z M478.864,453.211H298.221V435.04h180.643V453.211z"/></g></g></svg>`,
-      Gate: `<svg fill="none" stroke="${c1}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><title>gate</title><g id="gate"><path d="M5,62H5a4,4,0,0,1,4-4H56a4,4,0,0,1,4,4h0"/><line x1="6.919" y1="37.586" x2="3.223" y2="41.281"/><line x1="3.223" y1="37.586" x2="6.919" y2="41.281"/><line x1="37" y1="16.32" x2="37" y2="24.343"/><line x1="27" y1="24.411" x2="27" y2="16.32"/><path d="M14.215,15.7a3.03,3.03,0,0,0-.046.524c0,2.006,1.989,3.631,4.443,3.631s4.442-1.625,4.442-3.631"/><polyline points="22.976 57.588 22.415 48 14.585 48 14.025 57.581"/><path d="M49.785,15.706a3.007,3.007,0,0,1,.046.522c0,2.006-1.989,3.631-4.443,3.631s-4.442-1.625-4.442-3.631"/><path d="M54.532,11.427v.345a3.463,3.463,0,0,1-3.143,3.52,272.159,272.159,0,0,1-38.773.034,3.474,3.474,0,0,1-3.148-3.52v-.333"/><path d="M9.468,23.576s24.32,2.993,45.064,0v1.2a3.463,3.463,0,0,1-3.143,3.52,272.159,272.159,0,0,1-38.773.034,3.474,3.474,0,0,1-3.148-3.52Z"/><path d="M4,5.5s30.222,3.489,56,0V6.89a4.143,4.143,0,0,1-3.905,4.1,360.57,360.57,0,0,1-48.184.039A4.155,4.155,0,0,1,4,6.929Z"/><polyline points="41.024 57.59 41.585 48 49.415 48 49.976 57.59"/><line x1="32.044" y1="19" x2="32.044" y2="20.647" style="fill:#ffce56;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px"/><circle cx="28" cy="34" r="1"/><circle cx="28" cy="38" r="1"/><circle cx="28" cy="42" r="1"/><circle cx="28" cy="46" r="1"/><circle cx="36" cy="34" r="1"/><circle cx="36" cy="38" r="1"/><circle cx="36" cy="42" r="1"/><circle cx="36" cy="46" r="1"/><line x1="46" y1="53" x2="46" y2="58"/><line x1="18" y1="53" x2="18" y2="58"/><line x1="16" y1="48" x2="16" y2="29"/><line x1="21" y1="48" x2="21" y2="29"/><line x1="16" y1="24" x2="16" y2="19"/><line x1="21" y1="24" x2="21" y2="19"/><line x1="43" y1="48" x2="43" y2="29"/><line x1="48" y1="48" x2="48" y2="29"/><line x1="43" y1="24" x2="43" y2="19"/><line x1="48" y1="24" x2="48" y2="19"/></g></svg>`,
-      Pavilion: `<svg fill="none" stroke="${y1}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g id="china"><path d="M40,54.7V51.5a8.5,8.5,0,0,0-17,0v3.078"/><path d="M26,54.7V52.5a5.5,5.5,0,0,1,11,0v1.957"/><line x1="17" y1="33.699" x2="17" y2="25.237"/><line x1="20" y1="25.663" x2="20" y2="33.699"/><line x1="43" y1="33.699" x2="43" y2="26"/><line x1="46" y1="24.933" x2="46" y2="33.699"/><rect x="34" y="55" width="20" height="4"/><rect x="9" y="55" width="20" height="4"/><line x1="6" y1="59" x2="57" y2="59"/><polyline points="51 42.221 51 55 48 55 48 43"/><polyline points="15 43 15 55 12 55 12 42.221"/><polyline points="43 40 43 55 40 55 40 40"/><polyline points="23 40 23 55 20 55 20 39.664"/><polygon points="49 24 40 26 40 22 49 22 49 24"/><polyline points="55 37.485 55 41 46 43 46 39.428"/><polyline points="8 37 8 41 17 43 17 39"/><polygon points="14 24 23 26 23 22 14 22 14 24"/><polyline points="37 33.699 37 22 40 22 40 33.699"/><polyline points="23 33.699 23 22 26 22 26 33.455"/><path d="M20.119,21.983s-6.85.423-10.044-2.979C19.425,20.569,32,12,32,12s13.575,8.569,22.925,7c-3.194,3.4-10.044,2.979-10.044,2.979Z"/><line x1="32" y1="12" x2="32" y2="9"/><rect x="43" y="49" width="5" height="5"/><rect x="15" y="50" width="5" height="5"/><line x1="34" y1="53" x2="34" y2="58"/><path d="M2.218,35.636s30.347,9.819,59.1,0L45.342,34H18.19Z"/><line x1="29" y1="53" x2="29" y2="58"/></g></svg>`,
-      Tiger: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M916.210526 619.789474c0 98.842947-82.539789 134.736842-137.997473 134.736842-59.095579 0-99.597474-14.012632-138.805895-27.540211C601.950316 714.024421 563.2 700.631579 512 700.631579s-89.950316 13.392842-127.407158 26.354526C345.384421 740.513684 304.882526 754.526316 245.786947 754.526316 190.329263 754.526316 107.789474 718.632421 107.789474 619.789474v-80.842106H53.894737v80.842106c0 97.926737 63.191579 159.690105 136.003368 180.574315C202.832842 925.291789 342.204632 1024 512 1024c169.822316 0 309.167158-98.708211 322.101895-223.636211C906.913684 779.479579 970.105263 717.716211 970.105263 619.789474v-80.842106h-53.894737v80.842106zM512 970.105263c-135.491368 0-247.619368-70.440421-266.401684-161.68421h0.161684c68.149895 0 115.038316-16.222316 156.429474-30.504421C438.487579 765.359158 469.854316 754.526316 512 754.526316s73.512421 10.832842 109.783579 23.390316C663.174737 792.198737 710.063158 808.421053 778.213053 808.421053h0.188631c-18.782316 91.243789-130.937263 161.684211-266.401684 161.68421zM997.052632 161.684211c-39.828211 0-71.033263 8.919579-93.884632 19.078736-6.063158-13.231158-13.716211-25.438316-23.902316-35.651368C854.932211 120.697263 821.113263 107.789474 781.473684 107.789474c-41.040842 0-84.506947 23.740632-123.742316 54.514526a689.798737 689.798737 0 0 0-71.033263-46.780632c-27.109053-57.478737-53.544421-87.093895-54.703158-88.387368L512 5.012211l-19.994947 22.150736c-1.158737 1.293474-27.594105 30.908632-54.703158 88.387369a688.882526 688.882526 0 0 0-71.006316 46.780631C327.033263 131.530105 283.567158 107.789474 242.526316 107.789474c-39.639579 0-73.458526 12.907789-97.792 37.322105a120.373895 120.373895 0 0 0-23.902316 35.651368C97.953684 170.603789 66.775579 161.684211 26.947368 161.684211H0v215.578947c0 71.760842 69.093053 107.789474 107.789474 107.789474h1.670737c1.347368-18.324211 3.745684-36.325053 7.518315-53.894737H107.789474c-12.988632 0-53.894737-16.222316-53.894737-53.894737V217.330526c24.090947 3.233684 42.145684 10.401684 54.568421 17.00379-0.134737 2.829474-0.673684 5.416421-0.673684 8.272842 0.080842 33.253053 14.336 66.991158 39.666526 97.17221 8.677053-18.674526 18.512842-35.866947 28.860632-52.035368-10.078316-16.680421-14.605474-32.525474-14.632421-45.298526-0.053895-24.791579 7.275789-45.298526 21.207578-59.284211C196.904421 169.121684 217.519158 161.684211 242.526316 161.684211c50.499368 0 126.221474 66.155789 185.478737 138.024421a134.656 134.656 0 0 0-35.678316 43.897263c-23.632842-28.968421-56.832-64.997053-91.432421-87.363369l-17.677474-11.452631-15.386947 14.443789C216.710737 307.253895 161.684211 406.851368 161.684211 512c0 84.372211 44.328421 134.736842 118.568421 134.736842 40.259368 0 75.075368-11.371789 100.001684-22.797474 3.152842 17.650526 7.68 30.881684 7.949473 31.717053l50.876632-17.785263C439.026526 637.628632 431.157895 614.669474 431.157895 592.842105c0-13.338947 0-53.894737 80.842105-53.894737s80.842105 40.555789 80.842105 53.894737c0 21.827368-7.868632 44.786526-7.949473 45.029053l25.438315 8.865684 25.411369 8.919579c0.296421-0.835368 4.823579-14.039579 7.976421-31.717053 24.953263 11.425684 59.769263 22.797474 100.028631 22.797474 74.24 0 118.568421-50.364632 118.568421-134.736842 0-105.148632-55.026526-204.746105-106.145684-252.766316l-15.36-14.443789-17.704421 11.452631c-34.600421 22.366316-67.799579 58.394947-91.432421 87.336421a134.467368 134.467368 0 0 0-35.651368-43.870315C655.225263 227.84 731.001263 161.684211 781.473684 161.684211c25.007158 0 45.594947 7.437474 59.634527 21.477052 13.958737 13.985684 21.261474 34.465684 21.207578 59.284211-0.053895 12.773053-4.581053 28.618105-14.632421 45.325473 10.347789 16.168421 20.183579 33.333895 28.860632 52.035369 25.303579-30.181053 39.558737-63.919158 39.666526-97.172211 0-2.856421-0.565895-5.443368-0.673684-8.245894A160.525474 160.525474 0 0 1 970.105263 217.330526V377.263158c0 37.672421-40.933053 53.894737-53.894737 53.894737h-9.189052c3.799579 17.569684 6.170947 35.570526 7.518315 53.894737H916.210526c38.696421 0 107.789474-36.028632 107.789474-107.789474V161.684211h-26.947368z m-404.210527 242.526315c0 44.570947-36.271158 80.842105-80.842105 80.842106s-80.842105-36.271158-80.842105-80.842106 36.271158-80.842105 80.842105-80.842105 80.842105 36.271158 80.842105 80.842105z m80.842106 26.947369c14.848 0 26.947368 12.099368 26.947368 26.947368s-12.099368 26.947368-26.947368 26.947369a26.974316 26.974316 0 0 1 0-53.894737z m-296.421053 26.947368c0 14.848-12.099368 26.947368-26.947369 26.947369s-26.947368-12.099368-26.947368-26.947369 12.099368-26.947368 26.947368-26.947368 26.947368 12.099368 26.947369 26.947368z m4.50021 103.909053C367.696842 571.095579 329.054316 592.842105 280.252632 592.842105 264.245895 592.842105 215.578947 592.842105 215.578947 512c0-75.371789 35.139368-151.956211 73.916632-197.416421 22.554947 18.351158 44.032 42.280421 60.658526 62.679579A80.949895 80.949895 0 0 0 269.473684 458.105263c0 44.570947 36.271158 80.842105 80.842105 80.842105a80.680421 80.680421 0 0 0 68.284632-37.995789c1.940211 1.859368 4.176842 3.395368 6.224842 5.146947-21.665684 13.096421-36.378947 31.986526-43.061895 55.91579z m352.741053-247.430737C773.281684 360.043789 808.421053 436.628211 808.421053 512c0 80.842105-48.693895 80.842105-64.673685 80.842105-48.801684 0-87.417263-21.719579-101.537684-30.800842-6.629053-23.983158-21.369263-42.873263-43.061895-55.942737 2.048-1.751579 4.284632-3.287579 6.224843-5.146947A80.707368 80.707368 0 0 0 673.684211 538.947368c44.570947 0 80.842105-36.271158 80.842105-80.842105a80.949895 80.949895 0 0 0-80.680421-80.842105c16.626526-20.399158 38.076632-44.328421 60.658526-62.679579z m-187.607579-39.962947C535.686737 271.602526 524.153263 269.473684 512 269.473684s-23.686737 2.128842-34.896842 5.146948a816.047158 816.047158 0 0 0-69.146947-76.072421 636.389053 636.389053 0 0 1 63.218526-40.259369l7.841684-4.338526 3.69179-8.138105c10.347789-23.013053 20.749474-41.283368 29.291789-54.730106 8.542316 13.473684 18.944 31.717053 29.345684 54.757053l3.69179 8.138105 7.814737 4.338526c25.6 14.174316 47.616 28.995368 63.218526 40.259369a813.217684 813.217684 0 0 0-69.173895 76.045474z" fill="${c1}"/></svg>`,
-      Spring: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M754.526316 916.210526h-53.894737v-53.894737H323.368421v53.894737h-53.894737V530.809263a371.280842 371.280842 0 0 1-157.857684 61.763369l-7.626105-53.35579c86.231579-12.314947 176.074105-66.236632 239.723789-161.953684H107.789474v-53.894737h266.698105c8.272842-16.976842 15.764211-34.950737 22.447158-53.894737H215.578947V215.578947h197.254737c4.203789-17.273263 7.733895-35.247158 10.536421-53.894736H161.684211V107.789474h267.614315c1.212632-17.434947 1.859368-35.408842 1.859369-53.894737h53.894737c0 18.243368-0.619789 36.217263-1.859369 53.894737H862.315789v53.894737H477.480421a690.661053 690.661053 0 0 1-9.916632 53.894736H808.421053v53.894737H452.985263a608.202105 608.202105 0 0 1-19.941052 53.894737H916.210526v53.894737h-242.202947c54.164211 90.327579 128.862316 138.482526 247.511579 162.223158l-10.590316 52.843789c-61.170526-12.234105-112.64-30.827789-156.402526-57.263158V916.210526z m-431.157895-107.789473h377.263158v-107.789474H323.368421v107.789474z m0-161.684211h377.263158v-107.789474H323.368421v107.789474z m1.616842-161.68421h365.002105c-30.073263-29.561263-55.592421-65.185684-77.689263-107.789474h-205.71621a476.510316 476.510316 0 0 1-81.596632 107.789474z" fill="${e1}"/></svg>`,
-      Vietnam: `<svg fill="none" stroke="${Q3}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><title>vietnam</title><g id="vietnam"><polygon points="38.679 13 23.607 13 21.714 10.073 31 5 40.571 10.073 38.679 13"/><line x1="15" y1="62" x2="48" y2="62"/><line x1="24.671" y1="16.581" x2="25.143" y2="13"/><line x1="23.748" y1="23.573" x2="24.18" y2="20.302"/><line x1="22.571" y1="32.494" x2="23.253" y2="27.323"/><line x1="21.223" y1="42.715" x2="22.036" y2="36.551"/><line x1="20.042" y1="51.669" x2="20.74" y2="46.38"/><line x1="18.679" y1="62" x2="19.426" y2="56.341"/><line x1="42.898" y1="56.626" x2="43.607" y2="62"/><line x1="41.548" y1="46.396" x2="42.244" y2="51.669"/><line x1="40.215" y1="36.286" x2="41.063" y2="42.715"/><line x1="39.032" y1="27.323" x2="39.714" y2="32.494"/><line x1="38.106" y1="20.302" x2="38.538" y2="23.573"/><line x1="37.143" y1="13" x2="37.639" y2="16.758"/><polygon points="43.619 56 18.667 56 16.571 52 45.714 52 43.619 56"/><polygon points="42.22 46.063 20.066 46.063 18.205 43 44.081 43 42.22 46.063"/><polygon points="41.417 36 20.869 36 19.143 33 43.143 33 41.417 36"/><polygon points="39.949 27 22.336 27 20.857 24 41.429 24 39.949 27"/><polygon points="38.482 20 23.804 20 22.571 17 39.714 17 38.482 20"/><line x1="38" y1="62" x2="33" y2="10"/><line x1="24" y1="62" x2="29" y2="10"/><line x1="31" y1="24" x2="31" y2="22"/><line x1="31" y1="32" x2="31" y2="30"/><path d="M31.04,39h0a2.04,2.04,0,0,1,2.04,2.04V43a0,0,0,0,1,0,0H29a0,0,0,0,1,0,0V41.04A2.04,2.04,0,0,1,31.04,39Z"/><path d="M31.04,48h0a2.04,2.04,0,0,1,2.04,2.04V52a0,0,0,0,1,0,0H29a0,0,0,0,1,0,0V50.04A2.04,2.04,0,0,1,31.04,48Z"/><path d="M31,57h0a3,3,0,0,1,3,3v2a0,0,0,0,1,0,0H28a0,0,0,0,1,0,0V60A3,3,0,0,1,31,57Z"/><line x1="23" y1="10" x2="40" y2="10"/><line x1="31" y1="5" x2="31" y2="2"/></g></svg>`,
-      America: `<svg fill="${y1}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.003 512.003" xml:space="preserve"><g><g><rect x="2.862" y="496.505" width="506.279" height="15.498"/></g></g><g><g><polygon points="26.626,440.708 26.626,488.236 42.124,488.236 42.124,456.206 177.477,456.206 177.477,472.738 192.975,472.738
+    Gate: `<svg fill="none" stroke="${RGBA_ORANGE3}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><title>gate</title><g id="gate"><path d="M5,62H5a4,4,0,0,1,4-4H56a4,4,0,0,1,4,4h0"/><line x1="6.919" y1="37.586" x2="3.223" y2="41.281"/><line x1="3.223" y1="37.586" x2="6.919" y2="41.281"/><line x1="37" y1="16.32" x2="37" y2="24.343"/><line x1="27" y1="24.411" x2="27" y2="16.32"/><path d="M14.215,15.7a3.03,3.03,0,0,0-.046.524c0,2.006,1.989,3.631,4.443,3.631s4.442-1.625,4.442-3.631"/><polyline points="22.976 57.588 22.415 48 14.585 48 14.025 57.581"/><path d="M49.785,15.706a3.007,3.007,0,0,1,.046.522c0,2.006-1.989,3.631-4.443,3.631s-4.442-1.625-4.442-3.631"/><path d="M54.532,11.427v.345a3.463,3.463,0,0,1-3.143,3.52,272.159,272.159,0,0,1-38.773.034,3.474,3.474,0,0,1-3.148-3.52v-.333"/><path d="M9.468,23.576s24.32,2.993,45.064,0v1.2a3.463,3.463,0,0,1-3.143,3.52,272.159,272.159,0,0,1-38.773.034,3.474,3.474,0,0,1-3.148-3.52Z"/><path d="M4,5.5s30.222,3.489,56,0V6.89a4.143,4.143,0,0,1-3.905,4.1,360.57,360.57,0,0,1-48.184.039A4.155,4.155,0,0,1,4,6.929Z"/><polyline points="41.024 57.59 41.585 48 49.415 48 49.976 57.59"/><line x1="32.044" y1="19" x2="32.044" y2="20.647" style="fill:#ffce56;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px"/><circle cx="28" cy="34" r="1"/><circle cx="28" cy="38" r="1"/><circle cx="28" cy="42" r="1"/><circle cx="28" cy="46" r="1"/><circle cx="36" cy="34" r="1"/><circle cx="36" cy="38" r="1"/><circle cx="36" cy="42" r="1"/><circle cx="36" cy="46" r="1"/><line x1="46" y1="53" x2="46" y2="58"/><line x1="18" y1="53" x2="18" y2="58"/><line x1="16" y1="48" x2="16" y2="29"/><line x1="21" y1="48" x2="21" y2="29"/><line x1="16" y1="24" x2="16" y2="19"/><line x1="21" y1="24" x2="21" y2="19"/><line x1="43" y1="48" x2="43" y2="29"/><line x1="48" y1="48" x2="48" y2="29"/><line x1="43" y1="24" x2="43" y2="19"/><line x1="48" y1="24" x2="48" y2="19"/></g></svg>`,
+    Pavilion: `<svg fill="none" stroke="${RGBA_GREEN2}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g id="china"><path d="M40,54.7V51.5a8.5,8.5,0,0,0-17,0v3.078"/><path d="M26,54.7V52.5a5.5,5.5,0,0,1,11,0v1.957"/><line x1="17" y1="33.699" x2="17" y2="25.237"/><line x1="20" y1="25.663" x2="20" y2="33.699"/><line x1="43" y1="33.699" x2="43" y2="26"/><line x1="46" y1="24.933" x2="46" y2="33.699"/><rect x="34" y="55" width="20" height="4"/><rect x="9" y="55" width="20" height="4"/><line x1="6" y1="59" x2="57" y2="59"/><polyline points="51 42.221 51 55 48 55 48 43"/><polyline points="15 43 15 55 12 55 12 42.221"/><polyline points="43 40 43 55 40 55 40 40"/><polyline points="23 40 23 55 20 55 20 39.664"/><polygon points="49 24 40 26 40 22 49 22 49 24"/><polyline points="55 37.485 55 41 46 43 46 39.428"/><polyline points="8 37 8 41 17 43 17 39"/><polygon points="14 24 23 26 23 22 14 22 14 24"/><polyline points="37 33.699 37 22 40 22 40 33.699"/><polyline points="23 33.699 23 22 26 22 26 33.455"/><path d="M20.119,21.983s-6.85.423-10.044-2.979C19.425,20.569,32,12,32,12s13.575,8.569,22.925,7c-3.194,3.4-10.044,2.979-10.044,2.979Z"/><line x1="32" y1="12" x2="32" y2="9"/><rect x="43" y="49" width="5" height="5"/><rect x="15" y="50" width="5" height="5"/><line x1="34" y1="53" x2="34" y2="58"/><path d="M2.218,35.636s30.347,9.819,59.1,0L45.342,34H18.19Z"/><line x1="29" y1="53" x2="29" y2="58"/></g></svg>`,
+    Tiger: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M916.210526 619.789474c0 98.842947-82.539789 134.736842-137.997473 134.736842-59.095579 0-99.597474-14.012632-138.805895-27.540211C601.950316 714.024421 563.2 700.631579 512 700.631579s-89.950316 13.392842-127.407158 26.354526C345.384421 740.513684 304.882526 754.526316 245.786947 754.526316 190.329263 754.526316 107.789474 718.632421 107.789474 619.789474v-80.842106H53.894737v80.842106c0 97.926737 63.191579 159.690105 136.003368 180.574315C202.832842 925.291789 342.204632 1024 512 1024c169.822316 0 309.167158-98.708211 322.101895-223.636211C906.913684 779.479579 970.105263 717.716211 970.105263 619.789474v-80.842106h-53.894737v80.842106zM512 970.105263c-135.491368 0-247.619368-70.440421-266.401684-161.68421h0.161684c68.149895 0 115.038316-16.222316 156.429474-30.504421C438.487579 765.359158 469.854316 754.526316 512 754.526316s73.512421 10.832842 109.783579 23.390316C663.174737 792.198737 710.063158 808.421053 778.213053 808.421053h0.188631c-18.782316 91.243789-130.937263 161.684211-266.401684 161.68421zM997.052632 161.684211c-39.828211 0-71.033263 8.919579-93.884632 19.078736-6.063158-13.231158-13.716211-25.438316-23.902316-35.651368C854.932211 120.697263 821.113263 107.789474 781.473684 107.789474c-41.040842 0-84.506947 23.740632-123.742316 54.514526a689.798737 689.798737 0 0 0-71.033263-46.780632c-27.109053-57.478737-53.544421-87.093895-54.703158-88.387368L512 5.012211l-19.994947 22.150736c-1.158737 1.293474-27.594105 30.908632-54.703158 88.387369a688.882526 688.882526 0 0 0-71.006316 46.780631C327.033263 131.530105 283.567158 107.789474 242.526316 107.789474c-39.639579 0-73.458526 12.907789-97.792 37.322105a120.373895 120.373895 0 0 0-23.902316 35.651368C97.953684 170.603789 66.775579 161.684211 26.947368 161.684211H0v215.578947c0 71.760842 69.093053 107.789474 107.789474 107.789474h1.670737c1.347368-18.324211 3.745684-36.325053 7.518315-53.894737H107.789474c-12.988632 0-53.894737-16.222316-53.894737-53.894737V217.330526c24.090947 3.233684 42.145684 10.401684 54.568421 17.00379-0.134737 2.829474-0.673684 5.416421-0.673684 8.272842 0.080842 33.253053 14.336 66.991158 39.666526 97.17221 8.677053-18.674526 18.512842-35.866947 28.860632-52.035368-10.078316-16.680421-14.605474-32.525474-14.632421-45.298526-0.053895-24.791579 7.275789-45.298526 21.207578-59.284211C196.904421 169.121684 217.519158 161.684211 242.526316 161.684211c50.499368 0 126.221474 66.155789 185.478737 138.024421a134.656 134.656 0 0 0-35.678316 43.897263c-23.632842-28.968421-56.832-64.997053-91.432421-87.363369l-17.677474-11.452631-15.386947 14.443789C216.710737 307.253895 161.684211 406.851368 161.684211 512c0 84.372211 44.328421 134.736842 118.568421 134.736842 40.259368 0 75.075368-11.371789 100.001684-22.797474 3.152842 17.650526 7.68 30.881684 7.949473 31.717053l50.876632-17.785263C439.026526 637.628632 431.157895 614.669474 431.157895 592.842105c0-13.338947 0-53.894737 80.842105-53.894737s80.842105 40.555789 80.842105 53.894737c0 21.827368-7.868632 44.786526-7.949473 45.029053l25.438315 8.865684 25.411369 8.919579c0.296421-0.835368 4.823579-14.039579 7.976421-31.717053 24.953263 11.425684 59.769263 22.797474 100.028631 22.797474 74.24 0 118.568421-50.364632 118.568421-134.736842 0-105.148632-55.026526-204.746105-106.145684-252.766316l-15.36-14.443789-17.704421 11.452631c-34.600421 22.366316-67.799579 58.394947-91.432421 87.336421a134.467368 134.467368 0 0 0-35.651368-43.870315C655.225263 227.84 731.001263 161.684211 781.473684 161.684211c25.007158 0 45.594947 7.437474 59.634527 21.477052 13.958737 13.985684 21.261474 34.465684 21.207578 59.284211-0.053895 12.773053-4.581053 28.618105-14.632421 45.325473 10.347789 16.168421 20.183579 33.333895 28.860632 52.035369 25.303579-30.181053 39.558737-63.919158 39.666526-97.172211 0-2.856421-0.565895-5.443368-0.673684-8.245894A160.525474 160.525474 0 0 1 970.105263 217.330526V377.263158c0 37.672421-40.933053 53.894737-53.894737 53.894737h-9.189052c3.799579 17.569684 6.170947 35.570526 7.518315 53.894737H916.210526c38.696421 0 107.789474-36.028632 107.789474-107.789474V161.684211h-26.947368z m-404.210527 242.526315c0 44.570947-36.271158 80.842105-80.842105 80.842106s-80.842105-36.271158-80.842105-80.842106 36.271158-80.842105 80.842105-80.842105 80.842105 36.271158 80.842105 80.842105z m80.842106 26.947369c14.848 0 26.947368 12.099368 26.947368 26.947368s-12.099368 26.947368-26.947368 26.947369a26.974316 26.974316 0 0 1 0-53.894737z m-296.421053 26.947368c0 14.848-12.099368 26.947368-26.947369 26.947369s-26.947368-12.099368-26.947368-26.947369 12.099368-26.947368 26.947368-26.947368 26.947368 12.099368 26.947369 26.947368z m4.50021 103.909053C367.696842 571.095579 329.054316 592.842105 280.252632 592.842105 264.245895 592.842105 215.578947 592.842105 215.578947 512c0-75.371789 35.139368-151.956211 73.916632-197.416421 22.554947 18.351158 44.032 42.280421 60.658526 62.679579A80.949895 80.949895 0 0 0 269.473684 458.105263c0 44.570947 36.271158 80.842105 80.842105 80.842105a80.680421 80.680421 0 0 0 68.284632-37.995789c1.940211 1.859368 4.176842 3.395368 6.224842 5.146947-21.665684 13.096421-36.378947 31.986526-43.061895 55.91579z m352.741053-247.430737C773.281684 360.043789 808.421053 436.628211 808.421053 512c0 80.842105-48.693895 80.842105-64.673685 80.842105-48.801684 0-87.417263-21.719579-101.537684-30.800842-6.629053-23.983158-21.369263-42.873263-43.061895-55.942737 2.048-1.751579 4.284632-3.287579 6.224843-5.146947A80.707368 80.707368 0 0 0 673.684211 538.947368c44.570947 0 80.842105-36.271158 80.842105-80.842105a80.949895 80.949895 0 0 0-80.680421-80.842105c16.626526-20.399158 38.076632-44.328421 60.658526-62.679579z m-187.607579-39.962947C535.686737 271.602526 524.153263 269.473684 512 269.473684s-23.686737 2.128842-34.896842 5.146948a816.047158 816.047158 0 0 0-69.146947-76.072421 636.389053 636.389053 0 0 1 63.218526-40.259369l7.841684-4.338526 3.69179-8.138105c10.347789-23.013053 20.749474-41.283368 29.291789-54.730106 8.542316 13.473684 18.944 31.717053 29.345684 54.757053l3.69179 8.138105 7.814737 4.338526c25.6 14.174316 47.616 28.995368 63.218526 40.259369a813.217684 813.217684 0 0 0-69.173895 76.045474z" fill="${RGBA_ORANGE3}"/></svg>`,
+    Spring: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M754.526316 916.210526h-53.894737v-53.894737H323.368421v53.894737h-53.894737V530.809263a371.280842 371.280842 0 0 1-157.857684 61.763369l-7.626105-53.35579c86.231579-12.314947 176.074105-66.236632 239.723789-161.953684H107.789474v-53.894737h266.698105c8.272842-16.976842 15.764211-34.950737 22.447158-53.894737H215.578947V215.578947h197.254737c4.203789-17.273263 7.733895-35.247158 10.536421-53.894736H161.684211V107.789474h267.614315c1.212632-17.434947 1.859368-35.408842 1.859369-53.894737h53.894737c0 18.243368-0.619789 36.217263-1.859369 53.894737H862.315789v53.894737H477.480421a690.661053 690.661053 0 0 1-9.916632 53.894736H808.421053v53.894737H452.985263a608.202105 608.202105 0 0 1-19.941052 53.894737H916.210526v53.894737h-242.202947c54.164211 90.327579 128.862316 138.482526 247.511579 162.223158l-10.590316 52.843789c-61.170526-12.234105-112.64-30.827789-156.402526-57.263158V916.210526z m-431.157895-107.789473h377.263158v-107.789474H323.368421v107.789474z m0-161.684211h377.263158v-107.789474H323.368421v107.789474z m1.616842-161.68421h365.002105c-30.073263-29.561263-55.592421-65.185684-77.689263-107.789474h-205.71621a476.510316 476.510316 0 0 1-81.596632 107.789474z" fill="${RGBA_RED2}"/></svg>`,
+    Vietnam: `<svg fill="none" stroke="${RGBA_TEAL2}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><title>vietnam</title><g id="vietnam"><polygon points="38.679 13 23.607 13 21.714 10.073 31 5 40.571 10.073 38.679 13"/><line x1="15" y1="62" x2="48" y2="62"/><line x1="24.671" y1="16.581" x2="25.143" y2="13"/><line x1="23.748" y1="23.573" x2="24.18" y2="20.302"/><line x1="22.571" y1="32.494" x2="23.253" y2="27.323"/><line x1="21.223" y1="42.715" x2="22.036" y2="36.551"/><line x1="20.042" y1="51.669" x2="20.74" y2="46.38"/><line x1="18.679" y1="62" x2="19.426" y2="56.341"/><line x1="42.898" y1="56.626" x2="43.607" y2="62"/><line x1="41.548" y1="46.396" x2="42.244" y2="51.669"/><line x1="40.215" y1="36.286" x2="41.063" y2="42.715"/><line x1="39.032" y1="27.323" x2="39.714" y2="32.494"/><line x1="38.106" y1="20.302" x2="38.538" y2="23.573"/><line x1="37.143" y1="13" x2="37.639" y2="16.758"/><polygon points="43.619 56 18.667 56 16.571 52 45.714 52 43.619 56"/><polygon points="42.22 46.063 20.066 46.063 18.205 43 44.081 43 42.22 46.063"/><polygon points="41.417 36 20.869 36 19.143 33 43.143 33 41.417 36"/><polygon points="39.949 27 22.336 27 20.857 24 41.429 24 39.949 27"/><polygon points="38.482 20 23.804 20 22.571 17 39.714 17 38.482 20"/><line x1="38" y1="62" x2="33" y2="10"/><line x1="24" y1="62" x2="29" y2="10"/><line x1="31" y1="24" x2="31" y2="22"/><line x1="31" y1="32" x2="31" y2="30"/><path d="M31.04,39h0a2.04,2.04,0,0,1,2.04,2.04V43a0,0,0,0,1,0,0H29a0,0,0,0,1,0,0V41.04A2.04,2.04,0,0,1,31.04,39Z"/><path d="M31.04,48h0a2.04,2.04,0,0,1,2.04,2.04V52a0,0,0,0,1,0,0H29a0,0,0,0,1,0,0V50.04A2.04,2.04,0,0,1,31.04,48Z"/><path d="M31,57h0a3,3,0,0,1,3,3v2a0,0,0,0,1,0,0H28a0,0,0,0,1,0,0V60A3,3,0,0,1,31,57Z"/><line x1="23" y1="10" x2="40" y2="10"/><line x1="31" y1="5" x2="31" y2="2"/></g></svg>`,
+    America: `<svg fill="${RGBA_GREEN2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.003 512.003" xml:space="preserve"><g><g><rect x="2.862" y="496.505" width="506.279" height="15.498"/></g></g><g><g><polygon points="26.626,440.708 26.626,488.236 42.124,488.236 42.124,456.206 177.477,456.206 177.477,472.738 192.975,472.738
 			192.975,440.708 		"/></g></g><g><g><polygon points="319.028,440.708 319.028,472.738 334.526,472.738 334.526,456.206 469.879,456.206 469.879,488.236
 			485.377,488.236 485.377,440.708 		"/></g></g><g><g><rect x="200.209" y="440.711" width="111.588" height="15.498"/></g></g><g><g><rect x="160.946" y="416.947" width="198.379" height="15.498"/></g></g><g><g><path d="M327.294,393.179v-30.997H192.975v30.997h-8.266v15.498H335.56v-15.498H327.294z M311.796,393.179H208.473v-15.498
 			h103.322V393.179z"/></g></g><g><g><rect x="240.504" y="306.392" width="15.498" height="47.528"/></g></g><g><g><rect x="264.268" y="306.392" width="15.498" height="47.528"/></g></g><g><g><rect x="216.74" y="258.864" width="86.791" height="15.498"/></g></g><g><g><path d="M271.983,61.099V84.83c0,4.451-3.62,8.073-8.072,8.073s-8.073-3.621-8.073-8.073V61.099h-15.498V84.83
@@ -465,7 +675,7 @@ var tetris = (() => {
 			h39.547l21.081,0.19l-28.598,28.599v-10.915L200.207,141.737z M279.848,168.68l-39.346,39.346v-25.544l39.372-39.372
 			L279.848,168.68z"/></g></g><g><g><rect x="58.656" y="464.475" width="15.498" height="15.498"/></g></g><g><g><rect x="89.654" y="464.475" width="16.532" height="15.498"/></g></g><g><g><rect x="121.684" y="464.475" width="15.498" height="15.498"/></g></g><g><g><rect x="374.823" y="464.475" width="15.498" height="15.498"/></g></g><g><g><rect x="405.82" y="464.475" width="16.532" height="15.498"/></g></g><g><g><rect x="437.85" y="464.475" width="15.498" height="15.498"/></g></g><g><g><polygon points="201.241,464.472 201.241,488.236 216.739,488.236 216.739,479.97 295.264,479.97 295.264,488.236
 			310.762,488.236 310.762,464.472 		"/></g></g><g><g><rect x="247.737" y="235.099" width="23.764" height="15.498"/></g></g></svg>`,
-      France: `<svg fill="${X3}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M377.26,496.311l-10.244-24.584c-13.096-31.43-24.791-63.357-35.088-95.696h23.957v-15.689h-28.839
+    France: `<svg fill="${RGBA_BLACK2}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M377.26,496.311l-10.244-24.584c-13.096-31.43-24.791-63.357-35.088-95.696h23.957v-15.689h-28.839
 			c-9.613-31.716-17.881-63.814-24.782-96.224h13.876V248.43h-17.095c-7.376-37.118-12.979-74.622-16.758-112.409l-5.598-55.984
 			h7.027V64.349h-63.801v15.689h7.393l-5.599,55.984c-3.779,37.786-9.382,75.29-16.758,112.409h-17.459v15.689h14.24
 			c-6.9,32.41-15.168,64.508-24.782,96.224h-29.203v15.689h24.321c-10.298,32.339-21.993,64.266-35.088,95.696l-10.244,24.584
@@ -489,7 +699,7 @@ var tetris = (() => {
 			c-0.511-5.756-1.59-11.349-3.161-16.735h16.927l6.973,16.735H339.525z"/></g></g><g><g><path d="M259.842,17.495V0h-15.689v17.495c-9.308,3.252-16.006,12.115-16.006,22.52V56.02h15.689V40.015
 			c0-4.501,3.662-8.162,8.161-8.162c4.501,0,8.161,3.662,8.161,8.162V56.02h15.689V40.015
 			C275.847,29.611,269.149,20.748,259.842,17.495z"/></g></g></svg>`,
-      Greece: `<svg fill="${D}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="492.63" width="512" height="15.706"/></g></g><g><g><polygon points="31.411,461.219 31.411,485.301 47.117,485.301 47.117,476.924 464.883,476.924 464.883,485.301 480.589,485.301
+    Greece: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="492.63" width="512" height="15.706"/></g></g><g><g><polygon points="31.411,461.219 31.411,485.301 47.117,485.301 47.117,476.924 464.883,476.924 464.883,485.301 480.589,485.301
 			480.589,461.219 		"/></g></g><g><g><polygon points="47.117,429.808 47.117,453.89 62.822,453.89 62.822,445.513 449.178,445.513 449.178,453.89 464.883,453.89
 			464.883,429.808 		"/></g></g><g><g><path d="M125.644,193.178v-15.706H70.151v15.706h8.376v212.548h-8.376v15.706h55.493v-15.706h-7.329V193.178H125.644z
 			 M102.609,405.726h-8.376V193.178h8.376V405.726z"/></g></g><g><g><path d="M205.219,193.178v-15.706h-55.493v15.706h7.329v212.548h-7.329v15.706h55.493v-15.706h-8.376V193.178H205.219z
@@ -499,7 +709,7 @@ var tetris = (() => {
 			 M417.767,405.726h-8.376V193.178h8.376V405.726z"/></g></g><g><g><path d="M277.037,27.746h-8.996V3.665h-15.706v24.082h-9.438L23.035,100.731v45.33h24.082v23.035h417.767v-23.035h24.082v-45.262
 			L277.037,27.746z M449.178,153.391H62.822v-7.329h386.356V153.391z M473.26,130.356H38.74V114.65h95.28V98.945H78.268
 			l167.169-55.493h28.968l160.987,55.493h-49.036v15.706h86.904V130.356z"/></g></g><g><g><rect x="149.726" y="98.945" width="220.924" height="15.706"/></g></g><g><g><rect x="252.335" y="66.487" width="15.706" height="15.706"/></g></g><g><g><rect x="220.924" y="66.487" width="15.706" height="15.706"/></g></g><g><g><rect x="283.746" y="66.487" width="15.706" height="15.706"/></g></g></svg>`,
-      Australia: `<svg fill="${D}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="87.771" y="404.898" width="16.718" height="15.673"/></g></g><g><g><rect x="120.163" y="404.898" width="15.673" height="15.673"/></g></g><g><g><rect x="151.51" y="404.898" width="16.718" height="15.673"/></g></g><g><g><rect x="48.065" y="436.245" width="111.804" height="15.673"/></g></g><g><g><path d="M400.196,484.31v-24.033H280.033v24.033H0v15.673h512V484.31H400.196z M384.522,484.31h-88.816v-8.359h88.816V484.31z"/></g></g><g><g><path d="M452.271,420.571l30.125-64.605l-28.853-13.454c-11.344-5.29-23.244-8.733-35.485-10.291l16.643-32.112l-29.157-13.596
+    Australia: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="87.771" y="404.898" width="16.718" height="15.673"/></g></g><g><g><rect x="120.163" y="404.898" width="15.673" height="15.673"/></g></g><g><g><rect x="151.51" y="404.898" width="16.718" height="15.673"/></g></g><g><g><rect x="48.065" y="436.245" width="111.804" height="15.673"/></g></g><g><g><path d="M400.196,484.31v-24.033H280.033v24.033H0v15.673h512V484.31H400.196z M384.522,484.31h-88.816v-8.359h88.816V484.31z"/></g></g><g><g><path d="M452.271,420.571l30.125-64.605l-28.853-13.454c-11.344-5.29-23.244-8.733-35.485-10.291l16.643-32.112l-29.157-13.596
 			c-24.041-11.211-51.335-14.096-77.128-8.242l-6.645-13.795c-27.925-59.887-99.368-85.885-159.252-57.963l-28.853,13.454
 			l18.586,39.858c-21.034-1.938-42.432,1.686-61.732,10.687l-28.912,13.481l15.415,32.356c-11.894,1.614-23.461,5.011-34.503,10.161
 			l-28.853,13.454l30.277,64.933H15.673v71.053h15.673v-55.38h40.751v-24.033h111.804v39.706h304.065v39.706h15.673v-55.38H452.271z
@@ -509,7 +719,7 @@ var tetris = (() => {
 			l-17.462-37.448l14.648-6.832c52.051-24.268,114.151-1.672,138.466,50.472l71.948,149.382H245.01z M396.955,420.571
 			l-11.891-24.689l25.236-48.691c12.668,0.896,24.976,4.096,36.618,9.525l14.649,6.832l-26.591,57.023H396.955z"/></g></g><g><g><rect x="48.065" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="72.098" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="96.131" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="120.163" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="144.196" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="352.56" y="28.749" transform="matrix(0.7071 -0.7071 0.7071 0.7071 62.6021 272.6316)" width="15.673" height="63.999"/></g></g><g><g><rect x="328.406" y="132.105" transform="matrix(0.7071 -0.7071 0.7071 0.7071 6.6066 295.8334)" width="63.999" height="15.673"/></g></g><g><g><rect x="431.75" y="107.936" transform="matrix(0.7071 -0.7071 0.7071 0.7071 29.8029 351.821)" width="15.673" height="63.999"/></g></g><g><g><rect x="407.594" y="52.907" transform="matrix(0.7071 -0.7071 0.7071 0.7071 85.8018 328.6308)" width="63.999" height="15.673"/></g></g><g><g><rect x="391.837" y="92.474" width="15.673" height="15.673"/></g></g><g><g><rect x="431.543" y="92.474" width="16.718" height="15.673"/></g></g><g><g><rect x="455.576" y="92.474" width="32.392" height="15.673"/></g></g><g><g><rect x="391.837" y="12.016" width="15.673" height="48.065"/></g></g><g><g><rect x="391.837" y="132.18" width="15.673" height="39.706"/></g></g><g><g><rect x="391.837" y="188.604" width="15.673" height="31.347"/></g></g><g><g><rect x="304.065" y="92.474" width="56.424" height="15.673"/></g></g><g><g><polygon points="256,68.441 256,52.767 240.327,52.767 240.327,68.441 223.608,68.441 223.608,84.114 240.327,84.114
 			240.327,100.833 256,100.833 256,84.114 271.673,84.114 271.673,68.441 		"/></g></g><g><g><rect x="280.033" y="20.376" width="15.673" height="15.673"/></g></g><g><g><rect x="207.935" y="108.147" width="15.673" height="15.673"/></g></g></svg>`,
-      Brazil: `<svg fill="${D}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="132.146" y="496.453" width="256" height="15.547"/></g></g><g><g><path d="M315.595,472.615V360.68H204.696v111.935h-8.292v15.547h127.482v-15.547H315.595z M300.049,472.615h-8.292v-40.421
+    Brazil: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="132.146" y="496.453" width="256" height="15.547"/></g></g><g><g><path d="M315.595,472.615V360.68H204.696v111.935h-8.292v15.547h127.482v-15.547H315.595z M300.049,472.615h-8.292v-40.421
 			h-15.547v40.421h-8.292v-40.421h-15.547v40.421h-8.292v-40.421h-15.547v40.421h-8.292v-96.389h79.806V472.615z"/></g></g><g><g><rect x="204.733" y="336.063" transform="matrix(1 -0.0045 0.0045 1 -1.5447 1.1742)" width="110.848" height="15.547"/></g></g><g><g><rect x="227.498" y="384.518" width="16.583" height="15.547"/></g></g><g><g><rect x="252.372" y="384.518" width="15.547" height="15.547"/></g></g><g><g><rect x="276.211" y="384.518" width="15.547" height="15.547"/></g></g><g><g><path d="M277.085,72.551c4.145-4.232,6.707-10.02,6.707-16.397V23.451C283.792,10.52,273.271,0,260.341,0
 			c-12.933,0-23.453,10.52-23.453,23.451v32.702c0,6.378,2.562,12.166,6.707,16.397H76.178v19.402l29.288,19.983h18.388V96.389
 			h-13.591l-12.152-8.292h114.572c0.624,5.382,1.834,10.589,3.581,15.547h-68.572v-8.292h-15.547v23.838h79.806v64.744
@@ -521,7 +731,7 @@ var tetris = (() => {
 			h7.732v32.497h-7.732c-31.035,0-56.527-25.25-56.527-56.286v-3.801C240.659,140.86,261.097,151.671,284.025,151.671z
 			 M268.246,56.153c0,4.359-3.547,7.906-7.905,7.906c-4.359,0-7.906-3.547-7.906-7.906V23.451c0-4.358,3.547-7.905,7.906-7.905
 			c4.358,0,7.905,3.547,7.905,7.905V56.153z"/></g></g></svg>`,
-      Egypt: `<svg fill="${c1}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="40.834" y="427.714" width="112.033" height="15.706"/></g></g><g><g><rect x="152.867" y="444.466" width="47.117" height="15.706"/></g></g><g><g><rect x="71.198" y="475.877" width="32.458" height="15.706"/></g></g><g><g><rect y="467.501" width="15.706" height="15.706"/></g></g><g><g><rect x="215.689" y="475.877" width="159.149" height="15.706"/></g></g><g><g><rect x="327.722" y="444.466" width="56.54" height="15.706"/></g></g><g><g><rect x="384.262" y="427.714" width="23.035" height="15.706"/></g></g><g><g><rect x="255.477" y="427.714" width="39.787" height="15.706"/></g></g><g><g><rect x="456.507" y="451.795" width="55.493" height="15.706"/></g></g><g><g><rect x="414.626" y="484.254" width="16.753" height="15.706"/></g></g><g><g><rect x="486.871" y="420.384" width="25.129" height="15.706"/></g></g><g><g><rect y="420.384" width="15.706" height="15.706"/></g></g><g><g><rect x="215.689" y="260.188" width="24.082" height="15.706"/></g></g><g><g><rect x="279.558" y="363.845" width="32.458" height="15.706"/></g></g><g><g><polygon points="232.442,188.99 232.442,203.648 207.313,203.648 207.313,219.354 232.442,219.354 232.442,204.695
+    Egypt: `<svg fill="${RGBA_ORANGE3}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="40.834" y="427.714" width="112.033" height="15.706"/></g></g><g><g><rect x="152.867" y="444.466" width="47.117" height="15.706"/></g></g><g><g><rect x="71.198" y="475.877" width="32.458" height="15.706"/></g></g><g><g><rect y="467.501" width="15.706" height="15.706"/></g></g><g><g><rect x="215.689" y="475.877" width="159.149" height="15.706"/></g></g><g><g><rect x="327.722" y="444.466" width="56.54" height="15.706"/></g></g><g><g><rect x="384.262" y="427.714" width="23.035" height="15.706"/></g></g><g><g><rect x="255.477" y="427.714" width="39.787" height="15.706"/></g></g><g><g><rect x="456.507" y="451.795" width="55.493" height="15.706"/></g></g><g><g><rect x="414.626" y="484.254" width="16.753" height="15.706"/></g></g><g><g><rect x="486.871" y="420.384" width="25.129" height="15.706"/></g></g><g><g><rect y="420.384" width="15.706" height="15.706"/></g></g><g><g><rect x="215.689" y="260.188" width="24.082" height="15.706"/></g></g><g><g><rect x="279.558" y="363.845" width="32.458" height="15.706"/></g></g><g><g><polygon points="232.442,188.99 232.442,203.648 207.313,203.648 207.313,219.354 232.442,219.354 232.442,204.695
 			262.806,204.695 262.806,188.99 		"/></g></g><g><g><rect x="255.477" y="292.646" width="39.787" height="15.706"/></g></g><g><g><path d="M475.183,387.926l-34.476-43.413c17.317-4.695,33.06-14.196,45.414-27.643c16.268-17.706,25.227-40.71,25.227-64.771
 			c0-52.804-42.959-95.763-95.763-95.763c-19.655,0-38.544,5.912-54.624,17.097c-12.483,8.682-22.592,20.047-29.702,33.257
 			l-75.511-95.088L36.315,387.926H0v15.706h512v-15.706H475.183z M415.586,172.042c44.144,0,80.057,35.913,80.057,80.057
@@ -530,7 +740,7 @@ var tetris = (() => {
 			l6.849-8.624l104.306,0.248v-15.706H75.494l5.82-7.329h29.671V340.81H93.787l64.023-80.622h57.879v-15.706h-45.407l57.371-72.245
 			h39.371l62.514,151.82h-17.522v15.706h23.989l19.832,48.164H56.371z M372.823,387.926l-12.934-31.411h24.373V340.81h-30.839
 			l-69.235-168.141l81.973,103.225h-14.357v15.706h26.829l6.652,8.376h-17.775v15.706h30.247l57.371,72.245H372.823z"/></g></g><g><g><rect x="31.411" y="20.417" width="16.753" height="15.706"/></g></g><g><g><rect x="87.951" y="68.581" width="15.706" height="15.706"/></g></g><g><g><rect x="63.869" y="132.45" width="16.753" height="15.706"/></g></g><g><g><rect x="15.706" y="228.777" width="15.706" height="15.706"/></g></g><g><g><rect x="87.951" y="268.564" width="15.706" height="15.706"/></g></g><g><g><rect x="120.409" y="172.237" width="15.706" height="15.706"/></g></g><g><g><rect x="359.133" y="84.286" width="15.706" height="15.706"/></g></g><g><g><rect x="463.836" y="124.074" width="15.706" height="15.706"/></g></g><g><g><rect x="223.018" y="60.204" width="16.753" height="15.706"/></g></g><g><g><rect x="295.264" y="12.041" width="16.753" height="15.706"/></g></g><g><g><rect x="424.049" y="28.793" width="15.706" height="15.706"/></g></g><g><g><rect x="496.294" y="332.434" width="15.706" height="15.706"/></g></g></svg>`,
-      England: `<svg fill="${e1}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.004 512.004" xml:space="preserve"><g><g><polygon points="263.285,230.033 263.285,188.414 247.678,188.414 247.678,245.64 279.933,245.64 279.933,230.033 		"/></g></g><g><g><path d="M151.134,132.114v209.736H360.87V132.114H151.134z M345.263,157.2h-16.428v15.607h16.428v130.059h-16.428v15.607h16.428
+    England: `<svg fill="${RGBA_RED2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.004 512.004" xml:space="preserve"><g><g><polygon points="263.285,230.033 263.285,188.414 247.678,188.414 247.678,245.64 279.933,245.64 279.933,230.033 		"/></g></g><g><g><path d="M151.134,132.114v209.736H360.87V132.114H151.134z M345.263,157.2h-16.428v15.607h16.428v130.059h-16.428v15.607h16.428
 			v7.769H166.741v-7.769h16.428v-15.607h-16.428V172.807h16.428V157.2h-16.428v-9.48h178.521V157.2z"/></g></g><g><g><rect x="198.773" y="382.986" width="15.607" height="129.018"/></g></g><g><g><rect x="223.744" y="382.986" width="15.607" height="129.018"/></g></g><g><g><rect x="247.675" y="382.986" width="15.607" height="129.018"/></g></g><g><g><rect x="271.606" y="382.986" width="15.607" height="129.018"/></g></g><g><g><polygon points="166.522,350.727 166.522,366.334 174.846,366.334 174.846,512 190.453,512 190.453,366.334 320.511,366.334
 			320.511,512 336.118,512 336.118,366.334 345.482,366.334 345.482,350.727 		"/></g></g><g><g><rect x="296.577" y="382.986" width="15.607" height="129.018"/></g></g><g><g><path d="M327.794,108.298v-8.324h9.364V84.367H295.54v-9.364h35.974L256.22,0l-75.294,75.003h34.498v9.364h-40.578v15.607h8.324
 			v8.324h-16.648v15.607h178.961v-15.607H327.794z M256.22,22.029l37.513,37.367h-75.024L256.22,22.029z M279.933,75.003v9.364
@@ -541,7 +751,7 @@ var tetris = (() => {
 			c1.326-12.418,6.171-23.792,13.506-33.126l5.557,5.557l11.036-11.037l-5.557-5.557c8.988-7.063,19.87-11.804,31.752-13.332v7.553
 			h15.607v-7.686c12.288,1.378,23.543,6.195,32.792,13.464l-5.557,5.557l11.036,11.037l5.557-5.557
 			c7.334,9.334,12.181,20.708,13.506,33.127h-8.433v15.607h8.216C318.831,257.391,314.11,268.153,307.114,277.055z"/></g></g></svg>`,
-      India: `<svg fill="${D}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="494.507" width="512" height="15.673"/></g></g><g><g><rect x="118.073" y="225.969" width="275.853" height="15.674"/></g></g><g><g><rect x="79.412" y="328.369" width="15.674" height="32.392"/></g></g><g><g><rect x="79.412" y="399.422" width="15.674" height="32.392"/></g></g><g><g><rect x="150.465" y="321.054" width="15.673" height="31.347"/></g></g><g><g><rect x="150.465" y="391.063" width="15.673" height="33.437"/></g></g><g><g><rect x="346.906" y="321.054" width="15.673" height="31.347"/></g></g><g><g><rect x="346.906" y="391.063" width="15.673" height="33.437"/></g></g><g><g><rect x="417.959" y="328.369" width="15.673" height="32.392"/></g></g><g><g><rect x="417.959" y="399.422" width="15.673" height="32.392"/></g></g><g><g><path d="M307.2,123.857v15.673c17.763,0,31.898,14.338,31.898,32.101h15.673C354.771,145.508,333.322,123.857,307.2,123.857z"/></g></g><g><g><path d="M331.233,454.798v-98.388c0-41.277-33.749-74.859-75.233-74.859s-75.233,33.582-75.233,74.859v98.388h-47.02v15.673h47.02
+    India: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="494.507" width="512" height="15.673"/></g></g><g><g><rect x="118.073" y="225.969" width="275.853" height="15.674"/></g></g><g><g><rect x="79.412" y="328.369" width="15.674" height="32.392"/></g></g><g><g><rect x="79.412" y="399.422" width="15.674" height="32.392"/></g></g><g><g><rect x="150.465" y="321.054" width="15.673" height="31.347"/></g></g><g><g><rect x="150.465" y="391.063" width="15.673" height="33.437"/></g></g><g><g><rect x="346.906" y="321.054" width="15.673" height="31.347"/></g></g><g><g><rect x="346.906" y="391.063" width="15.673" height="33.437"/></g></g><g><g><rect x="417.959" y="328.369" width="15.673" height="32.392"/></g></g><g><g><rect x="417.959" y="399.422" width="15.673" height="32.392"/></g></g><g><g><path d="M307.2,123.857v15.673c17.763,0,31.898,14.338,31.898,32.101h15.673C354.771,145.508,333.322,123.857,307.2,123.857z"/></g></g><g><g><path d="M331.233,454.798v-98.388c0-41.277-33.749-74.859-75.233-74.859s-75.233,33.582-75.233,74.859v98.388h-47.02v15.673h47.02
 			v15.673h15.673V356.411c0-32.634,26.718-59.185,59.559-59.185s59.559,26.55,59.559,59.185v129.734h15.673v-15.673h47.02v-15.673
 			H331.233z"/></g></g><g><g><polygon points="102.4,305.378 102.4,289.704 47.02,289.704 47.02,486.145 62.694,486.145 62.694,470.472 102.4,470.472
 			102.4,454.798 62.694,454.798 62.694,305.378 		"/></g></g><g><g><path d="M70.008,265.672v-7.821c0-17.305,14.629-31.381,31.347-31.381v-15.674c-26.122,0-47.02,21.109-47.02,47.055v7.821H47.02
@@ -565,7 +775,7 @@ var tetris = (() => {
 			 M133.747,201.933v-30.815c0-16.754,6.588-32.415,18.549-44.1c11.937-11.659,27.856-18.081,44.827-18.081h7.885
 			c15.833,0,27.588-9.557,30.685-24.033h41.132c3.096,14.476,14.852,24.033,30.685,24.033h7.885
 			c35.246,0,62.857,27.314,62.857,62.181v30.815H133.747z"/></g></g></svg>`,
-      Italy: `<svg fill="${D}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="252.641" y="-103.971" transform="matrix(0.0663 -0.9978 0.9978 0.0663 227.2121 274.8721)" width="15.673" height="240.003"/></g></g><g><g><rect x="223.466" y="383.062" transform="matrix(0.0663 -0.9978 0.9978 0.0663 -238.0923 655.6849)" width="15.673" height="143.997"/></g></g><g><g><path d="M332.631,496.072l4.91-73.871l-7.983-0.531l5.327-80.149l8.145,0.541l1.04-15.639l-8.146-0.541l5.327-80.149l8.145,0.541
+    Italy: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="252.641" y="-103.971" transform="matrix(0.0663 -0.9978 0.9978 0.0663 227.2121 274.8721)" width="15.673" height="240.003"/></g></g><g><g><rect x="223.466" y="383.062" transform="matrix(0.0663 -0.9978 0.9978 0.0663 -238.0923 655.6849)" width="15.673" height="143.997"/></g></g><g><g><path d="M332.631,496.072l4.91-73.871l-7.983-0.531l5.327-80.149l8.145,0.541l1.04-15.639l-8.146-0.541l5.327-80.149l8.145,0.541
 			l1.04-15.639l-8.146-0.541l5.328-80.15l8.145,0.541l1.04-15.639l-8.146-0.541l5.327-80.149l8.145,0.541l1.04-15.639
 			L155.629,25.266l-1.04,15.639l8.146,0.541l-5.327,80.149l-8.145-0.541l-1.04,15.639l8.145,0.541l-5.327,80.149l-8.145-0.541
 			l-1.04,15.639l8.146,0.541l-5.327,80.149l-8.145-0.541l-1.04,15.639l8.146,0.541l-5.327,80.15l-7.982-0.531l-5.825,87.643H0
@@ -583,7 +793,7 @@ var tetris = (() => {
 			l4.256-64.022l-15.639-1.039l-4.256,64.021l-16.29-1.083l4.256-64.022l-15.639-1.039l-4.255,64.022l-16.291-1.083l4.255-64.022
 			l-15.639-1.039l-4.255,64.022l-16.29-1.083l4.255-64.022l-15.639-1.039l-4.255,64.022l-24.273-1.613l0.552-8.308l8.145,0.541
 			l1.04-15.639l-8.145-0.541l3.735-56.203l159.973,10.633l-3.736,56.203l-8.145-0.541l-1.04,15.639L327.206,220.746z"/></g></g></svg>`,
-      Mexico: `<svg fill="${y1}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="231.967" y="99.788" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="132.18" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="164.571" width="48.065" height="15.674"/></g></g><g><g><rect x="231.967" y="195.918" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="228.31" width="48.065" height="15.674"/></g></g><g><g><rect x="231.967" y="259.657" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="292.049" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="324.441" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="355.788" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="388.18" width="48.065" height="15.674"/></g></g><g><g><path d="M503.641,420.571v-64.784H407.51v-7.314h-15.673v7.314h-87.771v-24.033h8.359v8.359h15.673v-8.359h87.771v-15.674H304.065
+    Mexico: `<svg fill="${RGBA_GREEN2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="231.967" y="99.788" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="132.18" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="164.571" width="48.065" height="15.674"/></g></g><g><g><rect x="231.967" y="195.918" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="228.31" width="48.065" height="15.674"/></g></g><g><g><rect x="231.967" y="259.657" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="292.049" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="324.441" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="355.788" width="48.065" height="15.673"/></g></g><g><g><rect x="231.967" y="388.18" width="48.065" height="15.674"/></g></g><g><g><path d="M503.641,420.571v-64.784H407.51v-7.314h-15.673v7.314h-87.771v-24.033h8.359v8.359h15.673v-8.359h87.771v-15.674H304.065
 			v-8.359h135.837v8.359h-15.673v15.674h15.673v16.718h15.673v-56.424h-151.51v-24.033h39.706v8.359h15.673v-8.359h8.359v-15.674
 			h-63.739v-8.359h87.771v8.359h-15.673v15.674h15.673v15.673h15.673v-55.38H304.065v-24.033h8.359v7.314h15.673v-7.314h8.359
 			v-15.674h-32.392v-8.359h56.424v8.359h-16.718v15.674h16.718v15.673h15.673v-55.38h-72.098v-25.078h8.359V123.82h-8.359v-8.359
@@ -595,7 +805,7 @@ var tetris = (() => {
 			 M207.935,379.82H48.065v15.673h80.457v8.359h15.673v-8.359h63.739v25.078H79.412v-8.359H63.739v8.359H24.033v-25.078h15.673
 			V379.82H24.033v-8.359h183.902V379.82z M288.392,420.571h-64.784V91.429h64.784V420.571z M487.967,379.82h-15.673v15.673h15.673
 			v25.078h-15.673v-8.359H456.62v8.359H304.065v-25.078h39.706v8.359h15.673v-8.359h104.49V379.82H304.065v-8.359h183.902V379.82z"/></g></g></svg>`,
-      Russia: `<svg fill="${e1}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.001 512.001" xml:space="preserve"><g><g><rect x="0.833" y="496.379" width="510.335" height="15.622"/></g></g><g><g><rect x="184.138" y="351.61" width="15.622" height="46.867"/></g></g><g><g><rect x="57.074" y="398.478" width="15.622" height="47.909"/></g></g><g><g><polygon points="88.523,215.566 88.339,231.188 119.564,231.554 119.564,279.746 135.187,279.746 135.187,231.739
+    Russia: `<svg fill="${RGBA_RED2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.001 512.001" xml:space="preserve"><g><g><rect x="0.833" y="496.379" width="510.335" height="15.622"/></g></g><g><g><rect x="184.138" y="351.61" width="15.622" height="46.867"/></g></g><g><g><rect x="57.074" y="398.478" width="15.622" height="47.909"/></g></g><g><g><polygon points="88.523,215.566 88.339,231.188 119.564,231.554 119.564,279.746 135.187,279.746 135.187,231.739
 			143.427,231.836 143.611,216.215 		"/></g></g><g><g><path d="M98.712,344.319c8.338-8.592,13.485-20.297,13.485-33.187c0-11.264-7.17-24.799-21.919-41.376
 			c-6.905-7.761-13.737-14.184-17.581-17.652v-12.976h8.332v-15.622h-8.332v-8.332H57.075v8.332h-8.332v15.622h8.332v12.281
 			c-3.641,3.251-10.953,10.028-18.356,18.348c-14.75,16.576-21.919,30.111-21.919,41.376c0,12.891,5.148,24.595,13.485,33.187
@@ -638,7 +848,7 @@ var tetris = (() => {
 			 M244.185,149.267c-2.141-5.098-3.544-10.578-4.087-16.305l55.304-20.739l55.117,27.558c-0.955,4.306-2.398,8.43-4.284,12.303
 			L296.1,127.016L244.185,149.267z M295.849,183.655c-17.582,0-33.289-8.15-43.566-20.862l43.313-18.563l41.821,20.91
 			C327.16,176.501,312.326,183.655,295.849,183.655z"/></g></g></svg>`,
-      Chile: `<svg fill="${D}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M201.217,360.123H46.347c-16.775,0-30.423,13.647-30.423,30.423v97.436H31.63v-97.436c0-8.115,6.603-14.717,14.717-14.717
+    Chile: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M201.217,360.123H46.347c-16.775,0-30.423,13.647-30.423,30.423v97.436H31.63v-97.436c0-8.115,6.603-14.717,14.717-14.717
 			h154.87c8.116,0,14.717,6.603,14.717,14.717v97.436h15.706v-97.436C231.64,373.771,217.992,360.123,201.217,360.123z"/></g></g><g><g><rect x="23.035" y="87.845" width="15.706" height="263.853"/></g></g><g><g><rect x="208.36" y="87.845" width="15.706" height="263.853"/></g></g><g><g><rect x="110.986" y="249.089" width="24.082" height="15.706"/></g></g><g><g><rect x="72.245" y="280.5" width="103.656" height="15.706"/></g></g><g><g><path d="M223.639,64.808V49.485c0-27.228-22.151-49.379-49.379-49.379H73.305c-27.228,0-49.38,22.151-49.38,49.379v15.324H0
 			v159.149h15.706V80.514h72.245v24.082H56.54v15.706h31.411v63.869H72.245v47.117h103.656V184.17h-16.753v-63.869h32.458v-15.706
 			h-32.458V80.514h72.245v143.444H247.1V64.808H223.639z M207.934,64.809h-64.49v135.067h16.753v15.706H87.951v-15.706h15.706
@@ -649,7 +859,7 @@ var tetris = (() => {
 			h32.458v-15.706h-32.458V80.515h72.245v143.444H512V64.809H488.539z M472.834,64.808h-64.49v135.068h16.753v15.706h-72.245
 			v-15.706h15.706V64.808H304.53V49.485c0-18.567,15.107-33.674,33.674-33.674H439.16c18.567,0,33.674,15.107,33.674,33.674V64.808z
 			"/></g></g><g><g><rect y="496.189" width="512" height="15.706"/></g></g></svg>`,
-      Vatican: `<svg fill="${e1}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="375.607" y="255.475" width="16.787" height="15.738"/></g></g><g><g><rect x="439.607" y="255.475" width="15.738" height="15.738"/></g></g><g><g><rect x="56.656" y="255.475" width="15.738" height="15.738"/></g></g><g><g><rect x="119.607" y="255.475" width="16.787" height="15.738"/></g></g><g><g><polygon points="263.344,7.869 263.344,0.525 247.607,0.525 247.607,7.869 231.869,7.869 231.869,23.607 247.607,23.607
+    Vatican: `<svg fill="${RGBA_RED2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="375.607" y="255.475" width="16.787" height="15.738"/></g></g><g><g><rect x="439.607" y="255.475" width="15.738" height="15.738"/></g></g><g><g><rect x="56.656" y="255.475" width="15.738" height="15.738"/></g></g><g><g><rect x="119.607" y="255.475" width="16.787" height="15.738"/></g></g><g><g><polygon points="263.344,7.869 263.344,0.525 247.607,0.525 247.607,7.869 231.869,7.869 231.869,23.607 247.607,23.607
 			247.607,47.738 263.344,47.738 263.344,23.607 280.131,23.607 280.131,7.869 		"/></g></g><g><g><path d="M343.806,151.607c0-45.795-35.472-83.714-80.462-87.474v-8.001h-15.738v8.081c-44.493,4.256-79.412,41.955-79.412,87.395
 			h15.738c0-18.922,7.291-36.108,19.192-48.953c-1.764,5.437-2.73,11.232-2.73,17.253v31.7h15.738v-31.7
 			c0-19.212,13.509-35.305,31.475-39.192v6.892h15.738v-7.101c18.486,3.478,32.525,19.817,32.525,39.401v31.7h15.738v-31.7
@@ -666,7 +876,7 @@ var tetris = (() => {
 			 M472.131,279.607H39.869v-26.931l24.191-12.062l32.034,15.995l32.006-16.092l30.129,14.96h195.544l30.11-14.961l31.978,16.038
 			l32.07-15.965l24.199,12.086V279.607z"/></g></g><g><g><polygon points="231.869,391.869 231.869,463.213 247.607,463.213 247.607,407.607 264.393,407.607 264.393,463.213
 			280.131,463.213 280.131,391.869 		"/></g></g><g><g><rect x="231.869" y="367.738" width="48.262" height="15.738"/></g></g></svg>`,
-      Thailand: `<svg fill="${I1}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="56.424" y="495.282" width="399.151" height="16.718"/></g></g><g><g><path d="M415.869,470.204v-72.098h-11.166c7.032-8.412,11.21-19.287,11.21-31.156c0-26.608-21.474-48.257-48.077-48.257h-95.118
+    Thailand: `<svg fill="${RGBA_YELLOW2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="56.424" y="495.282" width="399.151" height="16.718"/></g></g><g><g><path d="M415.869,470.204v-72.098h-11.166c7.032-8.412,11.21-19.287,11.21-31.156c0-26.608-21.474-48.257-48.077-48.257h-95.118
 			v16.718h50.572c16.039,1.751,28.195,15.228,28.195,31.548c0,15.407-10.833,28.28-25.542,31.146h-56.918
 			c7.087-8.414,11.314-19.287,11.314-31.156c0-26.608-21.517-48.257-48.12-48.257H144.47c-26.603,0-48.383,21.648-48.383,48.256
 			c0,11.868,4.382,22.742,11.547,31.156H96.131v72.098H80.457v16.718h351.086v-16.718H415.869z M232.22,335.412
@@ -685,1384 +895,2199 @@ var tetris = (() => {
 			c9.826,0,18.201,6.312,21.296,15.091c-6.695-4.784-14.459-7.358-22.488-7.358c-8.259,0-15.784,2.245-22.038,6.183
 			C237.517,29.85,245.578,24.095,254.959,24.095z M232.384,87.771h16.301V71.053h-15.626c0.495-13.098,10.171-22.505,23.462-22.505
 			c12.465,0,22.265,11.181,23.398,21.568v0.937h-16.606v16.718h12.405l4.202,2.708v22.396c0,12.448-10.127,22.575-22.576,22.575
-			h-2.385c-12.448,0-22.575-10.127-22.575-22.575V87.771z M256.153,187.922l-36.188-36.188h34.995h2.385h34.996L256.153,187.922z"/></g></g><g><g><rect x="248.686" y="446.171" width="14.629" height="16.718"/></g></g><g><g><rect x="272.718" y="446.171" width="14.629" height="16.718"/></g></g><g><g><rect x="224.653" y="446.171" width="15.673" height="16.718"/></g></g></svg>`,
-    },
-    _1 = J3;
-  var t4 = (t) =>
-      [
-        'Vatican',
-        'Temple',
-        'Egypt',
-        'India',
-        'America',
-        'Chile',
-        'Forbidden',
-        'Tiger',
-        'Greece',
-        'England',
-        'Spring',
-        'France',
-        'Italy',
-        'Pavilion',
-        'Forbidden',
-        'Heaven',
-        'Temple',
-        'Tower',
-        'Russia',
-        'India',
-        'Gate',
-        'Mexico',
-        'Wall',
-        'Vietnam',
-        'Australia',
-      ][t],
-    P1 = t4;
-  var e4 = (t) => {
-      let { gameBoard: e, gameBoardContext: r } = l,
-        { width: o, height: h } = e,
-        a = new Date().getHours(),
-        s = _1[P1(a - 1)],
-        i,
-        g,
-        m,
-        p;
-      switch (t) {
-        case 'main-menu':
-        case 'countdown': {
-          ((i = V(G.tetris)), (g = o), (m = o / 2 - g / 2), (p = h - g));
-          break;
-        }
-        case 'playing': {
-          ((i = V(s)), (g = o * 1.4), (m = o - g / 1.7), (p = h - g));
-          break;
-        }
-        case 'paused': {
-          ((i = V(G.coffee)), (g = o * 1.5), (m = o - g * 0.93), (p = h - g));
-          break;
-        }
-        case 'game-over': {
-          ((i = V(G.happy)),
-            (g = Math.floor(o * 0.42)),
-            (m = o / 2 - g / 2),
-            (p = h / 2 - g * 1.35));
-          break;
-        }
+			h-2.385c-12.448,0-22.575-10.127-22.575-22.575V87.771z M256.153,187.922l-36.188-36.188h34.995h2.385h34.996L256.153,187.922z"/></g></g><g><g><rect x="248.686" y="446.171" width="14.629" height="16.718"/></g></g><g><g><rect x="272.718" y="446.171" width="14.629" height="16.718"/></g></g><g><g><rect x="224.653" y="446.171" width="15.673" height="16.718"/></g></g></svg>`
+  };
+  var famous_buildings_default = FamousBuildings;
+
+  // lib/utils/get-famous-buildings.js
+  var getFamousBuildings = (hour) => {
+    const map = [
+      "Vatican",
+      "Temple",
+      "Egypt",
+      "India",
+      "America",
+      "Chile",
+      "Forbidden",
+      "Tiger",
+      "Greece",
+      "England",
+      "Spring",
+      "France",
+      "Italy",
+      "Pavilion",
+      "Forbidden",
+      "Heaven",
+      "Temple",
+      "Tower",
+      "Russia",
+      "India",
+      "Gate",
+      "Mexico",
+      "Wall",
+      "Vietnam",
+      "Australia"
+    ];
+    return map[hour];
+  };
+  var get_famous_buildings_default = getFamousBuildings;
+
+  // lib/ui/image/render-scene-background.js
+  var renderSceneBackground = (scene) => {
+    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
+    const { width, height } = gameBoard2;
+    const time = /* @__PURE__ */ new Date();
+    const hour = time.getHours();
+    const building = famous_buildings_default[get_famous_buildings_default(hour - 1)];
+    let img;
+    let size;
+    let x;
+    let y;
+    switch (scene) {
+      case "main-menu":
+      case "countdown": {
+        img = getImage(scenes_background_default.tetris);
+        size = width;
+        x = width / 2 - size / 2;
+        y = height - size;
+        break;
       }
-      _(r, i, m, p, g);
-    },
-    b = e4;
-  var r4 = (t) => {
-      let { number: e, scale: r } = t;
-      (B(), T(), O(), b('countdown'), G1(), R1(), b1(e, r));
-    },
-    u1 = r4;
-  var o4 = new Set(['main-menu', 'playing', 'paused', 'game-over']),
-    h4 = (t) => {
-      !o4.has(t) || u.mode === t || (u.mode = t);
-    },
-    r1 = h4;
-  var i4 = { bgmEnabled: !0, bgmTimer: null },
-    H = i4;
-  var N1 = (t, e) => {
-      (t >= e.length && (t = 0),
-        x(e[t], 110, 0.05),
-        (H.bgmTimer = setTimeout(() => {
-          N1(t + 1, e);
-        }, 130)));
-    },
-    $1 = N1;
-  var c4 = () => {
-      (H.bgmTimer && clearTimeout(H.bgmTimer), (H.bgmTimer = null));
-    },
-    C = c4;
-  var g4 = () => {
-      let t = [
-        659, 659, 587, 659, 784, 880, 523, 523, 440, 523, 659, 784, 659, 659,
-        587, 659, 784, 880, 988, 880, 784, 659, 880, 784, 659, 587, 523, 587,
-        659, 784, 659, 587,
-      ];
-      if (!H.bgmEnabled) return !1;
-      (C(), $1(0, t));
-    },
-    R = g4;
-  var l4 = { COLS: 10, ROWS: 20 },
-    M = l4;
-  var {
-      PINK: s4,
-      BLUE: n4,
-      TEAL: a4,
-      YELLOW: v4,
-      PURPLE: m4,
-      ORANGE: d4,
-      GREEN: p4,
-      RED: f4,
-    } = v,
-    x4 = [
-      { shape: [[1, 1, 1, 1]], color: a4 },
-      { shape: [[1, 1, 1, 1, 1]], color: p4 },
-      {
-        shape: [
-          [1, 1],
-          [1, 1],
-        ],
-        color: d4,
-      },
-      {
-        shape: [
-          [0, 1, 0],
-          [1, 1, 1],
-        ],
-        color: v4,
-      },
-      {
-        shape: [
-          [1, 0, 0],
-          [1, 1, 1],
-        ],
-        color: n4,
-      },
-      {
-        shape: [
-          [0, 0, 1],
-          [1, 1, 1],
-        ],
-        color: s4,
-      },
-      {
-        shape: [
-          [0, 1, 1],
-          [1, 1, 0],
-        ],
-        color: f4,
-      },
-      {
-        shape: [
-          [1, 1, 0],
-          [0, 1, 1],
-        ],
-        color: m4,
-      },
-    ],
-    M1 = x4;
-  function w4() {
-    let t = Math.floor(Math.random() * M1.length),
-      e = M1[t];
-    return { ...e, shape: e.shape.map((r) => [...r]) };
-  }
-  var C1 = w4;
-  var y4 = (t, e, r) => {
-      let { ROWS: o, COLS: h } = M,
-        { curr: c, cx: a, cy: s, board: i } = r;
-      if (!c) return !1;
-      let g = c.shape;
-      for (let m = 0; m < g.length; m++)
-        for (let p = 0; p < g[m].length; p++)
-          if (g[m][p]) {
-            let d = a + p + t,
-              y = s + m + e,
-              q = d < 0 || d >= h || y >= o,
-              Y = y >= 0 && y < o && i[y][d];
-            if (q || Y) return !0;
-          }
-      return !1;
-    },
-    Z = y4;
-  var u4 = () => {
-      let t = n.getMode();
-      if (t === 'game-over' || t === 'paused' || t === 'main-menu') return !1;
-      (n.setMode('game-over'), n.saveHighScore(), C(), f.gameOver());
-    },
-    g1 = u4;
-  var M4 = () => {
-      let { nextPiece: t, nextPieceContext: e } = l,
-        { width: r, height: o } = t;
-      e.clearRect(0, 0, r, o);
-    },
-    F1 = M4;
-  var C4 = (t) => {
-      let { next: e } = t,
-        { BLACK: r } = v,
-        { nextPiece: o, nextPieceContext: h } = l,
-        { width: c, height: a } = o;
-      if (!e) return;
-      let { shape: s } = e,
-        g = Math.floor(c / 5),
-        m = Math.floor((c - s[0].length * g) / 2),
-        p = Math.floor((a - s.length * g) / 2);
-      F1();
-      for (let d = 0; d < s.length; d++)
-        for (let y = 0; y < s[d].length; y++) {
-          if (!s[d][y]) continue;
-          let q = m + y * g,
-            Y = p + d * g;
-          ((h.fillStyle = e.color),
-            h.fillRect(q, Y, g - 2, g - 2),
-            (h.strokeStyle = r),
-            h.strokeRect(q, Y, g - 2, g - 2));
-        }
-    },
-    l1 = C4;
-  var z4 = (t) => {
-      let { COLS: e } = M;
-      ((t.curr = t.next
-        ? { ...t.next, shape: t.next.shape.map((r) => [...r]) }
-        : C1()),
-        (t.next = C1()),
-        (t.cx = Math.floor(e / 2) - Math.floor(t.curr.shape[0].length / 2)),
-        (t.cy = 0),
-        l1(t.next),
-        Z(0, 0, t) && g1());
-    },
-    P = z4;
-  var V4 = () => {
-      (n.stop(), (n.rafId = requestAnimationFrame(n1)));
-    },
-    s1 = V4;
-  var H4 = (t, e) => {
-      let r = Number(t);
-      if (!Number.isFinite(r)) return '';
-      let o = Math.max(0, Math.floor(e)),
-        h = r < 0 ? '-' : '',
-        c = Math.abs(r).toString();
-      return h + c.padStart(o, '0');
-    },
-    E = H4;
-  var L4 = (t) => {
-      let e = document.querySelector('#level');
-      (e && (e.textContent = E(t.level, 2)),
-        n.setMode('playing'),
-        P(t),
-        f.levelStart(),
-        setTimeout(() => {
-          R();
-        }, 250),
-        (n.rafId = requestAnimationFrame(s1)));
-    },
-    D1 = L4;
-  var S4 = (t) => {
-      let e = { show: !0, number: 3, scale: 4, count: 0, acc: 0 };
-      return {
-        layer: 100,
-        blocking: !0,
-        name: 'countdown',
-        update(r) {
-          return (
-            (e.acc += r),
-            e.acc < 0.01
-              ? !0
-              : ((e.acc = 0),
-                u1(e),
-                e.count++,
-                (e.scale = Math.max(1, e.scale - 0.4)),
-                e.count >= 50 &&
-                  ((e.count = 0),
-                  (e.number -= 1),
-                  (e.scale = 4),
-                  e.number >= 1 && f.countdown()),
-                e.number <= 0 ? (this.stop(), !1) : !0)
-          );
-        },
-        stop() {
-          (r1('playing'), D1(t));
-        },
-        render() {
-          u1(e);
-        },
-      };
-    },
-    W1 = S4;
-  var E4 = (t) => {
-      I(W1(t));
-    },
-    U1 = E4;
-  var A4 = (t) => {
-      ((t.baseLines = (t.level - 1) * 10), U1(t));
-    },
-    q1 = A4;
-  var B4 = (t) => {
-      (n.setLevel(t), f.levelSelect());
-    },
-    A = B4;
-  var O4 = {
-      LEVEL_ONE: () => {
-        A(1);
-      },
-      LEVEL_TWO: () => {
-        A(2);
-      },
-      LEVEL_THREE: () => {
-        A(3);
-      },
-      LEVEL_FOUR: () => {
-        A(4);
-      },
-      LEVEL_FIVE: () => {
-        A(5);
-      },
-      LEVEL_SIX: () => {
-        A(6);
-      },
-      LEVEL_SEVEN: () => {
-        A(7);
-      },
-      LEVEL_EIGHT: () => {
-        A(8);
-      },
-      LEVEL_NINE: () => {
-        A(9);
-      },
-      LEVEL_TEN: () => {
-        A(10);
-      },
-      CONFIRM: (t, e) => {
-        q1(e.state);
-      },
-    },
-    Y1 = O4;
-  var T4 = (t, e, r) =>
-      Z(t, e, r) ? !1 : ((r.cx += t), (r.cy += e), f.move(), !0),
-    N = T4;
-  var b4 = (t) => {
-      let { curr: e } = t;
-      if (!e) return;
-      let r = e.shape;
-      ((e.shape = r[0].map((o, h) => r.map((c) => c[h]).toReversed())),
-        Z(0, 0, t) ? (e.shape = r) : f.rotate());
-    },
-    K1 = b4;
-  var R4 = (t) => {
-      let { curr: e } = t,
-        r = e.shape;
-      for (let o = 0; o < r.length; o++)
-        for (let h = 0; h < r[o].length; h++)
-          r[o][h] && (t.board[t.cy + o][t.cx + h] = e.color);
-    },
-    a1 = R4;
-  var k4 = (t, e, r, o) => {
-      let { RGBA_BLACK: h } = v,
-        { blockSize: c } = l,
-        a = c,
-        s = 1,
-        i = a - s * 2,
-        g = e * a + s,
-        m = r * a + s;
-      ((t.fillStyle = o),
-        t.fillRect(g, m, i, i),
-        (t.strokeStyle = h),
-        t.strokeRect(g, m, i, i));
-    },
-    W = k4;
-  var G4 = (t) => {
-      let { COLS: e } = M,
-        { gameBoardContext: r } = l;
-      for (let o of t.lines) {
-        (r.save(), (r.globalAlpha = o.alpha));
-        for (let h = 0; h < e; h++) W(r, h, o.y, o.color);
-        r.restore();
+      case "playing": {
+        img = getImage(building);
+        size = width * 1.4;
+        x = width - size / 1.7;
+        y = height - size;
+        break;
       }
-    },
-    j1 = G4;
-  var I4 = {
-      score: document.querySelector('#score'),
-      lines: document.querySelector('#lines'),
-      level: document.querySelector('#level'),
-      highScore: document.querySelector('#highScore'),
-    },
-    k = I4;
-  var _4 = (t, e, r, o, h) => {
-      let c = null;
-      if (t === e) return null;
-      let a = 0,
-        s = 0,
-        i = (g) => {
-          s || (s = g);
-          let m = g - s;
-          ((s = g), (a += m));
-          let p = Math.min(a / r, 1),
-            d = Math.floor(t + (e - t) * p);
-          (o(d, c),
-            p < 1
-              ? (c = requestAnimationFrame(i))
-              : (cancelAnimationFrame(c), h?.()));
-        };
-      return (
-        (c = requestAnimationFrame(i)),
-        { cancel: () => cancelAnimationFrame(c) }
-      );
-    },
-    Z1 = _4;
-  var $ = (t, e, r = 0) => (t.textContent = r ? E(e, r) : String(e)),
-    P4 = () => {
-      let t = { score: 0, lines: 0, level: 1, highScore: 0 },
-        e = { score: 0 },
-        r = { score: !1 },
-        o = (g) => {
-          ((e.score = g),
-            !r.score &&
-              ((r.score = !0),
-              Z1(
-                t.score,
-                e.score,
-                300,
-                (m) => {
-                  $(k.score, m, 5);
-                },
-                () => {
-                  ((t.score = e.score),
-                    (r.score = !1),
-                    t.score !== e.score && o(e.score));
-                },
-              )));
-        },
-        h = (g) => {
-          g !== t.lines && ($(k.lines, g, 2), (t.lines = g));
-        },
-        c = (g) => {
-          g !== t.level && ($(k.level, g, 2), (t.level = g));
-        },
-        a = (g) => {
-          g !== t.highScore && ($(k.highScore, g, 5), (t.highScore = g));
-        };
-      return {
-        update: (g) => {
-          (o(g.score), h(g.lines), c(g.level), a(g.highScore));
-        },
-        reset: () => {
-          ((t.score = t.lines = t.level = t.highScore = 0),
-            (r.score = !1),
-            $(k.score, 0, 5),
-            $(k.lines, 0, 2),
-            $(k.level, 1, 2),
-            $(k.highScore, 0, 5));
-        },
-      };
-    },
-    Q1 = P4;
-  var N4 = (t, e, r, o, h = !1) => {
-      let c = Q1();
-      ((n.getMode() === 'main-menu' || h) && c.reset(),
-        c.update({ score: t, lines: e, level: r, highScore: o }));
-    },
-    F = N4;
-  var { TEAL: $4, YELLOW: F4, PURPLE: D4, ORANGE: W4, GREEN: U4, RED: q4 } = v,
-    Y4 = [$4, F4, D4, W4, U4, q4],
-    z1 = Y4;
-  var K4 = (t) => {
-      let { gameBoardContext: e } = l;
-      for (let r of t)
-        ((e.globalAlpha = r.alpha),
-          (e.fillStyle = r.color),
-          e.beginPath(),
-          e.arc(r.x, r.y, r.radius, 0, Math.PI * 2),
-          e.fill(),
-          (r.x += r.vx),
-          (r.y += r.vy),
-          (r.alpha -= 0.024));
-      e.globalAlpha = 1;
-    },
-    X1 = K4;
-  var j4 = () => {
-      let { GREEN: t } = v,
-        { gameBoard: e } = l,
-        { width: r, height: o } = e;
-      w({
-        text: 'LEVEL UP',
-        x: r / 2,
-        y: o / 2.5,
-        color: t,
-        size: 1.2,
-        center: !0,
-      });
-    },
-    J1 = j4;
-  var Z4 = (t, e) => {
-      let { GREEN: r } = v,
-        { gameBoard: o } = l,
-        { width: h } = o;
-      w({ text: String(t), x: h / 2, y: e, color: r, size: 3, center: !0 });
-    },
-    v1 = Z4;
-  var Q4 = () => {
-      let { YELLOW: t, BLACK: e } = v,
-        { gameBoard: r } = l,
-        { width: o, height: h } = r;
-      w({
-        text: 'CONGRATS!',
-        x: o / 2,
-        y: h / 1.6,
-        color: t,
-        stroke: !0,
-        strokeColor: e,
-        lineWidth: 3,
-        size: 1.3,
-        center: !0,
-      });
-    },
-    t2 = Q4;
-  function X4(t, e) {
-    let { gameBoard: r } = l,
-      { height: o } = r;
-    (T(), O(), J1(), v1(t, o / 1.85), t2(), X1(e));
-  }
-  var e2 = X4;
-  var V1 = class {
-      constructor(e) {
-        ((this.fireworks = this.createFireworks()),
-          (this.duration = 3),
-          (this.spawnTimer = 0),
-          (this.layer = 100),
-          (this.blocking = !0),
-          (this.timer = 0),
-          (this.name = 'level-up'),
-          (this.state = e));
+      case "paused": {
+        img = getImage(scenes_background_default.coffee);
+        size = width * 1.5;
+        x = width - size * 0.93;
+        y = height - size;
+        break;
       }
-      createFireworks() {
-        let { width: e, height: r } = l.gameBoard,
-          o = [];
-        for (let h = 0; h < 40; h++) {
-          let c = Math.random() * Math.PI * 2,
-            a = 5 + Math.random() * 15;
-          o.push({
-            x: e / 2,
-            y: r / 2 - 60,
-            vx: Math.cos(c) * a,
-            vy: Math.sin(c) * a,
-            radius: 3 + Math.random() * 4,
-            color: z1[Math.floor(Math.random() * z1.length)],
-            alpha: 1,
-          });
-        }
-        return o;
+      case "game-over": {
+        img = getImage(scenes_background_default.happy);
+        size = Math.floor(width * 0.42);
+        x = width / 2 - size / 2;
+        y = height / 2 - size * 1.35;
+        break;
       }
-      update(e) {
-        return (
-          (this.timer += e),
-          (this.spawnTimer += e),
-          this.updateFireworks(e),
-          this.spawnTimer > 0.6 &&
-            (this.fireworks.push(...this.createFireworks()),
-            (this.spawnTimer = 0)),
-          this.timer >= this.duration ? (this.stop(), !1) : !0
-        );
-      }
-      stop() {
-        R();
-      }
-      updateFireworks(e) {
-        for (let o of this.fireworks)
-          ((o.vx *= 0.98),
-            (o.vy *= 0.98),
-            (o.vy += 0.01 * e),
-            (o.x += o.vx * e * 0.008),
-            (o.y += o.vy * e * 0.008),
-            (o.alpha -= e * 0.024),
-            (o.radius += e * 10));
-        this.fireworks = this.fireworks.filter((o) => o.alpha > 0);
-      }
-      render() {
-        let { fireworks: e, state: r } = this,
-          { level: o } = r;
-        e2(o, e);
-      }
+    }
+    render_image_default(ctx, img, x, y, size);
+  };
+  var render_scene_background_default = renderSceneBackground;
+
+  // lib/ui/effects/render-countdown.js
+  var renderCountdown = (state) => {
+    const { number, scale } = state;
+    clear_board_default();
+    render_overlay_default();
+    render_tetris_text_default();
+    render_scene_background_default("countdown");
+    render_game_image_default();
+    render_get_ready_text_default();
+    render_countdown_text_default(number, scale);
+  };
+  var render_countdown_default = renderCountdown;
+
+  // lib/engine/state/set-mode.js
+  var MODES = /* @__PURE__ */ new Set(["main-menu", "playing", "paused", "game-over"]);
+  var setMode = (mode) => {
+    if (!MODES.has(mode) || engine_state_default.mode === mode) {
+      return;
+    }
+    engine_state_default.mode = mode;
+  };
+  var set_mode_default = setMode;
+
+  // lib/audio/state/audio-state.js
+  var AudioState = {
+    /** 是否启用背景音乐 true = 播放 BGM false = 静音 BGM */
+    bgmEnabled: true,
+    /**
+     * BGM 定时器引用
+     *
+     * 常见用途：
+     *
+     * - SetInterval / setTimeout 控制循环播放
+     * - 或用于调度下一段 BGM clip
+     */
+    bgmTimer: null
+  };
+  var audio_state_default = AudioState;
+
+  // lib/audio/loop-play-bgm.js
+  var loopPlayBGM = (i, m) => {
+    if (i >= m.length) {
+      i = 0;
+    }
+    play_tone_default(m[i], 110, 0.05);
+    audio_state_default.bgmTimer = setTimeout(() => {
+      loopPlayBGM(i + 1, m);
+    }, 130);
+  };
+  var loop_play_bgm_default = loopPlayBGM;
+
+  // lib/audio/stop-bgm.js
+  var stopBGM = () => {
+    if (audio_state_default.bgmTimer) {
+      clearTimeout(audio_state_default.bgmTimer);
+    }
+    audio_state_default.bgmTimer = null;
+  };
+  var stop_bgm_default = stopBGM;
+
+  // lib/audio/play-bgm.js
+  var playBGM = () => {
+    const m = [
+      659,
+      659,
+      587,
+      659,
+      784,
+      880,
+      523,
+      523,
+      440,
+      523,
+      659,
+      784,
+      659,
+      659,
+      587,
+      659,
+      784,
+      880,
+      988,
+      880,
+      784,
+      659,
+      880,
+      784,
+      659,
+      587,
+      523,
+      587,
+      659,
+      784,
+      659,
+      587
+    ];
+    if (!audio_state_default.bgmEnabled) {
+      return false;
+    }
+    stop_bgm_default();
+    loop_play_bgm_default(0, m);
+  };
+  var play_bgm_default = playBGM;
+
+  // lib/ui/constants/board.js
+  var COLS = 10;
+  var ROWS = 20;
+  var BOARD = {
+    COLS,
+    ROWS
+  };
+  var board_default = BOARD;
+
+  // lib/ui/constants/tetrominoes.js
+  var { PINK: PINK2, BLUE: BLUE2, TEAL: TEAL2, YELLOW: YELLOW2, PURPLE: PURPLE2, ORANGE: ORANGE2, GREEN: GREEN2, RED: RED2 } = colors_default;
+  var TETROMINOES = [
+    // I型方块（长条）：1行4列
+    { shape: [[1, 1, 1, 1]], color: TEAL2 },
+    // I型方块（长条）：1行5列
+    { shape: [[1, 1, 1, 1, 1]], color: GREEN2 },
+    // O型方块（正方形）：2x2
+    {
+      shape: [
+        [1, 1],
+        [1, 1]
+      ],
+      color: ORANGE2
     },
-    r2 = V1;
-  var J4 = () => {
-      let { state: t } = n;
-      (C(), f.levelUp(), I(new r2(t)));
+    // T型方块：2x3
+    {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1]
+      ],
+      color: YELLOW2
     },
-    o2 = J4;
-  var H1 = class {
-      constructor(e, r) {
-        ((this.lines = e.map((o) => ({ y: o, alpha: 1, timer: 0 }))),
-          (this.state = r),
-          (this.layer = 200),
-          (this.blocking = !0),
-          (this.name = 'clear-lines'),
-          f.clear(e.length - 1));
-      }
-      update(e) {
-        let r = !0;
-        for (let o of this.lines) {
-          let h = Math.floor(o.timer / 0.12);
-          ((o.alpha = h % 2 === 0 ? 1 : 0),
-            (o.timer += e),
-            o.timer < 0.72 && (r = !1));
-        }
-        return r ? (this.stop(), !1) : !0;
-      }
-      stop() {
-        let { CLEAR_SCORES: e, MAX_LEVEL: r } = j,
-          { ROWS: o, COLS: h } = M,
-          { state: c } = this,
-          s = (c.clearLines || []).length;
-        for (let m = o - 1; m >= 0; m--)
-          c.board[m].every(Boolean) &&
-            (c.board.splice(m, 1),
-            c.board.unshift(Array.from({ length: h }).fill(0)),
-            m++);
-        ((c.clearLines = []), (c.lines += s), (c.score += e[s] * c.level));
-        let i = c.baseLines + c.lines,
-          g = Math.floor(i / 10) + 1;
-        (g > c.level && o2(),
-          (c.level = Math.min(Math.max(c.level, g), r)),
-          F(c.score, c.lines, c.level, c.highScore));
-      }
-      render() {
-        j1({ lines: this.lines });
-      }
+    // L型方块
+    {
+      shape: [
+        [1, 0, 0],
+        [1, 1, 1]
+      ],
+      color: BLUE2
     },
-    h2 = H1;
-  var t5 = (t, e) => {
-      let r = new h2(t, e);
-      I(r);
+    // J型方块
+    {
+      shape: [
+        [0, 0, 1],
+        [1, 1, 1]
+      ],
+      color: PINK2
     },
-    i2 = t5;
-  var e5 = (t) => {
-      let { ROWS: e } = M,
-        r = 0,
-        o = [];
-      for (let h = e - 1; h >= 0; h--)
-        t.board[h].every((a) => !!a) && (o.push(h), r++);
-      return r === 0
-        ? (n.saveHighScore(), !1)
-        : ((t.clearLines = o), i2(o, t), !0);
+    // S型方块（右斜）
+    {
+      shape: [
+        [0, 1, 1],
+        [1, 1, 0]
+      ],
+      color: RED2
     },
-    m1 = e5;
-  var r5 = (t) => {
-      for (; N(0, 1, t); );
-      (a1(t), f.fall(), m1(t), P(t), f.drop());
-    },
-    c2 = r5;
-  var o5 = (t) => {
-      let e = n.getMode();
-      e === 'paused' ||
-        e === 'game-over' ||
-        e === 'main-menu' ||
-        (C(),
-        n.setMode('playing'),
-        (t.score = 0),
-        (t.lines = 0),
-        (t.level = 1),
-        n.resetBoard(),
-        F(t.score, t.lines, t.level, t.highScore, !0),
-        P(t),
-        R(),
-        n.restart());
-    },
-    g2 = o5;
-  var L1 = class {
-      constructor(e = 500) {
-        ((this.layer = e),
-          (this.blocking = !0),
-          (this.timer = 0),
-          (this.active = !0),
-          (this.name = 'paused'));
-      }
-      update(e) {
-        return this.active
-          ? ((this.timer += e),
-            this.timer >= 1 && (f.secondTick(), (this.timer = 0)),
-            !0)
-          : !1;
-      }
-      stop() {
-        this.active = !1;
-      }
-      render() {
-        this.active = !0;
-      }
-    },
-    l2 = L1;
-  var Q = null,
-    s2 = () => {
-      Q || ((Q = new l2()), I(Q));
-    },
-    n2 = () => {
-      Q && (Q.stop(), (Q = null));
+    // Z型方块（左斜）
+    {
+      shape: [
+        [1, 1, 0],
+        [0, 1, 1]
+      ],
+      color: PURPLE2
+    }
+  ];
+  var tetrominoes_default = TETROMINOES;
+
+  // lib/game/utils/random-tetromino.js
+  function randomTetromino() {
+    const randomIndex = Math.floor(Math.random() * tetrominoes_default.length);
+    const piece = tetrominoes_default[randomIndex];
+    return {
+      ...piece,
+      shape: piece.shape.map((row) => [...row])
     };
-  var h5 = () => {
-      let t = n.getMode();
-      if (t === 'game-over' || t === 'main-menu') return !1;
-      t === 'playing'
-        ? (n.setMode('paused'), C(), f.pause(), s2())
-        : (n2(), n.setMode('playing'), f.resume(), R(), n.restart());
-    },
-    d1 = h5;
-  var i5 = () => {
-      let t = n.getMode();
-      t === 'main-menu' ||
-        t === 'paused' ||
-        t === 'game-over' ||
-        ((H.bgmEnabled = !H.bgmEnabled),
-        f.bgmToggle(),
-        H.bgmEnabled ? R() : C());
-    },
-    a2 = i5;
-  var c5 = {
-      MOVE_LEFT: (t, e) => {
-        N(-1, 0, e.state);
-      },
-      MOVE_RIGHT: (t, e) => {
-        N(1, 0, e.state);
-      },
-      MOVE_DOWN: (t, e) => {
-        N(0, 1, e.state);
-      },
-      DROP: (t, e) => {
-        c2(e.state);
-      },
-      ROTATE: (t, e) => {
-        K1(e.state);
-      },
-      RESTART: (t, e) => {
-        g2(e.state);
-      },
-      QUIT: () => {
-        g1();
-      },
-      TOGGLE_PAUSE: () => {
-        d1();
-      },
-      TOGGLE_MUSIC: () => {
-        a2();
-      },
-    },
-    v2 = c5;
-  var g5 = {
-      TOGGLE_PAUSE: () => {
-        d1();
-      },
-    },
-    m2 = g5;
-  var l5 = () => {
-      let { COLS: t, ROWS: e } = M;
-      u.board = Array.from({ length: e }, () =>
-        Array.from({ length: t }).fill(0),
-      );
-    },
-    o1 = l5;
-  var s5 = (t) => {
-      (C(),
-        n.start(),
-        o1(),
-        n.setMode('main-menu'),
-        (t.score = 0),
-        (t.lines = 0),
-        (t.level = 1),
-        (t.next = null),
-        F(t.score, t.lines, t.level, t.highScore));
-    },
-    d2 = s5;
-  var n5 = {
-      CONFIRM: (t, e) => {
-        d2(e.state);
-      },
-    },
-    p2 = n5;
-  var a5 = { 'main-menu': Y1, playing: v2, paused: m2, 'game-over': p2 },
-    v5 = (t, e) => {
-      let { type: r, payload: o } = t,
-        h = e.getMode(),
-        c = a5[h];
-      if (!c) return;
-      let a = c[r];
-      a?.(o, e);
-    },
-    f2 = v5;
-  var S1 = class {
-      constructor(e, r = {}) {
-        ((this.type = e), (this.payload = r));
-      }
-      execute(e) {
-        f2(this, e);
-      }
-    },
-    p1 = S1;
-  var m5 = (t) => Math.max(100, 1e3 - (t.level - 1) * 80),
-    x2 = m5;
-  var d5 = (t) => {
-      let e = n.getMode();
-      return !(
-        e === 'main-menu' ||
-        e === 'game-over' ||
-        i1() ||
-        (!N(0, 1, t) && (a1(t), f.fall(), m1(t), P(t), e === 'game-over'))
-      );
-    },
-    w2 = d5;
-  var y2 = (t) => {
-      n.timestamp || (n.timestamp = t);
-      let e = t - n.accumulator,
-        r = (t - n.timestamp) / 1e3;
-      r > 1e3 && (r = 1e3);
-      let o = x2(n.state);
-      if (((n.timestamp = t), z.playing)) {
-        let { data: h } = z;
-        for (; z.cursor < h.length && h[z.cursor].frame === z.frame; ) {
-          let c = h[z.cursor];
-          (J.enqueue(new p1(c.cmd.type, c.cmd.payload)), z.cursor++);
+  }
+  var random_tetromino_default = randomTetromino;
+
+  // lib/game/logic/collision.js
+  var collision = (ox, oy, state) => {
+    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
+    const { curr, cx, cy, board } = state;
+    if (!curr) {
+      return false;
+    }
+    const s = curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          const nx = cx + x + ox;
+          const ny = cy + y + oy;
+          const outOfBounds = nx < 0 || nx >= COLS2 || ny >= ROWS2;
+          const hitBlock = ny >= 0 && ny < ROWS2 && board[ny][nx];
+          if (outOfBounds || hitBlock) {
+            return true;
+          }
         }
       }
-      (J.flush(n),
-        n.update(r),
-        z.frame++,
-        (!n.accumulator || e > o) && (w2(n.state), (n.accumulator = t)),
-        n.render(),
-        n.animate(),
-        (n.rafId = requestAnimationFrame(y2)));
+    }
+    return false;
+  };
+  var collision_default = collision;
+
+  // lib/game/core/game-over.js
+  var gameOver = () => {
+    const mode = engine_default.getMode();
+    if (mode === "game-over" || mode === "paused" || mode === "main-menu") {
+      return false;
+    }
+    engine_default.setMode("game-over");
+    engine_default.saveHighScore();
+    stop_bgm_default();
+    sounds_default.gameOver();
+  };
+  var game_over_default = gameOver;
+
+  // lib/ui/next/clear-next-piece.js
+  var clearNextPiece = () => {
+    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } = canvas_default;
+    const { width, height } = nextPiece2;
+    nextPieceContext2.clearRect(0, 0, width, height);
+  };
+  var clear_next_piece_default = clearNextPiece;
+
+  // lib/ui/next/render-next-piece.js
+  var renderNextPiece = (state) => {
+    const { next } = state;
+    const { BLACK: BLACK2 } = colors_default;
+    const { nextPiece: nextPiece2, nextPieceContext: ctx } = canvas_default;
+    const { width, height } = nextPiece2;
+    if (!next) return;
+    const { shape } = next;
+    const gridSize = 5;
+    const blockSize2 = Math.floor(width / gridSize);
+    const ox = Math.floor((width - shape[0].length * blockSize2) / 2);
+    const oy = Math.floor((height - shape.length * blockSize2) / 2);
+    clear_next_piece_default();
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (!shape[y][x]) continue;
+        const px = ox + x * blockSize2;
+        const py = oy + y * blockSize2;
+        ctx.fillStyle = next.color;
+        ctx.fillRect(px, py, blockSize2 - 2, blockSize2 - 2);
+        ctx.strokeStyle = BLACK2;
+        ctx.strokeRect(px, py, blockSize2 - 2, blockSize2 - 2);
+      }
+    }
+  };
+  var render_next_piece_default = renderNextPiece;
+
+  // lib/game/logic/spawn.js
+  var spawn = (state) => {
+    const { COLS: COLS2 } = board_default;
+    state.curr = state.next ? {
+      ...state.next,
+      shape: state.next.shape.map((row) => [...row])
+    } : random_tetromino_default();
+    state.next = random_tetromino_default();
+    state.cx = Math.floor(COLS2 / 2) - Math.floor(state.curr.shape[0].length / 2);
+    state.cy = 0;
+    render_next_piece_default(state.next);
+    if (collision_default(0, 0, state)) {
+      game_over_default();
+    }
+  };
+  var spawn_default = spawn;
+
+  // lib/engine/restart-game-loop.js
+  var restartGameLoop = () => {
+    engine_default.stop();
+    engine_default.rafId = requestAnimationFrame(start_game_loop_default);
+  };
+  var restart_game_loop_default = restartGameLoop;
+
+  // lib/utils/pad-start.js
+  var padStart = (n, len) => {
+    const num = Number(n);
+    if (!Number.isFinite(num)) {
+      return "";
+    }
+    const targetLen = Math.max(0, Math.floor(len));
+    const sign = num < 0 ? "-" : "";
+    const absStr = Math.abs(num).toString();
+    return sign + absStr.padStart(targetLen, "0");
+  };
+  var pad_start_default = padStart;
+
+  // lib/game/core/begin-playing.js
+  var beginPlaying = (state) => {
+    const $level = document.querySelector("#level");
+    if ($level) {
+      $level.textContent = pad_start_default(state.level, 2);
+    }
+    engine_default.setMode("playing");
+    spawn_default(state);
+    sounds_default.levelStart();
+    setTimeout(() => {
+      play_bgm_default();
+    }, 250);
+    engine_default.rafId = requestAnimationFrame(restart_game_loop_default);
+  };
+  var begin_playing_default = beginPlaying;
+
+  // lib/animations/countdown-animation.js
+  var CountdownAnimation = (gameState) => {
+    const state = {
+      show: true,
+      number: 3,
+      scale: 4,
+      count: 0,
+      acc: 0
+    };
+    return {
+      layer: 100,
+      // 渲染层级（UI 层，显示在最前面）
+      blocking: true,
+      // 是否阻塞用户输入（倒计时期间禁止操作）
+      name: "countdown",
+      // 动画名称标识
+      /**
+       * ## 更新倒计时动画状态
+       *
+       * @param {number} delta - 距离上一帧的时间差（秒）
+       * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
+       */
+      update(delta) {
+        state.acc += delta;
+        if (state.acc < 0.01) {
+          return true;
+        }
+        state.acc = 0;
+        render_countdown_default(state);
+        state.count++;
+        state.scale = Math.max(1, state.scale - 0.4);
+        if (state.count >= 50) {
+          state.count = 0;
+          state.number -= 1;
+          state.scale = 4;
+          if (state.number >= 1) {
+            sounds_default.countdown();
+          }
+        }
+        if (state.number <= 0) {
+          this.stop();
+          return false;
+        }
+        return true;
+      },
+      stop() {
+        set_mode_default("playing");
+        begin_playing_default(gameState);
+      },
+      // 渲染倒计时动画：将当前状态传递给渲染函数
+      render() {
+        render_countdown_default(state);
+      }
+    };
+  };
+  var countdown_animation_default = CountdownAnimation;
+
+  // lib/controllers/countdown-controller.js
+  var startCountdown = (state) => {
+    registerAnimation(countdown_animation_default(state));
+  };
+  var countdown_controller_default = startCountdown;
+
+  // lib/game/core/start-game.js
+  var startGame = (state) => {
+    state.baseLines = (state.level - 1) * 10;
+    countdown_controller_default(state);
+  };
+  var start_game_default = startGame;
+
+  // lib/game/actions/select-level.js
+  var selectLevel = (level) => {
+    engine_default.setLevel(level);
+    sounds_default.levelSelect();
+  };
+  var select_level_default = selectLevel;
+
+  // lib/command/actions/main-menu-actions.js
+  var MAIN_MENU_ACTIONS = {
+    /** ## 选择难度 1 */
+    LEVEL_ONE: () => {
+      select_level_default(1);
     },
-    n1 = y2;
-  var p5 = () => {
-      n.rafId &&
-        (cancelAnimationFrame(n.rafId),
-        (n.rafId = null),
-        (n.timestamp = 0),
-        (n.accumulator = 0));
+    LEVEL_TWO: () => {
+      select_level_default(2);
     },
-    u2 = p5;
-  var f5 = () => {
-      n.resize();
+    LEVEL_THREE: () => {
+      select_level_default(3);
     },
-    M2 = f5;
-  var x5 = (t) => {
-      let { action: e } = t;
-      if (i1(['countdown', 'level-up']) || !e) return;
-      let o = new p1(e);
-      (J.enqueue(o), z.recording && z.data.push({ frame: z.frame, cmd: o }));
+    LEVEL_FOUR: () => {
+      select_level_default(4);
     },
-    C2 = x5;
-  var w5 = {
-      arrowleft: 'MOVE_LEFT',
-      arrowright: 'MOVE_RIGHT',
-      arrowdown: 'MOVE_DOWN',
-      arrowup: 'ROTATE',
-      ' ': 'DROP',
-      m: 'TOGGLE_MUSIC',
-      p: 'TOGGLE_PAUSE',
-      r: 'RESTART',
-      q: 'QUIT',
-      1: 'LEVEL_ONE',
-      2: 'LEVEL_TWO',
-      3: 'LEVEL_THREE',
-      4: 'LEVEL_FOUR',
-      5: 'LEVEL_FIVE',
-      6: 'LEVEL_SIX',
-      7: 'LEVEL_SEVEN',
-      8: 'LEVEL_EIGHT',
-      9: 'LEVEL_NINE',
-      t: 'LEVEL_TEN',
-      enter: 'CONFIRM',
+    LEVEL_FIVE: () => {
+      select_level_default(5);
     },
-    y5 = (t) => {
-      if (!t) return;
-      let e = t.toLowerCase();
-      return w5[e];
+    LEVEL_SIX: () => {
+      select_level_default(6);
     },
-    z2 = y5;
-  var u5 = (t) => {
-      let e = t.key.toLowerCase(),
-        r = z2(e);
-      r && C2({ type: 'keydown', key: e, action: r });
+    LEVEL_SEVEN: () => {
+      select_level_default(7);
     },
-    V2 = u5;
-  var M5 = () => {
-      (globalThis.addEventListener('resize', M2),
-        document.addEventListener('keydown', V2));
+    LEVEL_EIGHT: () => {
+      select_level_default(8);
     },
-    H2 = M5;
-  var C5 = (t) => localStorage.getItem(t),
-    L2 = C5;
-  var z5 = () => {
-      u.highScore = Number.parseInt(L2('tetris-high-score'), 10) || 0;
+    LEVEL_NINE: () => {
+      select_level_default(9);
     },
-    E1 = z5;
-  var V5 = (t, e) => {
-      localStorage.setItem(t, e);
+    LEVEL_TEN: () => {
+      select_level_default(10);
     },
-    S2 = V5;
-  var H5 = () => {
-      let { score: t } = u;
-      t > u.highScore &&
-        ((u.highScore = t), S2('tetris-high-score', u.highScore.toString()));
-    },
-    E2 = H5;
-  var L5 = () => u.mode,
-    A2 = L5;
-  var S5 = (t) => {
-      u.level = t;
-    },
-    B2 = S5;
-  var E5 = () => {
-      let { GREEN: t } = v,
-        { gameBoard: e } = l,
-        { width: r, height: o } = e;
-      w({
-        text: 'LEVEL',
-        x: r / 2,
-        y: o * 0.35,
-        color: t,
-        size: 1,
-        center: !0,
-      });
-    },
-    O2 = E5;
-  var A5 = () => {
-      let { WHITE: t } = v,
-        { gameBoard: e } = l,
-        { width: r, height: o } = e;
-      w({
-        text: '1-9 or T KEY',
-        x: r / 2,
-        y: o * 0.58,
-        color: t,
-        size: 1,
-        center: !0,
-      });
-    },
-    T2 = A5;
-  var B5 = () => {
-      let { TEAL: t } = v,
-        { gameBoard: e } = l,
-        { width: r, height: o } = e;
-      w({
-        text: 'ENTER START',
-        x: r / 2,
-        y: o * 0.74,
-        color: t,
-        size: 1.15,
-        center: !0,
-      });
-    },
-    f1 = B5;
-  var O5 = (t) => {
-      let { gameBoard: e } = l,
-        { height: r } = e;
-      (B(), T(), b('main-menu'), O(), O2(), v1(t, r * 0.5), T2(), f1());
-    },
-    h1 = O5;
-  var T5 = (t) => {
-      document?.fonts?.load
-        ? document.fonts.load('40px "Press Start 2P"').then(() => {
-            h1(t.level);
-          })
-        : setTimeout(() => {
-            h1(t.level);
-          }, 150);
-    },
-    b2 = T5;
-  var b5 = (t) => {
-      h1(t.level);
-    },
-    R2 = b5;
-  var R5 = () => {
-      let { YELLOW: t } = v,
-        { gameBoard: e } = l,
-        { width: r, height: o } = e;
-      w({
-        text: 'PAUSED',
-        x: r / 2,
-        y: o / 1.4,
-        color: t,
-        size: 1.6,
-        center: !0,
-      });
-    },
-    k2 = R5;
-  var k5 = (t, e = 'yyyy-MM-dd HH:mm:ss') => {
-      let r = t.getFullYear(),
-        o = t.getMonth() + 1,
-        h = t.getDate(),
-        c = t.getHours(),
-        a = t.getMinutes(),
-        s = t.getSeconds(),
-        i = () => (c >= 12 ? 'PM' : 'AM'),
-        g = e.includes('a'),
-        m = c % 12 || 12,
-        p = {
-          yyyy: r,
-          MM: E(o, 2),
-          dd: E(h, 2),
-          HH: E(c, 2),
-          hh: E(m, 2),
-          mm: E(a, 2),
-          ss: E(s, 2),
-          a: g ? i() : '',
+    /**
+     * ## 确认开始游戏
+     *
+     * @param {object} _ 参数对象
+     * @param {object} engine - 游戏引擎（实例）
+     */
+    CONFIRM: (_, engine) => {
+      start_game_default(engine.state);
+    }
+  };
+  var main_menu_actions_default = MAIN_MENU_ACTIONS;
+
+  // lib/game/logic/move.js
+  var move = (ox, oy, state) => {
+    if (!collision_default(ox, oy, state)) {
+      state.cx += ox;
+      state.cy += oy;
+      sounds_default.move();
+      return true;
+    }
+    return false;
+  };
+  var move_default = move;
+
+  // lib/game/logic/rotate.js
+  var rotate = (state) => {
+    const { curr } = state;
+    if (!curr) {
+      return;
+    }
+    const prev = curr.shape;
+    curr.shape = prev[0].map((_, i) => prev.map((r) => r[i]).toReversed());
+    if (collision_default(0, 0, state)) {
+      curr.shape = prev;
+    } else {
+      sounds_default.rotate();
+    }
+  };
+  var rotate_default = rotate;
+
+  // lib/game/logic/lock.js
+  var lock = (state) => {
+    const { curr } = state;
+    const s = curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          state.board[state.cy + y][state.cx + x] = curr.color;
+        }
+      }
+    }
+  };
+  var lock_default = lock;
+
+  // lib/ui/core/render-block.js
+  var renderBlock = (ctx, x, y, color) => {
+    const { RGBA_BLACK: RGBA_BLACK3 } = colors_default;
+    const { blockSize: blockSize2 } = canvas_default;
+    const bs = blockSize2;
+    const gap = 1;
+    const size = bs - gap * 2;
+    const px = x * bs + gap;
+    const py = y * bs + gap;
+    ctx.fillStyle = color;
+    ctx.fillRect(px, py, size, size);
+    ctx.strokeStyle = RGBA_BLACK3;
+    ctx.strokeRect(px, py, size, size);
+  };
+  var render_block_default = renderBlock;
+
+  // lib/ui/board/render-clear.js
+  var renderClear = (state) => {
+    const { COLS: COLS2 } = board_default;
+    const { gameBoardContext: ctx } = canvas_default;
+    for (const line of state.lines) {
+      ctx.save();
+      ctx.globalAlpha = line.alpha;
+      for (let x = 0; x < COLS2; x++) {
+        render_block_default(ctx, x, line.y, line.color);
+      }
+      ctx.restore();
+    }
+  };
+  var render_clear_default = renderClear;
+
+  // lib/ui/hud/hud-dom.js
+  var HudDom = {
+    /** @type {HTMLElement | null} 分数显示元素 */
+    score: document.querySelector("#score"),
+    /** @type {HTMLElement | null} 行数显示元素 */
+    lines: document.querySelector("#lines"),
+    /** @type {HTMLElement | null} 等级显示元素 */
+    level: document.querySelector("#level"),
+    /** @type {HTMLElement | null} 最高分显示元素 */
+    highScore: document.querySelector("#highScore")
+  };
+  var hud_dom_default = HudDom;
+
+  // lib/ui/hud/animate-hud-number.js
+  var animateHUDNumber = (from, to, duration, onUpdate, onComplete) => {
+    let rafId = null;
+    if (from === to) {
+      return null;
+    }
+    let elapsed = 0;
+    let lastTimestamp = 0;
+    const step = (timestamp) => {
+      if (!lastTimestamp) {
+        lastTimestamp = timestamp;
+      }
+      const delta = timestamp - lastTimestamp;
+      lastTimestamp = timestamp;
+      elapsed += delta;
+      const progress = Math.min(elapsed / duration, 1);
+      const value = Math.floor(from + (to - from) * progress);
+      onUpdate(value, rafId);
+      if (progress < 1) {
+        rafId = requestAnimationFrame(step);
+      } else {
+        cancelAnimationFrame(rafId);
+        onComplete?.();
+      }
+    };
+    rafId = requestAnimationFrame(step);
+    return {
+      cancel: () => cancelAnimationFrame(rafId)
+    };
+  };
+  var animate_hud_number_default = animateHUDNumber;
+
+  // lib/ui/hud/create-hud.js
+  var setText = (el, value, pad = 0) => el.textContent = pad ? pad_start_default(value, pad) : String(value);
+  var createHud = () => {
+    const prev = {
+      score: 0,
+      lines: 0,
+      level: 1,
+      highScore: 0
+    };
+    const target = {
+      score: 0
+    };
+    const animating = {
+      score: false
+    };
+    const updateScore = (next) => {
+      target.score = next;
+      if (animating.score) return;
+      animating.score = true;
+      animate_hud_number_default(
+        prev.score,
+        target.score,
+        300,
+        // 每帧更新 UI
+        (v) => {
+          setText(hud_dom_default.score, v, 5);
         },
-        d = e;
-      for (let y of Object.keys(p)) d = d.replace(new RegExp(y, 'g'), p[y]);
-      return d;
-    },
-    G2 = k5;
-  var G5 = (t, e = 'HH:mm:ss') => {
-      let { GREEN: r } = v,
-        { gameBoard: o } = l,
-        { width: h, height: c } = o,
-        a = G2(new Date(), e);
-      w({
-        text: a,
-        x: h / 2,
-        y: c / 4.15,
-        color: t || r,
-        size: 0.94,
-        center: !0,
-      });
-    },
-    I2 = G5;
-  var I5 = (t) => {
-      let e = t.getHours(),
-        r = t.getMinutes(),
-        o = t.getSeconds(),
-        h = ((e % 12) + r / 60 + o / 3600) * ((2 * Math.PI) / 12),
-        c = (r + o / 60) * ((2 * Math.PI) / 60),
-        a = o * ((2 * Math.PI) / 60);
-      return { hAng: h, mAng: c, sAng: a };
-    },
-    _2 = I5;
-  var { RGBA_TEAL: L } = v,
-    _5 = {
-      rat: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M210.432 1012.897684l-43.573895-31.690105c106.954105-147.051789 185.317053-171.196632 423.828211-172.705684 21.396211-31.258947 16.249263-56.266105 9.377684-89.70779-3.557053-17.138526-7.221895-34.842947-7.221895-54.433684 0-68.958316 25.330526-104.636632 63.407158-136.973474l34.896842 41.040842c-29.453474 25.061053-44.409263 46.780632-44.409263 95.932632 0 14.093474 2.937263 28.402526 6.063158 43.546947 5.901474 28.510316 12.8 62.032842-1.131789 99.462737 166.373053-10.24 264.542316-96.902737 264.542315-236.193684C916.210526 418.330947 827.580632 323.368421 684.921263 323.368421c-83.644632 0-153.303579 29.696-174.187789 39.612632a224.875789 224.875789 0 0 1-20.533895 31.339789l-41.741474-34.115368 20.884211 17.057684-20.911158-16.976842C448.781474 359.828211 485.052632 314.287158 485.052632 262.736842c0-34.816-8.946526-60.766316-26.570106-77.069474-17.515789-16.249263-44.786526-24.602947-81.219368-24.953263V323.368421h-53.894737V109.783579l24.872421-1.913263c64.700632-4.931368 114.095158 7.895579 146.863158 38.238316C524.207158 173.056 538.947368 212.291368 538.947368 262.736842c0 11.102316-1.131789 21.908211-3.072 32.202105 37.268211-12.584421 89.842526-25.465263 149.045895-25.465263C858.165895 269.473684 970.105263 387.907368 970.105263 571.176421 970.105263 711.922526 877.487158 862.315789 617.552842 862.315789c-258.667789 0-311.942737 19.698526-407.120842 150.581895z m19.105684-256.835368c-12.045474 0-24.387368-0.565895-37.025684-1.64379l-22.096842-1.859368-2.425263-22.016C167.747368 728.144842 161.684211 672.444632 161.684211 631.026526c0-103.585684 21.450105-178.903579 53.894736-259.045052V107.789474h53.894737v274.782315l-2.021052 4.904422C235.439158 465.758316 215.578947 533.800421 215.578947 631.026526c0 22.878316 2.101895 51.442526 3.826527 70.979369 99.678316 2.802526 172.813474-35.408842 222.450526-116.493474l48.020211 24.090947c-11.237053 28.133053-11.371789 51.577263-0.377264 67.853474 9.701053 14.282105 28.645053 23.174737 49.448421 23.174737v53.894737c-39.019789 0-74.186105-17.515789-94.073263-46.888421a100.244211 100.244211 0 0 1-12.422737-25.546106c-53.221053 49.178947-121.128421 73.943579-202.913684 73.970527zM379.957895 525.473684c0-34.223158-13.231158-44.463158-29.642106-44.463158s-29.642105 10.24-29.642105 44.463158c0 34.250105 13.231158 44.463158 29.642105 44.463158s29.642105-10.213053 29.642106-44.463158z" fill="${L}" /></svg>`,
-      ox: `<svg width="800px" height="800px" viewBox="0 -0.5 1025 1025" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M1025.347368 635.580632V916.210526h-53.894736v-71.033263c-16.330105-18.405053-69.820632-70.413474-161.684211-86.069895V916.210526h-53.894737v-161.68421h-107.789473v215.578947h-53.894737V700.631579h161.68421c100.998737 0 172.570947 38.669474 215.578948 71.868632v-115.738948c-33.684211-43.627789-51.712-137.458526-53.706106-279.498105H701.978947c-76.934737 0-127.218526-26.219789-175.804631-51.550316a1556.048842 1556.048842 0 0 0-26.839579-13.743158c-26.839579 26.004211-66.209684 44.921263-115.738948 55.511579 24.441263 22.986105 60.874105 52.116211 106.469053 72.838737l-22.312421 49.044211c-76.584421-34.816-129.589895-88.926316-150.824421-113.125053-10.644211 0.619789-21.477053 1.024-32.687158 1.024a473.734737 473.734737 0 0 1-123.365053-15.952842l-93.022315 186.314105 68.581052 53.86779C167.882105 579.557053 237.891368 538.947368 324.715789 538.947368v53.894737c-95.986526 0-170.361263 62.490947-171.088842 63.137684l-16.78821 14.282106-136.838737-107.358316 109.729684-219.809684C46.430316 314.448842 1.347368 267.371789 1.347368 199.868632 1.347368 89.815579 121.586526 53.894737 163.031579 53.894737v53.894737c-14.120421 0-107.789474 17.165474-107.789474 92.079158C55.242105 290.465684 192.188632 323.368421 284.240842 323.368421c67.907368 0 122.421895-12.988632 157.696-35.624421-42.711579-14.336-95.097263-23.120842-169.337263-18.324211l-3.503158-53.786947c95.878737-6.117053 160.148211 8.515368 211.429053 28.833684C484.244211 235.439158 486.4 225.818947 486.4 215.578947c0-48.855579-57.829053-76.288-58.394947-76.557473l22.393263-49.017263C454.063158 91.648 540.294737 131.826526 540.294737 215.578947c0 18.566737-3.422316 35.84-9.997474 51.631158 7.060211 3.584 13.985684 7.168 20.776421 10.698106C597.854316 302.322526 638.248421 323.368421 701.978947 323.368421h269.473685v26.947368c0 214.689684 35.220211 266.590316 45.999157 277.369264l7.895579 7.895579z m-729.384421 25.141894l-98.789052 118.541474 86.797473 137.835789 45.594948-28.725894-65.913263-104.690527 37.052631-44.43621C358.642526 785.192421 439.080421 808.421053 540.294737 808.421053v-53.894737c-99.893895 0-175.077053-24.549053-223.474526-72.946527l-20.857264-20.857263z" fill="${L}" /></svg>`,
-      rabbit: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M862.315789 720.896c0 36.621474-4.122947 69.389474-24.252631 110.349474L769.697684 970.105263H485.052632v-53.894737h48.370526C507.877053 880.074105 485.052632 833.509053 485.052632 781.473684c0-59.418947 24.171789-113.313684 63.218526-152.360421l38.103579 38.103579A161.091368 161.091368 0 0 0 538.947368 781.473684c0 54.784 35.381895 104.043789 63.514948 134.736842h133.712842l53.490526-108.759579c15.710316-31.851789 18.755368-55.834947 18.755369-86.554947 0-80.976842-63.434105-150.096842-178.607158-195.503158-17.542737 8.138105-38.292211 13.554526-63.919158 13.554526h-80.842105c-13.958737 0-43.924211 15.979789-57.290106 40.016843l-47.104-26.165895C401.408 515.449263 448.242526 485.052632 485.052632 485.052632h80.842105c37.268211 0 57.478737-15.440842 79.090526-36.45979C625.367579 336.195368 549.753263 269.473684 485.052632 269.473684h-107.789474a21.288421 21.288421 0 0 0-5.955369 2.021053A683.762526 683.762526 0 0 0 302.187789 194.021053c-35.84-34.223158-61.763368-58.933895-94.908631-79.440842A42.442105 42.442105 0 0 0 185.478737 107.789474a22.824421 22.824421 0 0 0-17.381053 7.194947c-10.913684 11.425684-6.063158 28.240842 1.428211 39.181474 21.989053 32.121263 47.912421 56.858947 83.752421 91.109052 20.614737 19.671579 49.259789 43.169684 77.392842 63.08379C281.007158 367.400421 215.578947 484.432842 215.578947 592.842105c0 74.482526 24.791579 124.065684 51.065264 176.586106C294.534737 825.209263 323.368421 882.903579 323.368421 970.105263h-53.894737c0-74.482526-24.791579-124.065684-51.065263-176.586105C190.517895 737.738105 161.684211 680.043789 161.684211 592.842105c0-90.866526 42.226526-197.685895 93.453473-274.485894a803.759158 803.759158 0 0 1-39.046737-34.115369C177.852632 247.754105 150.231579 221.399579 125.035789 184.616421c-24.441263-35.759158-22.797474-78.686316 4.069053-106.819368 26.300632-27.567158 70.898526-31.043368 106.522947-9.000421 37.941895 23.444211 65.562947 49.798737 103.774316 86.258526 9.970526 9.512421 33.037474 32.309895 56.93979 60.550737h68.634947c-27.621053-37.780211-60.416-72.730947-88.522105-99.543579-28.833684-27.540211-54.730105-52.116211-84.533895-74.024421L326.305684 0.296421c31.232 23.228632 57.802105 48.532211 87.309474 76.719158 53.840842 51.388632 94.450526 100.594526 121.74821 146.83621 82.836211 26.650947 150.042947 116.870737 165.025685 230.750316l1.724631 13.177263-9.404631 9.404632c-3.772632 3.772632-7.706947 7.653053-11.802948 11.587368C837.227789 561.178947 862.315789 663.498105 862.315789 720.896zM309.463579 754.526316c3.934316 8.057263 7.895579 16.087579 11.991579 24.144842C348.887579 832.970105 377.263158 889.128421 377.263158 970.105263h53.894737c0-93.696-34.061474-161.226105-61.520842-215.578947h-60.173474z m597.90821 53.894737c-3.422316 9.404632-7.814737 19.806316-13.770105 31.959579L829.790316 970.105263h60.065684l52.143158-105.957052c10.778947-21.935158 17.515789-40.016842 21.90821-55.727158h-56.535579zM514.694737 390.736842c0-34.223158-13.231158-44.463158-29.642105-44.463158s-29.642105 10.24-29.642106 44.463158c0 34.250105 13.231158 44.463158 29.642106 44.463158s29.642105-10.213053 29.642105-44.463158z" fill="${L}" /></svg>`,
-      dragon: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M552.421053 1024c-69.766737 0-113.825684-13.958737-156.402527-27.459368-54.487579-17.273263-110.807579-35.004632-232.421052-26.516211l-3.826527-53.733053c131.718737-9.458526 195.934316 10.967579 252.52379 28.887579 42.226526 13.365895 78.686316 24.926316 140.126316 24.926316 92.752842 0 148.210526-57.936842 148.210526-113.960421 0-16.949895-5.524211-101.618526-114.634105-101.618526-64.970105 0-112.747789 23.336421-163.328 48.02021C365.325474 830.571789 300.301474 862.315789 204.288 862.315789 85.908211 862.315789 0 787.294316 0 683.897263 0 588.126316 80.788211 485.052632 258.182737 485.052632c86.689684 0 155.917474 24.818526 229.214316 51.09221 45.810526 16.410947 92.564211 33.172211 145.488842 44.166737 9.000421-7.033263 13.850947-16.276211 13.850947-26.758737 0-37.187368-37.672421-74.859789-74.13221-111.265684l-3.287579-3.287579 38.103579-38.103579 3.260631 3.287579C652.853895 446.275368 700.631579 494.026105 700.631579 553.552842c0 12.719158-2.802526 24.926316-7.976421 36.109474A594.997895 594.997895 0 0 0 754.526316 592.842105c62.437053 0 107.789474-34.007579 107.789473-80.842105 0-58.853053-52.870737-110.268632-108.840421-164.702316l-8.057263-7.841684c-19.024842 16.437895-38.076632 35.489684-59.418947 56.832l-38.103579-38.103579c74.805895-74.832842 134.898526-134.898526 268.314947-141.931789V55.619368c-63.407158 7.787789-120.993684 39.424-121.667368 39.801264l-15.818105 8.811789-14.120421-11.344842C731.701895 66.452211 709.712842 53.894737 673.684211 53.894737c-41.418105 0-74.347789 25.869474-109.190737 53.301895-26.624 20.911158-54.137263 42.549895-86.851369 53.194105L469.342316 161.684211h-69.093053l-105.525895 105.525894-38.103579-38.130526L324.015158 161.684211H161.684211V107.789474h303.104c22.231579-8.272842 43.708632-25.168842 66.398315-42.981053C569.829053 34.438737 613.618526 0 673.684211 0c48.909474 0 81.408 17.946947 110.888421 40.097684C813.702737 26.300632 877.729684 0 943.157895 0h26.947368v323.368421h-53.894737v-53.167158c-54.164211 3.098947-92.914526 15.845053-127.002947 36.675369l1.832421 1.778526C852.587789 368.505263 916.210526 430.376421 916.210526 512c0 60.928-43.708632 109.945263-107.789473 127.622737V700.631579h53.894736v-53.894737h53.894737v53.894737h53.894737v53.894737h-53.894737v53.894737h-53.894737v-53.894737h-53.894736c-29.722947 0-53.894737-24.171789-53.894737-53.894737v-53.894737c-118.325895 0-207.063579-31.797895-285.318737-59.877053C400.437895 562.229895 335.494737 538.947368 258.182737 538.947368 117.059368 538.947368 53.894737 611.732211 53.894737 683.897263 53.894737 757.221053 115.738947 808.421053 204.288 808.421053c11.910737 0 23.228632-0.538947 34.034526-1.536C248.454737 796.321684 269.473684 770.640842 269.473684 739.166316c0-33.118316-43.088842-70.979368-58.152421-81.596632l30.935579-44.139789c8.299789 5.793684 81.111579 58.664421 81.111579 125.736421 0 19.429053-4.527158 37.052632-10.994526 52.304842 30.773895-10.051368 58.314105-23.498105 86.662737-37.349053C452.877474 727.848421 508.577684 700.631579 585.997474 700.631579 702.410105 700.631579 754.526316 778.725053 754.526316 856.144842 754.526316 938.657684 678.912 1024 552.421053 1024z m-21.180632-623.104L493.136842 362.792421l137.889684-137.889684 38.103579 38.103579-137.889684 137.889684z m-126.760421-18.351158l-38.103579-38.103579 152.980211-152.98021 38.103579 38.103579-152.980211 152.98021z m282.004211-218.624c15.494737-9.754947 43.331368-31.447579 43.331368-31.447579-25.734737-27.809684-49.556211-33.333895-67.368421-29.07621-19.240421 4.608-37.753263 24.602947-37.753263 24.602947s42.253474 22.447158 61.790316 35.920842z" fill="${L}" /></svg>`,
-      tiger: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M673.684211 1024c-114.768842 0-188.820211-33.333895-254.167579-62.787368-53.625263-24.144842-99.974737-45.002105-161.28-45.002106-40.448 0-83.590737 23.255579-103.639579 45.16379l-39.747369-36.432842C142.497684 894.787368 199.168 862.315789 258.236632 862.315789c68.392421 0 119.861895 21.288421 172.921263 45.056V673.684211c0-35.166316-17.542737-64.107789-30.639158-80.815158-15.198316 9.835789-32.067368 18.890105-50.741895 26.947368l-21.342316-49.475368C469.800421 509.413053 485.052632 377.317053 485.052632 323.368421V221.642105A597.827368 597.827368 0 0 0 404.210526 215.578947h-26.947368V134.736842c0-12.099368-14.848-26.947368-26.947369-26.947368-9.377684 0-18.836211 0.592842-26.947368 1.347368V269.473684h-53.894737V211.671579c-136.030316 102.912-158.450526 266.886737-161.306947 295.882105 9.135158 9.108211 38.992842 25.061053 71.976421 38.669474l38.103579-59.365053 12.449684-1.589894C321.212632 473.653895 377.263158 392.192 377.263158 323.368421h53.894737c0 88.333474-68.796632 192.242526-180.870737 213.342316l-48.397474 75.398737-20.291368-7.437474C53.894737 557.756632 53.894737 523.317895 53.894737 512c0-50.041263 37.025684-254.733474 215.578947-365.621895V62.490947l22.528-3.745684C293.187368 58.556632 321.482105 53.894737 350.315789 53.894737c41.552842 0 80.842105 39.289263 80.842106 80.842105v27.513263c248.697263 10.563368 592.842105 165.295158 592.842105 484.486737 0 185.451789-131.018105 377.263158-350.315789 377.263158z m-13.473685-323.368421c-36.513684 0-67.368421 49.367579-67.368421 107.789474 0 85.746526 68.096 145.084632 89.465263 161.549473 91.540211-2.533053 164.378947-45.487158 213.827369-107.654737H700.631579v-53.894736h230.238316c8.919579-17.273263 16.357053-35.354947 22.285473-53.894737h-239.885473l-6.467369-17.650527C706.290526 735.582316 692.439579 700.631579 660.210526 700.631579zM485.052632 931.112421c33.926737 14.066526 70.521263 26.597053 114.607157 33.468632C569.424842 928.309895 538.947368 875.223579 538.947368 808.421053c0-90.650947 53.274947-161.684211 121.263158-161.684211 44.759579 0 73.835789 28.779789 88.68379 53.894737h217.007158c2.775579-17.866105 4.203789-35.920842 4.203789-53.894737 0-38.938947-5.658947-74.752-15.925895-107.627789l-126.706526 126.679579-38.103579-38.103579L932.001684 485.052632a367.939368 367.939368 0 0 0-57.775158-81.596632l-154.543158 154.543158-38.103579-38.103579 153.573053-153.573053a537.869474 537.869474 0 0 0-82.593684-56.751158l-140.665263 140.638316-38.103579-38.103579 128.134737-128.134737A794.731789 794.731789 0 0 0 538.947368 231.046737V323.368421c0 50.149053-11.102316 156.698947-95.932631 236.328421 18.378105 23.417263 42.037895 63.407158 42.037895 113.987369v257.42821zM215.578947 431.157895v-53.894737c39.774316 0 53.894737-29.022316 53.894737-53.894737h53.894737c0 53.571368-37.025684 107.789474-107.789474 107.789474z" fill="${L}" /></svg>`,
-      snake: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M671.528421 788.857263c44.328421 11.964632 89.626947 19.563789 136.892632 19.56379 89.168842 0 161.684211-60.442947 161.68421-134.736842s-72.515368-134.736842-161.68421-134.736843c-19.078737 0-37.025684 1.509053-54.218106 4.015158-0.754526-101.402947-38.211368-172.355368-79.413894-219.648L673.684211 323.368421a1749.962105 1749.962105 0 0 1-79.036632-1.751579c45.702737 35.866947 108.705684 107.870316 105.984 232.367158 0 0.431158-0.080842 0.808421-0.10779 1.239579-34.923789 10.994526-66.155789 26.731789-95.097263 45.190737a163.085474 163.085474 0 0 0-15.845052-42.388211c-21.557895-39.639579-60.065684-66.775579-97.360842-93.022316C433.098105 423.343158 377.263158 384 377.263158 296.421053c0-130.290526 108.274526-188.631579 215.578947-188.631579 64.134737 0 132.715789 12.045474 214.366316 37.807158C802.330947 180.250947 780.099368 209.381053 700.631579 214.635789V161.684211h-53.894737v53.679157c-63.272421-1.024-104.528842-5.200842-104.986947-5.254736l-5.578106 53.598315C538.408421 263.949474 592.357053 269.473684 673.684211 269.473684c125.170526 0 188.631579-48.128 188.631578-143.063579V106.981053l-18.432-6.144C747.789474 68.823579 668.025263 53.894737 592.842105 53.894737c-158.666105 0-269.473684 99.732211-269.473684 242.526316 0 115.550316 76.422737 169.391158 137.83579 212.614736 33.684211 23.713684 65.509053 46.106947 81.003789 74.698106 9.539368 17.542737 13.285053 33.414737 12.341895 47.750737 21.153684 9.108211 42.118737 17.839158 62.949052 25.977263C671.151158 620.193684 729.977263 592.842105 808.421053 592.842105c59.445895 0 107.789474 36.271158 107.789473 80.842106s-48.343579 80.842105-107.789473 80.842105c-105.472 0-203.237053-42.388211-297.768421-83.429053-94.800842-41.094737-184.346947-79.952842-281.411369-79.952842C122.718316 591.171368 53.894737 644.715789 53.894737 727.578947c0 79.063579 67.098947 136.434526 159.555368 136.434527 142.174316 0 230.426947-66.883368 306.79579-129.886316 31.420632 13.419789 62.787368 26.058105 94.450526 37.133474-47.077053 49.637053-110.969263 82.566737-186.610526 91.270736l5.066105 53.625264c93.453474-7.006316 143.144421 9.350737 195.718737 26.543157 46.457263 15.225263 94.127158 30.854737 169.822316 30.854737 19.994947 0 41.957053-1.077895 66.344421-3.557052l-5.416421-53.625263c-105.283368 10.778947-158.100211-6.548211-213.935158-24.872422-22.150737-7.275789-44.624842-14.632421-70.305684-20.345263a334.848 334.848 0 0 0 96.14821-82.297263z m-458.078316 21.261474C162.573474 810.118737 107.789474 784.276211 107.789474 727.578947c0-60.847158 62.733474-82.539789 121.451789-82.539789 77.850947 0 154.731789 30.288842 235.250526 64.943158-66.263579 52.924632-139.722105 100.136421-251.041684 100.136421z" fill="${L}" /></svg>`,
-      horse: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M1024 0v404.210526c0 33.333895 0 134.736842-92.079158 134.736842h-13.824l-78.362947-109.056c-22.743579 49.906526-40.340211 103.046737-53.490527 162.950737h115.092211C937.310316 592.842105 970.105263 625.637053 970.105263 661.638737c0 60.631579-69.389474 154.300632-77.312 164.75621l-43.008-32.471579C875.466105 759.861895 916.210526 693.813895 916.210526 661.638737c0-5.982316-8.919579-14.901895-14.901894-14.901895h-125.332211C761.128421 736.121263 754.526316 840.569263 754.526316 970.105263h-53.894737c0-283.971368 31.097263-453.605053 110.888421-605.049263l20.318316-38.534737 112.801684 156.995369c14.443789-4.419368 25.465263-20.938105 25.465263-79.306106V0h53.894737z m-161.684211 161.684211h53.894737V0h-53.894737v80.842105c-17.381053-14.955789-38.184421-26.947368-80.842105-26.947368h-134.736842v53.894737h134.736842c37.672421 0 80.842105 40.906105 80.842105 53.894737z m-107.789473 0h-215.578948v53.894736h161.684211l53.894737-53.894736zM300.894316 766.544842L400.680421 916.210526h64.754526l-95.043368-142.551579L498.876632 646.736842h167.855157a1212.631579 1212.631579 0 0 1 9.431579-53.894737h-199.383579l-175.885473 173.702737z m109.97221-184.400842l-37.861052-38.319158-132.419369 130.802526C173.729684 571.095579 161.684211 529.812211 161.684211 469.315368 161.684211 398.578526 199.464421 323.368421 269.473684 323.368421h323.368421l53.894737-53.894737H269.473684c-6.709895 0-13.258105 0.565895-19.698526 1.482105C234.927158 249.451789 204.638316 215.578947 160.633263 215.578947 65.967158 215.578947 0 349.291789 0 469.315368c0 70.170947 16.141474 136.650105 49.232842 202.671158L6.197895 723.833263l41.472 34.41179 66.128842-79.737264-8.704-16.033684C83.105684 622.133895 53.894737 558.214737 53.894737 469.315368 53.894737 368.451368 106.765474 269.473684 160.633263 269.473684c13.231158 0 25.815579 9.889684 35.43579 20.533895C142.874947 321.967158 107.789474 388.500211 107.789474 469.315368c0 78.201263 19.698526 130.937263 93.642105 243.981474l-55.296 54.622316L280.899368 970.105263h64.754527l-130.048-195.072 195.260631-192.889263z" fill="${L}" /></svg>`,
-      goat: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M608.256 144.734316C555.762526 115.577263 506.098526 107.789474 485.052632 107.789474V53.894737c32.579368 0 91.270737 11.452632 149.369263 43.735579 75.290947 41.822316 130.694737 94.531368 171.385263 150.878316C755.873684 288.013474 697.101474 323.368421 646.736842 323.368421h-107.789474v-53.894737h107.789474c20.506947 0 48.424421-11.210105 80.437895-31.285895a471.04 471.04 0 0 0-118.918737-93.453473zM832.673684 342.231579c-16.384 0-29.642105 10.24-29.642105 44.463158 0 34.250105 13.231158 44.463158 29.642105 44.463158s29.642105-10.213053 29.642105-44.463158c0-34.223158-13.231158-44.463158-29.642105-44.463158zM1024 619.789474C1024 347.109053 901.066105 122.448842 686.753684 3.395368l-26.165895 47.104C914.324211 191.461053 964.688842 440.400842 969.647158 592.842105h-84.506947c-17.92-35.624421-45.352421-69.12-87.013053-101.995789l-16.788211-13.285053-16.734315 13.392842c-66.128842 52.897684-134.629053 127.083789-187.311158 209.677474H102.965895l-8.272842-20.318316C159.043368 617.013895 161.684211 603.109053 161.684211 485.052632v-53.894737h485.052631v-53.894737H161.684211c0-80.384 14.309053-110.026105 66.586947-137.916632l-25.384421-47.535158C123.365053 234.226526 107.789474 291.920842 107.789474 377.263158v107.789474c0 107.600842 0 107.600842-63.649685 169.283368l-13.069473 12.665263L110.618947 862.315789h58.206316l-43.897263-107.789473h103.477895l43.897263 107.789473h58.206316l-43.897263-107.789473h259.47621C508.981895 824.939789 485.052632 899.152842 485.052632 970.105263h53.894736c0-68.688842 27.270737-144.060632 68.958316-215.578947H687.157895c7.410526 0 13.473684 6.063158 13.473684 13.473684V862.315789h53.894737v-94.315789c0-37.160421-30.208-67.368421-67.368421-67.368421h-44.65179c40.771368-58.017684 89.438316-111.427368 138.913684-153.626947C841.512421 600.037053 862.315789 655.225263 862.315789 754.526316h53.894737c0-38.912-2.748632-74.482526-11.102315-107.789474H1024v-26.947368z" fill="${L}" /></svg>`,
-      monkey: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M538.947368 1024h-53.894736c0-32.794947 25.869474-87.417263 77.446736-103.316211C528.599579 881.152 485.052632 822.433684 485.052632 781.473684c0-44.570947 36.271158-80.842105 80.842105-80.842105h80.842105v53.894737h-80.842105a26.947368 26.947368 0 0 0-26.947369 26.947368c0 19.725474 36.675368 77.473684 92.133053 134.736842h88.602947c20.210526-14.147368 88.737684-71.464421 88.737685-198.602105 0-108.382316-93.237895-202.967579-168.151579-278.986105-49.502316-50.202947-88.576-89.842526-98.735158-128.61979-11.749053-44.732632-21.584842-112.586105-26.327579-148.318315H377.263158c-45.136842 0-89.519158 8.434526-121.802105 53.894736H431.157895v53.894737c-97.28 0-107.789474 113.071158-107.789474 161.684211v53.894737h53.894737v161.68421h-53.894737v-107.789474h-26.947368c-170.253474 0-188.631579-94.234947-188.631579-134.736842 0-31.043368 35.220211-72.326737 55.727158-93.722947 2.694737-14.686316 5.847579-28.348632 9.431579-41.013895H161.684211V215.578947h31.528421C239.642947 120.993684 317.224421 107.789474 377.263158 107.789474h185.640421l2.802526 23.794526c0.134737 1.050947 12.719158 106.657684 27.944421 164.756211 6.494316 24.872421 44.624842 63.514947 84.965053 104.448C760.481684 483.813053 862.315789 587.129263 862.315789 717.608421c0 92.375579-31.124211 155.028211-61.898105 194.425263C904.919579 892.146526 970.105263 803.004632 970.105263 673.684211c0-91.405474-42.819368-154.381474-84.237474-215.255579C847.791158 402.458947 808.421053 344.576 808.421053 269.473684c0-119.349895 87.093895-161.684211 161.68421-161.68421v53.894737c-32.417684 0-107.789474 10.509474-107.789474 107.789473 0 58.502737 31.555368 104.933053 68.096 158.639158C974.282105 492.597895 1024 565.679158 1024 673.684211c0 177.286737-108.301474 296.421053-269.473684 296.421052h-161.684211c-37.672421 0-53.894737 40.906105-53.894737 53.894737zM229.214316 269.473684a384.808421 384.808421 0 0 0-14.012632 58.341053l-1.401263 8.488421-6.090105 6.117053c-22.878316 22.932211-44.813474 52.601263-46.026105 62.275368 0 56.805053 53.76 75.264 107.789473 79.386947V431.157895c0-58.691368 13.473684-119.619368 46.511158-161.684211h-86.770526zM323.368421 1024h-53.894737c0-32.794947 25.869474-87.417263 77.446737-103.316211C313.020632 881.152 269.473684 822.433684 269.473684 781.473684c0-44.570947 36.271158-80.842105 80.842105-80.842105h45.16379A188.847158 188.847158 0 0 1 565.894737 592.842105h134.736842v53.894737h-134.736842c-74.293895 0-134.736842 60.442947-134.736842 134.736842v26.516211l-53.894737 0.377263V781.473684c0-9.162105 0.646737-18.135579 1.913263-26.947368H350.315789c-14.848 0-26.947368 12.072421-26.947368 26.947368 0 19.725474 36.675368 77.473684 92.133053 134.736842H431.157895v53.894737h-53.894737c-37.672421 0-53.894737 40.906105-53.894737 53.894737z" fill="${L}" /></svg>`,
-      rooster: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M673.684211 354.357895c-16.384 0-29.642105-10.213053-29.642106-44.463158 0-34.223158 13.231158-44.463158 29.642106-44.463158s29.642105 10.24 29.642105 44.463158c0 34.250105-13.258105 44.463158-29.642105 44.463158zM540.106105 970.105263l-50.58021-107.789474h156.05221l50.607158 107.789474h59.553684l-51.60421-109.918316C811.52 846.821053 916.210526 764.550737 916.210526 646.736842c0-53.032421-11.910737-95.420632-24.522105-140.314947C877.244632 455.033263 862.315789 401.893053 862.315789 323.368421V107.789474c0-59.445895-48.343579-107.789474-107.789473-107.789474a107.924211 107.924211 0 0 0-107.789474 106.172632 100.890947 100.890947 0 0 0-24.117895-3.314527 88.710737 88.710737 0 0 0-88.602947 88.602948c0 20.668632 5.227789 39.720421 10.671158 53.921684l-99.489684 59.688421 93.749894 14.470737V377.263158c0 14.416842-5.901474 21.692632-33.360842 49.152l-11.129263 11.129263C398.228211 326.521263 324.985263 269.473684 215.740632 269.473684 96.768 269.473684 0 366.241684 0 485.214316V646.736842h53.894737v-161.522526A162.007579 162.007579 0 0 1 215.740632 323.368421c82.081684 0 140.422737 36.244211 240.64 152.252632l-38.615579 38.615579C367.804632 461.285053 323.098947 431.157895 259.584 431.157895A151.983158 151.983158 0 0 0 107.789474 582.952421V754.526316h53.894737v-171.573895A98.007579 98.007579 0 0 1 259.584 485.052632c46.322526 0 79.629474 20.911158 137.027368 86.016l18.970948 21.530947 128.080842-128.080842C572.200421 435.981474 592.842105 415.366737 592.842105 377.263158v-97.926737l23.309474-14.120421-13.662316-23.04c-0.161684-0.242526-14.578526-24.899368-14.578526-50.688 0-19.132632 15.575579-34.708211 34.70821-34.708211 5.093053 0 26.785684 3.179789 39.558737 18.647579l26.327579 46.026106 39.774316-24.090948-20.372211-49.367579C704.754526 140.449684 700.631579 117.517474 700.631579 107.789474c0-29.722947 24.171789-53.894737 53.894737-53.894737s53.894737 24.171789 53.894737 53.894737v215.578947c0 85.935158 16.680421 145.300211 31.366736 197.632C851.887158 564.008421 862.315789 601.141895 862.315789 646.736842c0 95.285895-99.408842 161.684211-188.631578 161.684211h-209.461895l-68.419369-145.704421C375.242105 618.954105 338.108632 592.842105 296.448 592.842105A80.976842 80.976842 0 0 0 215.578947 673.711158V862.315789h53.894737v-188.604631c0-14.874947 12.099368-26.974316 26.974316-26.974316 20.533895 0 38.965895 14.147368 50.553263 38.858105L480.579368 970.105263h59.526737z" fill="${L}" /></svg>`,
-      dog: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M326.063158 282.947368c0 34.250105-13.231158 44.463158-29.642105 44.463158s-29.642105-10.213053-29.642106-44.463158c0-34.223158 13.231158-44.463158 29.642106-44.463157s29.642105 10.24 29.642105 44.463157zM269.473684 430.295579v311.646316L190.275368 916.210526h59.203369L323.368421 753.637053V377.263158h-26.947368c-119.403789 0-172.732632-53.382737-185.505685-107.789474h35.624421c51.092211 0 68.581053-15.764211 120.535579-62.544842 12.773053-11.506526 28.079158-25.276632 47.023158-41.741474l18.351158-15.952842-69.658947-99.139368-44.085895 30.989474 41.768421 59.472842c-11.183158 9.862737-20.884211 18.593684-29.480421 26.327579C180.736 212.156632 176.235789 215.578947 146.539789 215.578947H53.894737v26.947369c0 88.710737 66.910316 178.149053 215.578947 187.769263z m216.710737-161.414737c2.290526 71.733895 28.698947 136.326737 75.048421 182.918737C618.711579 509.628632 702.437053 538.947368 810.091789 538.947368c18.593684 0 36.190316-1.158737 52.628211-3.449263 3.745684 111.265684 33.630316 170.334316 51.496421 196.015158l-38.507789 84.722526C782.174316 742.049684 688.774737 700.631579 377.263158 700.631579v53.894737c34.277053 0 65.697684 0.512 94.639158 1.509052L374.595368 970.105263h59.203369l96.013474-211.240421c66.182737 4.338526 117.005474 11.829895 157.911578 22.016L626.229895 916.210526h59.176421l54.16421-119.134315c47.616 18.405053 79.737263 42.091789 113.125053 69.739789L805.753263 970.105263h59.203369l113.071157-248.778105-13.824-13.204211c-0.485053-0.458105-45.648842-47.589053-47.939368-185.263158C985.168842 498.553263 1024 447.811368 1024 377.263158c0-95.205053-66.506105-161.684211-161.684211-161.684211v53.894737c65.482105 0 107.789474 42.307368 107.789474 107.789474 0 89.088-87.013053 107.789474-160.013474 107.789474-92.752842 0-163.624421-23.983158-210.647578-71.27579-30.315789-30.504421-45.891368-65.832421-53.35579-98.735158 11.210105 6.952421 22.932211 13.338947 35.274105 19.186527l23.04-48.720843c-92.106105-43.654737-148.992-128.646737-219.243789-243.981473l-46.026105 28.05221c49.448421 81.246316 92.968421 148.506947 147.051789 199.302737z" fill="${L}" /></svg>`,
-      pig: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M808.421053 700.631579v53.894737c-196.446316 0-323.368421 84.641684-323.368421 215.578947h-53.894737c0-163.705263 148.075789-269.473684 377.263158-269.473684z m-323.368421 107.789474v-53.894737c-158.342737 0-245.598316 0-319.649685-49.367579L158.612211 700.631579H80.842105c-21.692632 0-26.624-14.821053-26.947368-26.947368v-82.620632c84.156632-11.183158 161.684211-74.913684 161.68421-186.853053V215.578947H161.684211v161.684211H134.736842c-66.964211 0-134.736842 37.025684-134.736842 107.789474h53.894737c0-42.630737 52.870737-53.894737 80.842105-53.894737h24.629895C147.132632 504.912842 85.153684 538.947368 26.947368 538.947368H0v134.736843c0 32.498526 21.530947 80.842105 80.842105 80.842105h61.682527c32.687158 20.506947 67.125895 33.145263 105.957052 41.013895A232.879158 232.879158 0 0 0 215.578947 916.210526h53.894737c0-41.930105 14.012632-80.303158 39.424-112.505263C358.885053 808.151579 415.959579 808.421053 485.052632 808.421053z m-72.946527-342.420211L323.368421 554.738526V431.157895h-53.894737v253.682526l180.736-180.736-38.103579-38.103579zM323.368421 161.684211h-53.894737v190.032842a769.536 769.536 0 0 1 53.894737-49.098106V161.684211z m323.368421-53.894737c-72.623158 0-146.809263 23.336421-215.578947 58.637473V107.789474h-53.894737v154.138947C458.832842 205.392842 555.331368 161.684211 646.736842 161.684211c148.587789 0 269.473684 120.885895 269.473684 269.473684v235.654737L809.579789 862.315789h61.359158L970.105263 680.555789V431.157895c0-178.310737-145.057684-323.368421-323.368421-323.368421z" fill="${L}" /></svg>`,
-    },
-    P2 = _5;
-  var P5 = (t) =>
-      [
-        'rat',
-        'ox',
-        'ox',
-        'tiger',
-        'tiger',
-        'rabbit',
-        'rabbit',
-        'dragon',
-        'dragon',
-        'snake',
-        'snake',
-        'horse',
-        'horse',
-        'goat',
-        'goat',
-        'monkey',
-        'monkey',
-        'rooster',
-        'rooster',
-        'dog',
-        'dog',
-        'pig',
-        'pig',
-        'rat',
-      ][t],
-    N2 = P5;
-  var N5 = () => {
-      let { gameBoard: t, gameBoardContext: e } = l,
-        { width: r } = t,
-        h = new Date().getHours(),
-        c = N2(h - 1),
-        a = V(P2[c]),
-        s = Math.floor(r * 0.36),
-        i = -s / 2,
-        g = -s / 2;
-      _(e, a, i, g, s);
-    },
-    $2 = N5;
-  var $5 = () => {
-      let t = new Date(),
-        { hAng: e, mAng: r, sAng: o } = _2(t),
-        { TEAL: h, RGBA_TEAL: c, ORANGE: a } = v,
-        { gameBoard: s, gameBoardContext: i } = l,
-        { width: g, height: m } = s,
-        p = g / 2,
-        d = m / 2.2,
-        y = Math.floor(g * 0.3);
-      (i.save(),
-        i.translate(p, d),
-        (i.lineCap = 'round'),
-        i.beginPath(),
-        i.arc(0, 0, y, 0, Math.PI * 2),
-        (i.fillStyle = c),
-        i.fill(),
-        (i.lineWidth = Math.floor(g * 0.06)),
-        (i.strokeStyle = h),
-        i.stroke(),
-        $2());
-      let q = Math.floor(g * 0.016),
-        Y = y - Math.floor(g * 0.08);
-      for (let x1 = 0; x1 < 12; x1++)
-        (i.save(),
-          i.rotate((x1 * Math.PI) / 6),
-          i.beginPath(),
-          i.arc(0, -Y, q, 0, Math.PI * 2),
-          (i.fillStyle = h),
-          i.fill(),
-          i.restore());
-      (i.save(),
-        i.rotate(e),
-        (i.lineWidth = 5),
-        i.beginPath(),
-        i.moveTo(0, 0),
-        i.lineTo(0, -y * 0.4),
-        i.stroke(),
-        i.restore(),
-        i.save(),
-        i.rotate(r),
-        (i.lineWidth = 4),
-        i.beginPath(),
-        i.moveTo(0, 0),
-        i.lineTo(0, -y * 0.65),
-        i.stroke(),
-        i.restore(),
-        i.save(),
-        i.rotate(o),
-        (i.strokeStyle = a),
-        (i.lineWidth = 2),
-        i.beginPath(),
-        i.moveTo(0, 0),
-        i.lineTo(0, -y * 0.75),
-        i.stroke(),
-        i.restore(),
-        i.beginPath(),
-        (i.fillStyle = a),
-        i.arc(0, 0, Math.floor(g * 0.014), 0, Math.PI * 2),
-        i.fill(),
-        i.restore());
-    },
-    F2 = $5;
-  var { RGBA_TEAL: S } = v,
-    F5 = {
-      zi: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 188.631579v-215.578947h269.473685v-53.894737H538.947368v-39.585684c26.543158-18.081684 94.585263-65.050947 177.852632-127.488L700.631579 215.578947H323.368421v53.894737h295.316211a4221.008842 4221.008842 0 0 1-121.640421 85.369263l-11.991579 8.003369V431.157895H242.526316v53.894737h242.526316v215.578947c0 48.343579-13.850947 53.894737-134.736843 53.894737v53.894737c105.391158 0 188.631579 0 188.631579-107.789474z" fill="${S}" /></svg>`,
-      chou: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-161.68421 188.631579h-159.555369c13.985684-172.813474 43.115789-357.429895 70.817684-385.158737L700.631579 269.473684H323.368421v53.894737h107.169684c-1.940211 45.756632-8.192 103.962947-15.76421 161.684211H323.368421v53.894736h83.968c-9.862737 68.446316-20.264421 130.128842-25.734737 161.684211H215.578947v53.894737h592.842106v-53.894737z m-346.543158-161.684211h149.800421a3313.717895 3313.717895 0 0 0-16.842105 161.684211h-158.477474c6.036211-35.247158 16.114526-95.636211 25.519158-161.684211z m22.608842-215.578947h171.735579c-15.198316 41.121684-27.405474 100.594526-36.890948 161.684211h-150.123789c7.383579-57.505684 13.419789-115.361684 15.279158-161.684211z" fill="${S}" /></svg>`,
-      yin: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-257.42821 299.250526l-107.789474-53.894737-24.117895 48.208843 107.789474 53.894736 24.117895-48.208842z m-269.473685-5.658947l-24.117894-48.208842-107.789474 53.894737 24.117895 48.208842 107.789473-53.894737zM700.631579 431.157895h-161.684211v-53.894737h107.789474v-53.894737H377.263158v53.894737h107.789474v53.894737h-161.684211v323.368421h53.894737v-53.894737h269.473684v53.894737h53.894737V431.157895z m-161.684211 161.68421h107.789474v53.894737h-107.789474v-53.894737z m-161.68421 0h107.789474v53.894737h-107.789474v-53.894737z m161.68421-107.789473h107.789474v53.894736h-107.789474v-53.894736z m-161.68421 0h107.789474v53.894736h-107.789474v-53.894736zM754.526316 215.578947h-223.097263l-20.803369-62.410105-51.119158 17.057684L474.624 215.578947H269.473684v107.789474h53.894737v-53.894737h377.263158v53.894737h53.894737V215.578947z" fill="${S}" /></svg>`,
-      mao: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-377.263158-188.631579h107.789474v323.368421c-20.48 0-39.936-11.264-40.016842-11.317895l-27.728842 46.214737c3.206737 1.940211 32.660211 18.997895 67.745684 18.997895 30.746947 0 53.894737-23.147789 53.894737-53.894737V269.473684h-215.578948v538.947369h53.894737V323.368421z m-107.789473 242.526316v-242.526316h-53.894737v196.904421l-107.789474 40.421053v-243.927579l169.094737-48.316632-14.821053-51.819789L269.473684 276.102737v304.801684l-36.405895 13.662316 18.917053 50.472421 178.741895-67.018105c-5.039158 69.928421-55.269053 106.981053-165.133474 122.933894l7.733895 53.328842C325.712842 746.657684 485.052632 723.536842 485.052632 565.894737z" fill="${S}" /></svg>`,
-      chen: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-498.122105 265.620211L431.157895 754.526316V485.052632h-66.074948c-14.470737 110.645895-44.355368 197.066105-102.696421 260.742736l-39.747368-36.432842C306.526316 617.876211 323.368421 462.901895 323.368421 242.526316V215.578947h377.263158v53.894737H377.182316c-0.404211 58.260211-2.209684 112.128-6.359579 161.684211H700.631579v53.894737h-122.152421a481.172211 481.172211 0 0 0 76.826947 119.70021l66.479158-39.855158 27.728842 46.214737-54.460631 32.687158c29.507368 24.953263 63.757474 45.675789 102.80421 58.098526l-16.303158 51.361684c-134.224842-42.711579-222.773895-167.073684-261.551158-268.207157H485.052632v221.857684l68.985263-41.391158 27.728842 46.214737-109.783579 65.886316zM646.736842 377.263158h-215.578947v-53.894737h215.578947v53.894737z" fill="${S}" /></svg>`,
-      si: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-242.041263 180.762947l-52.116211-13.797052C657.219368 749.864421 651.425684 754.526316 619.789474 754.526316h-242.526316V485.052632h269.473684v53.894736h53.894737V215.578947H323.368421v538.947369c0 29.722947 24.171789 53.894737 53.894737 53.894737h242.526316c77.689263 0 91.189895-51.065263 108.274526-115.658106zM377.263158 269.473684h269.473684v161.684211H377.263158v-161.684211z" fill="${S}" /></svg>`,
-      wu: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 26.947368h269.473685v-53.894736H538.947368v-161.684211h161.684211v-53.894737H411.001263c12.045474-33.28 20.156632-69.793684 20.156632-107.789473h-53.894737c0 121.963789-105.364211 233.391158-106.415158 234.496l38.858105 37.349052c2.883368-3.018105 43.816421-46.133895 77.392842-110.160842H485.052632v161.684211H215.578947v53.894736h269.473685v323.368421h53.894736V538.947368z" fill="${S}" /></svg>`,
-      wei: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 50.202947c52.304842 70.925474 136.973474 152.144842 232.528843 190.383158l19.994947-50.041263c-109.271579-43.708632-202.805895-152.629895-238.780632-217.49221H808.421053v-53.894737H538.947368v-53.894737h215.578948v-53.894737h-215.578948V161.684211h-53.894736v161.68421h-215.578948v53.894737h215.578948v53.894737H215.578947v53.894737h255.757474c-35.974737 64.862316-129.536 173.783579-238.807579 217.49221l20.021895 50.041263c95.528421-38.238316 180.197053-119.484632 232.501895-190.383158V808.421053h53.894736v-246.218106z" fill="${S}" /></svg>`,
-      shen: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 134.736842h161.684211v53.894737h53.894737V269.473684h-215.578948V161.684211h-53.894736v107.789473h-215.578948v431.157895h53.894737v-53.894737h161.684211v215.578947h53.894736v-215.578947z m0-161.68421h161.684211v107.789473h-161.684211v-107.789473z m-215.578947 0h161.684211v107.789473h-161.684211v-107.789473z m215.578947-161.684211h161.684211v107.789474h-161.684211v-107.789474z m-215.578947 0h161.684211v107.789474h-161.684211v-107.789474z" fill="${S}" /></svg>`,
-      you: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-215.578947-188.631579h-161.684211v-26.947368h161.684211V242.526316H269.473684v53.894737h161.684211v26.947368h-161.684211v485.052632h53.894737v-53.894737h377.263158v53.894737h53.894737V323.368421zM323.368421 646.736842h377.263158v53.894737H323.368421v-53.894737z m0-269.473684h107.789474c0 103.316211-72.784842 107.654737-81.084632 107.789474L350.315789 538.947368c46.592 0 134.736842-33.792 134.736843-161.68421h53.894736v107.789474c0 29.722947 24.171789 53.894737 53.894737 53.894736h107.789474v53.894737H323.368421v-215.578947z m377.263158 0v107.789474h-107.789474v-107.789474h107.789474z m-215.578947-80.842105h53.894736v26.947368h-53.894736v-26.947368z" fill="${S}" /></svg>`,
-      xu: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-375.592421 150.393263c33.684211 44.544 75.210105 74.698105 124.739369 90.812632l11.425684 3.718737 10.401684-6.009264C781.204211 727.740632 808.421053 622.565053 808.421053 592.842105h-53.894737c0 22.069895-19.132632 80.869053-33.711158 103.504842-34.816-14.605474-64.538947-39.262316-89.249684-74.13221 48.316632-55.269053 92.079158-117.328842 120.535579-179.900632l-49.044211-22.285473c-23.767579 52.250947-59.742316 104.717474-100.055579 152.656842-24.010105-50.930526-41.148632-115.927579-51.658105-195.395369H700.631579v-53.894737h-155.189895A1848.050526 1848.050526 0 0 1 538.947368 161.684211h-53.894736c0 58.206316 2.155789 112.074105 6.494315 161.68421H323.368421v26.947368c0 216.549053-13.177263 263.545263-100.702316 359.046737l39.747369 36.432842c63.326316-69.093053 92.806737-118.272 105.714526-206.848H485.052632v-53.894736h-111.319579a1742.147368 1742.147368 0 0 0 3.449263-107.789474h120.158316c12.611368 98.250105 35.031579 177.475368 67.395368 238.187789-61.978947 65.536-128.053895 117.975579-173.298526 142.282106l25.519158 47.481263c47.589053-25.573053 114.095158-77.446737 177.55621-142.821053z m125.170526-411.971368l-80.842105-80.842106-38.103579 38.103579 80.842105 80.842106 38.103579-38.103579z" fill="${S}" /></svg>`,
-      hai: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M309.975579 804.756211l-27.136-46.592c103.073684-60.011789 183.026526-132.473263 241.475368-219.24379H350.315789l-13.473684-50.283789c58.88-33.980632 99.435789-117.571368 118.703158-165.295158H242.526316v-53.894737h538.947368v53.894737h-268.18021c-12.395789 34.088421-42.469053 106.603789-90.435369 161.68421h134.009263a680.555789 680.555789 0 0 0 46.349474-107.708631l51.092211 17.057684c-58.421895 175.265684-171.034947 309.490526-344.333474 410.381474z m192.350316-2.937264L467.806316 760.454737c88.414316-73.728 154.516211-158.773895 202.105263-259.907369l48.801684 22.959158a797.372632 797.372632 0 0 1-82.351158 137.781895c32.741053 15.009684 83.456 44.867368 137.647158 101.591579l-38.938947 37.268211c-57.236211-59.877053-109.325474-85.557895-133.766737-95.178106a850.997895 850.997895 0 0 1-98.977684 96.848842z m48.613052-536.872421l-80.842105-53.894737 29.884632-44.840421 80.842105 53.894737-29.884632 44.840421zM512 53.894737C259.395368 53.894737 53.894737 259.395368 53.894737 512s205.500632 458.105263 458.105263 458.105263c9.081263 0 17.973895-0.835368 26.947368-1.374316v-53.894736c-8.946526 0.619789-17.866105 1.374316-26.947368 1.374315-222.881684 0-404.210526-181.328842-404.210526-404.210526S289.118316 107.789474 512 107.789474s404.210526 181.328842 404.210526 404.210526c0 195.206737-139.075368 358.507789-323.368421 396.045474v54.460631c214.096842-38.346105 377.263158-225.549474 377.263158-450.533052C970.105263 259.395368 764.604632 53.894737 512 53.894737z" fill="${S}" /></svg>`,
-    },
-    D2 = F5;
-  var D5 = (t) =>
-      [
-        'zi',
-        'chou',
-        'chou',
-        'yin',
-        'yin',
-        'mao',
-        'mao',
-        'chen',
-        'chen',
-        'si',
-        'si',
-        'wu',
-        'wu',
-        'wei',
-        'wei',
-        'shen',
-        'shen',
-        'you',
-        'you',
-        'xu',
-        'xu',
-        'hai',
-        'hai',
-        'zi',
-      ][t],
-    W2 = D5;
-  var W5 = () => {
-      let { gameBoard: t, gameBoardContext: e } = l,
-        { width: r, height: o } = t,
-        c = new Date().getHours(),
-        a = W2(c),
-        s = V(D2[a]),
-        i = Math.floor(r * 0.68),
-        g = r / 2 - i,
-        m = o / 2 - i * 1.2;
-      _(e, s, g, m, i);
-    },
-    U2 = W5;
-  function U5(t, e = {}) {
-    let { ROWS: r, COLS: o } = M,
-      { gameBoardContext: h } = l,
-      { overrideCells: c = [] } = e;
-    (B(), b('playing'), U2());
-    let a = new Set();
-    for (let s of c) Number.isInteger(s.fromY) && a.add(`${s.x},${s.fromY}`);
-    for (let s = 0; s < r; s++)
-      for (let i = 0; i < o; i++)
-        t[s][i] && (a.has(`${i},${s}`) || W(h, i, s, t[s][i]));
-    for (let s of c) W(h, s.x, s.y, s.value);
-  }
-  var q2 = U5;
-  var q5 = (t, e, r) => {
-      let { gameBoardContext: o } = l,
-        { shape: h, color: c } = t,
-        { length: a } = h;
-      for (let s = 0; s < a; s++)
-        for (let i = 0; i < h[s].length; i++) h[s][i] && W(o, e + i, r + s, c);
-      return !0;
-    },
-    Y2 = q5;
-  var Y5 = (t) => {
-      let { board: e, curr: r, cx: o, cy: h } = t;
-      (e && q2(e), r && Y2(r, o, h));
-    },
-    X = Y5;
-  var K5 = (t) => {
-      (B(), X(t), T(), b('paused'), O(), I2(), F2(), k2());
-    },
-    K2 = K5;
-  var j5 = (t) => {
-      K2(t);
-    },
-    j2 = j5;
-  var Z5 = () => {
-      let { RED: t, YELLOW: e } = v,
-        { gameBoard: r } = l,
-        { width: o, height: h } = r;
-      w({
-        text: 'GAME',
-        x: o / 2,
-        y: h / 1.8,
-        color: t,
-        strokeColor: e,
-        size: 2.3,
-        center: !0,
-        stroke: !0,
-      });
-    },
-    Z2 = Z5;
-  var Q5 = () => {
-      let { RED: t, YELLOW: e } = v,
-        { gameBoard: r } = l,
-        { width: o, height: h } = r;
-      w({
-        text: 'OVER',
-        x: o / 2,
-        y: h / 1.6,
-        color: t,
-        strokeColor: e,
-        size: 2.3,
-        center: !0,
-        stroke: !0,
-      });
-    },
-    Q2 = Q5;
-  var X5 = (t) => {
-      (B(), X(t), T(), b('game-over'), O(), Z2(), Q2(), f1());
-    },
-    X2 = X5;
-  var J5 = (t) => {
-      X2(t);
-    },
-    J2 = J5;
-  var t7 = (t) => {
-      (X(t), l1(t));
-    },
-    t3 = t7;
-  var e7 = (t) => {
-      t3(t);
-    },
-    e3 = e7;
-  var r7 = {
-      'main-menu': (t) => {
-        R2(t);
-      },
-      paused: (t) => {
-        j2(t);
-      },
-      'game-over': (t) => {
-        J2(t);
-      },
-      playing: (t) => {
-        e3(t);
-      },
-    },
-    r3 = r7;
-  var o7 = (t) => {
-      let e = n.getMode(),
-        r = r3[e];
-      r && r(t);
-    },
-    o3 = o7;
-  var h7 = () => {
-      let { ROWS: t, COLS: e } = M,
-        { gameBoard: r, nextPiece: o } = l,
-        h = globalThis.innerHeight * 0.9;
-      ((l.blockSize = Math.floor(h / t)),
-        (r.width = l.blockSize * e),
-        (r.height = l.blockSize * t),
-        (l.fontSize = Math.floor(r.height * 0.032)));
-      let c = Math.min(
-        globalThis.innerWidth * 0.1,
-        globalThis.innerHeight * 0.18,
+        // 动画结束回调
+        () => {
+          prev.score = target.score;
+          animating.score = false;
+          if (prev.score !== target.score) {
+            updateScore(target.score);
+          }
+        }
       );
-      ((o.width = c), (o.height = c));
+    };
+    const updateLines = (next) => {
+      if (next !== prev.lines) {
+        setText(hud_dom_default.lines, next, 2);
+        prev.lines = next;
+      }
+    };
+    const updateLevel = (next) => {
+      if (next === prev.level) {
+        return;
+      }
+      setText(hud_dom_default.level, next, 2);
+      prev.level = next;
+    };
+    const updateHighScore = (next) => {
+      if (next !== prev.highScore) {
+        setText(hud_dom_default.highScore, next, 5);
+        prev.highScore = next;
+      }
+    };
+    const update = (state) => {
+      updateScore(state.score);
+      updateLines(state.lines);
+      updateLevel(state.level);
+      updateHighScore(state.highScore);
+    };
+    const reset = () => {
+      prev.score = prev.lines = prev.level = prev.highScore = 0;
+      animating.score = false;
+      setText(hud_dom_default.score, 0, 5);
+      setText(hud_dom_default.lines, 0, 2);
+      setText(hud_dom_default.level, 1, 2);
+      setText(hud_dom_default.highScore, 0, 5);
+    };
+    return {
+      update,
+      reset
+    };
+  };
+  var create_hud_default = createHud;
+
+  // lib/ui/hud/render-hud.js
+  var renderHud = (score, lines, level, highScore, needReset = false) => {
+    const hud = create_hud_default();
+    const mode = engine_default.getMode();
+    if (mode === "main-menu" || needReset) {
+      hud.reset();
+    }
+    hud.update({
+      score,
+      lines,
+      level,
+      highScore
+    });
+  };
+  var render_hud_default = renderHud;
+
+  // lib/ui/constants/firework-colors.js
+  var { TEAL: TEAL3, YELLOW: YELLOW3, PURPLE: PURPLE3, ORANGE: ORANGE3, GREEN: GREEN3, RED: RED3 } = colors_default;
+  var FIREWORK_COLORS = [TEAL3, YELLOW3, PURPLE3, ORANGE3, GREEN3, RED3];
+  var firework_colors_default = FIREWORK_COLORS;
+
+  // lib/ui/effects/render-fireworks.js
+  var renderFireworks = (fireworks) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    for (const fire of fireworks) {
+      ctx.globalAlpha = fire.alpha;
+      ctx.fillStyle = fire.color;
+      ctx.beginPath();
+      ctx.arc(fire.x, fire.y, fire.radius, 0, Math.PI * 2);
+      ctx.fill();
+      fire.x += fire.vx;
+      fire.y += fire.vy;
+      fire.alpha -= 0.024;
+    }
+    ctx.globalAlpha = 1;
+  };
+  var render_fireworks_default = renderFireworks;
+
+  // lib/ui/text/render-level-up-text.js
+  var renderLevelUpText = () => {
+    const { GREEN: GREEN4 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "LEVEL UP",
+      x: width / 2,
+      y: height / 2.5,
+      color: GREEN4,
+      size: 1.2,
+      center: true
+    });
+  };
+  var render_level_up_text_default = renderLevelUpText;
+
+  // lib/ui/text/render-level-number.js
+  var renderLevelNumber = (level, y) => {
+    const { GREEN: GREEN4 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width } = gameBoard2;
+    render_text_default({
+      text: String(level),
+      x: width / 2,
+      y,
+      color: GREEN4,
+      size: 3,
+      center: true
+    });
+  };
+  var render_level_number_default = renderLevelNumber;
+
+  // lib/ui/text/render-congrats-text.js
+  var renderCongratsText = () => {
+    const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "CONGRATS!",
+      x: width / 2,
+      y: height / 1.6,
+      color: YELLOW4,
+      stroke: true,
+      strokeColor: BLACK2,
+      lineWidth: 3,
+      size: 1.3,
+      center: true
+    });
+  };
+  var render_congrats_text_default = renderCongratsText;
+
+  // lib/ui/effects/render-level-up.js
+  function renderLevelUp(level, fireworks) {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { height } = gameBoard2;
+    render_overlay_default();
+    render_tetris_text_default();
+    render_level_up_text_default();
+    render_level_number_default(level, height / 1.85);
+    render_congrats_text_default();
+    render_fireworks_default(fireworks);
+  }
+  var render_level_up_default = renderLevelUp;
+
+  // lib/animations/level-up-animation.js
+  var LevelUpAnimation = class {
+    /**
+     * ## 创建升级动画实例
+     *
+     * @param {object} state - 动画完成时的回调函数
+     */
+    constructor(state) {
+      this.fireworks = this.createFireworks();
+      this.duration = 3;
+      this.spawnTimer = 0;
+      this.layer = 100;
+      this.blocking = true;
+      this.timer = 0;
+      this.name = "level-up";
+      this.state = state;
+    }
+    /**
+     * ## 创建一组烟花粒子
+     *
+     * 在画布中心上方位置生成随机方向和速度的粒子
+     *
+     * @returns {object[]} 烟花粒子对象数组
+     */
+    createFireworks() {
+      const { width, height } = canvas_default.gameBoard;
+      const particles = [];
+      for (let i = 0; i < 40; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 5 + Math.random() * 15;
+        particles.push({
+          x: width / 2,
+          // 初始X坐标：画布中心
+          y: height / 2 - 60,
+          // 初始Y坐标：画布中心上方60像素
+          vx: Math.cos(angle) * speed,
+          // X轴速度分量
+          vy: Math.sin(angle) * speed,
+          // Y轴速度分量
+          radius: 3 + Math.random() * 4,
+          // 粒子半径（3-7像素）
+          color: firework_colors_default[Math.floor(Math.random() * firework_colors_default.length)],
+          // 随机颜色
+          alpha: 1
+          // 初始完全不透明
+        });
+      }
+      return particles;
+    }
+    /**
+     * ## 更新动画状态
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
+     */
+    update(delta) {
+      this.timer += delta;
+      this.spawnTimer += delta;
+      this.updateFireworks(delta);
+      if (this.spawnTimer > 0.6) {
+        this.fireworks.push(...this.createFireworks());
+        this.spawnTimer = 0;
+      }
+      if (this.timer >= this.duration) {
+        this.stop();
+        return false;
+      }
+      return true;
+    }
+    stop() {
+      play_bgm_default();
+    }
+    /**
+     * ## 更新所有烟花粒子的物理状态
+     *
+     * 包括：速度衰减、重力影响、位置更新、透明度衰减、半径增大
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     */
+    updateFireworks(delta) {
+      const gravity = 0.01;
+      for (const p of this.fireworks) {
+        p.vx *= 0.98;
+        p.vy *= 0.98;
+        p.vy += gravity * delta;
+        p.x += p.vx * delta * 8e-3;
+        p.y += p.vy * delta * 8e-3;
+        p.alpha -= delta * 0.024;
+        p.radius += delta * 10;
+      }
+      this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
+    }
+    /**
+     * ## 渲染升级动画
+     *
+     * 调用专门渲染函数显示"LEVEL UP"文字和烟花效果
+     */
+    render() {
+      const { fireworks, state } = this;
+      const { level } = state;
+      render_level_up_default(level, fireworks);
+    }
+  };
+  var level_up_animation_default = LevelUpAnimation;
+
+  // lib/controllers/level-up-controller.js
+  var startLevelUp = () => {
+    const { state } = engine_default;
+    stop_bgm_default();
+    sounds_default.levelUp();
+    registerAnimation(new level_up_animation_default(state));
+  };
+  var level_up_controller_default = startLevelUp;
+
+  // lib/animations/clear-lines-animation.js
+  var ClearLinesAnimation = class {
+    /**
+     * ## 创建消除行动画实例
+     *
+     * @param {number[]} lines - 需要消除的行索引数组
+     * @param {object} state - 游戏状态.
+     */
+    constructor(lines, state) {
+      this.lines = lines.map((y) => ({
+        // 行的Y坐标（行号）
+        y,
+        // 当前透明度（1=完全不透明，0=完全透明）
+        alpha: 1,
+        // 动画计时器（秒）
+        timer: 0
+      }));
+      this.state = state;
+      this.layer = 200;
+      this.blocking = true;
+      this.name = "clear-lines";
+      sounds_default.clear(lines.length - 1);
+    }
+    /**
+     * ## 更新动画状态
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
+     */
+    update(delta) {
+      let done = true;
+      for (const line of this.lines) {
+        const phase = Math.floor(line.timer / 0.12);
+        line.alpha = phase % 2 === 0 ? 1 : 0;
+        line.timer += delta;
+        if (line.timer < 0.72) {
+          done = false;
+        }
+      }
+      if (done) {
+        this.stop();
+        return false;
+      }
+      return true;
+    }
+    /**
+     * ## 动画完成后的清理工作
+     *
+     * 执行实际的行的消除、分数更新、等级提升等逻辑
+     */
+    stop() {
+      const { CLEAR_SCORES: CLEAR_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = game_default;
+      const { ROWS: ROWS2, COLS: COLS2 } = board_default;
+      const { state } = this;
+      const lines = state.clearLines || [];
+      const cleared = lines.length;
+      for (let y = ROWS2 - 1; y >= 0; y--) {
+        const isFullLine = state.board[y].every(Boolean);
+        if (isFullLine) {
+          state.board.splice(y, 1);
+          state.board.unshift(Array.from({ length: COLS2 }).fill(0));
+          y++;
+        }
+      }
+      state.clearLines = [];
+      state.lines += cleared;
+      state.score += CLEAR_SCORES2[cleared] * state.level;
+      const totalLines = state.baseLines + state.lines;
+      const newLevel = Math.floor(totalLines / 10) + 1;
+      if (newLevel > state.level) {
+        level_up_controller_default();
+      }
+      state.level = Math.min(Math.max(state.level, newLevel), MAX_LEVEL2);
+      render_hud_default(state.score, state.lines, state.level, state.highScore);
+    }
+    /**
+     * ## 渲染动画效果
+     *
+     * 先渲染活动区块，再渲染消除行的闪烁效果
+     */
+    render() {
+      render_clear_default({ lines: this.lines });
+    }
+  };
+  var clear_lines_animation_default = ClearLinesAnimation;
+
+  // lib/controllers/clear-lines-controller.js
+  var startClearLines = (lines, state) => {
+    const animation2 = new clear_lines_animation_default(lines, state);
+    registerAnimation(animation2);
+  };
+  var clear_lines_controller_default = startClearLines;
+
+  // lib/game/logic/clear-lines.js
+  var clearLines = (state) => {
+    const { ROWS: ROWS2 } = board_default;
+    let clear = 0;
+    const linesToClear = [];
+    for (let y = ROWS2 - 1; y >= 0; y--) {
+      const isLineFull = state.board[y].every((cell) => !!cell);
+      if (isLineFull) {
+        linesToClear.push(y);
+        clear++;
+      }
+    }
+    if (clear === 0) {
+      engine_default.saveHighScore();
+      return false;
+    }
+    state.clearLines = linesToClear;
+    clear_lines_controller_default(linesToClear, state);
+    return true;
+  };
+  var clear_lines_default = clearLines;
+
+  // lib/game/logic/drop.js
+  var drop = (state) => {
+    while (true) {
+      if (!move_default(0, 1, state)) {
+        break;
+      }
+    }
+    lock_default(state);
+    sounds_default.fall();
+    clear_lines_default(state);
+    spawn_default(state);
+    sounds_default.drop();
+  };
+  var drop_default = drop;
+
+  // lib/game/core/restart-game.js
+  var restartGame = (state) => {
+    const mode = engine_default.getMode();
+    if (mode === "paused" || mode === "game-over" || mode === "main-menu") {
+      return;
+    }
+    stop_bgm_default();
+    engine_default.setMode("playing");
+    state.score = 0;
+    state.lines = 0;
+    state.level = 1;
+    engine_default.resetBoard();
+    render_hud_default(state.score, state.lines, state.level, state.highScore, true);
+    spawn_default(state);
+    play_bgm_default();
+    engine_default.restart();
+  };
+  var restart_game_default = restartGame;
+
+  // lib/animations/paused-animation.js
+  var PausedAnimation = class {
+    /**
+     * ## 创建暂停动画实例
+     *
+     * @param {number} [layer=500] - 渲染层级，默认 500（显示在游戏界面上层） 使用较高的默认值确保暂停界面覆盖游戏内容.
+     *   Default is `500`
+     */
+    constructor(layer = 500) {
+      this.layer = layer;
+      this.blocking = true;
+      this.timer = 0;
+      this.active = true;
+      this.name = "paused";
+    }
+    /**
+     * ## 更新暂停动画状态
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 始终返回 true，表示动画永远不会自动结束
+     */
+    update(delta) {
+      if (!this.active) {
+        return false;
+      }
+      this.timer += delta;
+      if (this.timer >= 1) {
+        sounds_default.secondTick();
+        this.timer = 0;
+      }
+      return true;
+    }
+    stop() {
+      this.active = false;
+    }
+    /**
+     * ## 渲染暂停动画
+     *
+     * 将暂停界面绘制到屏幕上
+     */
+    render() {
+      this.active = true;
+    }
+  };
+  var paused_animation_default = PausedAnimation;
+
+  // lib/controllers/paused-controller.js
+  var animation = null;
+  var startPaused = () => {
+    if (animation) {
+      return;
+    }
+    animation = new paused_animation_default();
+    registerAnimation(animation);
+  };
+  var stopPaused = () => {
+    if (!animation) {
+      return;
+    }
+    animation.stop();
+    animation = null;
+  };
+
+  // lib/game/core/toggle-pause.js
+  var togglePause = () => {
+    const mode = engine_default.getMode();
+    if (mode === "game-over" || mode === "main-menu") {
+      return false;
+    }
+    if (mode === "playing") {
+      engine_default.setMode("paused");
+      stop_bgm_default();
+      sounds_default.pause();
+      startPaused();
+    } else {
+      stopPaused();
+      engine_default.setMode("playing");
+      sounds_default.resume();
+      play_bgm_default();
+      engine_default.restart();
+    }
+  };
+  var toggle_pause_default = togglePause;
+
+  // lib/audio/toggle-bgm.js
+  var toggleBGM = () => {
+    const mode = engine_default.getMode();
+    if (mode === "main-menu" || mode === "paused" || mode === "game-over") {
+      return;
+    }
+    audio_state_default.bgmEnabled = !audio_state_default.bgmEnabled;
+    sounds_default.bgmToggle();
+    if (audio_state_default.bgmEnabled) {
+      play_bgm_default();
+    } else {
+      stop_bgm_default();
+    }
+  };
+  var toggle_bgm_default = toggleBGM;
+
+  // lib/command/actions/game-playing-actions.js
+  var GAME_PLAYING_ACTIONS = {
+    /**
+     * ## 向左移动
+     *
+     * @param {object} _ 参数对象
+     * @param {object} engine - 游戏引擎（实例）
+     */
+    MOVE_LEFT: (_, engine) => {
+      move_default(-1, 0, engine.state);
     },
-    h3 = h7;
-  var U = {
-      rafId: null,
-      accumulator: 0,
-      lastTimestamp: 0,
-      state: u,
-      resetBoard: o1,
-      loadHighScore: E1,
-      saveHighScore: E2,
-      getMode: A2,
-      setMode: r1,
-      setLevel: B2,
-      launch: () => {
-        let { state: t } = U;
-        (o1(),
-          E1(),
-          r1('main-menu'),
-          (t.score = 0),
-          (t.lines = 0),
-          (t.level = 1),
-          U.resize(),
-          F(t.score, t.lines, t.level, t.highScore),
-          b2(t),
-          H2(),
-          U.start());
-      },
-      start: () => {
-        U.rafId = requestAnimationFrame(n1);
-      },
-      stop: () => {
-        u2();
-      },
-      restart: () => {
-        s1();
-      },
-      render: () => {
-        o3(U.state);
-      },
-      update: (t) => {
-        A1(t);
-      },
-      animate: () => {
-        B1();
-      },
-      resize: () => {
-        (h3(), U.render());
-      },
+    /**
+     * ## 向右移动
+     *
+     * @param {object} _ 参数对象
+     * @param {object} engine - 游戏引擎（实例）
+     */
+    MOVE_RIGHT: (_, engine) => {
+      move_default(1, 0, engine.state);
     },
-    n = U;
-  var i7 = () => {
-      (k1(G), n.launch());
+    /**
+     * ## 向下移动（软降）
+     *
+     * @param {object} _ 参数对象
+     * @param {object} engine - 游戏引擎（实例）
+     */
+    MOVE_DOWN: (_, engine) => {
+      move_default(0, 1, engine.state);
     },
-    i3 = i7;
-  i3();
+    /**
+     * ## 硬降（直接落地）
+     *
+     * @param {object} _ 参数对象
+     * @param {object} engine - 游戏引擎（实例）
+     */
+    DROP: (_, engine) => {
+      drop_default(engine.state);
+    },
+    /**
+     * ## 旋转方块
+     *
+     * @param {object} _ 参数对象
+     * @param {object} engine - 游戏引擎（实例）
+     */
+    ROTATE: (_, engine) => {
+      rotate_default(engine.state);
+    },
+    /**
+     * ## 重新开始游戏
+     *
+     * @param {object} _ 参数对象
+     * @param {object} engine - 游戏引擎（实例）
+     */
+    RESTART: (_, engine) => {
+      restart_game_default(engine.state);
+    },
+    /**
+     * ## 强制结束游戏
+     *
+     * 注意：直接调用 gameOver 属于“全局副作用”
+     */
+    QUIT: () => {
+      game_over_default();
+    },
+    /** ## 暂停 / 继续切换 */
+    TOGGLE_PAUSE: () => {
+      toggle_pause_default();
+    },
+    /** ## 背景音乐开关 */
+    TOGGLE_MUSIC: () => {
+      toggle_bgm_default();
+    }
+  };
+  var game_playing_actions_default = GAME_PLAYING_ACTIONS;
+
+  // lib/command/actions/paused-actions.js
+  var PAUSED_ACTIONS = {
+    /** ## 切换暂停状态（继续游戏 / 重新进入游戏循环） */
+    TOGGLE_PAUSE: () => {
+      toggle_pause_default();
+    }
+  };
+  var paused_actions_default = PAUSED_ACTIONS;
+
+  // lib/engine/state/reset-board.js
+  var resetBoard = () => {
+    const { COLS: COLS2, ROWS: ROWS2 } = board_default;
+    engine_state_default.board = Array.from(
+      { length: ROWS2 },
+      () => Array.from({ length: COLS2 }).fill(0)
+    );
+  };
+  var reset_board_default = resetBoard;
+
+  // lib/game/core/reset-to-main-menu.js
+  var resetToMainMenu = (state) => {
+    stop_bgm_default();
+    engine_default.start();
+    reset_board_default();
+    engine_default.setMode("main-menu");
+    state.score = 0;
+    state.lines = 0;
+    state.level = 1;
+    state.next = null;
+    render_hud_default(state.score, state.lines, state.level, state.highScore);
+  };
+  var reset_to_main_menu_default = resetToMainMenu;
+
+  // lib/command/actions/game-over-actions.js
+  var GAME_OVER_ACTIONS = {
+    /**
+     * 确认操作（例如：Enter / Space / OK）
+     *
+     * 作用：
+     *
+     * - 重置游戏状态
+     * - 返回主菜单
+     *
+     * @param {object} _ - Action payload（当前未使用）
+     * @param {object} engine - 游戏引擎实例
+     */
+    CONFIRM: (_, engine) => {
+      reset_to_main_menu_default(engine.state);
+    }
+  };
+  var game_over_actions_default = GAME_OVER_ACTIONS;
+
+  // lib/command/dispatch-command.js
+  var ACTIONS_MAP = {
+    "main-menu": main_menu_actions_default,
+    playing: game_playing_actions_default,
+    paused: paused_actions_default,
+    "game-over": game_over_actions_default
+  };
+  var dispatchCommand = (cmd, engine) => {
+    const { type, payload } = cmd;
+    const mode = engine.getMode();
+    const actions = ACTIONS_MAP[mode];
+    if (!actions) {
+      return;
+    }
+    const handler = actions[type];
+    handler?.(payload, engine);
+  };
+  var dispatch_command_default = dispatchCommand;
+
+  // lib/command/command.js
+  var Command = class {
+    /**
+     * ## 创建一个命令实例
+     *
+     * @param {string} type - 命令类型（如 MOVE / ROTATE）
+     * @param {object} [payload={}] - 命令参数（如方向、等级等）. Default is `{}`
+     */
+    constructor(type, payload = {}) {
+      this.type = type;
+      this.payload = payload;
+    }
+    /**
+     * ## 执行命令
+     *
+     * 将命令交给统一的 dispatch 系统处理， 而不是在 Command 内部写逻辑。
+     *
+     * @param {object} engine - 游戏引擎实例
+     */
+    execute(engine) {
+      dispatch_command_default(this, engine);
+    }
+  };
+  var command_default = Command;
+
+  // lib/game/logic/get-speed.js
+  var getSpeed = (state) => (
+    // 计算速度：基础值1000ms，每升一级减少80ms，最低不低于100ms
+    Math.max(100, 1e3 - (state.level - 1) * 80)
+  );
+  var get_speed_default = getSpeed;
+
+  // lib/game/core/step-game.js
+  var stepGame = (state) => {
+    const mode = engine_default.getMode();
+    if (mode === "main-menu" || mode === "game-over" || hasBlockingAnimation()) {
+      return false;
+    }
+    if (!move_default(0, 1, state)) {
+      lock_default(state);
+      sounds_default.fall();
+      clear_lines_default(state);
+      spawn_default(state);
+      if (mode === "game-over") {
+        return false;
+      }
+    }
+    return true;
+  };
+  var step_game_default = stepGame;
+
+  // lib/engine/start-game-loop.js
+  var startGameLoop = (timestamp) => {
+    if (!engine_default.timestamp) {
+      engine_default.timestamp = timestamp;
+    }
+    const stepDelta = timestamp - engine_default.accumulator;
+    let delta = (timestamp - engine_default.timestamp) / 1e3;
+    if (delta > 1e3) {
+      delta = 1e3;
+    }
+    const dropInterval = get_speed_default(engine_default.state);
+    engine_default.timestamp = timestamp;
+    if (replay_default.playing) {
+      const { data } = replay_default;
+      while (replay_default.cursor < data.length && data[replay_default.cursor].frame === replay_default.frame) {
+        const item = data[replay_default.cursor];
+        command_queue_default.enqueue(new command_default(item.cmd.type, item.cmd.payload));
+        replay_default.cursor++;
+      }
+    }
+    command_queue_default.flush(engine_default);
+    engine_default.update(delta);
+    replay_default.frame++;
+    if (!engine_default.accumulator || stepDelta > dropInterval) {
+      step_game_default(engine_default.state);
+      engine_default.accumulator = timestamp;
+    }
+    engine_default.render();
+    engine_default.animate();
+    engine_default.rafId = requestAnimationFrame(startGameLoop);
+  };
+  var start_game_loop_default = startGameLoop;
+
+  // lib/engine/stop-game-loop.js
+  var stopGameLoop = () => {
+    if (!engine_default.rafId) {
+      return;
+    }
+    cancelAnimationFrame(engine_default.rafId);
+    engine_default.rafId = null;
+    engine_default.timestamp = 0;
+    engine_default.accumulator = 0;
+  };
+  var stop_game_loop_default = stopGameLoop;
+
+  // lib/input/on-resize.js
+  var onResize = () => {
+    engine_default.resize();
+  };
+  var on_resize_default = onResize;
+
+  // lib/input/dispatch-input.js
+  var dispatchInput = (input) => {
+    const { action } = input;
+    const isBlocked = hasBlockingAnimation(["countdown", "level-up"]);
+    if (isBlocked || !action) {
+      return;
+    }
+    const cmd = new command_default(action);
+    command_queue_default.enqueue(cmd);
+    if (replay_default.recording) {
+      replay_default.data.push({
+        frame: replay_default.frame,
+        cmd
+      });
+    }
+  };
+  var dispatch_input_default = dispatchInput;
+
+  // lib/input/resolve-input-action.js
+  var ACTION_MAP = {
+    arrowleft: "MOVE_LEFT",
+    arrowright: "MOVE_RIGHT",
+    arrowdown: "MOVE_DOWN",
+    arrowup: "ROTATE",
+    " ": "DROP",
+    m: "TOGGLE_MUSIC",
+    p: "TOGGLE_PAUSE",
+    r: "RESTART",
+    q: "QUIT",
+    1: "LEVEL_ONE",
+    2: "LEVEL_TWO",
+    3: "LEVEL_THREE",
+    4: "LEVEL_FOUR",
+    5: "LEVEL_FIVE",
+    6: "LEVEL_SIX",
+    7: "LEVEL_SEVEN",
+    8: "LEVEL_EIGHT",
+    9: "LEVEL_NINE",
+    t: "LEVEL_TEN",
+    enter: "CONFIRM"
+  };
+  var resolveInputAction = (key) => {
+    if (!key) {
+      return;
+    }
+    const normalizedKey = key.toLowerCase();
+    return ACTION_MAP[normalizedKey];
+  };
+  var resolve_input_action_default = resolveInputAction;
+
+  // lib/input/on-keydown.js
+  var onKeydown = (e) => {
+    const key = e.key.toLowerCase();
+    const action = resolve_input_action_default(key);
+    if (!action) {
+      return;
+    }
+    dispatch_input_default({
+      type: "keydown",
+      key,
+      action
+    });
+  };
+  var on_keydown_default = onKeydown;
+
+  // lib/input/bind-events.js
+  var bindEvents = () => {
+    globalThis.addEventListener("resize", on_resize_default);
+    document.addEventListener("keydown", on_keydown_default);
+  };
+  var bind_events_default = bindEvents;
+
+  // lib/utils/get-storage.js
+  var getStorage = (key) => localStorage.getItem(key);
+  var get_storage_default = getStorage;
+
+  // lib/engine/state/load-high-score.js
+  var loadHighScore = () => {
+    engine_state_default.highScore = Number.parseInt(get_storage_default("tetris-high-score"), 10) || 0;
+  };
+  var load_high_score_default = loadHighScore;
+
+  // lib/utils/set-storage.js
+  var setStorage = (key, value) => {
+    localStorage.setItem(key, value);
+  };
+  var set_storage_default = setStorage;
+
+  // lib/engine/state/save-high-score.js
+  var saveHighScore = () => {
+    const { score } = engine_state_default;
+    if (score > engine_state_default.highScore) {
+      engine_state_default.highScore = score;
+      set_storage_default("tetris-high-score", engine_state_default.highScore.toString());
+    }
+  };
+  var save_high_score_default = saveHighScore;
+
+  // lib/engine/state/get-mode.js
+  var getMode = () => engine_state_default.mode;
+  var get_mode_default = getMode;
+
+  // lib/engine/state/set-level.js
+  var setLevel = (level) => {
+    engine_state_default.level = level;
+  };
+  var set_level_default = setLevel;
+
+  // lib/ui/text/render-level-text.js
+  var renderLevelText = () => {
+    const { GREEN: GREEN4 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "LEVEL",
+      x: width / 2,
+      y: height * 0.35,
+      color: GREEN4,
+      size: 1,
+      center: true
+    });
+  };
+  var render_level_text_default = renderLevelText;
+
+  // lib/ui/text/render-level-shortcut.js
+  var renderLevelShortcut = () => {
+    const { WHITE: WHITE2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "1-9 or T KEY",
+      x: width / 2,
+      y: height * 0.58,
+      color: WHITE2,
+      size: 1,
+      center: true
+    });
+  };
+  var render_level_shortcut_default = renderLevelShortcut;
+
+  // lib/ui/text/render-enter-start-text.js
+  var renderEnterStartText = () => {
+    const { TEAL: TEAL4 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "ENTER START",
+      x: width / 2,
+      y: height * 0.74,
+      color: TEAL4,
+      size: 1.15,
+      center: true
+    });
+  };
+  var render_enter_start_text_default = renderEnterStartText;
+
+  // lib/ui/scenes/main-menu-scene/render-main-menu.js
+  var renderMainMenu = (level) => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { height } = gameBoard2;
+    clear_board_default();
+    render_overlay_default();
+    render_scene_background_default("main-menu");
+    render_tetris_text_default();
+    render_level_text_default();
+    render_level_number_default(level, height * 0.5);
+    render_level_shortcut_default();
+    render_enter_start_text_default();
+  };
+  var render_main_menu_default = renderMainMenu;
+
+  // lib/ui/scenes/main-menu-scene/lazy-render-main-menu.js
+  var lazyRenderMainMenu = (state) => {
+    if (document?.fonts?.load) {
+      document.fonts.load('40px "Press Start 2P"').then(() => {
+        render_main_menu_default(state.level);
+      });
+    } else {
+      setTimeout(() => {
+        render_main_menu_default(state.level);
+      }, 150);
+    }
+  };
+  var lazy_render_main_menu_default = lazyRenderMainMenu;
+
+  // lib/ui/scenes/main-menu-scene/index.js
+  var mainMenuScene = (state) => {
+    render_main_menu_default(state.level);
+  };
+  var main_menu_scene_default = mainMenuScene;
+
+  // lib/ui/text/render-paused-text.js
+  var renderPausedText = () => {
+    const { YELLOW: YELLOW4 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "PAUSED",
+      x: width / 2,
+      y: height / 1.4,
+      color: YELLOW4,
+      size: 1.6,
+      center: true
+    });
+  };
+  var render_paused_text_default = renderPausedText;
+
+  // lib/utils/format-time.js
+  var formatTime = (date, format = "yyyy-MM-dd HH:mm:ss") => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const toSymbol = () => hours >= 12 ? "PM" : "AM";
+    const hasSymbol = format.includes("a");
+    const hour12 = hours % 12 || 12;
+    const symbols = {
+      yyyy: year,
+      MM: pad_start_default(month, 2),
+      dd: pad_start_default(day, 2),
+      HH: pad_start_default(hours, 2),
+      hh: pad_start_default(hour12, 2),
+      mm: pad_start_default(minutes, 2),
+      ss: pad_start_default(seconds, 2),
+      a: hasSymbol ? toSymbol() : ""
+    };
+    let time = format;
+    for (const key of Object.keys(symbols)) {
+      time = time.replace(new RegExp(key, "g"), symbols[key]);
+    }
+    return time;
+  };
+  var format_time_default = formatTime;
+
+  // lib/ui/effects/render-digital-clock.js
+  var renderDigitalClock = (color, format = "HH:mm:ss") => {
+    const { GREEN: GREEN4 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    const text = format_time_default(/* @__PURE__ */ new Date(), format);
+    render_text_default({
+      text,
+      x: width / 2,
+      y: height / 4.15,
+      color: color || GREEN4,
+      size: 0.94,
+      center: true
+    });
+  };
+  var render_digital_clock_default = renderDigitalClock;
+
+  // lib/ui/effects/utils/get-clock-angles.js
+  var getClockAngles = (time) => {
+    const h = time.getHours();
+    const m = time.getMinutes();
+    const s = time.getSeconds();
+    const hAng = (h % 12 + m / 60 + s / 3600) * (2 * Math.PI / 12);
+    const mAng = (m + s / 60) * (2 * Math.PI / 60);
+    const sAng = s * (2 * Math.PI / 60);
+    return {
+      hAng,
+      mAng,
+      sAng
+    };
+  };
+  var get_clock_angles_default = getClockAngles;
+
+  // lib/ui/constants/images/chinese-hour-animals.js
+  var { RGBA_TEAL: RGBA_TEAL3 } = colors_default;
+  var ChineseHourAnimals = {
+    rat: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M210.432 1012.897684l-43.573895-31.690105c106.954105-147.051789 185.317053-171.196632 423.828211-172.705684 21.396211-31.258947 16.249263-56.266105 9.377684-89.70779-3.557053-17.138526-7.221895-34.842947-7.221895-54.433684 0-68.958316 25.330526-104.636632 63.407158-136.973474l34.896842 41.040842c-29.453474 25.061053-44.409263 46.780632-44.409263 95.932632 0 14.093474 2.937263 28.402526 6.063158 43.546947 5.901474 28.510316 12.8 62.032842-1.131789 99.462737 166.373053-10.24 264.542316-96.902737 264.542315-236.193684C916.210526 418.330947 827.580632 323.368421 684.921263 323.368421c-83.644632 0-153.303579 29.696-174.187789 39.612632a224.875789 224.875789 0 0 1-20.533895 31.339789l-41.741474-34.115368 20.884211 17.057684-20.911158-16.976842C448.781474 359.828211 485.052632 314.287158 485.052632 262.736842c0-34.816-8.946526-60.766316-26.570106-77.069474-17.515789-16.249263-44.786526-24.602947-81.219368-24.953263V323.368421h-53.894737V109.783579l24.872421-1.913263c64.700632-4.931368 114.095158 7.895579 146.863158 38.238316C524.207158 173.056 538.947368 212.291368 538.947368 262.736842c0 11.102316-1.131789 21.908211-3.072 32.202105 37.268211-12.584421 89.842526-25.465263 149.045895-25.465263C858.165895 269.473684 970.105263 387.907368 970.105263 571.176421 970.105263 711.922526 877.487158 862.315789 617.552842 862.315789c-258.667789 0-311.942737 19.698526-407.120842 150.581895z m19.105684-256.835368c-12.045474 0-24.387368-0.565895-37.025684-1.64379l-22.096842-1.859368-2.425263-22.016C167.747368 728.144842 161.684211 672.444632 161.684211 631.026526c0-103.585684 21.450105-178.903579 53.894736-259.045052V107.789474h53.894737v274.782315l-2.021052 4.904422C235.439158 465.758316 215.578947 533.800421 215.578947 631.026526c0 22.878316 2.101895 51.442526 3.826527 70.979369 99.678316 2.802526 172.813474-35.408842 222.450526-116.493474l48.020211 24.090947c-11.237053 28.133053-11.371789 51.577263-0.377264 67.853474 9.701053 14.282105 28.645053 23.174737 49.448421 23.174737v53.894737c-39.019789 0-74.186105-17.515789-94.073263-46.888421a100.244211 100.244211 0 0 1-12.422737-25.546106c-53.221053 49.178947-121.128421 73.943579-202.913684 73.970527zM379.957895 525.473684c0-34.223158-13.231158-44.463158-29.642106-44.463158s-29.642105 10.24-29.642105 44.463158c0 34.250105 13.231158 44.463158 29.642105 44.463158s29.642105-10.213053 29.642106-44.463158z" fill="${RGBA_TEAL3}" /></svg>`,
+    ox: `<svg width="800px" height="800px" viewBox="0 -0.5 1025 1025" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M1025.347368 635.580632V916.210526h-53.894736v-71.033263c-16.330105-18.405053-69.820632-70.413474-161.684211-86.069895V916.210526h-53.894737v-161.68421h-107.789473v215.578947h-53.894737V700.631579h161.68421c100.998737 0 172.570947 38.669474 215.578948 71.868632v-115.738948c-33.684211-43.627789-51.712-137.458526-53.706106-279.498105H701.978947c-76.934737 0-127.218526-26.219789-175.804631-51.550316a1556.048842 1556.048842 0 0 0-26.839579-13.743158c-26.839579 26.004211-66.209684 44.921263-115.738948 55.511579 24.441263 22.986105 60.874105 52.116211 106.469053 72.838737l-22.312421 49.044211c-76.584421-34.816-129.589895-88.926316-150.824421-113.125053-10.644211 0.619789-21.477053 1.024-32.687158 1.024a473.734737 473.734737 0 0 1-123.365053-15.952842l-93.022315 186.314105 68.581052 53.86779C167.882105 579.557053 237.891368 538.947368 324.715789 538.947368v53.894737c-95.986526 0-170.361263 62.490947-171.088842 63.137684l-16.78821 14.282106-136.838737-107.358316 109.729684-219.809684C46.430316 314.448842 1.347368 267.371789 1.347368 199.868632 1.347368 89.815579 121.586526 53.894737 163.031579 53.894737v53.894737c-14.120421 0-107.789474 17.165474-107.789474 92.079158C55.242105 290.465684 192.188632 323.368421 284.240842 323.368421c67.907368 0 122.421895-12.988632 157.696-35.624421-42.711579-14.336-95.097263-23.120842-169.337263-18.324211l-3.503158-53.786947c95.878737-6.117053 160.148211 8.515368 211.429053 28.833684C484.244211 235.439158 486.4 225.818947 486.4 215.578947c0-48.855579-57.829053-76.288-58.394947-76.557473l22.393263-49.017263C454.063158 91.648 540.294737 131.826526 540.294737 215.578947c0 18.566737-3.422316 35.84-9.997474 51.631158 7.060211 3.584 13.985684 7.168 20.776421 10.698106C597.854316 302.322526 638.248421 323.368421 701.978947 323.368421h269.473685v26.947368c0 214.689684 35.220211 266.590316 45.999157 277.369264l7.895579 7.895579z m-729.384421 25.141894l-98.789052 118.541474 86.797473 137.835789 45.594948-28.725894-65.913263-104.690527 37.052631-44.43621C358.642526 785.192421 439.080421 808.421053 540.294737 808.421053v-53.894737c-99.893895 0-175.077053-24.549053-223.474526-72.946527l-20.857264-20.857263z" fill="${RGBA_TEAL3}" /></svg>`,
+    rabbit: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M862.315789 720.896c0 36.621474-4.122947 69.389474-24.252631 110.349474L769.697684 970.105263H485.052632v-53.894737h48.370526C507.877053 880.074105 485.052632 833.509053 485.052632 781.473684c0-59.418947 24.171789-113.313684 63.218526-152.360421l38.103579 38.103579A161.091368 161.091368 0 0 0 538.947368 781.473684c0 54.784 35.381895 104.043789 63.514948 134.736842h133.712842l53.490526-108.759579c15.710316-31.851789 18.755368-55.834947 18.755369-86.554947 0-80.976842-63.434105-150.096842-178.607158-195.503158-17.542737 8.138105-38.292211 13.554526-63.919158 13.554526h-80.842105c-13.958737 0-43.924211 15.979789-57.290106 40.016843l-47.104-26.165895C401.408 515.449263 448.242526 485.052632 485.052632 485.052632h80.842105c37.268211 0 57.478737-15.440842 79.090526-36.45979C625.367579 336.195368 549.753263 269.473684 485.052632 269.473684h-107.789474a21.288421 21.288421 0 0 0-5.955369 2.021053A683.762526 683.762526 0 0 0 302.187789 194.021053c-35.84-34.223158-61.763368-58.933895-94.908631-79.440842A42.442105 42.442105 0 0 0 185.478737 107.789474a22.824421 22.824421 0 0 0-17.381053 7.194947c-10.913684 11.425684-6.063158 28.240842 1.428211 39.181474 21.989053 32.121263 47.912421 56.858947 83.752421 91.109052 20.614737 19.671579 49.259789 43.169684 77.392842 63.08379C281.007158 367.400421 215.578947 484.432842 215.578947 592.842105c0 74.482526 24.791579 124.065684 51.065264 176.586106C294.534737 825.209263 323.368421 882.903579 323.368421 970.105263h-53.894737c0-74.482526-24.791579-124.065684-51.065263-176.586105C190.517895 737.738105 161.684211 680.043789 161.684211 592.842105c0-90.866526 42.226526-197.685895 93.453473-274.485894a803.759158 803.759158 0 0 1-39.046737-34.115369C177.852632 247.754105 150.231579 221.399579 125.035789 184.616421c-24.441263-35.759158-22.797474-78.686316 4.069053-106.819368 26.300632-27.567158 70.898526-31.043368 106.522947-9.000421 37.941895 23.444211 65.562947 49.798737 103.774316 86.258526 9.970526 9.512421 33.037474 32.309895 56.93979 60.550737h68.634947c-27.621053-37.780211-60.416-72.730947-88.522105-99.543579-28.833684-27.540211-54.730105-52.116211-84.533895-74.024421L326.305684 0.296421c31.232 23.228632 57.802105 48.532211 87.309474 76.719158 53.840842 51.388632 94.450526 100.594526 121.74821 146.83621 82.836211 26.650947 150.042947 116.870737 165.025685 230.750316l1.724631 13.177263-9.404631 9.404632c-3.772632 3.772632-7.706947 7.653053-11.802948 11.587368C837.227789 561.178947 862.315789 663.498105 862.315789 720.896zM309.463579 754.526316c3.934316 8.057263 7.895579 16.087579 11.991579 24.144842C348.887579 832.970105 377.263158 889.128421 377.263158 970.105263h53.894737c0-93.696-34.061474-161.226105-61.520842-215.578947h-60.173474z m597.90821 53.894737c-3.422316 9.404632-7.814737 19.806316-13.770105 31.959579L829.790316 970.105263h60.065684l52.143158-105.957052c10.778947-21.935158 17.515789-40.016842 21.90821-55.727158h-56.535579zM514.694737 390.736842c0-34.223158-13.231158-44.463158-29.642105-44.463158s-29.642105 10.24-29.642106 44.463158c0 34.250105 13.231158 44.463158 29.642106 44.463158s29.642105-10.213053 29.642105-44.463158z" fill="${RGBA_TEAL3}" /></svg>`,
+    dragon: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M552.421053 1024c-69.766737 0-113.825684-13.958737-156.402527-27.459368-54.487579-17.273263-110.807579-35.004632-232.421052-26.516211l-3.826527-53.733053c131.718737-9.458526 195.934316 10.967579 252.52379 28.887579 42.226526 13.365895 78.686316 24.926316 140.126316 24.926316 92.752842 0 148.210526-57.936842 148.210526-113.960421 0-16.949895-5.524211-101.618526-114.634105-101.618526-64.970105 0-112.747789 23.336421-163.328 48.02021C365.325474 830.571789 300.301474 862.315789 204.288 862.315789 85.908211 862.315789 0 787.294316 0 683.897263 0 588.126316 80.788211 485.052632 258.182737 485.052632c86.689684 0 155.917474 24.818526 229.214316 51.09221 45.810526 16.410947 92.564211 33.172211 145.488842 44.166737 9.000421-7.033263 13.850947-16.276211 13.850947-26.758737 0-37.187368-37.672421-74.859789-74.13221-111.265684l-3.287579-3.287579 38.103579-38.103579 3.260631 3.287579C652.853895 446.275368 700.631579 494.026105 700.631579 553.552842c0 12.719158-2.802526 24.926316-7.976421 36.109474A594.997895 594.997895 0 0 0 754.526316 592.842105c62.437053 0 107.789474-34.007579 107.789473-80.842105 0-58.853053-52.870737-110.268632-108.840421-164.702316l-8.057263-7.841684c-19.024842 16.437895-38.076632 35.489684-59.418947 56.832l-38.103579-38.103579c74.805895-74.832842 134.898526-134.898526 268.314947-141.931789V55.619368c-63.407158 7.787789-120.993684 39.424-121.667368 39.801264l-15.818105 8.811789-14.120421-11.344842C731.701895 66.452211 709.712842 53.894737 673.684211 53.894737c-41.418105 0-74.347789 25.869474-109.190737 53.301895-26.624 20.911158-54.137263 42.549895-86.851369 53.194105L469.342316 161.684211h-69.093053l-105.525895 105.525894-38.103579-38.130526L324.015158 161.684211H161.684211V107.789474h303.104c22.231579-8.272842 43.708632-25.168842 66.398315-42.981053C569.829053 34.438737 613.618526 0 673.684211 0c48.909474 0 81.408 17.946947 110.888421 40.097684C813.702737 26.300632 877.729684 0 943.157895 0h26.947368v323.368421h-53.894737v-53.167158c-54.164211 3.098947-92.914526 15.845053-127.002947 36.675369l1.832421 1.778526C852.587789 368.505263 916.210526 430.376421 916.210526 512c0 60.928-43.708632 109.945263-107.789473 127.622737V700.631579h53.894736v-53.894737h53.894737v53.894737h53.894737v53.894737h-53.894737v53.894737h-53.894737v-53.894737h-53.894736c-29.722947 0-53.894737-24.171789-53.894737-53.894737v-53.894737c-118.325895 0-207.063579-31.797895-285.318737-59.877053C400.437895 562.229895 335.494737 538.947368 258.182737 538.947368 117.059368 538.947368 53.894737 611.732211 53.894737 683.897263 53.894737 757.221053 115.738947 808.421053 204.288 808.421053c11.910737 0 23.228632-0.538947 34.034526-1.536C248.454737 796.321684 269.473684 770.640842 269.473684 739.166316c0-33.118316-43.088842-70.979368-58.152421-81.596632l30.935579-44.139789c8.299789 5.793684 81.111579 58.664421 81.111579 125.736421 0 19.429053-4.527158 37.052632-10.994526 52.304842 30.773895-10.051368 58.314105-23.498105 86.662737-37.349053C452.877474 727.848421 508.577684 700.631579 585.997474 700.631579 702.410105 700.631579 754.526316 778.725053 754.526316 856.144842 754.526316 938.657684 678.912 1024 552.421053 1024z m-21.180632-623.104L493.136842 362.792421l137.889684-137.889684 38.103579 38.103579-137.889684 137.889684z m-126.760421-18.351158l-38.103579-38.103579 152.980211-152.98021 38.103579 38.103579-152.980211 152.98021z m282.004211-218.624c15.494737-9.754947 43.331368-31.447579 43.331368-31.447579-25.734737-27.809684-49.556211-33.333895-67.368421-29.07621-19.240421 4.608-37.753263 24.602947-37.753263 24.602947s42.253474 22.447158 61.790316 35.920842z" fill="${RGBA_TEAL3}" /></svg>`,
+    tiger: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M673.684211 1024c-114.768842 0-188.820211-33.333895-254.167579-62.787368-53.625263-24.144842-99.974737-45.002105-161.28-45.002106-40.448 0-83.590737 23.255579-103.639579 45.16379l-39.747369-36.432842C142.497684 894.787368 199.168 862.315789 258.236632 862.315789c68.392421 0 119.861895 21.288421 172.921263 45.056V673.684211c0-35.166316-17.542737-64.107789-30.639158-80.815158-15.198316 9.835789-32.067368 18.890105-50.741895 26.947368l-21.342316-49.475368C469.800421 509.413053 485.052632 377.317053 485.052632 323.368421V221.642105A597.827368 597.827368 0 0 0 404.210526 215.578947h-26.947368V134.736842c0-12.099368-14.848-26.947368-26.947369-26.947368-9.377684 0-18.836211 0.592842-26.947368 1.347368V269.473684h-53.894737V211.671579c-136.030316 102.912-158.450526 266.886737-161.306947 295.882105 9.135158 9.108211 38.992842 25.061053 71.976421 38.669474l38.103579-59.365053 12.449684-1.589894C321.212632 473.653895 377.263158 392.192 377.263158 323.368421h53.894737c0 88.333474-68.796632 192.242526-180.870737 213.342316l-48.397474 75.398737-20.291368-7.437474C53.894737 557.756632 53.894737 523.317895 53.894737 512c0-50.041263 37.025684-254.733474 215.578947-365.621895V62.490947l22.528-3.745684C293.187368 58.556632 321.482105 53.894737 350.315789 53.894737c41.552842 0 80.842105 39.289263 80.842106 80.842105v27.513263c248.697263 10.563368 592.842105 165.295158 592.842105 484.486737 0 185.451789-131.018105 377.263158-350.315789 377.263158z m-13.473685-323.368421c-36.513684 0-67.368421 49.367579-67.368421 107.789474 0 85.746526 68.096 145.084632 89.465263 161.549473 91.540211-2.533053 164.378947-45.487158 213.827369-107.654737H700.631579v-53.894736h230.238316c8.919579-17.273263 16.357053-35.354947 22.285473-53.894737h-239.885473l-6.467369-17.650527C706.290526 735.582316 692.439579 700.631579 660.210526 700.631579zM485.052632 931.112421c33.926737 14.066526 70.521263 26.597053 114.607157 33.468632C569.424842 928.309895 538.947368 875.223579 538.947368 808.421053c0-90.650947 53.274947-161.684211 121.263158-161.684211 44.759579 0 73.835789 28.779789 88.68379 53.894737h217.007158c2.775579-17.866105 4.203789-35.920842 4.203789-53.894737 0-38.938947-5.658947-74.752-15.925895-107.627789l-126.706526 126.679579-38.103579-38.103579L932.001684 485.052632a367.939368 367.939368 0 0 0-57.775158-81.596632l-154.543158 154.543158-38.103579-38.103579 153.573053-153.573053a537.869474 537.869474 0 0 0-82.593684-56.751158l-140.665263 140.638316-38.103579-38.103579 128.134737-128.134737A794.731789 794.731789 0 0 0 538.947368 231.046737V323.368421c0 50.149053-11.102316 156.698947-95.932631 236.328421 18.378105 23.417263 42.037895 63.407158 42.037895 113.987369v257.42821zM215.578947 431.157895v-53.894737c39.774316 0 53.894737-29.022316 53.894737-53.894737h53.894737c0 53.571368-37.025684 107.789474-107.789474 107.789474z" fill="${RGBA_TEAL3}" /></svg>`,
+    snake: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M671.528421 788.857263c44.328421 11.964632 89.626947 19.563789 136.892632 19.56379 89.168842 0 161.684211-60.442947 161.68421-134.736842s-72.515368-134.736842-161.68421-134.736843c-19.078737 0-37.025684 1.509053-54.218106 4.015158-0.754526-101.402947-38.211368-172.355368-79.413894-219.648L673.684211 323.368421a1749.962105 1749.962105 0 0 1-79.036632-1.751579c45.702737 35.866947 108.705684 107.870316 105.984 232.367158 0 0.431158-0.080842 0.808421-0.10779 1.239579-34.923789 10.994526-66.155789 26.731789-95.097263 45.190737a163.085474 163.085474 0 0 0-15.845052-42.388211c-21.557895-39.639579-60.065684-66.775579-97.360842-93.022316C433.098105 423.343158 377.263158 384 377.263158 296.421053c0-130.290526 108.274526-188.631579 215.578947-188.631579 64.134737 0 132.715789 12.045474 214.366316 37.807158C802.330947 180.250947 780.099368 209.381053 700.631579 214.635789V161.684211h-53.894737v53.679157c-63.272421-1.024-104.528842-5.200842-104.986947-5.254736l-5.578106 53.598315C538.408421 263.949474 592.357053 269.473684 673.684211 269.473684c125.170526 0 188.631579-48.128 188.631578-143.063579V106.981053l-18.432-6.144C747.789474 68.823579 668.025263 53.894737 592.842105 53.894737c-158.666105 0-269.473684 99.732211-269.473684 242.526316 0 115.550316 76.422737 169.391158 137.83579 212.614736 33.684211 23.713684 65.509053 46.106947 81.003789 74.698106 9.539368 17.542737 13.285053 33.414737 12.341895 47.750737 21.153684 9.108211 42.118737 17.839158 62.949052 25.977263C671.151158 620.193684 729.977263 592.842105 808.421053 592.842105c59.445895 0 107.789474 36.271158 107.789473 80.842106s-48.343579 80.842105-107.789473 80.842105c-105.472 0-203.237053-42.388211-297.768421-83.429053-94.800842-41.094737-184.346947-79.952842-281.411369-79.952842C122.718316 591.171368 53.894737 644.715789 53.894737 727.578947c0 79.063579 67.098947 136.434526 159.555368 136.434527 142.174316 0 230.426947-66.883368 306.79579-129.886316 31.420632 13.419789 62.787368 26.058105 94.450526 37.133474-47.077053 49.637053-110.969263 82.566737-186.610526 91.270736l5.066105 53.625264c93.453474-7.006316 143.144421 9.350737 195.718737 26.543157 46.457263 15.225263 94.127158 30.854737 169.822316 30.854737 19.994947 0 41.957053-1.077895 66.344421-3.557052l-5.416421-53.625263c-105.283368 10.778947-158.100211-6.548211-213.935158-24.872422-22.150737-7.275789-44.624842-14.632421-70.305684-20.345263a334.848 334.848 0 0 0 96.14821-82.297263z m-458.078316 21.261474C162.573474 810.118737 107.789474 784.276211 107.789474 727.578947c0-60.847158 62.733474-82.539789 121.451789-82.539789 77.850947 0 154.731789 30.288842 235.250526 64.943158-66.263579 52.924632-139.722105 100.136421-251.041684 100.136421z" fill="${RGBA_TEAL3}" /></svg>`,
+    horse: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M1024 0v404.210526c0 33.333895 0 134.736842-92.079158 134.736842h-13.824l-78.362947-109.056c-22.743579 49.906526-40.340211 103.046737-53.490527 162.950737h115.092211C937.310316 592.842105 970.105263 625.637053 970.105263 661.638737c0 60.631579-69.389474 154.300632-77.312 164.75621l-43.008-32.471579C875.466105 759.861895 916.210526 693.813895 916.210526 661.638737c0-5.982316-8.919579-14.901895-14.901894-14.901895h-125.332211C761.128421 736.121263 754.526316 840.569263 754.526316 970.105263h-53.894737c0-283.971368 31.097263-453.605053 110.888421-605.049263l20.318316-38.534737 112.801684 156.995369c14.443789-4.419368 25.465263-20.938105 25.465263-79.306106V0h53.894737z m-161.684211 161.684211h53.894737V0h-53.894737v80.842105c-17.381053-14.955789-38.184421-26.947368-80.842105-26.947368h-134.736842v53.894737h134.736842c37.672421 0 80.842105 40.906105 80.842105 53.894737z m-107.789473 0h-215.578948v53.894736h161.684211l53.894737-53.894736zM300.894316 766.544842L400.680421 916.210526h64.754526l-95.043368-142.551579L498.876632 646.736842h167.855157a1212.631579 1212.631579 0 0 1 9.431579-53.894737h-199.383579l-175.885473 173.702737z m109.97221-184.400842l-37.861052-38.319158-132.419369 130.802526C173.729684 571.095579 161.684211 529.812211 161.684211 469.315368 161.684211 398.578526 199.464421 323.368421 269.473684 323.368421h323.368421l53.894737-53.894737H269.473684c-6.709895 0-13.258105 0.565895-19.698526 1.482105C234.927158 249.451789 204.638316 215.578947 160.633263 215.578947 65.967158 215.578947 0 349.291789 0 469.315368c0 70.170947 16.141474 136.650105 49.232842 202.671158L6.197895 723.833263l41.472 34.41179 66.128842-79.737264-8.704-16.033684C83.105684 622.133895 53.894737 558.214737 53.894737 469.315368 53.894737 368.451368 106.765474 269.473684 160.633263 269.473684c13.231158 0 25.815579 9.889684 35.43579 20.533895C142.874947 321.967158 107.789474 388.500211 107.789474 469.315368c0 78.201263 19.698526 130.937263 93.642105 243.981474l-55.296 54.622316L280.899368 970.105263h64.754527l-130.048-195.072 195.260631-192.889263z" fill="${RGBA_TEAL3}" /></svg>`,
+    goat: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M608.256 144.734316C555.762526 115.577263 506.098526 107.789474 485.052632 107.789474V53.894737c32.579368 0 91.270737 11.452632 149.369263 43.735579 75.290947 41.822316 130.694737 94.531368 171.385263 150.878316C755.873684 288.013474 697.101474 323.368421 646.736842 323.368421h-107.789474v-53.894737h107.789474c20.506947 0 48.424421-11.210105 80.437895-31.285895a471.04 471.04 0 0 0-118.918737-93.453473zM832.673684 342.231579c-16.384 0-29.642105 10.24-29.642105 44.463158 0 34.250105 13.231158 44.463158 29.642105 44.463158s29.642105-10.213053 29.642105-44.463158c0-34.223158-13.231158-44.463158-29.642105-44.463158zM1024 619.789474C1024 347.109053 901.066105 122.448842 686.753684 3.395368l-26.165895 47.104C914.324211 191.461053 964.688842 440.400842 969.647158 592.842105h-84.506947c-17.92-35.624421-45.352421-69.12-87.013053-101.995789l-16.788211-13.285053-16.734315 13.392842c-66.128842 52.897684-134.629053 127.083789-187.311158 209.677474H102.965895l-8.272842-20.318316C159.043368 617.013895 161.684211 603.109053 161.684211 485.052632v-53.894737h485.052631v-53.894737H161.684211c0-80.384 14.309053-110.026105 66.586947-137.916632l-25.384421-47.535158C123.365053 234.226526 107.789474 291.920842 107.789474 377.263158v107.789474c0 107.600842 0 107.600842-63.649685 169.283368l-13.069473 12.665263L110.618947 862.315789h58.206316l-43.897263-107.789473h103.477895l43.897263 107.789473h58.206316l-43.897263-107.789473h259.47621C508.981895 824.939789 485.052632 899.152842 485.052632 970.105263h53.894736c0-68.688842 27.270737-144.060632 68.958316-215.578947H687.157895c7.410526 0 13.473684 6.063158 13.473684 13.473684V862.315789h53.894737v-94.315789c0-37.160421-30.208-67.368421-67.368421-67.368421h-44.65179c40.771368-58.017684 89.438316-111.427368 138.913684-153.626947C841.512421 600.037053 862.315789 655.225263 862.315789 754.526316h53.894737c0-38.912-2.748632-74.482526-11.102315-107.789474H1024v-26.947368z" fill="${RGBA_TEAL3}" /></svg>`,
+    monkey: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M538.947368 1024h-53.894736c0-32.794947 25.869474-87.417263 77.446736-103.316211C528.599579 881.152 485.052632 822.433684 485.052632 781.473684c0-44.570947 36.271158-80.842105 80.842105-80.842105h80.842105v53.894737h-80.842105a26.947368 26.947368 0 0 0-26.947369 26.947368c0 19.725474 36.675368 77.473684 92.133053 134.736842h88.602947c20.210526-14.147368 88.737684-71.464421 88.737685-198.602105 0-108.382316-93.237895-202.967579-168.151579-278.986105-49.502316-50.202947-88.576-89.842526-98.735158-128.61979-11.749053-44.732632-21.584842-112.586105-26.327579-148.318315H377.263158c-45.136842 0-89.519158 8.434526-121.802105 53.894736H431.157895v53.894737c-97.28 0-107.789474 113.071158-107.789474 161.684211v53.894737h53.894737v161.68421h-53.894737v-107.789474h-26.947368c-170.253474 0-188.631579-94.234947-188.631579-134.736842 0-31.043368 35.220211-72.326737 55.727158-93.722947 2.694737-14.686316 5.847579-28.348632 9.431579-41.013895H161.684211V215.578947h31.528421C239.642947 120.993684 317.224421 107.789474 377.263158 107.789474h185.640421l2.802526 23.794526c0.134737 1.050947 12.719158 106.657684 27.944421 164.756211 6.494316 24.872421 44.624842 63.514947 84.965053 104.448C760.481684 483.813053 862.315789 587.129263 862.315789 717.608421c0 92.375579-31.124211 155.028211-61.898105 194.425263C904.919579 892.146526 970.105263 803.004632 970.105263 673.684211c0-91.405474-42.819368-154.381474-84.237474-215.255579C847.791158 402.458947 808.421053 344.576 808.421053 269.473684c0-119.349895 87.093895-161.684211 161.68421-161.68421v53.894737c-32.417684 0-107.789474 10.509474-107.789474 107.789473 0 58.502737 31.555368 104.933053 68.096 158.639158C974.282105 492.597895 1024 565.679158 1024 673.684211c0 177.286737-108.301474 296.421053-269.473684 296.421052h-161.684211c-37.672421 0-53.894737 40.906105-53.894737 53.894737zM229.214316 269.473684a384.808421 384.808421 0 0 0-14.012632 58.341053l-1.401263 8.488421-6.090105 6.117053c-22.878316 22.932211-44.813474 52.601263-46.026105 62.275368 0 56.805053 53.76 75.264 107.789473 79.386947V431.157895c0-58.691368 13.473684-119.619368 46.511158-161.684211h-86.770526zM323.368421 1024h-53.894737c0-32.794947 25.869474-87.417263 77.446737-103.316211C313.020632 881.152 269.473684 822.433684 269.473684 781.473684c0-44.570947 36.271158-80.842105 80.842105-80.842105h45.16379A188.847158 188.847158 0 0 1 565.894737 592.842105h134.736842v53.894737h-134.736842c-74.293895 0-134.736842 60.442947-134.736842 134.736842v26.516211l-53.894737 0.377263V781.473684c0-9.162105 0.646737-18.135579 1.913263-26.947368H350.315789c-14.848 0-26.947368 12.072421-26.947368 26.947368 0 19.725474 36.675368 77.473684 92.133053 134.736842H431.157895v53.894737h-53.894737c-37.672421 0-53.894737 40.906105-53.894737 53.894737z" fill="${RGBA_TEAL3}" /></svg>`,
+    rooster: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M673.684211 354.357895c-16.384 0-29.642105-10.213053-29.642106-44.463158 0-34.223158 13.231158-44.463158 29.642106-44.463158s29.642105 10.24 29.642105 44.463158c0 34.250105-13.258105 44.463158-29.642105 44.463158zM540.106105 970.105263l-50.58021-107.789474h156.05221l50.607158 107.789474h59.553684l-51.60421-109.918316C811.52 846.821053 916.210526 764.550737 916.210526 646.736842c0-53.032421-11.910737-95.420632-24.522105-140.314947C877.244632 455.033263 862.315789 401.893053 862.315789 323.368421V107.789474c0-59.445895-48.343579-107.789474-107.789473-107.789474a107.924211 107.924211 0 0 0-107.789474 106.172632 100.890947 100.890947 0 0 0-24.117895-3.314527 88.710737 88.710737 0 0 0-88.602947 88.602948c0 20.668632 5.227789 39.720421 10.671158 53.921684l-99.489684 59.688421 93.749894 14.470737V377.263158c0 14.416842-5.901474 21.692632-33.360842 49.152l-11.129263 11.129263C398.228211 326.521263 324.985263 269.473684 215.740632 269.473684 96.768 269.473684 0 366.241684 0 485.214316V646.736842h53.894737v-161.522526A162.007579 162.007579 0 0 1 215.740632 323.368421c82.081684 0 140.422737 36.244211 240.64 152.252632l-38.615579 38.615579C367.804632 461.285053 323.098947 431.157895 259.584 431.157895A151.983158 151.983158 0 0 0 107.789474 582.952421V754.526316h53.894737v-171.573895A98.007579 98.007579 0 0 1 259.584 485.052632c46.322526 0 79.629474 20.911158 137.027368 86.016l18.970948 21.530947 128.080842-128.080842C572.200421 435.981474 592.842105 415.366737 592.842105 377.263158v-97.926737l23.309474-14.120421-13.662316-23.04c-0.161684-0.242526-14.578526-24.899368-14.578526-50.688 0-19.132632 15.575579-34.708211 34.70821-34.708211 5.093053 0 26.785684 3.179789 39.558737 18.647579l26.327579 46.026106 39.774316-24.090948-20.372211-49.367579C704.754526 140.449684 700.631579 117.517474 700.631579 107.789474c0-29.722947 24.171789-53.894737 53.894737-53.894737s53.894737 24.171789 53.894737 53.894737v215.578947c0 85.935158 16.680421 145.300211 31.366736 197.632C851.887158 564.008421 862.315789 601.141895 862.315789 646.736842c0 95.285895-99.408842 161.684211-188.631578 161.684211h-209.461895l-68.419369-145.704421C375.242105 618.954105 338.108632 592.842105 296.448 592.842105A80.976842 80.976842 0 0 0 215.578947 673.711158V862.315789h53.894737v-188.604631c0-14.874947 12.099368-26.974316 26.974316-26.974316 20.533895 0 38.965895 14.147368 50.553263 38.858105L480.579368 970.105263h59.526737z" fill="${RGBA_TEAL3}" /></svg>`,
+    dog: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M326.063158 282.947368c0 34.250105-13.231158 44.463158-29.642105 44.463158s-29.642105-10.213053-29.642106-44.463158c0-34.223158 13.231158-44.463158 29.642106-44.463157s29.642105 10.24 29.642105 44.463157zM269.473684 430.295579v311.646316L190.275368 916.210526h59.203369L323.368421 753.637053V377.263158h-26.947368c-119.403789 0-172.732632-53.382737-185.505685-107.789474h35.624421c51.092211 0 68.581053-15.764211 120.535579-62.544842 12.773053-11.506526 28.079158-25.276632 47.023158-41.741474l18.351158-15.952842-69.658947-99.139368-44.085895 30.989474 41.768421 59.472842c-11.183158 9.862737-20.884211 18.593684-29.480421 26.327579C180.736 212.156632 176.235789 215.578947 146.539789 215.578947H53.894737v26.947369c0 88.710737 66.910316 178.149053 215.578947 187.769263z m216.710737-161.414737c2.290526 71.733895 28.698947 136.326737 75.048421 182.918737C618.711579 509.628632 702.437053 538.947368 810.091789 538.947368c18.593684 0 36.190316-1.158737 52.628211-3.449263 3.745684 111.265684 33.630316 170.334316 51.496421 196.015158l-38.507789 84.722526C782.174316 742.049684 688.774737 700.631579 377.263158 700.631579v53.894737c34.277053 0 65.697684 0.512 94.639158 1.509052L374.595368 970.105263h59.203369l96.013474-211.240421c66.182737 4.338526 117.005474 11.829895 157.911578 22.016L626.229895 916.210526h59.176421l54.16421-119.134315c47.616 18.405053 79.737263 42.091789 113.125053 69.739789L805.753263 970.105263h59.203369l113.071157-248.778105-13.824-13.204211c-0.485053-0.458105-45.648842-47.589053-47.939368-185.263158C985.168842 498.553263 1024 447.811368 1024 377.263158c0-95.205053-66.506105-161.684211-161.684211-161.684211v53.894737c65.482105 0 107.789474 42.307368 107.789474 107.789474 0 89.088-87.013053 107.789474-160.013474 107.789474-92.752842 0-163.624421-23.983158-210.647578-71.27579-30.315789-30.504421-45.891368-65.832421-53.35579-98.735158 11.210105 6.952421 22.932211 13.338947 35.274105 19.186527l23.04-48.720843c-92.106105-43.654737-148.992-128.646737-219.243789-243.981473l-46.026105 28.05221c49.448421 81.246316 92.968421 148.506947 147.051789 199.302737z" fill="${RGBA_TEAL3}" /></svg>`,
+    pig: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M808.421053 700.631579v53.894737c-196.446316 0-323.368421 84.641684-323.368421 215.578947h-53.894737c0-163.705263 148.075789-269.473684 377.263158-269.473684z m-323.368421 107.789474v-53.894737c-158.342737 0-245.598316 0-319.649685-49.367579L158.612211 700.631579H80.842105c-21.692632 0-26.624-14.821053-26.947368-26.947368v-82.620632c84.156632-11.183158 161.684211-74.913684 161.68421-186.853053V215.578947H161.684211v161.684211H134.736842c-66.964211 0-134.736842 37.025684-134.736842 107.789474h53.894737c0-42.630737 52.870737-53.894737 80.842105-53.894737h24.629895C147.132632 504.912842 85.153684 538.947368 26.947368 538.947368H0v134.736843c0 32.498526 21.530947 80.842105 80.842105 80.842105h61.682527c32.687158 20.506947 67.125895 33.145263 105.957052 41.013895A232.879158 232.879158 0 0 0 215.578947 916.210526h53.894737c0-41.930105 14.012632-80.303158 39.424-112.505263C358.885053 808.151579 415.959579 808.421053 485.052632 808.421053z m-72.946527-342.420211L323.368421 554.738526V431.157895h-53.894737v253.682526l180.736-180.736-38.103579-38.103579zM323.368421 161.684211h-53.894737v190.032842a769.536 769.536 0 0 1 53.894737-49.098106V161.684211z m323.368421-53.894737c-72.623158 0-146.809263 23.336421-215.578947 58.637473V107.789474h-53.894737v154.138947C458.832842 205.392842 555.331368 161.684211 646.736842 161.684211c148.587789 0 269.473684 120.885895 269.473684 269.473684v235.654737L809.579789 862.315789h61.359158L970.105263 680.555789V431.157895c0-178.310737-145.057684-323.368421-323.368421-323.368421z" fill="${RGBA_TEAL3}" /></svg>`
+  };
+  var chinese_hour_animals_default = ChineseHourAnimals;
+
+  // lib/utils/get-chinese-hour-animal.js
+  var getChineseHourAnimal = (hour) => {
+    const map = [
+      "rat",
+      "ox",
+      "ox",
+      "tiger",
+      "tiger",
+      "rabbit",
+      "rabbit",
+      "dragon",
+      "dragon",
+      "snake",
+      "snake",
+      "horse",
+      "horse",
+      "goat",
+      "goat",
+      "monkey",
+      "monkey",
+      "rooster",
+      "rooster",
+      "dog",
+      "dog",
+      "pig",
+      "pig",
+      "rat"
+    ];
+    return map[hour];
+  };
+  var get_chinese_hour_animal_default = getChineseHourAnimal;
+
+  // lib/ui/image/render-chinese-hour-animal-image.js
+  var renderChineseHourAnimalImage = () => {
+    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
+    const { width } = gameBoard2;
+    const time = /* @__PURE__ */ new Date();
+    const hour = time.getHours();
+    const animal = get_chinese_hour_animal_default(hour - 1);
+    const img = getImage(chinese_hour_animals_default[animal]);
+    const size = Math.floor(width * 0.36);
+    const x = -size / 2;
+    const y = -size / 2;
+    render_image_default(ctx, img, x, y, size);
+  };
+  var render_chinese_hour_animal_image_default = renderChineseHourAnimalImage;
+
+  // lib/ui/effects/render-analog-clock.js
+  var renderAnalogClock = () => {
+    const time = /* @__PURE__ */ new Date();
+    const { hAng, mAng, sAng } = get_clock_angles_default(time);
+    const { TEAL: TEAL4, RGBA_TEAL: RGBA_TEAL5, ORANGE: ORANGE4 } = colors_default;
+    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
+    const { width, height } = gameBoard2;
+    const centerX = width / 2;
+    const centerY = height / 2.2;
+    const radius = Math.floor(width * 0.3);
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fillStyle = RGBA_TEAL5;
+    ctx.fill();
+    ctx.lineWidth = Math.floor(width * 0.06);
+    ctx.strokeStyle = TEAL4;
+    ctx.stroke();
+    render_chinese_hour_animal_image_default();
+    const dotRadius = Math.floor(width * 0.016);
+    const dotDistance = radius - Math.floor(width * 0.08);
+    for (let i = 0; i < 12; i++) {
+      ctx.save();
+      ctx.rotate(i * Math.PI / 6);
+      ctx.beginPath();
+      ctx.arc(0, -dotDistance, dotRadius, 0, Math.PI * 2);
+      ctx.fillStyle = TEAL4;
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.rotate(hAng);
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -radius * 0.4);
+    ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.rotate(mAng);
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -radius * 0.65);
+    ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.rotate(sAng);
+    ctx.strokeStyle = ORANGE4;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -radius * 0.75);
+    ctx.stroke();
+    ctx.restore();
+    ctx.beginPath();
+    ctx.fillStyle = ORANGE4;
+    ctx.arc(0, 0, Math.floor(width * 0.014), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  var render_analog_clock_default = renderAnalogClock;
+
+  // lib/ui/constants/images/chinese-hour-characters.js
+  var { RGBA_TEAL: RGBA_TEAL4 } = colors_default;
+  var ChineseHourCharacters = {
+    zi: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 188.631579v-215.578947h269.473685v-53.894737H538.947368v-39.585684c26.543158-18.081684 94.585263-65.050947 177.852632-127.488L700.631579 215.578947H323.368421v53.894737h295.316211a4221.008842 4221.008842 0 0 1-121.640421 85.369263l-11.991579 8.003369V431.157895H242.526316v53.894737h242.526316v215.578947c0 48.343579-13.850947 53.894737-134.736843 53.894737v53.894737c105.391158 0 188.631579 0 188.631579-107.789474z" fill="${RGBA_TEAL4}" /></svg>`,
+    chou: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-161.68421 188.631579h-159.555369c13.985684-172.813474 43.115789-357.429895 70.817684-385.158737L700.631579 269.473684H323.368421v53.894737h107.169684c-1.940211 45.756632-8.192 103.962947-15.76421 161.684211H323.368421v53.894736h83.968c-9.862737 68.446316-20.264421 130.128842-25.734737 161.684211H215.578947v53.894737h592.842106v-53.894737z m-346.543158-161.684211h149.800421a3313.717895 3313.717895 0 0 0-16.842105 161.684211h-158.477474c6.036211-35.247158 16.114526-95.636211 25.519158-161.684211z m22.608842-215.578947h171.735579c-15.198316 41.121684-27.405474 100.594526-36.890948 161.684211h-150.123789c7.383579-57.505684 13.419789-115.361684 15.279158-161.684211z" fill="${RGBA_TEAL4}" /></svg>`,
+    yin: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-257.42821 299.250526l-107.789474-53.894737-24.117895 48.208843 107.789474 53.894736 24.117895-48.208842z m-269.473685-5.658947l-24.117894-48.208842-107.789474 53.894737 24.117895 48.208842 107.789473-53.894737zM700.631579 431.157895h-161.684211v-53.894737h107.789474v-53.894737H377.263158v53.894737h107.789474v53.894737h-161.684211v323.368421h53.894737v-53.894737h269.473684v53.894737h53.894737V431.157895z m-161.684211 161.68421h107.789474v53.894737h-107.789474v-53.894737z m-161.68421 0h107.789474v53.894737h-107.789474v-53.894737z m161.68421-107.789473h107.789474v53.894736h-107.789474v-53.894736z m-161.68421 0h107.789474v53.894736h-107.789474v-53.894736zM754.526316 215.578947h-223.097263l-20.803369-62.410105-51.119158 17.057684L474.624 215.578947H269.473684v107.789474h53.894737v-53.894737h377.263158v53.894737h53.894737V215.578947z" fill="${RGBA_TEAL4}" /></svg>`,
+    mao: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-377.263158-188.631579h107.789474v323.368421c-20.48 0-39.936-11.264-40.016842-11.317895l-27.728842 46.214737c3.206737 1.940211 32.660211 18.997895 67.745684 18.997895 30.746947 0 53.894737-23.147789 53.894737-53.894737V269.473684h-215.578948v538.947369h53.894737V323.368421z m-107.789473 242.526316v-242.526316h-53.894737v196.904421l-107.789474 40.421053v-243.927579l169.094737-48.316632-14.821053-51.819789L269.473684 276.102737v304.801684l-36.405895 13.662316 18.917053 50.472421 178.741895-67.018105c-5.039158 69.928421-55.269053 106.981053-165.133474 122.933894l7.733895 53.328842C325.712842 746.657684 485.052632 723.536842 485.052632 565.894737z" fill="${RGBA_TEAL4}" /></svg>`,
+    chen: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-498.122105 265.620211L431.157895 754.526316V485.052632h-66.074948c-14.470737 110.645895-44.355368 197.066105-102.696421 260.742736l-39.747368-36.432842C306.526316 617.876211 323.368421 462.901895 323.368421 242.526316V215.578947h377.263158v53.894737H377.182316c-0.404211 58.260211-2.209684 112.128-6.359579 161.684211H700.631579v53.894737h-122.152421a481.172211 481.172211 0 0 0 76.826947 119.70021l66.479158-39.855158 27.728842 46.214737-54.460631 32.687158c29.507368 24.953263 63.757474 45.675789 102.80421 58.098526l-16.303158 51.361684c-134.224842-42.711579-222.773895-167.073684-261.551158-268.207157H485.052632v221.857684l68.985263-41.391158 27.728842 46.214737-109.783579 65.886316zM646.736842 377.263158h-215.578947v-53.894737h215.578947v53.894737z" fill="${RGBA_TEAL4}" /></svg>`,
+    si: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-242.041263 180.762947l-52.116211-13.797052C657.219368 749.864421 651.425684 754.526316 619.789474 754.526316h-242.526316V485.052632h269.473684v53.894736h53.894737V215.578947H323.368421v538.947369c0 29.722947 24.171789 53.894737 53.894737 53.894737h242.526316c77.689263 0 91.189895-51.065263 108.274526-115.658106zM377.263158 269.473684h269.473684v161.684211H377.263158v-161.684211z" fill="${RGBA_TEAL4}" /></svg>`,
+    wu: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 26.947368h269.473685v-53.894736H538.947368v-161.684211h161.684211v-53.894737H411.001263c12.045474-33.28 20.156632-69.793684 20.156632-107.789473h-53.894737c0 121.963789-105.364211 233.391158-106.415158 234.496l38.858105 37.349052c2.883368-3.018105 43.816421-46.133895 77.392842-110.160842H485.052632v161.684211H215.578947v53.894736h269.473685v323.368421h53.894736V538.947368z" fill="${RGBA_TEAL4}" /></svg>`,
+    wei: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 50.202947c52.304842 70.925474 136.973474 152.144842 232.528843 190.383158l19.994947-50.041263c-109.271579-43.708632-202.805895-152.629895-238.780632-217.49221H808.421053v-53.894737H538.947368v-53.894737h215.578948v-53.894737h-215.578948V161.684211h-53.894736v161.68421h-215.578948v53.894737h215.578948v53.894737H215.578947v53.894737h255.757474c-35.974737 64.862316-129.536 173.783579-238.807579 217.49221l20.021895 50.041263c95.528421-38.238316 180.197053-119.484632 232.501895-190.383158V808.421053h53.894736v-246.218106z" fill="${RGBA_TEAL4}" /></svg>`,
+    shen: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 134.736842h161.684211v53.894737h53.894737V269.473684h-215.578948V161.684211h-53.894736v107.789473h-215.578948v431.157895h53.894737v-53.894737h161.684211v215.578947h53.894736v-215.578947z m0-161.68421h161.684211v107.789473h-161.684211v-107.789473z m-215.578947 0h161.684211v107.789473h-161.684211v-107.789473z m215.578947-161.684211h161.684211v107.789474h-161.684211v-107.789474z m-215.578947 0h161.684211v107.789474h-161.684211v-107.789474z" fill="${RGBA_TEAL4}" /></svg>`,
+    you: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-215.578947-188.631579h-161.684211v-26.947368h161.684211V242.526316H269.473684v53.894737h161.684211v26.947368h-161.684211v485.052632h53.894737v-53.894737h377.263158v53.894737h53.894737V323.368421zM323.368421 646.736842h377.263158v53.894737H323.368421v-53.894737z m0-269.473684h107.789474c0 103.316211-72.784842 107.654737-81.084632 107.789474L350.315789 538.947368c46.592 0 134.736842-33.792 134.736843-161.68421h53.894736v107.789474c0 29.722947 24.171789 53.894737 53.894737 53.894736h107.789474v53.894737H323.368421v-215.578947z m377.263158 0v107.789474h-107.789474v-107.789474h107.789474z m-215.578947-80.842105h53.894736v26.947368h-53.894736v-26.947368z" fill="${RGBA_TEAL4}" /></svg>`,
+    xu: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-375.592421 150.393263c33.684211 44.544 75.210105 74.698105 124.739369 90.812632l11.425684 3.718737 10.401684-6.009264C781.204211 727.740632 808.421053 622.565053 808.421053 592.842105h-53.894737c0 22.069895-19.132632 80.869053-33.711158 103.504842-34.816-14.605474-64.538947-39.262316-89.249684-74.13221 48.316632-55.269053 92.079158-117.328842 120.535579-179.900632l-49.044211-22.285473c-23.767579 52.250947-59.742316 104.717474-100.055579 152.656842-24.010105-50.930526-41.148632-115.927579-51.658105-195.395369H700.631579v-53.894737h-155.189895A1848.050526 1848.050526 0 0 1 538.947368 161.684211h-53.894736c0 58.206316 2.155789 112.074105 6.494315 161.68421H323.368421v26.947368c0 216.549053-13.177263 263.545263-100.702316 359.046737l39.747369 36.432842c63.326316-69.093053 92.806737-118.272 105.714526-206.848H485.052632v-53.894736h-111.319579a1742.147368 1742.147368 0 0 0 3.449263-107.789474h120.158316c12.611368 98.250105 35.031579 177.475368 67.395368 238.187789-61.978947 65.536-128.053895 117.975579-173.298526 142.282106l25.519158 47.481263c47.589053-25.573053 114.095158-77.446737 177.55621-142.821053z m125.170526-411.971368l-80.842105-80.842106-38.103579 38.103579 80.842105 80.842106 38.103579-38.103579z" fill="${RGBA_TEAL4}" /></svg>`,
+    hai: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M309.975579 804.756211l-27.136-46.592c103.073684-60.011789 183.026526-132.473263 241.475368-219.24379H350.315789l-13.473684-50.283789c58.88-33.980632 99.435789-117.571368 118.703158-165.295158H242.526316v-53.894737h538.947368v53.894737h-268.18021c-12.395789 34.088421-42.469053 106.603789-90.435369 161.68421h134.009263a680.555789 680.555789 0 0 0 46.349474-107.708631l51.092211 17.057684c-58.421895 175.265684-171.034947 309.490526-344.333474 410.381474z m192.350316-2.937264L467.806316 760.454737c88.414316-73.728 154.516211-158.773895 202.105263-259.907369l48.801684 22.959158a797.372632 797.372632 0 0 1-82.351158 137.781895c32.741053 15.009684 83.456 44.867368 137.647158 101.591579l-38.938947 37.268211c-57.236211-59.877053-109.325474-85.557895-133.766737-95.178106a850.997895 850.997895 0 0 1-98.977684 96.848842z m48.613052-536.872421l-80.842105-53.894737 29.884632-44.840421 80.842105 53.894737-29.884632 44.840421zM512 53.894737C259.395368 53.894737 53.894737 259.395368 53.894737 512s205.500632 458.105263 458.105263 458.105263c9.081263 0 17.973895-0.835368 26.947368-1.374316v-53.894736c-8.946526 0.619789-17.866105 1.374316-26.947368 1.374315-222.881684 0-404.210526-181.328842-404.210526-404.210526S289.118316 107.789474 512 107.789474s404.210526 181.328842 404.210526 404.210526c0 195.206737-139.075368 358.507789-323.368421 396.045474v54.460631c214.096842-38.346105 377.263158-225.549474 377.263158-450.533052C970.105263 259.395368 764.604632 53.894737 512 53.894737z" fill="${RGBA_TEAL4}" /></svg>`
+  };
+  var chinese_hour_characters_default = ChineseHourCharacters;
+
+  // lib/utils/get-chinese-hour-character.js
+  var getChineseHourCharacter = (hour) => {
+    const map = [
+      "zi",
+      "chou",
+      "chou",
+      "yin",
+      "yin",
+      "mao",
+      "mao",
+      "chen",
+      "chen",
+      "si",
+      "si",
+      "wu",
+      "wu",
+      "wei",
+      "wei",
+      "shen",
+      "shen",
+      "you",
+      "you",
+      "xu",
+      "xu",
+      "hai",
+      "hai",
+      "zi"
+    ];
+    return map[hour];
+  };
+  var get_chinese_hour_character_default = getChineseHourCharacter;
+
+  // lib/ui/image/render-chinese-hour-character-image.js
+  var renderChineseHourCharacterImage = () => {
+    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
+    const { width, height } = gameBoard2;
+    const time = /* @__PURE__ */ new Date();
+    const hour = time.getHours();
+    const character = get_chinese_hour_character_default(hour);
+    const img = getImage(chinese_hour_characters_default[character]);
+    const size = Math.floor(width * 0.68);
+    const x = width / 2 - size;
+    const y = height / 2 - size * 1.2;
+    render_image_default(ctx, img, x, y, size);
+  };
+  var render_chinese_hour_character_image_default = renderChineseHourCharacterImage;
+
+  // lib/ui/board/render-board.js
+  function renderBoard(board, options = {}) {
+    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
+    const { gameBoardContext: ctx } = canvas_default;
+    const { overrideCells = [] } = options;
+    clear_board_default();
+    render_scene_background_default("playing");
+    render_chinese_hour_character_image_default();
+    const skipMap = /* @__PURE__ */ new Set();
+    for (const cell of overrideCells) {
+      if (Number.isInteger(cell.fromY)) {
+        skipMap.add(`${cell.x},${cell.fromY}`);
+      }
+    }
+    for (let y = 0; y < ROWS2; y++) {
+      for (let x = 0; x < COLS2; x++) {
+        if (!board[y][x]) continue;
+        if (skipMap.has(`${x},${y}`)) continue;
+        render_block_default(ctx, x, y, board[y][x]);
+      }
+    }
+    for (const cell of overrideCells) {
+      render_block_default(
+        ctx,
+        cell.x,
+        // 这里可以是小数（动画关键！）
+        cell.y,
+        cell.value
+      );
+    }
+  }
+  var render_board_default = renderBoard;
+
+  // lib/ui/board/render-active-pieces.js
+  var renderActivePieces = (curr, cx, cy) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    const { shape, color } = curr;
+    const { length } = shape;
+    for (let y = 0; y < length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (shape[y][x]) {
+          render_block_default(ctx, cx + x, cy + y, color);
+        }
+      }
+    }
+    return true;
+  };
+  var render_active_pieces_default = renderActivePieces;
+
+  // lib/ui/board/render-active-only.js
+  var renderActiveOnly = (state) => {
+    const { board, curr, cx, cy } = state;
+    if (board) {
+      render_board_default(board);
+    }
+    if (curr) {
+      render_active_pieces_default(curr, cx, cy);
+    }
+  };
+  var render_active_only_default = renderActiveOnly;
+
+  // lib/ui/scenes/paused-scene/render-paused.js
+  var renderPaused = (state) => {
+    clear_board_default();
+    render_active_only_default(state);
+    render_overlay_default();
+    render_scene_background_default("paused");
+    render_tetris_text_default();
+    render_digital_clock_default();
+    render_analog_clock_default();
+    render_paused_text_default();
+  };
+  var render_paused_default = renderPaused;
+
+  // lib/ui/scenes/paused-scene/index.js
+  var pausedScene = (state) => {
+    render_paused_default(state);
+  };
+  var paused_scene_default = pausedScene;
+
+  // lib/ui/text/render-game-text.js
+  var renderGameText = () => {
+    const { RED: RED4, YELLOW: YELLOW4 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "GAME",
+      x: width / 2,
+      y: height / 1.8,
+      color: RED4,
+      strokeColor: YELLOW4,
+      size: 2.3,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_game_text_default = renderGameText;
+
+  // lib/ui/text/render-over-text.js
+  var renderOverText = () => {
+    const { RED: RED4, YELLOW: YELLOW4 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "OVER",
+      x: width / 2,
+      y: height / 1.6,
+      color: RED4,
+      strokeColor: YELLOW4,
+      size: 2.3,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_over_text_default = renderOverText;
+
+  // lib/ui/scenes/game-over-scene/render-game-over.js
+  var renderGameOver = (state) => {
+    clear_board_default();
+    render_active_only_default(state);
+    render_overlay_default();
+    render_scene_background_default("game-over");
+    render_tetris_text_default();
+    render_game_text_default();
+    render_over_text_default();
+    render_enter_start_text_default();
+  };
+  var render_game_over_default = renderGameOver;
+
+  // lib/ui/scenes/game-over-scene/index.js
+  var gameOverScene = (state) => {
+    render_game_over_default(state);
+  };
+  var game_over_scene_default = gameOverScene;
+
+  // lib/ui/scenes/playing-scene/render-playing.js
+  var renderPlaying = (state) => {
+    render_active_only_default(state);
+    render_next_piece_default(state);
+  };
+  var render_playing_default = renderPlaying;
+
+  // lib/ui/scenes/playing-scene/index.js
+  var playingScene = (state) => {
+    render_playing_default(state);
+  };
+  var playing_scene_default = playingScene;
+
+  // lib/ui/scenes/index.js
+  var Scenes = {
+    /**
+     * ## 主菜单场景
+     *
+     * @param {object} state 游戏状态
+     */
+    "main-menu": (state) => {
+      main_menu_scene_default(state);
+    },
+    /**
+     * ## 暂停场景
+     *
+     * @param {object} state 游戏状态
+     */
+    paused: (state) => {
+      paused_scene_default(state);
+    },
+    /**
+     * ## 游戏结束场景
+     *
+     * @param {object} state 游戏状态
+     */
+    "game-over": (state) => {
+      game_over_scene_default(state);
+    },
+    /**
+     * ## 游戏进行中场景
+     *
+     * @param {object} state 游戏状态
+     */
+    playing: (state) => {
+      playing_scene_default(state);
+    }
+  };
+  var scenes_default = Scenes;
+
+  // lib/ui/scene-manager/render-scene.js
+  var renderScene = (state) => {
+    const mode = engine_default.getMode();
+    const scene = scenes_default[mode];
+    if (!scene) return;
+    scene(state);
+  };
+  var render_scene_default = renderScene;
+
+  // lib/ui/core/resize.js
+  var resize = () => {
+    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
+    const { gameBoard: gameBoard2, nextPiece: nextPiece2 } = canvas_default;
+    const h = globalThis.innerHeight * 0.9;
+    canvas_default.blockSize = Math.floor(h / ROWS2);
+    gameBoard2.width = canvas_default.blockSize * COLS2;
+    gameBoard2.height = canvas_default.blockSize * ROWS2;
+    canvas_default.fontSize = Math.floor(gameBoard2.height * 0.032);
+    const nextSize = Math.min(
+      globalThis.innerWidth * 0.1,
+      globalThis.innerHeight * 0.18
+    );
+    nextPiece2.width = nextSize;
+    nextPiece2.height = nextSize;
+  };
+  var resize_default = resize;
+
+  // lib/engine/engine.js
+  var Engine = {
+    // Runtime 状态
+    rafId: null,
+    // 时间累积器（用于 fixed update / tick）
+    accumulator: 0,
+    // 上一帧时间戳
+    lastTimestamp: 0,
+    // 游戏状态
+    state: engine_state_default,
+    // 状态管理模块
+    resetBoard: reset_board_default,
+    loadHighScore: load_high_score_default,
+    saveHighScore: save_high_score_default,
+    getMode: get_mode_default,
+    setMode: set_mode_default,
+    setLevel: set_level_default,
+    /**
+     * ## 初始化游戏
+     *
+     * 执行完整游戏初始化流程：
+     *
+     * - 重置棋盘
+     * - 加载存档
+     * - 初始化状态
+     * - 绑定输入
+     * - 渲染主菜单
+     * - 启动 game loop
+     */
+    launch: () => {
+      const { state } = Engine;
+      reset_board_default();
+      load_high_score_default();
+      set_mode_default("main-menu");
+      state.score = 0;
+      state.lines = 0;
+      state.level = 1;
+      Engine.resize();
+      render_hud_default(state.score, state.lines, state.level, state.highScore);
+      lazy_render_main_menu_default(state);
+      bind_events_default();
+      Engine.start();
+    },
+    /** ## 启动主循环 */
+    start: () => {
+      Engine.rafId = requestAnimationFrame(start_game_loop_default);
+    },
+    /** ## 停止游戏循环 */
+    stop: () => {
+      stop_game_loop_default();
+    },
+    /** ## 重启游戏循环 */
+    restart: () => {
+      restart_game_loop_default();
+    },
+    /**
+     * ## 渲染阶段
+     *
+     * 负责 scene 渲染调度
+     */
+    render: () => {
+      render_scene_default(Engine.state);
+    },
+    /**
+     * ## 更新阶段
+     *
+     * 逻辑更新 + 动画更新（目前仅更新动画）
+     *
+     * @param {number} delta - 时间间隔
+     */
+    update: (delta) => {
+      updateAnimations(delta);
+    },
+    /** ## 动画渲染层 */
+    animate: () => {
+      renderAnimations();
+    },
+    /**
+     * ## 自适应画布
+     *
+     * Resize 后立即重新渲染
+     */
+    resize: () => {
+      resize_default();
+      Engine.render();
+    }
+  };
+  var engine_default = Engine;
+
+  // lib/main.js
+  var main = () => {
+    preloadImages(scenes_background_default);
+    engine_default.launch();
+  };
+  var main_default = main;
+
+  // lib/tetris.js
+  main_default();
 })();
-//# sourceMappingURL=tetris.js.map

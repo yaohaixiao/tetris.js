@@ -17,7 +17,7 @@
     "lint:prettier": "npm run format:prettier:raw -- --check",
     "test": "npm run format && npm run test:unit",
     "test:unit": "jest --config jest.config.js",
-    "prepare": "husky install"
+    "publish": "npm publish --access public"
   },
   "keywords": [
     "javascript",
