@@ -4,7 +4,7 @@ const HtmlTemplate = `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FC 经典俄罗斯方块</title>
+  <title>俄罗斯方块</title>
   <link href="./tetris.css" rel="stylesheet">
 </head>
 <body>
