@@ -1,18 +1,16 @@
 ## [0.5.1](https://github.com/yaohaixiao/tetris.js/compare/0.4.0...0.5.1) (2026-04-22)
 
-
 ### Bug Fixes
 
-* 放弃重力下落，保持纯粹的经典（就是目前搞不定重力） ([c2a1a93](https://github.com/yaohaixiao/tetris.js/commit/c2a1a93db6755455317541cab16c817ff6121be2))
-* 修复 formatTime 方法，hh 表示时没有补0； ([12a7627](https://github.com/yaohaixiao/tetris.js/commit/12a76278477b87336c856dfdd7737e64e03aab45))
-* 修复 PausedAnimation 动画中 active 属性初始化错误导致的问题； ([9ab0057](https://github.com/yaohaixiao/tetris.js/commit/9ab0057df8cf9f7f1a400de5b5f6ce6d0c40fd76))
-* 修复切换BGM失败的问题； ([570ff69](https://github.com/yaohaixiao/tetris.js/commit/570ff6926285887744c669a9abc782699ebbbe91))
-
+- 放弃重力下落，保持纯粹的经典（就是目前搞不定重力） ([c2a1a93](https://github.com/yaohaixiao/tetris.js/commit/c2a1a93db6755455317541cab16c817ff6121be2))
+- 修复 formatTime 方法，hh 表示时没有补0； ([12a7627](https://github.com/yaohaixiao/tetris.js/commit/12a76278477b87336c856dfdd7737e64e03aab45))
+- 修复 PausedAnimation 动画中 active 属性初始化错误导致的问题； ([9ab0057](https://github.com/yaohaixiao/tetris.js/commit/9ab0057df8cf9f7f1a400de5b5f6ce6d0c40fd76))
+- 修复切换BGM失败的问题； ([570ff69](https://github.com/yaohaixiao/tetris.js/commit/570ff6926285887744c669a9abc782699ebbbe91))
 
 ### Features
 
-* 给各给界面添加背景图片，丰富UI效果；完善重力下落算法； ([99498a5](https://github.com/yaohaixiao/tetris.js/commit/99498a51a174456def0e0abddd2cfa56cffc463e))
-* 添加长度5的长条，并且添加1次减5层奖励1200分； ([04a2f1c](https://github.com/yaohaixiao/tetris.js/commit/04a2f1ce73e92c4701c814c0465912f89cc1c31c))
+- 给各给界面添加背景图片，丰富UI效果；完善重力下落算法； ([99498a5](https://github.com/yaohaixiao/tetris.js/commit/99498a51a174456def0e0abddd2cfa56cffc463e))
+- 添加长度5的长条，并且添加1次减5层奖励1200分； ([04a2f1c](https://github.com/yaohaixiao/tetris.js/commit/04a2f1ce73e92c4701c814c0465912f89cc1c31c))
 
 # [0.5.0](https://github.com/yaohaixiao/tetris.js/compare/0.4.0...0.5.0) (2026-04-21)
 
