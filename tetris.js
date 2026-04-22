@@ -1,21 +1,22 @@
 var tetris = (() => {
   // lib/constants/colors.js
-  var TEAL = '#18c8fa';
-  var RGBA_TEAL = 'rgba(50, 190, 239, 0.3)';
-  var YELLOW = '#ff0';
-  var RGBA_YELLOW = 'rgba(255, 255, 0, 0.5)';
-  var PURPLE = '#a0a';
-  var BLUE = '#00f';
-  var ORANGE = '#ff7f00';
-  var RGBA_ORANGE = 'rgba(255, 127, 0, 0.4)';
-  var GREEN = '#0f0';
-  var RGBA_GREEN = 'rgba(0, 255, 0, 0.2)';
-  var RED = '#f00';
-  var RGBA_RED = 'rgba(255, 0, 0, 0.4)';
-  var BLACK = '#444';
-  var RGBA_BLACK = 'rgba(0,0,0,.5)';
-  var WHITE = '#fff';
-  var RGBA_WHITE = 'rgba(255,255,255,.3)';
+  var TEAL = "#18c8fa";
+  var RGBA_TEAL = "rgba(50, 190, 239, 0.3)";
+  var YELLOW = "#ff0";
+  var RGBA_YELLOW = "rgba(255, 255, 0, 0.5)";
+  var PURPLE = "#a0a";
+  var BLUE = "#00f";
+  var ORANGE = "#ffa500";
+  var RGBA_ORANGE = "rgba(255, 127, 0, 0.4)";
+  var GREEN = "#0f0";
+  var RGBA_GREEN = "rgba(0, 255, 0, 0.2)";
+  var RED = "#f00";
+  var RGBA_RED = "rgba(255, 0, 0, 0.4)";
+  var BLACK = "#444";
+  var RGBA_BLACK = "rgba(0,0,0,.5)";
+  var WHITE = "#fff";
+  var RGBA_WHITE = "rgba(255,255,255,.3)";
+  var PINK = "#ff4fa3";
   var COLORS = {
     TEAL,
     RGBA_TEAL,
@@ -33,11 +34,12 @@ var tetris = (() => {
     RGBA_BLACK,
     WHITE,
     RGBA_WHITE,
+    PINK
   };
   var colors_default = COLORS;
 
   // lib/ui/constants/images/scenes-background.js
-  var { RGBA_WHITE: RGBA_WHITE2 } = colors_default;
+  var { RGBA_ORANGE: RGBA_ORANGE2 } = colors_default;
   var ScenesBackground = {
     tetris: `<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><rect x="16.568" y="367.165" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="16.568" y="418.472" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="16.568" y="367.165" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="84.977" y="367.165" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="84.977" y="418.472" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="84.977" y="367.165" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="84.977" y="298.756" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="84.977" y="350.063" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="84.977" y="298.756" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="16.568" y="298.756" style="fill:#f9d84e" width="68.409" height="68.409"/><g><rect x="16.568" y="350.063" style="fill:#ffc20d" width="68.409" height="17.102"/><rect x="16.568" y="298.756" style="fill:#ffc20d" width="17.102" height="68.409"/></g><rect x="16.568" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="16.568" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="16.568" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="16.568" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="84.977" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="84.977" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="84.977" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="84.977" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="153.386" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="153.386" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="153.386" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="153.386" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="221.795" y="435.574" style="fill:#b169bf" width="68.409" height="68.409"/><g><rect x="221.795" y="435.574" style="fill:#844a8f" width="17.102" height="68.409"/><rect x="221.795" y="486.881" style="fill:#844a8f" width="68.409" height="17.102"/><rect x="221.795" y="486.881" style="fill:#844a8f" width="17.102" height="17.102"/></g><rect x="221.795" y="367.165" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="221.795" y="418.472" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="221.795" y="367.165" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="290.205" y="367.165" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="290.205" y="418.472" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="290.205" y="367.165" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="290.205" y="435.574" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="290.205" y="486.881" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="290.205" y="435.574" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="358.614" y="435.574" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="358.614" y="486.881" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="358.614" y="435.574" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="256" y="8.017" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="256" y="59.324" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="256" y="8.017" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="324.409" y="8.017" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="324.409" y="59.324" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="324.409" y="8.017" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="324.409" y="76.426" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="324.409" y="127.733" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="324.409" y="76.426" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="392.818" y="76.426" style="fill:#fd5e95" width="68.409" height="68.409"/><g><rect x="392.818" y="127.733" style="fill:#d14d7b" width="68.409" height="17.102"/><rect x="392.818" y="76.426" style="fill:#d14d7b" width="17.102" height="68.409"/></g><rect x="358.614" y="367.165" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="358.614" y="418.472" style="fill:#60a333" width="68.409" height="17.102"/><rect x="358.614" y="367.165" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="427.023" y="367.165" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="427.023" y="418.472" style="fill:#60a333" width="68.409" height="17.102"/><rect x="427.023" y="367.165" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="427.023" y="435.574" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="427.023" y="486.881" style="fill:#60a333" width="68.409" height="17.102"/><rect x="427.023" y="435.574" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="358.614" y="298.756" style="fill:#7dbb34" width="68.409" height="68.409"/><g><rect x="358.614" y="350.063" style="fill:#60a333" width="68.409" height="17.102"/><rect x="358.614" y="298.756" style="fill:#60a333" width="17.102" height="68.409"/></g><rect x="153.386" y="127.733" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="153.386" y="179.04" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="153.386" y="127.733" style="fill:#0aadbf" width="17.102" height="68.409"/></g><rect x="153.386" y="196.142" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="153.386" y="247.449" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="153.386" y="196.142" style="fill:#0aadbf" width="17.102" height="68.409"/></g><rect x="221.795" y="196.142" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="221.795" y="247.449" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="221.795" y="196.142" style="fill:#0aadbf" width="17.102" height="68.409"/></g><rect x="153.386" y="264.551" style="fill:#45cae0" width="68.409" height="68.409"/><g><rect x="153.386" y="315.858" style="fill:#0aadbf" width="68.409" height="17.102"/><rect x="153.386" y="264.551" style="fill:#0aadbf" width="17.102" height="68.409"/></g><path d="M256,84.443h60.392v60.392c0,4.428,3.588,8.017,8.017,8.017h136.818c4.428,0,8.017-3.588,8.017-8.017V76.426
 	c0-4.428-3.588-8.017-8.017-8.017h-60.392V8.017c0-4.428-3.588-8.017-8.017-8.017H256c-4.427,0-8.017,3.588-8.017,8.017v68.409
@@ -59,12 +61,7 @@ var tetris = (() => {
 	h52.376v52.376h-52.376V443.591z M229.812,443.591h52.376v52.376h-52.376V443.591z M298.221,443.591h52.376v52.376h-52.376V443.591z
 	 M366.63,443.591h52.376v52.376H366.63V443.591z M487.415,495.967H435.04v-52.376h52.376V495.967z"/></svg>`,
     game: `<svg width="800px" height="800px" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 30L19 33C19 36.866 15.866 40 12 40V40C8.13401 40 5 36.866 5 33L5 19" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 30L29 33C29 36.866 32.134 40 36 40V40C39.866 40 43 36.866 43 33L43 19" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="8" width="38" height="22" rx="11" fill="#2F88FF" stroke="#000000" stroke-width="4"/><path d="M21 19H13" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 15V23" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="32" y="15" width="4" height="4" rx="2" fill="white"/><rect x="28" y="20" width="4" height="4" rx="2" fill="white"/></svg>`,
-    coffee: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M203.431,40.311L163.296,0h-35.297v40.311h-31.72v47.591h319.441V40.311H203.431z M143.609,15.61h13.202l24.594,24.701
-			h-37.795V15.61z M400.111,72.293h-0.001H111.889V55.92h288.222V72.293z"/></g></g><g><g><path d="M386.936,224.208l4.472-111.818h8.201v-15.61H112.39v15.61h8.202l4.473,111.818H112.27v135.543h18.206L136.563,512
-			h238.874l6.084-152.249h18.209V224.208H386.936z M375.785,112.39l-4.473,111.818H140.687l-4.473-111.818H375.785z
-			 M361.395,472.455h-193.85v15.61h193.227l-0.333,8.325H151.561l-5.462-136.639h219.799L361.395,472.455z M384.119,248.715H368.39
-			v15.61h15.729v56.195H160.26v15.61h223.859v8.011H127.88v-8.011h15.729v-15.61H127.88v-56.195h223.86v-15.61H127.88v-8.898
-			h256.239V248.715z"/></g></g><g><g><rect x="192.52" y="151.935" width="126.959" height="15.61"/></g></g><g><g><rect x="216.455" y="184.195" width="79.089" height="15.61"/></g></g><g><g><rect x="312.195" y="448.52" width="15.61" height="15.61"/></g></g><g><g><rect x="288.26" y="448.52" width="15.61" height="15.61"/></g></g><g><g><rect x="336.13" y="448.52" width="15.61" height="15.61"/></g></g></svg>`,
+    coffee: `<svg fill="${RGBA_ORANGE2}" width="800px" height="800px" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M15.427734 3C14.062745 3 12.859456 3.9323872 12.521484 5.2558594L12.074219 7L12 7C11.133553 7 10.343298 7.2932543 9.7636719 7.7890625C9.1840453 8.2848707 8.8153921 8.9380401 8.5664062 9.625C8.0684347 10.99892 8 12.57785 8 14 A 1.0001 1.0001 0 0 0 9 15L10.119141 15L13.970703 45.017578 A 1.0001 1.0001 0 0 0 13.974609 45.042969C14.160517 46.237774 15.204427 47 16.367188 47L33.630859 47C34.794193 47 35.83786 46.235688 36.023438 45.042969 A 1.0001 1.0001 0 0 0 36.027344 45.017578L39.880859 15L41 15 A 1.0001 1.0001 0 0 0 42 14C42 12.57785 41.931565 10.99892 41.433594 9.625C41.184608 8.9380401 40.815955 8.2848707 40.236328 7.7890625C39.656702 7.2932543 38.866447 7 38 7L37.90625 7L37.474609 5.2734375 A 1.0001 1.0001 0 0 0 37.474609 5.2714844C37.141393 3.9416023 35.934385 3 34.5625 3L15.427734 3 z M 15.427734 5L34.5625 5C35.026615 5 35.42042 5.3076915 35.533203 5.7578125L35.84375 7L14.138672 7L14.458984 5.7519531C14.573013 5.3054253 14.966724 5 15.427734 5 z M 12.912109 8.9960938 A 1.0001 1.0001 0 0 0 13 9L37 9 A 1.0001 1.0001 0 0 0 37.064453 8.9980469 A 1.0001 1.0001 0 0 0 37.125 9L38 9C38.459053 9 38.706095 9.1106518 38.9375 9.3085938C39.168905 9.5065356 39.385047 9.8386001 39.554688 10.306641C39.802098 10.989256 39.830025 12.022136 39.878906 13L11.166016 13 A 1.0001 1.0001 0 0 0 10.955078 12.986328 A 1.0001 1.0001 0 0 0 10.835938 13L10.121094 13C10.169974 12.022136 10.197905 10.989256 10.445312 10.306641C10.614953 9.8386001 10.831095 9.5065355 11.0625 9.3085938C11.293905 9.1106518 11.540947 9 12 9L12.849609 9 A 1.0001 1.0001 0 0 0 12.912109 8.9960938 z M 12.136719 15L37.863281 15L36.708984 24L31.984375 24C30.659565 21.085293 28.095496 19.012008 24.992188 19.003906C24.945978 19.002306 24.902818 19.004791 24.857422 19.007812C21.786193 19.059813 19.278095 21.123031 17.988281 24L13.291016 24L12.136719 15 z M 24.945312 20.998047C24.966323 20.999147 24.947809 21 24.974609 21C27.392834 21 29.474358 22.682557 30.451172 25.34375 A 1.0001 1.0001 0 0 0 31.388672 26L31.490234 26L36.451172 26L35.810547 31L31.527344 31L31.388672 31 A 1.0001 1.0001 0 0 0 30.447266 31.660156C30.227471 32.270178 29.97672 32.828834 29.671875 33.296875C28.538498 35.034193 26.884731 35.976012 25.087891 35.998047L25.021484 35.998047C23.246013 35.998047 21.592289 35.09639 20.431641 33.398438 A 1.0001 1.0001 0 0 0 20.431641 33.396484C20.091871 32.900328 19.8123 32.306572 19.574219 31.65625 A 1.0001 1.0001 0 0 0 18.634766 31L18.521484 31L14.189453 31L13.548828 26L18.484375 26L18.589844 26 A 1.0001 1.0001 0 0 0 19.529297 25.339844C20.477663 22.708373 22.511851 21.026828 24.917969 21 A 1.0001 1.0001 0 0 0 24.945312 20.998047 z M 24.939453 23C23.705063 23.01347 22.665152 23.777929 22.001953 24.794922C21.338753 25.811913 20.978618 27.119966 20.994141 28.542969C21.009661 29.965972 21.398756 31.267249 22.083984 32.269531C22.769211 33.271814 23.826157 34.013466 25.060547 34C26.294937 33.98654 27.334848 33.22207 27.998047 32.205078C28.661247 31.188086 29.021382 29.880035 29.005859 28.457031C28.990339 27.034028 28.601244 25.732752 27.916016 24.730469C27.230789 23.728186 26.173843 22.986534 24.939453 23 z M 24.960938 25C25.386064 24.9954 25.843602 25.244939 26.263672 25.859375C26.683742 26.473812 26.994273 27.416385 27.005859 28.478516C27.017449 29.540646 26.728831 30.489827 26.322266 31.113281C25.915699 31.736734 25.464189 31.995363 25.039062 32C24.613936 32.0046 24.156399 31.755062 23.736328 31.140625C23.316259 30.526189 23.005727 29.583615 22.994141 28.521484C22.982551 27.459353 23.271169 26.510173 23.677734 25.886719C24.084301 25.263265 24.535811 25.004637 24.960938 25 z M 14.445312 33L18.021484 33C18.24578 33.51991 18.454188 34.047503 18.78125 34.525391C20.264602 36.695438 22.552956 37.998047 25.021484 37.998047L25.091797 37.998047 A 1.0001 1.0001 0 0 0 25.101562 37.998047C27.60154 37.971307 29.89481 36.614655 31.345703 34.390625 A 1.0001 1.0001 0 0 0 31.347656 34.390625C31.635588 33.948746 31.81459 33.471059 32.013672 33L35.554688 33L34.048828 44.736328C34.042405 44.777609 33.827526 45 33.630859 45L16.367188 45C16.173946 45 15.95727 44.775524 15.951172 44.736328L14.445312 33 z"/></svg>`,
     happy: `<svg height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.003 512.003" xml:space="preserve"><circle style="fill:#fddf6d" cx="256.001" cy="256.001" r="256.001"/><path style="fill:#fcc56b" d="M310.859,474.208c-141.385,0-256-114.615-256-256c0-75.537,32.722-143.422,84.757-190.281
 	C56.738,70.303,0,156.525,0,256c0,141.385,114.615,256,256,256c65.849,0,125.883-24.87,171.243-65.718
 	C392.325,464.135,352.77,474.208,310.859,474.208z"/><g><path style="fill:#7f184c" d="M245.899,187.172c-5.752,0-10.414-4.663-10.414-10.414c0-13.433-10.928-24.362-24.362-24.362
@@ -75,7 +72,7 @@ var tetris = (() => {
 	C427.243,383.088,367.251,443.08,293.248,443.08z"/><path style="fill:#e6e6e6" d="M172.426,367.092c3.531,7.341,7.718,14.305,12.472,20.829h216.699
 	c4.755-6.524,8.941-13.487,12.472-20.829H172.426z"/><g><path style="fill:#f9a880" d="M145.987,240.152c-19.011,0-34.423,15.412-34.423,34.423h68.848
 		C180.41,255.564,164.998,240.152,145.987,240.152z"/><path style="fill:#f9a880" d="M446.251,240.152c-19.011,0-34.423,15.412-34.423,34.423h68.848
-		C480.676,255.564,465.264,240.152,446.251,240.152z"/></g><ellipse transform="matrix(0.2723 -0.9622 0.9622 0.2723 142.573 335.222)" style="fill:#fceb88" cx="292.913" cy="73.351" rx="29.854" ry="53.46"/></svg>`,
+		C480.676,255.564,465.264,240.152,446.251,240.152z"/></g><ellipse transform="matrix(0.2723 -0.9622 0.9622 0.2723 142.573 335.222)" style="fill:#fceb88" cx="292.913" cy="73.351" rx="29.854" ry="53.46"/></svg>`
   };
   var scenes_background_default = ScenesBackground;
 
@@ -98,8 +95,7 @@ var tetris = (() => {
      * paused：游戏暂停
      * game-over：游戏结束
      */
-    mode: 'main-menu',
-    gravityEnabled: true,
+    mode: "main-menu"
   };
   var engine_state_default = EngineState;
 
@@ -172,7 +168,7 @@ var tetris = (() => {
     /** ## 停止播放 */
     stopPlay() {
       this.playing = false;
-    },
+    }
   };
   var replay_default = Replay;
 
@@ -212,7 +208,7 @@ var tetris = (() => {
     /** ## 清空队列（丢弃所有未执行命令） */
     clear() {
       this.queue.length = 0;
-    },
+    }
   };
   var command_queue_default = CommandQueue;
 
@@ -236,17 +232,14 @@ var tetris = (() => {
       animation2.render();
     }
   };
-  var hasBlockingAnimation = (names = []) =>
-    animations.some((animation2) => {
-      const isBlocking = animation2.blocking;
-      return names && names.length > 0
-        ? isBlocking && names.includes(animation2.name)
-        : isBlocking;
-    });
+  var hasBlockingAnimation = (names = []) => animations.some((animation2) => {
+    const isBlocking = animation2.blocking;
+    return names && names.length > 0 ? isBlocking && names.includes(animation2.name) : isBlocking;
+  });
 
   // lib/audio/play-tone.js
   var audioCtx = new AudioContext();
-  var playTone = (freq, dur, vol = 0.1, wave = 'square') => {
+  var playTone = (freq, dur, vol = 0.1, wave = "square") => {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = wave;
@@ -264,13 +257,35 @@ var tetris = (() => {
   var play_tone_default = playTone;
 
   // lib/audio/sounds.js
+  var MOTIFS = {
+    combo: {
+      shift: 0,
+      speed: 1,
+      volume: 1
+    },
+    tetris: {
+      shift: 2,
+      speed: 1.2,
+      volume: 1.1
+    },
+    perfect: {
+      shift: 5,
+      speed: 0.9,
+      volume: 1.3
+    }
+  };
+  var getMotif = (lines, isPerfectClear = false) => {
+    if (isPerfectClear) return "perfect";
+    if (lines === 4) return "tetris";
+    return "combo";
+  };
   var Sounds = {
     // 等级选择音效（正弦波柔和音效）
-    levelSelect: () => play_tone_default(523, 80, 0.1, 'sine'),
+    levelSelect: () => play_tone_default(523, 80, 0.1, "sine"),
     // 等级开始音效
-    levelStart: () => play_tone_default(1319, 160, 0.22, 'sine'),
+    levelStart: () => play_tone_default(1319, 160, 0.22, "sine"),
     // 开始倒计时音效
-    countdown: () => play_tone_default(784, 180, 0.3, 'sine'),
+    countdown: () => play_tone_default(784, 180, 0.3, "sine"),
     // 方块移动音效
     move: () => play_tone_default(330, 60),
     // 方块旋转音效
@@ -279,32 +294,39 @@ var tetris = (() => {
     drop: () => play_tone_default(220, 100),
     // 方块落地音效
     fall: () => play_tone_default(180, 200),
-    //
     /**
-     * ## 方块消除音效
+     * ## 消行动效音播放（基于和弦 + 动机系统）
      *
-     * 根据消除层数播放不同的音效
+     * 根据消除行数生成不同音乐动机，并播放对应和弦音效
      *
-     * @param {number} lines - 消除方块的层数
+     * @param {number} lines - 消除行数
+     * @param {boolean} isPerfectClear - 是否全清
      */
-    clear: (lines = 0) => {
+    clear: (lines = 1, isPerfectClear = false) => {
       const frequencies = [
         [440, 587, 698],
         [587, 698, 880],
         [698, 880, 1174],
         [587, 880, 1174],
-        [440, 880, 1174],
+        [440, 880, 1174]
       ];
       const speeds = [260, 300, 380];
       const volumes = [0.32, 0.3, 0.25];
       const timeouts = [160, 320, 480];
-      const music = frequencies[lines];
-      for (const [index, freq] of music.entries()) {
-        setTimeout(
-          () =>
-            play_tone_default(freq, speeds[index], volumes[index], 'square'),
-          timeouts[index],
-        );
+      const motif = getMotif(lines, isPerfectClear);
+      const cfg = MOTIFS[motif];
+      const index = Math.min(lines, frequencies.length - 1);
+      const baseChord = frequencies[index];
+      const chord = baseChord.map((freq) => freq + cfg.shift * 12);
+      for (const [i, freq] of chord.entries()) {
+        setTimeout(() => {
+          play_tone_default(
+            freq,
+            speeds[i] * cfg.speed,
+            volumes[i] * cfg.volume,
+            "square"
+          );
+        }, timeouts[i]);
       }
     },
     // 升级庆祝音效
@@ -321,7 +343,7 @@ var tetris = (() => {
     // 暂停游戏音效
     pause: () => play_tone_default(300, 150),
     // 秒针走动音效
-    secondTick: () => play_tone_default(880, 50, 0.085, 'sine'),
+    secondTick: () => play_tone_default(880, 50, 0.085, "sine"),
     // 恢复游戏音效
     resume: () => play_tone_default(400, 150),
     // 游戏结束音效（悲伤旋律）
@@ -331,15 +353,15 @@ var tetris = (() => {
       setTimeout(() => play_tone_default(262, 500), 520);
     },
     // 背景音乐开关音效
-    bgmToggle: () => play_tone_default(440, 100),
+    bgmToggle: () => play_tone_default(440, 100)
   };
   var sounds_default = Sounds;
 
   // lib/ui/core/canvas.js
-  var gameBoard = document.querySelector('#game-board');
-  var gameBoardContext = gameBoard.getContext('2d');
-  var nextPiece = document.querySelector('#next-piece');
-  var nextPieceContext = nextPiece.getContext('2d');
+  var gameBoard = document.querySelector("#game-board");
+  var gameBoardContext = gameBoard.getContext("2d");
+  var nextPiece = document.querySelector("#next-piece");
+  var nextPieceContext = nextPiece.getContext("2d");
   var fontSize = 0;
   var blockSize = 0;
   var Canvas = {
@@ -348,14 +370,13 @@ var tetris = (() => {
     nextPiece,
     nextPieceContext,
     fontSize,
-    blockSize,
+    blockSize
   };
   var canvas_default = Canvas;
 
   // lib/ui/board/clear-board.js
   function clearBoard() {
-    const { gameBoard: gameBoard2, gameBoardContext: gameBoardContext2 } =
-      canvas_default;
+    const { gameBoard: gameBoard2, gameBoardContext: gameBoardContext2 } = canvas_default;
     const { width, height } = gameBoard2;
     gameBoardContext2.clearRect(0, 0, width, height);
   }
@@ -368,7 +389,7 @@ var tetris = (() => {
   var GAME = {
     CLEAR_SCORES,
     MAX_LEVEL,
-    FONT_FAMILY,
+    FONT_FAMILY
   };
   var game_default = GAME;
 
@@ -382,15 +403,15 @@ var tetris = (() => {
       strokeColor,
       size = 1,
       center = true,
-      baseline = '',
+      baseline = "",
       stroke = false,
-      lineWidth = 2,
+      lineWidth = 2
     } = options;
     const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
     const { gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
     ctx.save();
     if (center) {
-      ctx.textAlign = 'center';
+      ctx.textAlign = "center";
     }
     if (baseline) {
       ctx.textBaseline = baseline;
@@ -413,11 +434,11 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: 'TETRIS.JS',
+      text: "TETRIS.JS",
       x: width / 2,
       y: height * 0.1,
       color: GREEN4,
-      size: 1.1,
+      size: 1.1
     });
   };
   var render_tetris_text_default = renderTetrisText;
@@ -438,15 +459,11 @@ var tetris = (() => {
   var renderCountdownText = (count, scale = 1) => {
     const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
     const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
-    const {
-      gameBoard: gameBoard2,
-      gameBoardContext: ctx,
-      fontSize: fontSize2,
-    } = canvas_default;
+    const { gameBoard: gameBoard2, gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
     const { width, height } = gameBoard2;
     ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.translate(width / 2, height / 2);
     ctx.scale(scale, scale);
     ctx.font = `${fontSize2 * 3.25}px ${FONT_FAMILY2}`;
@@ -466,7 +483,7 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: 'GET READY!',
+      text: "GET READY!",
       x: width / 2,
       y: height / 1.46,
       color: GREEN4,
@@ -476,7 +493,7 @@ var tetris = (() => {
       size: 1.1,
       center: true,
       // 对齐方式与你原逻辑一致
-      baseline: 'top',
+      baseline: "top"
     });
   };
   var render_get_ready_text_default = renderGetReadyText;
@@ -488,7 +505,7 @@ var tetris = (() => {
       return ImagesCache.get(svg);
     }
     const img = new Image();
-    const blob = new Blob([svg], { type: 'image/svg+xml' });
+    const blob = new Blob([svg], { type: "image/svg+xml" });
     img.src = URL.createObjectURL(blob);
     ImagesCache.set(svg, img);
     return img;
@@ -535,13 +552,13 @@ var tetris = (() => {
     RGBA_TEAL: RGBA_TEAL2,
     RGBA_YELLOW: RGBA_YELLOW2,
     RGBA_RED: RGBA_RED2,
-    RGBA_ORANGE: RGBA_ORANGE2,
+    RGBA_ORANGE: RGBA_ORANGE3,
     RGBA_GREEN: RGBA_GREEN2,
     RGBA_BLACK: RGBA_BLACK2,
-    RGBA_WHITE: RGBA_WHITE3,
+    RGBA_WHITE: RGBA_WHITE2
   } = colors_default;
   var FamousBuildings = {
-    Tower: `<svg fill="${RGBA_WHITE3}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M341.512,495.967h-11.975l-33.221-71.978c6.644-8.584,10.613-19.341,10.613-31.012c0-18.862-10.346-35.341-25.653-44.095
+    Tower: `<svg fill="${RGBA_WHITE2}" height="800px" width="800px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M341.512,495.967h-11.975l-33.221-71.978c6.644-8.584,10.613-19.341,10.613-31.012c0-18.862-10.346-35.341-25.653-44.095
 			v-134.14c15.308-8.754,25.653-25.234,25.653-44.095c0-25.268-18.556-46.278-42.756-50.133v-11.736
 			c9.93-3.354,17.102-12.752,17.102-23.8s-7.172-20.446-17.102-23.8V8.017c0-4.427-3.589-8.017-8.017-8.017
 			c-4.427,0-8.017,3.589-8.017,8.017v53.16c-9.93,3.354-17.102,12.752-17.102,23.8s7.172,20.446,17.102,23.8v11.736
@@ -560,7 +577,7 @@ var tetris = (() => {
 			h-18.171v-18.844c2.95,0.536,5.984,0.831,9.086,0.831c3.102,0,6.135-0.295,9.086-0.831V461.762z M256.158,427.716
 			c-16.524,0-30.381-11.601-33.879-27.084h67.757C286.539,416.115,272.682,427.716,256.158,427.716z M281.277,495.967v-58.895
 			c0.906-0.518,1.797-1.061,2.667-1.633l27.936,60.528H281.277z"/></g></g></svg>`,
-    Temple: `<svg fill="${RGBA_ORANGE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="495.837" width="512" height="15.642"/></g></g><g><g><rect x="49.01" y="471.853" width="413.98" height="15.642"/></g></g><g><g><polygon points="159.544,359.234 159.544,439.527 175.185,439.527 175.185,374.876 336.815,374.876 336.815,439.527
+    Temple: `<svg fill="${RGBA_ORANGE3}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="495.837" width="512" height="15.642"/></g></g><g><g><rect x="49.01" y="471.853" width="413.98" height="15.642"/></g></g><g><g><polygon points="159.544,359.234 159.544,439.527 175.185,439.527 175.185,374.876 336.815,374.876 336.815,439.527
 			352.456,439.527 352.456,359.234 		"/></g></g><g><g><rect x="159.544" y="336.293" width="192.912" height="15.642"/></g></g><g><g><rect x="208.554" y="311.267" width="94.892" height="15.642"/></g></g><g><g><rect x="224.196" y="407.202" width="15.642" height="15.642"/></g></g><g><g><rect x="272.163" y="407.202" width="15.642" height="15.642"/></g></g><g><g><polygon points="208.554,96.456 208.554,136.081 224.196,136.081 224.196,112.098 287.805,112.098 287.805,136.081
 			303.446,136.081 303.446,96.456 		"/></g></g><g><g><path d="M368.098,32.847v15.642h14.391c-3.395,9.011-12.413,15.642-22.685,15.642h-24.032v-0.014
 			c-13.556,0-23.984-10.82-23.984-24.119V0.521H200.212v39.476c0,13.299-10.428,24.119-23.984,24.119v0.014h-24.035
@@ -638,9 +655,9 @@ var tetris = (() => {
 			h-18.171v-26.188c0-4.427-3.589-8.017-8.017-8.017h-34.739v-9.086c0-4.427-3.589-8.017-8.017-8.017s-8.017,3.589-8.017,8.017
 			v9.086h-52.376v-35.273h274.706v35.273h-52.376v-9.086c0-4.427-3.589-8.017-8.017-8.017s-8.017,3.589-8.017,8.017v9.086h-34.739
 			C285.777,419.006,282.188,422.596,282.188,427.023z M478.864,453.211H298.221V435.04h180.643V453.211z"/></g></g></svg>`,
-    Gate: `<svg fill="none" stroke="${RGBA_ORANGE2}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><title>gate</title><g id="gate"><path d="M5,62H5a4,4,0,0,1,4-4H56a4,4,0,0,1,4,4h0"/><line x1="6.919" y1="37.586" x2="3.223" y2="41.281"/><line x1="3.223" y1="37.586" x2="6.919" y2="41.281"/><line x1="37" y1="16.32" x2="37" y2="24.343"/><line x1="27" y1="24.411" x2="27" y2="16.32"/><path d="M14.215,15.7a3.03,3.03,0,0,0-.046.524c0,2.006,1.989,3.631,4.443,3.631s4.442-1.625,4.442-3.631"/><polyline points="22.976 57.588 22.415 48 14.585 48 14.025 57.581"/><path d="M49.785,15.706a3.007,3.007,0,0,1,.046.522c0,2.006-1.989,3.631-4.443,3.631s-4.442-1.625-4.442-3.631"/><path d="M54.532,11.427v.345a3.463,3.463,0,0,1-3.143,3.52,272.159,272.159,0,0,1-38.773.034,3.474,3.474,0,0,1-3.148-3.52v-.333"/><path d="M9.468,23.576s24.32,2.993,45.064,0v1.2a3.463,3.463,0,0,1-3.143,3.52,272.159,272.159,0,0,1-38.773.034,3.474,3.474,0,0,1-3.148-3.52Z"/><path d="M4,5.5s30.222,3.489,56,0V6.89a4.143,4.143,0,0,1-3.905,4.1,360.57,360.57,0,0,1-48.184.039A4.155,4.155,0,0,1,4,6.929Z"/><polyline points="41.024 57.59 41.585 48 49.415 48 49.976 57.59"/><line x1="32.044" y1="19" x2="32.044" y2="20.647" style="fill:#ffce56;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px"/><circle cx="28" cy="34" r="1"/><circle cx="28" cy="38" r="1"/><circle cx="28" cy="42" r="1"/><circle cx="28" cy="46" r="1"/><circle cx="36" cy="34" r="1"/><circle cx="36" cy="38" r="1"/><circle cx="36" cy="42" r="1"/><circle cx="36" cy="46" r="1"/><line x1="46" y1="53" x2="46" y2="58"/><line x1="18" y1="53" x2="18" y2="58"/><line x1="16" y1="48" x2="16" y2="29"/><line x1="21" y1="48" x2="21" y2="29"/><line x1="16" y1="24" x2="16" y2="19"/><line x1="21" y1="24" x2="21" y2="19"/><line x1="43" y1="48" x2="43" y2="29"/><line x1="48" y1="48" x2="48" y2="29"/><line x1="43" y1="24" x2="43" y2="19"/><line x1="48" y1="24" x2="48" y2="19"/></g></svg>`,
+    Gate: `<svg fill="none" stroke="${RGBA_ORANGE3}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><title>gate</title><g id="gate"><path d="M5,62H5a4,4,0,0,1,4-4H56a4,4,0,0,1,4,4h0"/><line x1="6.919" y1="37.586" x2="3.223" y2="41.281"/><line x1="3.223" y1="37.586" x2="6.919" y2="41.281"/><line x1="37" y1="16.32" x2="37" y2="24.343"/><line x1="27" y1="24.411" x2="27" y2="16.32"/><path d="M14.215,15.7a3.03,3.03,0,0,0-.046.524c0,2.006,1.989,3.631,4.443,3.631s4.442-1.625,4.442-3.631"/><polyline points="22.976 57.588 22.415 48 14.585 48 14.025 57.581"/><path d="M49.785,15.706a3.007,3.007,0,0,1,.046.522c0,2.006-1.989,3.631-4.443,3.631s-4.442-1.625-4.442-3.631"/><path d="M54.532,11.427v.345a3.463,3.463,0,0,1-3.143,3.52,272.159,272.159,0,0,1-38.773.034,3.474,3.474,0,0,1-3.148-3.52v-.333"/><path d="M9.468,23.576s24.32,2.993,45.064,0v1.2a3.463,3.463,0,0,1-3.143,3.52,272.159,272.159,0,0,1-38.773.034,3.474,3.474,0,0,1-3.148-3.52Z"/><path d="M4,5.5s30.222,3.489,56,0V6.89a4.143,4.143,0,0,1-3.905,4.1,360.57,360.57,0,0,1-48.184.039A4.155,4.155,0,0,1,4,6.929Z"/><polyline points="41.024 57.59 41.585 48 49.415 48 49.976 57.59"/><line x1="32.044" y1="19" x2="32.044" y2="20.647" style="fill:#ffce56;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px"/><circle cx="28" cy="34" r="1"/><circle cx="28" cy="38" r="1"/><circle cx="28" cy="42" r="1"/><circle cx="28" cy="46" r="1"/><circle cx="36" cy="34" r="1"/><circle cx="36" cy="38" r="1"/><circle cx="36" cy="42" r="1"/><circle cx="36" cy="46" r="1"/><line x1="46" y1="53" x2="46" y2="58"/><line x1="18" y1="53" x2="18" y2="58"/><line x1="16" y1="48" x2="16" y2="29"/><line x1="21" y1="48" x2="21" y2="29"/><line x1="16" y1="24" x2="16" y2="19"/><line x1="21" y1="24" x2="21" y2="19"/><line x1="43" y1="48" x2="43" y2="29"/><line x1="48" y1="48" x2="48" y2="29"/><line x1="43" y1="24" x2="43" y2="19"/><line x1="48" y1="24" x2="48" y2="19"/></g></svg>`,
     Pavilion: `<svg fill="none" stroke="${RGBA_GREEN2}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g id="china"><path d="M40,54.7V51.5a8.5,8.5,0,0,0-17,0v3.078"/><path d="M26,54.7V52.5a5.5,5.5,0,0,1,11,0v1.957"/><line x1="17" y1="33.699" x2="17" y2="25.237"/><line x1="20" y1="25.663" x2="20" y2="33.699"/><line x1="43" y1="33.699" x2="43" y2="26"/><line x1="46" y1="24.933" x2="46" y2="33.699"/><rect x="34" y="55" width="20" height="4"/><rect x="9" y="55" width="20" height="4"/><line x1="6" y1="59" x2="57" y2="59"/><polyline points="51 42.221 51 55 48 55 48 43"/><polyline points="15 43 15 55 12 55 12 42.221"/><polyline points="43 40 43 55 40 55 40 40"/><polyline points="23 40 23 55 20 55 20 39.664"/><polygon points="49 24 40 26 40 22 49 22 49 24"/><polyline points="55 37.485 55 41 46 43 46 39.428"/><polyline points="8 37 8 41 17 43 17 39"/><polygon points="14 24 23 26 23 22 14 22 14 24"/><polyline points="37 33.699 37 22 40 22 40 33.699"/><polyline points="23 33.699 23 22 26 22 26 33.455"/><path d="M20.119,21.983s-6.85.423-10.044-2.979C19.425,20.569,32,12,32,12s13.575,8.569,22.925,7c-3.194,3.4-10.044,2.979-10.044,2.979Z"/><line x1="32" y1="12" x2="32" y2="9"/><rect x="43" y="49" width="5" height="5"/><rect x="15" y="50" width="5" height="5"/><line x1="34" y1="53" x2="34" y2="58"/><path d="M2.218,35.636s30.347,9.819,59.1,0L45.342,34H18.19Z"/><line x1="29" y1="53" x2="29" y2="58"/></g></svg>`,
-    Tiger: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M916.210526 619.789474c0 98.842947-82.539789 134.736842-137.997473 134.736842-59.095579 0-99.597474-14.012632-138.805895-27.540211C601.950316 714.024421 563.2 700.631579 512 700.631579s-89.950316 13.392842-127.407158 26.354526C345.384421 740.513684 304.882526 754.526316 245.786947 754.526316 190.329263 754.526316 107.789474 718.632421 107.789474 619.789474v-80.842106H53.894737v80.842106c0 97.926737 63.191579 159.690105 136.003368 180.574315C202.832842 925.291789 342.204632 1024 512 1024c169.822316 0 309.167158-98.708211 322.101895-223.636211C906.913684 779.479579 970.105263 717.716211 970.105263 619.789474v-80.842106h-53.894737v80.842106zM512 970.105263c-135.491368 0-247.619368-70.440421-266.401684-161.68421h0.161684c68.149895 0 115.038316-16.222316 156.429474-30.504421C438.487579 765.359158 469.854316 754.526316 512 754.526316s73.512421 10.832842 109.783579 23.390316C663.174737 792.198737 710.063158 808.421053 778.213053 808.421053h0.188631c-18.782316 91.243789-130.937263 161.684211-266.401684 161.68421zM997.052632 161.684211c-39.828211 0-71.033263 8.919579-93.884632 19.078736-6.063158-13.231158-13.716211-25.438316-23.902316-35.651368C854.932211 120.697263 821.113263 107.789474 781.473684 107.789474c-41.040842 0-84.506947 23.740632-123.742316 54.514526a689.798737 689.798737 0 0 0-71.033263-46.780632c-27.109053-57.478737-53.544421-87.093895-54.703158-88.387368L512 5.012211l-19.994947 22.150736c-1.158737 1.293474-27.594105 30.908632-54.703158 88.387369a688.882526 688.882526 0 0 0-71.006316 46.780631C327.033263 131.530105 283.567158 107.789474 242.526316 107.789474c-39.639579 0-73.458526 12.907789-97.792 37.322105a120.373895 120.373895 0 0 0-23.902316 35.651368C97.953684 170.603789 66.775579 161.684211 26.947368 161.684211H0v215.578947c0 71.760842 69.093053 107.789474 107.789474 107.789474h1.670737c1.347368-18.324211 3.745684-36.325053 7.518315-53.894737H107.789474c-12.988632 0-53.894737-16.222316-53.894737-53.894737V217.330526c24.090947 3.233684 42.145684 10.401684 54.568421 17.00379-0.134737 2.829474-0.673684 5.416421-0.673684 8.272842 0.080842 33.253053 14.336 66.991158 39.666526 97.17221 8.677053-18.674526 18.512842-35.866947 28.860632-52.035368-10.078316-16.680421-14.605474-32.525474-14.632421-45.298526-0.053895-24.791579 7.275789-45.298526 21.207578-59.284211C196.904421 169.121684 217.519158 161.684211 242.526316 161.684211c50.499368 0 126.221474 66.155789 185.478737 138.024421a134.656 134.656 0 0 0-35.678316 43.897263c-23.632842-28.968421-56.832-64.997053-91.432421-87.363369l-17.677474-11.452631-15.386947 14.443789C216.710737 307.253895 161.684211 406.851368 161.684211 512c0 84.372211 44.328421 134.736842 118.568421 134.736842 40.259368 0 75.075368-11.371789 100.001684-22.797474 3.152842 17.650526 7.68 30.881684 7.949473 31.717053l50.876632-17.785263C439.026526 637.628632 431.157895 614.669474 431.157895 592.842105c0-13.338947 0-53.894737 80.842105-53.894737s80.842105 40.555789 80.842105 53.894737c0 21.827368-7.868632 44.786526-7.949473 45.029053l25.438315 8.865684 25.411369 8.919579c0.296421-0.835368 4.823579-14.039579 7.976421-31.717053 24.953263 11.425684 59.769263 22.797474 100.028631 22.797474 74.24 0 118.568421-50.364632 118.568421-134.736842 0-105.148632-55.026526-204.746105-106.145684-252.766316l-15.36-14.443789-17.704421 11.452631c-34.600421 22.366316-67.799579 58.394947-91.432421 87.336421a134.467368 134.467368 0 0 0-35.651368-43.870315C655.225263 227.84 731.001263 161.684211 781.473684 161.684211c25.007158 0 45.594947 7.437474 59.634527 21.477052 13.958737 13.985684 21.261474 34.465684 21.207578 59.284211-0.053895 12.773053-4.581053 28.618105-14.632421 45.325473 10.347789 16.168421 20.183579 33.333895 28.860632 52.035369 25.303579-30.181053 39.558737-63.919158 39.666526-97.172211 0-2.856421-0.565895-5.443368-0.673684-8.245894A160.525474 160.525474 0 0 1 970.105263 217.330526V377.263158c0 37.672421-40.933053 53.894737-53.894737 53.894737h-9.189052c3.799579 17.569684 6.170947 35.570526 7.518315 53.894737H916.210526c38.696421 0 107.789474-36.028632 107.789474-107.789474V161.684211h-26.947368z m-404.210527 242.526315c0 44.570947-36.271158 80.842105-80.842105 80.842106s-80.842105-36.271158-80.842105-80.842106 36.271158-80.842105 80.842105-80.842105 80.842105 36.271158 80.842105 80.842105z m80.842106 26.947369c14.848 0 26.947368 12.099368 26.947368 26.947368s-12.099368 26.947368-26.947368 26.947369a26.974316 26.974316 0 0 1 0-53.894737z m-296.421053 26.947368c0 14.848-12.099368 26.947368-26.947369 26.947369s-26.947368-12.099368-26.947368-26.947369 12.099368-26.947368 26.947368-26.947368 26.947368 12.099368 26.947369 26.947368z m4.50021 103.909053C367.696842 571.095579 329.054316 592.842105 280.252632 592.842105 264.245895 592.842105 215.578947 592.842105 215.578947 512c0-75.371789 35.139368-151.956211 73.916632-197.416421 22.554947 18.351158 44.032 42.280421 60.658526 62.679579A80.949895 80.949895 0 0 0 269.473684 458.105263c0 44.570947 36.271158 80.842105 80.842105 80.842105a80.680421 80.680421 0 0 0 68.284632-37.995789c1.940211 1.859368 4.176842 3.395368 6.224842 5.146947-21.665684 13.096421-36.378947 31.986526-43.061895 55.91579z m352.741053-247.430737C773.281684 360.043789 808.421053 436.628211 808.421053 512c0 80.842105-48.693895 80.842105-64.673685 80.842105-48.801684 0-87.417263-21.719579-101.537684-30.800842-6.629053-23.983158-21.369263-42.873263-43.061895-55.942737 2.048-1.751579 4.284632-3.287579 6.224843-5.146947A80.707368 80.707368 0 0 0 673.684211 538.947368c44.570947 0 80.842105-36.271158 80.842105-80.842105a80.949895 80.949895 0 0 0-80.680421-80.842105c16.626526-20.399158 38.076632-44.328421 60.658526-62.679579z m-187.607579-39.962947C535.686737 271.602526 524.153263 269.473684 512 269.473684s-23.686737 2.128842-34.896842 5.146948a816.047158 816.047158 0 0 0-69.146947-76.072421 636.389053 636.389053 0 0 1 63.218526-40.259369l7.841684-4.338526 3.69179-8.138105c10.347789-23.013053 20.749474-41.283368 29.291789-54.730106 8.542316 13.473684 18.944 31.717053 29.345684 54.757053l3.69179 8.138105 7.814737 4.338526c25.6 14.174316 47.616 28.995368 63.218526 40.259369a813.217684 813.217684 0 0 0-69.173895 76.045474z" fill="${RGBA_ORANGE2}"/></svg>`,
+    Tiger: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M916.210526 619.789474c0 98.842947-82.539789 134.736842-137.997473 134.736842-59.095579 0-99.597474-14.012632-138.805895-27.540211C601.950316 714.024421 563.2 700.631579 512 700.631579s-89.950316 13.392842-127.407158 26.354526C345.384421 740.513684 304.882526 754.526316 245.786947 754.526316 190.329263 754.526316 107.789474 718.632421 107.789474 619.789474v-80.842106H53.894737v80.842106c0 97.926737 63.191579 159.690105 136.003368 180.574315C202.832842 925.291789 342.204632 1024 512 1024c169.822316 0 309.167158-98.708211 322.101895-223.636211C906.913684 779.479579 970.105263 717.716211 970.105263 619.789474v-80.842106h-53.894737v80.842106zM512 970.105263c-135.491368 0-247.619368-70.440421-266.401684-161.68421h0.161684c68.149895 0 115.038316-16.222316 156.429474-30.504421C438.487579 765.359158 469.854316 754.526316 512 754.526316s73.512421 10.832842 109.783579 23.390316C663.174737 792.198737 710.063158 808.421053 778.213053 808.421053h0.188631c-18.782316 91.243789-130.937263 161.684211-266.401684 161.68421zM997.052632 161.684211c-39.828211 0-71.033263 8.919579-93.884632 19.078736-6.063158-13.231158-13.716211-25.438316-23.902316-35.651368C854.932211 120.697263 821.113263 107.789474 781.473684 107.789474c-41.040842 0-84.506947 23.740632-123.742316 54.514526a689.798737 689.798737 0 0 0-71.033263-46.780632c-27.109053-57.478737-53.544421-87.093895-54.703158-88.387368L512 5.012211l-19.994947 22.150736c-1.158737 1.293474-27.594105 30.908632-54.703158 88.387369a688.882526 688.882526 0 0 0-71.006316 46.780631C327.033263 131.530105 283.567158 107.789474 242.526316 107.789474c-39.639579 0-73.458526 12.907789-97.792 37.322105a120.373895 120.373895 0 0 0-23.902316 35.651368C97.953684 170.603789 66.775579 161.684211 26.947368 161.684211H0v215.578947c0 71.760842 69.093053 107.789474 107.789474 107.789474h1.670737c1.347368-18.324211 3.745684-36.325053 7.518315-53.894737H107.789474c-12.988632 0-53.894737-16.222316-53.894737-53.894737V217.330526c24.090947 3.233684 42.145684 10.401684 54.568421 17.00379-0.134737 2.829474-0.673684 5.416421-0.673684 8.272842 0.080842 33.253053 14.336 66.991158 39.666526 97.17221 8.677053-18.674526 18.512842-35.866947 28.860632-52.035368-10.078316-16.680421-14.605474-32.525474-14.632421-45.298526-0.053895-24.791579 7.275789-45.298526 21.207578-59.284211C196.904421 169.121684 217.519158 161.684211 242.526316 161.684211c50.499368 0 126.221474 66.155789 185.478737 138.024421a134.656 134.656 0 0 0-35.678316 43.897263c-23.632842-28.968421-56.832-64.997053-91.432421-87.363369l-17.677474-11.452631-15.386947 14.443789C216.710737 307.253895 161.684211 406.851368 161.684211 512c0 84.372211 44.328421 134.736842 118.568421 134.736842 40.259368 0 75.075368-11.371789 100.001684-22.797474 3.152842 17.650526 7.68 30.881684 7.949473 31.717053l50.876632-17.785263C439.026526 637.628632 431.157895 614.669474 431.157895 592.842105c0-13.338947 0-53.894737 80.842105-53.894737s80.842105 40.555789 80.842105 53.894737c0 21.827368-7.868632 44.786526-7.949473 45.029053l25.438315 8.865684 25.411369 8.919579c0.296421-0.835368 4.823579-14.039579 7.976421-31.717053 24.953263 11.425684 59.769263 22.797474 100.028631 22.797474 74.24 0 118.568421-50.364632 118.568421-134.736842 0-105.148632-55.026526-204.746105-106.145684-252.766316l-15.36-14.443789-17.704421 11.452631c-34.600421 22.366316-67.799579 58.394947-91.432421 87.336421a134.467368 134.467368 0 0 0-35.651368-43.870315C655.225263 227.84 731.001263 161.684211 781.473684 161.684211c25.007158 0 45.594947 7.437474 59.634527 21.477052 13.958737 13.985684 21.261474 34.465684 21.207578 59.284211-0.053895 12.773053-4.581053 28.618105-14.632421 45.325473 10.347789 16.168421 20.183579 33.333895 28.860632 52.035369 25.303579-30.181053 39.558737-63.919158 39.666526-97.172211 0-2.856421-0.565895-5.443368-0.673684-8.245894A160.525474 160.525474 0 0 1 970.105263 217.330526V377.263158c0 37.672421-40.933053 53.894737-53.894737 53.894737h-9.189052c3.799579 17.569684 6.170947 35.570526 7.518315 53.894737H916.210526c38.696421 0 107.789474-36.028632 107.789474-107.789474V161.684211h-26.947368z m-404.210527 242.526315c0 44.570947-36.271158 80.842105-80.842105 80.842106s-80.842105-36.271158-80.842105-80.842106 36.271158-80.842105 80.842105-80.842105 80.842105 36.271158 80.842105 80.842105z m80.842106 26.947369c14.848 0 26.947368 12.099368 26.947368 26.947368s-12.099368 26.947368-26.947368 26.947369a26.974316 26.974316 0 0 1 0-53.894737z m-296.421053 26.947368c0 14.848-12.099368 26.947368-26.947369 26.947369s-26.947368-12.099368-26.947368-26.947369 12.099368-26.947368 26.947368-26.947368 26.947368 12.099368 26.947369 26.947368z m4.50021 103.909053C367.696842 571.095579 329.054316 592.842105 280.252632 592.842105 264.245895 592.842105 215.578947 592.842105 215.578947 512c0-75.371789 35.139368-151.956211 73.916632-197.416421 22.554947 18.351158 44.032 42.280421 60.658526 62.679579A80.949895 80.949895 0 0 0 269.473684 458.105263c0 44.570947 36.271158 80.842105 80.842105 80.842105a80.680421 80.680421 0 0 0 68.284632-37.995789c1.940211 1.859368 4.176842 3.395368 6.224842 5.146947-21.665684 13.096421-36.378947 31.986526-43.061895 55.91579z m352.741053-247.430737C773.281684 360.043789 808.421053 436.628211 808.421053 512c0 80.842105-48.693895 80.842105-64.673685 80.842105-48.801684 0-87.417263-21.719579-101.537684-30.800842-6.629053-23.983158-21.369263-42.873263-43.061895-55.942737 2.048-1.751579 4.284632-3.287579 6.224843-5.146947A80.707368 80.707368 0 0 0 673.684211 538.947368c44.570947 0 80.842105-36.271158 80.842105-80.842105a80.949895 80.949895 0 0 0-80.680421-80.842105c16.626526-20.399158 38.076632-44.328421 60.658526-62.679579z m-187.607579-39.962947C535.686737 271.602526 524.153263 269.473684 512 269.473684s-23.686737 2.128842-34.896842 5.146948a816.047158 816.047158 0 0 0-69.146947-76.072421 636.389053 636.389053 0 0 1 63.218526-40.259369l7.841684-4.338526 3.69179-8.138105c10.347789-23.013053 20.749474-41.283368 29.291789-54.730106 8.542316 13.473684 18.944 31.717053 29.345684 54.757053l3.69179 8.138105 7.814737 4.338526c25.6 14.174316 47.616 28.995368 63.218526 40.259369a813.217684 813.217684 0 0 0-69.173895 76.045474z" fill="${RGBA_ORANGE3}"/></svg>`,
     Spring: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M754.526316 916.210526h-53.894737v-53.894737H323.368421v53.894737h-53.894737V530.809263a371.280842 371.280842 0 0 1-157.857684 61.763369l-7.626105-53.35579c86.231579-12.314947 176.074105-66.236632 239.723789-161.953684H107.789474v-53.894737h266.698105c8.272842-16.976842 15.764211-34.950737 22.447158-53.894737H215.578947V215.578947h197.254737c4.203789-17.273263 7.733895-35.247158 10.536421-53.894736H161.684211V107.789474h267.614315c1.212632-17.434947 1.859368-35.408842 1.859369-53.894737h53.894737c0 18.243368-0.619789 36.217263-1.859369 53.894737H862.315789v53.894737H477.480421a690.661053 690.661053 0 0 1-9.916632 53.894736H808.421053v53.894737H452.985263a608.202105 608.202105 0 0 1-19.941052 53.894737H916.210526v53.894737h-242.202947c54.164211 90.327579 128.862316 138.482526 247.511579 162.223158l-10.590316 52.843789c-61.170526-12.234105-112.64-30.827789-156.402526-57.263158V916.210526z m-431.157895-107.789473h377.263158v-107.789474H323.368421v107.789474z m0-161.684211h377.263158v-107.789474H323.368421v107.789474z m1.616842-161.68421h365.002105c-30.073263-29.561263-55.592421-65.185684-77.689263-107.789474h-205.71621a476.510316 476.510316 0 0 1-81.596632 107.789474z" fill="${RGBA_RED2}"/></svg>`,
     Vietnam: `<svg fill="none" stroke="${RGBA_TEAL2}" stroke-width="2" width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><title>vietnam</title><g id="vietnam"><polygon points="38.679 13 23.607 13 21.714 10.073 31 5 40.571 10.073 38.679 13"/><line x1="15" y1="62" x2="48" y2="62"/><line x1="24.671" y1="16.581" x2="25.143" y2="13"/><line x1="23.748" y1="23.573" x2="24.18" y2="20.302"/><line x1="22.571" y1="32.494" x2="23.253" y2="27.323"/><line x1="21.223" y1="42.715" x2="22.036" y2="36.551"/><line x1="20.042" y1="51.669" x2="20.74" y2="46.38"/><line x1="18.679" y1="62" x2="19.426" y2="56.341"/><line x1="42.898" y1="56.626" x2="43.607" y2="62"/><line x1="41.548" y1="46.396" x2="42.244" y2="51.669"/><line x1="40.215" y1="36.286" x2="41.063" y2="42.715"/><line x1="39.032" y1="27.323" x2="39.714" y2="32.494"/><line x1="38.106" y1="20.302" x2="38.538" y2="23.573"/><line x1="37.143" y1="13" x2="37.639" y2="16.758"/><polygon points="43.619 56 18.667 56 16.571 52 45.714 52 43.619 56"/><polygon points="42.22 46.063 20.066 46.063 18.205 43 44.081 43 42.22 46.063"/><polygon points="41.417 36 20.869 36 19.143 33 43.143 33 41.417 36"/><polygon points="39.949 27 22.336 27 20.857 24 41.429 24 39.949 27"/><polygon points="38.482 20 23.804 20 22.571 17 39.714 17 38.482 20"/><line x1="38" y1="62" x2="33" y2="10"/><line x1="24" y1="62" x2="29" y2="10"/><line x1="31" y1="24" x2="31" y2="22"/><line x1="31" y1="32" x2="31" y2="30"/><path d="M31.04,39h0a2.04,2.04,0,0,1,2.04,2.04V43a0,0,0,0,1,0,0H29a0,0,0,0,1,0,0V41.04A2.04,2.04,0,0,1,31.04,39Z"/><path d="M31.04,48h0a2.04,2.04,0,0,1,2.04,2.04V52a0,0,0,0,1,0,0H29a0,0,0,0,1,0,0V50.04A2.04,2.04,0,0,1,31.04,48Z"/><path d="M31,57h0a3,3,0,0,1,3,3v2a0,0,0,0,1,0,0H28a0,0,0,0,1,0,0V60A3,3,0,0,1,31,57Z"/><line x1="23" y1="10" x2="40" y2="10"/><line x1="31" y1="5" x2="31" y2="2"/></g></svg>`,
     America: `<svg fill="${RGBA_GREEN2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.003 512.003" xml:space="preserve"><g><g><rect x="2.862" y="496.505" width="506.279" height="15.498"/></g></g><g><g><polygon points="26.626,440.708 26.626,488.236 42.124,488.236 42.124,456.206 177.477,456.206 177.477,472.738 192.975,472.738
@@ -682,7 +699,7 @@ var tetris = (() => {
 			c-0.511-5.756-1.59-11.349-3.161-16.735h16.927l6.973,16.735H339.525z"/></g></g><g><g><path d="M259.842,17.495V0h-15.689v17.495c-9.308,3.252-16.006,12.115-16.006,22.52V56.02h15.689V40.015
 			c0-4.501,3.662-8.162,8.161-8.162c4.501,0,8.161,3.662,8.161,8.162V56.02h15.689V40.015
 			C275.847,29.611,269.149,20.748,259.842,17.495z"/></g></g></svg>`,
-    Greece: `<svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="492.63" width="512" height="15.706"/></g></g><g><g><polygon points="31.411,461.219 31.411,485.301 47.117,485.301 47.117,476.924 464.883,476.924 464.883,485.301 480.589,485.301
+    Greece: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="492.63" width="512" height="15.706"/></g></g><g><g><polygon points="31.411,461.219 31.411,485.301 47.117,485.301 47.117,476.924 464.883,476.924 464.883,485.301 480.589,485.301
 			480.589,461.219 		"/></g></g><g><g><polygon points="47.117,429.808 47.117,453.89 62.822,453.89 62.822,445.513 449.178,445.513 449.178,453.89 464.883,453.89
 			464.883,429.808 		"/></g></g><g><g><path d="M125.644,193.178v-15.706H70.151v15.706h8.376v212.548h-8.376v15.706h55.493v-15.706h-7.329V193.178H125.644z
 			 M102.609,405.726h-8.376V193.178h8.376V405.726z"/></g></g><g><g><path d="M205.219,193.178v-15.706h-55.493v15.706h7.329v212.548h-7.329v15.706h55.493v-15.706h-8.376V193.178H205.219z
@@ -692,7 +709,7 @@ var tetris = (() => {
 			 M417.767,405.726h-8.376V193.178h8.376V405.726z"/></g></g><g><g><path d="M277.037,27.746h-8.996V3.665h-15.706v24.082h-9.438L23.035,100.731v45.33h24.082v23.035h417.767v-23.035h24.082v-45.262
 			L277.037,27.746z M449.178,153.391H62.822v-7.329h386.356V153.391z M473.26,130.356H38.74V114.65h95.28V98.945H78.268
 			l167.169-55.493h28.968l160.987,55.493h-49.036v15.706h86.904V130.356z"/></g></g><g><g><rect x="149.726" y="98.945" width="220.924" height="15.706"/></g></g><g><g><rect x="252.335" y="66.487" width="15.706" height="15.706"/></g></g><g><g><rect x="220.924" y="66.487" width="15.706" height="15.706"/></g></g><g><g><rect x="283.746" y="66.487" width="15.706" height="15.706"/></g></g></svg>`,
-    Australia: `<svg fill="${RGBA_WHITE3}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="87.771" y="404.898" width="16.718" height="15.673"/></g></g><g><g><rect x="120.163" y="404.898" width="15.673" height="15.673"/></g></g><g><g><rect x="151.51" y="404.898" width="16.718" height="15.673"/></g></g><g><g><rect x="48.065" y="436.245" width="111.804" height="15.673"/></g></g><g><g><path d="M400.196,484.31v-24.033H280.033v24.033H0v15.673h512V484.31H400.196z M384.522,484.31h-88.816v-8.359h88.816V484.31z"/></g></g><g><g><path d="M452.271,420.571l30.125-64.605l-28.853-13.454c-11.344-5.29-23.244-8.733-35.485-10.291l16.643-32.112l-29.157-13.596
+    Australia: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="87.771" y="404.898" width="16.718" height="15.673"/></g></g><g><g><rect x="120.163" y="404.898" width="15.673" height="15.673"/></g></g><g><g><rect x="151.51" y="404.898" width="16.718" height="15.673"/></g></g><g><g><rect x="48.065" y="436.245" width="111.804" height="15.673"/></g></g><g><g><path d="M400.196,484.31v-24.033H280.033v24.033H0v15.673h512V484.31H400.196z M384.522,484.31h-88.816v-8.359h88.816V484.31z"/></g></g><g><g><path d="M452.271,420.571l30.125-64.605l-28.853-13.454c-11.344-5.29-23.244-8.733-35.485-10.291l16.643-32.112l-29.157-13.596
 			c-24.041-11.211-51.335-14.096-77.128-8.242l-6.645-13.795c-27.925-59.887-99.368-85.885-159.252-57.963l-28.853,13.454
 			l18.586,39.858c-21.034-1.938-42.432,1.686-61.732,10.687l-28.912,13.481l15.415,32.356c-11.894,1.614-23.461,5.011-34.503,10.161
 			l-28.853,13.454l30.277,64.933H15.673v71.053h15.673v-55.38h40.751v-24.033h111.804v39.706h304.065v39.706h15.673v-55.38H452.271z
@@ -702,7 +719,7 @@ var tetris = (() => {
 			l-17.462-37.448l14.648-6.832c52.051-24.268,114.151-1.672,138.466,50.472l71.948,149.382H245.01z M396.955,420.571
 			l-11.891-24.689l25.236-48.691c12.668,0.896,24.976,4.096,36.618,9.525l14.649,6.832l-26.591,57.023H396.955z"/></g></g><g><g><rect x="48.065" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="72.098" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="96.131" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="120.163" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="144.196" y="460.278" width="15.673" height="15.673"/></g></g><g><g><rect x="352.56" y="28.749" transform="matrix(0.7071 -0.7071 0.7071 0.7071 62.6021 272.6316)" width="15.673" height="63.999"/></g></g><g><g><rect x="328.406" y="132.105" transform="matrix(0.7071 -0.7071 0.7071 0.7071 6.6066 295.8334)" width="63.999" height="15.673"/></g></g><g><g><rect x="431.75" y="107.936" transform="matrix(0.7071 -0.7071 0.7071 0.7071 29.8029 351.821)" width="15.673" height="63.999"/></g></g><g><g><rect x="407.594" y="52.907" transform="matrix(0.7071 -0.7071 0.7071 0.7071 85.8018 328.6308)" width="63.999" height="15.673"/></g></g><g><g><rect x="391.837" y="92.474" width="15.673" height="15.673"/></g></g><g><g><rect x="431.543" y="92.474" width="16.718" height="15.673"/></g></g><g><g><rect x="455.576" y="92.474" width="32.392" height="15.673"/></g></g><g><g><rect x="391.837" y="12.016" width="15.673" height="48.065"/></g></g><g><g><rect x="391.837" y="132.18" width="15.673" height="39.706"/></g></g><g><g><rect x="391.837" y="188.604" width="15.673" height="31.347"/></g></g><g><g><rect x="304.065" y="92.474" width="56.424" height="15.673"/></g></g><g><g><polygon points="256,68.441 256,52.767 240.327,52.767 240.327,68.441 223.608,68.441 223.608,84.114 240.327,84.114
 			240.327,100.833 256,100.833 256,84.114 271.673,84.114 271.673,68.441 		"/></g></g><g><g><rect x="280.033" y="20.376" width="15.673" height="15.673"/></g></g><g><g><rect x="207.935" y="108.147" width="15.673" height="15.673"/></g></g></svg>`,
-    Brazil: `<svg fill="${RGBA_WHITE3}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="132.146" y="496.453" width="256" height="15.547"/></g></g><g><g><path d="M315.595,472.615V360.68H204.696v111.935h-8.292v15.547h127.482v-15.547H315.595z M300.049,472.615h-8.292v-40.421
+    Brazil: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="132.146" y="496.453" width="256" height="15.547"/></g></g><g><g><path d="M315.595,472.615V360.68H204.696v111.935h-8.292v15.547h127.482v-15.547H315.595z M300.049,472.615h-8.292v-40.421
 			h-15.547v40.421h-8.292v-40.421h-15.547v40.421h-8.292v-40.421h-15.547v40.421h-8.292v-96.389h79.806V472.615z"/></g></g><g><g><rect x="204.733" y="336.063" transform="matrix(1 -0.0045 0.0045 1 -1.5447 1.1742)" width="110.848" height="15.547"/></g></g><g><g><rect x="227.498" y="384.518" width="16.583" height="15.547"/></g></g><g><g><rect x="252.372" y="384.518" width="15.547" height="15.547"/></g></g><g><g><rect x="276.211" y="384.518" width="15.547" height="15.547"/></g></g><g><g><path d="M277.085,72.551c4.145-4.232,6.707-10.02,6.707-16.397V23.451C283.792,10.52,273.271,0,260.341,0
 			c-12.933,0-23.453,10.52-23.453,23.451v32.702c0,6.378,2.562,12.166,6.707,16.397H76.178v19.402l29.288,19.983h18.388V96.389
 			h-13.591l-12.152-8.292h114.572c0.624,5.382,1.834,10.589,3.581,15.547h-68.572v-8.292h-15.547v23.838h79.806v64.744
@@ -714,7 +731,7 @@ var tetris = (() => {
 			h7.732v32.497h-7.732c-31.035,0-56.527-25.25-56.527-56.286v-3.801C240.659,140.86,261.097,151.671,284.025,151.671z
 			 M268.246,56.153c0,4.359-3.547,7.906-7.905,7.906c-4.359,0-7.906-3.547-7.906-7.906V23.451c0-4.358,3.547-7.905,7.906-7.905
 			c4.358,0,7.905,3.547,7.905,7.905V56.153z"/></g></g></svg>`,
-    Egypt: `<svg fill="${RGBA_ORANGE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="40.834" y="427.714" width="112.033" height="15.706"/></g></g><g><g><rect x="152.867" y="444.466" width="47.117" height="15.706"/></g></g><g><g><rect x="71.198" y="475.877" width="32.458" height="15.706"/></g></g><g><g><rect y="467.501" width="15.706" height="15.706"/></g></g><g><g><rect x="215.689" y="475.877" width="159.149" height="15.706"/></g></g><g><g><rect x="327.722" y="444.466" width="56.54" height="15.706"/></g></g><g><g><rect x="384.262" y="427.714" width="23.035" height="15.706"/></g></g><g><g><rect x="255.477" y="427.714" width="39.787" height="15.706"/></g></g><g><g><rect x="456.507" y="451.795" width="55.493" height="15.706"/></g></g><g><g><rect x="414.626" y="484.254" width="16.753" height="15.706"/></g></g><g><g><rect x="486.871" y="420.384" width="25.129" height="15.706"/></g></g><g><g><rect y="420.384" width="15.706" height="15.706"/></g></g><g><g><rect x="215.689" y="260.188" width="24.082" height="15.706"/></g></g><g><g><rect x="279.558" y="363.845" width="32.458" height="15.706"/></g></g><g><g><polygon points="232.442,188.99 232.442,203.648 207.313,203.648 207.313,219.354 232.442,219.354 232.442,204.695
+    Egypt: `<svg fill="${RGBA_ORANGE3}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="40.834" y="427.714" width="112.033" height="15.706"/></g></g><g><g><rect x="152.867" y="444.466" width="47.117" height="15.706"/></g></g><g><g><rect x="71.198" y="475.877" width="32.458" height="15.706"/></g></g><g><g><rect y="467.501" width="15.706" height="15.706"/></g></g><g><g><rect x="215.689" y="475.877" width="159.149" height="15.706"/></g></g><g><g><rect x="327.722" y="444.466" width="56.54" height="15.706"/></g></g><g><g><rect x="384.262" y="427.714" width="23.035" height="15.706"/></g></g><g><g><rect x="255.477" y="427.714" width="39.787" height="15.706"/></g></g><g><g><rect x="456.507" y="451.795" width="55.493" height="15.706"/></g></g><g><g><rect x="414.626" y="484.254" width="16.753" height="15.706"/></g></g><g><g><rect x="486.871" y="420.384" width="25.129" height="15.706"/></g></g><g><g><rect y="420.384" width="15.706" height="15.706"/></g></g><g><g><rect x="215.689" y="260.188" width="24.082" height="15.706"/></g></g><g><g><rect x="279.558" y="363.845" width="32.458" height="15.706"/></g></g><g><g><polygon points="232.442,188.99 232.442,203.648 207.313,203.648 207.313,219.354 232.442,219.354 232.442,204.695
 			262.806,204.695 262.806,188.99 		"/></g></g><g><g><rect x="255.477" y="292.646" width="39.787" height="15.706"/></g></g><g><g><path d="M475.183,387.926l-34.476-43.413c17.317-4.695,33.06-14.196,45.414-27.643c16.268-17.706,25.227-40.71,25.227-64.771
 			c0-52.804-42.959-95.763-95.763-95.763c-19.655,0-38.544,5.912-54.624,17.097c-12.483,8.682-22.592,20.047-29.702,33.257
 			l-75.511-95.088L36.315,387.926H0v15.706h512v-15.706H475.183z M415.586,172.042c44.144,0,80.057,35.913,80.057,80.057
@@ -734,7 +751,7 @@ var tetris = (() => {
 			c1.326-12.418,6.171-23.792,13.506-33.126l5.557,5.557l11.036-11.037l-5.557-5.557c8.988-7.063,19.87-11.804,31.752-13.332v7.553
 			h15.607v-7.686c12.288,1.378,23.543,6.195,32.792,13.464l-5.557,5.557l11.036,11.037l5.557-5.557
 			c7.334,9.334,12.181,20.708,13.506,33.127h-8.433v15.607h8.216C318.831,257.391,314.11,268.153,307.114,277.055z"/></g></g></svg>`,
-    India: `<svg fill="${RGBA_WHITE3}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="494.507" width="512" height="15.673"/></g></g><g><g><rect x="118.073" y="225.969" width="275.853" height="15.674"/></g></g><g><g><rect x="79.412" y="328.369" width="15.674" height="32.392"/></g></g><g><g><rect x="79.412" y="399.422" width="15.674" height="32.392"/></g></g><g><g><rect x="150.465" y="321.054" width="15.673" height="31.347"/></g></g><g><g><rect x="150.465" y="391.063" width="15.673" height="33.437"/></g></g><g><g><rect x="346.906" y="321.054" width="15.673" height="31.347"/></g></g><g><g><rect x="346.906" y="391.063" width="15.673" height="33.437"/></g></g><g><g><rect x="417.959" y="328.369" width="15.673" height="32.392"/></g></g><g><g><rect x="417.959" y="399.422" width="15.673" height="32.392"/></g></g><g><g><path d="M307.2,123.857v15.673c17.763,0,31.898,14.338,31.898,32.101h15.673C354.771,145.508,333.322,123.857,307.2,123.857z"/></g></g><g><g><path d="M331.233,454.798v-98.388c0-41.277-33.749-74.859-75.233-74.859s-75.233,33.582-75.233,74.859v98.388h-47.02v15.673h47.02
+    India: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect y="494.507" width="512" height="15.673"/></g></g><g><g><rect x="118.073" y="225.969" width="275.853" height="15.674"/></g></g><g><g><rect x="79.412" y="328.369" width="15.674" height="32.392"/></g></g><g><g><rect x="79.412" y="399.422" width="15.674" height="32.392"/></g></g><g><g><rect x="150.465" y="321.054" width="15.673" height="31.347"/></g></g><g><g><rect x="150.465" y="391.063" width="15.673" height="33.437"/></g></g><g><g><rect x="346.906" y="321.054" width="15.673" height="31.347"/></g></g><g><g><rect x="346.906" y="391.063" width="15.673" height="33.437"/></g></g><g><g><rect x="417.959" y="328.369" width="15.673" height="32.392"/></g></g><g><g><rect x="417.959" y="399.422" width="15.673" height="32.392"/></g></g><g><g><path d="M307.2,123.857v15.673c17.763,0,31.898,14.338,31.898,32.101h15.673C354.771,145.508,333.322,123.857,307.2,123.857z"/></g></g><g><g><path d="M331.233,454.798v-98.388c0-41.277-33.749-74.859-75.233-74.859s-75.233,33.582-75.233,74.859v98.388h-47.02v15.673h47.02
 			v15.673h15.673V356.411c0-32.634,26.718-59.185,59.559-59.185s59.559,26.55,59.559,59.185v129.734h15.673v-15.673h47.02v-15.673
 			H331.233z"/></g></g><g><g><polygon points="102.4,305.378 102.4,289.704 47.02,289.704 47.02,486.145 62.694,486.145 62.694,470.472 102.4,470.472
 			102.4,454.798 62.694,454.798 62.694,305.378 		"/></g></g><g><g><path d="M70.008,265.672v-7.821c0-17.305,14.629-31.381,31.347-31.381v-15.674c-26.122,0-47.02,21.109-47.02,47.055v7.821H47.02
@@ -758,7 +775,7 @@ var tetris = (() => {
 			 M133.747,201.933v-30.815c0-16.754,6.588-32.415,18.549-44.1c11.937-11.659,27.856-18.081,44.827-18.081h7.885
 			c15.833,0,27.588-9.557,30.685-24.033h41.132c3.096,14.476,14.852,24.033,30.685,24.033h7.885
 			c35.246,0,62.857,27.314,62.857,62.181v30.815H133.747z"/></g></g></svg>`,
-    Italy: `<svg fill="${RGBA_WHITE3}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="252.641" y="-103.971" transform="matrix(0.0663 -0.9978 0.9978 0.0663 227.2121 274.8721)" width="15.673" height="240.003"/></g></g><g><g><rect x="223.466" y="383.062" transform="matrix(0.0663 -0.9978 0.9978 0.0663 -238.0923 655.6849)" width="15.673" height="143.997"/></g></g><g><g><path d="M332.631,496.072l4.91-73.871l-7.983-0.531l5.327-80.149l8.145,0.541l1.04-15.639l-8.146-0.541l5.327-80.149l8.145,0.541
+    Italy: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><rect x="252.641" y="-103.971" transform="matrix(0.0663 -0.9978 0.9978 0.0663 227.2121 274.8721)" width="15.673" height="240.003"/></g></g><g><g><rect x="223.466" y="383.062" transform="matrix(0.0663 -0.9978 0.9978 0.0663 -238.0923 655.6849)" width="15.673" height="143.997"/></g></g><g><g><path d="M332.631,496.072l4.91-73.871l-7.983-0.531l5.327-80.149l8.145,0.541l1.04-15.639l-8.146-0.541l5.327-80.149l8.145,0.541
 			l1.04-15.639l-8.146-0.541l5.328-80.15l8.145,0.541l1.04-15.639l-8.146-0.541l5.327-80.149l8.145,0.541l1.04-15.639
 			L155.629,25.266l-1.04,15.639l8.146,0.541l-5.327,80.149l-8.145-0.541l-1.04,15.639l8.145,0.541l-5.327,80.149l-8.145-0.541
 			l-1.04,15.639l8.146,0.541l-5.327,80.149l-8.145-0.541l-1.04,15.639l8.146,0.541l-5.327,80.15l-7.982-0.531l-5.825,87.643H0
@@ -831,7 +848,7 @@ var tetris = (() => {
 			 M244.185,149.267c-2.141-5.098-3.544-10.578-4.087-16.305l55.304-20.739l55.117,27.558c-0.955,4.306-2.398,8.43-4.284,12.303
 			L296.1,127.016L244.185,149.267z M295.849,183.655c-17.582,0-33.289-8.15-43.566-20.862l43.313-18.563l41.821,20.91
 			C327.16,176.501,312.326,183.655,295.849,183.655z"/></g></g></svg>`,
-    Chile: `<svg fill="${RGBA_WHITE3}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M201.217,360.123H46.347c-16.775,0-30.423,13.647-30.423,30.423v97.436H31.63v-97.436c0-8.115,6.603-14.717,14.717-14.717
+    Chile: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve"><g><g><path d="M201.217,360.123H46.347c-16.775,0-30.423,13.647-30.423,30.423v97.436H31.63v-97.436c0-8.115,6.603-14.717,14.717-14.717
 			h154.87c8.116,0,14.717,6.603,14.717,14.717v97.436h15.706v-97.436C231.64,373.771,217.992,360.123,201.217,360.123z"/></g></g><g><g><rect x="23.035" y="87.845" width="15.706" height="263.853"/></g></g><g><g><rect x="208.36" y="87.845" width="15.706" height="263.853"/></g></g><g><g><rect x="110.986" y="249.089" width="24.082" height="15.706"/></g></g><g><g><rect x="72.245" y="280.5" width="103.656" height="15.706"/></g></g><g><g><path d="M223.639,64.808V49.485c0-27.228-22.151-49.379-49.379-49.379H73.305c-27.228,0-49.38,22.151-49.38,49.379v15.324H0
 			v159.149h15.706V80.514h72.245v24.082H56.54v15.706h31.411v63.869H72.245v47.117h103.656V184.17h-16.753v-63.869h32.458v-15.706
 			h-32.458V80.514h72.245v143.444H247.1V64.808H223.639z M207.934,64.809h-64.49v135.067h16.753v15.706H87.951v-15.706h15.706
@@ -878,38 +895,38 @@ var tetris = (() => {
 			c9.826,0,18.201,6.312,21.296,15.091c-6.695-4.784-14.459-7.358-22.488-7.358c-8.259,0-15.784,2.245-22.038,6.183
 			C237.517,29.85,245.578,24.095,254.959,24.095z M232.384,87.771h16.301V71.053h-15.626c0.495-13.098,10.171-22.505,23.462-22.505
 			c12.465,0,22.265,11.181,23.398,21.568v0.937h-16.606v16.718h12.405l4.202,2.708v22.396c0,12.448-10.127,22.575-22.576,22.575
-			h-2.385c-12.448,0-22.575-10.127-22.575-22.575V87.771z M256.153,187.922l-36.188-36.188h34.995h2.385h34.996L256.153,187.922z"/></g></g><g><g><rect x="248.686" y="446.171" width="14.629" height="16.718"/></g></g><g><g><rect x="272.718" y="446.171" width="14.629" height="16.718"/></g></g><g><g><rect x="224.653" y="446.171" width="15.673" height="16.718"/></g></g></svg>`,
+			h-2.385c-12.448,0-22.575-10.127-22.575-22.575V87.771z M256.153,187.922l-36.188-36.188h34.995h2.385h34.996L256.153,187.922z"/></g></g><g><g><rect x="248.686" y="446.171" width="14.629" height="16.718"/></g></g><g><g><rect x="272.718" y="446.171" width="14.629" height="16.718"/></g></g><g><g><rect x="224.653" y="446.171" width="15.673" height="16.718"/></g></g></svg>`
   };
   var famous_buildings_default = FamousBuildings;
 
   // lib/utils/get-famous-buildings.js
   var getFamousBuildings = (hour) => {
     const map = [
-      'Vatican',
-      'Temple',
-      'Egypt',
-      'India',
-      'America',
-      'Chile',
-      'Forbidden',
-      'Tiger',
-      'Pavilion',
-      'England',
-      'Spring',
-      'France',
-      'Italy',
-      'Pavilion',
-      'Greece',
-      'Heaven',
-      'Temple',
-      'Tower',
-      'Russia',
-      'India',
-      'Gate',
-      'Mexico',
-      'Wall',
-      'Vietnam',
-      'Australia',
+      "Vatican",
+      "Temple",
+      "Egypt",
+      "India",
+      "America",
+      "Chile",
+      "Forbidden",
+      "Tiger",
+      "Greece",
+      "England",
+      "Spring",
+      "France",
+      "Italy",
+      "Pavilion",
+      "Forbidden",
+      "Heaven",
+      "Temple",
+      "Tower",
+      "Russia",
+      "India",
+      "Gate",
+      "Mexico",
+      "Wall",
+      "Vietnam",
+      "Australia"
     ];
     return map[hour];
   };
@@ -921,36 +938,35 @@ var tetris = (() => {
     const { width, height } = gameBoard2;
     const time = /* @__PURE__ */ new Date();
     const hour = time.getHours();
-    const building =
-      famous_buildings_default[get_famous_buildings_default(hour - 1)];
+    const building = famous_buildings_default[get_famous_buildings_default(hour - 1)];
     let img;
     let size;
     let x;
     let y;
     switch (scene) {
-      case 'main-menu':
-      case 'countdown': {
+      case "main-menu":
+      case "countdown": {
         img = getImage(scenes_background_default.tetris);
         size = width;
         x = width / 2 - size / 2;
         y = height - size;
         break;
       }
-      case 'playing': {
+      case "playing": {
         img = getImage(building);
         size = width * 1.4;
         x = width - size / 1.7;
         y = height - size;
         break;
       }
-      case 'paused': {
+      case "paused": {
         img = getImage(scenes_background_default.coffee);
-        size = Math.floor(width * 1.5);
-        x = width - size / 1.4;
+        size = width * 1.5;
+        x = width - size * 0.93;
         y = height - size;
         break;
       }
-      case 'game-over': {
+      case "game-over": {
         img = getImage(scenes_background_default.happy);
         size = Math.floor(width * 0.42);
         x = width / 2 - size / 2;
@@ -968,7 +984,7 @@ var tetris = (() => {
     clear_board_default();
     render_overlay_default();
     render_tetris_text_default();
-    render_scene_background_default('countdown');
+    render_scene_background_default("countdown");
     render_game_image_default();
     render_get_ready_text_default();
     render_countdown_text_default(number, scale);
@@ -976,12 +992,7 @@ var tetris = (() => {
   var render_countdown_default = renderCountdown;
 
   // lib/engine/state/set-mode.js
-  var MODES = /* @__PURE__ */ new Set([
-    'main-menu',
-    'playing',
-    'paused',
-    'game-over',
-  ]);
+  var MODES = /* @__PURE__ */ new Set(["main-menu", "playing", "paused", "game-over"]);
   var setMode = (mode) => {
     if (!MODES.has(mode) || engine_state_default.mode === mode) {
       return;
@@ -1002,7 +1013,7 @@ var tetris = (() => {
      * - SetInterval / setTimeout 控制循环播放
      * - 或用于调度下一段 BGM clip
      */
-    bgmTimer: null,
+    bgmTimer: null
   };
   var audio_state_default = AudioState;
 
@@ -1030,9 +1041,38 @@ var tetris = (() => {
   // lib/audio/play-bgm.js
   var playBGM = () => {
     const m = [
-      659, 659, 587, 659, 784, 880, 523, 523, 440, 523, 659, 784, 659, 659, 587,
-      659, 784, 880, 988, 880, 784, 659, 880, 784, 659, 587, 523, 587, 659, 784,
-      659, 587,
+      659,
+      659,
+      587,
+      659,
+      784,
+      880,
+      523,
+      523,
+      440,
+      523,
+      659,
+      784,
+      659,
+      659,
+      587,
+      659,
+      784,
+      880,
+      988,
+      880,
+      784,
+      659,
+      880,
+      784,
+      659,
+      587,
+      523,
+      587,
+      659,
+      784,
+      659,
+      587
     ];
     if (!audio_state_default.bgmEnabled) {
       return false;
@@ -1047,73 +1087,65 @@ var tetris = (() => {
   var ROWS = 20;
   var BOARD = {
     COLS,
-    ROWS,
+    ROWS
   };
   var board_default = BOARD;
 
   // lib/ui/constants/tetrominoes.js
-  var {
-    BLUE: BLUE2,
-    TEAL: TEAL2,
-    YELLOW: YELLOW2,
-    PURPLE: PURPLE2,
-    ORANGE: ORANGE2,
-    GREEN: GREEN2,
-    RED: RED2,
-  } = colors_default;
+  var { PINK: PINK2, BLUE: BLUE2, TEAL: TEAL2, YELLOW: YELLOW2, PURPLE: PURPLE2, ORANGE: ORANGE2, GREEN: GREEN2, RED: RED2 } = colors_default;
   var TETROMINOES = [
     // I型方块（长条）：1行4列
     { shape: [[1, 1, 1, 1]], color: TEAL2 },
     // I型方块（长条）：1行5列
-    { shape: [[1, 1, 1, 1, 1]], color: TEAL2 },
+    { shape: [[1, 1, 1, 1, 1]], color: GREEN2 },
     // O型方块（正方形）：2x2
     {
       shape: [
         [1, 1],
-        [1, 1],
+        [1, 1]
       ],
-      color: YELLOW2,
+      color: ORANGE2
     },
-    // T型方块
+    // T型方块：2x3
     {
       shape: [
         [0, 1, 0],
-        [1, 1, 1],
+        [1, 1, 1]
       ],
-      color: PURPLE2,
+      color: YELLOW2
     },
     // L型方块
     {
       shape: [
         [1, 0, 0],
-        [1, 1, 1],
+        [1, 1, 1]
       ],
-      color: BLUE2,
+      color: BLUE2
     },
     // J型方块
     {
       shape: [
         [0, 0, 1],
-        [1, 1, 1],
+        [1, 1, 1]
       ],
-      color: ORANGE2,
+      color: PINK2
     },
     // S型方块（右斜）
     {
       shape: [
         [0, 1, 1],
-        [1, 1, 0],
+        [1, 1, 0]
       ],
-      color: GREEN2,
+      color: RED2
     },
     // Z型方块（左斜）
     {
       shape: [
         [1, 1, 0],
-        [0, 1, 1],
+        [0, 1, 1]
       ],
-      color: RED2,
-    },
+      color: PURPLE2
+    }
   ];
   var tetrominoes_default = TETROMINOES;
 
@@ -1123,7 +1155,7 @@ var tetris = (() => {
     const piece = tetrominoes_default[randomIndex];
     return {
       ...piece,
-      shape: piece.shape.map((row) => [...row]),
+      shape: piece.shape.map((row) => [...row])
     };
   }
   var random_tetromino_default = randomTetromino;
@@ -1156,10 +1188,10 @@ var tetris = (() => {
   // lib/game/core/game-over.js
   var gameOver = () => {
     const mode = engine_default.getMode();
-    if (mode === 'game-over' || mode === 'paused' || mode === 'main-menu') {
+    if (mode === "game-over" || mode === "paused" || mode === "main-menu") {
       return false;
     }
-    engine_default.setMode('game-over');
+    engine_default.setMode("game-over");
     engine_default.saveHighScore();
     stop_bgm_default();
     sounds_default.gameOver();
@@ -1168,8 +1200,7 @@ var tetris = (() => {
 
   // lib/ui/next/clear-next-piece.js
   var clearNextPiece = () => {
-    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } =
-      canvas_default;
+    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } = canvas_default;
     const { width, height } = nextPiece2;
     nextPieceContext2.clearRect(0, 0, width, height);
   };
@@ -1205,15 +1236,12 @@ var tetris = (() => {
   // lib/game/logic/spawn.js
   var spawn = (state) => {
     const { COLS: COLS2 } = board_default;
-    state.curr = state.next
-      ? {
-          ...state.next,
-          shape: state.next.shape.map((row) => [...row]),
-        }
-      : random_tetromino_default();
+    state.curr = state.next ? {
+      ...state.next,
+      shape: state.next.shape.map((row) => [...row])
+    } : random_tetromino_default();
     state.next = random_tetromino_default();
-    state.cx =
-      Math.floor(COLS2 / 2) - Math.floor(state.curr.shape[0].length / 2);
+    state.cx = Math.floor(COLS2 / 2) - Math.floor(state.curr.shape[0].length / 2);
     state.cy = 0;
     render_next_piece_default(state.next);
     if (collision_default(0, 0, state)) {
@@ -1233,22 +1261,22 @@ var tetris = (() => {
   var padStart = (n, len) => {
     const num = Number(n);
     if (!Number.isFinite(num)) {
-      return '';
+      return "";
     }
     const targetLen = Math.max(0, Math.floor(len));
-    const sign = num < 0 ? '-' : '';
+    const sign = num < 0 ? "-" : "";
     const absStr = Math.abs(num).toString();
-    return sign + absStr.padStart(targetLen, '0');
+    return sign + absStr.padStart(targetLen, "0");
   };
   var pad_start_default = padStart;
 
   // lib/game/core/begin-playing.js
   var beginPlaying = (state) => {
-    const $level = document.querySelector('#level');
+    const $level = document.querySelector("#level");
     if ($level) {
       $level.textContent = pad_start_default(state.level, 2);
     }
-    engine_default.setMode('playing');
+    engine_default.setMode("playing");
     spawn_default(state);
     sounds_default.levelStart();
     setTimeout(() => {
@@ -1265,14 +1293,14 @@ var tetris = (() => {
       number: 3,
       scale: 4,
       count: 0,
-      acc: 0,
+      acc: 0
     };
     return {
       layer: 100,
       // 渲染层级（UI 层，显示在最前面）
       blocking: true,
       // 是否阻塞用户输入（倒计时期间禁止操作）
-      name: 'countdown',
+      name: "countdown",
       // 动画名称标识
       /**
        * ## 更新倒计时动画状态
@@ -1304,27 +1332,27 @@ var tetris = (() => {
         return true;
       },
       stop() {
-        set_mode_default('playing');
+        set_mode_default("playing");
         begin_playing_default(gameState);
       },
       // 渲染倒计时动画：将当前状态传递给渲染函数
       render() {
         render_countdown_default(state);
-      },
+      }
     };
   };
   var countdown_animation_default = CountdownAnimation;
 
   // lib/controllers/countdown-controller.js
-  var startCountdown = () => {
-    registerAnimation(countdown_animation_default(engine_default.state));
+  var startCountdown = (state) => {
+    registerAnimation(countdown_animation_default(state));
   };
   var countdown_controller_default = startCountdown;
 
   // lib/game/core/start-game.js
   var startGame = (state) => {
     state.baseLines = (state.level - 1) * 10;
-    countdown_controller_default();
+    countdown_controller_default(state);
   };
   var start_game_default = startGame;
 
@@ -1376,7 +1404,7 @@ var tetris = (() => {
      */
     CONFIRM: (_, engine) => {
       start_game_default(engine.state);
-    },
+    }
   };
   var main_menu_actions_default = MAIN_MENU_ACTIONS;
 
@@ -1456,13 +1484,13 @@ var tetris = (() => {
   // lib/ui/hud/hud-dom.js
   var HudDom = {
     /** @type {HTMLElement | null} 分数显示元素 */
-    score: document.querySelector('#score'),
+    score: document.querySelector("#score"),
     /** @type {HTMLElement | null} 行数显示元素 */
-    lines: document.querySelector('#lines'),
+    lines: document.querySelector("#lines"),
     /** @type {HTMLElement | null} 等级显示元素 */
-    level: document.querySelector('#level'),
+    level: document.querySelector("#level"),
     /** @type {HTMLElement | null} 最高分显示元素 */
-    highScore: document.querySelector('#highScore'),
+    highScore: document.querySelector("#highScore")
   };
   var hud_dom_default = HudDom;
 
@@ -1493,26 +1521,25 @@ var tetris = (() => {
     };
     rafId = requestAnimationFrame(step);
     return {
-      cancel: () => cancelAnimationFrame(rafId),
+      cancel: () => cancelAnimationFrame(rafId)
     };
   };
   var animate_hud_number_default = animateHUDNumber;
 
   // lib/ui/hud/create-hud.js
-  var setText = (el, value, pad = 0) =>
-    (el.textContent = pad ? pad_start_default(value, pad) : String(value));
+  var setText = (el, value, pad = 0) => el.textContent = pad ? pad_start_default(value, pad) : String(value);
   var createHud = () => {
     const prev = {
       score: 0,
       lines: 0,
       level: 1,
-      highScore: 0,
+      highScore: 0
     };
     const target = {
-      score: 0,
+      score: 0
     };
     const animating = {
-      score: false,
+      score: false
     };
     const updateScore = (next) => {
       target.score = next;
@@ -1533,7 +1560,7 @@ var tetris = (() => {
           if (prev.score !== target.score) {
             updateScore(target.score);
           }
-        },
+        }
       );
     };
     const updateLines = (next) => {
@@ -1571,7 +1598,7 @@ var tetris = (() => {
     };
     return {
       update,
-      reset,
+      reset
     };
   };
   var create_hud_default = createHud;
@@ -1580,27 +1607,20 @@ var tetris = (() => {
   var renderHud = (score, lines, level, highScore, needReset = false) => {
     const hud = create_hud_default();
     const mode = engine_default.getMode();
-    if (mode === 'main-menu' || needReset) {
+    if (mode === "main-menu" || needReset) {
       hud.reset();
     }
     hud.update({
       score,
       lines,
       level,
-      highScore,
+      highScore
     });
   };
   var render_hud_default = renderHud;
 
   // lib/ui/constants/firework-colors.js
-  var {
-    TEAL: TEAL3,
-    YELLOW: YELLOW3,
-    PURPLE: PURPLE3,
-    ORANGE: ORANGE3,
-    GREEN: GREEN3,
-    RED: RED3,
-  } = colors_default;
+  var { TEAL: TEAL3, YELLOW: YELLOW3, PURPLE: PURPLE3, ORANGE: ORANGE3, GREEN: GREEN3, RED: RED3 } = colors_default;
   var FIREWORK_COLORS = [TEAL3, YELLOW3, PURPLE3, ORANGE3, GREEN3, RED3];
   var firework_colors_default = FIREWORK_COLORS;
 
@@ -1627,12 +1647,12 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: 'LEVEL UP',
+      text: "LEVEL UP",
       x: width / 2,
       y: height / 2.5,
       color: GREEN4,
       size: 1.2,
-      center: true,
+      center: true
     });
   };
   var render_level_up_text_default = renderLevelUpText;
@@ -1648,7 +1668,7 @@ var tetris = (() => {
       y,
       color: GREEN4,
       size: 3,
-      center: true,
+      center: true
     });
   };
   var render_level_number_default = renderLevelNumber;
@@ -1659,7 +1679,7 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: 'CONGRATS!',
+      text: "CONGRATS!",
       x: width / 2,
       y: height / 1.6,
       color: YELLOW4,
@@ -1667,7 +1687,7 @@ var tetris = (() => {
       strokeColor: BLACK2,
       lineWidth: 3,
       size: 1.3,
-      center: true,
+      center: true
     });
   };
   var render_congrats_text_default = renderCongratsText;
@@ -1699,7 +1719,7 @@ var tetris = (() => {
       this.layer = 100;
       this.blocking = true;
       this.timer = 0;
-      this.name = 'level-up';
+      this.name = "level-up";
       this.state = state;
     }
     /**
@@ -1726,12 +1746,9 @@ var tetris = (() => {
           // Y轴速度分量
           radius: 3 + Math.random() * 4,
           // 粒子半径（3-7像素）
-          color:
-            firework_colors_default[
-              Math.floor(Math.random() * firework_colors_default.length)
-            ],
+          color: firework_colors_default[Math.floor(Math.random() * firework_colors_default.length)],
           // 随机颜色
-          alpha: 1,
+          alpha: 1
           // 初始完全不透明
         });
       }
@@ -1817,12 +1834,12 @@ var tetris = (() => {
         // 当前透明度（1=完全不透明，0=完全透明）
         alpha: 1,
         // 动画计时器（秒）
-        timer: 0,
+        timer: 0
       }));
       this.state = state;
       this.layer = 200;
       this.blocking = true;
-      this.name = 'clear-lines';
+      this.name = "clear-lines";
       sounds_default.clear(lines.length - 1);
     }
     /**
@@ -1853,17 +1870,18 @@ var tetris = (() => {
      * 执行实际的行的消除、分数更新、等级提升等逻辑
      */
     stop() {
-      const { CLEAR_SCORES: CLEAR_SCORES2, MAX_LEVEL: MAX_LEVEL2 } =
-        game_default;
+      const { CLEAR_SCORES: CLEAR_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = game_default;
+      const { ROWS: ROWS2, COLS: COLS2 } = board_default;
       const { state } = this;
       const lines = state.clearLines || [];
       const cleared = lines.length;
-      lines.sort((a, b) => b - a);
-      for (const y of lines) {
-        state.board.splice(y, 1);
-        state.board.unshift(
-          Array.from({ length: state.board[0].length }).fill(0),
-        );
+      for (let y = ROWS2 - 1; y >= 0; y--) {
+        const isFullLine = state.board[y].every(Boolean);
+        if (isFullLine) {
+          state.board.splice(y, 1);
+          state.board.unshift(Array.from({ length: COLS2 }).fill(0));
+          y++;
+        }
       }
       state.clearLines = [];
       state.lines += cleared;
@@ -1874,12 +1892,7 @@ var tetris = (() => {
         level_up_controller_default();
       }
       state.level = Math.min(Math.max(state.level, newLevel), MAX_LEVEL2);
-      render_hud_default(
-        state.score,
-        state.lines,
-        state.level,
-        state.highScore,
-      );
+      render_hud_default(state.score, state.lines, state.level, state.highScore);
     }
     /**
      * ## 渲染动画效果
@@ -1939,22 +1952,16 @@ var tetris = (() => {
   // lib/game/core/restart-game.js
   var restartGame = (state) => {
     const mode = engine_default.getMode();
-    if (mode === 'paused' || mode === 'game-over' || mode === 'main-menu') {
+    if (mode === "paused" || mode === "game-over" || mode === "main-menu") {
       return;
     }
     stop_bgm_default();
-    engine_default.setMode('playing');
+    engine_default.setMode("playing");
     state.score = 0;
     state.lines = 0;
     state.level = 1;
     engine_default.resetBoard();
-    render_hud_default(
-      state.score,
-      state.lines,
-      state.level,
-      state.highScore,
-      true,
-    );
+    render_hud_default(state.score, state.lines, state.level, state.highScore, true);
     spawn_default(state);
     play_bgm_default();
     engine_default.restart();
@@ -1966,15 +1973,15 @@ var tetris = (() => {
     /**
      * ## 创建暂停动画实例
      *
-     * @param {number} [layer=500] - 渲染层级，默认 500（显示在游戏界面上层）
-     *   使用较高的默认值确保暂停界面覆盖游戏内容. Default is `500`
+     * @param {number} [layer=500] - 渲染层级，默认 500（显示在游戏界面上层） 使用较高的默认值确保暂停界面覆盖游戏内容.
+     *   Default is `500`
      */
     constructor(layer = 500) {
       this.layer = layer;
       this.blocking = true;
       this.timer = 0;
       this.active = true;
-      this.name = 'paused';
+      this.name = "paused";
     }
     /**
      * ## 更新暂停动画状态
@@ -2027,17 +2034,17 @@ var tetris = (() => {
   // lib/game/core/toggle-pause.js
   var togglePause = () => {
     const mode = engine_default.getMode();
-    if (mode === 'game-over' || mode === 'main-menu') {
+    if (mode === "game-over" || mode === "main-menu") {
       return false;
     }
-    if (mode === 'playing') {
-      engine_default.setMode('paused');
+    if (mode === "playing") {
+      engine_default.setMode("paused");
       stop_bgm_default();
       sounds_default.pause();
       startPaused();
     } else {
       stopPaused();
-      engine_default.setMode('playing');
+      engine_default.setMode("playing");
       sounds_default.resume();
       play_bgm_default();
       engine_default.restart();
@@ -2048,7 +2055,7 @@ var tetris = (() => {
   // lib/audio/toggle-bgm.js
   var toggleBGM = () => {
     const mode = engine_default.getMode();
-    if (mode === 'main-menu' || mode === 'paused' || mode === 'game-over') {
+    if (mode === "main-menu" || mode === "paused" || mode === "game-over") {
       return;
     }
     audio_state_default.bgmEnabled = !audio_state_default.bgmEnabled;
@@ -2132,7 +2139,7 @@ var tetris = (() => {
     /** ## 背景音乐开关 */
     TOGGLE_MUSIC: () => {
       toggle_bgm_default();
-    },
+    }
   };
   var game_playing_actions_default = GAME_PLAYING_ACTIONS;
 
@@ -2141,15 +2148,16 @@ var tetris = (() => {
     /** ## 切换暂停状态（继续游戏 / 重新进入游戏循环） */
     TOGGLE_PAUSE: () => {
       toggle_pause_default();
-    },
+    }
   };
   var paused_actions_default = PAUSED_ACTIONS;
 
   // lib/engine/state/reset-board.js
   var resetBoard = () => {
     const { COLS: COLS2, ROWS: ROWS2 } = board_default;
-    engine_state_default.board = Array.from({ length: ROWS2 }, () =>
-      Array.from({ length: COLS2 }).fill(0),
+    engine_state_default.board = Array.from(
+      { length: ROWS2 },
+      () => Array.from({ length: COLS2 }).fill(0)
     );
   };
   var reset_board_default = resetBoard;
@@ -2159,7 +2167,7 @@ var tetris = (() => {
     stop_bgm_default();
     engine_default.start();
     reset_board_default();
-    engine_default.setMode('main-menu');
+    engine_default.setMode("main-menu");
     state.score = 0;
     state.lines = 0;
     state.level = 1;
@@ -2183,16 +2191,16 @@ var tetris = (() => {
      */
     CONFIRM: (_, engine) => {
       reset_to_main_menu_default(engine.state);
-    },
+    }
   };
   var game_over_actions_default = GAME_OVER_ACTIONS;
 
   // lib/command/dispatch-command.js
   var ACTIONS_MAP = {
-    'main-menu': main_menu_actions_default,
+    "main-menu": main_menu_actions_default,
     playing: game_playing_actions_default,
     paused: paused_actions_default,
-    'game-over': game_over_actions_default,
+    "game-over": game_over_actions_default
   };
   var dispatchCommand = (cmd, engine) => {
     const { type, payload } = cmd;
@@ -2232,19 +2240,16 @@ var tetris = (() => {
   var command_default = Command;
 
   // lib/game/logic/get-speed.js
-  var getSpeed = (state) =>
+  var getSpeed = (state) => (
     // 计算速度：基础值1000ms，每升一级减少80ms，最低不低于100ms
-    Math.max(100, 1e3 - (state.level - 1) * 80);
+    Math.max(100, 1e3 - (state.level - 1) * 80)
+  );
   var get_speed_default = getSpeed;
 
   // lib/game/core/step-game.js
   var stepGame = (state) => {
     const mode = engine_default.getMode();
-    if (
-      mode === 'main-menu' ||
-      mode === 'game-over' ||
-      hasBlockingAnimation()
-    ) {
+    if (mode === "main-menu" || mode === "game-over" || hasBlockingAnimation()) {
       return false;
     }
     if (!move_default(0, 1, state)) {
@@ -2252,7 +2257,7 @@ var tetris = (() => {
       sounds_default.fall();
       clear_lines_default(state);
       spawn_default(state);
-      if (mode === 'game-over') {
+      if (mode === "game-over") {
         return false;
       }
     }
@@ -2274,14 +2279,9 @@ var tetris = (() => {
     engine_default.timestamp = timestamp;
     if (replay_default.playing) {
       const { data } = replay_default;
-      while (
-        replay_default.cursor < data.length &&
-        data[replay_default.cursor].frame === replay_default.frame
-      ) {
+      while (replay_default.cursor < data.length && data[replay_default.cursor].frame === replay_default.frame) {
         const item = data[replay_default.cursor];
-        command_queue_default.enqueue(
-          new command_default(item.cmd.type, item.cmd.payload),
-        );
+        command_queue_default.enqueue(new command_default(item.cmd.type, item.cmd.payload));
         replay_default.cursor++;
       }
     }
@@ -2319,7 +2319,7 @@ var tetris = (() => {
   // lib/input/dispatch-input.js
   var dispatchInput = (input) => {
     const { action } = input;
-    const isBlocked = hasBlockingAnimation(['countdown', 'level-up']);
+    const isBlocked = hasBlockingAnimation(["countdown", "level-up"]);
     if (isBlocked || !action) {
       return;
     }
@@ -2328,7 +2328,7 @@ var tetris = (() => {
     if (replay_default.recording) {
       replay_default.data.push({
         frame: replay_default.frame,
-        cmd,
+        cmd
       });
     }
   };
@@ -2336,26 +2336,26 @@ var tetris = (() => {
 
   // lib/input/resolve-input-action.js
   var ACTION_MAP = {
-    arrowleft: 'MOVE_LEFT',
-    arrowright: 'MOVE_RIGHT',
-    arrowdown: 'MOVE_DOWN',
-    arrowup: 'ROTATE',
-    ' ': 'DROP',
-    m: 'TOGGLE_MUSIC',
-    p: 'TOGGLE_PAUSE',
-    r: 'RESTART',
-    q: 'QUIT',
-    1: 'LEVEL_ONE',
-    2: 'LEVEL_TWO',
-    3: 'LEVEL_THREE',
-    4: 'LEVEL_FOUR',
-    5: 'LEVEL_FIVE',
-    6: 'LEVEL_SIX',
-    7: 'LEVEL_SEVEN',
-    8: 'LEVEL_EIGHT',
-    9: 'LEVEL_NINE',
-    t: 'LEVEL_TEN',
-    enter: 'CONFIRM',
+    arrowleft: "MOVE_LEFT",
+    arrowright: "MOVE_RIGHT",
+    arrowdown: "MOVE_DOWN",
+    arrowup: "ROTATE",
+    " ": "DROP",
+    m: "TOGGLE_MUSIC",
+    p: "TOGGLE_PAUSE",
+    r: "RESTART",
+    q: "QUIT",
+    1: "LEVEL_ONE",
+    2: "LEVEL_TWO",
+    3: "LEVEL_THREE",
+    4: "LEVEL_FOUR",
+    5: "LEVEL_FIVE",
+    6: "LEVEL_SIX",
+    7: "LEVEL_SEVEN",
+    8: "LEVEL_EIGHT",
+    9: "LEVEL_NINE",
+    t: "LEVEL_TEN",
+    enter: "CONFIRM"
   };
   var resolveInputAction = (key) => {
     if (!key) {
@@ -2374,17 +2374,17 @@ var tetris = (() => {
       return;
     }
     dispatch_input_default({
-      type: 'keydown',
+      type: "keydown",
       key,
-      action,
+      action
     });
   };
   var on_keydown_default = onKeydown;
 
   // lib/input/bind-events.js
   var bindEvents = () => {
-    globalThis.addEventListener('resize', on_resize_default);
-    document.addEventListener('keydown', on_keydown_default);
+    globalThis.addEventListener("resize", on_resize_default);
+    document.addEventListener("keydown", on_keydown_default);
   };
   var bind_events_default = bindEvents;
 
@@ -2394,8 +2394,7 @@ var tetris = (() => {
 
   // lib/engine/state/load-high-score.js
   var loadHighScore = () => {
-    engine_state_default.highScore =
-      Number.parseInt(get_storage_default('tetris-high-score'), 10) || 0;
+    engine_state_default.highScore = Number.parseInt(get_storage_default("tetris-high-score"), 10) || 0;
   };
   var load_high_score_default = loadHighScore;
 
@@ -2410,10 +2409,7 @@ var tetris = (() => {
     const { score } = engine_state_default;
     if (score > engine_state_default.highScore) {
       engine_state_default.highScore = score;
-      set_storage_default(
-        'tetris-high-score',
-        engine_state_default.highScore.toString(),
-      );
+      set_storage_default("tetris-high-score", engine_state_default.highScore.toString());
     }
   };
   var save_high_score_default = saveHighScore;
@@ -2434,12 +2430,12 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: 'LEVEL',
+      text: "LEVEL",
       x: width / 2,
       y: height * 0.35,
       color: GREEN4,
       size: 1,
-      center: true,
+      center: true
     });
   };
   var render_level_text_default = renderLevelText;
@@ -2450,12 +2446,12 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: '1-9 or T KEY',
+      text: "1-9 or T KEY",
       x: width / 2,
       y: height * 0.58,
       color: WHITE2,
       size: 1,
-      center: true,
+      center: true
     });
   };
   var render_level_shortcut_default = renderLevelShortcut;
@@ -2466,12 +2462,12 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: 'ENTER START',
+      text: "ENTER START",
       x: width / 2,
       y: height * 0.74,
       color: TEAL4,
       size: 1.15,
-      center: true,
+      center: true
     });
   };
   var render_enter_start_text_default = renderEnterStartText;
@@ -2482,7 +2478,7 @@ var tetris = (() => {
     const { height } = gameBoard2;
     clear_board_default();
     render_overlay_default();
-    render_scene_background_default('main-menu');
+    render_scene_background_default("main-menu");
     render_tetris_text_default();
     render_level_text_default();
     render_level_number_default(level, height * 0.5);
@@ -2517,26 +2513,26 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: 'PAUSED',
+      text: "PAUSED",
       x: width / 2,
       y: height / 1.4,
       color: YELLOW4,
       size: 1.6,
-      center: true,
+      center: true
     });
   };
   var render_paused_text_default = renderPausedText;
 
   // lib/utils/format-time.js
-  var formatTime = (date, format = 'yyyy-MM-dd HH:mm:ss') => {
+  var formatTime = (date, format = "yyyy-MM-dd HH:mm:ss") => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    const toSymbol = () => (hours >= 12 ? 'PM' : 'AM');
-    const hasSymbol = format.includes('a');
+    const toSymbol = () => hours >= 12 ? "PM" : "AM";
+    const hasSymbol = format.includes("a");
     const hour12 = hours % 12 || 12;
     const symbols = {
       yyyy: year,
@@ -2546,18 +2542,18 @@ var tetris = (() => {
       hh: pad_start_default(hour12, 2),
       mm: pad_start_default(minutes, 2),
       ss: pad_start_default(seconds, 2),
-      a: hasSymbol ? toSymbol() : '',
+      a: hasSymbol ? toSymbol() : ""
     };
     let time = format;
     for (const key of Object.keys(symbols)) {
-      time = time.replace(new RegExp(key, 'g'), symbols[key]);
+      time = time.replace(new RegExp(key, "g"), symbols[key]);
     }
     return time;
   };
   var format_time_default = formatTime;
 
   // lib/ui/effects/render-digital-clock.js
-  var renderDigitalClock = (color, format = 'HH:mm:ss') => {
+  var renderDigitalClock = (color, format = "HH:mm:ss") => {
     const { GREEN: GREEN4 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
@@ -2568,7 +2564,7 @@ var tetris = (() => {
       y: height / 4.15,
       color: color || GREEN4,
       size: 0.94,
-      center: true,
+      center: true
     });
   };
   var render_digital_clock_default = renderDigitalClock;
@@ -2578,13 +2574,13 @@ var tetris = (() => {
     const h = time.getHours();
     const m = time.getMinutes();
     const s = time.getSeconds();
-    const hAng = ((h % 12) + m / 60 + s / 3600) * ((2 * Math.PI) / 12);
-    const mAng = (m + s / 60) * ((2 * Math.PI) / 60);
-    const sAng = s * ((2 * Math.PI) / 60);
+    const hAng = (h % 12 + m / 60 + s / 3600) * (2 * Math.PI / 12);
+    const mAng = (m + s / 60) * (2 * Math.PI / 60);
+    const sAng = s * (2 * Math.PI / 60);
     return {
       hAng,
       mAng,
-      sAng,
+      sAng
     };
   };
   var get_clock_angles_default = getClockAngles;
@@ -2603,37 +2599,37 @@ var tetris = (() => {
     monkey: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M538.947368 1024h-53.894736c0-32.794947 25.869474-87.417263 77.446736-103.316211C528.599579 881.152 485.052632 822.433684 485.052632 781.473684c0-44.570947 36.271158-80.842105 80.842105-80.842105h80.842105v53.894737h-80.842105a26.947368 26.947368 0 0 0-26.947369 26.947368c0 19.725474 36.675368 77.473684 92.133053 134.736842h88.602947c20.210526-14.147368 88.737684-71.464421 88.737685-198.602105 0-108.382316-93.237895-202.967579-168.151579-278.986105-49.502316-50.202947-88.576-89.842526-98.735158-128.61979-11.749053-44.732632-21.584842-112.586105-26.327579-148.318315H377.263158c-45.136842 0-89.519158 8.434526-121.802105 53.894736H431.157895v53.894737c-97.28 0-107.789474 113.071158-107.789474 161.684211v53.894737h53.894737v161.68421h-53.894737v-107.789474h-26.947368c-170.253474 0-188.631579-94.234947-188.631579-134.736842 0-31.043368 35.220211-72.326737 55.727158-93.722947 2.694737-14.686316 5.847579-28.348632 9.431579-41.013895H161.684211V215.578947h31.528421C239.642947 120.993684 317.224421 107.789474 377.263158 107.789474h185.640421l2.802526 23.794526c0.134737 1.050947 12.719158 106.657684 27.944421 164.756211 6.494316 24.872421 44.624842 63.514947 84.965053 104.448C760.481684 483.813053 862.315789 587.129263 862.315789 717.608421c0 92.375579-31.124211 155.028211-61.898105 194.425263C904.919579 892.146526 970.105263 803.004632 970.105263 673.684211c0-91.405474-42.819368-154.381474-84.237474-215.255579C847.791158 402.458947 808.421053 344.576 808.421053 269.473684c0-119.349895 87.093895-161.684211 161.68421-161.68421v53.894737c-32.417684 0-107.789474 10.509474-107.789474 107.789473 0 58.502737 31.555368 104.933053 68.096 158.639158C974.282105 492.597895 1024 565.679158 1024 673.684211c0 177.286737-108.301474 296.421053-269.473684 296.421052h-161.684211c-37.672421 0-53.894737 40.906105-53.894737 53.894737zM229.214316 269.473684a384.808421 384.808421 0 0 0-14.012632 58.341053l-1.401263 8.488421-6.090105 6.117053c-22.878316 22.932211-44.813474 52.601263-46.026105 62.275368 0 56.805053 53.76 75.264 107.789473 79.386947V431.157895c0-58.691368 13.473684-119.619368 46.511158-161.684211h-86.770526zM323.368421 1024h-53.894737c0-32.794947 25.869474-87.417263 77.446737-103.316211C313.020632 881.152 269.473684 822.433684 269.473684 781.473684c0-44.570947 36.271158-80.842105 80.842105-80.842105h45.16379A188.847158 188.847158 0 0 1 565.894737 592.842105h134.736842v53.894737h-134.736842c-74.293895 0-134.736842 60.442947-134.736842 134.736842v26.516211l-53.894737 0.377263V781.473684c0-9.162105 0.646737-18.135579 1.913263-26.947368H350.315789c-14.848 0-26.947368 12.072421-26.947368 26.947368 0 19.725474 36.675368 77.473684 92.133053 134.736842H431.157895v53.894737h-53.894737c-37.672421 0-53.894737 40.906105-53.894737 53.894737z" fill="${RGBA_TEAL3}" /></svg>`,
     rooster: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M673.684211 354.357895c-16.384 0-29.642105-10.213053-29.642106-44.463158 0-34.223158 13.231158-44.463158 29.642106-44.463158s29.642105 10.24 29.642105 44.463158c0 34.250105-13.258105 44.463158-29.642105 44.463158zM540.106105 970.105263l-50.58021-107.789474h156.05221l50.607158 107.789474h59.553684l-51.60421-109.918316C811.52 846.821053 916.210526 764.550737 916.210526 646.736842c0-53.032421-11.910737-95.420632-24.522105-140.314947C877.244632 455.033263 862.315789 401.893053 862.315789 323.368421V107.789474c0-59.445895-48.343579-107.789474-107.789473-107.789474a107.924211 107.924211 0 0 0-107.789474 106.172632 100.890947 100.890947 0 0 0-24.117895-3.314527 88.710737 88.710737 0 0 0-88.602947 88.602948c0 20.668632 5.227789 39.720421 10.671158 53.921684l-99.489684 59.688421 93.749894 14.470737V377.263158c0 14.416842-5.901474 21.692632-33.360842 49.152l-11.129263 11.129263C398.228211 326.521263 324.985263 269.473684 215.740632 269.473684 96.768 269.473684 0 366.241684 0 485.214316V646.736842h53.894737v-161.522526A162.007579 162.007579 0 0 1 215.740632 323.368421c82.081684 0 140.422737 36.244211 240.64 152.252632l-38.615579 38.615579C367.804632 461.285053 323.098947 431.157895 259.584 431.157895A151.983158 151.983158 0 0 0 107.789474 582.952421V754.526316h53.894737v-171.573895A98.007579 98.007579 0 0 1 259.584 485.052632c46.322526 0 79.629474 20.911158 137.027368 86.016l18.970948 21.530947 128.080842-128.080842C572.200421 435.981474 592.842105 415.366737 592.842105 377.263158v-97.926737l23.309474-14.120421-13.662316-23.04c-0.161684-0.242526-14.578526-24.899368-14.578526-50.688 0-19.132632 15.575579-34.708211 34.70821-34.708211 5.093053 0 26.785684 3.179789 39.558737 18.647579l26.327579 46.026106 39.774316-24.090948-20.372211-49.367579C704.754526 140.449684 700.631579 117.517474 700.631579 107.789474c0-29.722947 24.171789-53.894737 53.894737-53.894737s53.894737 24.171789 53.894737 53.894737v215.578947c0 85.935158 16.680421 145.300211 31.366736 197.632C851.887158 564.008421 862.315789 601.141895 862.315789 646.736842c0 95.285895-99.408842 161.684211-188.631578 161.684211h-209.461895l-68.419369-145.704421C375.242105 618.954105 338.108632 592.842105 296.448 592.842105A80.976842 80.976842 0 0 0 215.578947 673.711158V862.315789h53.894737v-188.604631c0-14.874947 12.099368-26.974316 26.974316-26.974316 20.533895 0 38.965895 14.147368 50.553263 38.858105L480.579368 970.105263h59.526737z" fill="${RGBA_TEAL3}" /></svg>`,
     dog: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M326.063158 282.947368c0 34.250105-13.231158 44.463158-29.642105 44.463158s-29.642105-10.213053-29.642106-44.463158c0-34.223158 13.231158-44.463158 29.642106-44.463157s29.642105 10.24 29.642105 44.463157zM269.473684 430.295579v311.646316L190.275368 916.210526h59.203369L323.368421 753.637053V377.263158h-26.947368c-119.403789 0-172.732632-53.382737-185.505685-107.789474h35.624421c51.092211 0 68.581053-15.764211 120.535579-62.544842 12.773053-11.506526 28.079158-25.276632 47.023158-41.741474l18.351158-15.952842-69.658947-99.139368-44.085895 30.989474 41.768421 59.472842c-11.183158 9.862737-20.884211 18.593684-29.480421 26.327579C180.736 212.156632 176.235789 215.578947 146.539789 215.578947H53.894737v26.947369c0 88.710737 66.910316 178.149053 215.578947 187.769263z m216.710737-161.414737c2.290526 71.733895 28.698947 136.326737 75.048421 182.918737C618.711579 509.628632 702.437053 538.947368 810.091789 538.947368c18.593684 0 36.190316-1.158737 52.628211-3.449263 3.745684 111.265684 33.630316 170.334316 51.496421 196.015158l-38.507789 84.722526C782.174316 742.049684 688.774737 700.631579 377.263158 700.631579v53.894737c34.277053 0 65.697684 0.512 94.639158 1.509052L374.595368 970.105263h59.203369l96.013474-211.240421c66.182737 4.338526 117.005474 11.829895 157.911578 22.016L626.229895 916.210526h59.176421l54.16421-119.134315c47.616 18.405053 79.737263 42.091789 113.125053 69.739789L805.753263 970.105263h59.203369l113.071157-248.778105-13.824-13.204211c-0.485053-0.458105-45.648842-47.589053-47.939368-185.263158C985.168842 498.553263 1024 447.811368 1024 377.263158c0-95.205053-66.506105-161.684211-161.684211-161.684211v53.894737c65.482105 0 107.789474 42.307368 107.789474 107.789474 0 89.088-87.013053 107.789474-160.013474 107.789474-92.752842 0-163.624421-23.983158-210.647578-71.27579-30.315789-30.504421-45.891368-65.832421-53.35579-98.735158 11.210105 6.952421 22.932211 13.338947 35.274105 19.186527l23.04-48.720843c-92.106105-43.654737-148.992-128.646737-219.243789-243.981473l-46.026105 28.05221c49.448421 81.246316 92.968421 148.506947 147.051789 199.302737z" fill="${RGBA_TEAL3}" /></svg>`,
-    pig: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M808.421053 700.631579v53.894737c-196.446316 0-323.368421 84.641684-323.368421 215.578947h-53.894737c0-163.705263 148.075789-269.473684 377.263158-269.473684z m-323.368421 107.789474v-53.894737c-158.342737 0-245.598316 0-319.649685-49.367579L158.612211 700.631579H80.842105c-21.692632 0-26.624-14.821053-26.947368-26.947368v-82.620632c84.156632-11.183158 161.684211-74.913684 161.68421-186.853053V215.578947H161.684211v161.684211H134.736842c-66.964211 0-134.736842 37.025684-134.736842 107.789474h53.894737c0-42.630737 52.870737-53.894737 80.842105-53.894737h24.629895C147.132632 504.912842 85.153684 538.947368 26.947368 538.947368H0v134.736843c0 32.498526 21.530947 80.842105 80.842105 80.842105h61.682527c32.687158 20.506947 67.125895 33.145263 105.957052 41.013895A232.879158 232.879158 0 0 0 215.578947 916.210526h53.894737c0-41.930105 14.012632-80.303158 39.424-112.505263C358.885053 808.151579 415.959579 808.421053 485.052632 808.421053z m-72.946527-342.420211L323.368421 554.738526V431.157895h-53.894737v253.682526l180.736-180.736-38.103579-38.103579zM323.368421 161.684211h-53.894737v190.032842a769.536 769.536 0 0 1 53.894737-49.098106V161.684211z m323.368421-53.894737c-72.623158 0-146.809263 23.336421-215.578947 58.637473V107.789474h-53.894737v154.138947C458.832842 205.392842 555.331368 161.684211 646.736842 161.684211c148.587789 0 269.473684 120.885895 269.473684 269.473684v235.654737L809.579789 862.315789h61.359158L970.105263 680.555789V431.157895c0-178.310737-145.057684-323.368421-323.368421-323.368421z" fill="${RGBA_TEAL3}" /></svg>`,
+    pig: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M808.421053 700.631579v53.894737c-196.446316 0-323.368421 84.641684-323.368421 215.578947h-53.894737c0-163.705263 148.075789-269.473684 377.263158-269.473684z m-323.368421 107.789474v-53.894737c-158.342737 0-245.598316 0-319.649685-49.367579L158.612211 700.631579H80.842105c-21.692632 0-26.624-14.821053-26.947368-26.947368v-82.620632c84.156632-11.183158 161.684211-74.913684 161.68421-186.853053V215.578947H161.684211v161.684211H134.736842c-66.964211 0-134.736842 37.025684-134.736842 107.789474h53.894737c0-42.630737 52.870737-53.894737 80.842105-53.894737h24.629895C147.132632 504.912842 85.153684 538.947368 26.947368 538.947368H0v134.736843c0 32.498526 21.530947 80.842105 80.842105 80.842105h61.682527c32.687158 20.506947 67.125895 33.145263 105.957052 41.013895A232.879158 232.879158 0 0 0 215.578947 916.210526h53.894737c0-41.930105 14.012632-80.303158 39.424-112.505263C358.885053 808.151579 415.959579 808.421053 485.052632 808.421053z m-72.946527-342.420211L323.368421 554.738526V431.157895h-53.894737v253.682526l180.736-180.736-38.103579-38.103579zM323.368421 161.684211h-53.894737v190.032842a769.536 769.536 0 0 1 53.894737-49.098106V161.684211z m323.368421-53.894737c-72.623158 0-146.809263 23.336421-215.578947 58.637473V107.789474h-53.894737v154.138947C458.832842 205.392842 555.331368 161.684211 646.736842 161.684211c148.587789 0 269.473684 120.885895 269.473684 269.473684v235.654737L809.579789 862.315789h61.359158L970.105263 680.555789V431.157895c0-178.310737-145.057684-323.368421-323.368421-323.368421z" fill="${RGBA_TEAL3}" /></svg>`
   };
   var chinese_hour_animals_default = ChineseHourAnimals;
 
   // lib/utils/get-chinese-hour-animal.js
   var getChineseHourAnimal = (hour) => {
     const map = [
-      'rat',
-      'ox',
-      'ox',
-      'tiger',
-      'tiger',
-      'rabbit',
-      'rabbit',
-      'dragon',
-      'dragon',
-      'snake',
-      'snake',
-      'horse',
-      'horse',
-      'goat',
-      'goat',
-      'monkey',
-      'monkey',
-      'rooster',
-      'rooster',
-      'dog',
-      'dog',
-      'pig',
-      'pig',
-      'rat',
+      "rat",
+      "ox",
+      "ox",
+      "tiger",
+      "tiger",
+      "rabbit",
+      "rabbit",
+      "dragon",
+      "dragon",
+      "snake",
+      "snake",
+      "horse",
+      "horse",
+      "goat",
+      "goat",
+      "monkey",
+      "monkey",
+      "rooster",
+      "rooster",
+      "dog",
+      "dog",
+      "pig",
+      "pig",
+      "rat"
     ];
     return map[hour];
   };
@@ -2658,11 +2654,7 @@ var tetris = (() => {
   var renderAnalogClock = () => {
     const time = /* @__PURE__ */ new Date();
     const { hAng, mAng, sAng } = get_clock_angles_default(time);
-    const {
-      TEAL: TEAL4,
-      RGBA_TEAL: RGBA_TEAL5,
-      ORANGE: ORANGE4,
-    } = colors_default;
+    const { TEAL: TEAL4, RGBA_TEAL: RGBA_TEAL5, ORANGE: ORANGE4 } = colors_default;
     const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
     const { width, height } = gameBoard2;
     const centerX = width / 2;
@@ -2670,7 +2662,7 @@ var tetris = (() => {
     const radius = Math.floor(width * 0.3);
     ctx.save();
     ctx.translate(centerX, centerY);
-    ctx.lineCap = 'round';
+    ctx.lineCap = "round";
     ctx.beginPath();
     ctx.arc(0, 0, radius, 0, Math.PI * 2);
     ctx.fillStyle = RGBA_TEAL5;
@@ -2683,7 +2675,7 @@ var tetris = (() => {
     const dotDistance = radius - Math.floor(width * 0.08);
     for (let i = 0; i < 12; i++) {
       ctx.save();
-      ctx.rotate((i * Math.PI) / 6);
+      ctx.rotate(i * Math.PI / 6);
       ctx.beginPath();
       ctx.arc(0, -dotDistance, dotRadius, 0, Math.PI * 2);
       ctx.fillStyle = TEAL4;
@@ -2737,37 +2729,37 @@ var tetris = (() => {
     shen: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 134.736842h161.684211v53.894737h53.894737V269.473684h-215.578948V161.684211h-53.894736v107.789473h-215.578948v431.157895h53.894737v-53.894737h161.684211v215.578947h53.894736v-215.578947z m0-161.68421h161.684211v107.789473h-161.684211v-107.789473z m-215.578947 0h161.684211v107.789473h-161.684211v-107.789473z m215.578947-161.684211h161.684211v107.789474h-161.684211v-107.789474z m-215.578947 0h161.684211v107.789474h-161.684211v-107.789474z" fill="${RGBA_TEAL4}" /></svg>`,
     you: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-215.578947-188.631579h-161.684211v-26.947368h161.684211V242.526316H269.473684v53.894737h161.684211v26.947368h-161.684211v485.052632h53.894737v-53.894737h377.263158v53.894737h53.894737V323.368421zM323.368421 646.736842h377.263158v53.894737H323.368421v-53.894737z m0-269.473684h107.789474c0 103.316211-72.784842 107.654737-81.084632 107.789474L350.315789 538.947368c46.592 0 134.736842-33.792 134.736843-161.68421h53.894736v107.789474c0 29.722947 24.171789 53.894737 53.894737 53.894736h107.789474v53.894737H323.368421v-215.578947z m377.263158 0v107.789474h-107.789474v-107.789474h107.789474z m-215.578947-80.842105h53.894736v26.947368h-53.894736v-26.947368z" fill="${RGBA_TEAL4}" /></svg>`,
     xu: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-375.592421 150.393263c33.684211 44.544 75.210105 74.698105 124.739369 90.812632l11.425684 3.718737 10.401684-6.009264C781.204211 727.740632 808.421053 622.565053 808.421053 592.842105h-53.894737c0 22.069895-19.132632 80.869053-33.711158 103.504842-34.816-14.605474-64.538947-39.262316-89.249684-74.13221 48.316632-55.269053 92.079158-117.328842 120.535579-179.900632l-49.044211-22.285473c-23.767579 52.250947-59.742316 104.717474-100.055579 152.656842-24.010105-50.930526-41.148632-115.927579-51.658105-195.395369H700.631579v-53.894737h-155.189895A1848.050526 1848.050526 0 0 1 538.947368 161.684211h-53.894736c0 58.206316 2.155789 112.074105 6.494315 161.68421H323.368421v26.947368c0 216.549053-13.177263 263.545263-100.702316 359.046737l39.747369 36.432842c63.326316-69.093053 92.806737-118.272 105.714526-206.848H485.052632v-53.894736h-111.319579a1742.147368 1742.147368 0 0 0 3.449263-107.789474h120.158316c12.611368 98.250105 35.031579 177.475368 67.395368 238.187789-61.978947 65.536-128.053895 117.975579-173.298526 142.282106l25.519158 47.481263c47.589053-25.573053 114.095158-77.446737 177.55621-142.821053z m125.170526-411.971368l-80.842105-80.842106-38.103579 38.103579 80.842105 80.842106 38.103579-38.103579z" fill="${RGBA_TEAL4}" /></svg>`,
-    hai: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M309.975579 804.756211l-27.136-46.592c103.073684-60.011789 183.026526-132.473263 241.475368-219.24379H350.315789l-13.473684-50.283789c58.88-33.980632 99.435789-117.571368 118.703158-165.295158H242.526316v-53.894737h538.947368v53.894737h-268.18021c-12.395789 34.088421-42.469053 106.603789-90.435369 161.68421h134.009263a680.555789 680.555789 0 0 0 46.349474-107.708631l51.092211 17.057684c-58.421895 175.265684-171.034947 309.490526-344.333474 410.381474z m192.350316-2.937264L467.806316 760.454737c88.414316-73.728 154.516211-158.773895 202.105263-259.907369l48.801684 22.959158a797.372632 797.372632 0 0 1-82.351158 137.781895c32.741053 15.009684 83.456 44.867368 137.647158 101.591579l-38.938947 37.268211c-57.236211-59.877053-109.325474-85.557895-133.766737-95.178106a850.997895 850.997895 0 0 1-98.977684 96.848842z m48.613052-536.872421l-80.842105-53.894737 29.884632-44.840421 80.842105 53.894737-29.884632 44.840421zM512 53.894737C259.395368 53.894737 53.894737 259.395368 53.894737 512s205.500632 458.105263 458.105263 458.105263c9.081263 0 17.973895-0.835368 26.947368-1.374316v-53.894736c-8.946526 0.619789-17.866105 1.374316-26.947368 1.374315-222.881684 0-404.210526-181.328842-404.210526-404.210526S289.118316 107.789474 512 107.789474s404.210526 181.328842 404.210526 404.210526c0 195.206737-139.075368 358.507789-323.368421 396.045474v54.460631c214.096842-38.346105 377.263158-225.549474 377.263158-450.533052C970.105263 259.395368 764.604632 53.894737 512 53.894737z" fill="${RGBA_TEAL4}" /></svg>`,
+    hai: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M309.975579 804.756211l-27.136-46.592c103.073684-60.011789 183.026526-132.473263 241.475368-219.24379H350.315789l-13.473684-50.283789c58.88-33.980632 99.435789-117.571368 118.703158-165.295158H242.526316v-53.894737h538.947368v53.894737h-268.18021c-12.395789 34.088421-42.469053 106.603789-90.435369 161.68421h134.009263a680.555789 680.555789 0 0 0 46.349474-107.708631l51.092211 17.057684c-58.421895 175.265684-171.034947 309.490526-344.333474 410.381474z m192.350316-2.937264L467.806316 760.454737c88.414316-73.728 154.516211-158.773895 202.105263-259.907369l48.801684 22.959158a797.372632 797.372632 0 0 1-82.351158 137.781895c32.741053 15.009684 83.456 44.867368 137.647158 101.591579l-38.938947 37.268211c-57.236211-59.877053-109.325474-85.557895-133.766737-95.178106a850.997895 850.997895 0 0 1-98.977684 96.848842z m48.613052-536.872421l-80.842105-53.894737 29.884632-44.840421 80.842105 53.894737-29.884632 44.840421zM512 53.894737C259.395368 53.894737 53.894737 259.395368 53.894737 512s205.500632 458.105263 458.105263 458.105263c9.081263 0 17.973895-0.835368 26.947368-1.374316v-53.894736c-8.946526 0.619789-17.866105 1.374316-26.947368 1.374315-222.881684 0-404.210526-181.328842-404.210526-404.210526S289.118316 107.789474 512 107.789474s404.210526 181.328842 404.210526 404.210526c0 195.206737-139.075368 358.507789-323.368421 396.045474v54.460631c214.096842-38.346105 377.263158-225.549474 377.263158-450.533052C970.105263 259.395368 764.604632 53.894737 512 53.894737z" fill="${RGBA_TEAL4}" /></svg>`
   };
   var chinese_hour_characters_default = ChineseHourCharacters;
 
   // lib/utils/get-chinese-hour-character.js
   var getChineseHourCharacter = (hour) => {
     const map = [
-      'zi',
-      'chou',
-      'chou',
-      'yin',
-      'yin',
-      'mao',
-      'mao',
-      'chen',
-      'chen',
-      'si',
-      'si',
-      'wu',
-      'wu',
-      'wei',
-      'wei',
-      'shen',
-      'shen',
-      'you',
-      'you',
-      'xu',
-      'xu',
-      'hai',
-      'hai',
-      'zi',
+      "zi",
+      "chou",
+      "chou",
+      "yin",
+      "yin",
+      "mao",
+      "mao",
+      "chen",
+      "chen",
+      "si",
+      "si",
+      "wu",
+      "wu",
+      "wei",
+      "wei",
+      "shen",
+      "shen",
+      "you",
+      "you",
+      "xu",
+      "xu",
+      "hai",
+      "hai",
+      "zi"
     ];
     return map[hour];
   };
@@ -2786,8 +2778,7 @@ var tetris = (() => {
     const y = height / 2 - size * 1.2;
     render_image_default(ctx, img, x, y, size);
   };
-  var render_chinese_hour_character_image_default =
-    renderChineseHourCharacterImage;
+  var render_chinese_hour_character_image_default = renderChineseHourCharacterImage;
 
   // lib/ui/board/render-board.js
   function renderBoard(board, options = {}) {
@@ -2795,7 +2786,7 @@ var tetris = (() => {
     const { gameBoardContext: ctx } = canvas_default;
     const { overrideCells = [] } = options;
     clear_board_default();
-    render_scene_background_default('playing');
+    render_scene_background_default("playing");
     render_chinese_hour_character_image_default();
     const skipMap = /* @__PURE__ */ new Set();
     for (const cell of overrideCells) {
@@ -2816,7 +2807,7 @@ var tetris = (() => {
         cell.x,
         // 这里可以是小数（动画关键！）
         cell.y,
-        cell.value,
+        cell.value
       );
     }
   }
@@ -2855,7 +2846,7 @@ var tetris = (() => {
     clear_board_default();
     render_active_only_default(state);
     render_overlay_default();
-    render_scene_background_default('paused');
+    render_scene_background_default("paused");
     render_tetris_text_default();
     render_digital_clock_default();
     render_analog_clock_default();
@@ -2875,14 +2866,14 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: 'GAME',
+      text: "GAME",
       x: width / 2,
       y: height / 1.8,
       color: RED4,
       strokeColor: YELLOW4,
       size: 2.3,
       center: true,
-      stroke: true,
+      stroke: true
     });
   };
   var render_game_text_default = renderGameText;
@@ -2893,14 +2884,14 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: 'OVER',
+      text: "OVER",
       x: width / 2,
       y: height / 1.6,
       color: RED4,
       strokeColor: YELLOW4,
       size: 2.3,
       center: true,
-      stroke: true,
+      stroke: true
     });
   };
   var render_over_text_default = renderOverText;
@@ -2910,7 +2901,7 @@ var tetris = (() => {
     clear_board_default();
     render_active_only_default(state);
     render_overlay_default();
-    render_scene_background_default('game-over');
+    render_scene_background_default("game-over");
     render_tetris_text_default();
     render_game_text_default();
     render_over_text_default();
@@ -2944,7 +2935,7 @@ var tetris = (() => {
      *
      * @param {object} state 游戏状态
      */
-    'main-menu': (state) => {
+    "main-menu": (state) => {
       main_menu_scene_default(state);
     },
     /**
@@ -2960,7 +2951,7 @@ var tetris = (() => {
      *
      * @param {object} state 游戏状态
      */
-    'game-over': (state) => {
+    "game-over": (state) => {
       game_over_scene_default(state);
     },
     /**
@@ -2970,7 +2961,7 @@ var tetris = (() => {
      */
     playing: (state) => {
       playing_scene_default(state);
-    },
+    }
   };
   var scenes_default = Scenes;
 
@@ -2994,7 +2985,7 @@ var tetris = (() => {
     canvas_default.fontSize = Math.floor(gameBoard2.height * 0.032);
     const nextSize = Math.min(
       globalThis.innerWidth * 0.1,
-      globalThis.innerHeight * 0.18,
+      globalThis.innerHeight * 0.18
     );
     nextPiece2.width = nextSize;
     nextPiece2.height = nextSize;
@@ -3034,17 +3025,12 @@ var tetris = (() => {
       const { state } = Engine;
       reset_board_default();
       load_high_score_default();
-      set_mode_default('main-menu');
+      set_mode_default("main-menu");
       state.score = 0;
       state.lines = 0;
       state.level = 1;
       Engine.resize();
-      render_hud_default(
-        state.score,
-        state.lines,
-        state.level,
-        state.highScore,
-      );
+      render_hud_default(state.score, state.lines, state.level, state.highScore);
       lazy_render_main_menu_default(state);
       bind_events_default();
       Engine.start();
@@ -3091,7 +3077,7 @@ var tetris = (() => {
     resize: () => {
       resize_default();
       Engine.render();
-    },
+    }
   };
   var engine_default = Engine;
 
