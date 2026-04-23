@@ -1,23 +1,23 @@
 var tetris = (() => {
   // lib/constants/colors.js
-  var TEAL = "#18c8fa";
-  var RGBA_TEAL = "rgba(50, 190, 239, 0.3)";
-  var YELLOW = "#ff0";
-  var RGBA_YELLOW = "rgba(255, 255, 0, 0.5)";
-  var PURPLE = "#a0a";
-  var BLUE = "#00f";
-  var ORANGE = "#ffa500";
-  var RGBA_ORANGE = "rgba(255, 127, 0, 0.4)";
-  var GREEN = "#0f0";
-  var DARK_GREEN = "#5c9d31";
-  var RGBA_GREEN = "rgba(0, 255, 0, 0.2)";
-  var RED = "#f00";
-  var RGBA_RED = "rgba(255, 0, 0, 0.4)";
-  var BLACK = "#666";
-  var RGBA_BLACK = "rgba(0,0,0,.5)";
-  var WHITE = "#fff";
-  var RGBA_WHITE = "rgba(255,255,255,.3)";
-  var PINK = "#ff4fa3";
+  var TEAL = '#18c8fa';
+  var RGBA_TEAL = 'rgba(50, 190, 239, 0.3)';
+  var YELLOW = '#ff0';
+  var RGBA_YELLOW = 'rgba(255, 255, 0, 0.5)';
+  var PURPLE = '#a0a';
+  var BLUE = '#00f';
+  var ORANGE = '#ffa500';
+  var RGBA_ORANGE = 'rgba(255, 127, 0, 0.4)';
+  var GREEN = '#0f0';
+  var DARK_GREEN = '#5c9d31';
+  var RGBA_GREEN = 'rgba(0, 255, 0, 0.2)';
+  var RED = '#f00';
+  var RGBA_RED = 'rgba(255, 0, 0, 0.4)';
+  var BLACK = '#666';
+  var RGBA_BLACK = 'rgba(0,0,0,.5)';
+  var WHITE = '#fff';
+  var RGBA_WHITE = 'rgba(255,255,255,.3)';
+  var PINK = '#ff4fa3';
   var COLORS = {
     TEAL,
     RGBA_TEAL,
@@ -36,7 +36,7 @@ var tetris = (() => {
     RGBA_BLACK,
     WHITE,
     RGBA_WHITE,
-    PINK
+    PINK,
   };
   var colors_default = COLORS;
 
@@ -113,7 +113,7 @@ var tetris = (() => {
 	C427.243,383.088,367.251,443.08,293.248,443.08z"/><path style="fill:#e6e6e6" d="M172.426,367.092c3.531,7.341,7.718,14.305,12.472,20.829h216.699
 	c4.755-6.524,8.941-13.487,12.472-20.829H172.426z"/><g><path style="fill:#f9a880" d="M145.987,240.152c-19.011,0-34.423,15.412-34.423,34.423h68.848
 		C180.41,255.564,164.998,240.152,145.987,240.152z"/><path style="fill:#f9a880" d="M446.251,240.152c-19.011,0-34.423,15.412-34.423,34.423h68.848
-		C480.676,255.564,465.264,240.152,446.251,240.152z"/></g><ellipse transform="matrix(0.2723 -0.9622 0.9622 0.2723 142.573 335.222)" style="fill:#fceb88" cx="292.913" cy="73.351" rx="29.854" ry="53.46"/></svg>`
+		C480.676,255.564,465.264,240.152,446.251,240.152z"/></g><ellipse transform="matrix(0.2723 -0.9622 0.9622 0.2723 142.573 335.222)" style="fill:#fceb88" cx="292.913" cy="73.351" rx="29.854" ry="53.46"/></svg>`,
   };
   var scenes_background_default = ScenesBackground;
 
@@ -136,7 +136,7 @@ var tetris = (() => {
      * paused：游戏暂停
      * game-over：游戏结束
      */
-    mode: "main-menu"
+    mode: 'main-menu',
   };
   var engine_state_default = EngineState;
 
@@ -209,7 +209,7 @@ var tetris = (() => {
     /** ## 停止播放 */
     stopPlay() {
       this.playing = false;
-    }
+    },
   };
   var replay_default = Replay;
 
@@ -249,7 +249,7 @@ var tetris = (() => {
     /** ## 清空队列（丢弃所有未执行命令） */
     clear() {
       this.queue.length = 0;
-    }
+    },
   };
   var command_queue_default = CommandQueue;
 
@@ -273,14 +273,17 @@ var tetris = (() => {
       animation2.render();
     }
   };
-  var hasBlockingAnimation = (names = []) => animations.some((animation2) => {
-    const isBlocking = animation2.blocking;
-    return names && names.length > 0 ? isBlocking && names.includes(animation2.name) : isBlocking;
-  });
+  var hasBlockingAnimation = (names = []) =>
+    animations.some((animation2) => {
+      const isBlocking = animation2.blocking;
+      return names && names.length > 0
+        ? isBlocking && names.includes(animation2.name)
+        : isBlocking;
+    });
 
   // lib/audio/play-tone.js
   var audioCtx = new AudioContext();
-  var playTone = (freq, dur, vol = 0.1, wave = "square") => {
+  var playTone = (freq, dur, vol = 0.1, wave = 'square') => {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = wave;
@@ -295,7 +298,7 @@ var tetris = (() => {
     gain.connect(audioCtx.destination);
     osc.start();
     osc.stop(now + durationInSeconds);
-    osc.addEventListener("ended", () => {
+    osc.addEventListener('ended', () => {
       osc.disconnect();
       gain.disconnect();
     });
@@ -307,31 +310,31 @@ var tetris = (() => {
     combo: {
       shift: 0,
       speed: 1,
-      volume: 1
+      volume: 1,
     },
     tetris: {
       shift: 2,
       speed: 1.2,
-      volume: 1.1
+      volume: 1.1,
     },
     perfect: {
       shift: 5,
       speed: 0.9,
-      volume: 1.3
-    }
+      volume: 1.3,
+    },
   };
   var getMotif = (lines, isPerfectClear = false) => {
-    if (isPerfectClear) return "perfect";
-    if (lines === 4) return "tetris";
-    return "combo";
+    if (isPerfectClear) return 'perfect';
+    if (lines === 4) return 'tetris';
+    return 'combo';
   };
   var Sounds = {
     // 等级选择音效（正弦波柔和音效）
-    levelSelect: () => play_tone_default(523, 80, 0.1, "sine"),
+    levelSelect: () => play_tone_default(523, 80, 0.1, 'sine'),
     // 等级开始音效
-    levelStart: () => play_tone_default(1319, 160, 0.22, "sine"),
+    levelStart: () => play_tone_default(1319, 160, 0.22, 'sine'),
     // 开始倒计时音效
-    countdown: () => play_tone_default(784, 180, 0.3, "sine"),
+    countdown: () => play_tone_default(784, 180, 0.3, 'sine'),
     // 方块移动音效
     move: () => play_tone_default(330, 60),
     // 方块旋转音效
@@ -354,7 +357,7 @@ var tetris = (() => {
         [587, 698, 880],
         [698, 880, 1174],
         [587, 880, 1174],
-        [440, 880, 1174]
+        [440, 880, 1174],
       ];
       const speeds = [260, 300, 380];
       const volumes = [0.32, 0.3, 0.25];
@@ -370,7 +373,7 @@ var tetris = (() => {
             freq,
             speeds[i] * cfg.speed,
             volumes[i] * cfg.volume,
-            "square"
+            'square',
           );
         }, timeouts[i]);
       }
@@ -389,7 +392,7 @@ var tetris = (() => {
     // 暂停游戏音效
     pause: () => play_tone_default(300, 150),
     // 秒针走动音效
-    secondTick: () => play_tone_default(880, 50, 0.085, "sine"),
+    secondTick: () => play_tone_default(880, 50, 0.085, 'sine'),
     // 恢复游戏音效
     resume: () => play_tone_default(400, 150),
     // 游戏结束音效（悲伤旋律）
@@ -399,15 +402,15 @@ var tetris = (() => {
       setTimeout(() => play_tone_default(262, 500), 520);
     },
     // 背景音乐开关音效
-    bgmToggle: () => play_tone_default(440, 100)
+    bgmToggle: () => play_tone_default(440, 100),
   };
   var sounds_default = Sounds;
 
   // lib/ui/core/canvas.js
-  var gameBoard = document.querySelector("#game-board");
-  var gameBoardContext = gameBoard.getContext("2d");
-  var nextPiece = document.querySelector("#next-piece");
-  var nextPieceContext = nextPiece.getContext("2d");
+  var gameBoard = document.querySelector('#game-board');
+  var gameBoardContext = gameBoard.getContext('2d');
+  var nextPiece = document.querySelector('#next-piece');
+  var nextPieceContext = nextPiece.getContext('2d');
   var fontSize = 0;
   var blockSize = 0;
   var Canvas = {
@@ -416,13 +419,14 @@ var tetris = (() => {
     nextPiece,
     nextPieceContext,
     fontSize,
-    blockSize
+    blockSize,
   };
   var canvas_default = Canvas;
 
   // lib/ui/board/clear-board.js
   function clearBoard() {
-    const { gameBoard: gameBoard2, gameBoardContext: gameBoardContext2 } = canvas_default;
+    const { gameBoard: gameBoard2, gameBoardContext: gameBoardContext2 } =
+      canvas_default;
     const { width, height } = gameBoard2;
     gameBoardContext2.clearRect(0, 0, width, height);
   }
@@ -435,7 +439,7 @@ var tetris = (() => {
   var GAME = {
     CLEAR_SCORES,
     MAX_LEVEL,
-    FONT_FAMILY
+    FONT_FAMILY,
   };
   var game_default = GAME;
 
@@ -449,15 +453,15 @@ var tetris = (() => {
       strokeColor,
       size = 1,
       center = true,
-      baseline = "",
+      baseline = '',
       stroke = false,
-      lineWidth = 2
+      lineWidth = 2,
     } = options;
     const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
     const { gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
     ctx.save();
     if (center) {
-      ctx.textAlign = "center";
+      ctx.textAlign = 'center';
     }
     if (baseline) {
       ctx.textBaseline = baseline;
@@ -480,11 +484,11 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "TETRIS.JS",
+      text: 'TETRIS.JS',
       x: width / 2,
       y: height * 0.1,
       color: GREEN5,
-      size: 1.1
+      size: 1.1,
     });
   };
   var render_tetris_text_default = renderTetrisText;
@@ -505,11 +509,15 @@ var tetris = (() => {
   var renderCountdownText = (count, scale = 1) => {
     const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
     const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
-    const { gameBoard: gameBoard2, gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
+    const {
+      gameBoard: gameBoard2,
+      gameBoardContext: ctx,
+      fontSize: fontSize2,
+    } = canvas_default;
     const { width, height } = gameBoard2;
     ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.translate(width / 2, height / 2);
     ctx.scale(scale, scale);
     ctx.font = `${fontSize2 * 3.25}px ${FONT_FAMILY2}`;
@@ -529,7 +537,7 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "GET READY!",
+      text: 'GET READY!',
       x: width / 2,
       y: height / 1.46,
       color: GREEN5,
@@ -539,7 +547,7 @@ var tetris = (() => {
       size: 1.1,
       center: true,
       // 对齐方式与你原逻辑一致
-      baseline: "top"
+      baseline: 'top',
     });
   };
   var render_get_ready_text_default = renderGetReadyText;
@@ -551,7 +559,7 @@ var tetris = (() => {
       return ImagesCache.get(svg);
     }
     const img = new Image();
-    const blob = new Blob([svg], { type: "image/svg+xml" });
+    const blob = new Blob([svg], { type: 'image/svg+xml' });
     img.src = URL.createObjectURL(blob);
     ImagesCache.set(svg, img);
     return img;
@@ -597,36 +605,36 @@ var tetris = (() => {
   var renderSceneBackground = (scene) => {
     const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
     const { width, height } = gameBoard2;
-    const hours = (/* @__PURE__ */ new Date()).getHours();
-    const icon = hours > 11 ? "tower" : "temple";
+    const hours = /* @__PURE__ */ new Date().getHours();
+    const icon = hours > 11 ? 'tower' : 'temple';
     let img;
     let size;
     let x;
     let y;
     switch (scene) {
-      case "main-menu":
-      case "countdown": {
+      case 'main-menu':
+      case 'countdown': {
         img = getImage(scenes_background_default.tetris);
         size = width;
         x = width / 2 - size / 2;
         y = height - size;
         break;
       }
-      case "playing": {
+      case 'playing': {
         img = getImage(scenes_background_default[icon]);
         size = width * (hours > 11 ? 1.8 : 1.46);
         x = width - (hours > 11 ? size / 1.6 : size);
         y = height - size;
         break;
       }
-      case "paused": {
+      case 'paused': {
         img = getImage(scenes_background_default.coffee);
         size = width * 0.86;
         x = width / 2 - size / 2;
         y = height - size * 0.94;
         break;
       }
-      case "game-over": {
+      case 'game-over': {
         img = getImage(scenes_background_default.happy);
         size = Math.floor(width * 0.42);
         x = width / 2 - size / 2;
@@ -644,7 +652,7 @@ var tetris = (() => {
     clear_board_default();
     render_overlay_default();
     render_tetris_text_default();
-    render_scene_background_default("countdown");
+    render_scene_background_default('countdown');
     render_gamepad_image_default();
     render_get_ready_text_default();
     render_countdown_text_default(number, scale);
@@ -652,7 +660,12 @@ var tetris = (() => {
   var render_countdown_default = renderCountdown;
 
   // lib/engine/state/set-mode.js
-  var MODES = /* @__PURE__ */ new Set(["main-menu", "playing", "paused", "game-over"]);
+  var MODES = /* @__PURE__ */ new Set([
+    'main-menu',
+    'playing',
+    'paused',
+    'game-over',
+  ]);
   var setMode = (mode) => {
     if (!MODES.has(mode) || engine_state_default.mode === mode) {
       return;
@@ -673,554 +686,151 @@ var tetris = (() => {
      * - SetInterval / setTimeout 控制循环播放
      * - 或用于调度下一段 BGM clip
      */
-    bgmTimer: null
+    bgmTimer: null,
   };
   var audio_state_default = AudioState;
 
   // lib/audio/constants/musics.js
   var Musics = {
     TetrisTheme: {
-      name: "TetrisTheme",
+      name: 'TetrisTheme',
       melody: [
         // === A段：经典律动 (3-1-1 结构) ===
-        659,
-        659,
-        659,
-        494,
-        523,
-        587,
-        587,
-        587,
-        523,
-        494,
+        659, 659, 659, 494, 523, 587, 587, 587, 523, 494,
         // Mi--- Si-Do- Re--- Do-Si
-        440,
-        440,
-        440,
-        523,
-        659,
-        659,
-        659,
-        587,
-        523,
+        440, 440, 440, 523, 659, 659, 659, 587, 523,
         // La--- Do-Mi- Re--- Do-Si
-        494,
-        494,
-        494,
-        523,
-        587,
-        587,
-        587,
-        659,
+        494, 494, 494, 523, 587, 587, 587, 659,
         // Si--- Do-Re- Mi---
-        523,
-        523,
-        523,
-        440,
-        440,
-        440,
-        440,
+        523, 523, 523, 440, 440, 440, 440,
         // Do--- La---
         // === A'段：高音区 (严格复制开头的 3-1-1 节奏) ===
-        587,
-        587,
-        587,
-        784,
-        880,
-        880,
-        880,
-        784,
-        659,
+        587, 587, 587, 784, 880, 880, 880, 784, 659,
         // Re--- Sol-La- Sol--- Mi
-        523,
-        523,
-        523,
-        659,
-        784,
-        784,
-        784,
-        659,
-        587,
+        523, 523, 523, 659, 784, 784, 784, 659, 587,
         // Do--- Mi-Sol- Mi--- Re
-        494,
-        494,
-        494,
-        523,
-        587,
-        587,
-        587,
-        659,
+        494, 494, 494, 523, 587, 587, 587, 659,
         // Si--- Do-Re- Mi---
-        523,
-        523,
-        523,
-        440,
-        440,
-        440,
-        440,
+        523, 523, 523, 440, 440, 440, 440,
         // Do--- La---
         // === B段：下行区 (也要用 3-1-1 才能保持顿挫) ===
-        659,
-        659,
-        659,
-        523,
-        523,
-        587,
-        587,
-        587,
-        494,
-        494,
+        659, 659, 659, 523, 523, 587, 587, 587, 494, 494,
         // Mi--- Do-Do Re--- Si-Si
-        523,
-        523,
-        523,
-        440,
-        440,
-        415,
-        415,
-        415,
-        415,
+        523, 523, 523, 440, 440, 415, 415, 415, 415,
         // Do--- La-La #So---
-        659,
-        659,
-        659,
-        523,
-        523,
-        587,
-        587,
-        587,
-        494,
-        494,
+        659, 659, 659, 523, 523, 587, 587, 587, 494, 494,
         // Mi--- Do-Do Re--- Si-Si
-        523,
-        523,
-        523,
-        659,
-        659,
-        880,
-        880,
-        880,
-        880,
+        523, 523, 523, 659, 659, 880, 880, 880, 880,
         // Do--- Mi-Mi La---
         // === 结尾收束 (最后的一跺脚) ===
-        784,
-        784,
-        784,
-        659,
-        587,
-        587,
-        587,
-        523,
+        784, 784, 784, 659, 587, 587, 587, 523,
         // Sol--- Mi Re--- Do
-        494,
-        494,
-        494,
-        523,
-        587,
-        587,
-        587,
-        659,
+        494, 494, 494, 523, 587, 587, 587, 659,
         // Si--- Do Re--- Mi
-        523,
-        523,
-        523,
-        440,
-        440,
-        440,
-        440
+        523, 523, 523, 440, 440, 440, 440,
         // Do--- La---
       ],
       duration: 150,
-      volume: 0.08
+      volume: 0.08,
     },
     Loginska: {
-      name: "Loginska",
+      name: 'Loginska',
       melody: [
         // === A段：沉稳推进 ===
-        659,
-        659,
-        659,
-        784,
-        880,
-        784,
-        784,
-        784,
-        659,
-        587,
+        659, 659, 659, 784, 880, 784, 784, 784, 659, 587,
         // Mi--- Sol-La Sol--- Mi-Re
-        659,
-        659,
-        659,
-        523,
-        587,
-        659,
-        659,
-        659,
-        784,
-        880,
+        659, 659, 659, 523, 587, 659, 659, 659, 784, 880,
         // Mi--- Do-Re Mi--- Sol-La
         // === B段：上行高潮 ===
-        784,
-        784,
-        784,
-        880,
-        988,
-        880,
-        880,
-        880,
-        784,
-        659,
+        784, 784, 784, 880, 988, 880, 880, 880, 784, 659,
         // Sol--- La-Si Sol--- La-Mi
-        587,
-        587,
-        587,
-        659,
-        523,
-        587,
-        587,
-        587,
-        659,
-        784,
+        587, 587, 587, 659, 523, 587, 587, 587, 659, 784,
         // Re--- Mi-Do Re--- Mi-Sol
         // === C段：急促下行收束 ===
-        784,
-        784,
-        784,
-        659,
-        587,
-        659,
-        659,
-        659,
-        523,
-        494,
+        784, 784, 784, 659, 587, 659, 659, 659, 523, 494,
         // Sol--- Mi-Re Mi--- Do-Si
-        440,
-        440,
-        440,
-        440,
-        440,
-        440,
-        440
+        440, 440, 440, 440, 440, 440, 440,
         // La-------
       ],
       // 稍微慢一点点，突出沉稳感
       duration: 160,
-      volume: 0.07
+      volume: 0.07,
     },
     Technotris: {
-      name: "Technotris",
+      name: 'Technotris',
       melody: [
         // === Intro（电子重复）===
-        659,
-        659,
-        494,
-        494,
-        523,
-        523,
-        587,
-        587,
-        523,
-        523,
-        494,
-        494,
+        659, 659, 494, 494, 523, 523, 587, 587, 523, 523, 494, 494,
         // === 主旋律A（加倍节奏）===
-        659,
-        494,
-        523,
-        587,
-        523,
-        494,
-        440,
-        494,
-        523,
-        587,
-        659,
-        659,
-        659,
-        587,
-        523,
-        494,
+        659, 494, 523, 587, 523, 494, 440, 494, 523, 587, 659, 659, 659, 587,
+        523, 494,
         // === 电子重复变体 ===
-        523,
-        523,
-        587,
-        587,
-        659,
-        659,
-        784,
-        784,
-        659,
-        659,
-        587,
-        587,
+        523, 523, 587, 587, 659, 659, 784, 784, 659, 659, 587, 587,
         // === 上行推进（带tech味）===
-        659,
-        784,
-        880,
-        784,
-        659,
-        587,
-        659,
-        523,
-        587,
-        659,
-        784,
-        880,
-        988,
-        880,
+        659, 784, 880, 784, 659, 587, 659, 523, 587, 659, 784, 880, 988, 880,
         784,
         // === 高潮（高频+重复）===
-        784,
-        880,
-        988,
-        1175,
-        988,
-        880,
-        784,
-        659,
-        659,
-        659,
-        784,
-        784,
-        880,
-        880,
+        784, 880, 988, 1175, 988, 880, 784, 659, 659, 659, 784, 784, 880, 880,
         // === Break（简化节奏）===
-        659,
-        587,
-        523,
-        494,
-        523,
-        587,
-        659,
+        659, 587, 523, 494, 523, 587, 659,
         // === Drop（强化重复节奏）===
-        784,
-        784,
-        880,
-        880,
-        988,
-        988,
-        880,
-        880,
-        784,
-        784,
-        659,
-        659,
-        587,
-        587,
-        523,
-        523,
+        784, 784, 880, 880, 988, 988, 880, 880, 784, 784, 659, 659, 587, 587,
+        523, 523,
         // === Ending（循环点）===
-        494,
-        523,
-        587,
-        659,
-        587,
-        523,
-        494,
-        440
+        494, 523, 587, 659, 587, 523, 494, 440,
       ],
       duration: 150,
-      volume: 0.09
+      volume: 0.09,
     },
     FirstDivision: {
-      name: "FirstDivision",
+      name: 'FirstDivision',
       melody: [
         // === 主动机（进行曲感）===
-        523,
-        587,
-        659,
-        587,
-        523,
-        494,
-        523,
-        587,
-        659,
+        523, 587, 659, 587, 523, 494, 523, 587, 659,
         // === 重复推进 ===
-        659,
-        698,
-        784,
-        698,
-        659,
-        587,
-        659,
-        523,
-        587,
+        659, 698, 784, 698, 659, 587, 659, 523, 587,
         // === 第二句（上行）===
-        523,
-        587,
-        659,
-        698,
-        784,
-        698,
-        659,
-        587,
-        523,
-        494,
-        523,
+        523, 587, 659, 698, 784, 698, 659, 587, 523, 494, 523,
         // === 强化段（军乐推进）===
-        659,
-        784,
-        880,
-        784,
-        659,
-        587,
-        659,
-        523,
-        587,
-        659,
-        698,
-        784,
+        659, 784, 880, 784, 659, 587, 659, 523, 587, 659, 698, 784,
         // === 高潮（稳定推进）===
-        784,
-        880,
-        988,
-        880,
-        784,
-        698,
-        784,
-        659,
-        587,
-        523,
-        587,
-        659,
+        784, 880, 988, 880, 784, 698, 784, 659, 587, 523, 587, 659,
         // === 回落（收束）===
-        587,
-        523,
-        494,
-        523,
-        587,
-        659,
-        587,
-        523,
+        587, 523, 494, 523, 587, 659, 587, 523,
         // === 循环点 ===
-        494,
-        523,
-        587,
-        523,
-        494
+        494, 523, 587, 523, 494,
       ],
       duration: 180,
-      volume: 0.08
+      volume: 0.08,
     },
     Korobeiniki: {
-      name: "Korobeiniki",
+      name: 'Korobeiniki',
       melody: [
         // === A段（经典开头）===
-        659,
-        494,
-        523,
-        587,
-        523,
-        494,
-        440,
-        494,
-        523,
-        587,
-        659,
-        523,
-        587,
-        659,
-        587,
-        523,
-        494,
+        659, 494, 523, 587, 523, 494, 440, 494, 523, 587, 659, 523, 587, 659,
+        587, 523, 494,
         // === A'段（变体）===
-        523,
-        587,
-        659,
-        784,
-        659,
-        587,
-        523,
-        494,
-        523,
-        587,
-        659,
-        587,
-        523,
-        494,
+        523, 587, 659, 784, 659, 587, 523, 494, 523, 587, 659, 587, 523, 494,
         // === B段（推进）===
-        587,
-        659,
-        784,
-        659,
-        587,
-        523,
-        587,
-        659,
-        523,
-        494,
-        659,
-        784,
-        880,
-        784,
+        587, 659, 784, 659, 587, 523, 587, 659, 523, 494, 659, 784, 880, 784,
         659,
         // === C段（高潮）===
-        587,
-        659,
-        784,
-        880,
-        784,
-        659,
-        587,
-        523,
-        587,
-        659,
-        784,
-        659,
-        587,
-        523,
+        587, 659, 784, 880, 784, 659, 587, 523, 587, 659, 784, 659, 587, 523,
         // === D段（变化）===
-        523,
-        587,
-        659,
-        784,
-        880,
-        784,
-        659,
-        587,
-        523,
-        494,
-        523,
-        587,
-        659,
-        523,
+        523, 587, 659, 784, 880, 784, 659, 587, 523, 494, 523, 587, 659, 523,
         494,
         // === E段（回落）===
-        440,
-        494,
-        523,
-        587,
-        523,
-        494,
-        440,
-        494,
-        523,
-        587,
-        659,
+        440, 494, 523, 587, 523, 494, 440, 494, 523, 587, 659,
         // === F段（再现+收束）===
-        659,
-        784,
-        880,
-        784,
-        659,
-        587,
-        659,
-        523,
-        587,
-        659,
-        587,
-        523,
-        494,
+        659, 784, 880, 784, 659, 587, 659, 523, 587, 659, 587, 523, 494,
         // === 结尾（循环点）===
-        523,
-        494,
-        440
+        523, 494, 440,
       ],
       duration: 140,
-      volume: 0.08
+      volume: 0.08,
     },
     JourneyToWest: {
-      name: "JourneyToWest",
+      name: 'JourneyToWest',
       /*
        * 逻辑说明：
        * 1. 采用 3-1-1 或 2-1-1 的动态长度模拟原曲的“奔跑感”。
@@ -1228,152 +838,46 @@ var tetris = (() => {
        */
       melody: [
         // === 前奏：标志性的"丢丢丢丢"电子脉冲 ===
-        880,
-        120,
-        880,
-        120,
-        0,
-        60,
-        880,
-        120,
-        880,
-        120,
-        0,
-        60,
-        880,
-        120,
-        880,
-        120,
-        0,
-        60,
-        880,
-        120,
-        880,
-        240,
+        880, 120, 880, 120, 0, 60, 880, 120, 880, 120, 0, 60, 880, 120, 880,
+        120, 0, 60, 880, 120, 880, 240,
         // === 主旋律：La Do Re Mi ===
-        440,
-        400,
-        440,
-        100,
-        440,
-        300,
+        440, 400, 440, 100, 440, 300,
         // La (附点节奏)
-        523,
-        400,
-        587,
-        400,
-        587,
-        100,
-        87,
-        300,
+        523, 400, 587, 400, 587, 100, 87, 300,
         // Do Re
-        659,
-        500,
+        659, 500,
         // Mi
         // === 冲上云霄：高音La Sol Mi ===
-        880,
-        400,
-        880,
-        100,
-        880,
-        300,
+        880, 400, 880, 100, 880, 300,
         // 高音La
-        784,
-        400,
-        659,
-        400,
-        659,
-        100,
-        659,
-        300,
+        784, 400, 659, 400, 659, 100, 659, 300,
         // Sol Mi
-        659,
-        500,
+        659, 500,
         // === 转折：Re Do La ===
-        587,
-        400,
-        587,
-        100,
-        587,
-        300,
+        587, 400, 587, 100, 587, 300,
         // Re
-        523,
-        400,
-        440,
-        400,
-        440,
-        100,
-        440,
-        300,
+        523, 400, 440, 400, 440, 100, 440, 300,
         // Do La
-        440,
-        500,
+        440, 500,
         // === 燃段：Si La Sol La ===
-        587,
-        300,
-        587,
-        200,
-        659,
-        300,
-        784,
-        400,
+        587, 300, 587, 200, 659, 300, 784, 400,
         // Re Mi Sol
-        784,
-        200,
-        784,
-        200,
-        880,
-        400,
+        784, 200, 784, 200, 880, 400,
         // Sol La
-        988,
-        300,
-        988,
-        200,
-        988,
-        300,
-        880,
-        400,
+        988, 300, 988, 200, 988, 300, 880, 400,
         // Si La
-        784,
-        300,
-        784,
-        200,
-        784,
-        400,
+        784, 300, 784, 200, 784, 400,
         // Sol
         // === 回响：超高音 ===
-        1175,
-        150,
-        1175,
-        150,
-        0,
-        100,
-        1175,
-        150,
-        1175,
-        150,
-        0,
-        100,
-        880,
-        300,
-        880,
-        300,
+        1175, 150, 1175, 150, 0, 100, 1175, 150, 1175, 150, 0, 100, 880, 300,
+        880, 300,
         // === 结尾 ===
-        440,
-        400,
-        440,
-        200,
-        440,
-        400,
-        440,
-        200,
-        440,
-        600
+        440, 400, 440, 200, 440, 400, 440, 200, 440, 600,
       ],
       // 建议：这首歌需要极快的节奏才能带出那个电音味儿
       duration: 110,
-      volume: 0.12
-    }
+      volume: 0.12,
+    },
   };
   var musics_default = Musics;
 
@@ -1446,12 +950,21 @@ var tetris = (() => {
   var ROWS = 20;
   var BOARD = {
     COLS,
-    ROWS
+    ROWS,
   };
   var board_default = BOARD;
 
   // lib/ui/constants/tetrominoes.js
-  var { PINK: PINK2, BLUE: BLUE2, TEAL: TEAL2, YELLOW: YELLOW2, PURPLE: PURPLE2, ORANGE: ORANGE2, GREEN: GREEN2, RED: RED2 } = colors_default;
+  var {
+    PINK: PINK2,
+    BLUE: BLUE2,
+    TEAL: TEAL2,
+    YELLOW: YELLOW2,
+    PURPLE: PURPLE2,
+    ORANGE: ORANGE2,
+    GREEN: GREEN2,
+    RED: RED2,
+  } = colors_default;
   var TETROMINOES = [
     // I型方块（长条）：1行4列
     { shape: [[1, 1, 1, 1]], color: TEAL2 },
@@ -1461,50 +974,50 @@ var tetris = (() => {
     {
       shape: [
         [1, 1],
-        [1, 1]
+        [1, 1],
       ],
-      color: ORANGE2
+      color: ORANGE2,
     },
     // T型方块：2x3
     {
       shape: [
         [0, 1, 0],
-        [1, 1, 1]
+        [1, 1, 1],
       ],
-      color: YELLOW2
+      color: YELLOW2,
     },
     // L型方块
     {
       shape: [
         [1, 0, 0],
-        [1, 1, 1]
+        [1, 1, 1],
       ],
-      color: BLUE2
+      color: BLUE2,
     },
     // J型方块
     {
       shape: [
         [0, 0, 1],
-        [1, 1, 1]
+        [1, 1, 1],
       ],
-      color: PINK2
+      color: PINK2,
     },
     // S型方块（右斜）
     {
       shape: [
         [0, 1, 1],
-        [1, 1, 0]
+        [1, 1, 0],
       ],
-      color: RED2
+      color: RED2,
     },
     // Z型方块（左斜）
     {
       shape: [
         [1, 1, 0],
-        [0, 1, 1]
+        [0, 1, 1],
       ],
-      color: PURPLE2
-    }
+      color: PURPLE2,
+    },
   ];
   var tetrominoes_default = TETROMINOES;
 
@@ -1514,7 +1027,7 @@ var tetris = (() => {
     const piece = tetrominoes_default[randomIndex];
     return {
       ...piece,
-      shape: piece.shape.map((row) => [...row])
+      shape: piece.shape.map((row) => [...row]),
     };
   }
   var random_tetromino_default = randomTetromino;
@@ -1547,10 +1060,10 @@ var tetris = (() => {
   // lib/game/core/game-over.js
   var gameOver = () => {
     const mode = engine_default.getMode();
-    if (mode === "game-over" || mode === "paused" || mode === "main-menu") {
+    if (mode === 'game-over' || mode === 'paused' || mode === 'main-menu') {
       return false;
     }
-    engine_default.setMode("game-over");
+    engine_default.setMode('game-over');
     engine_default.saveHighScore();
     stop_bgm_default();
     sounds_default.gameOver();
@@ -1559,7 +1072,8 @@ var tetris = (() => {
 
   // lib/ui/next/clear-next-piece.js
   var clearNextPiece = () => {
-    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } = canvas_default;
+    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } =
+      canvas_default;
     const { width, height } = nextPiece2;
     nextPieceContext2.clearRect(0, 0, width, height);
   };
@@ -1595,12 +1109,15 @@ var tetris = (() => {
   // lib/game/logic/spawn.js
   var spawn = (state) => {
     const { COLS: COLS2 } = board_default;
-    state.curr = state.next ? {
-      ...state.next,
-      shape: state.next.shape.map((row) => [...row])
-    } : random_tetromino_default();
+    state.curr = state.next
+      ? {
+          ...state.next,
+          shape: state.next.shape.map((row) => [...row]),
+        }
+      : random_tetromino_default();
     state.next = random_tetromino_default();
-    state.cx = Math.floor(COLS2 / 2) - Math.floor(state.curr.shape[0].length / 2);
+    state.cx =
+      Math.floor(COLS2 / 2) - Math.floor(state.curr.shape[0].length / 2);
     state.cy = 0;
     render_next_piece_default(state.next);
     if (collision_default(0, 0, state)) {
@@ -1620,22 +1137,22 @@ var tetris = (() => {
   var padStart = (n, len) => {
     const num = Number(n);
     if (!Number.isFinite(num)) {
-      return "";
+      return '';
     }
     const targetLen = Math.max(0, Math.floor(len));
-    const sign = num < 0 ? "-" : "";
+    const sign = num < 0 ? '-' : '';
     const absStr = Math.abs(num).toString();
-    return sign + absStr.padStart(targetLen, "0");
+    return sign + absStr.padStart(targetLen, '0');
   };
   var pad_start_default = padStart;
 
   // lib/game/core/begin-playing.js
   var beginPlaying = (state) => {
-    const $level = document.querySelector("#level");
+    const $level = document.querySelector('#level');
     if ($level) {
       $level.textContent = pad_start_default(state.level, 2);
     }
-    engine_default.setMode("playing");
+    engine_default.setMode('playing');
     spawn_default(state);
     sounds_default.levelStart();
     setTimeout(() => {
@@ -1652,14 +1169,14 @@ var tetris = (() => {
       number: 3,
       scale: 4,
       count: 0,
-      acc: 0
+      acc: 0,
     };
     return {
       layer: 100,
       // 渲染层级（UI 层，显示在最前面）
       blocking: true,
       // 是否阻塞用户输入（倒计时期间禁止操作）
-      name: "countdown",
+      name: 'countdown',
       // 动画名称标识
       /**
        * ## 更新倒计时动画状态
@@ -1691,13 +1208,13 @@ var tetris = (() => {
         return true;
       },
       stop() {
-        set_mode_default("playing");
+        set_mode_default('playing');
         begin_playing_default(gameState);
       },
       // 渲染倒计时动画：将当前状态传递给渲染函数
       render() {
         render_countdown_default(state);
-      }
+      },
     };
   };
   var countdown_animation_default = CountdownAnimation;
@@ -1763,7 +1280,7 @@ var tetris = (() => {
      */
     CONFIRM: (_, engine) => {
       start_game_default(engine.state);
-    }
+    },
   };
   var main_menu_actions_default = MAIN_MENU_ACTIONS;
 
@@ -1849,13 +1366,13 @@ var tetris = (() => {
   // lib/ui/hud/hud-dom.js
   var HudDom = {
     /** @type {HTMLElement | null} 分数显示元素 */
-    score: document.querySelector("#score"),
+    score: document.querySelector('#score'),
     /** @type {HTMLElement | null} 行数显示元素 */
-    lines: document.querySelector("#lines"),
+    lines: document.querySelector('#lines'),
     /** @type {HTMLElement | null} 等级显示元素 */
-    level: document.querySelector("#level"),
+    level: document.querySelector('#level'),
     /** @type {HTMLElement | null} 最高分显示元素 */
-    highScore: document.querySelector("#highScore")
+    highScore: document.querySelector('#highScore'),
   };
   var hud_dom_default = HudDom;
 
@@ -1886,25 +1403,26 @@ var tetris = (() => {
     };
     rafId = requestAnimationFrame(step);
     return {
-      cancel: () => cancelAnimationFrame(rafId)
+      cancel: () => cancelAnimationFrame(rafId),
     };
   };
   var animate_hud_number_default = animateHUDNumber;
 
   // lib/ui/hud/create-hud.js
-  var setText = (el, value, pad = 0) => el.textContent = pad ? pad_start_default(value, pad) : String(value);
+  var setText = (el, value, pad = 0) =>
+    (el.textContent = pad ? pad_start_default(value, pad) : String(value));
   var createHud = () => {
     const prev = {
       score: 0,
       lines: 0,
       level: 1,
-      highScore: 0
+      highScore: 0,
     };
     const target = {
-      score: 0
+      score: 0,
     };
     const animating = {
-      score: false
+      score: false,
     };
     const updateScore = (next) => {
       target.score = next;
@@ -1925,7 +1443,7 @@ var tetris = (() => {
           if (prev.score !== target.score) {
             updateScore(target.score);
           }
-        }
+        },
       );
     };
     const updateLines = (next) => {
@@ -1963,7 +1481,7 @@ var tetris = (() => {
     };
     return {
       update,
-      reset
+      reset,
     };
   };
   var create_hud_default = createHud;
@@ -1972,20 +1490,27 @@ var tetris = (() => {
   var renderHud = (score, lines, level, highScore, needReset = false) => {
     const hud = create_hud_default();
     const mode = engine_default.getMode();
-    if (mode === "main-menu" || needReset) {
+    if (mode === 'main-menu' || needReset) {
       hud.reset();
     }
     hud.update({
       score,
       lines,
       level,
-      highScore
+      highScore,
     });
   };
   var render_hud_default = renderHud;
 
   // lib/ui/constants/firework-colors.js
-  var { TEAL: TEAL3, YELLOW: YELLOW3, PURPLE: PURPLE3, ORANGE: ORANGE3, GREEN: GREEN3, RED: RED3 } = colors_default;
+  var {
+    TEAL: TEAL3,
+    YELLOW: YELLOW3,
+    PURPLE: PURPLE3,
+    ORANGE: ORANGE3,
+    GREEN: GREEN3,
+    RED: RED3,
+  } = colors_default;
   var FIREWORK_COLORS = [TEAL3, YELLOW3, PURPLE3, ORANGE3, GREEN3, RED3];
   var firework_colors_default = FIREWORK_COLORS;
 
@@ -2012,12 +1537,12 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "LEVEL UP",
+      text: 'LEVEL UP',
       x: width / 2,
       y: height / 2.5,
       color: GREEN5,
       size: 1.2,
-      center: true
+      center: true,
     });
   };
   var render_level_up_text_default = renderLevelUpText;
@@ -2033,7 +1558,7 @@ var tetris = (() => {
       y,
       color: GREEN5,
       size: 3,
-      center: true
+      center: true,
     });
   };
   var render_level_number_default = renderLevelNumber;
@@ -2044,7 +1569,7 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "CONGRATS!",
+      text: 'CONGRATS!',
       x: width / 2,
       y: height / 1.6,
       color: YELLOW4,
@@ -2052,7 +1577,7 @@ var tetris = (() => {
       strokeColor: BLACK2,
       lineWidth: 3,
       size: 1.3,
-      center: true
+      center: true,
     });
   };
   var render_congrats_text_default = renderCongratsText;
@@ -2084,7 +1609,7 @@ var tetris = (() => {
       this.layer = 100;
       this.blocking = true;
       this.timer = 0;
-      this.name = "level-up";
+      this.name = 'level-up';
       this.state = state;
     }
     /**
@@ -2111,9 +1636,12 @@ var tetris = (() => {
           // Y轴速度分量
           radius: 3 + Math.random() * 4,
           // 粒子半径（3-7像素）
-          color: firework_colors_default[Math.floor(Math.random() * firework_colors_default.length)],
+          color:
+            firework_colors_default[
+              Math.floor(Math.random() * firework_colors_default.length)
+            ],
           // 随机颜色
-          alpha: 1
+          alpha: 1,
           // 初始完全不透明
         });
       }
@@ -2199,12 +1727,12 @@ var tetris = (() => {
         // 当前透明度（1=完全不透明，0=完全透明）
         alpha: 1,
         // 动画计时器（秒）
-        timer: 0
+        timer: 0,
       }));
       this.state = state;
       this.layer = 200;
       this.blocking = true;
-      this.name = "clear-lines";
+      this.name = 'clear-lines';
       sounds_default.clear(lines.length - 1);
     }
     /**
@@ -2235,7 +1763,8 @@ var tetris = (() => {
      * 执行实际的行的消除、分数更新、等级提升等逻辑
      */
     stop() {
-      const { CLEAR_SCORES: CLEAR_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = game_default;
+      const { CLEAR_SCORES: CLEAR_SCORES2, MAX_LEVEL: MAX_LEVEL2 } =
+        game_default;
       const { ROWS: ROWS2, COLS: COLS2 } = board_default;
       const { state } = this;
       const lines = state.clearLines || [];
@@ -2257,7 +1786,12 @@ var tetris = (() => {
         level_up_controller_default();
       }
       set_level_default(Math.min(Math.max(state.level, newLevel), MAX_LEVEL2));
-      render_hud_default(state.score, state.lines, state.level, state.highScore);
+      render_hud_default(
+        state.score,
+        state.lines,
+        state.level,
+        state.highScore,
+      );
     }
     /**
      * ## 渲染动画效果
@@ -2317,15 +1851,15 @@ var tetris = (() => {
   // lib/game/core/restart-game.js
   var restartGame = (state) => {
     const mode = engine_default.getMode();
-    if (mode === "paused" || mode === "game-over" || mode === "main-menu") {
+    if (mode === 'paused' || mode === 'game-over' || mode === 'main-menu') {
       return;
     }
     stop_bgm_default();
-    engine_default.setMode("playing");
+    engine_default.setMode('playing');
     engine_default.setHud({
       score: 0,
       lines: 0,
-      level: 1
+      level: 1,
     });
     engine_default.resetBoard();
     const { score, lines, level, highScore } = state;
@@ -2341,15 +1875,15 @@ var tetris = (() => {
     /**
      * ## 创建暂停动画实例
      *
-     * @param {number} [layer=500] - 渲染层级，默认 500（显示在游戏界面上层） 使用较高的默认值确保暂停界面覆盖游戏内容.
-     *   Default is `500`
+     * @param {number} [layer=500] - 渲染层级，默认 500（显示在游戏界面上层）
+     *   使用较高的默认值确保暂停界面覆盖游戏内容. Default is `500`
      */
     constructor(layer = 500) {
       this.layer = layer;
       this.blocking = true;
       this.timer = 0;
       this.active = true;
-      this.name = "paused";
+      this.name = 'paused';
     }
     /**
      * ## 更新暂停动画状态
@@ -2402,17 +1936,17 @@ var tetris = (() => {
   // lib/game/core/toggle-pause.js
   var togglePause = () => {
     const mode = engine_default.getMode();
-    if (mode === "game-over" || mode === "main-menu") {
+    if (mode === 'game-over' || mode === 'main-menu') {
       return false;
     }
-    if (mode === "playing") {
-      engine_default.setMode("paused");
+    if (mode === 'playing') {
+      engine_default.setMode('paused');
       stop_bgm_default();
       sounds_default.pause();
       startPaused();
     } else {
       stopPaused();
-      engine_default.setMode("playing");
+      engine_default.setMode('playing');
       sounds_default.resume();
       play_bgm_default();
       engine_default.restart();
@@ -2423,7 +1957,7 @@ var tetris = (() => {
   // lib/audio/toggle-bgm.js
   var toggleBGM = () => {
     const mode = engine_default.getMode();
-    if (mode === "main-menu" || mode === "paused" || mode === "game-over") {
+    if (mode === 'main-menu' || mode === 'paused' || mode === 'game-over') {
       return;
     }
     audio_state_default.bgmEnabled = !audio_state_default.bgmEnabled;
@@ -2507,7 +2041,7 @@ var tetris = (() => {
     /** ## 背景音乐开关 */
     TOGGLE_MUSIC: () => {
       toggle_bgm_default();
-    }
+    },
   };
   var game_playing_actions_default = GAME_PLAYING_ACTIONS;
 
@@ -2516,16 +2050,15 @@ var tetris = (() => {
     /** ## 切换暂停状态（继续游戏 / 重新进入游戏循环） */
     TOGGLE_PAUSE: () => {
       toggle_pause_default();
-    }
+    },
   };
   var paused_actions_default = PAUSED_ACTIONS;
 
   // lib/engine/state/reset-board.js
   var resetBoard = () => {
     const { COLS: COLS2, ROWS: ROWS2 } = board_default;
-    engine_state_default.board = Array.from(
-      { length: ROWS2 },
-      () => Array.from({ length: COLS2 }).fill(0)
+    engine_state_default.board = Array.from({ length: ROWS2 }, () =>
+      Array.from({ length: COLS2 }).fill(0),
     );
   };
   var reset_board_default = resetBoard;
@@ -2535,11 +2068,11 @@ var tetris = (() => {
     stop_bgm_default();
     engine_default.start();
     reset_board_default();
-    engine_default.setMode("main-menu");
+    engine_default.setMode('main-menu');
     engine_default.setHud({
       score: 0,
       lines: 0,
-      level: 1
+      level: 1,
     });
     state.next = null;
     const { score, lines, level, highScore } = state;
@@ -2562,16 +2095,16 @@ var tetris = (() => {
      */
     CONFIRM: (_, engine) => {
       reset_to_main_menu_default(engine.state);
-    }
+    },
   };
   var game_over_actions_default = GAME_OVER_ACTIONS;
 
   // lib/command/dispatch-command.js
   var ACTIONS_MAP = {
-    "main-menu": main_menu_actions_default,
+    'main-menu': main_menu_actions_default,
     playing: game_playing_actions_default,
     paused: paused_actions_default,
-    "game-over": game_over_actions_default
+    'game-over': game_over_actions_default,
   };
   var dispatchCommand = (cmd, engine) => {
     const { type, payload } = cmd;
@@ -2611,16 +2144,19 @@ var tetris = (() => {
   var command_default = Command;
 
   // lib/game/logic/get-speed.js
-  var getSpeed = (state) => (
+  var getSpeed = (state) =>
     // 计算速度：基础值1000ms，每升一级减少80ms，最低不低于100ms
-    Math.max(100, 1e3 - (state.level - 1) * 80)
-  );
+    Math.max(100, 1e3 - (state.level - 1) * 80);
   var get_speed_default = getSpeed;
 
   // lib/game/core/step-game.js
   var stepGame = (state) => {
     const mode = engine_default.getMode();
-    if (mode === "main-menu" || mode === "game-over" || hasBlockingAnimation()) {
+    if (
+      mode === 'main-menu' ||
+      mode === 'game-over' ||
+      hasBlockingAnimation()
+    ) {
       return false;
     }
     if (!move_default(0, 1, state)) {
@@ -2628,7 +2164,7 @@ var tetris = (() => {
       sounds_default.fall();
       clear_lines_default(state);
       spawn_default(state);
-      if (mode === "game-over") {
+      if (mode === 'game-over') {
         return false;
       }
     }
@@ -2650,9 +2186,14 @@ var tetris = (() => {
     engine_default.timestamp = timestamp;
     if (replay_default.playing) {
       const { data } = replay_default;
-      while (replay_default.cursor < data.length && data[replay_default.cursor].frame === replay_default.frame) {
+      while (
+        replay_default.cursor < data.length &&
+        data[replay_default.cursor].frame === replay_default.frame
+      ) {
         const item = data[replay_default.cursor];
-        command_queue_default.enqueue(new command_default(item.cmd.type, item.cmd.payload));
+        command_queue_default.enqueue(
+          new command_default(item.cmd.type, item.cmd.payload),
+        );
         replay_default.cursor++;
       }
     }
@@ -2690,7 +2231,7 @@ var tetris = (() => {
   // lib/input/dispatch-input.js
   var dispatchInput = (input) => {
     const { action } = input;
-    const isBlocked = hasBlockingAnimation(["countdown", "level-up"]);
+    const isBlocked = hasBlockingAnimation(['countdown', 'level-up']);
     if (isBlocked || !action) {
       return;
     }
@@ -2699,7 +2240,7 @@ var tetris = (() => {
     if (replay_default.recording) {
       replay_default.data.push({
         frame: replay_default.frame,
-        cmd
+        cmd,
       });
     }
   };
@@ -2707,26 +2248,26 @@ var tetris = (() => {
 
   // lib/input/resolve-input-action.js
   var ACTION_MAP = {
-    arrowleft: "MOVE_LEFT",
-    arrowright: "MOVE_RIGHT",
-    arrowdown: "MOVE_DOWN",
-    arrowup: "ROTATE",
-    " ": "DROP",
-    m: "TOGGLE_MUSIC",
-    p: "TOGGLE_PAUSE",
-    r: "RESTART",
-    q: "QUIT",
-    1: "LEVEL_ONE",
-    2: "LEVEL_TWO",
-    3: "LEVEL_THREE",
-    4: "LEVEL_FOUR",
-    5: "LEVEL_FIVE",
-    6: "LEVEL_SIX",
-    7: "LEVEL_SEVEN",
-    8: "LEVEL_EIGHT",
-    9: "LEVEL_NINE",
-    t: "LEVEL_TEN",
-    enter: "CONFIRM"
+    arrowleft: 'MOVE_LEFT',
+    arrowright: 'MOVE_RIGHT',
+    arrowdown: 'MOVE_DOWN',
+    arrowup: 'ROTATE',
+    ' ': 'DROP',
+    m: 'TOGGLE_MUSIC',
+    p: 'TOGGLE_PAUSE',
+    r: 'RESTART',
+    q: 'QUIT',
+    1: 'LEVEL_ONE',
+    2: 'LEVEL_TWO',
+    3: 'LEVEL_THREE',
+    4: 'LEVEL_FOUR',
+    5: 'LEVEL_FIVE',
+    6: 'LEVEL_SIX',
+    7: 'LEVEL_SEVEN',
+    8: 'LEVEL_EIGHT',
+    9: 'LEVEL_NINE',
+    t: 'LEVEL_TEN',
+    enter: 'CONFIRM',
   };
   var resolveInputAction = (key) => {
     if (!key) {
@@ -2745,17 +2286,17 @@ var tetris = (() => {
       return;
     }
     dispatch_input_default({
-      type: "keydown",
+      type: 'keydown',
       key,
-      action
+      action,
     });
   };
   var on_keydown_default = onKeydown;
 
   // lib/input/bind-events.js
   var bindEvents = () => {
-    globalThis.addEventListener("resize", on_resize_default);
-    document.addEventListener("keydown", on_keydown_default);
+    globalThis.addEventListener('resize', on_resize_default);
+    document.addEventListener('keydown', on_keydown_default);
   };
   var bind_events_default = bindEvents;
 
@@ -2765,7 +2306,8 @@ var tetris = (() => {
 
   // lib/engine/state/load-high-score.js
   var loadHighScore = () => {
-    engine_state_default.highScore = Number.parseInt(get_storage_default("tetris-high-score"), 10) || 0;
+    engine_state_default.highScore =
+      Number.parseInt(get_storage_default('tetris-high-score'), 10) || 0;
   };
   var load_high_score_default = loadHighScore;
 
@@ -2780,7 +2322,10 @@ var tetris = (() => {
     const { score } = engine_state_default;
     if (score > engine_state_default.highScore) {
       engine_state_default.highScore = score;
-      set_storage_default("tetris-high-score", engine_state_default.highScore.toString());
+      set_storage_default(
+        'tetris-high-score',
+        engine_state_default.highScore.toString(),
+      );
     }
   };
   var save_high_score_default = saveHighScore;
@@ -2795,12 +2340,12 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "LEVEL",
+      text: 'LEVEL',
       x: width / 2,
       y: height * 0.35,
       color: GREEN5,
       size: 1,
-      center: true
+      center: true,
     });
   };
   var render_level_text_default = renderLevelText;
@@ -2811,12 +2356,12 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "1-9 or T KEY",
+      text: '1-9 or T KEY',
       x: width / 2,
       y: height * 0.58,
       color: WHITE3,
       size: 1,
-      center: true
+      center: true,
     });
   };
   var render_level_shortcut_default = renderLevelShortcut;
@@ -2827,12 +2372,12 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "ENTER START",
+      text: 'ENTER START',
       x: width / 2,
       y: height * 0.74,
       color: TEAL5,
       size: 1.15,
-      center: true
+      center: true,
     });
   };
   var render_enter_start_text_default = renderEnterStartText;
@@ -2843,7 +2388,7 @@ var tetris = (() => {
     const { height } = gameBoard2;
     clear_board_default();
     render_overlay_default();
-    render_scene_background_default("main-menu");
+    render_scene_background_default('main-menu');
     render_tetris_text_default();
     render_level_text_default();
     render_level_number_default(level, height * 0.5);
@@ -2878,28 +2423,28 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "PAUSED",
+      text: 'PAUSED',
       x: width / 2,
       y: height / 1.4,
       color: YELLOW4,
       strokeColor: BLACK2,
       size: 1.6,
       center: true,
-      stroke: true
+      stroke: true,
     });
   };
   var render_paused_text_default = renderPausedText;
 
   // lib/utils/format-time.js
-  var formatTime = (date, format = "yyyy-MM-dd HH:mm:ss") => {
+  var formatTime = (date, format = 'yyyy-MM-dd HH:mm:ss') => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    const toSymbol = () => hours >= 12 ? "PM" : "AM";
-    const hasSymbol = format.includes("a");
+    const toSymbol = () => (hours >= 12 ? 'PM' : 'AM');
+    const hasSymbol = format.includes('a');
     const hour12 = hours % 12 || 12;
     const symbols = {
       yyyy: year,
@@ -2909,11 +2454,11 @@ var tetris = (() => {
       hh: pad_start_default(hour12, 2),
       mm: pad_start_default(minutes, 2),
       ss: pad_start_default(seconds, 2),
-      a: hasSymbol ? toSymbol() : ""
+      a: hasSymbol ? toSymbol() : '',
     };
     let time = format;
     for (const key of Object.keys(symbols)) {
-      time = time.replace(new RegExp(key, "g"), symbols[key]);
+      time = time.replace(new RegExp(key, 'g'), symbols[key]);
     }
     return time;
   };
@@ -2921,44 +2466,56 @@ var tetris = (() => {
 
   // lib/ui/effects/render-digital-clock.js
   var { GREEN: GREEN4 } = colors_default;
-  var renderDigitalClock = (time, color = GREEN4, format = "HH:mm:ss") => {
+  var renderDigitalClock = (time, color = GREEN4, format = 'HH:mm:ss') => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
-    const text = format_time_default(time || /* @__PURE__ */ new Date(), format);
+    const text = format_time_default(
+      time || /* @__PURE__ */ new Date(),
+      format,
+    );
     render_text_default({
       text,
       x: width / 2,
       y: height / 4.15,
       color,
       size: 0.94,
-      center: true
+      center: true,
     });
   };
   var render_digital_clock_default = renderDigitalClock;
 
   // lib/ui/effects/clock/constants/clock-themes.js
-  var { WHITE: WHITE2, PINK: PINK3, TEAL: TEAL4, RED: RED4, ORANGE: ORANGE4, DARK_GREEN: DARK_GREEN2, RGBA_TEAL: RGBA_TEAL2, RGBA_GREEN: RGBA_GREEN2 } = colors_default;
+  var {
+    WHITE: WHITE2,
+    PINK: PINK3,
+    TEAL: TEAL4,
+    RED: RED4,
+    ORANGE: ORANGE4,
+    DARK_GREEN: DARK_GREEN2,
+    RGBA_TEAL: RGBA_TEAL2,
+    RGBA_GREEN: RGBA_GREEN2,
+  } = colors_default;
   var ClockThemes = {
     Teal: {
       stroke: TEAL4,
       face: RGBA_GREEN2,
-      secondHand: ORANGE4
+      secondHand: ORANGE4,
     },
     Green: {
       stroke: DARK_GREEN2,
       face: RGBA_TEAL2,
-      secondHand: TEAL4
+      secondHand: TEAL4,
     },
     Orange: {
       stroke: ORANGE4,
       face: RGBA_GREEN2,
-      secondHand: RED4
+      secondHand: RED4,
     },
     White: {
       stroke: WHITE2,
       face: RGBA_TEAL2,
-      secondHand: PINK3
-    }
+      secondHand: PINK3,
+    },
   };
   var clock_themes_default = ClockThemes;
 
@@ -2967,13 +2524,13 @@ var tetris = (() => {
     const h = time.getHours();
     const m = time.getMinutes();
     const s = time.getSeconds();
-    const hAng = (h % 12 + m / 60 + s / 3600) * (2 * Math.PI / 12);
-    const mAng = (m + s / 60) * (2 * Math.PI / 60);
-    const sAng = s * (2 * Math.PI / 60);
+    const hAng = ((h % 12) + m / 60 + s / 3600) * ((2 * Math.PI) / 12);
+    const mAng = (m + s / 60) * ((2 * Math.PI) / 60);
+    const sAng = s * ((2 * Math.PI) / 60);
     return {
       hAng,
       mAng,
-      sAng
+      sAng,
     };
   };
   var get_clock_angles_default = getClockAngles;
@@ -2992,37 +2549,37 @@ var tetris = (() => {
     monkey: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M538.947368 1024h-53.894736c0-32.794947 25.869474-87.417263 77.446736-103.316211C528.599579 881.152 485.052632 822.433684 485.052632 781.473684c0-44.570947 36.271158-80.842105 80.842105-80.842105h80.842105v53.894737h-80.842105a26.947368 26.947368 0 0 0-26.947369 26.947368c0 19.725474 36.675368 77.473684 92.133053 134.736842h88.602947c20.210526-14.147368 88.737684-71.464421 88.737685-198.602105 0-108.382316-93.237895-202.967579-168.151579-278.986105-49.502316-50.202947-88.576-89.842526-98.735158-128.61979-11.749053-44.732632-21.584842-112.586105-26.327579-148.318315H377.263158c-45.136842 0-89.519158 8.434526-121.802105 53.894736H431.157895v53.894737c-97.28 0-107.789474 113.071158-107.789474 161.684211v53.894737h53.894737v161.68421h-53.894737v-107.789474h-26.947368c-170.253474 0-188.631579-94.234947-188.631579-134.736842 0-31.043368 35.220211-72.326737 55.727158-93.722947 2.694737-14.686316 5.847579-28.348632 9.431579-41.013895H161.684211V215.578947h31.528421C239.642947 120.993684 317.224421 107.789474 377.263158 107.789474h185.640421l2.802526 23.794526c0.134737 1.050947 12.719158 106.657684 27.944421 164.756211 6.494316 24.872421 44.624842 63.514947 84.965053 104.448C760.481684 483.813053 862.315789 587.129263 862.315789 717.608421c0 92.375579-31.124211 155.028211-61.898105 194.425263C904.919579 892.146526 970.105263 803.004632 970.105263 673.684211c0-91.405474-42.819368-154.381474-84.237474-215.255579C847.791158 402.458947 808.421053 344.576 808.421053 269.473684c0-119.349895 87.093895-161.684211 161.68421-161.68421v53.894737c-32.417684 0-107.789474 10.509474-107.789474 107.789473 0 58.502737 31.555368 104.933053 68.096 158.639158C974.282105 492.597895 1024 565.679158 1024 673.684211c0 177.286737-108.301474 296.421053-269.473684 296.421052h-161.684211c-37.672421 0-53.894737 40.906105-53.894737 53.894737zM229.214316 269.473684a384.808421 384.808421 0 0 0-14.012632 58.341053l-1.401263 8.488421-6.090105 6.117053c-22.878316 22.932211-44.813474 52.601263-46.026105 62.275368 0 56.805053 53.76 75.264 107.789473 79.386947V431.157895c0-58.691368 13.473684-119.619368 46.511158-161.684211h-86.770526zM323.368421 1024h-53.894737c0-32.794947 25.869474-87.417263 77.446737-103.316211C313.020632 881.152 269.473684 822.433684 269.473684 781.473684c0-44.570947 36.271158-80.842105 80.842105-80.842105h45.16379A188.847158 188.847158 0 0 1 565.894737 592.842105h134.736842v53.894737h-134.736842c-74.293895 0-134.736842 60.442947-134.736842 134.736842v26.516211l-53.894737 0.377263V781.473684c0-9.162105 0.646737-18.135579 1.913263-26.947368H350.315789c-14.848 0-26.947368 12.072421-26.947368 26.947368 0 19.725474 36.675368 77.473684 92.133053 134.736842H431.157895v53.894737h-53.894737c-37.672421 0-53.894737 40.906105-53.894737 53.894737z" fill="${RGBA_ORANGE2}" /></svg>`,
     rooster: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M673.684211 354.357895c-16.384 0-29.642105-10.213053-29.642106-44.463158 0-34.223158 13.231158-44.463158 29.642106-44.463158s29.642105 10.24 29.642105 44.463158c0 34.250105-13.258105 44.463158-29.642105 44.463158zM540.106105 970.105263l-50.58021-107.789474h156.05221l50.607158 107.789474h59.553684l-51.60421-109.918316C811.52 846.821053 916.210526 764.550737 916.210526 646.736842c0-53.032421-11.910737-95.420632-24.522105-140.314947C877.244632 455.033263 862.315789 401.893053 862.315789 323.368421V107.789474c0-59.445895-48.343579-107.789474-107.789473-107.789474a107.924211 107.924211 0 0 0-107.789474 106.172632 100.890947 100.890947 0 0 0-24.117895-3.314527 88.710737 88.710737 0 0 0-88.602947 88.602948c0 20.668632 5.227789 39.720421 10.671158 53.921684l-99.489684 59.688421 93.749894 14.470737V377.263158c0 14.416842-5.901474 21.692632-33.360842 49.152l-11.129263 11.129263C398.228211 326.521263 324.985263 269.473684 215.740632 269.473684 96.768 269.473684 0 366.241684 0 485.214316V646.736842h53.894737v-161.522526A162.007579 162.007579 0 0 1 215.740632 323.368421c82.081684 0 140.422737 36.244211 240.64 152.252632l-38.615579 38.615579C367.804632 461.285053 323.098947 431.157895 259.584 431.157895A151.983158 151.983158 0 0 0 107.789474 582.952421V754.526316h53.894737v-171.573895A98.007579 98.007579 0 0 1 259.584 485.052632c46.322526 0 79.629474 20.911158 137.027368 86.016l18.970948 21.530947 128.080842-128.080842C572.200421 435.981474 592.842105 415.366737 592.842105 377.263158v-97.926737l23.309474-14.120421-13.662316-23.04c-0.161684-0.242526-14.578526-24.899368-14.578526-50.688 0-19.132632 15.575579-34.708211 34.70821-34.708211 5.093053 0 26.785684 3.179789 39.558737 18.647579l26.327579 46.026106 39.774316-24.090948-20.372211-49.367579C704.754526 140.449684 700.631579 117.517474 700.631579 107.789474c0-29.722947 24.171789-53.894737 53.894737-53.894737s53.894737 24.171789 53.894737 53.894737v215.578947c0 85.935158 16.680421 145.300211 31.366736 197.632C851.887158 564.008421 862.315789 601.141895 862.315789 646.736842c0 95.285895-99.408842 161.684211-188.631578 161.684211h-209.461895l-68.419369-145.704421C375.242105 618.954105 338.108632 592.842105 296.448 592.842105A80.976842 80.976842 0 0 0 215.578947 673.711158V862.315789h53.894737v-188.604631c0-14.874947 12.099368-26.974316 26.974316-26.974316 20.533895 0 38.965895 14.147368 50.553263 38.858105L480.579368 970.105263h59.526737z" fill="${RGBA_ORANGE2}" /></svg>`,
     dog: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M326.063158 282.947368c0 34.250105-13.231158 44.463158-29.642105 44.463158s-29.642105-10.213053-29.642106-44.463158c0-34.223158 13.231158-44.463158 29.642106-44.463157s29.642105 10.24 29.642105 44.463157zM269.473684 430.295579v311.646316L190.275368 916.210526h59.203369L323.368421 753.637053V377.263158h-26.947368c-119.403789 0-172.732632-53.382737-185.505685-107.789474h35.624421c51.092211 0 68.581053-15.764211 120.535579-62.544842 12.773053-11.506526 28.079158-25.276632 47.023158-41.741474l18.351158-15.952842-69.658947-99.139368-44.085895 30.989474 41.768421 59.472842c-11.183158 9.862737-20.884211 18.593684-29.480421 26.327579C180.736 212.156632 176.235789 215.578947 146.539789 215.578947H53.894737v26.947369c0 88.710737 66.910316 178.149053 215.578947 187.769263z m216.710737-161.414737c2.290526 71.733895 28.698947 136.326737 75.048421 182.918737C618.711579 509.628632 702.437053 538.947368 810.091789 538.947368c18.593684 0 36.190316-1.158737 52.628211-3.449263 3.745684 111.265684 33.630316 170.334316 51.496421 196.015158l-38.507789 84.722526C782.174316 742.049684 688.774737 700.631579 377.263158 700.631579v53.894737c34.277053 0 65.697684 0.512 94.639158 1.509052L374.595368 970.105263h59.203369l96.013474-211.240421c66.182737 4.338526 117.005474 11.829895 157.911578 22.016L626.229895 916.210526h59.176421l54.16421-119.134315c47.616 18.405053 79.737263 42.091789 113.125053 69.739789L805.753263 970.105263h59.203369l113.071157-248.778105-13.824-13.204211c-0.485053-0.458105-45.648842-47.589053-47.939368-185.263158C985.168842 498.553263 1024 447.811368 1024 377.263158c0-95.205053-66.506105-161.684211-161.684211-161.684211v53.894737c65.482105 0 107.789474 42.307368 107.789474 107.789474 0 89.088-87.013053 107.789474-160.013474 107.789474-92.752842 0-163.624421-23.983158-210.647578-71.27579-30.315789-30.504421-45.891368-65.832421-53.35579-98.735158 11.210105 6.952421 22.932211 13.338947 35.274105 19.186527l23.04-48.720843c-92.106105-43.654737-148.992-128.646737-219.243789-243.981473l-46.026105 28.05221c49.448421 81.246316 92.968421 148.506947 147.051789 199.302737z" fill="${RGBA_ORANGE2}" /></svg>`,
-    pig: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M808.421053 700.631579v53.894737c-196.446316 0-323.368421 84.641684-323.368421 215.578947h-53.894737c0-163.705263 148.075789-269.473684 377.263158-269.473684z m-323.368421 107.789474v-53.894737c-158.342737 0-245.598316 0-319.649685-49.367579L158.612211 700.631579H80.842105c-21.692632 0-26.624-14.821053-26.947368-26.947368v-82.620632c84.156632-11.183158 161.684211-74.913684 161.68421-186.853053V215.578947H161.684211v161.684211H134.736842c-66.964211 0-134.736842 37.025684-134.736842 107.789474h53.894737c0-42.630737 52.870737-53.894737 80.842105-53.894737h24.629895C147.132632 504.912842 85.153684 538.947368 26.947368 538.947368H0v134.736843c0 32.498526 21.530947 80.842105 80.842105 80.842105h61.682527c32.687158 20.506947 67.125895 33.145263 105.957052 41.013895A232.879158 232.879158 0 0 0 215.578947 916.210526h53.894737c0-41.930105 14.012632-80.303158 39.424-112.505263C358.885053 808.151579 415.959579 808.421053 485.052632 808.421053z m-72.946527-342.420211L323.368421 554.738526V431.157895h-53.894737v253.682526l180.736-180.736-38.103579-38.103579zM323.368421 161.684211h-53.894737v190.032842a769.536 769.536 0 0 1 53.894737-49.098106V161.684211z m323.368421-53.894737c-72.623158 0-146.809263 23.336421-215.578947 58.637473V107.789474h-53.894737v154.138947C458.832842 205.392842 555.331368 161.684211 646.736842 161.684211c148.587789 0 269.473684 120.885895 269.473684 269.473684v235.654737L809.579789 862.315789h61.359158L970.105263 680.555789V431.157895c0-178.310737-145.057684-323.368421-323.368421-323.368421z" fill="${RGBA_ORANGE2}" /></svg>`
+    pig: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M808.421053 700.631579v53.894737c-196.446316 0-323.368421 84.641684-323.368421 215.578947h-53.894737c0-163.705263 148.075789-269.473684 377.263158-269.473684z m-323.368421 107.789474v-53.894737c-158.342737 0-245.598316 0-319.649685-49.367579L158.612211 700.631579H80.842105c-21.692632 0-26.624-14.821053-26.947368-26.947368v-82.620632c84.156632-11.183158 161.684211-74.913684 161.68421-186.853053V215.578947H161.684211v161.684211H134.736842c-66.964211 0-134.736842 37.025684-134.736842 107.789474h53.894737c0-42.630737 52.870737-53.894737 80.842105-53.894737h24.629895C147.132632 504.912842 85.153684 538.947368 26.947368 538.947368H0v134.736843c0 32.498526 21.530947 80.842105 80.842105 80.842105h61.682527c32.687158 20.506947 67.125895 33.145263 105.957052 41.013895A232.879158 232.879158 0 0 0 215.578947 916.210526h53.894737c0-41.930105 14.012632-80.303158 39.424-112.505263C358.885053 808.151579 415.959579 808.421053 485.052632 808.421053z m-72.946527-342.420211L323.368421 554.738526V431.157895h-53.894737v253.682526l180.736-180.736-38.103579-38.103579zM323.368421 161.684211h-53.894737v190.032842a769.536 769.536 0 0 1 53.894737-49.098106V161.684211z m323.368421-53.894737c-72.623158 0-146.809263 23.336421-215.578947 58.637473V107.789474h-53.894737v154.138947C458.832842 205.392842 555.331368 161.684211 646.736842 161.684211c148.587789 0 269.473684 120.885895 269.473684 269.473684v235.654737L809.579789 862.315789h61.359158L970.105263 680.555789V431.157895c0-178.310737-145.057684-323.368421-323.368421-323.368421z" fill="${RGBA_ORANGE2}" /></svg>`,
   };
   var chinese_hour_animals_default = ChineseHourAnimals;
 
   // lib/ui/image/utils/get-chinese-hour-animal.js
   var getChineseHourAnimal = (hour) => {
     const map = [
-      "rat",
-      "ox",
-      "ox",
-      "tiger",
-      "tiger",
-      "rabbit",
-      "rabbit",
-      "dragon",
-      "dragon",
-      "snake",
-      "snake",
-      "horse",
-      "horse",
-      "goat",
-      "goat",
-      "monkey",
-      "monkey",
-      "rooster",
-      "rooster",
-      "dog",
-      "dog",
-      "pig",
-      "pig",
-      "rat"
+      'rat',
+      'ox',
+      'ox',
+      'tiger',
+      'tiger',
+      'rabbit',
+      'rabbit',
+      'dragon',
+      'dragon',
+      'snake',
+      'snake',
+      'horse',
+      'horse',
+      'goat',
+      'goat',
+      'monkey',
+      'monkey',
+      'rooster',
+      'rooster',
+      'dog',
+      'dog',
+      'pig',
+      'pig',
+      'rat',
     ];
     return map[hour];
   };
@@ -3065,7 +2622,7 @@ var tetris = (() => {
     const dotDistance = radius - Math.floor(radius * 0.25);
     for (let i = 0; i < 12; i++) {
       ctx.save();
-      ctx.rotate(i * Math.PI / 6);
+      ctx.rotate((i * Math.PI) / 6);
       ctx.beginPath();
       ctx.arc(0, -dotDistance, dotRadius, 0, Math.PI * 2);
       ctx.fillStyle = theme.stroke;
@@ -3143,7 +2700,7 @@ var tetris = (() => {
     }
     ctx.save();
     ctx.translate(centerX, centerY);
-    ctx.lineCap = "round";
+    ctx.lineCap = 'round';
     render_clock_dial_default(radius, theme);
     render_chinese_hour_animal_image_default();
     render_clock_ticks_default(radius, theme);
@@ -3167,37 +2724,37 @@ var tetris = (() => {
     shen: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-431.157895 134.736842h161.684211v53.894737h53.894737V269.473684h-215.578948V161.684211h-53.894736v107.789473h-215.578948v431.157895h53.894737v-53.894737h161.684211v215.578947h53.894736v-215.578947z m0-161.68421h161.684211v107.789473h-161.684211v-107.789473z m-215.578947 0h161.684211v107.789473h-161.684211v-107.789473z m215.578947-161.684211h161.684211v107.789474h-161.684211v-107.789474z m-215.578947 0h161.684211v107.789474h-161.684211v-107.789474z" fill="${RGBA_TEAL3}" /></svg>`,
     you: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-215.578947-188.631579h-161.684211v-26.947368h161.684211V242.526316H269.473684v53.894737h161.684211v26.947368h-161.684211v485.052632h53.894737v-53.894737h377.263158v53.894737h53.894737V323.368421zM323.368421 646.736842h377.263158v53.894737H323.368421v-53.894737z m0-269.473684h107.789474c0 103.316211-72.784842 107.654737-81.084632 107.789474L350.315789 538.947368c46.592 0 134.736842-33.792 134.736843-161.68421h53.894736v107.789474c0 29.722947 24.171789 53.894737 53.894737 53.894736h107.789474v53.894737H323.368421v-215.578947z m377.263158 0v107.789474h-107.789474v-107.789474h107.789474z m-215.578947-80.842105h53.894736v26.947368h-53.894736v-26.947368z" fill="${RGBA_TEAL3}" /></svg>`,
     xu: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M970.105263 512c0 224.983579-163.166316 412.186947-377.263158 450.533053v-54.460632C777.135158 870.507789 916.210526 707.206737 916.210526 512c0-222.881684-181.328842-404.210526-404.210526-404.210526S107.789474 289.118316 107.789474 512s181.328842 404.210526 404.210526 404.210526c9.081263 0 18.000842-0.754526 26.947368-1.374315v53.894736c-8.973474 0.538947-17.866105 1.374316-26.947368 1.374316-252.604632 0-458.105263-205.500632-458.105263-458.105263S259.395368 53.894737 512 53.894737s458.105263 205.500632 458.105263 458.105263z m-375.592421 150.393263c33.684211 44.544 75.210105 74.698105 124.739369 90.812632l11.425684 3.718737 10.401684-6.009264C781.204211 727.740632 808.421053 622.565053 808.421053 592.842105h-53.894737c0 22.069895-19.132632 80.869053-33.711158 103.504842-34.816-14.605474-64.538947-39.262316-89.249684-74.13221 48.316632-55.269053 92.079158-117.328842 120.535579-179.900632l-49.044211-22.285473c-23.767579 52.250947-59.742316 104.717474-100.055579 152.656842-24.010105-50.930526-41.148632-115.927579-51.658105-195.395369H700.631579v-53.894737h-155.189895A1848.050526 1848.050526 0 0 1 538.947368 161.684211h-53.894736c0 58.206316 2.155789 112.074105 6.494315 161.68421H323.368421v26.947368c0 216.549053-13.177263 263.545263-100.702316 359.046737l39.747369 36.432842c63.326316-69.093053 92.806737-118.272 105.714526-206.848H485.052632v-53.894736h-111.319579a1742.147368 1742.147368 0 0 0 3.449263-107.789474h120.158316c12.611368 98.250105 35.031579 177.475368 67.395368 238.187789-61.978947 65.536-128.053895 117.975579-173.298526 142.282106l25.519158 47.481263c47.589053-25.573053 114.095158-77.446737 177.55621-142.821053z m125.170526-411.971368l-80.842105-80.842106-38.103579 38.103579 80.842105 80.842106 38.103579-38.103579z" fill="${RGBA_TEAL3}" /></svg>`,
-    hai: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M309.975579 804.756211l-27.136-46.592c103.073684-60.011789 183.026526-132.473263 241.475368-219.24379H350.315789l-13.473684-50.283789c58.88-33.980632 99.435789-117.571368 118.703158-165.295158H242.526316v-53.894737h538.947368v53.894737h-268.18021c-12.395789 34.088421-42.469053 106.603789-90.435369 161.68421h134.009263a680.555789 680.555789 0 0 0 46.349474-107.708631l51.092211 17.057684c-58.421895 175.265684-171.034947 309.490526-344.333474 410.381474z m192.350316-2.937264L467.806316 760.454737c88.414316-73.728 154.516211-158.773895 202.105263-259.907369l48.801684 22.959158a797.372632 797.372632 0 0 1-82.351158 137.781895c32.741053 15.009684 83.456 44.867368 137.647158 101.591579l-38.938947 37.268211c-57.236211-59.877053-109.325474-85.557895-133.766737-95.178106a850.997895 850.997895 0 0 1-98.977684 96.848842z m48.613052-536.872421l-80.842105-53.894737 29.884632-44.840421 80.842105 53.894737-29.884632 44.840421zM512 53.894737C259.395368 53.894737 53.894737 259.395368 53.894737 512s205.500632 458.105263 458.105263 458.105263c9.081263 0 17.973895-0.835368 26.947368-1.374316v-53.894736c-8.946526 0.619789-17.866105 1.374316-26.947368 1.374315-222.881684 0-404.210526-181.328842-404.210526-404.210526S289.118316 107.789474 512 107.789474s404.210526 181.328842 404.210526 404.210526c0 195.206737-139.075368 358.507789-323.368421 396.045474v54.460631c214.096842-38.346105 377.263158-225.549474 377.263158-450.533052C970.105263 259.395368 764.604632 53.894737 512 53.894737z" fill="${RGBA_TEAL3}" /></svg>`
+    hai: `<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg"><path d="M309.975579 804.756211l-27.136-46.592c103.073684-60.011789 183.026526-132.473263 241.475368-219.24379H350.315789l-13.473684-50.283789c58.88-33.980632 99.435789-117.571368 118.703158-165.295158H242.526316v-53.894737h538.947368v53.894737h-268.18021c-12.395789 34.088421-42.469053 106.603789-90.435369 161.68421h134.009263a680.555789 680.555789 0 0 0 46.349474-107.708631l51.092211 17.057684c-58.421895 175.265684-171.034947 309.490526-344.333474 410.381474z m192.350316-2.937264L467.806316 760.454737c88.414316-73.728 154.516211-158.773895 202.105263-259.907369l48.801684 22.959158a797.372632 797.372632 0 0 1-82.351158 137.781895c32.741053 15.009684 83.456 44.867368 137.647158 101.591579l-38.938947 37.268211c-57.236211-59.877053-109.325474-85.557895-133.766737-95.178106a850.997895 850.997895 0 0 1-98.977684 96.848842z m48.613052-536.872421l-80.842105-53.894737 29.884632-44.840421 80.842105 53.894737-29.884632 44.840421zM512 53.894737C259.395368 53.894737 53.894737 259.395368 53.894737 512s205.500632 458.105263 458.105263 458.105263c9.081263 0 17.973895-0.835368 26.947368-1.374316v-53.894736c-8.946526 0.619789-17.866105 1.374316-26.947368 1.374315-222.881684 0-404.210526-181.328842-404.210526-404.210526S289.118316 107.789474 512 107.789474s404.210526 181.328842 404.210526 404.210526c0 195.206737-139.075368 358.507789-323.368421 396.045474v54.460631c214.096842-38.346105 377.263158-225.549474 377.263158-450.533052C970.105263 259.395368 764.604632 53.894737 512 53.894737z" fill="${RGBA_TEAL3}" /></svg>`,
   };
   var chinese_hour_characters_default = ChineseHourCharacters;
 
   // lib/ui/image/utils/get-chinese-hour-character.js
   var getChineseHourCharacter = (hour) => {
     const map = [
-      "zi",
-      "chou",
-      "chou",
-      "yin",
-      "yin",
-      "mao",
-      "mao",
-      "chen",
-      "chen",
-      "si",
-      "si",
-      "wu",
-      "wu",
-      "wei",
-      "wei",
-      "shen",
-      "shen",
-      "you",
-      "you",
-      "xu",
-      "xu",
-      "hai",
-      "hai",
-      "zi"
+      'zi',
+      'chou',
+      'chou',
+      'yin',
+      'yin',
+      'mao',
+      'mao',
+      'chen',
+      'chen',
+      'si',
+      'si',
+      'wu',
+      'wu',
+      'wei',
+      'wei',
+      'shen',
+      'shen',
+      'you',
+      'you',
+      'xu',
+      'xu',
+      'hai',
+      'hai',
+      'zi',
     ];
     return map[hour];
   };
@@ -3216,14 +2773,15 @@ var tetris = (() => {
     const y = height / 2 - size * 1.2;
     render_image_default(ctx, img, x, y, size);
   };
-  var render_chinese_hour_character_image_default = renderChineseHourCharacterImage;
+  var render_chinese_hour_character_image_default =
+    renderChineseHourCharacterImage;
 
   // lib/ui/board/render-board.js
   function renderBoard(board) {
     const { ROWS: ROWS2, COLS: COLS2 } = board_default;
     const { gameBoardContext: gameBoardContext2 } = canvas_default;
     clear_board_default();
-    render_scene_background_default("playing");
+    render_scene_background_default('playing');
     render_chinese_hour_character_image_default();
     for (let y = 0; y < ROWS2; y++) {
       for (let x = 0; x < COLS2; x++) {
@@ -3268,7 +2826,7 @@ var tetris = (() => {
     clear_board_default();
     render_active_only_default(state);
     render_overlay_default();
-    render_scene_background_default("paused");
+    render_scene_background_default('paused');
     render_tetris_text_default();
     render_digital_clock_default();
     render_analog_clock_default();
@@ -3288,14 +2846,14 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "GAME",
+      text: 'GAME',
       x: width / 2,
       y: height / 1.8,
       color: RED5,
       strokeColor: YELLOW4,
       size: 2.3,
       center: true,
-      stroke: true
+      stroke: true,
     });
   };
   var render_game_text_default = renderGameText;
@@ -3306,14 +2864,14 @@ var tetris = (() => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
-      text: "OVER",
+      text: 'OVER',
       x: width / 2,
       y: height / 1.6,
       color: RED5,
       strokeColor: YELLOW4,
       size: 2.3,
       center: true,
-      stroke: true
+      stroke: true,
     });
   };
   var render_over_text_default = renderOverText;
@@ -3323,7 +2881,7 @@ var tetris = (() => {
     clear_board_default();
     render_active_only_default(state);
     render_overlay_default();
-    render_scene_background_default("game-over");
+    render_scene_background_default('game-over');
     render_tetris_text_default();
     render_game_text_default();
     render_over_text_default();
@@ -3357,7 +2915,7 @@ var tetris = (() => {
      *
      * @param {object} state 游戏状态
      */
-    "main-menu": (state) => {
+    'main-menu': (state) => {
       main_menu_scene_default(state);
     },
     /**
@@ -3373,7 +2931,7 @@ var tetris = (() => {
      *
      * @param {object} state 游戏状态
      */
-    "game-over": (state) => {
+    'game-over': (state) => {
       game_over_scene_default(state);
     },
     /**
@@ -3383,7 +2941,7 @@ var tetris = (() => {
      */
     playing: (state) => {
       playing_scene_default(state);
-    }
+    },
   };
   var scenes_default = Scenes;
 
@@ -3407,7 +2965,7 @@ var tetris = (() => {
     canvas_default.fontSize = Math.floor(gameBoard2.height * 0.032);
     const nextSize = Math.min(
       globalThis.innerWidth * 0.1,
-      globalThis.innerHeight * 0.18
+      globalThis.innerHeight * 0.18,
     );
     nextPiece2.width = nextSize;
     nextPiece2.height = nextSize;
@@ -3430,7 +2988,7 @@ var tetris = (() => {
     return {
       source,
       lines,
-      level
+      level,
     };
   };
   var get_hud_default = getHud;
@@ -3470,11 +3028,11 @@ var tetris = (() => {
       const { state } = Engine;
       reset_board_default();
       load_high_score_default();
-      set_mode_default("main-menu");
+      set_mode_default('main-menu');
       Engine.setHud({
         score: 0,
         lines: 0,
-        level: 1
+        level: 1,
       });
       Engine.resize();
       const { score, lines, level, highScore } = state;
@@ -3525,7 +3083,7 @@ var tetris = (() => {
     resize: () => {
       resize_default();
       Engine.render();
-    }
+    },
   };
   var engine_default = Engine;
 
