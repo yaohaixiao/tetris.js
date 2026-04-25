@@ -671,7 +671,7 @@ var tetris = (() => {
       }
       case "paused": {
         img = getImage(scenes_background_default.coffee);
-        size = width * 0.86;
+        size = width * 0.76;
         x = width / 2 - size / 2;
         y = height - size * 0.94;
         break;
@@ -3268,7 +3268,7 @@ var tetris = (() => {
       size = Math.floor(width * 0.48);
       x = width - size * 0.7;
       y = height / 2 - size * 1.4;
-    } else if (hour > 4 && hour <= 7) {
+    } else if (hour > 3 && hour <= 7) {
       size = Math.floor(width * 0.52);
       x = width - size * 1.1;
       y = height / 2 - size * 1.7;
@@ -3290,8 +3290,8 @@ var tetris = (() => {
       y = height / 2 - size * 1.7;
     } else {
       size = Math.floor(width * 0.48);
-      x = width / 2 - size / 2;
-      y = -size * 0.1;
+      x = -size * 0.3;
+      y = height / 2 - size * 1.4;
     }
     render_image_default(ctx, img, x, y, size);
   };
