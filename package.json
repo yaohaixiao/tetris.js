@@ -9,7 +9,7 @@
     "build:formatted": "node build/build.js action=format",
     "build": "node build/build.js action=minify",
     "format": "npm run format:es && npm run format:prettier",
-    "format:es": "npm run lint:es --fix",
+    "format:es": "eslint . --fix",
     "format:prettier": "npm run format:prettier:raw -- --write",
     "format:prettier:raw": "prettier \"**/*.{{m,c,}{j,t}s{x,},md{x,},json,y{a,}ml}\" --ignore-path .gitignore",
     "lint": "npm run lint:es && npm run lint:prettier",
