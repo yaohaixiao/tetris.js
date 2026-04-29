@@ -3302,17 +3302,26 @@ var tetris = (() => {
   var render_chinese_hour_character_image_default = renderChineseHourCharacterImage;
 
   // lib/ui/board/render-board.js
-  function renderBoard(board) {
+  function renderBoard(board, options = {}) {
     const { ROWS: ROWS2, COLS: COLS2 } = board_default;
     const { gameBoardContext: gameBoardContext2 } = canvas_default;
+    const overrideCells = options.overrideCells || null;
     clear_board_default();
-    render_chinese_hour_character_image_default();
     render_scene_background_default("playing");
+    render_chinese_hour_character_image_default();
     for (let y = 0; y < ROWS2; y++) {
       for (let x = 0; x < COLS2; x++) {
-        if (board[y][x]) {
-          render_block_default(gameBoardContext2, x, y, board[y][x]);
+        const val = board[y][x];
+        if (val) {
+          render_block_default(gameBoardContext2, x, y, val);
         }
+      }
+    }
+    if (overrideCells && overrideCells.length > 0) {
+      for (const cell of overrideCells) {
+        const { x, y, value } = cell;
+        if (x < 0 || x >= COLS2 || y < 0 || y >= ROWS2 || !value) continue;
+        render_block_default(gameBoardContext2, x, y, value);
       }
     }
   }
