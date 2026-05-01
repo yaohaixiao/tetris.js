@@ -1,3 +1,19 @@
+## [0.5.2](https://github.com/yaohaixiao/tetris.js/compare/0.5.1...0.5.2) (2026-05-01)
+
+
+### Bug Fixes
+
+* 去掉 clearImagesCache() 调整后多余的 URL.revoke 的处理； ([1114fbf](https://github.com/yaohaixiao/tetris.js/commit/1114fbfde67f96c82e508b5ed059c3fef4640579))
+* 暂时无法完成重力效果，连续下落的逻辑，干脆干掉这个效果； ([4b39c47](https://github.com/yaohaixiao/tetris.js/commit/4b39c47d6f0d789c5013730ebceaa76e83b6c329))
+
+
+### Features
+
+* 调整游戏进行中的UI设计（12时辰文字的位置和大小） ([a4b9817](https://github.com/yaohaixiao/tetris.js/commit/a4b98172b601e5608a706edcb94a9b29255a58e4))
+* 调整暂停界面 UI，添加新的3个表盘的配色；优化模式时钟的代码结构； ([8ab8110](https://github.com/yaohaixiao/tetris.js/commit/8ab8110288b446717d4ba7696c54adfb85cf0d9e))
+* 优化背景音乐，添加多首背景音乐，根据级别播放不同的背景音乐 ([b5eeb01](https://github.com/yaohaixiao/tetris.js/commit/b5eeb010b7d0f8ee9a5299cff693c348704b852c))
+
+
 ## [0.5.1](https://github.com/yaohaixiao/tetris.js/compare/0.4.0...0.5.1) (2026-04-22)
 
 ### Bug Fixes
