@@ -2704,25 +2704,30 @@ var tetris = (() => {
       const state = store.getState();
       const lines = state.clearLines || [];
       const cleared = lines.length;
+      const board = structuredClone(state.board);
       for (let y = ROWS2 - 1; y >= 0; y--) {
-        const isFullLine = state.board[y].every(Boolean);
+        const isFullLine = board[y].every(Boolean);
         if (isFullLine) {
-          state.board.splice(y, 1);
-          state.board.unshift(Array.from({ length: COLS2 }).fill(0));
+          board.splice(y, 1);
+          board.unshift(Array.from({ length: COLS2 }).fill(0));
           y++;
         }
       }
-      state.clearLines = [];
-      state.lines += cleared;
-      state.score += CLEAR_LINE_SCORES2[cleared] * state.level;
-      const totalLines = state.baseLines + state.lines;
+      const nextLines = state.lines + cleared;
+      const totalLines = state.baseLines + nextLines;
       const newLevel = Math.floor(totalLines / 10) + 1;
       if (newLevel > state.level) {
         level_up_controller_default(newLevel);
       }
-      const level = Math.min(Math.max(state.level, newLevel), MAX_LEVEL2);
-      store.setLevel(level);
-      render_hud_default(state);
+      store.setState((prev) => ({
+        ...prev,
+        clearLines: [],
+        lines: nextLines,
+        score: prev.score + CLEAR_LINE_SCORES2[cleared] * prev.level,
+        level: Math.min(Math.max(prev.level, newLevel), MAX_LEVEL2),
+        board
+      }));
+      render_hud_default(store.getState());
     }
     /**
      * ## 渲染动画
