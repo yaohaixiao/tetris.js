@@ -1454,6 +1454,13 @@ var tetris = (() => {
     /** ## 停止播放 */
     stopPlay() {
       this.playing = false;
+    },
+    reset() {
+      this.recording = false;
+      this.playing = false;
+      this.frame = 0;
+      this.cursor = 0;
+      this.data = [];
     }
   };
   var replay_default = Replay;
@@ -1744,14 +1751,14 @@ var tetris = (() => {
     "game-over": game_over_actions_default
   };
   var dispatchCommand = (cmd, engine) => {
-    const { type, payload } = cmd;
+    const { action, payload } = cmd;
     const { Game: Game2 } = engine;
     const mode = Game2.store.getMode();
     const actions = ACTIONS_MAP[mode];
     if (!actions) {
       return;
     }
-    const handler = actions[type];
+    const handler = actions[action];
     handler?.(payload, Game2);
   };
   var dispatch_command_default = dispatchCommand;
@@ -1761,11 +1768,11 @@ var tetris = (() => {
     /**
      * ## 创建一个命令实例
      *
-     * @param {string} type - 命令类型（如 MOVE / ROTATE）
+     * @param {string} action - 命令类型（如 MOVE / ROTATE）
      * @param {object} [payload={}] - 命令参数（如方向、等级等）. Default is `{}`
      */
-    constructor(type, payload = {}) {
-      this.type = type;
+    constructor(action, payload = {}) {
+      this.action = action;
       this.payload = payload;
     }
     /**
@@ -1773,10 +1780,17 @@ var tetris = (() => {
      *
      * 将命令交给统一的 dispatch 系统处理， 而不是在 Command 内部写逻辑。
      *
-     * @param {object} game - 游戏控制模块
+     * @param {object} engine - 游戏引擎
      */
-    execute(game) {
-      dispatch_command_default(this, game);
+    execute(engine) {
+      const { action, payload } = this;
+      dispatch_command_default(
+        {
+          action,
+          payload
+        },
+        engine
+      );
     }
   };
   var command_default = Command;
@@ -1797,11 +1811,13 @@ var tetris = (() => {
     if (replay_default.playing) {
       const { data } = replay_default;
       while (replay_default.cursor < data.length && data[replay_default.cursor].frame === replay_default.frame) {
-        const item = data[replay_default.cursor];
-        command_queue_default.enqueue(new command_default(item.cmd.type, item.cmd.payload));
+        const record = data[replay_default.cursor];
+        const { cmd } = record;
+        command_queue_default.enqueue(new command_default(cmd.action, cmd.payload));
         replay_default.cursor++;
       }
     }
+    engine_default.Gamepad.update();
     command_queue_default.flush(engine_default);
     if (!engine_default.accumulator || stepDelta > dropInterval) {
       Game2.tick();
@@ -2694,8 +2710,6 @@ var tetris = (() => {
      * 2. 更新分数与消除行数
      * 3. 判断并处理升级
      * 4. 更新 HUD
-     *
-     * 注意：此处直接修改游戏状态（state），后稍需要优化
      */
     stop() {
       const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = game_default2;
@@ -2955,6 +2969,14 @@ var tetris = (() => {
     const { store } = game_default;
     stop_bgm_default();
     engine_default.Animations.clear();
+    command_queue_default.clear();
+    if (replay_default.playing) {
+      replay_default.stopPlay();
+    }
+    if (replay_default.recording) {
+      replay_default.stopRecord();
+    }
+    replay_default.reset();
     engine_default.start();
     store.resetBoard();
     store.setState({
@@ -3254,84 +3276,6 @@ var tetris = (() => {
     engine_default.accumulator = 0;
   };
   var stop_game_loop_default = stopGameLoop;
-
-  // lib/input/on-resize.js
-  var onResize = () => {
-    engine_default.resize();
-  };
-  var on_resize_default = onResize;
-
-  // lib/engine/dispatch-input.js
-  var dispatchInput = (input) => {
-    const { action } = input;
-    const hasBlocking = engine_default.Animations.hasBlocking(["countdown", "level-up"]);
-    if (hasBlocking || !action) {
-      return;
-    }
-    const cmd = new command_default(action);
-    command_queue_default.enqueue(cmd);
-    if (replay_default.recording) {
-      replay_default.data.push({
-        frame: replay_default.frame,
-        cmd
-      });
-    }
-  };
-  var dispatch_input_default = dispatchInput;
-
-  // lib/input/resolve-input-action.js
-  var ACTION_MAP = {
-    arrowleft: "MOVE_LEFT",
-    arrowright: "MOVE_RIGHT",
-    arrowdown: "MOVE_DOWN",
-    arrowup: "ROTATE",
-    " ": "DROP",
-    m: "TOGGLE_MUSIC",
-    p: "TOGGLE_PAUSE",
-    r: "RESTART",
-    q: "QUIT",
-    1: "LEVEL_ONE",
-    2: "LEVEL_TWO",
-    3: "LEVEL_THREE",
-    4: "LEVEL_FOUR",
-    5: "LEVEL_FIVE",
-    6: "LEVEL_SIX",
-    7: "LEVEL_SEVEN",
-    8: "LEVEL_EIGHT",
-    9: "LEVEL_NINE",
-    t: "LEVEL_TEN",
-    enter: "CONFIRM"
-  };
-  var resolveInputAction = (key) => {
-    if (!key) {
-      return;
-    }
-    const normalizedKey = key.toLowerCase();
-    return ACTION_MAP[normalizedKey];
-  };
-  var resolve_input_action_default = resolveInputAction;
-
-  // lib/input/on-keydown.js
-  var onKeydown = (e) => {
-    const key = e.key.toLowerCase();
-    const action = resolve_input_action_default(key);
-    if (!action) {
-      return;
-    }
-    dispatch_input_default({
-      type: "keydown",
-      key,
-      action
-    });
-  };
-  var on_keydown_default = onKeydown;
-
-  // lib/input/bind-events.js
-  var bindEvents = () => {
-    globalThis.addEventListener("resize", on_resize_default);
-    document.addEventListener("keydown", on_keydown_default);
-  };
-  var bind_events_default = bindEvents;
 
   // lib/ui/text/render-level-text.js
   var renderLevelText = () => {
@@ -4129,6 +4073,427 @@ var tetris = (() => {
   };
   var resize_default = resize;
 
+  // lib/engine/dispatch-input.js
+  var dispatchInput = (input) => {
+    const { action, payload } = input;
+    const hasBlocking = engine_default.Animations.hasBlocking(["countdown", "level-up"]);
+    if (hasBlocking || !action) {
+      return;
+    }
+    const cmd = new command_default(action, payload);
+    command_queue_default.enqueue(cmd);
+    if (replay_default.recording) {
+      replay_default.data.push({
+        frame: replay_default.frame,
+        cmd
+      });
+    }
+  };
+  var dispatch_input_default = dispatchInput;
+
+  // lib/input/gamepad-controller.js
+  var GAMEPAD_ACTION_MAP = {
+    A: "TOGGLE_MUSIC",
+    B: "DROP",
+    X: "RESTART",
+    Y: "TOGGLE_PAUSE",
+    START: "CONFIRM",
+    BACK: "QUIT",
+    DPAD_LEFT: "MOVE_LEFT",
+    DPAD_RIGHT: "MOVE_RIGHT",
+    DPAD_DOWN: "MOVE_DOWN",
+    DPAD_UP: "ROTATE"
+  };
+  var STANDARD_BTN_MAP = {
+    A: 0,
+    B: 1,
+    X: 2,
+    Y: 3,
+    LB: 4,
+    RB: 5,
+    LT: 6,
+    RT: 7,
+    BACK: 8,
+    START: 9,
+    DPAD_UP: 12,
+    DPAD_DOWN: 13,
+    DPAD_LEFT: 14,
+    DPAD_RIGHT: 15
+  };
+  var BETOP_20BC_1263_BTN_MAP = {
+    A: 2,
+    B: 1,
+    X: 3,
+    Y: 0,
+    LB: 4,
+    RB: 5,
+    LT: 6,
+    RT: 7,
+    BACK: 8,
+    START: 9
+  };
+  var GamepadController = class {
+    /**
+     * ## 当前激活手柄 Index
+     *
+     * @type {number | null}
+     */
+    activeGamepadIndex = null;
+    /**
+     * ## 摇杆死区（避免漂移）
+     *
+     * @type {number}
+     */
+    DEAD_ZONE = 0.15;
+    /**
+     * ## 方向触发阈值
+     *
+     * @type {number}
+     */
+    DPAD_THRESHOLD = 0.5;
+    constructor() {
+      this.AXIS_MAP = {
+        LEFT_STICK_X: 0,
+        LEFT_STICK_Y: 1
+      };
+      this.curBtnMap = STANDARD_BTN_MAP;
+      this.buttonStates = {};
+      this.axisStates = {};
+      this._eventsBound = false;
+      this.dpadAxisState = {
+        up: false,
+        down: false,
+        left: false,
+        right: false
+      };
+    }
+    /**
+     * ## 每帧调用
+     *
+     * 流程：
+     *
+     * 1. 刷新 Gamepad snapshot
+     * 2. 如果存在 active gamepad
+     * 3. 收集输入 → dispatch
+     */
+    update() {
+      this._refreshGamepadState();
+      if (!this.activeGamepad) {
+        return;
+      }
+      this._collectCommands();
+    }
+    /** ## 绑定 Gamepad 连接事件 */
+    bindEvents() {
+      if (this._eventsBound) {
+        return;
+      }
+      globalThis.addEventListener("gamepadconnected", this._onConnect);
+      globalThis.addEventListener("gamepaddisconnected", this._onDisconnect);
+      this._eventsBound = true;
+    }
+    /** ## 销毁事件绑定 */
+    destroy() {
+      globalThis.removeEventListener("gamepadconnected", this._onConnect);
+      globalThis.removeEventListener("gamepaddisconnected", this._onDisconnect);
+      this._eventsBound = false;
+    }
+    /**
+     * ## 手柄连接
+     *
+     * - 设置 activeGamepad
+     * - 自动识别 BETOP 并切换 mapping
+     *
+     * @param {object} e - 事件对象
+     */
+    _onConnect = (e) => {
+      const pad = e.gamepad;
+      if (this.activeGamepadIndex === null) {
+        this.activeGamepadIndex = pad.index;
+        this.curBtnMap = this._isBetop(pad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+      }
+    };
+    /**
+     * ## 手柄断开
+     *
+     * - 清空状态
+     *
+     * @param {object} e - 事件对象
+     */
+    _onDisconnect = (e) => {
+      if (this.activeGamepadIndex === e.gamepad.index) {
+        this.activeGamepadIndex = null;
+        this.buttonStates = {};
+        this.axisStates = {};
+      }
+    };
+    /**
+     * ## 判断是否为 BETOP（北通） 手柄
+     *
+     * @param {string} id - 手柄 id 字符串
+     * @returns {boolean} - 返回判断结果，是北通返回 true，否则返回 false
+     */
+    _isBetop(id) {
+      return id.includes("20bc") && id.includes("1263");
+    }
+    /**
+     * ## 刷新 Gamepad 状态
+     *
+     * - 必须每帧调用 navigator.getGamepads()
+     * - 因为 Gamepad 对象是 snapshot，不是实时引用
+     */
+    _refreshGamepadState() {
+      const pads = navigator.getGamepads?.() || [];
+      if (this.activeGamepadIndex === null) {
+        const firstPad = Array.from(pads).find(Boolean);
+        if (firstPad) {
+          this.activeGamepadIndex = firstPad.index;
+          this.curBtnMap = this._isBetop(firstPad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+        }
+      }
+      this.activeGamepad = this.activeGamepadIndex === null ? null : pads[this.activeGamepadIndex];
+    }
+    /**
+     * ## 收集所有输入
+     *
+     * - 转换为 Command（通过 dispatchInput）
+     */
+    _collectCommands() {
+      const pad = this.activeGamepad;
+      if (!pad) {
+        return;
+      }
+      for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
+        if (this._isPressed(btnName)) {
+          if (this._isBetop(pad.id) && btnName.startsWith("DPAD_")) {
+            continue;
+          }
+          dispatch_input_default({ device: "gamepad", action, payload: {} });
+        }
+      }
+      const x = this._getAxis(this.AXIS_MAP.LEFT_STICK_X);
+      const y = this._getAxis(this.AXIS_MAP.LEFT_STICK_Y);
+      this._handleStickMove(x, y);
+      if (this._isBetop(pad.id)) {
+        const dpadVal = pad.axes[9] ?? 0;
+        this._handleBetopDpad(dpadVal);
+      }
+    }
+    /**
+     * ## 摇杆移动处理（带防抖）
+     *
+     * @param {number} x - X轴偏移数值
+     * @param {number} y - Y轴偏移数值
+     */
+    _handleStickMove(x, y) {
+      if (y < -this.DPAD_THRESHOLD) {
+        this._startAxisAction("ROTATE");
+      } else {
+        this._stopAxisAction("ROTATE");
+      }
+      if (y > this.DPAD_THRESHOLD) {
+        this._startAxisAction("MOVE_DOWN");
+      } else {
+        this._stopAxisAction("MOVE_DOWN");
+      }
+      if (x < -this.DPAD_THRESHOLD) {
+        this._startAxisAction("MOVE_LEFT");
+      } else {
+        this._stopAxisAction("MOVE_LEFT");
+      }
+      if (x > this.DPAD_THRESHOLD) {
+        this._startAxisAction("MOVE_RIGHT");
+      } else {
+        this._stopAxisAction("MOVE_RIGHT");
+      }
+    }
+    /**
+     * ## 开始轴动作（触发一次）
+     *
+     * 仅在未触发时触发 dispatch
+     *
+     * @param {string} action - 动作名称
+     */
+    _startAxisAction(action) {
+      if (!this.axisStates[action]) {
+        this.axisStates[action] = true;
+        dispatch_input_default({ device: "gamepad", action, payload: {} });
+      }
+    }
+    /**
+     * ## 停止轴动作（重置状态）
+     *
+     * @param {string} action - 动作名称
+     */
+    _stopAxisAction(action) {
+      this.axisStates[action] = false;
+    }
+    /**
+     * ## BETOP DPAD（axis9）解析
+     *
+     * 不同方向对应固定浮点值
+     *
+     * @param {number} val -
+     */
+    _handleBetopDpad(val) {
+      const v = val.toFixed(5);
+      const st = this.dpadAxisState;
+      switch (v) {
+        // 上
+        case "-1.00000": {
+          if (!st.up) {
+            st.up = true;
+            dispatch_input_default({ device: "gamepad", action: "ROTATE", payload: {} });
+          }
+          st.down = st.left = st.right = false;
+          break;
+        }
+        // 下
+        case "0.14286": {
+          if (!st.down) {
+            st.down = true;
+            dispatch_input_default({
+              device: "gamepad",
+              action: "MOVE_DOWN",
+              payload: {}
+            });
+          }
+          st.up = st.left = st.right = false;
+          break;
+        }
+        // 左
+        case "0.71429": {
+          if (!st.left) {
+            st.left = true;
+            dispatch_input_default({
+              device: "gamepad",
+              action: "MOVE_LEFT",
+              payload: {}
+            });
+          }
+          st.up = st.down = st.right = false;
+          break;
+        }
+        // 右
+        case "-0.42857": {
+          if (!st.right) {
+            st.right = true;
+            dispatch_input_default({
+              device: "gamepad",
+              action: "MOVE_RIGHT",
+              payload: {}
+            });
+          }
+          st.up = st.down = st.left = false;
+          break;
+        }
+        // 松开手柄充值状态
+        default: {
+          st.up = st.down = st.left = st.right = false;
+          break;
+        }
+      }
+    }
+    /**
+     * ## 获取轴值（带 dead zone）
+     *
+     * @param {number} index - 索引值
+     * @returns {number} - 返回获取的轴值
+     */
+    _getAxis(index) {
+      if (!this.activeGamepad) {
+        return 0;
+      }
+      const val = this.activeGamepad.axes[index] ?? 0;
+      return Math.abs(val) > this.DEAD_ZONE ? val : 0;
+    }
+    /**
+     * ## 判断按钮是否“刚按下”（防抖）
+     *
+     * @param {string} btnName - 按钮名称
+     * @returns {boolean} - 按钮按下返回 true，否则返回 false
+     */
+    _isPressed(btnName) {
+      const idx = this.curBtnMap[btnName];
+      if (idx === void 0 || !this.activeGamepad) {
+        return false;
+      }
+      const btn = this.activeGamepad.buttons[idx];
+      if (!btn) {
+        return false;
+      }
+      const pressed = btn.value > 0.5;
+      if (pressed && !this.buttonStates[btnName]) {
+        this.buttonStates[btnName] = true;
+        return true;
+      }
+      if (!pressed) {
+        this.buttonStates[btnName] = false;
+      }
+      return false;
+    }
+  };
+  var gamepad_controller_default = GamepadController;
+
+  // lib/input/keyboard.js
+  var KEYBOARDS_ACTION_MAP = {
+    arrowleft: "MOVE_LEFT",
+    arrowright: "MOVE_RIGHT",
+    arrowdown: "MOVE_DOWN",
+    arrowup: "ROTATE",
+    " ": "DROP",
+    m: "TOGGLE_MUSIC",
+    p: "TOGGLE_PAUSE",
+    r: "RESTART",
+    q: "QUIT",
+    1: "LEVEL_ONE",
+    2: "LEVEL_TWO",
+    3: "LEVEL_THREE",
+    4: "LEVEL_FOUR",
+    5: "LEVEL_FIVE",
+    6: "LEVEL_SIX",
+    7: "LEVEL_SEVEN",
+    8: "LEVEL_EIGHT",
+    9: "LEVEL_NINE",
+    t: "LEVEL_TEN",
+    enter: "CONFIRM"
+  };
+  var resolveKeyboardAction = (key) => {
+    if (!key) {
+      return;
+    }
+    const normalizedKey = key.toLowerCase();
+    return KEYBOARDS_ACTION_MAP[normalizedKey];
+  };
+  var onKeydown = (e) => {
+    const key = e.key.toLowerCase();
+    const action = resolveKeyboardAction(key);
+    if (!action) {
+      return;
+    }
+    dispatch_input_default({
+      device: "keyboard",
+      action,
+      payload: {}
+    });
+  };
+  var onResize = () => {
+    engine_default.resize();
+  };
+  var bindEvents = () => {
+    globalThis.addEventListener("resize", onResize);
+    document.addEventListener("keydown", onKeydown);
+  };
+  var destroy = () => {
+    globalThis.removeEventListener("resize", onResize);
+    document.removeEventListener("keydown", onKeydown);
+  };
+  var Keyboard = {
+    bindEvents,
+    destroy
+  };
+  var keyboard_default = Keyboard;
+
   // lib/engine/index.js
   var Engine = {
     // Runtime 状态
@@ -4139,6 +4504,8 @@ var tetris = (() => {
     lastTimestamp: 0,
     Animations: animation_system_default(),
     Game: game_default,
+    Gamepad: new gamepad_controller_default(),
+    Keyboards: keyboard_default,
     /**
      * ## 初始化游戏
      *
@@ -4152,7 +4519,7 @@ var tetris = (() => {
      * - 启动 game loop
      */
     launch: () => {
-      const { Game: Game2 } = Engine;
+      const { Game: Game2, Gamepad, Keyboards } = Engine;
       const { store } = Game2;
       store.resetBoard();
       Game2.loadHighScore();
@@ -4166,7 +4533,8 @@ var tetris = (() => {
       const state = store.getState();
       render_hud_default(state);
       lazy_render_main_menu_default(state);
-      bind_events_default();
+      Keyboards.bindEvents();
+      Gamepad.bindEvents();
       Engine.start();
     },
     /** ## 启动主循环 */
