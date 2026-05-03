@@ -58,7 +58,7 @@ var tetris = (() => {
   };
   var colors_default = COLORS;
 
-  // lib/ui/constants/images/scenes-background.js
+  // lib/services/ui/constants/images/scenes-background.js
   var { RGBA_WHITE: RGBA_WHITE2 } = colors_default;
   var ScenesBackground = {
     tetris: `<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512"><path d="M16.568 367.165h68.409v68.409H16.568z" style="fill:#f9d84e"/><path d="M16.568 418.472h68.409v17.102H16.568z" style="fill:#ffc20d"/><path d="M16.568 367.165H33.67v68.409H16.568z" style="fill:#ffc20d"/><path d="M84.977 367.165h68.409v68.409H84.977z" style="fill:#f9d84e"/><path d="M84.977 418.472h68.409v17.102H84.977z" style="fill:#ffc20d"/><path d="M84.977 367.165h17.102v68.409H84.977z" style="fill:#ffc20d"/><path d="M84.977 298.756h68.409v68.409H84.977z" style="fill:#f9d84e"/><path d="M84.977 350.063h68.409v17.102H84.977z" style="fill:#ffc20d"/><path d="M84.977 298.756h17.102v68.409H84.977z" style="fill:#ffc20d"/><path d="M16.568 298.756h68.409v68.409H16.568z" style="fill:#f9d84e"/><path d="M16.568 350.063h68.409v17.102H16.568z" style="fill:#ffc20d"/><path d="M16.568 298.756H33.67v68.409H16.568z" style="fill:#ffc20d"/><path d="M16.568 435.574h68.409v68.409H16.568z" style="fill:#b169bf"/><path d="M16.568 435.574H33.67v68.409H16.568z" style="fill:#844a8f"/><path d="M16.568 486.881h68.409v17.102H16.568z" style="fill:#844a8f"/><path d="M16.568 486.881H33.67v17.102H16.568z" style="fill:#844a8f"/><path d="M84.977 435.574h68.409v68.409H84.977z" style="fill:#b169bf"/><path d="M84.977 435.574h17.102v68.409H84.977z" style="fill:#844a8f"/><path d="M84.977 486.881h68.409v17.102H84.977z" style="fill:#844a8f"/><path d="M84.977 486.881h17.102v17.102H84.977z" style="fill:#844a8f"/><path d="M153.386 435.574h68.409v68.409h-68.409z" style="fill:#b169bf"/><path d="M153.386 435.574h17.102v68.409h-17.102z" style="fill:#844a8f"/><path d="M153.386 486.881h68.409v17.102h-68.409z" style="fill:#844a8f"/><path d="M153.386 486.881h17.102v17.102h-17.102z" style="fill:#844a8f"/><path d="M221.795 435.574h68.409v68.409h-68.409z" style="fill:#b169bf"/><path d="M221.795 435.574h17.102v68.409h-17.102z" style="fill:#844a8f"/><path d="M221.795 486.881h68.409v17.102h-68.409z" style="fill:#844a8f"/><path d="M221.795 486.881h17.102v17.102h-17.102z" style="fill:#844a8f"/><path d="M221.795 367.165h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M221.795 418.472h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M221.795 367.165h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M290.205 367.165h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M290.205 418.472h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M290.205 367.165h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M290.205 435.574h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M290.205 486.881h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M290.205 435.574h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M358.614 435.574h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M358.614 486.881h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M358.614 435.574h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M256 8.017h68.409v68.409H256z" style="fill:#fd5e95"/><path d="M256 59.324h68.409v17.102H256z" style="fill:#d14d7b"/><path d="M256 8.017h17.102v68.409H256z" style="fill:#d14d7b"/><path d="M324.409 8.017h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M324.409 59.324h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M324.409 8.017h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M324.409 76.426h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M324.409 127.733h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M324.409 76.426h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M392.818 76.426h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M392.818 127.733h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M392.818 76.426h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M358.614 367.165h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M358.614 418.472h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M358.614 367.165h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M427.023 367.165h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M427.023 418.472h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M427.023 367.165h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M427.023 435.574h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M427.023 486.881h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M427.023 435.574h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M358.614 298.756h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M358.614 350.063h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M358.614 298.756h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M153.386 127.733h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M153.386 179.04h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M153.386 127.733h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M153.386 196.142h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M153.386 247.449h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M153.386 196.142h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M221.795 196.142h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M221.795 247.449h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M221.795 196.142h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M153.386 264.551h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M153.386 315.858h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M153.386 264.551h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M256 84.443h60.392v60.392a8.016 8.016 0 0 0 8.017 8.017h136.818a8.016 8.016 0 0 0 8.017-8.017V76.426a8.016 8.016 0 0 0-8.017-8.017h-60.392V8.017A8.016 8.016 0 0 0 392.818 0H256a8.017 8.017 0 0 0-8.017 8.017v68.409A8.017 8.017 0 0 0 256 84.443m76.426 0h52.376v52.376h-52.376zm120.785 52.375h-52.376V84.443h52.376zm-68.409-68.409h-52.376V16.033h52.376zM264.017 16.033h52.376v52.376h-52.376zM495.432 359.148H435.04v-60.392a8.016 8.016 0 0 0-8.017-8.017h-68.409a8.016 8.016 0 0 0-8.017 8.017v60.392h-9.086a8.016 8.016 0 0 0-8.017 8.017 8.016 8.016 0 0 0 8.017 8.017h9.086v52.376h-52.376v-52.376h9.086a8.016 8.016 0 0 0 8.017-8.017 8.016 8.016 0 0 0-8.017-8.017h-85.511a8.017 8.017 0 0 0-8.017 8.017v60.392h-52.376v-86.58h60.392a8.017 8.017 0 0 0 8.017-8.017v-60.392h60.392a8.016 8.016 0 0 0 8.017-8.017v-68.409a8.016 8.016 0 0 0-8.017-8.017h-60.392v-60.392a8.017 8.017 0 0 0-8.017-8.017h-68.409a8.017 8.017 0 0 0-8.017 8.017v17.102a8.017 8.017 0 0 0 8.017 8.017 8.017 8.017 0 0 0 8.017-8.017v-9.086h52.376v52.376h-52.376v-9.086a8.017 8.017 0 0 0-8.017-8.017 8.017 8.017 0 0 0-8.017 8.017v111.699H67.875c-4.427 0-8.017 3.588-8.017 8.017s3.589 8.017 8.017 8.017h9.086v52.376H24.585v-52.376h9.086c4.427 0 8.017-3.588 8.017-8.017s-3.589-8.017-8.017-8.017H16.568a8.017 8.017 0 0 0-8.017 8.017v205.228A8.017 8.017 0 0 0 16.568 512h478.864a8.016 8.016 0 0 0 8.017-8.017V367.165a8.016 8.016 0 0 0-8.017-8.017m-8.017 68.409H435.04v-52.376h52.376zM366.63 375.182h52.376v52.376H366.63zm0-68.41h52.376v52.376H366.63zm-136.818 68.41h52.376v52.376h-52.376zm-136.818 0h52.376v52.376H92.994zm120.785-50.238h-52.376v-52.376h52.376zm68.409-68.41h-52.376v-52.376h52.376zm-68.409-52.375v52.376h-52.376v-52.376zM145.37 359.148H92.994v-52.376h52.376zm-68.41 16.034v52.376H24.585v-52.376zm-52.375 68.409H76.96v52.376H24.585zm68.409 0h52.376v52.376H92.994zm68.409 0h52.376v52.376h-52.376zm68.409 0h52.376v52.376h-52.376zm68.409 0h52.376v52.376h-52.376zm68.409 0h52.376v52.376H366.63zm120.785 52.376H435.04v-52.376h52.376z"/></svg>`,
@@ -71,7 +71,56 @@ var tetris = (() => {
   };
   var scenes_background_default = ScenesBackground;
 
-  // lib/audio/constants/motifs.js
+  // lib/core/event-bus/index.js
+  var EventBus = {
+    events: /* @__PURE__ */ new Map(),
+    /**
+     * ## 订阅事件
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数
+     */
+    on(event, handler) {
+      if (!this.events.has(event)) {
+        this.events.set(event, /* @__PURE__ */ new Set());
+      }
+      this.events.get(event).add(handler);
+    },
+    /**
+     * ## 取消订阅
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数
+     */
+    off(event, handler) {
+      const set = this.events.get(event);
+      if (!set) return;
+      set.delete(handler);
+      if (set.size === 0) {
+        this.events.delete(event);
+      }
+    },
+    /**
+     * ## 触发事件
+     *
+     * @param {string} event - 事件名称
+     * @param {object} payload - 参数对象
+     */
+    emit(event, payload) {
+      const set = this.events.get(event);
+      if (!set) return;
+      for (const handler of set) {
+        handler(payload);
+      }
+    },
+    /** ## 清空所有事件（用于重启 / 测试 / reset） */
+    clear() {
+      this.events.clear();
+    }
+  };
+  var event_bus_default = EventBus;
+
+  // lib/services/audio/constants/motifs.js
   var MOTIFS = {
     combo: {
       shift: 0,
@@ -91,7 +140,7 @@ var tetris = (() => {
   };
   var motifs_default = MOTIFS;
 
-  // lib/audio/play-tone.js
+  // lib/services/audio/play-tone.js
   var audioCtx = new AudioContext();
   var playTone = (freq, dur, vol = 0.1, wave = "square") => {
     const osc = audioCtx.createOscillator();
@@ -115,7 +164,7 @@ var tetris = (() => {
   };
   var play_tone_default = playTone;
 
-  // lib/audio/sounds.js
+  // lib/services/audio/sounds.js
   var getMotif = (lines, isPerfectClear = false) => {
     if (isPerfectClear) {
       return "perfect";
@@ -203,192 +252,7 @@ var tetris = (() => {
   };
   var sounds_default = Sounds;
 
-  // lib/ui/constants/board.js
-  var COLS = 10;
-  var ROWS = 20;
-  var BOARD = {
-    COLS,
-    ROWS
-  };
-  var board_default = BOARD;
-
-  // lib/game/state/game-state.js
-  var GameState = {
-    board: [],
-    curr: null,
-    cx: 0,
-    cy: 0,
-    next: null,
-    score: 0,
-    lines: 0,
-    level: 1,
-    highScore: 0,
-    baseLines: 0,
-    clearLines: [],
-    /*
-     * main-menu：等级选择（主菜单）
-     * playing：游戏中
-     * paused：游戏暂停
-     * game-over：游戏结束
-     */
-    mode: "main-menu"
-  };
-  var game_state_default = GameState;
-
-  // lib/utils/is-function.js
-  var isFunction = (val) => {
-    if (val == null || typeof val !== "function" && typeof val !== "object") {
-      return false;
-    }
-    return (
-      // 处理某些特殊环境下 typeof 误判为 object 的函数（极少数情况）
-      typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]"
-    );
-  };
-  var is_function_default = isFunction;
-
-  // lib/game/state/game-store.js
-  var createGameStore = (initialState) => {
-    let state = {
-      ...structuredClone(initialState || game_state_default),
-      nextSequence: []
-    };
-    return {
-      /**
-       * ## 获取完整 state
-       *
-       * @returns {object} 当前游戏状态
-       */
-      getState: () => state,
-      /**
-       * ## 更新 state（支持 patch 或函数）
-       *
-       * 支持两种模式：
-       *
-       * 1. Object patch
-       * 2. Function (prevState) => patch
-       *
-       * @param {object | Function} patch - 状态更新内容或函数
-       */
-      setState: (patch) => {
-        state = {
-          ...state,
-          ...is_function_default(patch) ? patch(state) : patch
-        };
-      },
-      /**
-       * ## 重置棋盘
-       *
-       * 根据 BOARD 常量重新生成空棋盘
-       */
-      resetBoard: () => {
-        const { COLS: COLS2, ROWS: ROWS2 } = board_default;
-        state.board = Array.from(
-          { length: ROWS2 },
-          () => Array.from({ length: COLS2 }).fill(0)
-        );
-      },
-      /**
-       * ## 获取已消除行数（baseLines）
-       *
-       * @returns {number} - 返回基础行数
-       */
-      getBaseLines: () => state.baseLines,
-      /**
-       * ## 设置基础行数
-       *
-       * @param {number} lines - 基础行数
-       */
-      setBaseLines: (lines) => {
-        state.baseLines = lines;
-      },
-      /**
-       * ## 获取当前已消除行（clearLines）
-       *
-       * @returns {object[]} - 返回清理的行数数据
-       */
-      getClearLines: () => state.clearLines,
-      /**
-       * ## 设置当前消除行
-       *
-       * @param {number[]} lines - 消除行数组
-       */
-      setClearLines: (lines) => {
-        state.clearLines = lines;
-      },
-      /**
-       * ## 获取 HUD 数据
-       *
-       * 返回 UI 渲染所需的核心数据
-       *
-       * @returns {object} HUD 数据
-       */
-      getHub: () => {
-        const { source, lines, level } = state;
-        return {
-          source,
-          lines,
-          level
-        };
-      },
-      /**
-       * ## 设置 HUD 数据
-       *
-       * @param {object} hud - HUD 数据对象
-       */
-      setHud: (hud) => {
-        const { score, lines, level } = hud;
-        state.score = score;
-        state.lines = lines;
-        state.level = level;
-      },
-      /**
-       * ## 设置最高分
-       *
-       * @param {number} highScore - 历史最高分
-       */
-      setHighScore: (highScore) => {
-        state.highScore = highScore;
-      },
-      /**
-       * ## 获取最高分
-       *
-       * @returns {number} - 返回最高分数
-       */
-      getHighScore: () => state.highScore,
-      /**
-       * ## 获取当前等级
-       *
-       * @returns {number} - 放回当前等级
-       */
-      getLevel: () => state.level,
-      /**
-       * ## 设置当前等级
-       *
-       * @param {number} level - 当前等级
-       */
-      setLevel: (level) => {
-        state.level = level;
-      },
-      /**
-       * ## 获取游戏模式
-       *
-       * @returns {string} 当前模式（main-menu / playing / paused / game-over）
-       */
-      getMode: () => state.mode,
-      /**
-       * ## 设置游戏模式
-       *
-       * @param {string} mode - 游戏模式
-       */
-      setMode: (mode) => {
-        state.mode = mode;
-      }
-    };
-  };
-  var game_store_default = createGameStore;
-
-  // lib/audio/state/audio-state.js
+  // lib/services/audio/state/audio-state.js
   var AudioState = {
     /** 是否启用背景音乐 true = 播放 BGM false = 静音 BGM */
     bgmEnabled: true,
@@ -404,7 +268,7 @@ var tetris = (() => {
   };
   var audio_state_default = AudioState;
 
-  // lib/audio/constants/musics.js
+  // lib/services/audio/constants/musics.js
   var Musics = {
     /**
      * ## 背景音乐：TetrisTheme
@@ -1134,7 +998,7 @@ var tetris = (() => {
   };
   var musics_default = Musics;
 
-  // lib/audio/loop-play-bgm.js
+  // lib/services/audio/loop-play-bgm.js
   var loopPlayBGM = (i, m, dur = 110, vol = 0.05) => {
     if (i >= m.length) {
       i = 0;
@@ -1146,7 +1010,7 @@ var tetris = (() => {
   };
   var loop_play_bgm_default = loopPlayBGM;
 
-  // lib/audio/stop-bgm.js
+  // lib/services/audio/stop-bgm.js
   var stopBGM = () => {
     if (audio_state_default.bgmTimer) {
       clearTimeout(audio_state_default.bgmTimer);
@@ -1155,7 +1019,7 @@ var tetris = (() => {
   };
   var stop_bgm_default = stopBGM;
 
-  // lib/audio/play-bgm.js
+  // lib/services/audio/play-bgm.js
   var {
     TetrisTheme,
     Loginska,
@@ -1196,7 +1060,282 @@ var tetris = (() => {
   };
   var play_bgm_default = playBGM;
 
-  // lib/engine/replay/index.js
+  // lib/services/audio/toggle-bgm.js
+  var toggleBGM = (level) => {
+    audio_state_default.bgmEnabled = !audio_state_default.bgmEnabled;
+    sounds_default.bgmToggle();
+    if (audio_state_default.bgmEnabled) {
+      play_bgm_default(level);
+    } else {
+      stop_bgm_default();
+    }
+  };
+  var toggle_bgm_default = toggleBGM;
+
+  // lib/services/audio/index.js
+  var Audio2 = {
+    Sounds: sounds_default,
+    playBGM: play_bgm_default,
+    stopBGM: stop_bgm_default,
+    toggleBGM: toggle_bgm_default
+  };
+  var audio_default = Audio2;
+
+  // lib/game/constants/game.js
+  var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
+  var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
+  var MAX_LEVEL = 99;
+  var GAME = {
+    CLEAR_LINE_SCORES,
+    MAX_LEVEL,
+    FONT_FAMILY
+  };
+  var game_default = GAME;
+
+  // lib/game/constants/shapes.js
+  var { PINK: PINK2, BLUE: BLUE2, TEAL: TEAL2, YELLOW: YELLOW2, VIOLET: VIOLET2, ORANGE: ORANGE2, GREEN: GREEN2, RED: RED2 } = colors_default;
+  var SHAPES = [
+    // I型方块（长条）：1行4列
+    { shape: [[1, 1, 1, 1]], color: TEAL2 },
+    // I型方块（长条）：1行5列
+    { shape: [[1, 1, 1, 1, 1]], color: GREEN2 },
+    // O型方块（正方形）：2x2
+    {
+      shape: [
+        [1, 1],
+        [1, 1]
+      ],
+      color: ORANGE2
+    },
+    // T型方块：2x3
+    {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1]
+      ],
+      color: YELLOW2
+    },
+    // L型方块
+    {
+      shape: [
+        [1, 0, 0],
+        [1, 1, 1]
+      ],
+      color: BLUE2
+    },
+    // J型方块
+    {
+      shape: [
+        [0, 0, 1],
+        [1, 1, 1]
+      ],
+      color: PINK2
+    },
+    // S型方块（右斜）
+    {
+      shape: [
+        [0, 1, 1],
+        [1, 1, 0]
+      ],
+      color: RED2
+    },
+    // Z型方块（左斜）
+    {
+      shape: [
+        [1, 1, 0],
+        [0, 1, 1]
+      ],
+      color: VIOLET2
+    }
+  ];
+  var shapes_default = SHAPES;
+
+  // lib/services/ui/constants/board.js
+  var COLS = 10;
+  var ROWS = 20;
+  var BOARD = {
+    COLS,
+    ROWS
+  };
+  var board_default = BOARD;
+
+  // lib/game/state/game-state.js
+  var GameState = {
+    board: [],
+    curr: null,
+    cx: 0,
+    cy: 0,
+    next: null,
+    score: 0,
+    lines: 0,
+    level: 1,
+    highScore: 0,
+    baseLines: 0,
+    clearLines: [],
+    /*
+     * main-menu：等级选择（主菜单）
+     * playing：游戏中
+     * paused：游戏暂停
+     * game-over：游戏结束
+     */
+    mode: "main-menu"
+  };
+  var game_state_default = GameState;
+
+  // lib/utils/is-function.js
+  var isFunction = (val) => {
+    if (val == null || typeof val !== "function" && typeof val !== "object") {
+      return false;
+    }
+    return (
+      // 处理某些特殊环境下 typeof 误判为 object 的函数（极少数情况）
+      typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]"
+    );
+  };
+  var is_function_default = isFunction;
+
+  // lib/game/state/game-store.js
+  var createGameStore = (initialState) => {
+    let state = {
+      ...structuredClone(initialState || game_state_default),
+      nextSequence: []
+    };
+    return {
+      /**
+       * ## 获取完整 state
+       *
+       * @returns {object} 当前游戏状态
+       */
+      getState: () => state,
+      /**
+       * ## 更新 state（支持 patch 或函数）
+       *
+       * 支持两种模式：
+       *
+       * 1. Object patch
+       * 2. Function (prevState) => patch
+       *
+       * @param {object | Function} patch - 状态更新内容或函数
+       */
+      setState: (patch) => {
+        state = {
+          ...state,
+          ...is_function_default(patch) ? patch(state) : patch
+        };
+      },
+      /**
+       * ## 重置棋盘
+       *
+       * 根据 BOARD 常量重新生成空棋盘
+       */
+      resetBoard: () => {
+        const { COLS: COLS2, ROWS: ROWS2 } = board_default;
+        state.board = Array.from(
+          { length: ROWS2 },
+          () => Array.from({ length: COLS2 }).fill(0)
+        );
+      },
+      /**
+       * ## 获取已消除行数（baseLines）
+       *
+       * @returns {number} - 返回基础行数
+       */
+      getBaseLines: () => state.baseLines,
+      /**
+       * ## 设置基础行数
+       *
+       * @param {number} lines - 基础行数
+       */
+      setBaseLines: (lines) => {
+        state.baseLines = lines;
+      },
+      /**
+       * ## 获取当前已消除行（clearLines）
+       *
+       * @returns {object[]} - 返回清理的行数数据
+       */
+      getClearLines: () => state.clearLines,
+      /**
+       * ## 设置当前消除行
+       *
+       * @param {number[]} lines - 消除行数组
+       */
+      setClearLines: (lines) => {
+        state.clearLines = lines;
+      },
+      /**
+       * ## 获取 HUD 数据
+       *
+       * 返回 UI 渲染所需的核心数据
+       *
+       * @returns {object} HUD 数据
+       */
+      getHub: () => {
+        const { source, lines, level } = state;
+        return {
+          source,
+          lines,
+          level
+        };
+      },
+      /**
+       * ## 设置 HUD 数据
+       *
+       * @param {object} hud - HUD 数据对象
+       */
+      setHud: (hud) => {
+        const { score, lines, level } = hud;
+        state.score = score;
+        state.lines = lines;
+        state.level = level;
+      },
+      /**
+       * ## 设置最高分
+       *
+       * @param {number} highScore - 历史最高分
+       */
+      setHighScore: (highScore) => {
+        state.highScore = highScore;
+      },
+      /**
+       * ## 获取最高分
+       *
+       * @returns {number} - 返回最高分数
+       */
+      getHighScore: () => state.highScore,
+      /**
+       * ## 获取当前等级
+       *
+       * @returns {number} - 放回当前等级
+       */
+      getLevel: () => state.level,
+      /**
+       * ## 设置当前等级
+       *
+       * @param {number} level - 当前等级
+       */
+      setLevel: (level) => {
+        state.level = level;
+      },
+      /**
+       * ## 获取游戏模式
+       *
+       * @returns {string} 当前模式（main-menu / playing / paused / game-over）
+       */
+      getMode: () => state.mode,
+      /**
+       * ## 设置游戏模式
+       *
+       * @param {string} mode - 游戏模式
+       */
+      setMode: (mode) => {
+        state.mode = mode;
+      }
+    };
+  };
+  var game_store_default = createGameStore;
+
+  // lib/runtime/replay-runtime.js
   var Replay = {
     /**
      * ## 是否正在录制
@@ -1276,6 +1415,7 @@ var tetris = (() => {
       Replay.playing = true;
       Replay.cursor = 0;
       Replay.pieceIndex = 0;
+      Replay.startTime = Date.now();
     },
     /** ## 停止播放 */
     stopPlay() {
@@ -1293,132 +1433,14 @@ var tetris = (() => {
       Replay.totalPausedTime = 0;
     }
   };
-  var replay_default = Replay;
+  var replay_runtime_default = Replay;
 
-  // lib/game/constants/shapes.js
-  var { PINK: PINK2, BLUE: BLUE2, TEAL: TEAL2, YELLOW: YELLOW2, VIOLET: VIOLET2, ORANGE: ORANGE2, GREEN: GREEN2, RED: RED2 } = colors_default;
-  var SHAPES = [
-    // I型方块（长条）：1行4列
-    { shape: [[1, 1, 1, 1]], color: TEAL2 },
-    // I型方块（长条）：1行5列
-    { shape: [[1, 1, 1, 1, 1]], color: GREEN2 },
-    // O型方块（正方形）：2x2
-    {
-      shape: [
-        [1, 1],
-        [1, 1]
-      ],
-      color: ORANGE2
-    },
-    // T型方块：2x3
-    {
-      shape: [
-        [0, 1, 0],
-        [1, 1, 1]
-      ],
-      color: YELLOW2
-    },
-    // L型方块
-    {
-      shape: [
-        [1, 0, 0],
-        [1, 1, 1]
-      ],
-      color: BLUE2
-    },
-    // J型方块
-    {
-      shape: [
-        [0, 0, 1],
-        [1, 1, 1]
-      ],
-      color: PINK2
-    },
-    // S型方块（右斜）
-    {
-      shape: [
-        [0, 1, 1],
-        [1, 1, 0]
-      ],
-      color: RED2
-    },
-    // Z型方块（左斜）
-    {
-      shape: [
-        [1, 1, 0],
-        [0, 1, 1]
-      ],
-      color: VIOLET2
-    }
-  ];
-  var shapes_default = SHAPES;
+  // lib/services/ui/constants/firework-colors.js
+  var { TEAL: TEAL3, YELLOW: YELLOW3, PURPLE: PURPLE2, ORANGE: ORANGE3, GREEN: GREEN3, RED: RED3 } = colors_default;
+  var FIREWORK_COLORS = [TEAL3, YELLOW3, PURPLE2, ORANGE3, GREEN3, RED3];
+  var firework_colors_default = FIREWORK_COLORS;
 
-  // lib/game/utils/random-shape.js
-  function randomShape() {
-    const index = Math.floor(Math.random() * shapes_default.length);
-    const piece = shapes_default[index];
-    return {
-      ...piece,
-      shape: piece.shape.map((row) => [...row])
-    };
-  }
-  var random_shape_default = randomShape;
-
-  // lib/game/logic/collision.js
-  var collision = (ox, oy) => {
-    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
-    const state = game_default.store.getState();
-    const { curr, cx, cy, board } = state;
-    if (!curr) {
-      return false;
-    }
-    const s = curr.shape;
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          const nx = cx + x + ox;
-          const ny = cy + y + oy;
-          const outOfBounds = nx < 0 || nx >= COLS2 || ny >= ROWS2;
-          const hitBlock = ny >= 0 && ny < ROWS2 && board[ny][nx];
-          if (outOfBounds || hitBlock) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  };
-  var collision_default = collision;
-
-  // lib/game/core/over.js
-  var over = () => {
-    const { store } = game_default;
-    const mode = store.getMode();
-    if (mode === "game-over" || mode === "replay") {
-      return;
-    }
-    replay_default.stopRecord();
-    game_default.saveHighScore();
-    stop_bgm_default();
-    sounds_default.gameOver();
-    if (replay_default.hasData) {
-      store.resetBoard();
-      store.setState({
-        score: 0,
-        lines: 0,
-        level: 1
-      });
-      store.setMode("replay");
-      replay_default.startPlay();
-      replay_default.startTime = Date.now();
-      spawn_default();
-    } else {
-      store.setMode("game-over");
-    }
-  };
-  var over_default = over;
-
-  // lib/ui/core/canvas.js
+  // lib/services/ui/core/canvas.js
   var gameBoard = document.querySelector("#game-board");
   var gameBoardContext = gameBoard.getContext("2d");
   var nextPiece = document.querySelector("#next-piece");
@@ -1435,592 +1457,7 @@ var tetris = (() => {
   };
   var canvas_default = Canvas;
 
-  // lib/ui/next/clear-next-piece.js
-  var clearNextPiece = () => {
-    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } = canvas_default;
-    const { width, height } = nextPiece2;
-    nextPieceContext2.clearRect(0, 0, width, height);
-  };
-  var clear_next_piece_default = clearNextPiece;
-
-  // lib/ui/next/render-next-piece.js
-  var renderNextPiece = (state) => {
-    const { next } = state;
-    const { BLACK: BLACK2 } = colors_default;
-    const { nextPiece: nextPiece2, nextPieceContext: ctx } = canvas_default;
-    const { width, height } = nextPiece2;
-    if (!next) {
-      return;
-    }
-    const { shape } = next;
-    const gridSize = 5;
-    const blockSize2 = Math.floor(width / gridSize);
-    const ox = Math.floor((width - shape[0].length * blockSize2) / 2);
-    const oy = Math.floor((height - shape.length * blockSize2) / 2);
-    clear_next_piece_default();
-    for (let y = 0; y < shape.length; y++) {
-      for (let x = 0; x < shape[y].length; x++) {
-        if (!shape[y][x]) {
-          continue;
-        }
-        const px = ox + x * blockSize2;
-        const py = oy + y * blockSize2;
-        ctx.fillStyle = next.color;
-        ctx.fillRect(px, py, blockSize2 - 2, blockSize2 - 2);
-        ctx.strokeStyle = BLACK2;
-        ctx.strokeRect(px, py, blockSize2 - 2, blockSize2 - 2);
-      }
-    }
-  };
-  var render_next_piece_default = renderNextPiece;
-
-  // lib/game/logic/spawn.js
-  var spawn = () => {
-    const { store } = game_default;
-    const { COLS: COLS2 } = board_default;
-    if (replay_default.playing) {
-      const piece = replay_default.pieceSequence[replay_default.pieceIndex];
-      if (!piece) {
-        return;
-      }
-      const nextPiece2 = replay_default.pieceSequence[replay_default.pieceIndex + 1] || null;
-      store.setState({
-        curr: piece,
-        next: nextPiece2 ? structuredClone(nextPiece2) : null,
-        cx: Math.floor(COLS2 / 2) - Math.floor(piece.shape[0].length / 2),
-        cy: 0
-      });
-      render_next_piece_default(store.getState());
-      replay_default.pieceIndex++;
-      return;
-    }
-    const state = store.getState();
-    const { next } = state;
-    const curr = next ? {
-      ...next,
-      shape: next.shape.map((row) => [...row])
-    } : random_shape_default();
-    store.setState({
-      // 当前方块 = 下一个方块，若不存在则随机生成
-      curr,
-      // 重新随机生成下一个预览方块
-      next: random_shape_default(),
-      // 水平居中：屏幕中间 - 方块宽度的一半
-      cx: Math.floor(COLS2 / 2) - Math.floor(curr.shape[0].length / 2),
-      // 垂直位置从顶部开始
-      cy: 0
-    });
-    const currentState = store.getState();
-    render_next_piece_default(currentState);
-    if (replay_default.recording && currentState.curr) {
-      replay_default.pieceSequence.push(structuredClone(currentState.curr));
-    }
-    if (collision_default(0, 0)) {
-      over_default();
-    }
-  };
-  var spawn_default = spawn;
-
-  // lib/engine/command/command-queue.js
-  var CommandQueue = {
-    /**
-     * ## 命令队列（FIFO）
-     *
-     * @type {object[]}
-     */
-    queue: [],
-    /**
-     * ## 入队一个 Command
-     *
-     * @param {object} command - 要执行的命令
-     */
-    enqueue(command) {
-      this.queue.push(command);
-    },
-    /**
-     * ## 执行并清空队列中的所有 Command
-     *
-     * 当前行为：
-     *
-     * - 一次性执行全部 command
-     * - 不做时间分帧控制
-     *
-     * @param {object} engine - 游戏引擎实例
-     */
-    flush(engine) {
-      const { queue } = this;
-      while (queue.length > 0) {
-        const cmd = queue.shift();
-        cmd.execute(engine);
-      }
-    },
-    /** ## 清空队列（丢弃所有未执行命令） */
-    clear() {
-      this.queue.length = 0;
-    }
-  };
-  var command_queue_default = CommandQueue;
-
-  // lib/engine/command/actions/main-menu-actions.js
-  var MAIN_MENU_ACTIONS = {
-    /**
-     * ## 选择难度 1
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_ONE: (_, game) => {
-      game.selectLevel(1);
-    },
-    /**
-     * ## 选择难度 2
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_TWO: (_, game) => {
-      game.selectLevel(2);
-    },
-    /**
-     * ## 选择难度 3
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_THREE: (_, game) => {
-      game.selectLevel(3);
-    },
-    /**
-     * ## 选择难度 4
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_FOUR: (_, game) => {
-      game.selectLevel(4);
-    },
-    /**
-     * ## 选择难度 5
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_FIVE: (_, game) => {
-      game.selectLevel(5);
-    },
-    /**
-     * ## 选择难度 6
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_SIX: (_, game) => {
-      game.selectLevel(6);
-    },
-    /**
-     * ## 选择难度 7
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_SEVEN: (_, game) => {
-      game.selectLevel(7);
-    },
-    /**
-     * ## 选择难度 8
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_EIGHT: (_, game) => {
-      game.selectLevel(8);
-    },
-    /**
-     * ## 选择难度 9
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_NINE: (_, game) => {
-      game.selectLevel(9);
-    },
-    /**
-     * ## 选择难度 10
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    LEVEL_TEN: (_, game) => {
-      game.selectLevel(10);
-    },
-    /**
-     * ## 确认开始游戏
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    CONFIRM: (_, game) => {
-      game.start();
-    }
-  };
-  var main_menu_actions_default = MAIN_MENU_ACTIONS;
-
-  // lib/audio/toggle-bgm.js
-  var toggleBGM = (level) => {
-    audio_state_default.bgmEnabled = !audio_state_default.bgmEnabled;
-    sounds_default.bgmToggle();
-    if (audio_state_default.bgmEnabled) {
-      play_bgm_default(level);
-    } else {
-      stop_bgm_default();
-    }
-  };
-  var toggle_bgm_default = toggleBGM;
-
-  // lib/engine/command/actions/game-playing-actions.js
-  var GAME_PLAYING_ACTIONS = {
-    /**
-     * ## 向左移动
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    MOVE_LEFT: (_, game) => {
-      game.move(-1, 0);
-    },
-    /**
-     * ## 向右移动
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    MOVE_RIGHT: (_, game) => {
-      game.move(1, 0);
-    },
-    /**
-     * ## 向下移动（软降）
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    MOVE_DOWN: (_, game) => {
-      game.move(0, 1);
-    },
-    /**
-     * ## 硬降（直接落地）
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    DROP: (_, game) => {
-      game.drop();
-    },
-    /**
-     * ## 旋转方块
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    ROTATE: (_, game) => {
-      game.rotate();
-    },
-    /**
-     * ## 重新开始游戏
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    RESTART: (_, game) => {
-      game.restart();
-    },
-    /**
-     * ## 强制结束游戏
-     *
-     * 注意：直接调用 over 属于“全局副作用”
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    QUIT: (_, game) => {
-      game.over();
-    },
-    /**
-     * ## 暂停 / 继续切换
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    TOGGLE_PAUSE: (_, game) => {
-      game.togglePause();
-    },
-    /**
-     * ## 背景音乐开关
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    TOGGLE_MUSIC: (_, game) => {
-      const level = game.store.getLevel();
-      toggle_bgm_default(level);
-    }
-  };
-  var game_playing_actions_default = GAME_PLAYING_ACTIONS;
-
-  // lib/engine/command/actions/paused-actions.js
-  var PAUSED_ACTIONS = {
-    /**
-     * ## 切换暂停状态（继续游戏 / 重新进入游戏循环）
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    TOGGLE_PAUSE: (_, game) => {
-      game.togglePause();
-    }
-  };
-  var paused_actions_default = PAUSED_ACTIONS;
-
-  // lib/engine/command/actions/game-over-actions.js
-  var GAME_OVER_ACTIONS = {
-    /**
-     * 确认操作（例如：Enter / Space / OK）
-     *
-     * 作用：
-     *
-     * - 重置游戏状态
-     * - 返回主菜单
-     *
-     * @param {object} _ - Action payload（当前未使用）
-     * @param {object} game - 游戏控制模块
-     */
-    CONFIRM: (_, game) => {
-      game.reset();
-    }
-  };
-  var game_over_actions_default = GAME_OVER_ACTIONS;
-
-  // lib/engine/command/actions/replay-actions.js
-  var REPLAY_ACTIONS = {
-    /**
-     * ## 向左移动
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    MOVE_LEFT: (_, game) => {
-      game.move(-1, 0);
-    },
-    /**
-     * ## 向右移动
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    MOVE_RIGHT: (_, game) => {
-      game.move(1, 0);
-    },
-    /**
-     * ## 向下移动（软降）
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    MOVE_DOWN: (_, game) => {
-      game.move(0, 1);
-    },
-    /**
-     * ## 旋转方块
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    ROTATE: (_, game) => {
-      game.rotate();
-    },
-    /**
-     * ## 硬降（直接落地）
-     *
-     * @param {object} _ 参数对象
-     * @param {object} game - 游戏控制模块
-     */
-    DROP: (_, game) => {
-      game.drop();
-    },
-    /**
-     * 确认操作（例如：Enter / Space / OK）
-     *
-     * 作用：
-     *
-     * - 重置游戏状态
-     * - 返回主菜单
-     *
-     * @param {object} _ - Action payload（当前未使用）
-     * @param {object} game - 游戏控制模块
-     */
-    CONFIRM: (_, game) => {
-      game.reset();
-    }
-  };
-  var replay_actions_default = REPLAY_ACTIONS;
-
-  // lib/engine/dispatch-command.js
-  var ACTIONS_MAP = {
-    "main-menu": main_menu_actions_default,
-    playing: game_playing_actions_default,
-    paused: paused_actions_default,
-    "game-over": game_over_actions_default,
-    replay: replay_actions_default
-  };
-  var dispatchCommand = (cmd, engine) => {
-    const { action, payload } = cmd;
-    const { Game: Game2 } = engine;
-    const mode = Game2.store.getMode();
-    const actions = ACTIONS_MAP[mode];
-    if (!actions) {
-      return;
-    }
-    const handler = actions[action];
-    handler?.(payload, Game2);
-  };
-  var dispatch_command_default = dispatchCommand;
-
-  // lib/engine/command/command.js
-  var Command = class {
-    /**
-     * ## 创建一个命令实例
-     *
-     * @param {string} action - 命令类型（如 MOVE / ROTATE）
-     * @param {object} [payload={}] - 命令参数（如方向、等级等）. Default is `{}`
-     */
-    constructor(action, payload = {}) {
-      this.action = action;
-      this.payload = payload;
-    }
-    /**
-     * ## 执行命令
-     *
-     * 将命令交给统一的 dispatch 系统处理， 而不是在 Command 内部写逻辑。
-     *
-     * @param {object} engine - 游戏引擎
-     */
-    execute(engine) {
-      const { action, payload } = this;
-      dispatch_command_default(
-        {
-          action,
-          payload
-        },
-        engine
-      );
-    }
-  };
-  var command_default = Command;
-
-  // lib/engine/dispatch-input.js
-  var dispatchInput = (input) => {
-    const { action, payload } = input;
-    const hasBlocking = engine_default.Animations.hasBlocking(["countdown", "level-up"]);
-    if (hasBlocking || !action) {
-      return;
-    }
-    const cmd = new command_default(action, payload);
-    command_queue_default.enqueue(cmd);
-    if (replay_default.recording) {
-      const elapsedTime = Date.now() - replay_default.startTime - replay_default.totalPausedTime;
-      replay_default.data.push({
-        ms: elapsedTime,
-        cmd
-      });
-    }
-  };
-  var dispatch_input_default = dispatchInput;
-
-  // lib/engine/start-game-loop.js
-  var startGameLoop = (timestamp) => {
-    if (!engine_default.timestamp) {
-      engine_default.timestamp = timestamp;
-    }
-    const { Game: Game2 } = engine_default;
-    const stepDelta = timestamp - engine_default.accumulator;
-    let delta = (timestamp - engine_default.timestamp) / 1e3;
-    if (delta > 1e3) {
-      delta = 1e3;
-    }
-    const dropInterval = Game2.getSpeed();
-    engine_default.timestamp = timestamp;
-    if (replay_default.playing) {
-      const { data } = replay_default;
-      const { length } = data;
-      const currentElapsed = Date.now() - replay_default.startTime;
-      if (length > 0 && replay_default.cursor >= length) {
-        Game2.store.setMode("game-over");
-        replay_default.stopPlay();
-      }
-      while (replay_default.playing && replay_default.cursor < data.length && data[replay_default.cursor].ms <= currentElapsed) {
-        const record = data[replay_default.cursor];
-        const { cmd } = record;
-        dispatch_input_default({
-          device: "replay",
-          action: cmd.action,
-          payload: cmd.payload
-        });
-        replay_default.cursor++;
-      }
-    }
-    if (!replay_default.playing) {
-      engine_default.Gamepad.update();
-    }
-    command_queue_default.flush(engine_default);
-    if ((!engine_default.accumulator || stepDelta > dropInterval) && !replay_default.playing) {
-      Game2.tick();
-      engine_default.accumulator = timestamp;
-    }
-    engine_default.update(delta);
-    engine_default.render();
-    engine_default.animate();
-    engine_default.rafId = requestAnimationFrame(startGameLoop);
-  };
-  var start_game_loop_default = startGameLoop;
-
-  // lib/engine/restart-game-loop.js
-  var restartGameLoop = () => {
-    engine_default.stop();
-    engine_default.rafId = requestAnimationFrame(start_game_loop_default);
-  };
-  var restart_game_loop_default = restartGameLoop;
-
-  // lib/utils/pad-start.js
-  var padStart = (n, len) => {
-    const num = Number(n);
-    if (!Number.isFinite(num)) {
-      return "";
-    }
-    const targetLen = Math.max(0, Math.floor(len));
-    const sign = num < 0 ? "-" : "";
-    const absStr = Math.abs(num).toString();
-    return sign + absStr.padStart(targetLen, "0");
-  };
-  var pad_start_default = padStart;
-
-  // lib/game/core/begin.js
-  var begin = () => {
-    const { store } = game_default;
-    const $level = document.querySelector("#level");
-    if ($level) {
-      $level.textContent = pad_start_default(store.getLevel(), 2);
-    }
-    replay_default.startRecord();
-    store.setMode("playing");
-    spawn_default();
-    sounds_default.levelStart();
-    setTimeout(() => {
-      play_bgm_default();
-    }, 250);
-    engine_default.rafId = requestAnimationFrame(restart_game_loop_default);
-  };
-  var begin_default = begin;
-
-  // lib/ui/board/clear-board.js
+  // lib/services/ui/board/clear-board.js
   function clearBoard() {
     const { gameBoard: gameBoard2, gameBoardContext: gameBoardContext2 } = canvas_default;
     const { width, height } = gameBoard2;
@@ -2028,18 +1465,7 @@ var tetris = (() => {
   }
   var clear_board_default = clearBoard;
 
-  // lib/game/constants/game.js
-  var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
-  var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
-  var MAX_LEVEL = 99;
-  var GAME = {
-    CLEAR_LINE_SCORES,
-    MAX_LEVEL,
-    FONT_FAMILY
-  };
-  var game_default2 = GAME;
-
-  // lib/ui/text/render-text.js
+  // lib/services/ui/text/render-text.js
   var renderText = (options) => {
     const {
       text,
@@ -2053,7 +1479,7 @@ var tetris = (() => {
       stroke = false,
       lineWidth = 2
     } = options;
-    const { FONT_FAMILY: FONT_FAMILY2 } = game_default2;
+    const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
     const { gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
     ctx.save();
     if (center) {
@@ -2074,7 +1500,7 @@ var tetris = (() => {
   };
   var render_text_default = renderText;
 
-  // lib/ui/text/render-tetris-text.js
+  // lib/services/ui/text/render-tetris-text.js
   var renderTetrisText = () => {
     const { GREEN: GREEN6 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
@@ -2089,7 +1515,73 @@ var tetris = (() => {
   };
   var render_tetris_text_default = renderTetrisText;
 
-  // lib/ui/overlay/render-overlay.js
+  // lib/services/ui/text/render-level-text.js
+  var renderLevelText = () => {
+    const { GREEN: GREEN6 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "LEVEL",
+      x: width / 2,
+      y: height * 0.35,
+      color: GREEN6,
+      size: 1,
+      center: true
+    });
+  };
+  var render_level_text_default = renderLevelText;
+
+  // lib/services/ui/text/render-level-number.js
+  var renderLevelNumber = (level, y) => {
+    const { GREEN: GREEN6 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width } = gameBoard2;
+    render_text_default({
+      text: String(level),
+      x: width / 2,
+      y,
+      color: GREEN6,
+      size: 3,
+      center: true
+    });
+  };
+  var render_level_number_default = renderLevelNumber;
+
+  // lib/services/ui/text/render-level-shortcut.js
+  var renderLevelShortcut = () => {
+    const { WHITE: WHITE3 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "1-9 or T KEY",
+      x: width / 2,
+      y: height * 0.58,
+      color: WHITE3,
+      size: 1,
+      center: true
+    });
+  };
+  var render_level_shortcut_default = renderLevelShortcut;
+
+  // lib/services/ui/text/render-enter-start-text.js
+  var renderEnterStartText = () => {
+    const { TEAL: TEAL5, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "ENTER START",
+      x: width / 2,
+      y: height * 0.74,
+      color: TEAL5,
+      strokeColor: BLACK2,
+      size: 1.15,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_enter_start_text_default = renderEnterStartText;
+
+  // lib/services/ui/overlay/render-overlay.js
   var renderOverlay = (color) => {
     const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
     const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
@@ -2101,50 +1593,7 @@ var tetris = (() => {
   };
   var render_overlay_default = renderOverlay;
 
-  // lib/ui/text/render-countdown-text.js
-  var renderCountdownText = (count, scale = 1) => {
-    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
-    const { FONT_FAMILY: FONT_FAMILY2 } = game_default2;
-    const { gameBoard: gameBoard2, gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.translate(width / 2, height / 2);
-    ctx.scale(scale, scale);
-    ctx.font = `${fontSize2 * 3.25}px ${FONT_FAMILY2}`;
-    ctx.fillStyle = YELLOW5;
-    ctx.strokeStyle = BLACK2;
-    ctx.lineWidth = 6;
-    const text = String(count);
-    ctx.strokeText(text, 0, 0);
-    ctx.fillText(text, 0, 0);
-    ctx.restore();
-  };
-  var render_countdown_text_default = renderCountdownText;
-
-  // lib/ui/text/render-get-ready-text.js
-  var renderGetReadyText = () => {
-    const { GREEN: GREEN6, BLACK: BLACK2 } = colors_default;
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    render_text_default({
-      text: "GET READY!",
-      x: width / 2,
-      y: height / 1.46,
-      color: GREEN6,
-      stroke: true,
-      strokeColor: BLACK2,
-      // 固定字号
-      size: 1.1,
-      center: true,
-      // 对齐方式与你原逻辑一致
-      baseline: "top"
-    });
-  };
-  var render_get_ready_text_default = renderGetReadyText;
-
-  // lib/ui/image/image-manager.js
+  // lib/services/ui/image/image-manager.js
   var ImagesCache = /* @__PURE__ */ new Map();
   var toDataURI = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   var getImage = (svg) => {
@@ -2168,7 +1617,7 @@ var tetris = (() => {
     }
   };
 
-  // lib/ui/image/render-image.js
+  // lib/services/ui/image/render-image.js
   var renderImage = (img, x, y, size) => {
     const { gameBoardContext: ctx } = canvas_default;
     if (!img.complete) {
@@ -2180,19 +1629,7 @@ var tetris = (() => {
   };
   var render_image_default = renderImage;
 
-  // lib/ui/image/render-gamepad.js
-  var renderGamepad = () => {
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    const img = getImage(scenes_background_default.gamepad);
-    const size = Math.floor(width * 0.54);
-    const x = width / 2 - size / 2;
-    const y = height / 2 - size * 1.2;
-    render_image_default(img, x, y, size);
-  };
-  var render_gamepad_default = renderGamepad;
-
-  // lib/ui/image/render-scene-background.js
+  // lib/services/ui/image/render-scene-background.js
   var renderSceneBackground = (scene) => {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
@@ -2250,161 +1687,411 @@ var tetris = (() => {
   };
   var render_scene_background_default = renderSceneBackground;
 
-  // lib/ui/effects/render-countdown.js
-  var renderCountdown = (state) => {
-    const { number, scale } = state;
+  // lib/services/ui/scenes/main-menu-scene/render-main-menu.js
+  var renderMainMenu = (level) => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { height } = gameBoard2;
     clear_board_default();
     render_overlay_default();
+    render_scene_background_default("main-menu");
     render_tetris_text_default();
-    render_scene_background_default("countdown");
-    render_gamepad_default();
-    render_get_ready_text_default();
-    render_countdown_text_default(number, scale);
+    render_level_text_default();
+    render_level_number_default(level, height * 0.5);
+    render_level_shortcut_default();
+    render_enter_start_text_default();
   };
-  var render_countdown_default = renderCountdown;
+  var render_main_menu_default = renderMainMenu;
 
-  // lib/animations/countdown-animation.js
-  var CountdownAnimation = class {
-    /**
-     * ## 渲染层级（UI 层，显示在最前面）
-     *
-     * @type {number}
-     */
-    layer = 100;
-    /**
-     * ## 是否阻塞用户输入
-     *
-     * @type {boolean}
-     */
-    blocking = true;
-    /**
-     * ## 动画名称标识
-     *
-     * @type {string}
-     */
-    name = "countdown";
-    constructor() {
-      this.state = {
-        show: true,
-        number: 3,
-        scale: 4,
-        count: 0,
-        acc: 0
-      };
+  // lib/services/ui/scenes/main-menu-scene/index.js
+  var mainMenuScene = (state) => {
+    render_main_menu_default(state.level);
+  };
+  var main_menu_scene_default = mainMenuScene;
+
+  // lib/services/ui/text/render-paused-text.js
+  var renderPausedText = () => {
+    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "PAUSED",
+      x: width / 2,
+      y: height / 1.4,
+      color: YELLOW5,
+      strokeColor: BLACK2,
+      size: 1.6,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_paused_text_default = renderPausedText;
+
+  // lib/utils/pad-start.js
+  var padStart = (n, len) => {
+    const num = Number(n);
+    if (!Number.isFinite(num)) {
+      return "";
     }
-    /**
-     * ## 更新动画状态
-     *
-     * 每帧调用：
-     *
-     * - 控制更新节奏（基于 acc）
-     * - 更新缩放动画
-     * - 控制数字切换
-     * - 判断动画是否结束
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {boolean} - 是否继续存活（true=继续，false=结束）
-     */
-    update(delta) {
-      const { state } = this;
-      state.acc += delta;
-      if (state.acc < 0.01) {
-        return true;
-      }
-      state.acc = 0;
-      state.count++;
-      state.scale = Math.max(1, state.scale - 0.4);
-      if (state.count >= 50) {
-        state.count = 0;
-        state.number -= 1;
-        state.scale = 4;
-        if (state.number >= 1) {
-          sounds_default.countdown();
-        }
-      }
-      if (state.number <= 0) {
-        this.stop();
-        return false;
-      }
-      return true;
+    const targetLen = Math.max(0, Math.floor(len));
+    const sign = num < 0 ? "-" : "";
+    const absStr = Math.abs(num).toString();
+    return sign + absStr.padStart(targetLen, "0");
+  };
+  var pad_start_default = padStart;
+
+  // lib/utils/format-time.js
+  var formatTime = (date, format = "yyyy-MM-dd HH:mm:ss") => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const toSymbol = () => hours >= 12 ? "PM" : "AM";
+    const hasSymbol = format.includes("a");
+    const hour12 = hours % 12 || 12;
+    const symbols = {
+      yyyy: year,
+      MM: pad_start_default(month, 2),
+      dd: pad_start_default(day, 2),
+      HH: pad_start_default(hours, 2),
+      hh: pad_start_default(hour12, 2),
+      mm: pad_start_default(minutes, 2),
+      ss: pad_start_default(seconds, 2),
+      a: hasSymbol ? toSymbol() : ""
+    };
+    let time = format;
+    for (const key of Object.keys(symbols)) {
+      time = time.replace(new RegExp(key, "g"), symbols[key]);
     }
-    /**
-     * ## 倒计时结束处理
-     *
-     * - 切换游戏状态为 playing
-     * - 启动游戏主逻辑
-     */
-    stop() {
-      const { Game: Game2 } = engine_default;
-      Game2.store.setMode("playing");
-      Game2.begin();
-    }
-    /**
-     * ## 渲染动画
-     *
-     * 将当前 state 传递给渲染函数
-     */
-    render() {
-      render_countdown_default(this.state);
+    return time;
+  };
+  var format_time_default = formatTime;
+
+  // lib/services/ui/effects/render-digital-clock.js
+  var { GREEN: GREEN4 } = colors_default;
+  var renderDigitalClock = (time, color = GREEN4, format = "HH:mm:ss") => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    const text = format_time_default(time || /* @__PURE__ */ new Date(), format);
+    render_text_default({
+      text,
+      x: width / 2,
+      y: height / 4.15,
+      color,
+      size: 0.94,
+      center: true
+    });
+  };
+  var render_digital_clock_default = renderDigitalClock;
+
+  // lib/services/ui/effects/clock/constants/clock-themes.js
+  var {
+    CORAL: CORAL2,
+    RGBA_CORAL: RGBA_CORAL2,
+    WHITE: WHITE2,
+    RGBA_WHITE: RGBA_WHITE3,
+    PURPLE: PURPLE3,
+    RGBA_PURPLE: RGBA_PURPLE2,
+    TEAL: TEAL4,
+    RGBA_TEAL: RGBA_TEAL2,
+    PINK: PINK3,
+    RGBA_PINK: RGBA_PINK2,
+    ORANGE: ORANGE4,
+    RGBA_ORANGE: RGBA_ORANGE2,
+    GREEN: GREEN5,
+    RGBA_GREEN: RGBA_GREEN2,
+    BLUE: BLUE3,
+    RGBA_BLUE: RGBA_BLUE2,
+    YELLOW: YELLOW4,
+    RGBA_YELLOW: RGBA_YELLOW2,
+    RED: RED4,
+    RGBA_RED: RGBA_RED2,
+    VIOLET: VIOLET3,
+    RGBA_VIOLET: RGBA_VIOLET2,
+    CYAN: CYAN2,
+    RGBA_CYAN: RGBA_CYAN2
+  } = colors_default;
+  var ClockThemes = {
+    Teal: {
+      stroke: TEAL4,
+      face: RGBA_TEAL2,
+      secondHand: VIOLET3
+    },
+    Violet: {
+      stroke: VIOLET3,
+      face: RGBA_VIOLET2,
+      secondHand: TEAL4
+    },
+    Yellow: {
+      stroke: YELLOW4,
+      face: RGBA_YELLOW2,
+      secondHand: PINK3
+    },
+    Pink: {
+      stroke: PINK3,
+      face: RGBA_PINK2,
+      secondHand: YELLOW4
+    },
+    Purple: {
+      stroke: PURPLE3,
+      face: RGBA_PURPLE2,
+      secondHand: GREEN5
+    },
+    Green: {
+      stroke: GREEN5,
+      face: RGBA_GREEN2,
+      secondHand: CYAN2
+    },
+    Blue: {
+      stroke: BLUE3,
+      face: RGBA_BLUE2,
+      secondHand: CORAL2
+    },
+    Coral: {
+      stroke: CORAL2,
+      face: RGBA_CORAL2,
+      secondHand: BLUE3
+    },
+    Orange: {
+      stroke: ORANGE4,
+      face: RGBA_ORANGE2,
+      secondHand: CYAN2
+    },
+    Cyan: {
+      stroke: CYAN2,
+      face: RGBA_CYAN2,
+      secondHand: ORANGE4
+    },
+    White: {
+      stroke: WHITE2,
+      face: RGBA_WHITE3,
+      secondHand: RED4
+    },
+    Red: {
+      stroke: RED4,
+      face: RGBA_RED2,
+      secondHand: WHITE2
     }
   };
-  var countdown_animation_default = CountdownAnimation;
+  var clock_themes_default = ClockThemes;
 
-  // lib/controllers/countdown-controller.js
-  var startCountdown = () => {
-    engine_default.Animations.register(new countdown_animation_default());
+  // lib/services/ui/effects/clock/utils/get-clock-angles.js
+  var getClockAngles = (time) => {
+    const h = time.getHours();
+    const m = time.getMinutes();
+    const s = time.getSeconds();
+    const hAng = (h % 12 + m / 60 + s / 3600) * (2 * Math.PI / 12);
+    const mAng = (m + s / 60) * (2 * Math.PI / 60);
+    const sAng = s * (2 * Math.PI / 60);
+    return {
+      hAng,
+      mAng,
+      sAng
+    };
   };
-  var countdown_controller_default = startCountdown;
+  var get_clock_angles_default = getClockAngles;
 
-  // lib/game/core/start.js
-  var start = () => {
-    const level = game_default.store.getLevel();
-    const lines = (level - 1) * 10;
-    game_default.store.setBaseLines(lines);
-    countdown_controller_default();
+  // lib/services/ui/constants/images/chinese-hour-animals.js
+  var { RGBA_WHITE: RGBA_WHITE4 } = colors_default;
+  var ChineseHourAnimals = {
+    rat: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m210.432 1012.898-43.574-31.69C273.812 834.156 352.175 810.01 590.686 808.502c21.397-31.26 16.25-56.266 9.378-89.708-3.557-17.138-7.222-34.843-7.222-54.434 0-68.958 25.33-104.636 63.407-136.973l34.897 41.04c-29.453 25.062-44.41 46.781-44.41 95.933 0 14.094 2.938 28.403 6.064 43.547 5.901 28.51 12.8 62.033-1.132 99.463 166.373-10.24 264.543-96.903 264.543-236.194 0-152.845-88.63-247.808-231.29-247.808-83.644 0-153.303 29.696-174.188 39.613a225 225 0 0 1-20.533 31.34l-41.742-34.116 20.884 17.058-20.91-16.977c.35-.458 36.62-45.999 36.62-97.55 0-34.815-8.946-60.765-26.57-77.069-17.515-16.249-44.786-24.603-81.219-24.953v162.654h-53.895V109.784l24.873-1.914c64.7-4.931 114.095 7.896 146.863 38.239 29.103 26.947 43.843 66.182 43.843 116.628 0 11.102-1.131 21.908-3.072 32.202 37.269-12.584 89.843-25.465 149.046-25.465 173.245 0 285.184 118.433 285.184 301.702 0 140.747-92.618 291.14-352.552 291.14-258.668 0-311.943 19.698-407.121 150.582m19.106-256.836c-12.046 0-24.388-.566-37.026-1.643l-22.097-1.86-2.425-22.016c-.243-2.398-6.306-58.098-6.306-99.516 0-103.586 21.45-178.904 53.895-259.046V107.79h53.895v274.783l-2.021 4.904c-32.014 78.282-51.874 146.324-51.874 243.55 0 22.879 2.102 51.443 3.826 70.98 99.679 2.802 172.814-35.409 222.451-116.494l48.02 24.091c-11.237 28.133-11.372 51.578-.377 67.854 9.701 14.282 28.645 23.175 49.448 23.175v53.894c-39.02 0-74.186-17.515-94.073-46.888a100.2 100.2 0 0 1-12.423-25.546c-53.22 49.179-121.128 73.943-202.913 73.97m150.42-230.588c0-34.223-13.231-44.463-29.642-44.463s-29.642 10.24-29.642 44.463c0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463"/></svg>`,
+    ox: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 -0.5 1025 1025"><path d="M1025.347 635.58v280.63h-53.894v-71.033c-16.33-18.405-69.821-70.413-161.685-86.07v157.104h-53.894V754.526h-107.79v215.58H594.19V700.631h161.685c100.998 0 172.57 38.67 215.579 71.868V656.761c-33.685-43.628-51.712-137.458-53.706-279.498H701.979c-76.935 0-127.219-26.22-175.805-51.55a1556 1556 0 0 0-26.84-13.743c-26.839 26.004-66.209 44.92-115.738 55.511 24.441 22.986 60.874 52.116 106.469 72.839l-22.313 49.044c-76.584-34.816-129.59-88.926-150.824-113.125-10.644.62-21.477 1.024-32.687 1.024a473.7 473.7 0 0 1-123.365-15.953L67.853 547.624l68.582 53.868c31.447-21.935 101.456-62.545 188.28-62.545v53.895c-95.986 0-170.36 62.491-171.088 63.138l-16.788 14.282L0 562.904l109.73-219.81C46.43 314.449 1.347 267.372 1.347 199.869c0-110.053 120.24-145.974 161.685-145.974v53.894c-14.12 0-107.79 17.166-107.79 92.08 0 90.597 136.947 123.5 228.999 123.5 67.907 0 122.422-12.99 157.696-35.625-42.712-14.336-95.097-23.12-169.337-18.324l-3.504-53.787c95.88-6.117 160.149 8.515 211.43 28.834 3.718-9.028 5.874-18.648 5.874-28.888 0-48.856-57.83-76.288-58.395-76.558l22.393-49.017c3.665 1.644 89.897 41.823 89.897 125.575 0 18.567-3.423 35.84-9.998 51.631 7.06 3.584 13.986 7.168 20.777 10.698 46.78 24.415 87.174 45.46 150.905 45.46h269.474v26.948c0 214.69 35.22 266.59 45.999 277.37zm-729.384 25.143-98.79 118.541L283.972 917.1l45.595-28.726-65.913-104.69 37.053-44.437c57.937 45.945 138.374 69.174 239.589 69.174v-53.895c-99.894 0-175.077-24.549-223.475-72.946z"/></svg>`,
+    rabbit: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M862.316 720.896c0 36.621-4.123 69.39-24.253 110.35l-68.365 138.86H485.053V916.21h48.37c-25.546-36.137-48.37-82.702-48.37-134.737 0-59.42 24.171-113.314 63.218-152.36l38.104 38.103a161.1 161.1 0 0 0-47.428 114.257c0 54.784 35.382 104.043 63.515 134.737h133.713l53.49-108.76c15.711-31.852 18.756-55.835 18.756-86.555 0-80.977-63.434-150.097-178.607-195.503-17.543 8.138-38.292 13.554-63.92 13.554h-80.841c-13.96 0-43.925 15.98-57.29 40.017l-47.104-26.166c20.749-37.349 67.584-67.745 104.394-67.745h80.842c37.268 0 57.478-15.441 79.09-36.46-19.617-112.398-95.232-179.12-159.932-179.12h-107.79a21.3 21.3 0 0 0-5.955 2.022 684 684 0 0 0-69.12-77.474c-35.84-34.223-61.764-58.934-94.909-79.44a42.44 42.44 0 0 0-21.8-6.792 22.82 22.82 0 0 0-17.381 7.195c-10.914 11.426-6.063 28.241 1.428 39.182 21.989 32.121 47.912 56.859 83.752 91.109 20.615 19.672 49.26 43.17 77.393 63.084C281.007 367.4 215.58 484.433 215.58 592.842c0 74.483 24.792 124.066 51.065 176.586 27.89 55.781 56.724 113.476 56.724 200.677h-53.894c0-74.482-24.792-124.065-51.066-176.586-27.89-55.78-56.724-113.475-56.724-200.677 0-90.866 42.227-197.686 93.454-274.486a804 804 0 0 1-39.047-34.115c-38.238-36.487-65.86-62.841-91.055-99.625-24.441-35.759-22.798-78.686 4.069-106.819 26.3-27.567 70.898-31.043 106.523-9 37.942 23.444 65.563 49.798 103.774 86.258 9.97 9.513 33.038 32.31 56.94 60.55h68.635c-27.621-37.78-60.416-72.73-88.522-99.543-28.834-27.54-54.73-52.116-84.534-74.024L326.306.296c31.232 23.23 57.802 48.533 87.31 76.72 53.84 51.388 94.45 100.594 121.747 146.836 82.837 26.65 150.043 116.87 165.026 230.75l1.725 13.177-9.405 9.405a820 820 0 0 1-11.803 11.587c156.322 72.408 181.41 174.727 181.41 232.125m-552.852 33.63c3.934 8.058 7.895 16.088 11.991 24.145 27.433 54.3 55.808 110.457 55.808 191.434h53.895c0-93.696-34.062-161.226-61.52-215.579zm597.908 53.895c-3.423 9.405-7.815 19.806-13.77 31.96L829.79 970.105h60.066l52.143-105.957c10.78-21.935 17.516-40.017 21.908-55.727zM514.695 390.737c0-34.223-13.231-44.463-29.642-44.463s-29.642 10.24-29.642 44.463c0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463"/></svg>`,
+    dragon: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M552.421 1024c-69.767 0-113.826-13.959-156.402-27.46-54.488-17.273-110.808-35.004-232.422-26.516l-3.826-53.733c131.719-9.458 195.934 10.968 252.524 28.888 42.226 13.366 78.686 24.926 140.126 24.926 92.753 0 148.21-57.937 148.21-113.96 0-16.95-5.524-101.619-114.634-101.619-64.97 0-112.747 23.337-163.328 48.02-57.344 28.026-122.368 59.77-218.381 59.77C85.908 862.316 0 787.294 0 683.897c0-95.77 80.788-198.844 258.183-198.844 86.69 0 155.917 24.818 229.214 51.092 45.81 16.41 92.564 33.172 145.489 44.167 9-7.034 13.85-16.277 13.85-26.76 0-37.187-37.672-74.859-74.131-111.265L569.317 439l38.104-38.104 3.26 3.288c42.173 42.091 89.95 89.842 89.95 149.369 0 12.719-2.802 24.926-7.976 36.11a595 595 0 0 0 61.871 3.18c62.437 0 107.79-34.008 107.79-80.843 0-58.853-52.87-110.269-108.84-164.702l-8.058-7.842c-19.025 16.438-38.077 35.49-59.419 56.832l-38.103-38.104C722.7 283.352 782.794 223.286 916.21 216.253V55.619c-63.408 7.788-120.994 39.424-121.668 39.802l-15.818 8.811-14.12-11.344c-32.903-26.436-54.892-38.993-90.92-38.993-41.419 0-74.349 25.87-109.192 53.302-26.624 20.91-54.137 42.55-86.85 53.194l-8.3 1.293h-69.094L294.723 267.21l-38.103-38.13 67.395-67.396h-162.33V107.79h303.103c22.232-8.272 43.709-25.168 66.399-42.98C569.829 34.438 613.619 0 673.684 0c48.91 0 81.408 17.947 110.889 40.098C813.703 26.3 877.73 0 943.158 0h26.947v323.368h-53.894v-53.167c-54.165 3.1-92.915 15.845-127.003 36.676l1.832 1.778C852.588 368.505 916.21 430.376 916.21 512c0 60.928-43.708 109.945-107.789 127.623v61.009h53.895v-53.895h53.895v53.895h53.894v53.894h-53.894v53.895h-53.895v-53.895H808.42c-29.723 0-53.895-24.171-53.895-53.894v-53.895c-118.326 0-207.063-31.798-285.318-59.877-68.77-24.63-133.713-47.913-211.025-47.913-141.124 0-204.288 72.785-204.288 144.95 0 73.324 61.844 124.524 150.393 124.524 11.91 0 23.229-.539 34.035-1.536 10.132-10.563 31.15-36.244 31.15-67.719 0-33.118-43.088-70.98-58.152-81.596l30.936-44.14c8.3 5.794 81.111 58.664 81.111 125.736 0 19.43-4.527 37.053-10.994 52.305 30.774-10.051 58.314-23.498 86.663-37.349 53.84-26.274 109.54-53.49 186.96-53.49 116.413 0 168.53 78.093 168.53 155.513 0 82.513-75.615 167.855-202.106 167.855m-21.18-623.104-38.104-38.104 137.89-137.89 38.103 38.104zM404.48 382.545l-38.104-38.104 152.98-152.98 38.104 38.104zM686.484 163.92c15.495-9.755 43.332-31.448 43.332-31.448-25.735-27.81-49.557-33.334-67.369-29.076-19.24 4.608-37.753 24.603-37.753 24.603s42.253 22.447 61.79 35.92"/></svg>`,
+    tiger: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M673.684 1024c-114.769 0-188.82-33.334-254.167-62.787-53.626-24.145-99.975-45.002-161.28-45.002-40.448 0-83.591 23.255-103.64 45.163l-39.747-36.433c27.648-30.154 84.318-62.625 143.387-62.625 68.392 0 119.862 21.288 172.92 45.056V673.684c0-35.166-17.542-64.108-30.638-80.815-15.199 9.836-32.068 18.89-50.742 26.947l-21.342-49.475C469.8 509.413 485.053 377.317 485.053 323.368V221.642a598 598 0 0 0-80.842-6.063h-26.948v-80.842c0-12.1-14.848-26.948-26.947-26.948-9.378 0-18.836.593-26.948 1.348v160.337h-53.894v-57.802c-136.03 102.912-158.45 266.886-161.307 295.882 9.135 9.108 38.993 25.06 71.976 38.67l38.104-59.366 12.45-1.59c90.516-11.614 146.566-93.076 146.566-161.9h53.895c0 88.334-68.797 192.243-180.87 213.343l-48.398 75.398-20.292-7.437C53.895 557.757 53.895 523.318 53.895 512c0-50.041 37.025-254.733 215.579-365.622V62.491l22.528-3.746c1.185-.188 29.48-4.85 58.314-4.85 41.553 0 80.842 39.289 80.842 80.842v27.513C679.855 172.813 1024 327.545 1024 646.737 1024 832.189 892.982 1024 673.684 1024m-13.473-323.368c-36.514 0-67.369 49.367-67.369 107.79 0 85.746 68.096 145.084 89.465 161.549 91.54-2.534 164.38-45.488 213.828-107.655H700.632V808.42H930.87c8.92-17.273 16.357-35.355 22.285-53.895H713.27l-6.467-17.65c-.512-1.294-14.363-36.244-46.592-36.244m-175.158 230.48c33.926 14.067 70.52 26.597 114.607 33.47-30.235-36.272-60.713-89.358-60.713-156.16 0-90.652 53.275-161.685 121.264-161.685 44.76 0 73.835 28.78 88.683 53.895h217.007c2.776-17.867 4.204-35.921 4.204-53.895 0-38.94-5.659-74.752-15.926-107.628L827.473 665.79l-38.104-38.104 142.633-142.632a368 368 0 0 0-57.775-81.597L719.683 557.999l-38.103-38.103 153.573-153.573a538 538 0 0 0-82.594-56.752L611.894 450.21l-38.104-38.104 128.135-128.135a794.7 794.7 0 0 0-162.978-52.924v92.321c0 50.15-11.102 156.7-95.932 236.329 18.378 23.417 42.038 63.407 42.038 113.987zM215.579 431.158v-53.895c39.774 0 53.895-29.022 53.895-53.895h53.894c0 53.572-37.025 107.79-107.79 107.79"/></svg>`,
+    snake: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M671.528 788.857c44.329 11.965 89.627 19.564 136.893 19.564 89.169 0 161.684-60.443 161.684-134.737S897.59 538.947 808.421 538.947c-19.079 0-37.026 1.51-54.218 4.016-.755-101.403-38.211-172.356-79.414-219.648l-1.105.053a1750 1750 0 0 1-79.036-1.751c45.702 35.867 108.705 107.87 105.984 232.367 0 .431-.081.808-.108 1.24-34.924 10.994-66.156 26.731-95.097 45.19a163 163 0 0 0-15.846-42.388c-21.557-39.64-60.065-66.775-97.36-93.022C433.098 423.344 377.263 384 377.263 296.42c0-130.29 108.275-188.632 215.58-188.632 64.134 0 132.715 12.046 214.365 37.808-4.877 34.654-27.109 63.784-106.576 69.039v-52.952h-53.895v53.68c-63.273-1.025-104.529-5.201-104.987-5.255l-5.578 53.598c2.236.242 56.185 5.767 137.512 5.767 125.17 0 188.632-48.128 188.632-143.064v-19.429l-18.432-6.144c-96.095-32.013-175.859-46.942-251.042-46.942-158.666 0-269.474 99.732-269.474 242.526 0 115.55 76.423 169.391 137.836 212.615 33.684 23.713 65.51 46.107 81.004 74.698 9.54 17.543 13.285 33.415 12.342 47.75 21.154 9.109 42.119 17.84 62.949 25.978 53.652-37.268 112.478-64.62 190.922-64.62 59.446 0 107.79 36.271 107.79 80.842s-48.344 80.842-107.79 80.842c-105.472 0-203.237-42.388-297.768-83.429-94.801-41.094-184.347-79.953-281.412-79.953-106.523.027-175.346 53.572-175.346 136.435 0 79.064 67.099 136.434 159.555 136.434 142.174 0 230.427-66.883 306.796-129.886 31.42 13.42 62.787 26.058 94.45 37.134-47.077 49.637-110.969 82.566-186.61 91.27l5.066 53.626c93.453-7.007 143.144 9.35 195.719 26.543 46.457 15.225 94.127 30.855 169.822 30.855 19.995 0 41.957-1.078 66.344-3.558l-5.416-53.625c-105.283 10.78-158.1-6.548-213.935-24.872-22.15-7.276-44.625-14.633-70.306-20.345a334.9 334.9 0 0 0 96.148-82.298M213.45 810.12c-50.877 0-105.66-25.843-105.66-82.54 0-60.847 62.733-82.54 121.451-82.54 77.851 0 154.732 30.289 235.25 64.943-66.263 52.925-139.721 100.137-251.04 100.137"/></svg>`,
+    horse: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M1024 0v404.21c0 33.334 0 134.737-92.08 134.737h-13.823l-78.363-109.056c-22.744 49.907-40.34 103.047-53.49 162.951h115.092c35.974 0 68.77 32.795 68.77 68.797 0 60.631-69.39 154.3-77.313 164.756l-43.008-32.472c25.681-34.061 66.426-100.11 66.426-132.284 0-5.983-8.92-14.902-14.902-14.902H775.976c-14.848 89.384-21.45 193.832-21.45 323.368h-53.894c0-283.971 31.097-453.605 110.888-605.049l20.318-38.535L944.64 483.517c14.444-4.42 25.465-20.938 25.465-79.306V0zM862.316 161.684h53.895V0h-53.895v80.842c-17.381-14.956-38.185-26.947-80.842-26.947H646.737v53.894h134.737c37.672 0 80.842 40.907 80.842 53.895m-107.79 0H538.947v53.895h161.685zm-453.632 604.86 99.786 149.667h64.755l-95.043-142.552 128.485-126.922h167.855a1213 1213 0 0 1 9.431-53.895H476.78zm109.973-184.4-37.862-38.32-132.419 130.803c-66.856-103.531-78.902-144.815-78.902-205.312 0-70.736 37.78-145.947 107.79-145.947h323.368l53.895-53.894H269.474c-6.71 0-13.258.566-19.699 1.482-14.848-21.504-45.137-55.377-89.142-55.377C65.967 215.579 0 349.292 0 469.315c0 70.171 16.141 136.65 49.233 202.672L6.198 723.833l41.472 34.412 66.129-79.737-8.704-16.034c-21.99-40.34-51.2-104.26-51.2-193.159 0-100.864 52.87-199.841 106.738-199.841 13.231 0 25.816 9.89 35.436 20.534-53.194 31.96-88.28 98.492-88.28 179.307 0 78.202 19.699 130.938 93.643 243.982l-55.296 54.622 134.763 202.186h64.755L215.606 775.033z"/></svg>`,
+    goat: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M608.256 144.734c-52.493-29.157-102.157-36.945-123.203-36.945V53.895c32.579 0 91.27 11.452 149.369 43.735 75.29 41.823 130.695 94.532 171.385 150.879-49.933 39.504-108.706 74.86-159.07 74.86h-107.79v-53.895h107.79c20.507 0 48.424-11.21 80.438-31.286a471 471 0 0 0-118.919-93.454m224.418 197.498c-16.384 0-29.642 10.24-29.642 44.463 0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463c0-34.223-13.231-44.463-29.642-44.463M1024 619.789c0-272.68-122.934-497.34-337.246-616.394L660.588 50.5c253.736 140.962 304.1 389.902 309.06 542.343H885.14c-17.92-35.624-45.352-69.12-87.013-101.996l-16.788-13.285-16.734 13.393c-66.13 52.898-134.63 127.084-187.312 209.678H102.966l-8.273-20.319c64.35-63.3 66.991-77.204 66.991-195.26v-53.895h485.053v-53.895H161.684c0-80.384 14.31-110.026 66.587-137.916l-25.384-47.536c-79.522 42.416-95.098 100.11-95.098 185.452v107.79c0 107.6 0 107.6-63.65 169.283L31.07 667.001l79.549 195.315h58.206l-43.897-107.79h103.478l43.897 107.79h58.206l-43.897-107.79h259.476c-37.106 70.414-61.035 144.627-61.035 215.58h53.894c0-68.69 27.271-144.061 68.959-215.58h79.252c7.41 0 13.474 6.063 13.474 13.474v94.316h53.894V768c0-37.16-30.208-67.368-67.368-67.368h-44.652c40.771-58.018 89.438-111.428 138.914-153.627 60.092 53.032 80.896 108.22 80.896 207.521h53.895c0-38.912-2.75-74.482-11.103-107.79H1024z"/></svg>`,
+    monkey: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M538.947 1024h-53.894c0-32.795 25.87-87.417 77.446-103.316-33.9-39.532-77.446-98.25-77.446-139.21 0-44.571 36.27-80.842 80.842-80.842h80.842v53.894h-80.842a26.947 26.947 0 0 0-26.948 26.948c0 19.725 36.676 77.473 92.133 134.737h88.603c20.21-14.148 88.738-71.465 88.738-198.603 0-108.382-93.238-202.967-168.152-278.986-49.502-50.203-88.576-89.842-98.735-128.62-11.749-44.732-21.585-112.586-26.327-148.318H377.263c-45.137 0-89.519 8.435-121.802 53.895h175.697v53.895c-97.28 0-107.79 113.07-107.79 161.684v53.895h53.895v161.684h-53.895v-107.79h-26.947c-170.253 0-188.632-94.235-188.632-134.736 0-31.044 35.22-72.327 55.728-93.723 2.694-14.687 5.847-28.35 9.431-41.014h-11.264v-53.895h31.529c46.43-94.585 124.011-107.79 184.05-107.79h185.64l2.803 23.795c.135 1.05 12.72 106.658 27.945 164.756 6.494 24.873 44.624 63.515 84.965 104.448 81.866 83.025 183.7 186.341 183.7 316.82 0 92.376-31.124 155.029-61.898 194.426 104.502-19.887 169.687-109.03 169.687-238.35 0-91.405-42.82-154.381-84.237-215.255-38.077-55.97-77.447-113.853-77.447-188.955 0-119.35 87.094-161.685 161.684-161.685v53.895c-32.417 0-107.79 10.51-107.79 107.79 0 58.502 31.556 104.933 68.097 158.639C974.282 492.598 1024 565.679 1024 673.684c0 177.287-108.301 296.421-269.474 296.421H592.842c-37.672 0-53.895 40.906-53.895 53.895M229.214 269.474a385 385 0 0 0-14.012 58.34l-1.402 8.49-6.09 6.116c-22.878 22.932-44.813 52.601-46.026 62.276 0 56.805 53.76 75.264 107.79 79.387v-52.925c0-58.691 13.473-119.62 46.51-161.684zM323.368 1024h-53.894c0-32.795 25.87-87.417 77.446-103.316-33.9-39.532-77.446-98.25-77.446-139.21 0-44.571 36.27-80.842 80.842-80.842h45.164a188.85 188.85 0 0 1 170.415-107.79h134.737v53.895H565.895c-74.294 0-134.737 60.443-134.737 134.737v26.516l-53.895.377v-26.893c0-9.162.647-18.136 1.913-26.948h-28.86c-14.848 0-26.948 12.073-26.948 26.948 0 19.725 36.676 77.473 92.133 134.737h15.657v53.894h-53.895c-37.672 0-53.895 40.906-53.895 53.895"/></svg>`,
+    rooster: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M673.684 354.358c-16.384 0-29.642-10.213-29.642-44.463 0-34.223 13.231-44.463 29.642-44.463s29.642 10.24 29.642 44.463c0 34.25-13.258 44.463-29.642 44.463M540.106 970.105l-50.58-107.79h156.052l50.607 107.79h59.554l-51.604-109.918C811.52 846.82 916.21 764.55 916.21 646.737c0-53.033-11.911-95.42-24.523-140.315-14.443-51.389-29.372-104.529-29.372-183.054V107.79C862.316 48.344 813.972 0 754.526 0a107.924 107.924 0 0 0-107.79 106.173 101 101 0 0 0-24.117-3.315 88.71 88.71 0 0 0-88.603 88.603c0 20.669 5.228 39.72 10.671 53.922l-99.49 59.688 93.75 14.47v57.722c0 14.417-5.901 21.693-33.36 49.152l-11.13 11.13C398.228 326.52 324.985 269.473 215.741 269.473 96.768 269.474 0 366.242 0 485.214v161.523h53.895V485.214A162.01 162.01 0 0 1 215.74 323.368c82.081 0 140.422 36.245 240.64 152.253l-38.616 38.616c-49.96-52.952-94.666-83.08-158.181-83.08a151.983 151.983 0 0 0-151.795 151.795v171.574h53.895V582.952a98.01 98.01 0 0 1 97.9-97.9c46.323 0 79.63 20.912 137.027 86.017l18.971 21.53 128.081-128.08c28.537-28.538 49.18-49.152 49.18-87.256v-97.927l23.309-14.12-13.663-23.04c-.161-.243-14.578-24.9-14.578-50.688 0-19.133 15.575-34.708 34.708-34.708 5.093 0 26.786 3.18 39.559 18.647l26.327 46.026 39.775-24.09-20.373-49.368c-3.152-7.545-7.275-30.478-7.275-40.206 0-29.722 24.171-53.894 53.894-53.894s53.895 24.172 53.895 53.894v215.58c0 85.935 16.68 145.3 31.367 197.631 12.1 43.008 22.528 80.142 22.528 125.737 0 95.286-99.41 161.684-188.632 161.684H464.222l-68.42-145.704c-20.56-43.763-57.693-69.875-99.354-69.875a80.977 80.977 0 0 0-80.87 80.87v188.604h53.896V673.71c0-14.875 12.1-26.974 26.974-26.974 20.534 0 38.966 14.147 50.553 38.858l133.578 284.51z"/></svg>`,
+    dog: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M326.063 282.947c0 34.25-13.231 44.464-29.642 44.464s-29.642-10.214-29.642-44.464c0-34.223 13.231-44.463 29.642-44.463s29.642 10.24 29.642 44.463m-56.59 147.349v311.646L190.276 916.21h59.204l73.89-162.574V377.263H296.42c-119.404 0-172.733-53.383-185.506-107.79h35.625c51.092 0 68.58-15.764 120.535-62.544 12.773-11.507 28.08-25.277 47.024-41.742l18.35-15.952-69.658-99.14-44.086 30.99 41.768 59.472c-11.183 9.863-20.884 18.594-29.48 26.328-50.257 45.272-54.757 48.694-84.453 48.694H53.895v26.947c0 88.711 66.91 178.15 215.579 187.77M486.185 268.88c2.29 71.734 28.7 136.327 75.049 182.919 57.479 57.829 141.204 87.147 248.859 87.147 18.593 0 36.19-1.158 52.628-3.449 3.746 111.266 33.63 170.334 51.496 196.015l-38.507 84.723c-93.535-74.186-186.934-115.604-498.446-115.604v53.894c34.277 0 65.698.512 94.64 1.51l-97.308 214.07H433.8l96.013-211.241c66.183 4.338 117.006 11.83 157.912 22.016L626.23 916.21h59.176l54.165-119.135c47.616 18.405 79.737 42.092 113.125 69.74l-46.943 103.29h59.204l113.07-248.779-13.823-13.204c-.485-.458-45.65-47.59-47.94-185.263C985.17 498.553 1024 447.81 1024 377.263c0-95.205-66.506-161.684-161.684-161.684v53.895c65.482 0 107.79 42.307 107.79 107.79 0 89.087-87.014 107.789-160.014 107.789-92.753 0-163.625-23.984-210.648-71.276-30.316-30.505-45.891-65.833-53.356-98.735 11.21 6.952 22.933 13.339 35.275 19.186l23.04-48.72C512.296 241.852 455.41 156.86 385.159 41.525l-46.026 28.052c49.448 81.246 92.968 148.507 147.051 199.303"/></svg>`,
+    pig: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M808.421 700.632v53.894c-196.446 0-323.368 84.642-323.368 215.58h-53.895c0-163.706 148.076-269.474 377.263-269.474m-323.368 107.79v-53.896c-158.343 0-245.599 0-319.65-49.367l-6.79-4.527h-77.77c-21.694 0-26.625-14.821-26.948-26.948v-82.62C138.05 579.88 215.579 516.15 215.579 404.21V215.579h-53.895v161.684h-26.947C67.773 377.263 0 414.29 0 485.053h53.895c0-42.631 52.87-53.895 80.842-53.895h24.63c-12.234 73.755-74.213 107.79-132.42 107.79H0v134.736c0 32.499 21.53 80.842 80.842 80.842h61.683c32.687 20.507 67.126 33.146 105.957 41.014a232.9 232.9 0 0 0-32.903 120.67h53.895c0-41.93 14.012-80.303 39.424-112.505 49.987 4.447 107.062 4.716 176.155 4.716M412.106 466l-88.738 88.738V431.158h-53.894V684.84L450.21 504.104zm-88.738-304.317h-53.894v190.033a770 770 0 0 1 53.894-49.098zm323.369-53.895c-72.623 0-146.81 23.337-215.58 58.638v-58.638h-53.894v154.14c81.57-56.536 178.068-100.245 269.474-100.245 148.588 0 269.474 120.886 269.474 269.474v235.655L809.58 862.316h61.359l99.166-181.76V431.158c0-178.31-145.057-323.369-323.368-323.369"/></svg>`
   };
-  var start_default = start;
+  var chinese_hour_animals_default = ChineseHourAnimals;
 
-  // lib/game/logic/move.js
-  var move = (ox, oy) => {
-    const { store } = game_default;
-    const state = store.getState();
-    let { cx, cy } = state;
-    if (!collision_default(ox, oy)) {
-      cx += ox;
-      cy += oy;
-      store.setState({
-        cx,
-        cy
-      });
-      sounds_default.move();
-      return true;
+  // lib/services/ui/image/utils/get-chinese-hour-animal.js
+  var getChineseHourAnimal = (hour) => {
+    const map = [
+      "rat",
+      "ox",
+      "ox",
+      "tiger",
+      "tiger",
+      "rabbit",
+      "rabbit",
+      "dragon",
+      "dragon",
+      "snake",
+      "snake",
+      "horse",
+      "horse",
+      "goat",
+      "goat",
+      "monkey",
+      "monkey",
+      "rooster",
+      "rooster",
+      "dog",
+      "dog",
+      "pig",
+      "pig",
+      "rat"
+    ];
+    return map[hour];
+  };
+  var get_chinese_hour_animal_default = getChineseHourAnimal;
+
+  // lib/services/ui/image/render-chinese-hour-animal.js
+  var renderChineseHourAnimal = () => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width } = gameBoard2;
+    const time = /* @__PURE__ */ new Date();
+    const hour = time.getHours();
+    const index = hour - 1;
+    const animal = get_chinese_hour_animal_default(Math.max(index, 0));
+    const img = getImage(chinese_hour_animals_default[animal]);
+    const size = Math.floor(width * 0.38);
+    const x = -size / 2;
+    const y = -size / 2;
+    render_image_default(img, x, y, size);
+  };
+  var render_chinese_hour_animal_default = renderChineseHourAnimal;
+
+  // lib/services/ui/effects/clock/render-clock-dial.js
+  var renderClockDial = (radius, theme) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fillStyle = theme.face;
+    ctx.fill();
+    ctx.lineWidth = Math.floor(radius * 0.2);
+    ctx.strokeStyle = theme.stroke;
+    ctx.stroke();
+    ctx.restore();
+  };
+  var render_clock_dial_default = renderClockDial;
+
+  // lib/services/ui/effects/clock/render-clock-ticks.js
+  var renderClockTicks = (radius, theme) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    const dotRadius = Math.floor(radius * 0.06);
+    const dotDistance = radius - Math.floor(radius * 0.25);
+    for (let i = 0; i < 12; i++) {
+      ctx.save();
+      ctx.rotate(i * Math.PI / 6);
+      ctx.beginPath();
+      ctx.arc(0, -dotDistance, dotRadius, 0, Math.PI * 2);
+      ctx.fillStyle = theme.stroke;
+      ctx.fill();
+      ctx.restore();
     }
-    return false;
   };
-  var move_default = move;
+  var render_clock_ticks_default = renderClockTicks;
 
-  // lib/game/logic/lock.js
-  var lock = () => {
-    const { store } = game_default;
-    const state = store.getState();
-    const { curr } = state;
-    const s = curr.shape;
-    const board = structuredClone(state.board);
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          board[state.cy + y][state.cx + x] = curr.color;
-          store.setState({
-            board
-          });
-        }
-      }
-    }
+  // lib/services/ui/effects/clock/render-clock-hands.js
+  var renderClockHands = (radius, angles, theme) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    const { hAng, mAng, sAng } = angles;
+    ctx.save();
+    ctx.rotate(hAng);
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = theme.stroke;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -radius * 0.4);
+    ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.rotate(mAng);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = theme.stroke;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -radius * 0.65);
+    ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.rotate(sAng);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = theme.secondHand;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -radius * 0.75);
+    ctx.stroke();
+    ctx.restore();
   };
-  var lock_default = lock;
+  var render_clock_hands_default = renderClockHands;
 
-  // lib/ui/core/render-block.js
+  // lib/services/ui/effects/clock/render-clock-center.js
+  var renderClockCenter = (radius, theme) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = theme.secondHand;
+    ctx.arc(0, 0, Math.floor(radius * 0.05), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  var render_clock_center_default = renderClockCenter;
+
+  // lib/services/ui/effects/clock/utils/get-chinese-hour-dial-theme.js
+  var getChineseHourDialTheme = (hour) => {
+    const map = [
+      "Red",
+      "White",
+      "White",
+      "Orange",
+      "Orange",
+      "Cyan",
+      "Cyan",
+      "Blue",
+      "Blue",
+      "Coral",
+      "Coral",
+      "Purple",
+      "Purple",
+      "Green",
+      "Green",
+      "Yellow",
+      "Yellow",
+      "Pink",
+      "Pink",
+      "Teal",
+      "Teal",
+      "Violet",
+      "Violet",
+      "Red"
+    ];
+    return map[hour];
+  };
+  var get_chinese_hour_dial_theme_default = getChineseHourDialTheme;
+
+  // lib/services/ui/effects/clock/render-analog-clock.js
+  var renderAnalogClock = (time) => {
+    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
+    const { width, height } = gameBoard2;
+    const centerX = width / 2;
+    const centerY = height / 2.2;
+    const radius = Math.floor(width * 0.3);
+    const displayTime = time || /* @__PURE__ */ new Date();
+    const hours = displayTime.getHours();
+    const angles = get_clock_angles_default(displayTime);
+    const theme = clock_themes_default[get_chinese_hour_dial_theme_default(hours)];
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.lineCap = "round";
+    render_clock_dial_default(radius, theme);
+    render_chinese_hour_animal_default();
+    render_clock_ticks_default(radius, theme);
+    render_clock_hands_default(radius, angles, theme);
+    render_clock_center_default(radius, theme);
+    ctx.restore();
+  };
+  var render_analog_clock_default = renderAnalogClock;
+
+  // lib/services/ui/core/render-block.js
   var renderBlock = (x, y, color) => {
     const { gameBoardContext: ctx, blockSize: blockSize2 } = canvas_default;
     const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
@@ -2419,22 +2106,405 @@ var tetris = (() => {
   };
   var render_block_default = renderBlock;
 
-  // lib/ui/board/render-clear.js
-  var renderClear = (state) => {
-    const { COLS: COLS2 } = board_default;
-    const { gameBoardContext: ctx } = canvas_default;
-    for (const line of state.lines) {
-      ctx.save();
-      ctx.globalAlpha = line.alpha;
-      for (let x = 0; x < COLS2; x++) {
-        render_block_default(x, line.y, line.color);
-      }
-      ctx.restore();
+  // lib/services/ui/constants/images/chinese-hour-characters.js
+  var { RGBA_TEAL: RGBA_TEAL3 } = colors_default;
+  var ChineseHourCharacters = {
+    zi: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M538.947 700.632v-215.58h269.474v-53.894H538.947v-39.586c26.544-18.081 94.586-65.05 177.853-127.488l-16.168-48.505H323.368v53.895h295.317a4221 4221 0 0 1-121.64 85.369l-11.992 8.003v68.312H242.526v53.895h242.527v215.579c0 48.343-13.851 53.894-134.737 53.894v53.895c105.39 0 188.631 0 188.631-107.79"/></svg>`,
+    chou: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M808.421 700.632H648.866c13.985-172.814 43.115-357.43 70.817-385.16l-19.051-45.998H323.368v53.894h107.17c-1.94 45.757-8.192 103.963-15.764 161.685h-91.406v53.894h83.968c-9.862 68.447-20.264 130.13-25.734 161.685H215.579v53.894H808.42zM461.878 538.947h149.8a3314 3314 0 0 0-16.842 161.685H436.36c6.036-35.248 16.114-95.637 25.519-161.685m22.609-215.579h171.735c-15.198 41.122-27.405 100.595-36.89 161.685H469.207c7.383-57.506 13.42-115.362 15.279-161.685"/></svg>`,
+    yin: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M712.677 811.25l-107.79-53.894-24.117 48.209 107.79 53.894zm-269.474-5.658-24.118-48.21-107.789 53.895 24.118 48.21zm257.429-374.434H538.947v-53.895h107.79v-53.895H377.263v53.895h107.79v53.895H323.368v323.368h53.895v-53.894h269.474v53.894h53.895zM538.947 592.842h107.79v53.895h-107.79zm-161.684 0h107.79v53.895h-107.79zm161.684-107.79h107.79v53.895h-107.79zm-161.684 0h107.79v53.895h-107.79zM754.526 215.58H531.43l-20.803-62.41-51.12 17.058 15.118 45.352h-205.15v107.79h53.894v-53.895h377.264v53.894h53.894z"/></svg>`,
+    mao: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M592.842 323.368h107.79v323.369c-20.48 0-39.936-11.264-40.017-11.318l-27.73 46.215c3.208 1.94 32.661 18.998 67.747 18.998 30.747 0 53.894-23.148 53.894-53.895V269.474H538.947V808.42h53.895zm-107.79 242.527V323.368h-53.894v196.905l-107.79 40.42V316.767l169.095-48.316-14.82-51.82-208.17 59.473v304.801l-36.405 13.663 18.917 50.472 178.742-67.018c-5.04 69.928-55.27 106.981-165.134 122.934l7.734 53.329c52.386-7.626 211.726-30.747 211.726-188.39"/></svg>`,
+    chen: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M471.983 777.62l-40.825-23.094V485.053h-66.075c-14.47 110.646-44.355 197.066-102.696 260.742l-39.748-36.432c83.887-91.487 100.73-246.461 100.73-466.837V215.58h377.263v53.895h-323.45c-.404 58.26-2.21 112.128-6.36 161.684h329.81v53.895H578.479a481.2 481.2 0 0 0 76.827 119.7l66.48-39.855 27.728 46.214-54.46 32.688c29.507 24.953 63.757 45.675 102.804 58.098l-16.303 51.362C647.33 710.548 558.78 586.186 520.003 485.053h-34.95V706.91l68.985-41.39 27.729 46.214zm174.754-400.357h-215.58v-53.895h215.58z"/></svg>`,
+    si: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M728.064 692.763l-52.116-13.797c-18.729 70.898-24.522 75.56-56.159 75.56H377.263V485.053h269.474v53.894h53.895V215.58H323.368v538.947c0 29.723 24.172 53.895 53.895 53.895H619.79c77.69 0 91.19-51.065 108.275-115.658m-350.8-423.29h269.473v161.685H377.263z"/></svg>`,
+    wu: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512m-431.158 26.947h269.474v-53.894H538.947V323.368h161.685v-53.894h-289.63c12.045-33.28 20.156-69.794 20.156-107.79h-53.895c0 121.964-105.364 233.391-106.415 234.496l38.858 37.35c2.883-3.019 43.817-46.135 77.393-110.162h97.954v161.685H215.579v53.894h269.474v323.369h53.894z"/></svg>`,
+    wei: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512m-431.158 50.203c52.305 70.925 136.974 152.145 232.53 190.383l19.994-50.041c-109.271-43.709-202.806-152.63-238.78-217.492h255.73v-53.895H538.947v-53.895h215.58v-53.895h-215.58V161.684h-53.894v161.684h-215.58v53.895h215.58v53.895H215.579v53.895h255.757C435.362 549.915 341.8 658.836 232.53 702.545l20.022 50.041c95.528-38.238 180.197-119.485 232.502-190.383V808.42h53.894z"/></svg>`,
+    shen: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M538.947 646.737h161.685v53.895h53.894V269.474H538.947v-107.79h-53.894v107.79h-215.58v431.158h53.895v-53.895h161.685v215.579h53.894zm0-161.684h161.685v107.79H538.947zm-215.579 0h161.685v107.79H323.368zm215.58-161.685h161.684v107.79H538.947zm-215.58 0h161.685v107.79H323.368z"/></svg>`,
+    you: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M754.526 323.368H592.842v-26.947h161.684v-53.895H269.474v53.895h161.684v26.947H269.474v485.053h53.894v-53.895h377.264v53.895h53.894zM323.368 646.737h377.264v53.895H323.368zm0-269.474h107.79c0 103.316-72.785 107.655-81.085 107.79l.243 53.894c46.592 0 134.737-33.792 134.737-161.684h53.894v107.79c0 29.723 24.172 53.894 53.895 53.894h107.79v53.895H323.368zm377.264 0v107.79h-107.79v-107.79zm-215.58-80.842h53.895v26.947h-53.894z"/></svg>`,
+    xu: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M594.513 662.393c33.684 44.544 75.21 74.698 124.74 90.813l11.425 3.719 10.402-6.01c40.124-23.174 67.341-128.35 67.341-158.073h-53.895c0 22.07-19.132 80.87-33.71 103.505-34.817-14.606-64.54-39.262-89.25-74.132 48.316-55.27 92.079-117.33 120.535-179.9l-49.044-22.286C679.289 472.279 643.315 524.746 603 572.685c-24.01-50.93-41.148-115.927-51.658-195.395h149.289v-53.895h-155.19a1848 1848 0 0 1-6.495-161.71h-53.894c0 58.206 2.155 112.073 6.494 161.683H323.368v26.948c0 216.549-13.177 263.545-100.702 359.047l39.747 36.432c63.327-69.093 92.807-118.272 105.715-206.848h116.925v-53.894h-111.32a1742 1742 0 0 0 3.45-107.79H497.34c12.611 98.25 35.031 177.476 67.395 238.188-61.979 65.536-128.054 117.976-173.299 142.282l25.52 47.481c47.589-25.573 114.095-77.446 177.556-142.82m125.17-411.971-80.842-80.842-38.103 38.103 80.842 80.842z"/></svg>`,
+    hai: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m309.976 804.756-27.136-46.592c103.073-60.012 183.026-132.473 241.475-219.244h-174l-13.473-50.283c58.88-33.981 99.436-117.572 118.703-165.296H242.526v-53.894h538.948v53.894h-268.18c-12.396 34.089-42.47 106.604-90.436 161.685h134.01a680.6 680.6 0 0 0 46.349-107.709l51.092 17.058c-58.422 175.265-171.035 309.49-344.333 410.381m192.35-2.937-34.52-41.364c88.415-73.728 154.517-158.774 202.106-259.908l48.801 22.96a797.4 797.4 0 0 1-82.35 137.781c32.74 15.01 83.455 44.868 137.646 101.592l-38.939 37.268c-57.236-59.877-109.325-85.558-133.766-95.178a851 851 0 0 1-98.978 96.849m48.613-536.872-80.842-53.895 29.884-44.84 80.843 53.894zM512 53.895c-252.605 0-458.105 205.5-458.105 458.105S259.395 970.105 512 970.105c9.081 0 17.974-.835 26.947-1.374v-53.895c-8.946.62-17.866 1.375-26.947 1.375-222.882 0-404.21-181.33-404.21-404.211S289.117 107.79 512 107.79 916.21 289.117 916.21 512c0 195.207-139.075 358.508-323.368 396.045v54.461c214.097-38.346 377.263-225.55 377.263-450.533 0-252.578-205.5-458.078-458.105-458.078"/></svg>`
+  };
+  var chinese_hour_characters_default = ChineseHourCharacters;
+
+  // lib/services/ui/image/utils/get-chinese-hour-character.js
+  var getChineseHourCharacter = (hour) => {
+    const map = [
+      "zi",
+      "chou",
+      "chou",
+      "yin",
+      "yin",
+      "mao",
+      "mao",
+      "chen",
+      "chen",
+      "si",
+      "si",
+      "wu",
+      "wu",
+      "wei",
+      "wei",
+      "shen",
+      "shen",
+      "you",
+      "you",
+      "xu",
+      "xu",
+      "hai",
+      "hai",
+      "zi"
+    ];
+    return map[hour];
+  };
+  var get_chinese_hour_character_default = getChineseHourCharacter;
+
+  // lib/services/ui/image/render-chinese-hour-character.js
+  var LAYOUT_STRATEGIES = {
+    // 深夜 0-3 点
+    night_0_3: (width, height) => ({
+      size: Math.floor(width * 0.48),
+      x: width - Math.floor(width * 0.48) * 0.7,
+      y: height / 2 - Math.floor(width * 0.48) * 1.4
+    }),
+    // 清晨 4-7 点
+    morning_4_7: (width, height) => {
+      const size = Math.floor(width * 0.52);
+      return {
+        size,
+        x: width - size * 1.1,
+        y: height / 2 - size * 1.7
+      };
+    },
+    // 上午 8-11 点
+    morning_8_11: (width, height) => {
+      const size = Math.floor(width * 0.58);
+      return {
+        size,
+        x: width - size * 1.2,
+        y: height / 2 - size * 1.75
+      };
+    },
+    // 中午 12-14 点
+    noon_12_14: (width) => {
+      const size = Math.floor(width * 0.68);
+      return {
+        size,
+        x: width / 2 - size / 2,
+        y: -size * 0.1
+      };
+    },
+    // 下午 14-16 点
+    afternoon_14_16: (width, height) => {
+      const size = Math.floor(width * 0.58);
+      return {
+        size,
+        x: size * 0.2,
+        y: height / 2 - size * 1.75
+      };
+    },
+    // 傍晚 17-19 点
+    evening_17_19: (width, height) => {
+      const size = Math.floor(width * 0.52);
+      return {
+        size,
+        x: size * 0.1,
+        y: height / 2 - size * 1.7
+      };
+    },
+    // 夜晚 20-23 点
+    night_20_23: (width, height) => {
+      const size = Math.floor(width * 0.48);
+      return {
+        size,
+        x: -size * 0.3,
+        y: height / 2 - size * 1.4
+      };
     }
   };
-  var render_clear_default = renderClear;
+  var getStrategyKey = (hour) => {
+    if (hour <= 3) {
+      return "night_0_3";
+    }
+    if (hour <= 7) {
+      return "morning_4_7";
+    }
+    if (hour <= 11) {
+      return "morning_8_11";
+    }
+    if (hour <= 14) {
+      return "noon_12_14";
+    }
+    if (hour <= 16) {
+      return "afternoon_14_16";
+    }
+    if (hour <= 19) {
+      return "evening_17_19";
+    }
+    return "night_20_23";
+  };
+  var renderChineseHourCharacter = () => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    const hour = (/* @__PURE__ */ new Date()).getHours();
+    const character = get_chinese_hour_character_default(hour);
+    const img = getImage(chinese_hour_characters_default[character]);
+    const key = getStrategyKey(hour);
+    const strategy = LAYOUT_STRATEGIES[key];
+    const { size, x, y } = strategy(width, height);
+    render_image_default(img, x, y, size);
+  };
+  var render_chinese_hour_character_default = renderChineseHourCharacter;
 
-  // lib/ui/hud/hud-dom.js
+  // lib/services/ui/board/render-board.js
+  function renderBoard(board) {
+    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
+    clear_board_default();
+    render_chinese_hour_character_default();
+    render_scene_background_default("playing");
+    for (let y = 0; y < ROWS2; y++) {
+      for (let x = 0; x < COLS2; x++) {
+        if (board[y][x]) {
+          render_block_default(x, y, board[y][x]);
+        }
+      }
+    }
+  }
+  var render_board_default = renderBoard;
+
+  // lib/services/ui/board/render-active-pieces.js
+  var renderActivePieces = (curr, cx, cy) => {
+    const { shape, color } = curr;
+    const { length } = shape;
+    for (let y = 0; y < length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (shape[y][x]) {
+          render_block_default(cx + x, cy + y, color);
+        }
+      }
+    }
+    return true;
+  };
+  var render_active_pieces_default = renderActivePieces;
+
+  // lib/services/ui/board/render-active-only.js
+  var renderActiveOnly = (state) => {
+    const { board, curr, cx, cy } = state;
+    if (board) {
+      render_board_default(board);
+    }
+    if (curr) {
+      render_active_pieces_default(curr, cx, cy);
+    }
+  };
+  var render_active_only_default = renderActiveOnly;
+
+  // lib/services/ui/scenes/paused-scene/render-paused.js
+  var renderPaused = (state) => {
+    clear_board_default();
+    render_active_only_default(state);
+    render_overlay_default();
+    render_scene_background_default("paused");
+    render_tetris_text_default();
+    render_digital_clock_default();
+    render_analog_clock_default();
+    render_paused_text_default();
+  };
+  var render_paused_default = renderPaused;
+
+  // lib/services/ui/scenes/paused-scene/index.js
+  var pausedScene = (state) => {
+    render_paused_default(state);
+  };
+  var paused_scene_default = pausedScene;
+
+  // lib/services/ui/text/render-game-text.js
+  var renderGameText = () => {
+    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "GAME",
+      x: width / 2,
+      y: height / 1.8,
+      color: RED5,
+      strokeColor: YELLOW5,
+      size: 2.3,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_game_text_default = renderGameText;
+
+  // lib/services/ui/text/render-over-text.js
+  var renderOverText = () => {
+    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "OVER",
+      x: width / 2,
+      y: height / 1.6,
+      color: RED5,
+      strokeColor: YELLOW5,
+      size: 2.3,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_over_text_default = renderOverText;
+
+  // lib/services/ui/scenes/game-over-scene/render-game-over.js
+  var renderGameOver = (state) => {
+    clear_board_default();
+    render_active_only_default(state);
+    render_overlay_default();
+    render_scene_background_default("game-over");
+    render_tetris_text_default();
+    render_game_text_default();
+    render_over_text_default();
+    render_enter_start_text_default();
+  };
+  var render_game_over_default = renderGameOver;
+
+  // lib/services/ui/scenes/game-over-scene/index.js
+  var gameOverScene = (state) => {
+    render_game_over_default(state);
+  };
+  var game_over_scene_default = gameOverScene;
+
+  // lib/services/ui/next/clear-next-piece.js
+  var clearNextPiece = () => {
+    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } = canvas_default;
+    const { width, height } = nextPiece2;
+    nextPieceContext2.clearRect(0, 0, width, height);
+  };
+  var clear_next_piece_default = clearNextPiece;
+
+  // lib/services/ui/next/render-next-piece.js
+  var renderNextPiece = (state) => {
+    const { next } = state;
+    const { BLACK: BLACK2 } = colors_default;
+    const { nextPiece: nextPiece2, nextPieceContext: ctx } = canvas_default;
+    const { width, height } = nextPiece2;
+    if (!next) {
+      return;
+    }
+    const { shape } = next;
+    const gridSize = 5;
+    const blockSize2 = Math.floor(width / gridSize);
+    const ox = Math.floor((width - shape[0].length * blockSize2) / 2);
+    const oy = Math.floor((height - shape.length * blockSize2) / 2);
+    clear_next_piece_default();
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (!shape[y][x]) {
+          continue;
+        }
+        const px = ox + x * blockSize2;
+        const py = oy + y * blockSize2;
+        ctx.fillStyle = next.color;
+        ctx.fillRect(px, py, blockSize2 - 2, blockSize2 - 2);
+        ctx.strokeStyle = BLACK2;
+        ctx.strokeRect(px, py, blockSize2 - 2, blockSize2 - 2);
+      }
+    }
+  };
+  var render_next_piece_default = renderNextPiece;
+
+  // lib/services/ui/scenes/playing-scene/render-playing.js
+  var renderPlaying = (state) => {
+    render_active_only_default(state);
+    render_next_piece_default(state);
+  };
+  var render_playing_default = renderPlaying;
+
+  // lib/services/ui/scenes/playing-scene/index.js
+  var playingScene = (state) => {
+    render_playing_default(state);
+  };
+  var playing_scene_default = playingScene;
+
+  // lib/services/ui/scenes/replay-scene/render-replay.js
+  var renderReplay = (state) => {
+    clear_board_default();
+    render_playing_default(state);
+    render_overlay_default();
+    render_scene_background_default("game-over");
+    render_tetris_text_default();
+    render_game_text_default();
+    render_over_text_default();
+    render_enter_start_text_default();
+  };
+  var render_replay_default = renderReplay;
+
+  // lib/services/ui/scenes/replay-scene/index.js
+  var replayScene = (state) => {
+    render_replay_default(state);
+  };
+  var replay_scene_default = replayScene;
+
+  // lib/services/ui/scenes/index.js
+  var Scenes = {
+    /**
+     * ## 主菜单场景
+     *
+     * @param {object} state 游戏状态
+     */
+    "main-menu": (state) => {
+      main_menu_scene_default(state);
+    },
+    /**
+     * ## 游戏进行中场景
+     *
+     * @param {object} state 游戏状态
+     */
+    playing: (state) => {
+      playing_scene_default(state);
+    },
+    /**
+     * ## 暂停场景
+     *
+     * @param {object} state 游戏状态
+     */
+    paused: (state) => {
+      paused_scene_default(state);
+    },
+    /**
+     * ## 游戏结束场景
+     *
+     * @param {object} state 游戏状态
+     */
+    "game-over": (state) => {
+      game_over_scene_default(state);
+    },
+    replay: (state) => {
+      replay_scene_default(state);
+    }
+  };
+  var scenes_default = Scenes;
+
+  // lib/services/ui/scene-manager/render-scene.js
+  var renderScene = (state) => {
+    const { mode } = state;
+    const scene = scenes_default[mode];
+    if (!scene) return;
+    scene(state);
+  };
+  var render_scene_default = renderScene;
+
+  // lib/services/ui/scene-manager/lazy-render-scene.js
+  var lazyRenderScene = (state) => {
+    if (document?.fonts?.load) {
+      document.fonts.load('40px "Press Start 2P"').then(() => {
+        render_scene_default(state);
+      });
+    } else {
+      setTimeout(() => {
+        render_scene_default(state);
+      }, 150);
+    }
+  };
+  var lazy_render_scene_default = lazyRenderScene;
+
+  // lib/services/ui/hud/hud-dom.js
   var HudDom = {
     /** @type {HTMLElement | null} 分数显示元素 */
     score: document.querySelector("#score"),
@@ -2447,7 +2517,7 @@ var tetris = (() => {
   };
   var hud_dom_default = HudDom;
 
-  // lib/ui/hud/animate-hud-number.js
+  // lib/services/ui/hud/animate-hud-number.js
   var animateHUDNumber = (from, to, duration, onUpdate, onComplete) => {
     let rafId = null;
     if (from === to) {
@@ -2479,7 +2549,7 @@ var tetris = (() => {
   };
   var animate_hud_number_default = animateHUDNumber;
 
-  // lib/ui/hud/create-hud.js
+  // lib/services/ui/hud/create-hud.js
   var setText = (el, value, pad = 0) => el.textContent = pad ? pad_start_default(value, pad) : String(value);
   var createHud = () => {
     const prev = {
@@ -2556,7 +2626,7 @@ var tetris = (() => {
   };
   var create_hud_default = createHud;
 
-  // lib/ui/hud/render-hud.js
+  // lib/services/ui/hud/render-hud.js
   var renderHud = (state) => {
     const hud = create_hud_default();
     const { mode, score, lines, level, highScore, needReset = false } = state;
@@ -2572,12 +2642,90 @@ var tetris = (() => {
   };
   var render_hud_default = renderHud;
 
-  // lib/ui/constants/firework-colors.js
-  var { TEAL: TEAL3, YELLOW: YELLOW3, PURPLE: PURPLE2, ORANGE: ORANGE3, GREEN: GREEN3, RED: RED3 } = colors_default;
-  var FIREWORK_COLORS = [TEAL3, YELLOW3, PURPLE2, ORANGE3, GREEN3, RED3];
-  var firework_colors_default = FIREWORK_COLORS;
+  // lib/services/ui/board/render-clear.js
+  var renderClear = (state) => {
+    const { COLS: COLS2 } = board_default;
+    const { gameBoardContext: ctx } = canvas_default;
+    for (const line of state.lines) {
+      ctx.save();
+      ctx.globalAlpha = line.alpha;
+      for (let x = 0; x < COLS2; x++) {
+        render_block_default(x, line.y, line.color);
+      }
+      ctx.restore();
+    }
+  };
+  var render_clear_default = renderClear;
 
-  // lib/ui/effects/render-fireworks.js
+  // lib/services/ui/text/render-countdown-text.js
+  var renderCountdownText = (count, scale = 1) => {
+    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
+    const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
+    const { gameBoard: gameBoard2, gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.translate(width / 2, height / 2);
+    ctx.scale(scale, scale);
+    ctx.font = `${fontSize2 * 3.25}px ${FONT_FAMILY2}`;
+    ctx.fillStyle = YELLOW5;
+    ctx.strokeStyle = BLACK2;
+    ctx.lineWidth = 6;
+    const text = String(count);
+    ctx.strokeText(text, 0, 0);
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+  };
+  var render_countdown_text_default = renderCountdownText;
+
+  // lib/services/ui/text/render-get-ready-text.js
+  var renderGetReadyText = () => {
+    const { GREEN: GREEN6, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "GET READY!",
+      x: width / 2,
+      y: height / 1.46,
+      color: GREEN6,
+      stroke: true,
+      strokeColor: BLACK2,
+      // 固定字号
+      size: 1.1,
+      center: true,
+      // 对齐方式与你原逻辑一致
+      baseline: "top"
+    });
+  };
+  var render_get_ready_text_default = renderGetReadyText;
+
+  // lib/services/ui/image/render-gamepad.js
+  var renderGamepad = () => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    const img = getImage(scenes_background_default.gamepad);
+    const size = Math.floor(width * 0.54);
+    const x = width / 2 - size / 2;
+    const y = height / 2 - size * 1.2;
+    render_image_default(img, x, y, size);
+  };
+  var render_gamepad_default = renderGamepad;
+
+  // lib/services/ui/effects/render-countdown.js
+  var renderCountdown = (state) => {
+    const { number, scale } = state;
+    clear_board_default();
+    render_overlay_default();
+    render_tetris_text_default();
+    render_scene_background_default("countdown");
+    render_gamepad_default();
+    render_get_ready_text_default();
+    render_countdown_text_default(number, scale);
+  };
+  var render_countdown_default = renderCountdown;
+
+  // lib/services/ui/effects/render-fireworks.js
   var renderFireworks = (fireworks) => {
     const { gameBoardContext: ctx } = canvas_default;
     for (const fire of fireworks) {
@@ -2594,7 +2742,7 @@ var tetris = (() => {
   };
   var render_fireworks_default = renderFireworks;
 
-  // lib/ui/text/render-level-up-text.js
+  // lib/services/ui/text/render-level-up-text.js
   var renderLevelUpText = () => {
     const { GREEN: GREEN6 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
@@ -2610,23 +2758,7 @@ var tetris = (() => {
   };
   var render_level_up_text_default = renderLevelUpText;
 
-  // lib/ui/text/render-level-number.js
-  var renderLevelNumber = (level, y) => {
-    const { GREEN: GREEN6 } = colors_default;
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width } = gameBoard2;
-    render_text_default({
-      text: String(level),
-      x: width / 2,
-      y,
-      color: GREEN6,
-      size: 3,
-      center: true
-    });
-  };
-  var render_level_number_default = renderLevelNumber;
-
-  // lib/ui/text/render-congrats-text.js
+  // lib/services/ui/text/render-congrats-text.js
   var renderCongratsText = () => {
     const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
@@ -2645,7 +2777,7 @@ var tetris = (() => {
   };
   var render_congrats_text_default = renderCongratsText;
 
-  // lib/ui/effects/render-level-up.js
+  // lib/services/ui/effects/render-level-up.js
   function renderLevelUp(level, fireworks) {
     const { gameBoard: gameBoard2 } = canvas_default;
     const { height } = gameBoard2;
@@ -2658,8 +2790,698 @@ var tetris = (() => {
   }
   var render_level_up_default = renderLevelUp;
 
-  // lib/animations/level-up-animation.js
-  var LevelUpAnimation = class {
+  // lib/services/ui/core/resize.js
+  var resize = () => {
+    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
+    const { gameBoard: gameBoard2, nextPiece: nextPiece2 } = canvas_default;
+    const h = globalThis.innerHeight * 0.9;
+    canvas_default.blockSize = Math.floor(h / ROWS2);
+    gameBoard2.width = canvas_default.blockSize * COLS2;
+    gameBoard2.height = canvas_default.blockSize * ROWS2;
+    canvas_default.fontSize = Math.floor(gameBoard2.height * 0.032);
+    const nextSize = Math.min(
+      globalThis.innerWidth * 0.1,
+      globalThis.innerHeight * 0.18
+    );
+    nextPiece2.width = nextSize;
+    nextPiece2.height = nextSize;
+  };
+  var resize_default = resize;
+
+  // lib/services/ui/index.js
+  var UI = {
+    CONSTANTS: {
+      BOARD: board_default,
+      FIREWORK_COLORS: firework_colors_default
+    },
+    Canvas: canvas_default,
+    updateHud(state) {
+      render_hud_default(state);
+    },
+    lazyRender(state) {
+      lazy_render_scene_default(state);
+    },
+    render(state) {
+      render_scene_default(state);
+    },
+    renderClear: render_clear_default,
+    renderCountdown: render_countdown_default,
+    renderLevelUp: render_level_up_default,
+    renderNextPiece: render_next_piece_default,
+    resize(state) {
+      resize_default();
+      UI.render(state);
+    }
+  };
+  var ui_default = UI;
+
+  // lib/game/utils/random-shape.js
+  function randomShape() {
+    const index = Math.floor(Math.random() * shapes_default.length);
+    const piece = shapes_default[index];
+    return {
+      ...piece,
+      shape: piece.shape.map((row) => [...row])
+    };
+  }
+  var random_shape_default = randomShape;
+
+  // lib/game/logic/collision.js
+  var collision = (ox, oy) => {
+    const { ROWS: ROWS2, COLS: COLS2 } = ui_default.CONSTANTS.BOARD;
+    const state = game_default2.store.getState();
+    const { curr, cx, cy, board } = state;
+    if (!curr) {
+      return false;
+    }
+    const s = curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          const nx = cx + x + ox;
+          const ny = cy + y + oy;
+          const outOfBounds = nx < 0 || nx >= COLS2 || ny >= ROWS2;
+          const hitBlock = ny >= 0 && ny < ROWS2 && board[ny][nx];
+          if (outOfBounds || hitBlock) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+  var collision_default = collision;
+
+  // lib/game/core/over.js
+  var over = () => {
+    const { store } = game_default2;
+    const mode = store.getMode();
+    if (mode === "game-over" || mode === "replay") {
+      return;
+    }
+    replay_runtime_default.stopRecord();
+    game_default2.saveHighScore();
+    audio_default.stopBGM();
+    audio_default.Sounds.gameOver();
+    if (replay_runtime_default.hasData) {
+      store.resetBoard();
+      store.setState({
+        score: 0,
+        lines: 0,
+        level: 1
+      });
+      store.setMode("replay");
+      replay_runtime_default.startPlay();
+      spawn_default();
+    } else {
+      store.setMode("game-over");
+    }
+  };
+  var over_default = over;
+
+  // lib/game/logic/spawn.js
+  var spawn = () => {
+    const { store } = game_default2;
+    const { COLS: COLS2 } = ui_default.CONSTANTS.BOARD;
+    if (replay_runtime_default.playing) {
+      const piece = replay_runtime_default.pieceSequence[replay_runtime_default.pieceIndex];
+      if (!piece) {
+        return;
+      }
+      const nextPiece2 = replay_runtime_default.pieceSequence[replay_runtime_default.pieceIndex + 1] || null;
+      store.setState({
+        curr: piece,
+        next: nextPiece2 ? structuredClone(nextPiece2) : null,
+        cx: Math.floor(COLS2 / 2) - Math.floor(piece.shape[0].length / 2),
+        cy: 0
+      });
+      ui_default.renderNextPiece(store.getState());
+      replay_runtime_default.pieceIndex++;
+      return;
+    }
+    const state = store.getState();
+    const { next } = state;
+    const curr = next ? {
+      ...next,
+      shape: next.shape.map((row) => [...row])
+    } : random_shape_default();
+    store.setState({
+      // 当前方块 = 下一个方块，若不存在则随机生成
+      curr,
+      // 重新随机生成下一个预览方块
+      next: random_shape_default(),
+      // 水平居中：屏幕中间 - 方块宽度的一半
+      cx: Math.floor(COLS2 / 2) - Math.floor(curr.shape[0].length / 2),
+      // 垂直位置从顶部开始
+      cy: 0
+    });
+    const currentState = store.getState();
+    ui_default.renderNextPiece(currentState);
+    if (replay_runtime_default.recording && currentState.curr) {
+      replay_runtime_default.pieceSequence.push(structuredClone(currentState.curr));
+    }
+    if (collision_default(0, 0)) {
+      over_default();
+    }
+  };
+  var spawn_default = spawn;
+
+  // lib/core/command/command-queue.js
+  var CommandQueue = {
+    /**
+     * ## 命令队列（FIFO）
+     *
+     * @type {object[]}
+     */
+    queue: [],
+    /**
+     * ## 入队一个 Command
+     *
+     * @param {object} command - 要执行的命令
+     */
+    enqueue(command) {
+      this.queue.push(command);
+    },
+    /**
+     * ## 执行并清空队列中的所有 Command
+     *
+     * 当前行为：
+     *
+     * - 一次性执行全部 command
+     * - 不做时间分帧控制
+     *
+     * @param {object} context - 执行上下文
+     */
+    flush(context) {
+      const { queue } = this;
+      while (queue.length > 0) {
+        const cmd = queue.shift();
+        cmd.execute(context);
+      }
+    },
+    /** ## 清空队列（丢弃所有未执行命令） */
+    clear() {
+      this.queue.length = 0;
+    }
+  };
+  var command_queue_default = CommandQueue;
+
+  // lib/services/input/gamepad-controller.js
+  var GAMEPAD_ACTION_MAP = {
+    A: "TOGGLE_MUSIC",
+    B: "DROP",
+    X: "RESTART",
+    Y: "TOGGLE_PAUSE",
+    START: "CONFIRM",
+    BACK: "QUIT",
+    DPAD_LEFT: "MOVE_LEFT",
+    DPAD_RIGHT: "MOVE_RIGHT",
+    DPAD_DOWN: "MOVE_DOWN",
+    DPAD_UP: "ROTATE"
+  };
+  var STANDARD_BTN_MAP = {
+    A: 0,
+    B: 1,
+    X: 2,
+    Y: 3,
+    LB: 4,
+    RB: 5,
+    LT: 6,
+    RT: 7,
+    BACK: 8,
+    START: 9,
+    DPAD_UP: 12,
+    DPAD_DOWN: 13,
+    DPAD_LEFT: 14,
+    DPAD_RIGHT: 15
+  };
+  var BETOP_20BC_1263_BTN_MAP = {
+    A: 2,
+    B: 1,
+    X: 3,
+    Y: 0,
+    LB: 4,
+    RB: 5,
+    LT: 6,
+    RT: 7,
+    BACK: 8,
+    START: 9
+  };
+  var GamepadController = class {
+    /**
+     * ## 当前激活手柄 Index
+     *
+     * @type {number | null}
+     */
+    activeGamepadIndex = null;
+    /**
+     * ## 摇杆死区（避免漂移）
+     *
+     * @type {number}
+     */
+    DEAD_ZONE = 0.15;
+    /**
+     * ## 方向触发阈值
+     *
+     * @type {number}
+     */
+    DPAD_THRESHOLD = 0.5;
+    constructor() {
+      this.AXIS_MAP = {
+        LEFT_STICK_X: 0,
+        LEFT_STICK_Y: 1
+      };
+      this.curBtnMap = STANDARD_BTN_MAP;
+      this.buttonStates = {};
+      this.axisStates = {};
+      this._eventsBound = false;
+      this.dpadAxisState = {
+        up: false,
+        down: false,
+        left: false,
+        right: false
+      };
+    }
+    /**
+     * ## 每帧调用
+     *
+     * 流程：
+     *
+     * 1. 刷新 Gamepad snapshot
+     * 2. 如果存在 active gamepad
+     * 3. 收集输入 → dispatch
+     */
+    update() {
+      this._refreshGamepadState();
+      if (!this.activeGamepad) {
+        return;
+      }
+      this._collectCommands();
+    }
+    /** ## 绑定 Gamepad 连接事件 */
+    bindEvents() {
+      if (this._eventsBound) {
+        return;
+      }
+      globalThis.addEventListener("gamepadconnected", this._onConnect);
+      globalThis.addEventListener("gamepaddisconnected", this._onDisconnect);
+      this._eventsBound = true;
+    }
+    /** ## 销毁事件绑定 */
+    destroy() {
+      globalThis.removeEventListener("gamepadconnected", this._onConnect);
+      globalThis.removeEventListener("gamepaddisconnected", this._onDisconnect);
+      this._eventsBound = false;
+    }
+    /**
+     * ## 手柄连接
+     *
+     * - 设置 activeGamepad
+     * - 自动识别 BETOP 并切换 mapping
+     *
+     * @param {object} e - 事件对象
+     */
+    _onConnect = (e) => {
+      const pad = e.gamepad;
+      if (this.activeGamepadIndex === null) {
+        this.activeGamepadIndex = pad.index;
+        this.curBtnMap = this._isBetop(pad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+      }
+    };
+    /**
+     * ## 手柄断开
+     *
+     * - 清空状态
+     *
+     * @param {object} e - 事件对象
+     */
+    _onDisconnect = (e) => {
+      if (this.activeGamepadIndex === e.gamepad.index) {
+        this.activeGamepadIndex = null;
+        this.buttonStates = {};
+        this.axisStates = {};
+      }
+    };
+    /**
+     * ## 判断是否为 BETOP（北通） 手柄
+     *
+     * @param {string} id - 手柄 id 字符串
+     * @returns {boolean} - 返回判断结果，是北通返回 true，否则返回 false
+     */
+    _isBetop(id) {
+      return id.includes("20bc") && id.includes("1263");
+    }
+    /**
+     * ## 刷新 Gamepad 状态
+     *
+     * - 必须每帧调用 navigator.getGamepads()
+     * - 因为 Gamepad 对象是 snapshot，不是实时引用
+     */
+    _refreshGamepadState() {
+      const pads = navigator.getGamepads?.() || [];
+      if (this.activeGamepadIndex === null) {
+        const firstPad = Array.from(pads).find(Boolean);
+        if (firstPad) {
+          this.activeGamepadIndex = firstPad.index;
+          this.curBtnMap = this._isBetop(firstPad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+        }
+      }
+      this.activeGamepad = this.activeGamepadIndex === null ? null : pads[this.activeGamepadIndex];
+    }
+    /**
+     * ## 收集所有输入
+     *
+     * - 转换为 Command（通过 dispatchInput）
+     */
+    _collectCommands() {
+      const pad = this.activeGamepad;
+      if (!pad) {
+        return;
+      }
+      for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
+        if (this._isPressed(btnName)) {
+          if (this._isBetop(pad.id) && btnName.startsWith("DPAD_")) {
+            continue;
+          }
+          engine_default.dispatchInput({ device: "gamepad", action, payload: {} });
+        }
+      }
+      const x = this._getAxis(this.AXIS_MAP.LEFT_STICK_X);
+      const y = this._getAxis(this.AXIS_MAP.LEFT_STICK_Y);
+      this._handleStickMove(x, y);
+      if (this._isBetop(pad.id)) {
+        const dpadVal = pad.axes[9] ?? 0;
+        this._handleBetopDpad(dpadVal);
+      }
+    }
+    /**
+     * ## 摇杆移动处理（带防抖）
+     *
+     * @param {number} x - X轴偏移数值
+     * @param {number} y - Y轴偏移数值
+     */
+    _handleStickMove(x, y) {
+      if (y < -this.DPAD_THRESHOLD) {
+        this._startAxisAction("ROTATE");
+      } else {
+        this._stopAxisAction("ROTATE");
+      }
+      if (y > this.DPAD_THRESHOLD) {
+        this._startAxisAction("MOVE_DOWN");
+      } else {
+        this._stopAxisAction("MOVE_DOWN");
+      }
+      if (x < -this.DPAD_THRESHOLD) {
+        this._startAxisAction("MOVE_LEFT");
+      } else {
+        this._stopAxisAction("MOVE_LEFT");
+      }
+      if (x > this.DPAD_THRESHOLD) {
+        this._startAxisAction("MOVE_RIGHT");
+      } else {
+        this._stopAxisAction("MOVE_RIGHT");
+      }
+    }
+    /**
+     * ## 开始轴动作（触发一次）
+     *
+     * 仅在未触发时触发 dispatch
+     *
+     * @param {string} action - 动作名称
+     */
+    _startAxisAction(action) {
+      if (!this.axisStates[action]) {
+        this.axisStates[action] = true;
+        engine_default.dispatchInput({
+          device: "gamepad",
+          action,
+          payload: {}
+        });
+      }
+    }
+    /**
+     * ## 停止轴动作（重置状态）
+     *
+     * @param {string} action - 动作名称
+     */
+    _stopAxisAction(action) {
+      this.axisStates[action] = false;
+    }
+    /**
+     * ## BETOP DPAD（axis9）解析
+     *
+     * 不同方向对应固定浮点值
+     *
+     * @param {number} val -
+     */
+    _handleBetopDpad(val) {
+      const v = val.toFixed(5);
+      const st = this.dpadAxisState;
+      switch (v) {
+        // 上
+        case "-1.00000": {
+          if (!st.up) {
+            st.up = true;
+            engine_default.dispatchInput({
+              device: "gamepad",
+              action: "ROTATE",
+              payload: {}
+            });
+          }
+          st.down = st.left = st.right = false;
+          break;
+        }
+        // 下
+        case "0.14286": {
+          if (!st.down) {
+            st.down = true;
+            engine_default.dispatchInput({
+              device: "gamepad",
+              action: "MOVE_DOWN",
+              payload: {}
+            });
+          }
+          st.up = st.left = st.right = false;
+          break;
+        }
+        // 左
+        case "0.71429": {
+          if (!st.left) {
+            st.left = true;
+            engine_default.dispatchInput({
+              device: "gamepad",
+              action: "MOVE_LEFT",
+              payload: {}
+            });
+          }
+          st.up = st.down = st.right = false;
+          break;
+        }
+        // 右
+        case "-0.42857": {
+          if (!st.right) {
+            st.right = true;
+            engine_default.dispatchInput({
+              device: "gamepad",
+              action: "MOVE_RIGHT",
+              payload: {}
+            });
+          }
+          st.up = st.down = st.left = false;
+          break;
+        }
+        // 松开手柄充值状态
+        default: {
+          st.up = st.down = st.left = st.right = false;
+          break;
+        }
+      }
+    }
+    /**
+     * ## 获取轴值（带 dead zone）
+     *
+     * @param {number} index - 索引值
+     * @returns {number} - 返回获取的轴值
+     */
+    _getAxis(index) {
+      if (!this.activeGamepad) {
+        return 0;
+      }
+      const val = this.activeGamepad.axes[index] ?? 0;
+      return Math.abs(val) > this.DEAD_ZONE ? val : 0;
+    }
+    /**
+     * ## 判断按钮是否“刚按下”（防抖）
+     *
+     * @param {string} btnName - 按钮名称
+     * @returns {boolean} - 按钮按下返回 true，否则返回 false
+     */
+    _isPressed(btnName) {
+      const idx = this.curBtnMap[btnName];
+      if (idx === void 0 || !this.activeGamepad) {
+        return false;
+      }
+      const btn = this.activeGamepad.buttons[idx];
+      if (!btn) {
+        return false;
+      }
+      const pressed = btn.value > 0.5;
+      if (pressed && !this.buttonStates[btnName]) {
+        this.buttonStates[btnName] = true;
+        return true;
+      }
+      if (!pressed) {
+        this.buttonStates[btnName] = false;
+      }
+      return false;
+    }
+  };
+  var gamepad_controller_default = GamepadController;
+
+  // lib/services/input/keyboard.js
+  var KEYBOARDS_ACTION_MAP = {
+    arrowleft: "MOVE_LEFT",
+    arrowright: "MOVE_RIGHT",
+    arrowdown: "MOVE_DOWN",
+    arrowup: "ROTATE",
+    " ": "DROP",
+    m: "TOGGLE_MUSIC",
+    p: "TOGGLE_PAUSE",
+    r: "RESTART",
+    q: "QUIT",
+    1: "LEVEL_ONE",
+    2: "LEVEL_TWO",
+    3: "LEVEL_THREE",
+    4: "LEVEL_FOUR",
+    5: "LEVEL_FIVE",
+    6: "LEVEL_SIX",
+    7: "LEVEL_SEVEN",
+    8: "LEVEL_EIGHT",
+    9: "LEVEL_NINE",
+    t: "LEVEL_TEN",
+    enter: "CONFIRM"
+  };
+  var resolveKeyboardAction = (key) => {
+    if (!key) {
+      return;
+    }
+    const normalizedKey = key.toLowerCase();
+    return KEYBOARDS_ACTION_MAP[normalizedKey];
+  };
+  var onKeydown = (e) => {
+    const key = e.key.toLowerCase();
+    const action = resolveKeyboardAction(key);
+    if (!action) {
+      return;
+    }
+    engine_default.dispatchInput({
+      device: "keyboard",
+      action,
+      payload: {}
+    });
+  };
+  var onResize = () => {
+    ui_default.resize();
+  };
+  var bindEvents = () => {
+    globalThis.addEventListener("resize", onResize);
+    document.addEventListener("keydown", onKeydown);
+  };
+  var destroy = () => {
+    globalThis.removeEventListener("resize", onResize);
+    document.removeEventListener("keydown", onKeydown);
+  };
+  var Keyboard = {
+    bindEvents,
+    destroy
+  };
+  var keyboard_default = Keyboard;
+
+  // lib/services/input/index.js
+  var Input = {
+    Gamepad: new gamepad_controller_default(),
+    Keyboards: keyboard_default
+  };
+  var input_default = Input;
+
+  // lib/engine/start-game-loop.js
+  var startGameLoop = (timestamp) => {
+    if (!engine_default.timestamp) {
+      engine_default.timestamp = timestamp;
+    }
+    const { Animations, dispatchInput: dispatchInput2 } = engine_default;
+    const { store } = game_default2;
+    const stepDelta = timestamp - engine_default.accumulator;
+    let delta = (timestamp - engine_default.timestamp) / 1e3;
+    if (delta > 1e3) {
+      delta = 1e3;
+    }
+    const dropInterval = game_default2.getSpeed();
+    engine_default.timestamp = timestamp;
+    if (replay_runtime_default.playing) {
+      const { data } = replay_runtime_default;
+      const { length } = data;
+      const currentElapsed = Date.now() - replay_runtime_default.startTime;
+      if (length > 0 && replay_runtime_default.cursor >= length) {
+        store.setMode("game-over");
+        replay_runtime_default.stopPlay();
+      }
+      while (replay_runtime_default.playing && replay_runtime_default.cursor < data.length && data[replay_runtime_default.cursor].ms <= currentElapsed) {
+        const record = data[replay_runtime_default.cursor];
+        const { cmd } = record;
+        dispatchInput2({
+          device: "replay",
+          action: cmd.action,
+          payload: cmd.payload
+        });
+        replay_runtime_default.cursor++;
+      }
+    }
+    if (!replay_runtime_default.playing) {
+      input_default.Gamepad.update();
+    }
+    command_queue_default.flush({
+      Game: game_default2,
+      Audio: audio_default
+    });
+    if ((!engine_default.accumulator || stepDelta > dropInterval) && !replay_runtime_default.playing) {
+      game_default2.tick();
+      engine_default.accumulator = timestamp;
+    }
+    Animations.update(delta);
+    ui_default.render(store.getState());
+    Animations.render();
+    engine_default.rafId = requestAnimationFrame(startGameLoop);
+  };
+  var start_game_loop_default = startGameLoop;
+
+  // lib/engine/restart-game-loop.js
+  var restartGameLoop = () => {
+    engine_default.stop();
+    engine_default.rafId = requestAnimationFrame(start_game_loop_default);
+  };
+  var restart_game_loop_default = restartGameLoop;
+
+  // lib/game/core/begin.js
+  var begin = () => {
+    const { store } = game_default2;
+    const $level = document.querySelector("#level");
+    if ($level) {
+      $level.textContent = pad_start_default(store.getLevel(), 2);
+    }
+    replay_runtime_default.startRecord();
+    store.setMode("playing");
+    spawn_default();
+    audio_default.Sounds.levelStart();
+    setTimeout(() => {
+      audio_default.playBGM();
+    }, 250);
+    engine_default.rafId = requestAnimationFrame(restart_game_loop_default);
+  };
+  var begin_default = begin;
+
+  // lib/services/animations/countdown-animation.js
+  var CountdownAnimation = class {
     /**
      * ## 渲染层级（UI 层，显示在最前面）
      *
@@ -2677,122 +3499,80 @@ var tetris = (() => {
      *
      * @type {string}
      */
-    name = "level-up";
-    /**
-     * ## 创建升级动画实例
-     *
-     * @class
-     * @param {number} level - 当前等级
-     */
-    constructor(level) {
-      this.level = level;
-      this.fireworks = this.createFireworks();
-      this.duration = 3;
-      this.spawnTimer = 0;
-      this.timer = 0;
-    }
-    /**
-     * ## 创建一组烟花粒子
-     *
-     * 在画布中心上方位置生成随机方向和速度的粒子
-     *
-     * @returns {object[]} 烟花粒子对象数组
-     */
-    createFireworks() {
-      const { width, height } = canvas_default.gameBoard;
-      const particles = [];
-      for (let i = 0; i < 40; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 5 + Math.random() * 15;
-        particles.push({
-          x: width / 2,
-          // 初始X坐标：画布中心
-          y: height / 2 - 60,
-          // 初始Y坐标：画布中心上方60像素
-          vx: Math.cos(angle) * speed,
-          // X轴速度分量
-          vy: Math.sin(angle) * speed,
-          // Y轴速度分量
-          radius: 3 + Math.random() * 4,
-          // 粒子半径（3-7像素）
-          color: firework_colors_default[Math.floor(Math.random() * firework_colors_default.length)],
-          // 随机颜色
-          alpha: 1
-          // 初始完全不透明
-        });
-      }
-      return particles;
+    name = "countdown";
+    constructor() {
+      this.state = {
+        show: true,
+        number: 3,
+        scale: 4,
+        count: 0,
+        acc: 0
+      };
     }
     /**
      * ## 更新动画状态
      *
+     * 每帧调用：
+     *
+     * - 控制更新节奏（基于 acc）
+     * - 更新缩放动画
+     * - 控制数字切换
+     * - 判断动画是否结束
+     *
      * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
+     * @returns {boolean} - 是否继续存活（true=继续，false=结束）
      */
     update(delta) {
-      this.timer += delta;
-      this.spawnTimer += delta;
-      this.updateFireworks(delta);
-      if (this.spawnTimer > 0.6) {
-        this.fireworks.push(...this.createFireworks());
-        this.spawnTimer = 0;
+      const { state } = this;
+      state.acc += delta;
+      if (state.acc < 0.01) {
+        return true;
       }
-      if (this.timer >= this.duration) {
+      state.acc = 0;
+      state.count++;
+      state.scale = Math.max(1, state.scale - 0.4);
+      if (state.count >= 50) {
+        state.count = 0;
+        state.number -= 1;
+        state.scale = 4;
+        if (state.number >= 1) {
+          audio_default.Sounds.countdown();
+        }
+      }
+      if (state.number <= 0) {
         this.stop();
         return false;
       }
       return true;
     }
     /**
-     * ## 升级动画结束处理
+     * ## 倒计时结束处理
      *
-     * 继续播放背景音乐
+     * - 切换游戏状态为 playing
+     * - 启动游戏主逻辑
      */
     stop() {
-      play_bgm_default(this.level);
+      game_default2.store.setMode("playing");
+      game_default2.begin();
     }
     /**
-     * ## 更新所有烟花粒子的物理状态
+     * ## 渲染动画
      *
-     * 包括：速度衰减、重力影响、位置更新、透明度衰减、半径增大
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     */
-    updateFireworks(delta) {
-      const gravity = 0.01;
-      for (const p of this.fireworks) {
-        p.vx *= 0.98;
-        p.vy *= 0.98;
-        p.vy += gravity * delta;
-        p.x += p.vx * delta * 8e-3;
-        p.y += p.vy * delta * 8e-3;
-        p.alpha -= delta * 0.024;
-        p.radius += delta * 10;
-      }
-      this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
-    }
-    /**
-     * ## 渲染升级动画
-     *
-     * 调用专门渲染函数显示"LEVEL UP"文字和烟花效果
+     * 将当前 state 传递给渲染函数
      */
     render() {
-      const { level, fireworks } = this;
-      render_level_up_default(level, fireworks);
+      ui_default.renderCountdown(this.state);
     }
   };
-  var level_up_animation_default = LevelUpAnimation;
+  var countdown_animation_default = CountdownAnimation;
 
-  // lib/controllers/level-up-controller.js
-  var startLevelUp = (level) => {
-    const animation2 = new level_up_animation_default(level);
-    stop_bgm_default();
-    sounds_default.levelUp();
-    engine_default.Animations.register(animation2);
+  // lib/services/effects/countdown.js
+  var startCountdown = () => {
+    engine_default.Animations.register(new countdown_animation_default());
   };
-  var level_up_controller_default = startLevelUp;
+  var countdown_default = startCountdown;
 
-  // lib/animations/clear-lines-animation.js
+  // lib/services/animations/clear-lines-animation.js
   var ClearLinesAnimation = class {
     /**
      * ## 渲染层级（UI 层，显示在最前面）
@@ -2823,7 +3603,7 @@ var tetris = (() => {
         alpha: 1,
         timer: 0
       }));
-      sounds_default.clear(lines.length - 1);
+      audio_default.Sounds.clear(lines.length - 1);
     }
     /**
      * ## 更新动画状态
@@ -2864,9 +3644,9 @@ var tetris = (() => {
      * 4. 更新 HUD
      */
     stop() {
-      const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = game_default2;
-      const { ROWS: ROWS2, COLS: COLS2 } = board_default;
-      const { store } = engine_default.Game;
+      const { store, CONSTANTS } = game_default2;
+      const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = CONSTANTS.GAME;
+      const { ROWS: ROWS2, COLS: COLS2 } = ui_default.CONSTANTS.BOARD;
       const state = store.getState();
       const lines = state.clearLines || [];
       const cleared = lines.length;
@@ -2882,8 +3662,8 @@ var tetris = (() => {
       const nextLines = state.lines + cleared;
       const totalLines = state.baseLines + nextLines;
       const newLevel = Math.floor(totalLines / 10) + 1;
-      if (newLevel > state.level && !replay_default.playing) {
-        level_up_controller_default(newLevel);
+      if (newLevel > state.level && !replay_runtime_default.playing) {
+        effects_default.startLevelUp(newLevel);
       }
       store.setState((prev) => ({
         ...prev,
@@ -2893,7 +3673,7 @@ var tetris = (() => {
         level: Math.min(Math.max(prev.level, newLevel), MAX_LEVEL2),
         board
       }));
-      render_hud_default(store.getState());
+      ui_default.updateHud(store.getState());
     }
     /**
      * ## 渲染动画
@@ -2905,83 +3685,19 @@ var tetris = (() => {
      * 不修改 state，仅负责视觉表现
      */
     render() {
-      render_clear_default({ lines: this.lines });
+      ui_default.renderClear({ lines: this.lines });
     }
   };
   var clear_lines_animation_default = ClearLinesAnimation;
 
-  // lib/controllers/clear-lines-controller.js
+  // lib/services/effects/clear-lines.js
   var startClearLines = (lines) => {
     const animation2 = new clear_lines_animation_default(lines);
     engine_default.Animations.register(animation2);
   };
-  var clear_lines_controller_default = startClearLines;
+  var clear_lines_default = startClearLines;
 
-  // lib/game/logic/clear-lines.js
-  var clearLines = () => {
-    const { store } = game_default;
-    const state = store.getState();
-    const { ROWS: ROWS2 } = board_default;
-    let clear = 0;
-    const linesToClear = [];
-    for (let y = ROWS2 - 1; y >= 0; y--) {
-      const isLineFull = state.board[y].every((cell) => !!cell);
-      if (isLineFull) {
-        linesToClear.push(y);
-        clear++;
-      }
-    }
-    if (clear === 0) {
-      return false;
-    }
-    store.setClearLines(linesToClear);
-    clear_lines_controller_default(linesToClear);
-    return true;
-  };
-  var clear_lines_default = clearLines;
-
-  // lib/game/core/tick.js
-  var tick = () => {
-    const mode = game_default.store.getMode();
-    if (mode === "main-menu" || mode === "replay" || mode === "game-over" || engine_default.Animations.hasBlocking()) {
-      return;
-    }
-    if (!move_default(0, 1)) {
-      lock_default();
-      sounds_default.fall();
-      clear_lines_default();
-      spawn_default();
-    }
-  };
-  var tick_default = tick;
-
-  // lib/game/core/restart.js
-  var restart = () => {
-    const { store } = game_default;
-    const mode = store.getMode();
-    if (mode === "main-menu" || mode === "paused" || mode === "replay" || mode === "game-over") {
-      return;
-    }
-    stop_bgm_default();
-    store.setState({
-      mode: "playing",
-      score: 0,
-      lines: 0,
-      level: 1
-    });
-    store.resetBoard();
-    const state = store.getState();
-    render_hud_default({
-      ...state,
-      needReset: true
-    });
-    spawn_default();
-    play_bgm_default(store.getLevel());
-    engine_default.restart();
-  };
-  var restart_default = restart;
-
-  // lib/animations/paused-animation.js
+  // lib/services/animations/paused-animation.js
   var PausedAnimation = class {
     /**
      * ## 渲染层级（UI 层，显示在最前面）
@@ -3025,7 +3741,7 @@ var tetris = (() => {
       }
       this.timer += delta;
       if (this.timer >= 1) {
-        sounds_default.secondTick();
+        audio_default.Sounds.secondTick();
         this.timer = 0;
       }
       return true;
@@ -3049,7 +3765,7 @@ var tetris = (() => {
   };
   var paused_animation_default = PausedAnimation;
 
-  // lib/controllers/paused-controller.js
+  // lib/services/effects/paused.js
   var animation = null;
   var startPaused = () => {
     if (animation) {
@@ -3066,50 +3782,311 @@ var tetris = (() => {
     animation = null;
   };
 
+  // lib/services/animations/level-up-animation.js
+  var LevelUpAnimation = class {
+    /**
+     * ## 渲染层级（UI 层，显示在最前面）
+     *
+     * @type {number}
+     */
+    layer = 100;
+    /**
+     * ## 是否阻塞用户输入
+     *
+     * @type {boolean}
+     */
+    blocking = true;
+    /**
+     * ## 动画名称标识
+     *
+     * @type {string}
+     */
+    name = "level-up";
+    /**
+     * ## 创建升级动画实例
+     *
+     * @class
+     * @param {number} level - 当前等级
+     */
+    constructor(level) {
+      this.level = level;
+      this.fireworks = this.createFireworks();
+      this.duration = 3;
+      this.spawnTimer = 0;
+      this.timer = 0;
+    }
+    /**
+     * ## 创建一组烟花粒子
+     *
+     * 在画布中心上方位置生成随机方向和速度的粒子
+     *
+     * @returns {object[]} 烟花粒子对象数组
+     */
+    createFireworks() {
+      const { Canvas: Canvas2, CONSTANTS } = ui_default;
+      const { FIREWORK_COLORS: FIREWORK_COLORS2 } = CONSTANTS;
+      const { width, height } = Canvas2.gameBoard;
+      const particles = [];
+      for (let i = 0; i < 40; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 5 + Math.random() * 15;
+        particles.push({
+          x: width / 2,
+          // 初始X坐标：画布中心
+          y: height / 2 - 60,
+          // 初始Y坐标：画布中心上方60像素
+          vx: Math.cos(angle) * speed,
+          // X轴速度分量
+          vy: Math.sin(angle) * speed,
+          // Y轴速度分量
+          radius: 3 + Math.random() * 4,
+          // 粒子半径（3-7像素）
+          color: FIREWORK_COLORS2[Math.floor(Math.random() * FIREWORK_COLORS2.length)],
+          // 随机颜色
+          alpha: 1
+          // 初始完全不透明
+        });
+      }
+      return particles;
+    }
+    /**
+     * ## 更新动画状态
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
+     */
+    update(delta) {
+      this.timer += delta;
+      this.spawnTimer += delta;
+      this.updateFireworks(delta);
+      if (this.spawnTimer > 0.6) {
+        this.fireworks.push(...this.createFireworks());
+        this.spawnTimer = 0;
+      }
+      if (this.timer >= this.duration) {
+        this.stop();
+        return false;
+      }
+      return true;
+    }
+    /**
+     * ## 升级动画结束处理
+     *
+     * 继续播放背景音乐
+     */
+    stop() {
+      Audio.playBGM(this.level);
+    }
+    /**
+     * ## 更新所有烟花粒子的物理状态
+     *
+     * 包括：速度衰减、重力影响、位置更新、透明度衰减、半径增大
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     */
+    updateFireworks(delta) {
+      const gravity = 0.01;
+      for (const p of this.fireworks) {
+        p.vx *= 0.98;
+        p.vy *= 0.98;
+        p.vy += gravity * delta;
+        p.x += p.vx * delta * 8e-3;
+        p.y += p.vy * delta * 8e-3;
+        p.alpha -= delta * 0.024;
+        p.radius += delta * 10;
+      }
+      this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
+    }
+    /**
+     * ## 渲染升级动画
+     *
+     * 调用专门渲染函数显示"LEVEL UP"文字和烟花效果
+     */
+    render() {
+      const { level, fireworks } = this;
+      ui_default.renderLevelUp(level, fireworks);
+    }
+  };
+  var level_up_animation_default = LevelUpAnimation;
+
+  // lib/services/effects/level-up.js
+  var startLevelUp = (level) => {
+    const animation2 = new level_up_animation_default(level);
+    audio_default.stopBGM();
+    audio_default.Sounds.levelUp();
+    engine_default.Animations.register(animation2);
+  };
+  var level_up_default = startLevelUp;
+
+  // lib/services/effects/index.js
+  var Effects = {
+    startCountdown: countdown_default,
+    startClearLines: clear_lines_default,
+    startPaused,
+    stopPaused,
+    startLevelUp: level_up_default
+  };
+  var effects_default = Effects;
+
+  // lib/game/core/start.js
+  var start = () => {
+    const level = game_default2.store.getLevel();
+    const lines = (level - 1) * 10;
+    game_default2.store.setBaseLines(lines);
+    effects_default.startCountdown();
+  };
+  var start_default = start;
+
+  // lib/game/logic/move.js
+  var move = (ox, oy) => {
+    const { store } = game_default2;
+    const state = store.getState();
+    let { cx, cy } = state;
+    if (!collision_default(ox, oy)) {
+      cx += ox;
+      cy += oy;
+      store.setState({
+        cx,
+        cy
+      });
+      audio_default.Sounds.move();
+      return true;
+    }
+    return false;
+  };
+  var move_default = move;
+
+  // lib/game/logic/lock.js
+  var lock = () => {
+    const { store } = game_default2;
+    const state = store.getState();
+    const { curr } = state;
+    const s = curr.shape;
+    const board = structuredClone(state.board);
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          board[state.cy + y][state.cx + x] = curr.color;
+          store.setState({
+            board
+          });
+        }
+      }
+    }
+  };
+  var lock_default = lock;
+
+  // lib/game/logic/clear-lines.js
+  var clearLines = () => {
+    const { store } = game_default2;
+    const state = store.getState();
+    const { ROWS: ROWS2 } = ui_default.CONSTANTS.BOARD;
+    let clear = 0;
+    const linesToClear = [];
+    for (let y = ROWS2 - 1; y >= 0; y--) {
+      const isLineFull = state.board[y].every((cell) => !!cell);
+      if (isLineFull) {
+        linesToClear.push(y);
+        clear++;
+      }
+    }
+    if (clear === 0) {
+      return linesToClear;
+    }
+    store.setClearLines(linesToClear);
+    return linesToClear;
+  };
+  var clear_lines_default2 = clearLines;
+
+  // lib/game/core/tick.js
+  var tick = () => {
+    const mode = game_default2.store.getMode();
+    if (mode === "main-menu" || mode === "replay" || mode === "game-over" || engine_default.Animations.hasBlocking()) {
+      return;
+    }
+    if (!move_default(0, 1)) {
+      lock_default();
+      audio_default.Sounds.fall();
+      const linesToClear = clear_lines_default2();
+      if (linesToClear.length > 0) {
+        effects_default.startClearLines(linesToClear);
+        return;
+      }
+      spawn_default();
+    }
+  };
+  var tick_default = tick;
+
+  // lib/game/core/restart.js
+  var restart = () => {
+    const { store } = game_default2;
+    const mode = store.getMode();
+    if (mode === "main-menu" || mode === "paused" || mode === "replay" || mode === "game-over") {
+      return;
+    }
+    audio_default.stopBGM();
+    store.setState({
+      mode: "playing",
+      score: 0,
+      lines: 0,
+      level: 1
+    });
+    store.resetBoard();
+    const state = store.getState();
+    ui_default.updateHud({
+      ...state,
+      needReset: true
+    });
+    spawn_default();
+    audio_default.playBGM(store.getLevel());
+    engine_default.restart();
+  };
+  var restart_default = restart;
+
   // lib/game/core/play.js
   var play = () => {
-    const { store } = game_default;
+    const { store } = game_default2;
     const mode = store.getMode();
     if (mode === "main-menu" || mode !== "paused" || mode === "replay" || mode === "game-over") {
       return false;
     }
-    stopPaused();
+    effects_default.stopPaused();
     store.setMode("playing");
-    sounds_default.resume();
-    play_bgm_default();
+    audio_default.Sounds.resume();
+    audio_default.playBGM();
     engine_default.restart();
   };
   var play_default = play;
 
   // lib/game/core/pause.js
   var pause = () => {
-    const { store } = game_default;
+    const { store } = game_default2;
     const mode = store.getMode();
     if (mode === "main-menu" || mode !== "playing" || mode === "replay" || mode === "game-over") {
       return;
     }
     store.setMode("paused");
-    stop_bgm_default();
-    sounds_default.pause();
-    startPaused();
+    audio_default.stopBGM();
+    audio_default.Sounds.pause();
+    effects_default.startPaused();
   };
   var pause_default = pause;
 
   // lib/game/core/toggle-pause.js
   var togglePause = () => {
-    const mode = game_default.store.getMode();
+    const mode = game_default2.store.getMode();
     if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
       return false;
     }
     if (mode === "playing") {
-      if (replay_default.recording) {
-        replay_default.pauseStartTime = Date.now();
+      if (replay_runtime_default.recording) {
+        replay_runtime_default.pauseStartTime = Date.now();
       }
       pause_default();
     } else {
-      if (replay_default.recording && replay_default.pauseStartTime > 0) {
-        replay_default.totalPausedTime += Date.now() - replay_default.pauseStartTime;
-        replay_default.pauseStartTime = 0;
+      if (replay_runtime_default.recording && replay_runtime_default.pauseStartTime > 0) {
+        replay_runtime_default.totalPausedTime += Date.now() - replay_runtime_default.pauseStartTime;
+        replay_runtime_default.pauseStartTime = 0;
       }
       play_default();
     }
@@ -3118,20 +4095,20 @@ var tetris = (() => {
 
   // lib/game/core/get-speed.js
   var getSpeed = () => {
-    const level = game_default.store.getLevel();
+    const level = game_default2.store.getLevel();
     return Math.max(100, 1e3 - (level - 1) * 80);
   };
   var get_speed_default = getSpeed;
 
   // lib/game/core/reset.js
   var reset = () => {
-    const { store } = game_default;
-    stop_bgm_default();
+    const { store } = game_default2;
+    audio_default.stopBGM();
     engine_default.Animations.clear();
     command_queue_default.clear();
-    replay_default.stopRecord();
-    replay_default.stopPlay();
-    replay_default.reset();
+    replay_runtime_default.stopRecord();
+    replay_runtime_default.stopPlay();
+    replay_runtime_default.reset();
     engine_default.start();
     store.resetBoard();
     store.setState({
@@ -3142,7 +4119,7 @@ var tetris = (() => {
       next: null
     });
     const state = store.getState();
-    render_hud_default(state);
+    ui_default.updateHud(state);
   };
   var reset_default = reset;
 
@@ -3153,17 +4130,21 @@ var tetris = (() => {
         break;
       }
     }
+    const { Sounds: Sounds2 } = audio_default;
     lock_default();
-    sounds_default.fall();
-    clear_lines_default();
+    Sounds2.fall();
+    const linesToClear = clear_lines_default2();
+    if (linesToClear.length > 0) {
+      effects_default.startClearLines(linesToClear);
+    }
     spawn_default();
-    sounds_default.drop();
+    Sounds2.drop();
   };
   var drop_default = drop;
 
   // lib/game/logic/rotate.js
   var rotate = () => {
-    const { store } = game_default;
+    const { store } = game_default2;
     const state = store.getState();
     const { curr } = state;
     if (!curr) {
@@ -3183,7 +4164,7 @@ var tetris = (() => {
         curr: currentShape
       });
     } else {
-      sounds_default.rotate();
+      audio_default.Sounds.rotate();
     }
   };
   var rotate_default = rotate;
@@ -3200,6 +4181,10 @@ var tetris = (() => {
 
   // lib/game/index.js
   var Game = {
+    CONSTANTS: {
+      GAME: game_default,
+      SHAPES: shapes_default
+    },
     // 游戏状态
     store: game_store_default(),
     // 核心流程控制逻辑
@@ -3212,7 +4197,7 @@ var tetris = (() => {
     getSpeed: get_speed_default,
     reset: reset_default,
     // 游戏方块控制逻辑
-    clearLines: clear_lines_default,
+    clearLines: clear_lines_default2,
     collision: collision_default,
     drop: drop_default,
     lock: lock_default,
@@ -3222,7 +4207,7 @@ var tetris = (() => {
     selectLevel: (level) => {
       const { store } = Game;
       store.setLevel(level);
-      sounds_default.levelSelect();
+      audio_default.Sounds.levelSelect();
     },
     loadHighScore: () => {
       const { store } = Game;
@@ -3237,9 +4222,9 @@ var tetris = (() => {
       }
     }
   };
-  var game_default = Game;
+  var game_default2 = Game;
 
-  // lib/engine/animation-system.js
+  // lib/runtime/animation-runtime.js
   var createAnimationSystem = () => {
     const queue = [];
     const pending = [];
@@ -3418,7 +4403,7 @@ var tetris = (() => {
       }
     };
   };
-  var animation_system_default = createAnimationSystem;
+  var animation_runtime_default = createAnimationSystem;
 
   // lib/engine/stop-game-loop.js
   var stopGameLoop = () => {
@@ -3432,1220 +4417,396 @@ var tetris = (() => {
   };
   var stop_game_loop_default = stopGameLoop;
 
-  // lib/ui/text/render-level-text.js
-  var renderLevelText = () => {
-    const { GREEN: GREEN6 } = colors_default;
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    render_text_default({
-      text: "LEVEL",
-      x: width / 2,
-      y: height * 0.35,
-      color: GREEN6,
-      size: 1,
-      center: true
-    });
+  // lib/core/command/command.js
+  var Command = class {
+    /**
+     * ## 创建一个命令实例
+     *
+     * @param {string} action - 命令类型（如 MOVE / ROTATE）
+     * @param {object} [payload={}] - 命令参数（如方向、等级等）. Default is `{}`
+     */
+    constructor(action, payload = {}) {
+      this.action = action;
+      this.payload = payload;
+    }
+    /**
+     * ## 执行命令
+     *
+     * 将命令交给统一的 dispatch 系统处理， 而不是在 Command 内部写逻辑。
+     *
+     * @param {object} context - 执行上下文
+     */
+    execute(context) {
+      const { action, payload } = this;
+      engine_default.dispatchCommand(
+        {
+          action,
+          payload
+        },
+        context
+      );
+    }
   };
-  var render_level_text_default = renderLevelText;
+  var command_default = Command;
 
-  // lib/ui/text/render-level-shortcut.js
-  var renderLevelShortcut = () => {
-    const { WHITE: WHITE3 } = colors_default;
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    render_text_default({
-      text: "1-9 or T KEY",
-      x: width / 2,
-      y: height * 0.58,
-      color: WHITE3,
-      size: 1,
-      center: true
-    });
-  };
-  var render_level_shortcut_default = renderLevelShortcut;
-
-  // lib/ui/text/render-enter-start-text.js
-  var renderEnterStartText = () => {
-    const { TEAL: TEAL5, BLACK: BLACK2 } = colors_default;
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    render_text_default({
-      text: "ENTER START",
-      x: width / 2,
-      y: height * 0.74,
-      color: TEAL5,
-      strokeColor: BLACK2,
-      size: 1.15,
-      center: true,
-      stroke: true
-    });
-  };
-  var render_enter_start_text_default = renderEnterStartText;
-
-  // lib/ui/scenes/main-menu-scene/render-main-menu.js
-  var renderMainMenu = (level) => {
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { height } = gameBoard2;
-    clear_board_default();
-    render_overlay_default();
-    render_scene_background_default("main-menu");
-    render_tetris_text_default();
-    render_level_text_default();
-    render_level_number_default(level, height * 0.5);
-    render_level_shortcut_default();
-    render_enter_start_text_default();
-  };
-  var render_main_menu_default = renderMainMenu;
-
-  // lib/ui/scenes/main-menu-scene/lazy-render-main-menu.js
-  var lazyRenderMainMenu = (state) => {
-    const { level } = state;
-    if (document?.fonts?.load) {
-      document.fonts.load('40px "Press Start 2P"').then(() => {
-        render_main_menu_default(level);
+  // lib/engine/dispatch-input.js
+  var dispatchInput = (input) => {
+    const { action, payload } = input;
+    const hasBlocking = engine_default.Animations.hasBlocking(["countdown", "level-up"]);
+    if (hasBlocking || !action) {
+      return;
+    }
+    const cmd = new command_default(action, payload);
+    command_queue_default.enqueue(cmd);
+    if (replay_runtime_default.recording) {
+      const elapsedTime = Date.now() - replay_runtime_default.startTime - replay_runtime_default.totalPausedTime;
+      replay_runtime_default.data.push({
+        ms: elapsedTime,
+        cmd
       });
-    } else {
-      setTimeout(() => {
-        render_main_menu_default(level);
-      }, 150);
     }
   };
-  var lazy_render_main_menu_default = lazyRenderMainMenu;
+  var dispatch_input_default = dispatchInput;
 
-  // lib/ui/scenes/main-menu-scene/index.js
-  var mainMenuScene = (state) => {
-    render_main_menu_default(state.level);
-  };
-  var main_menu_scene_default = mainMenuScene;
-
-  // lib/ui/text/render-paused-text.js
-  var renderPausedText = () => {
-    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    render_text_default({
-      text: "PAUSED",
-      x: width / 2,
-      y: height / 1.4,
-      color: YELLOW5,
-      strokeColor: BLACK2,
-      size: 1.6,
-      center: true,
-      stroke: true
-    });
-  };
-  var render_paused_text_default = renderPausedText;
-
-  // lib/utils/format-time.js
-  var formatTime = (date, format = "yyyy-MM-dd HH:mm:ss") => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const seconds = date.getSeconds();
-    const toSymbol = () => hours >= 12 ? "PM" : "AM";
-    const hasSymbol = format.includes("a");
-    const hour12 = hours % 12 || 12;
-    const symbols = {
-      yyyy: year,
-      MM: pad_start_default(month, 2),
-      dd: pad_start_default(day, 2),
-      HH: pad_start_default(hours, 2),
-      hh: pad_start_default(hour12, 2),
-      mm: pad_start_default(minutes, 2),
-      ss: pad_start_default(seconds, 2),
-      a: hasSymbol ? toSymbol() : ""
-    };
-    let time = format;
-    for (const key of Object.keys(symbols)) {
-      time = time.replace(new RegExp(key, "g"), symbols[key]);
-    }
-    return time;
-  };
-  var format_time_default = formatTime;
-
-  // lib/ui/effects/render-digital-clock.js
-  var { GREEN: GREEN4 } = colors_default;
-  var renderDigitalClock = (time, color = GREEN4, format = "HH:mm:ss") => {
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    const text = format_time_default(time || /* @__PURE__ */ new Date(), format);
-    render_text_default({
-      text,
-      x: width / 2,
-      y: height / 4.15,
-      color,
-      size: 0.94,
-      center: true
-    });
-  };
-  var render_digital_clock_default = renderDigitalClock;
-
-  // lib/ui/effects/clock/constants/clock-themes.js
-  var {
-    CORAL: CORAL2,
-    RGBA_CORAL: RGBA_CORAL2,
-    WHITE: WHITE2,
-    RGBA_WHITE: RGBA_WHITE3,
-    PURPLE: PURPLE3,
-    RGBA_PURPLE: RGBA_PURPLE2,
-    TEAL: TEAL4,
-    RGBA_TEAL: RGBA_TEAL2,
-    PINK: PINK3,
-    RGBA_PINK: RGBA_PINK2,
-    ORANGE: ORANGE4,
-    RGBA_ORANGE: RGBA_ORANGE2,
-    GREEN: GREEN5,
-    RGBA_GREEN: RGBA_GREEN2,
-    BLUE: BLUE3,
-    RGBA_BLUE: RGBA_BLUE2,
-    YELLOW: YELLOW4,
-    RGBA_YELLOW: RGBA_YELLOW2,
-    RED: RED4,
-    RGBA_RED: RGBA_RED2,
-    VIOLET: VIOLET3,
-    RGBA_VIOLET: RGBA_VIOLET2,
-    CYAN: CYAN2,
-    RGBA_CYAN: RGBA_CYAN2
-  } = colors_default;
-  var ClockThemes = {
-    Teal: {
-      stroke: TEAL4,
-      face: RGBA_TEAL2,
-      secondHand: VIOLET3
-    },
-    Violet: {
-      stroke: VIOLET3,
-      face: RGBA_VIOLET2,
-      secondHand: TEAL4
-    },
-    Yellow: {
-      stroke: YELLOW4,
-      face: RGBA_YELLOW2,
-      secondHand: PINK3
-    },
-    Pink: {
-      stroke: PINK3,
-      face: RGBA_PINK2,
-      secondHand: YELLOW4
-    },
-    Purple: {
-      stroke: PURPLE3,
-      face: RGBA_PURPLE2,
-      secondHand: GREEN5
-    },
-    Green: {
-      stroke: GREEN5,
-      face: RGBA_GREEN2,
-      secondHand: CYAN2
-    },
-    Blue: {
-      stroke: BLUE3,
-      face: RGBA_BLUE2,
-      secondHand: CORAL2
-    },
-    Coral: {
-      stroke: CORAL2,
-      face: RGBA_CORAL2,
-      secondHand: BLUE3
-    },
-    Orange: {
-      stroke: ORANGE4,
-      face: RGBA_ORANGE2,
-      secondHand: CYAN2
-    },
-    Cyan: {
-      stroke: CYAN2,
-      face: RGBA_CYAN2,
-      secondHand: ORANGE4
-    },
-    White: {
-      stroke: WHITE2,
-      face: RGBA_WHITE3,
-      secondHand: RED4
-    },
-    Red: {
-      stroke: RED4,
-      face: RGBA_RED2,
-      secondHand: WHITE2
-    }
-  };
-  var clock_themes_default = ClockThemes;
-
-  // lib/ui/effects/clock/utils/get-clock-angles.js
-  var getClockAngles = (time) => {
-    const h = time.getHours();
-    const m = time.getMinutes();
-    const s = time.getSeconds();
-    const hAng = (h % 12 + m / 60 + s / 3600) * (2 * Math.PI / 12);
-    const mAng = (m + s / 60) * (2 * Math.PI / 60);
-    const sAng = s * (2 * Math.PI / 60);
-    return {
-      hAng,
-      mAng,
-      sAng
-    };
-  };
-  var get_clock_angles_default = getClockAngles;
-
-  // lib/ui/constants/images/chinese-hour-animals.js
-  var { RGBA_WHITE: RGBA_WHITE4 } = colors_default;
-  var ChineseHourAnimals = {
-    rat: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m210.432 1012.898-43.574-31.69C273.812 834.156 352.175 810.01 590.686 808.502c21.397-31.26 16.25-56.266 9.378-89.708-3.557-17.138-7.222-34.843-7.222-54.434 0-68.958 25.33-104.636 63.407-136.973l34.897 41.04c-29.453 25.062-44.41 46.781-44.41 95.933 0 14.094 2.938 28.403 6.064 43.547 5.901 28.51 12.8 62.033-1.132 99.463 166.373-10.24 264.543-96.903 264.543-236.194 0-152.845-88.63-247.808-231.29-247.808-83.644 0-153.303 29.696-174.188 39.613a225 225 0 0 1-20.533 31.34l-41.742-34.116 20.884 17.058-20.91-16.977c.35-.458 36.62-45.999 36.62-97.55 0-34.815-8.946-60.765-26.57-77.069-17.515-16.249-44.786-24.603-81.219-24.953v162.654h-53.895V109.784l24.873-1.914c64.7-4.931 114.095 7.896 146.863 38.239 29.103 26.947 43.843 66.182 43.843 116.628 0 11.102-1.131 21.908-3.072 32.202 37.269-12.584 89.843-25.465 149.046-25.465 173.245 0 285.184 118.433 285.184 301.702 0 140.747-92.618 291.14-352.552 291.14-258.668 0-311.943 19.698-407.121 150.582m19.106-256.836c-12.046 0-24.388-.566-37.026-1.643l-22.097-1.86-2.425-22.016c-.243-2.398-6.306-58.098-6.306-99.516 0-103.586 21.45-178.904 53.895-259.046V107.79h53.895v274.783l-2.021 4.904c-32.014 78.282-51.874 146.324-51.874 243.55 0 22.879 2.102 51.443 3.826 70.98 99.679 2.802 172.814-35.409 222.451-116.494l48.02 24.091c-11.237 28.133-11.372 51.578-.377 67.854 9.701 14.282 28.645 23.175 49.448 23.175v53.894c-39.02 0-74.186-17.515-94.073-46.888a100.2 100.2 0 0 1-12.423-25.546c-53.22 49.179-121.128 73.943-202.913 73.97m150.42-230.588c0-34.223-13.231-44.463-29.642-44.463s-29.642 10.24-29.642 44.463c0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463"/></svg>`,
-    ox: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 -0.5 1025 1025"><path d="M1025.347 635.58v280.63h-53.894v-71.033c-16.33-18.405-69.821-70.413-161.685-86.07v157.104h-53.894V754.526h-107.79v215.58H594.19V700.631h161.685c100.998 0 172.57 38.67 215.579 71.868V656.761c-33.685-43.628-51.712-137.458-53.706-279.498H701.979c-76.935 0-127.219-26.22-175.805-51.55a1556 1556 0 0 0-26.84-13.743c-26.839 26.004-66.209 44.92-115.738 55.511 24.441 22.986 60.874 52.116 106.469 72.839l-22.313 49.044c-76.584-34.816-129.59-88.926-150.824-113.125-10.644.62-21.477 1.024-32.687 1.024a473.7 473.7 0 0 1-123.365-15.953L67.853 547.624l68.582 53.868c31.447-21.935 101.456-62.545 188.28-62.545v53.895c-95.986 0-170.36 62.491-171.088 63.138l-16.788 14.282L0 562.904l109.73-219.81C46.43 314.449 1.347 267.372 1.347 199.869c0-110.053 120.24-145.974 161.685-145.974v53.894c-14.12 0-107.79 17.166-107.79 92.08 0 90.597 136.947 123.5 228.999 123.5 67.907 0 122.422-12.99 157.696-35.625-42.712-14.336-95.097-23.12-169.337-18.324l-3.504-53.787c95.88-6.117 160.149 8.515 211.43 28.834 3.718-9.028 5.874-18.648 5.874-28.888 0-48.856-57.83-76.288-58.395-76.558l22.393-49.017c3.665 1.644 89.897 41.823 89.897 125.575 0 18.567-3.423 35.84-9.998 51.631 7.06 3.584 13.986 7.168 20.777 10.698 46.78 24.415 87.174 45.46 150.905 45.46h269.474v26.948c0 214.69 35.22 266.59 45.999 277.37zm-729.384 25.143-98.79 118.541L283.972 917.1l45.595-28.726-65.913-104.69 37.053-44.437c57.937 45.945 138.374 69.174 239.589 69.174v-53.895c-99.894 0-175.077-24.549-223.475-72.946z"/></svg>`,
-    rabbit: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M862.316 720.896c0 36.621-4.123 69.39-24.253 110.35l-68.365 138.86H485.053V916.21h48.37c-25.546-36.137-48.37-82.702-48.37-134.737 0-59.42 24.171-113.314 63.218-152.36l38.104 38.103a161.1 161.1 0 0 0-47.428 114.257c0 54.784 35.382 104.043 63.515 134.737h133.713l53.49-108.76c15.711-31.852 18.756-55.835 18.756-86.555 0-80.977-63.434-150.097-178.607-195.503-17.543 8.138-38.292 13.554-63.92 13.554h-80.841c-13.96 0-43.925 15.98-57.29 40.017l-47.104-26.166c20.749-37.349 67.584-67.745 104.394-67.745h80.842c37.268 0 57.478-15.441 79.09-36.46-19.617-112.398-95.232-179.12-159.932-179.12h-107.79a21.3 21.3 0 0 0-5.955 2.022 684 684 0 0 0-69.12-77.474c-35.84-34.223-61.764-58.934-94.909-79.44a42.44 42.44 0 0 0-21.8-6.792 22.82 22.82 0 0 0-17.381 7.195c-10.914 11.426-6.063 28.241 1.428 39.182 21.989 32.121 47.912 56.859 83.752 91.109 20.615 19.672 49.26 43.17 77.393 63.084C281.007 367.4 215.58 484.433 215.58 592.842c0 74.483 24.792 124.066 51.065 176.586 27.89 55.781 56.724 113.476 56.724 200.677h-53.894c0-74.482-24.792-124.065-51.066-176.586-27.89-55.78-56.724-113.475-56.724-200.677 0-90.866 42.227-197.686 93.454-274.486a804 804 0 0 1-39.047-34.115c-38.238-36.487-65.86-62.841-91.055-99.625-24.441-35.759-22.798-78.686 4.069-106.819 26.3-27.567 70.898-31.043 106.523-9 37.942 23.444 65.563 49.798 103.774 86.258 9.97 9.513 33.038 32.31 56.94 60.55h68.635c-27.621-37.78-60.416-72.73-88.522-99.543-28.834-27.54-54.73-52.116-84.534-74.024L326.306.296c31.232 23.23 57.802 48.533 87.31 76.72 53.84 51.388 94.45 100.594 121.747 146.836 82.837 26.65 150.043 116.87 165.026 230.75l1.725 13.177-9.405 9.405a820 820 0 0 1-11.803 11.587c156.322 72.408 181.41 174.727 181.41 232.125m-552.852 33.63c3.934 8.058 7.895 16.088 11.991 24.145 27.433 54.3 55.808 110.457 55.808 191.434h53.895c0-93.696-34.062-161.226-61.52-215.579zm597.908 53.895c-3.423 9.405-7.815 19.806-13.77 31.96L829.79 970.105h60.066l52.143-105.957c10.78-21.935 17.516-40.017 21.908-55.727zM514.695 390.737c0-34.223-13.231-44.463-29.642-44.463s-29.642 10.24-29.642 44.463c0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463"/></svg>`,
-    dragon: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M552.421 1024c-69.767 0-113.826-13.959-156.402-27.46-54.488-17.273-110.808-35.004-232.422-26.516l-3.826-53.733c131.719-9.458 195.934 10.968 252.524 28.888 42.226 13.366 78.686 24.926 140.126 24.926 92.753 0 148.21-57.937 148.21-113.96 0-16.95-5.524-101.619-114.634-101.619-64.97 0-112.747 23.337-163.328 48.02-57.344 28.026-122.368 59.77-218.381 59.77C85.908 862.316 0 787.294 0 683.897c0-95.77 80.788-198.844 258.183-198.844 86.69 0 155.917 24.818 229.214 51.092 45.81 16.41 92.564 33.172 145.489 44.167 9-7.034 13.85-16.277 13.85-26.76 0-37.187-37.672-74.859-74.131-111.265L569.317 439l38.104-38.104 3.26 3.288c42.173 42.091 89.95 89.842 89.95 149.369 0 12.719-2.802 24.926-7.976 36.11a595 595 0 0 0 61.871 3.18c62.437 0 107.79-34.008 107.79-80.843 0-58.853-52.87-110.269-108.84-164.702l-8.058-7.842c-19.025 16.438-38.077 35.49-59.419 56.832l-38.103-38.104C722.7 283.352 782.794 223.286 916.21 216.253V55.619c-63.408 7.788-120.994 39.424-121.668 39.802l-15.818 8.811-14.12-11.344c-32.903-26.436-54.892-38.993-90.92-38.993-41.419 0-74.349 25.87-109.192 53.302-26.624 20.91-54.137 42.55-86.85 53.194l-8.3 1.293h-69.094L294.723 267.21l-38.103-38.13 67.395-67.396h-162.33V107.79h303.103c22.232-8.272 43.709-25.168 66.399-42.98C569.829 34.438 613.619 0 673.684 0c48.91 0 81.408 17.947 110.889 40.098C813.703 26.3 877.73 0 943.158 0h26.947v323.368h-53.894v-53.167c-54.165 3.1-92.915 15.845-127.003 36.676l1.832 1.778C852.588 368.505 916.21 430.376 916.21 512c0 60.928-43.708 109.945-107.789 127.623v61.009h53.895v-53.895h53.895v53.895h53.894v53.894h-53.894v53.895h-53.895v-53.895H808.42c-29.723 0-53.895-24.171-53.895-53.894v-53.895c-118.326 0-207.063-31.798-285.318-59.877-68.77-24.63-133.713-47.913-211.025-47.913-141.124 0-204.288 72.785-204.288 144.95 0 73.324 61.844 124.524 150.393 124.524 11.91 0 23.229-.539 34.035-1.536 10.132-10.563 31.15-36.244 31.15-67.719 0-33.118-43.088-70.98-58.152-81.596l30.936-44.14c8.3 5.794 81.111 58.664 81.111 125.736 0 19.43-4.527 37.053-10.994 52.305 30.774-10.051 58.314-23.498 86.663-37.349 53.84-26.274 109.54-53.49 186.96-53.49 116.413 0 168.53 78.093 168.53 155.513 0 82.513-75.615 167.855-202.106 167.855m-21.18-623.104-38.104-38.104 137.89-137.89 38.103 38.104zM404.48 382.545l-38.104-38.104 152.98-152.98 38.104 38.104zM686.484 163.92c15.495-9.755 43.332-31.448 43.332-31.448-25.735-27.81-49.557-33.334-67.369-29.076-19.24 4.608-37.753 24.603-37.753 24.603s42.253 22.447 61.79 35.92"/></svg>`,
-    tiger: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M673.684 1024c-114.769 0-188.82-33.334-254.167-62.787-53.626-24.145-99.975-45.002-161.28-45.002-40.448 0-83.591 23.255-103.64 45.163l-39.747-36.433c27.648-30.154 84.318-62.625 143.387-62.625 68.392 0 119.862 21.288 172.92 45.056V673.684c0-35.166-17.542-64.108-30.638-80.815-15.199 9.836-32.068 18.89-50.742 26.947l-21.342-49.475C469.8 509.413 485.053 377.317 485.053 323.368V221.642a598 598 0 0 0-80.842-6.063h-26.948v-80.842c0-12.1-14.848-26.948-26.947-26.948-9.378 0-18.836.593-26.948 1.348v160.337h-53.894v-57.802c-136.03 102.912-158.45 266.886-161.307 295.882 9.135 9.108 38.993 25.06 71.976 38.67l38.104-59.366 12.45-1.59c90.516-11.614 146.566-93.076 146.566-161.9h53.895c0 88.334-68.797 192.243-180.87 213.343l-48.398 75.398-20.292-7.437C53.895 557.757 53.895 523.318 53.895 512c0-50.041 37.025-254.733 215.579-365.622V62.491l22.528-3.746c1.185-.188 29.48-4.85 58.314-4.85 41.553 0 80.842 39.289 80.842 80.842v27.513C679.855 172.813 1024 327.545 1024 646.737 1024 832.189 892.982 1024 673.684 1024m-13.473-323.368c-36.514 0-67.369 49.367-67.369 107.79 0 85.746 68.096 145.084 89.465 161.549 91.54-2.534 164.38-45.488 213.828-107.655H700.632V808.42H930.87c8.92-17.273 16.357-35.355 22.285-53.895H713.27l-6.467-17.65c-.512-1.294-14.363-36.244-46.592-36.244m-175.158 230.48c33.926 14.067 70.52 26.597 114.607 33.47-30.235-36.272-60.713-89.358-60.713-156.16 0-90.652 53.275-161.685 121.264-161.685 44.76 0 73.835 28.78 88.683 53.895h217.007c2.776-17.867 4.204-35.921 4.204-53.895 0-38.94-5.659-74.752-15.926-107.628L827.473 665.79l-38.104-38.104 142.633-142.632a368 368 0 0 0-57.775-81.597L719.683 557.999l-38.103-38.103 153.573-153.573a538 538 0 0 0-82.594-56.752L611.894 450.21l-38.104-38.104 128.135-128.135a794.7 794.7 0 0 0-162.978-52.924v92.321c0 50.15-11.102 156.7-95.932 236.329 18.378 23.417 42.038 63.407 42.038 113.987zM215.579 431.158v-53.895c39.774 0 53.895-29.022 53.895-53.895h53.894c0 53.572-37.025 107.79-107.79 107.79"/></svg>`,
-    snake: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M671.528 788.857c44.329 11.965 89.627 19.564 136.893 19.564 89.169 0 161.684-60.443 161.684-134.737S897.59 538.947 808.421 538.947c-19.079 0-37.026 1.51-54.218 4.016-.755-101.403-38.211-172.356-79.414-219.648l-1.105.053a1750 1750 0 0 1-79.036-1.751c45.702 35.867 108.705 107.87 105.984 232.367 0 .431-.081.808-.108 1.24-34.924 10.994-66.156 26.731-95.097 45.19a163 163 0 0 0-15.846-42.388c-21.557-39.64-60.065-66.775-97.36-93.022C433.098 423.344 377.263 384 377.263 296.42c0-130.29 108.275-188.632 215.58-188.632 64.134 0 132.715 12.046 214.365 37.808-4.877 34.654-27.109 63.784-106.576 69.039v-52.952h-53.895v53.68c-63.273-1.025-104.529-5.201-104.987-5.255l-5.578 53.598c2.236.242 56.185 5.767 137.512 5.767 125.17 0 188.632-48.128 188.632-143.064v-19.429l-18.432-6.144c-96.095-32.013-175.859-46.942-251.042-46.942-158.666 0-269.474 99.732-269.474 242.526 0 115.55 76.423 169.391 137.836 212.615 33.684 23.713 65.51 46.107 81.004 74.698 9.54 17.543 13.285 33.415 12.342 47.75 21.154 9.109 42.119 17.84 62.949 25.978 53.652-37.268 112.478-64.62 190.922-64.62 59.446 0 107.79 36.271 107.79 80.842s-48.344 80.842-107.79 80.842c-105.472 0-203.237-42.388-297.768-83.429-94.801-41.094-184.347-79.953-281.412-79.953-106.523.027-175.346 53.572-175.346 136.435 0 79.064 67.099 136.434 159.555 136.434 142.174 0 230.427-66.883 306.796-129.886 31.42 13.42 62.787 26.058 94.45 37.134-47.077 49.637-110.969 82.566-186.61 91.27l5.066 53.626c93.453-7.007 143.144 9.35 195.719 26.543 46.457 15.225 94.127 30.855 169.822 30.855 19.995 0 41.957-1.078 66.344-3.558l-5.416-53.625c-105.283 10.78-158.1-6.548-213.935-24.872-22.15-7.276-44.625-14.633-70.306-20.345a334.9 334.9 0 0 0 96.148-82.298M213.45 810.12c-50.877 0-105.66-25.843-105.66-82.54 0-60.847 62.733-82.54 121.451-82.54 77.851 0 154.732 30.289 235.25 64.943-66.263 52.925-139.721 100.137-251.04 100.137"/></svg>`,
-    horse: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M1024 0v404.21c0 33.334 0 134.737-92.08 134.737h-13.823l-78.363-109.056c-22.744 49.907-40.34 103.047-53.49 162.951h115.092c35.974 0 68.77 32.795 68.77 68.797 0 60.631-69.39 154.3-77.313 164.756l-43.008-32.472c25.681-34.061 66.426-100.11 66.426-132.284 0-5.983-8.92-14.902-14.902-14.902H775.976c-14.848 89.384-21.45 193.832-21.45 323.368h-53.894c0-283.971 31.097-453.605 110.888-605.049l20.318-38.535L944.64 483.517c14.444-4.42 25.465-20.938 25.465-79.306V0zM862.316 161.684h53.895V0h-53.895v80.842c-17.381-14.956-38.185-26.947-80.842-26.947H646.737v53.894h134.737c37.672 0 80.842 40.907 80.842 53.895m-107.79 0H538.947v53.895h161.685zm-453.632 604.86 99.786 149.667h64.755l-95.043-142.552 128.485-126.922h167.855a1213 1213 0 0 1 9.431-53.895H476.78zm109.973-184.4-37.862-38.32-132.419 130.803c-66.856-103.531-78.902-144.815-78.902-205.312 0-70.736 37.78-145.947 107.79-145.947h323.368l53.895-53.894H269.474c-6.71 0-13.258.566-19.699 1.482-14.848-21.504-45.137-55.377-89.142-55.377C65.967 215.579 0 349.292 0 469.315c0 70.171 16.141 136.65 49.233 202.672L6.198 723.833l41.472 34.412 66.129-79.737-8.704-16.034c-21.99-40.34-51.2-104.26-51.2-193.159 0-100.864 52.87-199.841 106.738-199.841 13.231 0 25.816 9.89 35.436 20.534-53.194 31.96-88.28 98.492-88.28 179.307 0 78.202 19.699 130.938 93.643 243.982l-55.296 54.622 134.763 202.186h64.755L215.606 775.033z"/></svg>`,
-    goat: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M608.256 144.734c-52.493-29.157-102.157-36.945-123.203-36.945V53.895c32.579 0 91.27 11.452 149.369 43.735 75.29 41.823 130.695 94.532 171.385 150.879-49.933 39.504-108.706 74.86-159.07 74.86h-107.79v-53.895h107.79c20.507 0 48.424-11.21 80.438-31.286a471 471 0 0 0-118.919-93.454m224.418 197.498c-16.384 0-29.642 10.24-29.642 44.463 0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463c0-34.223-13.231-44.463-29.642-44.463M1024 619.789c0-272.68-122.934-497.34-337.246-616.394L660.588 50.5c253.736 140.962 304.1 389.902 309.06 542.343H885.14c-17.92-35.624-45.352-69.12-87.013-101.996l-16.788-13.285-16.734 13.393c-66.13 52.898-134.63 127.084-187.312 209.678H102.966l-8.273-20.319c64.35-63.3 66.991-77.204 66.991-195.26v-53.895h485.053v-53.895H161.684c0-80.384 14.31-110.026 66.587-137.916l-25.384-47.536c-79.522 42.416-95.098 100.11-95.098 185.452v107.79c0 107.6 0 107.6-63.65 169.283L31.07 667.001l79.549 195.315h58.206l-43.897-107.79h103.478l43.897 107.79h58.206l-43.897-107.79h259.476c-37.106 70.414-61.035 144.627-61.035 215.58h53.894c0-68.69 27.271-144.061 68.959-215.58h79.252c7.41 0 13.474 6.063 13.474 13.474v94.316h53.894V768c0-37.16-30.208-67.368-67.368-67.368h-44.652c40.771-58.018 89.438-111.428 138.914-153.627 60.092 53.032 80.896 108.22 80.896 207.521h53.895c0-38.912-2.75-74.482-11.103-107.79H1024z"/></svg>`,
-    monkey: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M538.947 1024h-53.894c0-32.795 25.87-87.417 77.446-103.316-33.9-39.532-77.446-98.25-77.446-139.21 0-44.571 36.27-80.842 80.842-80.842h80.842v53.894h-80.842a26.947 26.947 0 0 0-26.948 26.948c0 19.725 36.676 77.473 92.133 134.737h88.603c20.21-14.148 88.738-71.465 88.738-198.603 0-108.382-93.238-202.967-168.152-278.986-49.502-50.203-88.576-89.842-98.735-128.62-11.749-44.732-21.585-112.586-26.327-148.318H377.263c-45.137 0-89.519 8.435-121.802 53.895h175.697v53.895c-97.28 0-107.79 113.07-107.79 161.684v53.895h53.895v161.684h-53.895v-107.79h-26.947c-170.253 0-188.632-94.235-188.632-134.736 0-31.044 35.22-72.327 55.728-93.723 2.694-14.687 5.847-28.35 9.431-41.014h-11.264v-53.895h31.529c46.43-94.585 124.011-107.79 184.05-107.79h185.64l2.803 23.795c.135 1.05 12.72 106.658 27.945 164.756 6.494 24.873 44.624 63.515 84.965 104.448 81.866 83.025 183.7 186.341 183.7 316.82 0 92.376-31.124 155.029-61.898 194.426 104.502-19.887 169.687-109.03 169.687-238.35 0-91.405-42.82-154.381-84.237-215.255-38.077-55.97-77.447-113.853-77.447-188.955 0-119.35 87.094-161.685 161.684-161.685v53.895c-32.417 0-107.79 10.51-107.79 107.79 0 58.502 31.556 104.933 68.097 158.639C974.282 492.598 1024 565.679 1024 673.684c0 177.287-108.301 296.421-269.474 296.421H592.842c-37.672 0-53.895 40.906-53.895 53.895M229.214 269.474a385 385 0 0 0-14.012 58.34l-1.402 8.49-6.09 6.116c-22.878 22.932-44.813 52.601-46.026 62.276 0 56.805 53.76 75.264 107.79 79.387v-52.925c0-58.691 13.473-119.62 46.51-161.684zM323.368 1024h-53.894c0-32.795 25.87-87.417 77.446-103.316-33.9-39.532-77.446-98.25-77.446-139.21 0-44.571 36.27-80.842 80.842-80.842h45.164a188.85 188.85 0 0 1 170.415-107.79h134.737v53.895H565.895c-74.294 0-134.737 60.443-134.737 134.737v26.516l-53.895.377v-26.893c0-9.162.647-18.136 1.913-26.948h-28.86c-14.848 0-26.948 12.073-26.948 26.948 0 19.725 36.676 77.473 92.133 134.737h15.657v53.894h-53.895c-37.672 0-53.895 40.906-53.895 53.895"/></svg>`,
-    rooster: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M673.684 354.358c-16.384 0-29.642-10.213-29.642-44.463 0-34.223 13.231-44.463 29.642-44.463s29.642 10.24 29.642 44.463c0 34.25-13.258 44.463-29.642 44.463M540.106 970.105l-50.58-107.79h156.052l50.607 107.79h59.554l-51.604-109.918C811.52 846.82 916.21 764.55 916.21 646.737c0-53.033-11.911-95.42-24.523-140.315-14.443-51.389-29.372-104.529-29.372-183.054V107.79C862.316 48.344 813.972 0 754.526 0a107.924 107.924 0 0 0-107.79 106.173 101 101 0 0 0-24.117-3.315 88.71 88.71 0 0 0-88.603 88.603c0 20.669 5.228 39.72 10.671 53.922l-99.49 59.688 93.75 14.47v57.722c0 14.417-5.901 21.693-33.36 49.152l-11.13 11.13C398.228 326.52 324.985 269.473 215.741 269.473 96.768 269.474 0 366.242 0 485.214v161.523h53.895V485.214A162.01 162.01 0 0 1 215.74 323.368c82.081 0 140.422 36.245 240.64 152.253l-38.616 38.616c-49.96-52.952-94.666-83.08-158.181-83.08a151.983 151.983 0 0 0-151.795 151.795v171.574h53.895V582.952a98.01 98.01 0 0 1 97.9-97.9c46.323 0 79.63 20.912 137.027 86.017l18.971 21.53 128.081-128.08c28.537-28.538 49.18-49.152 49.18-87.256v-97.927l23.309-14.12-13.663-23.04c-.161-.243-14.578-24.9-14.578-50.688 0-19.133 15.575-34.708 34.708-34.708 5.093 0 26.786 3.18 39.559 18.647l26.327 46.026 39.775-24.09-20.373-49.368c-3.152-7.545-7.275-30.478-7.275-40.206 0-29.722 24.171-53.894 53.894-53.894s53.895 24.172 53.895 53.894v215.58c0 85.935 16.68 145.3 31.367 197.631 12.1 43.008 22.528 80.142 22.528 125.737 0 95.286-99.41 161.684-188.632 161.684H464.222l-68.42-145.704c-20.56-43.763-57.693-69.875-99.354-69.875a80.977 80.977 0 0 0-80.87 80.87v188.604h53.896V673.71c0-14.875 12.1-26.974 26.974-26.974 20.534 0 38.966 14.147 50.553 38.858l133.578 284.51z"/></svg>`,
-    dog: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M326.063 282.947c0 34.25-13.231 44.464-29.642 44.464s-29.642-10.214-29.642-44.464c0-34.223 13.231-44.463 29.642-44.463s29.642 10.24 29.642 44.463m-56.59 147.349v311.646L190.276 916.21h59.204l73.89-162.574V377.263H296.42c-119.404 0-172.733-53.383-185.506-107.79h35.625c51.092 0 68.58-15.764 120.535-62.544 12.773-11.507 28.08-25.277 47.024-41.742l18.35-15.952-69.658-99.14-44.086 30.99 41.768 59.472c-11.183 9.863-20.884 18.594-29.48 26.328-50.257 45.272-54.757 48.694-84.453 48.694H53.895v26.947c0 88.711 66.91 178.15 215.579 187.77M486.185 268.88c2.29 71.734 28.7 136.327 75.049 182.919 57.479 57.829 141.204 87.147 248.859 87.147 18.593 0 36.19-1.158 52.628-3.449 3.746 111.266 33.63 170.334 51.496 196.015l-38.507 84.723c-93.535-74.186-186.934-115.604-498.446-115.604v53.894c34.277 0 65.698.512 94.64 1.51l-97.308 214.07H433.8l96.013-211.241c66.183 4.338 117.006 11.83 157.912 22.016L626.23 916.21h59.176l54.165-119.135c47.616 18.405 79.737 42.092 113.125 69.74l-46.943 103.29h59.204l113.07-248.779-13.823-13.204c-.485-.458-45.65-47.59-47.94-185.263C985.17 498.553 1024 447.81 1024 377.263c0-95.205-66.506-161.684-161.684-161.684v53.895c65.482 0 107.79 42.307 107.79 107.79 0 89.087-87.014 107.789-160.014 107.789-92.753 0-163.625-23.984-210.648-71.276-30.316-30.505-45.891-65.833-53.356-98.735 11.21 6.952 22.933 13.339 35.275 19.186l23.04-48.72C512.296 241.852 455.41 156.86 385.159 41.525l-46.026 28.052c49.448 81.246 92.968 148.507 147.051 199.303"/></svg>`,
-    pig: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M808.421 700.632v53.894c-196.446 0-323.368 84.642-323.368 215.58h-53.895c0-163.706 148.076-269.474 377.263-269.474m-323.368 107.79v-53.896c-158.343 0-245.599 0-319.65-49.367l-6.79-4.527h-77.77c-21.694 0-26.625-14.821-26.948-26.948v-82.62C138.05 579.88 215.579 516.15 215.579 404.21V215.579h-53.895v161.684h-26.947C67.773 377.263 0 414.29 0 485.053h53.895c0-42.631 52.87-53.895 80.842-53.895h24.63c-12.234 73.755-74.213 107.79-132.42 107.79H0v134.736c0 32.499 21.53 80.842 80.842 80.842h61.683c32.687 20.507 67.126 33.146 105.957 41.014a232.9 232.9 0 0 0-32.903 120.67h53.895c0-41.93 14.012-80.303 39.424-112.505 49.987 4.447 107.062 4.716 176.155 4.716M412.106 466l-88.738 88.738V431.158h-53.894V684.84L450.21 504.104zm-88.738-304.317h-53.894v190.033a770 770 0 0 1 53.894-49.098zm323.369-53.895c-72.623 0-146.81 23.337-215.58 58.638v-58.638h-53.894v154.14c81.57-56.536 178.068-100.245 269.474-100.245 148.588 0 269.474 120.886 269.474 269.474v235.655L809.58 862.316h61.359l99.166-181.76V431.158c0-178.31-145.057-323.369-323.368-323.369"/></svg>`
-  };
-  var chinese_hour_animals_default = ChineseHourAnimals;
-
-  // lib/ui/image/utils/get-chinese-hour-animal.js
-  var getChineseHourAnimal = (hour) => {
-    const map = [
-      "rat",
-      "ox",
-      "ox",
-      "tiger",
-      "tiger",
-      "rabbit",
-      "rabbit",
-      "dragon",
-      "dragon",
-      "snake",
-      "snake",
-      "horse",
-      "horse",
-      "goat",
-      "goat",
-      "monkey",
-      "monkey",
-      "rooster",
-      "rooster",
-      "dog",
-      "dog",
-      "pig",
-      "pig",
-      "rat"
-    ];
-    return map[hour];
-  };
-  var get_chinese_hour_animal_default = getChineseHourAnimal;
-
-  // lib/ui/image/render-chinese-hour-animal.js
-  var renderChineseHourAnimal = () => {
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width } = gameBoard2;
-    const time = /* @__PURE__ */ new Date();
-    const hour = time.getHours();
-    const animal = get_chinese_hour_animal_default(hour - 1);
-    const img = getImage(chinese_hour_animals_default[animal]);
-    const size = Math.floor(width * 0.38);
-    const x = -size / 2;
-    const y = -size / 2;
-    render_image_default(img, x, y, size);
-  };
-  var render_chinese_hour_animal_default = renderChineseHourAnimal;
-
-  // lib/ui/effects/clock/render-clock-dial.js
-  var renderClockDial = (radius, theme) => {
-    const { gameBoardContext: ctx } = canvas_default;
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(0, 0, radius, 0, Math.PI * 2);
-    ctx.fillStyle = theme.face;
-    ctx.fill();
-    ctx.lineWidth = Math.floor(radius * 0.2);
-    ctx.strokeStyle = theme.stroke;
-    ctx.stroke();
-    ctx.restore();
-  };
-  var render_clock_dial_default = renderClockDial;
-
-  // lib/ui/effects/clock/render-clock-ticks.js
-  var renderClockTicks = (radius, theme) => {
-    const { gameBoardContext: ctx } = canvas_default;
-    const dotRadius = Math.floor(radius * 0.06);
-    const dotDistance = radius - Math.floor(radius * 0.25);
-    for (let i = 0; i < 12; i++) {
-      ctx.save();
-      ctx.rotate(i * Math.PI / 6);
-      ctx.beginPath();
-      ctx.arc(0, -dotDistance, dotRadius, 0, Math.PI * 2);
-      ctx.fillStyle = theme.stroke;
-      ctx.fill();
-      ctx.restore();
-    }
-  };
-  var render_clock_ticks_default = renderClockTicks;
-
-  // lib/ui/effects/clock/render-clock-hands.js
-  var renderClockHands = (radius, angles, theme) => {
-    const { gameBoardContext: ctx } = canvas_default;
-    const { hAng, mAng, sAng } = angles;
-    ctx.save();
-    ctx.rotate(hAng);
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = theme.stroke;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(0, -radius * 0.4);
-    ctx.stroke();
-    ctx.restore();
-    ctx.save();
-    ctx.rotate(mAng);
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = theme.stroke;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(0, -radius * 0.65);
-    ctx.stroke();
-    ctx.restore();
-    ctx.save();
-    ctx.rotate(sAng);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = theme.secondHand;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(0, -radius * 0.75);
-    ctx.stroke();
-    ctx.restore();
-  };
-  var render_clock_hands_default = renderClockHands;
-
-  // lib/ui/effects/clock/render-clock-center.js
-  var renderClockCenter = (radius, theme) => {
-    const { gameBoardContext: ctx } = canvas_default;
-    ctx.save();
-    ctx.beginPath();
-    ctx.fillStyle = theme.secondHand;
-    ctx.arc(0, 0, Math.floor(radius * 0.05), 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  };
-  var render_clock_center_default = renderClockCenter;
-
-  // lib/ui/effects/clock/utils/get-chinese-hour-dial-theme.js
-  var getChineseHourDialTheme = (hour) => {
-    const map = [
-      "Red",
-      "White",
-      "White",
-      "Orange",
-      "Orange",
-      "Cyan",
-      "Cyan",
-      "Blue",
-      "Blue",
-      "Coral",
-      "Coral",
-      "Purple",
-      "Purple",
-      "Green",
-      "Green",
-      "Yellow",
-      "Yellow",
-      "Pink",
-      "Pink",
-      "Teal",
-      "Teal",
-      "Violet",
-      "Violet",
-      "Red"
-    ];
-    return map[hour];
-  };
-  var get_chinese_hour_dial_theme_default = getChineseHourDialTheme;
-
-  // lib/ui/effects/clock/render-analog-clock.js
-  var renderAnalogClock = (time) => {
-    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
-    const { width, height } = gameBoard2;
-    const centerX = width / 2;
-    const centerY = height / 2.2;
-    const radius = Math.floor(width * 0.3);
-    const displayTime = time || /* @__PURE__ */ new Date();
-    const hours = displayTime.getHours();
-    const angles = get_clock_angles_default(displayTime);
-    const theme = clock_themes_default[get_chinese_hour_dial_theme_default(hours)];
-    ctx.save();
-    ctx.translate(centerX, centerY);
-    ctx.lineCap = "round";
-    render_clock_dial_default(radius, theme);
-    render_chinese_hour_animal_default();
-    render_clock_ticks_default(radius, theme);
-    render_clock_hands_default(radius, angles, theme);
-    render_clock_center_default(radius, theme);
-    ctx.restore();
-  };
-  var render_analog_clock_default = renderAnalogClock;
-
-  // lib/ui/constants/images/chinese-hour-characters.js
-  var { RGBA_TEAL: RGBA_TEAL3 } = colors_default;
-  var ChineseHourCharacters = {
-    zi: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M538.947 700.632v-215.58h269.474v-53.894H538.947v-39.586c26.544-18.081 94.586-65.05 177.853-127.488l-16.168-48.505H323.368v53.895h295.317a4221 4221 0 0 1-121.64 85.369l-11.992 8.003v68.312H242.526v53.895h242.527v215.579c0 48.343-13.851 53.894-134.737 53.894v53.895c105.39 0 188.631 0 188.631-107.79"/></svg>`,
-    chou: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M808.421 700.632H648.866c13.985-172.814 43.115-357.43 70.817-385.16l-19.051-45.998H323.368v53.894h107.17c-1.94 45.757-8.192 103.963-15.764 161.685h-91.406v53.894h83.968c-9.862 68.447-20.264 130.13-25.734 161.685H215.579v53.894H808.42zM461.878 538.947h149.8a3314 3314 0 0 0-16.842 161.685H436.36c6.036-35.248 16.114-95.637 25.519-161.685m22.609-215.579h171.735c-15.198 41.122-27.405 100.595-36.89 161.685H469.207c7.383-57.506 13.42-115.362 15.279-161.685"/></svg>`,
-    yin: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M712.677 811.25l-107.79-53.894-24.117 48.209 107.79 53.894zm-269.474-5.658-24.118-48.21-107.789 53.895 24.118 48.21zm257.429-374.434H538.947v-53.895h107.79v-53.895H377.263v53.895h107.79v53.895H323.368v323.368h53.895v-53.894h269.474v53.894h53.895zM538.947 592.842h107.79v53.895h-107.79zm-161.684 0h107.79v53.895h-107.79zm161.684-107.79h107.79v53.895h-107.79zm-161.684 0h107.79v53.895h-107.79zM754.526 215.58H531.43l-20.803-62.41-51.12 17.058 15.118 45.352h-205.15v107.79h53.894v-53.895h377.264v53.894h53.894z"/></svg>`,
-    mao: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M592.842 323.368h107.79v323.369c-20.48 0-39.936-11.264-40.017-11.318l-27.73 46.215c3.208 1.94 32.661 18.998 67.747 18.998 30.747 0 53.894-23.148 53.894-53.895V269.474H538.947V808.42h53.895zm-107.79 242.527V323.368h-53.894v196.905l-107.79 40.42V316.767l169.095-48.316-14.82-51.82-208.17 59.473v304.801l-36.405 13.663 18.917 50.472 178.742-67.018c-5.04 69.928-55.27 106.981-165.134 122.934l7.734 53.329c52.386-7.626 211.726-30.747 211.726-188.39"/></svg>`,
-    chen: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M471.983 777.62l-40.825-23.094V485.053h-66.075c-14.47 110.646-44.355 197.066-102.696 260.742l-39.748-36.432c83.887-91.487 100.73-246.461 100.73-466.837V215.58h377.263v53.895h-323.45c-.404 58.26-2.21 112.128-6.36 161.684h329.81v53.895H578.479a481.2 481.2 0 0 0 76.827 119.7l66.48-39.855 27.728 46.214-54.46 32.688c29.507 24.953 63.757 45.675 102.804 58.098l-16.303 51.362C647.33 710.548 558.78 586.186 520.003 485.053h-34.95V706.91l68.985-41.39 27.729 46.214zm174.754-400.357h-215.58v-53.895h215.58z"/></svg>`,
-    si: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M728.064 692.763l-52.116-13.797c-18.729 70.898-24.522 75.56-56.159 75.56H377.263V485.053h269.474v53.894h53.895V215.58H323.368v538.947c0 29.723 24.172 53.895 53.895 53.895H619.79c77.69 0 91.19-51.065 108.275-115.658m-350.8-423.29h269.473v161.685H377.263z"/></svg>`,
-    wu: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512m-431.158 26.947h269.474v-53.894H538.947V323.368h161.685v-53.894h-289.63c12.045-33.28 20.156-69.794 20.156-107.79h-53.895c0 121.964-105.364 233.391-106.415 234.496l38.858 37.35c2.883-3.019 43.817-46.135 77.393-110.162h97.954v161.685H215.579v53.894h269.474v323.369h53.894z"/></svg>`,
-    wei: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512m-431.158 50.203c52.305 70.925 136.974 152.145 232.53 190.383l19.994-50.041c-109.271-43.709-202.806-152.63-238.78-217.492h255.73v-53.895H538.947v-53.895h215.58v-53.895h-215.58V161.684h-53.894v161.684h-215.58v53.895h215.58v53.895H215.579v53.895h255.757C435.362 549.915 341.8 658.836 232.53 702.545l20.022 50.041c95.528-38.238 180.197-119.485 232.502-190.383V808.42h53.894z"/></svg>`,
-    shen: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M538.947 646.737h161.685v53.895h53.894V269.474H538.947v-107.79h-53.894v107.79h-215.58v431.158h53.895v-53.895h161.685v215.579h53.894zm0-161.684h161.685v107.79H538.947zm-215.579 0h161.685v107.79H323.368zm215.58-161.685h161.684v107.79H538.947zm-215.58 0h161.685v107.79H323.368z"/></svg>`,
-    you: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M754.526 323.368H592.842v-26.947h161.684v-53.895H269.474v53.895h161.684v26.947H269.474v485.053h53.894v-53.895h377.264v53.895h53.894zM323.368 646.737h377.264v53.895H323.368zm0-269.474h107.79c0 103.316-72.785 107.655-81.085 107.79l.243 53.894c46.592 0 134.737-33.792 134.737-161.684h53.894v107.79c0 29.723 24.172 53.894 53.895 53.894h107.79v53.895H323.368zm377.264 0v107.79h-107.79v-107.79zm-215.58-80.842h53.895v26.947h-53.894z"/></svg>`,
-    xu: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M594.513 662.393c33.684 44.544 75.21 74.698 124.74 90.813l11.425 3.719 10.402-6.01c40.124-23.174 67.341-128.35 67.341-158.073h-53.895c0 22.07-19.132 80.87-33.71 103.505-34.817-14.606-64.54-39.262-89.25-74.132 48.316-55.27 92.079-117.33 120.535-179.9l-49.044-22.286C679.289 472.279 643.315 524.746 603 572.685c-24.01-50.93-41.148-115.927-51.658-195.395h149.289v-53.895h-155.19a1848 1848 0 0 1-6.495-161.71h-53.894c0 58.206 2.155 112.073 6.494 161.683H323.368v26.948c0 216.549-13.177 263.545-100.702 359.047l39.747 36.432c63.327-69.093 92.807-118.272 105.715-206.848h116.925v-53.894h-111.32a1742 1742 0 0 0 3.45-107.79H497.34c12.611 98.25 35.031 177.476 67.395 238.188-61.979 65.536-128.054 117.976-173.299 142.282l25.52 47.481c47.589-25.573 114.095-77.446 177.556-142.82m125.17-411.971-80.842-80.842-38.103 38.103 80.842 80.842z"/></svg>`,
-    hai: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m309.976 804.756-27.136-46.592c103.073-60.012 183.026-132.473 241.475-219.244h-174l-13.473-50.283c58.88-33.981 99.436-117.572 118.703-165.296H242.526v-53.894h538.948v53.894h-268.18c-12.396 34.089-42.47 106.604-90.436 161.685h134.01a680.6 680.6 0 0 0 46.349-107.709l51.092 17.058c-58.422 175.265-171.035 309.49-344.333 410.381m192.35-2.937-34.52-41.364c88.415-73.728 154.517-158.774 202.106-259.908l48.801 22.96a797.4 797.4 0 0 1-82.35 137.781c32.74 15.01 83.455 44.868 137.646 101.592l-38.939 37.268c-57.236-59.877-109.325-85.558-133.766-95.178a851 851 0 0 1-98.978 96.849m48.613-536.872-80.842-53.895 29.884-44.84 80.843 53.894zM512 53.895c-252.605 0-458.105 205.5-458.105 458.105S259.395 970.105 512 970.105c9.081 0 17.974-.835 26.947-1.374v-53.895c-8.946.62-17.866 1.375-26.947 1.375-222.882 0-404.21-181.33-404.21-404.211S289.117 107.79 512 107.79 916.21 289.117 916.21 512c0 195.207-139.075 358.508-323.368 396.045v54.461c214.097-38.346 377.263-225.55 377.263-450.533 0-252.578-205.5-458.078-458.105-458.078"/></svg>`
-  };
-  var chinese_hour_characters_default = ChineseHourCharacters;
-
-  // lib/ui/image/utils/get-chinese-hour-character.js
-  var getChineseHourCharacter = (hour) => {
-    const map = [
-      "zi",
-      "chou",
-      "chou",
-      "yin",
-      "yin",
-      "mao",
-      "mao",
-      "chen",
-      "chen",
-      "si",
-      "si",
-      "wu",
-      "wu",
-      "wei",
-      "wei",
-      "shen",
-      "shen",
-      "you",
-      "you",
-      "xu",
-      "xu",
-      "hai",
-      "hai",
-      "zi"
-    ];
-    return map[hour];
-  };
-  var get_chinese_hour_character_default = getChineseHourCharacter;
-
-  // lib/ui/image/render-chinese-hour-character.js
-  var LAYOUT_STRATEGIES = {
-    // 深夜 0-3 点
-    night_0_3: (width, height) => ({
-      size: Math.floor(width * 0.48),
-      x: width - Math.floor(width * 0.48) * 0.7,
-      y: height / 2 - Math.floor(width * 0.48) * 1.4
-    }),
-    // 清晨 4-7 点
-    morning_4_7: (width, height) => {
-      const size = Math.floor(width * 0.52);
-      return {
-        size,
-        x: width - size * 1.1,
-        y: height / 2 - size * 1.7
-      };
-    },
-    // 上午 8-11 点
-    morning_8_11: (width, height) => {
-      const size = Math.floor(width * 0.58);
-      return {
-        size,
-        x: width - size * 1.2,
-        y: height / 2 - size * 1.75
-      };
-    },
-    // 中午 12-14 点
-    noon_12_14: (width) => {
-      const size = Math.floor(width * 0.68);
-      return {
-        size,
-        x: width / 2 - size / 2,
-        y: -size * 0.1
-      };
-    },
-    // 下午 14-16 点
-    afternoon_14_16: (width, height) => {
-      const size = Math.floor(width * 0.58);
-      return {
-        size,
-        x: size * 0.2,
-        y: height / 2 - size * 1.75
-      };
-    },
-    // 傍晚 17-19 点
-    evening_17_19: (width, height) => {
-      const size = Math.floor(width * 0.52);
-      return {
-        size,
-        x: size * 0.1,
-        y: height / 2 - size * 1.7
-      };
-    },
-    // 夜晚 20-23 点
-    night_20_23: (width, height) => {
-      const size = Math.floor(width * 0.48);
-      return {
-        size,
-        x: -size * 0.3,
-        y: height / 2 - size * 1.4
-      };
-    }
-  };
-  var getStrategyKey = (hour) => {
-    if (hour <= 3) {
-      return "night_0_3";
-    }
-    if (hour <= 7) {
-      return "morning_4_7";
-    }
-    if (hour <= 11) {
-      return "morning_8_11";
-    }
-    if (hour <= 14) {
-      return "noon_12_14";
-    }
-    if (hour <= 16) {
-      return "afternoon_14_16";
-    }
-    if (hour <= 19) {
-      return "evening_17_19";
-    }
-    return "night_20_23";
-  };
-  var renderChineseHourCharacter = () => {
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    const hour = (/* @__PURE__ */ new Date()).getHours();
-    const character = get_chinese_hour_character_default(hour);
-    const img = getImage(chinese_hour_characters_default[character]);
-    const key = getStrategyKey(hour);
-    const strategy = LAYOUT_STRATEGIES[key];
-    const { size, x, y } = strategy(width, height);
-    render_image_default(img, x, y, size);
-  };
-  var render_chinese_hour_character_default = renderChineseHourCharacter;
-
-  // lib/ui/board/render-board.js
-  function renderBoard(board) {
-    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
-    clear_board_default();
-    render_chinese_hour_character_default();
-    render_scene_background_default("playing");
-    for (let y = 0; y < ROWS2; y++) {
-      for (let x = 0; x < COLS2; x++) {
-        if (board[y][x]) {
-          render_block_default(x, y, board[y][x]);
-        }
-      }
-    }
-  }
-  var render_board_default = renderBoard;
-
-  // lib/ui/board/render-active-pieces.js
-  var renderActivePieces = (curr, cx, cy) => {
-    const { shape, color } = curr;
-    const { length } = shape;
-    for (let y = 0; y < length; y++) {
-      for (let x = 0; x < shape[y].length; x++) {
-        if (shape[y][x]) {
-          render_block_default(cx + x, cy + y, color);
-        }
-      }
-    }
-    return true;
-  };
-  var render_active_pieces_default = renderActivePieces;
-
-  // lib/ui/board/render-active-only.js
-  var renderActiveOnly = (state) => {
-    const { board, curr, cx, cy } = state;
-    if (board) {
-      render_board_default(board);
-    }
-    if (curr) {
-      render_active_pieces_default(curr, cx, cy);
-    }
-  };
-  var render_active_only_default = renderActiveOnly;
-
-  // lib/ui/scenes/paused-scene/render-paused.js
-  var renderPaused = (state) => {
-    clear_board_default();
-    render_active_only_default(state);
-    render_overlay_default();
-    render_scene_background_default("paused");
-    render_tetris_text_default();
-    render_digital_clock_default();
-    render_analog_clock_default();
-    render_paused_text_default();
-  };
-  var render_paused_default = renderPaused;
-
-  // lib/ui/scenes/paused-scene/index.js
-  var pausedScene = (state) => {
-    render_paused_default(state);
-  };
-  var paused_scene_default = pausedScene;
-
-  // lib/ui/text/render-game-text.js
-  var renderGameText = () => {
-    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    render_text_default({
-      text: "GAME",
-      x: width / 2,
-      y: height / 1.8,
-      color: RED5,
-      strokeColor: YELLOW5,
-      size: 2.3,
-      center: true,
-      stroke: true
-    });
-  };
-  var render_game_text_default = renderGameText;
-
-  // lib/ui/text/render-over-text.js
-  var renderOverText = () => {
-    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
-    const { gameBoard: gameBoard2 } = canvas_default;
-    const { width, height } = gameBoard2;
-    render_text_default({
-      text: "OVER",
-      x: width / 2,
-      y: height / 1.6,
-      color: RED5,
-      strokeColor: YELLOW5,
-      size: 2.3,
-      center: true,
-      stroke: true
-    });
-  };
-  var render_over_text_default = renderOverText;
-
-  // lib/ui/scenes/game-over-scene/render-game-over.js
-  var renderGameOver = (state) => {
-    clear_board_default();
-    render_active_only_default(state);
-    render_overlay_default();
-    render_scene_background_default("game-over");
-    render_tetris_text_default();
-    render_game_text_default();
-    render_over_text_default();
-    render_enter_start_text_default();
-  };
-  var render_game_over_default = renderGameOver;
-
-  // lib/ui/scenes/game-over-scene/index.js
-  var gameOverScene = (state) => {
-    render_game_over_default(state);
-  };
-  var game_over_scene_default = gameOverScene;
-
-  // lib/ui/scenes/playing-scene/render-playing.js
-  var renderPlaying = (state) => {
-    render_active_only_default(state);
-    render_next_piece_default(state);
-  };
-  var render_playing_default = renderPlaying;
-
-  // lib/ui/scenes/playing-scene/index.js
-  var playingScene = (state) => {
-    render_playing_default(state);
-  };
-  var playing_scene_default = playingScene;
-
-  // lib/ui/scenes/replay-scene/index.js
-  var replayScene = (state) => {
-    clear_board_default();
-    render_playing_default(state);
-    render_overlay_default();
-    render_scene_background_default("game-over");
-    render_tetris_text_default();
-    render_game_text_default();
-    render_over_text_default();
-    render_enter_start_text_default();
-  };
-  var replay_scene_default = replayScene;
-
-  // lib/ui/scenes/index.js
-  var Scenes = {
+  // lib/game/actions/main-menu-actions.js
+  var MAIN_MENU_ACTIONS = {
     /**
-     * ## 主菜单场景
+     * ## 选择难度 1
      *
-     * @param {object} state 游戏状态
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
      */
-    "main-menu": (state) => {
-      main_menu_scene_default(state);
+    LEVEL_ONE: (_, { Game: Game2 }) => {
+      Game2.selectLevel(1);
     },
     /**
-     * ## 暂停场景
+     * ## 选择难度 2
      *
-     * @param {object} state 游戏状态
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
      */
-    paused: (state) => {
-      paused_scene_default(state);
+    LEVEL_TWO: (_, { Game: Game2 }) => {
+      Game2.selectLevel(2);
     },
     /**
-     * ## 游戏结束场景
+     * ## 选择难度 3
      *
-     * @param {object} state 游戏状态
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
      */
-    "game-over": (state) => {
-      game_over_scene_default(state);
+    LEVEL_THREE: (_, { Game: Game2 }) => {
+      Game2.selectLevel(3);
     },
-    replay: (state) => {
-      replay_scene_default(state);
+    /**
+     * ## 选择难度 4
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    LEVEL_FOUR: (_, { Game: Game2 }) => {
+      Game2.selectLevel(4);
     },
     /**
-     * ## 游戏进行中场景
+     * ## 选择难度 5
      *
-     * @param {object} state 游戏状态
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
      */
-    playing: (state) => {
-      playing_scene_default(state);
+    LEVEL_FIVE: (_, { Game: Game2 }) => {
+      Game2.selectLevel(5);
+    },
+    /**
+     * ## 选择难度 6
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    LEVEL_SIX: (_, { Game: Game2 }) => {
+      Game2.selectLevel(6);
+    },
+    /**
+     * ## 选择难度 7
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    LEVEL_SEVEN: (_, { Game: Game2 }) => {
+      Game2.selectLevel(7);
+    },
+    /**
+     * ## 选择难度 8
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    LEVEL_EIGHT: (_, { Game: Game2 }) => {
+      Game2.selectLevel(8);
+    },
+    /**
+     * ## 选择难度 9
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    LEVEL_NINE: (_, { Game: Game2 }) => {
+      Game2.selectLevel(9);
+    },
+    /**
+     * ## 选择难度 10
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    LEVEL_TEN: (_, { Game: Game2 }) => {
+      Game2.selectLevel(10);
+    },
+    /**
+     * ## 确认开始游戏
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    CONFIRM: (_, { Game: Game2 }) => {
+      Game2.start();
     }
   };
-  var scenes_default = Scenes;
+  var main_menu_actions_default = MAIN_MENU_ACTIONS;
 
-  // lib/ui/scene-manager/render-scene.js
-  var renderScene = (state) => {
-    const { mode } = state;
-    const scene = scenes_default[mode];
-    if (!scene) return;
-    scene(state);
+  // lib/game/actions/game-playing-actions.js
+  var GAME_PLAYING_ACTIONS = {
+    /**
+     * ## 向左移动
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    MOVE_LEFT: (_, { Game: Game2 }) => {
+      Game2.move(-1, 0);
+    },
+    /**
+     * ## 向右移动
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    MOVE_RIGHT: (_, { Game: Game2 }) => {
+      Game2.move(1, 0);
+    },
+    /**
+     * ## 向下移动（软降）
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    MOVE_DOWN: (_, { Game: Game2 }) => {
+      Game2.move(0, 1);
+    },
+    /**
+     * ## 硬降（直接落地）
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    DROP: (_, { Game: Game2 }) => {
+      Game2.drop();
+    },
+    /**
+     * ## 旋转方块
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    ROTATE: (_, { Game: Game2 }) => {
+      Game2.rotate();
+    },
+    /**
+     * ## 重新开始游戏
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    RESTART: (_, { Game: Game2 }) => {
+      Game2.restart();
+    },
+    /**
+     * ## 强制结束游戏
+     *
+     * 注意：直接调用 over 属于“全局副作用”
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    QUIT: (_, { Game: Game2 }) => {
+      Game2.over();
+    },
+    /**
+     * ## 暂停 / 继续切换
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    TOGGLE_PAUSE: (_, { Game: Game2 }) => {
+      Game2.togglePause();
+    },
+    /**
+     * ## 背景音乐开关
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     * @param {object} context.Audio - 音频控制模块
+     */
+    TOGGLE_MUSIC: (_, { Game: Game2, Audio: Audio3 }) => {
+      const level = Game2.store.getLevel();
+      Audio3.toggleBGM(level);
+    }
   };
-  var render_scene_default = renderScene;
+  var game_playing_actions_default = GAME_PLAYING_ACTIONS;
 
-  // lib/ui/core/resize.js
-  var resize = () => {
-    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
-    const { gameBoard: gameBoard2, nextPiece: nextPiece2 } = canvas_default;
-    const h = globalThis.innerHeight * 0.9;
-    canvas_default.blockSize = Math.floor(h / ROWS2);
-    gameBoard2.width = canvas_default.blockSize * COLS2;
-    gameBoard2.height = canvas_default.blockSize * ROWS2;
-    canvas_default.fontSize = Math.floor(gameBoard2.height * 0.032);
-    const nextSize = Math.min(
-      globalThis.innerWidth * 0.1,
-      globalThis.innerHeight * 0.18
-    );
-    nextPiece2.width = nextSize;
-    nextPiece2.height = nextSize;
+  // lib/game/actions/paused-actions.js
+  var PAUSED_ACTIONS = {
+    /**
+     * ## 切换暂停状态（继续游戏 / 重新进入游戏循环）
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    TOGGLE_PAUSE: (_, { Game: Game2 }) => {
+      Game2.togglePause();
+    }
   };
-  var resize_default = resize;
+  var paused_actions_default = PAUSED_ACTIONS;
 
-  // lib/input/gamepad-controller.js
-  var GAMEPAD_ACTION_MAP = {
-    A: "TOGGLE_MUSIC",
-    B: "DROP",
-    X: "RESTART",
-    Y: "TOGGLE_PAUSE",
-    START: "CONFIRM",
-    BACK: "QUIT",
-    DPAD_LEFT: "MOVE_LEFT",
-    DPAD_RIGHT: "MOVE_RIGHT",
-    DPAD_DOWN: "MOVE_DOWN",
-    DPAD_UP: "ROTATE"
-  };
-  var STANDARD_BTN_MAP = {
-    A: 0,
-    B: 1,
-    X: 2,
-    Y: 3,
-    LB: 4,
-    RB: 5,
-    LT: 6,
-    RT: 7,
-    BACK: 8,
-    START: 9,
-    DPAD_UP: 12,
-    DPAD_DOWN: 13,
-    DPAD_LEFT: 14,
-    DPAD_RIGHT: 15
-  };
-  var BETOP_20BC_1263_BTN_MAP = {
-    A: 2,
-    B: 1,
-    X: 3,
-    Y: 0,
-    LB: 4,
-    RB: 5,
-    LT: 6,
-    RT: 7,
-    BACK: 8,
-    START: 9
-  };
-  var GamepadController = class {
+  // lib/game/actions/game-over-actions.js
+  var GAME_OVER_ACTIONS = {
     /**
-     * ## 当前激活手柄 Index
+     * 确认操作（例如：Enter / Space / OK）
      *
-     * @type {number | null}
+     * 作用：
+     *
+     * - 重置游戏状态
+     * - 返回主菜单
+     *
+     * @param {object} _ - Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
      */
-    activeGamepadIndex = null;
-    /**
-     * ## 摇杆死区（避免漂移）
-     *
-     * @type {number}
-     */
-    DEAD_ZONE = 0.15;
-    /**
-     * ## 方向触发阈值
-     *
-     * @type {number}
-     */
-    DPAD_THRESHOLD = 0.5;
-    constructor() {
-      this.AXIS_MAP = {
-        LEFT_STICK_X: 0,
-        LEFT_STICK_Y: 1
-      };
-      this.curBtnMap = STANDARD_BTN_MAP;
-      this.buttonStates = {};
-      this.axisStates = {};
-      this._eventsBound = false;
-      this.dpadAxisState = {
-        up: false,
-        down: false,
-        left: false,
-        right: false
-      };
-    }
-    /**
-     * ## 每帧调用
-     *
-     * 流程：
-     *
-     * 1. 刷新 Gamepad snapshot
-     * 2. 如果存在 active gamepad
-     * 3. 收集输入 → dispatch
-     */
-    update() {
-      this._refreshGamepadState();
-      if (!this.activeGamepad) {
-        return;
-      }
-      this._collectCommands();
-    }
-    /** ## 绑定 Gamepad 连接事件 */
-    bindEvents() {
-      if (this._eventsBound) {
-        return;
-      }
-      globalThis.addEventListener("gamepadconnected", this._onConnect);
-      globalThis.addEventListener("gamepaddisconnected", this._onDisconnect);
-      this._eventsBound = true;
-    }
-    /** ## 销毁事件绑定 */
-    destroy() {
-      globalThis.removeEventListener("gamepadconnected", this._onConnect);
-      globalThis.removeEventListener("gamepaddisconnected", this._onDisconnect);
-      this._eventsBound = false;
-    }
-    /**
-     * ## 手柄连接
-     *
-     * - 设置 activeGamepad
-     * - 自动识别 BETOP 并切换 mapping
-     *
-     * @param {object} e - 事件对象
-     */
-    _onConnect = (e) => {
-      const pad = e.gamepad;
-      if (this.activeGamepadIndex === null) {
-        this.activeGamepadIndex = pad.index;
-        this.curBtnMap = this._isBetop(pad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
-      }
-    };
-    /**
-     * ## 手柄断开
-     *
-     * - 清空状态
-     *
-     * @param {object} e - 事件对象
-     */
-    _onDisconnect = (e) => {
-      if (this.activeGamepadIndex === e.gamepad.index) {
-        this.activeGamepadIndex = null;
-        this.buttonStates = {};
-        this.axisStates = {};
-      }
-    };
-    /**
-     * ## 判断是否为 BETOP（北通） 手柄
-     *
-     * @param {string} id - 手柄 id 字符串
-     * @returns {boolean} - 返回判断结果，是北通返回 true，否则返回 false
-     */
-    _isBetop(id) {
-      return id.includes("20bc") && id.includes("1263");
-    }
-    /**
-     * ## 刷新 Gamepad 状态
-     *
-     * - 必须每帧调用 navigator.getGamepads()
-     * - 因为 Gamepad 对象是 snapshot，不是实时引用
-     */
-    _refreshGamepadState() {
-      const pads = navigator.getGamepads?.() || [];
-      if (this.activeGamepadIndex === null) {
-        const firstPad = Array.from(pads).find(Boolean);
-        if (firstPad) {
-          this.activeGamepadIndex = firstPad.index;
-          this.curBtnMap = this._isBetop(firstPad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
-        }
-      }
-      this.activeGamepad = this.activeGamepadIndex === null ? null : pads[this.activeGamepadIndex];
-    }
-    /**
-     * ## 收集所有输入
-     *
-     * - 转换为 Command（通过 dispatchInput）
-     */
-    _collectCommands() {
-      const pad = this.activeGamepad;
-      if (!pad) {
-        return;
-      }
-      for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
-        if (this._isPressed(btnName)) {
-          if (this._isBetop(pad.id) && btnName.startsWith("DPAD_")) {
-            continue;
-          }
-          dispatch_input_default({ device: "gamepad", action, payload: {} });
-        }
-      }
-      const x = this._getAxis(this.AXIS_MAP.LEFT_STICK_X);
-      const y = this._getAxis(this.AXIS_MAP.LEFT_STICK_Y);
-      this._handleStickMove(x, y);
-      if (this._isBetop(pad.id)) {
-        const dpadVal = pad.axes[9] ?? 0;
-        this._handleBetopDpad(dpadVal);
-      }
-    }
-    /**
-     * ## 摇杆移动处理（带防抖）
-     *
-     * @param {number} x - X轴偏移数值
-     * @param {number} y - Y轴偏移数值
-     */
-    _handleStickMove(x, y) {
-      if (y < -this.DPAD_THRESHOLD) {
-        this._startAxisAction("ROTATE");
-      } else {
-        this._stopAxisAction("ROTATE");
-      }
-      if (y > this.DPAD_THRESHOLD) {
-        this._startAxisAction("MOVE_DOWN");
-      } else {
-        this._stopAxisAction("MOVE_DOWN");
-      }
-      if (x < -this.DPAD_THRESHOLD) {
-        this._startAxisAction("MOVE_LEFT");
-      } else {
-        this._stopAxisAction("MOVE_LEFT");
-      }
-      if (x > this.DPAD_THRESHOLD) {
-        this._startAxisAction("MOVE_RIGHT");
-      } else {
-        this._stopAxisAction("MOVE_RIGHT");
-      }
-    }
-    /**
-     * ## 开始轴动作（触发一次）
-     *
-     * 仅在未触发时触发 dispatch
-     *
-     * @param {string} action - 动作名称
-     */
-    _startAxisAction(action) {
-      if (!this.axisStates[action]) {
-        this.axisStates[action] = true;
-        dispatch_input_default({ device: "gamepad", action, payload: {} });
-      }
-    }
-    /**
-     * ## 停止轴动作（重置状态）
-     *
-     * @param {string} action - 动作名称
-     */
-    _stopAxisAction(action) {
-      this.axisStates[action] = false;
-    }
-    /**
-     * ## BETOP DPAD（axis9）解析
-     *
-     * 不同方向对应固定浮点值
-     *
-     * @param {number} val -
-     */
-    _handleBetopDpad(val) {
-      const v = val.toFixed(5);
-      const st = this.dpadAxisState;
-      switch (v) {
-        // 上
-        case "-1.00000": {
-          if (!st.up) {
-            st.up = true;
-            dispatch_input_default({ device: "gamepad", action: "ROTATE", payload: {} });
-          }
-          st.down = st.left = st.right = false;
-          break;
-        }
-        // 下
-        case "0.14286": {
-          if (!st.down) {
-            st.down = true;
-            dispatch_input_default({
-              device: "gamepad",
-              action: "MOVE_DOWN",
-              payload: {}
-            });
-          }
-          st.up = st.left = st.right = false;
-          break;
-        }
-        // 左
-        case "0.71429": {
-          if (!st.left) {
-            st.left = true;
-            dispatch_input_default({
-              device: "gamepad",
-              action: "MOVE_LEFT",
-              payload: {}
-            });
-          }
-          st.up = st.down = st.right = false;
-          break;
-        }
-        // 右
-        case "-0.42857": {
-          if (!st.right) {
-            st.right = true;
-            dispatch_input_default({
-              device: "gamepad",
-              action: "MOVE_RIGHT",
-              payload: {}
-            });
-          }
-          st.up = st.down = st.left = false;
-          break;
-        }
-        // 松开手柄充值状态
-        default: {
-          st.up = st.down = st.left = st.right = false;
-          break;
-        }
-      }
-    }
-    /**
-     * ## 获取轴值（带 dead zone）
-     *
-     * @param {number} index - 索引值
-     * @returns {number} - 返回获取的轴值
-     */
-    _getAxis(index) {
-      if (!this.activeGamepad) {
-        return 0;
-      }
-      const val = this.activeGamepad.axes[index] ?? 0;
-      return Math.abs(val) > this.DEAD_ZONE ? val : 0;
-    }
-    /**
-     * ## 判断按钮是否“刚按下”（防抖）
-     *
-     * @param {string} btnName - 按钮名称
-     * @returns {boolean} - 按钮按下返回 true，否则返回 false
-     */
-    _isPressed(btnName) {
-      const idx = this.curBtnMap[btnName];
-      if (idx === void 0 || !this.activeGamepad) {
-        return false;
-      }
-      const btn = this.activeGamepad.buttons[idx];
-      if (!btn) {
-        return false;
-      }
-      const pressed = btn.value > 0.5;
-      if (pressed && !this.buttonStates[btnName]) {
-        this.buttonStates[btnName] = true;
-        return true;
-      }
-      if (!pressed) {
-        this.buttonStates[btnName] = false;
-      }
-      return false;
+    CONFIRM: (_, { Game: Game2 }) => {
+      Game2.reset();
     }
   };
-  var gamepad_controller_default = GamepadController;
+  var game_over_actions_default = GAME_OVER_ACTIONS;
 
-  // lib/input/keyboard.js
-  var KEYBOARDS_ACTION_MAP = {
-    arrowleft: "MOVE_LEFT",
-    arrowright: "MOVE_RIGHT",
-    arrowdown: "MOVE_DOWN",
-    arrowup: "ROTATE",
-    " ": "DROP",
-    m: "TOGGLE_MUSIC",
-    p: "TOGGLE_PAUSE",
-    r: "RESTART",
-    q: "QUIT",
-    1: "LEVEL_ONE",
-    2: "LEVEL_TWO",
-    3: "LEVEL_THREE",
-    4: "LEVEL_FOUR",
-    5: "LEVEL_FIVE",
-    6: "LEVEL_SIX",
-    7: "LEVEL_SEVEN",
-    8: "LEVEL_EIGHT",
-    9: "LEVEL_NINE",
-    t: "LEVEL_TEN",
-    enter: "CONFIRM"
+  // lib/game/actions/replay-actions.js
+  var REPLAY_ACTIONS = {
+    /**
+     * ## 向左移动
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    MOVE_LEFT: (_, { Game: Game2 }) => {
+      Game2.move(-1, 0);
+    },
+    /**
+     * ## 向右移动
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    MOVE_RIGHT: (_, { Game: Game2 }) => {
+      Game2.move(1, 0);
+    },
+    /**
+     * ## 向下移动（软降）
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    MOVE_DOWN: (_, { Game: Game2 }) => {
+      Game2.move(0, 1);
+    },
+    /**
+     * ## 旋转方块
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    ROTATE: (_, { Game: Game2 }) => {
+      Game2.rotate();
+    },
+    /**
+     * ## 硬降（直接落地）
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    DROP: (_, { Game: Game2 }) => {
+      Game2.drop();
+    },
+    /**
+     * 确认操作（例如：Enter / Space / OK）
+     *
+     * 作用：
+     *
+     * - 重置游戏状态
+     * - 返回主菜单
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    CONFIRM: (_, { Game: Game2 }) => {
+      Game2.reset();
+    }
   };
-  var resolveKeyboardAction = (key) => {
-    if (!key) {
+  var replay_actions_default = REPLAY_ACTIONS;
+
+  // lib/engine/dispatch-command.js
+  var ACTIONS_MAP = {
+    "main-menu": main_menu_actions_default,
+    playing: game_playing_actions_default,
+    paused: paused_actions_default,
+    "game-over": game_over_actions_default,
+    replay: replay_actions_default
+  };
+  var dispatchCommand = (cmd, context) => {
+    const { action, payload } = cmd;
+    const { Game: Game2, Audio: Audio3 } = context;
+    const mode = Game2.store.getMode();
+    const actions = ACTIONS_MAP[mode];
+    if (!actions) {
       return;
     }
-    const normalizedKey = key.toLowerCase();
-    return KEYBOARDS_ACTION_MAP[normalizedKey];
+    const handler = actions[action];
+    handler?.(payload, { Game: Game2, Audio: Audio3 });
   };
-  var onKeydown = (e) => {
-    const key = e.key.toLowerCase();
-    const action = resolveKeyboardAction(key);
-    if (!action) {
-      return;
-    }
-    dispatch_input_default({
-      device: "keyboard",
-      action,
-      payload: {}
-    });
-  };
-  var onResize = () => {
-    engine_default.resize();
-  };
-  var bindEvents = () => {
-    globalThis.addEventListener("resize", onResize);
-    document.addEventListener("keydown", onKeydown);
-  };
-  var destroy = () => {
-    globalThis.removeEventListener("resize", onResize);
-    document.removeEventListener("keydown", onKeydown);
-  };
-  var Keyboard = {
-    bindEvents,
-    destroy
-  };
-  var keyboard_default = Keyboard;
+  var dispatch_command_default = dispatchCommand;
 
   // lib/engine/index.js
   var Engine = {
@@ -4655,10 +4816,8 @@ var tetris = (() => {
     accumulator: 0,
     // 上一帧时间戳
     lastTimestamp: 0,
-    Animations: animation_system_default(),
-    Game: game_default,
-    Gamepad: new gamepad_controller_default(),
-    Keyboards: keyboard_default,
+    EventBus: event_bus_default,
+    Animations: animation_runtime_default(),
     /**
      * ## 初始化游戏
      *
@@ -4672,22 +4831,21 @@ var tetris = (() => {
      * - 启动 game loop
      */
     launch: () => {
-      const { Game: Game2, Gamepad, Keyboards } = Engine;
-      const { store } = Game2;
+      const { store } = game_default2;
       store.resetBoard();
-      Game2.loadHighScore();
+      game_default2.loadHighScore();
       store.setState({
         mode: "main-menu",
         score: 0,
         lines: 0,
         level: 1
       });
-      Engine.resize();
       const state = store.getState();
-      render_hud_default(state);
-      lazy_render_main_menu_default(state);
-      Keyboards.bindEvents();
-      Gamepad.bindEvents();
+      ui_default.resize(state);
+      ui_default.updateHud(state);
+      ui_default.lazyRender(state);
+      input_default.Keyboards.bindEvents();
+      input_default.Gamepad.bindEvents();
       Engine.start();
     },
     /** ## 启动主循环 */
@@ -4702,40 +4860,8 @@ var tetris = (() => {
     restart: () => {
       restart_game_loop_default();
     },
-    /**
-     * ## 渲染阶段
-     *
-     * 负责 scene 渲染调度
-     */
-    render: () => {
-      const { Game: Game2 } = Engine;
-      render_scene_default(Game2.store.getState());
-    },
-    /**
-     * ## 更新阶段
-     *
-     * 逻辑更新 + 动画更新（目前仅更新动画）
-     *
-     * @param {number} delta - 时间间隔
-     */
-    update: (delta) => {
-      const { Animations } = Engine;
-      Animations.update(delta);
-    },
-    /** ## 动画渲染层 */
-    animate: () => {
-      const { Animations } = Engine;
-      Animations.render();
-    },
-    /**
-     * ## 自适应画布
-     *
-     * Resize 后立即重新渲染
-     */
-    resize: () => {
-      resize_default();
-      Engine.render();
-    }
+    dispatchInput: dispatch_input_default,
+    dispatchCommand: dispatch_command_default
   };
   var engine_default = Engine;
 
