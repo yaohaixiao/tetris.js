@@ -249,7 +249,10 @@ var tetris = (() => {
 
   // lib/game/state/game-store.js
   var createGameStore = (initialState) => {
-    let state = structuredClone(initialState || game_state_default);
+    let state = {
+      ...structuredClone(initialState || game_state_default),
+      nextSequence: []
+    };
     return {
       /**
        * ## 获取完整 state
@@ -1193,6 +1196,94 @@ var tetris = (() => {
   };
   var play_bgm_default = playBGM;
 
+  // lib/engine/replay/index.js
+  var Replay = {
+    /**
+     * ## 是否正在录制
+     *
+     * @type {boolean}
+     */
+    recording: false,
+    /**
+     * ## 是否正在播放
+     *
+     * @type {boolean}
+     */
+    playing: false,
+    /**
+     * ## 当前帧计数（用于标记时间轴）
+     *
+     * @type {number}
+     */
+    frame: 0,
+    /**
+     * ## 录制的数据列表：
+     *
+     * 一般结构类似：[{ frame: number, command: Command }]
+     *
+     * @type {Array}
+     */
+    data: [],
+    /**
+     * ## 播放游标（当前播放到 data 的位置）
+     *
+     * @type {number}
+     */
+    cursor: 0,
+    // 用来存本局的方块顺序
+    pieceSequence: [],
+    pieceIndex: 0,
+    /**
+     * ## 开始录制
+     *
+     * 行为：
+     *
+     * - 打开 recording 状态
+     * - 清空已有数据
+     * - 重置 frame
+     */
+    startRecord() {
+      Replay.recording = true;
+      Replay.data = [];
+      Replay.frame = 0;
+      Replay.pieceSequence = [];
+      Replay.pieceIndex = 0;
+    },
+    /** ## 停止录制 */
+    stopRecord() {
+      Replay.recording = false;
+    },
+    /**
+     * ## 开始播放
+     *
+     * 行为：
+     *
+     * - 打开 playing 状态
+     * - 重置 frame
+     * - 重置 cursor
+     */
+    startPlay() {
+      Replay.playing = true;
+      Replay.frame = 0;
+      Replay.cursor = 0;
+      Replay.pieceIndex = 0;
+    },
+    /** ## 停止播放 */
+    stopPlay() {
+      Replay.playing = false;
+    },
+    reset() {
+      Replay.recording = false;
+      Replay.playing = false;
+      Replay.frame = 0;
+      Replay.cursor = 0;
+      Replay.data = [];
+      Replay.pieceSequence = [];
+      Replay.pieceIndex = 0;
+    }
+  };
+  var replay_default = Replay;
+
   // lib/game/constants/shapes.js
   var { PINK: PINK2, BLUE: BLUE2, TEAL: TEAL2, YELLOW: YELLOW2, VIOLET: VIOLET2, ORANGE: ORANGE2, GREEN: GREEN2, RED: RED2 } = colors_default;
   var SHAPES = [
@@ -1292,13 +1383,22 @@ var tetris = (() => {
   var over = () => {
     const { store } = game_default;
     const mode = store.getMode();
-    if (mode === "game-over" || mode === "paused" || mode === "main-menu") {
+    if (mode === "game-over" || mode === "replay") {
       return;
     }
-    store.setMode("game-over");
+    replay_default.stopRecord();
     game_default.saveHighScore();
     stop_bgm_default();
     sounds_default.gameOver();
+    store.resetBoard();
+    store.setState({
+      score: 0,
+      lines: 0,
+      level: 1
+    });
+    store.setMode("replay");
+    replay_default.startPlay();
+    spawn_default();
   };
   var over_default = over;
 
@@ -1360,8 +1460,24 @@ var tetris = (() => {
 
   // lib/game/logic/spawn.js
   var spawn = () => {
-    const { COLS: COLS2 } = board_default;
     const { store } = game_default;
+    const { COLS: COLS2 } = board_default;
+    if (replay_default.playing) {
+      const piece = replay_default.pieceSequence[replay_default.pieceIndex];
+      if (!piece) {
+        return;
+      }
+      const nextPiece2 = replay_default.pieceSequence[replay_default.pieceIndex + 1] || null;
+      store.setState({
+        curr: piece,
+        next: nextPiece2 ? structuredClone(nextPiece2) : null,
+        cx: Math.floor(COLS2 / 2) - Math.floor(piece.shape[0].length / 2),
+        cy: 0
+      });
+      render_next_piece_default(store.getState());
+      replay_default.pieceIndex++;
+      return;
+    }
     const state = store.getState();
     const { next } = state;
     const curr = next ? {
@@ -1378,92 +1494,16 @@ var tetris = (() => {
       // 垂直位置从顶部开始
       cy: 0
     });
-    render_next_piece_default(store.getState());
+    const currentState = store.getState();
+    render_next_piece_default(currentState);
+    if (replay_default.recording && currentState.curr) {
+      replay_default.pieceSequence.push(structuredClone(currentState.curr));
+    }
     if (collision_default(0, 0)) {
       over_default();
     }
   };
   var spawn_default = spawn;
-
-  // lib/engine/replay/index.js
-  var Replay = {
-    /**
-     * ## 是否正在录制
-     *
-     * @type {boolean}
-     */
-    recording: false,
-    /**
-     * ## 是否正在播放
-     *
-     * @type {boolean}
-     */
-    playing: false,
-    /**
-     * ## 当前帧计数（用于标记时间轴）
-     *
-     * @type {number}
-     */
-    frame: 0,
-    /**
-     * ## 录制的数据列表：
-     *
-     * 一般结构类似：[{ frame: number, command: Command }]
-     *
-     * @type {Array}
-     */
-    data: [],
-    /**
-     * ## 播放游标（当前播放到 data 的位置）
-     *
-     * @type {number}
-     */
-    cursor: 0,
-    /**
-     * ## 开始录制
-     *
-     * 行为：
-     *
-     * - 打开 recording 状态
-     * - 清空已有数据
-     * - 重置 frame
-     */
-    startRecord() {
-      this.recording = true;
-      this.data = [];
-      this.frame = 0;
-    },
-    /** ## 停止录制 */
-    stopRecord() {
-      this.recording = false;
-    },
-    /**
-     * ## 开始播放
-     *
-     * 行为：
-     *
-     * - 打开 playing 状态
-     * - 重置 frame
-     * - 重置 cursor
-     */
-    startPlay() {
-      this.playing = true;
-      this.frame = 0;
-      this.cursor = 0;
-    },
-    /** ## 停止播放 */
-    stopPlay() {
-      this.playing = false;
-    },
-    reset() {
-      this.recording = false;
-      this.playing = false;
-      this.frame = 0;
-      this.cursor = 0;
-      this.data = [];
-    }
-  };
-  var replay_default = Replay;
 
   // lib/engine/command/command-queue.js
   var CommandQueue = {
@@ -1743,12 +1783,77 @@ var tetris = (() => {
   };
   var game_over_actions_default = GAME_OVER_ACTIONS;
 
+  // lib/engine/command/actions/replay-actions.js
+  var REPLAY_ACTIONS = {
+    /**
+     * ## 向左移动
+     *
+     * @param {object} _ 参数对象
+     * @param {object} game - 游戏控制模块
+     */
+    MOVE_LEFT: (_, game) => {
+      game.move(-1, 0);
+    },
+    /**
+     * ## 向右移动
+     *
+     * @param {object} _ 参数对象
+     * @param {object} game - 游戏控制模块
+     */
+    MOVE_RIGHT: (_, game) => {
+      game.move(1, 0);
+    },
+    /**
+     * ## 向下移动（软降）
+     *
+     * @param {object} _ 参数对象
+     * @param {object} game - 游戏控制模块
+     */
+    MOVE_DOWN: (_, game) => {
+      game.move(0, 1);
+    },
+    /**
+     * ## 旋转方块
+     *
+     * @param {object} _ 参数对象
+     * @param {object} game - 游戏控制模块
+     */
+    ROTATE: (_, game) => {
+      game.rotate();
+    },
+    /**
+     * ## 硬降（直接落地）
+     *
+     * @param {object} _ 参数对象
+     * @param {object} game - 游戏控制模块
+     */
+    DROP: (_, game) => {
+      game.drop();
+    },
+    /**
+     * 确认操作（例如：Enter / Space / OK）
+     *
+     * 作用：
+     *
+     * - 重置游戏状态
+     * - 返回主菜单
+     *
+     * @param {object} _ - Action payload（当前未使用）
+     * @param {object} game - 游戏控制模块
+     */
+    CONFIRM: (_, game) => {
+      game.reset();
+    }
+  };
+  var replay_actions_default = REPLAY_ACTIONS;
+
   // lib/engine/dispatch-command.js
   var ACTIONS_MAP = {
     "main-menu": main_menu_actions_default,
     playing: game_playing_actions_default,
     paused: paused_actions_default,
-    "game-over": game_over_actions_default
+    "game-over": game_over_actions_default,
+    replay: replay_actions_default
   };
   var dispatchCommand = (cmd, engine) => {
     const { action, payload } = cmd;
@@ -1795,6 +1900,24 @@ var tetris = (() => {
   };
   var command_default = Command;
 
+  // lib/engine/dispatch-input.js
+  var dispatchInput = (input) => {
+    const { action, payload } = input;
+    const hasBlocking = engine_default.Animations.hasBlocking(["countdown", "level-up"]);
+    if (hasBlocking || !action) {
+      return;
+    }
+    const cmd = new command_default(action, payload);
+    command_queue_default.enqueue(cmd);
+    if (replay_default.recording) {
+      replay_default.data.push({
+        frame: replay_default.frame,
+        cmd
+      });
+    }
+  };
+  var dispatch_input_default = dispatchInput;
+
   // lib/engine/start-game-loop.js
   var startGameLoop = (timestamp) => {
     if (!engine_default.timestamp) {
@@ -1808,23 +1931,37 @@ var tetris = (() => {
     }
     const dropInterval = Game2.getSpeed();
     engine_default.timestamp = timestamp;
+    if (replay_default.playing || replay_default.recording) {
+      replay_default.frame++;
+    }
     if (replay_default.playing) {
       const { data } = replay_default;
+      const { length } = data;
+      if (length > 0 && replay_default.cursor >= length) {
+        Game2.store.setMode("game-over");
+        replay_default.stopPlay();
+        return;
+      }
       while (replay_default.cursor < data.length && data[replay_default.cursor].frame === replay_default.frame) {
         const record = data[replay_default.cursor];
         const { cmd } = record;
-        command_queue_default.enqueue(new command_default(cmd.action, cmd.payload));
+        dispatch_input_default({
+          device: "replay",
+          action: cmd.action,
+          payload: cmd.payload
+        });
         replay_default.cursor++;
       }
     }
-    engine_default.Gamepad.update();
+    if (!replay_default.playing) {
+      engine_default.Gamepad.update();
+    }
     command_queue_default.flush(engine_default);
-    if (!engine_default.accumulator || stepDelta > dropInterval) {
+    if ((!engine_default.accumulator || stepDelta > dropInterval) && !replay_default.playing) {
       Game2.tick();
       engine_default.accumulator = timestamp;
     }
     engine_default.update(delta);
-    replay_default.frame++;
     engine_default.render();
     engine_default.animate();
     engine_default.rafId = requestAnimationFrame(startGameLoop);
@@ -1858,6 +1995,7 @@ var tetris = (() => {
     if ($level) {
       $level.textContent = pad_start_default(store.getLevel(), 2);
     }
+    replay_default.startRecord();
     store.setMode("playing");
     spawn_default();
     sounds_default.levelStart();
@@ -2791,7 +2929,7 @@ var tetris = (() => {
   // lib/game/core/tick.js
   var tick = () => {
     const mode = game_default.store.getMode();
-    if (mode === "main-menu" || mode === "game-over" || engine_default.Animations.hasBlocking()) {
+    if (mode === "main-menu" || mode === "replay" || mode === "game-over" || engine_default.Animations.hasBlocking()) {
       return;
     }
     if (!move_default(0, 1)) {
@@ -2807,7 +2945,7 @@ var tetris = (() => {
   var restart = () => {
     const { store } = game_default;
     const mode = store.getMode();
-    if (mode === "paused" || mode === "game-over" || mode === "main-menu") {
+    if (mode === "main-menu" || mode === "paused" || mode === "replay" || mode === "game-over") {
       return;
     }
     stop_bgm_default();
@@ -2918,7 +3056,7 @@ var tetris = (() => {
   var play = () => {
     const { store } = game_default;
     const mode = store.getMode();
-    if (mode === "game-over" || mode === "main-menu" || mode !== "paused") {
+    if (mode === "main-menu" || mode !== "paused" || mode === "replay" || mode === "game-over") {
       return false;
     }
     stopPaused();
@@ -2933,7 +3071,7 @@ var tetris = (() => {
   var pause = () => {
     const { store } = game_default;
     const mode = store.getMode();
-    if (mode === "game-over" || mode === "main-menu" || mode !== "playing") {
+    if (mode === "main-menu" || mode !== "playing" || mode === "replay" || mode === "game-over") {
       return;
     }
     store.setMode("paused");
@@ -2946,7 +3084,7 @@ var tetris = (() => {
   // lib/game/core/toggle-pause.js
   var togglePause = () => {
     const mode = game_default.store.getMode();
-    if (mode === "game-over" || mode === "main-menu") {
+    if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
       return false;
     }
     if (mode === "playing") {
@@ -2970,12 +3108,8 @@ var tetris = (() => {
     stop_bgm_default();
     engine_default.Animations.clear();
     command_queue_default.clear();
-    if (replay_default.playing) {
-      replay_default.stopPlay();
-    }
-    if (replay_default.recording) {
-      replay_default.stopRecord();
-    }
+    replay_default.stopRecord();
+    replay_default.stopPlay();
     replay_default.reset();
     engine_default.start();
     store.resetBoard();
@@ -4009,6 +4143,19 @@ var tetris = (() => {
   };
   var playing_scene_default = playingScene;
 
+  // lib/ui/scenes/replay-scene/index.js
+  var replayScene = (state) => {
+    clear_board_default();
+    render_playing_default(state);
+    render_overlay_default();
+    render_scene_background_default("game-over");
+    render_tetris_text_default();
+    render_game_text_default();
+    render_over_text_default();
+    render_enter_start_text_default();
+  };
+  var replay_scene_default = replayScene;
+
   // lib/ui/scenes/index.js
   var Scenes = {
     /**
@@ -4034,6 +4181,9 @@ var tetris = (() => {
      */
     "game-over": (state) => {
       game_over_scene_default(state);
+    },
+    replay: (state) => {
+      replay_scene_default(state);
     },
     /**
      * ## 游戏进行中场景
@@ -4072,24 +4222,6 @@ var tetris = (() => {
     nextPiece2.height = nextSize;
   };
   var resize_default = resize;
-
-  // lib/engine/dispatch-input.js
-  var dispatchInput = (input) => {
-    const { action, payload } = input;
-    const hasBlocking = engine_default.Animations.hasBlocking(["countdown", "level-up"]);
-    if (hasBlocking || !action) {
-      return;
-    }
-    const cmd = new command_default(action, payload);
-    command_queue_default.enqueue(cmd);
-    if (replay_default.recording) {
-      replay_default.data.push({
-        frame: replay_default.frame,
-        cmd
-      });
-    }
-  };
-  var dispatch_input_default = dispatchInput;
 
   // lib/input/gamepad-controller.js
   var GAMEPAD_ACTION_MAP = {
