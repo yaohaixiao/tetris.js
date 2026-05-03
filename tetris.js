@@ -1211,12 +1211,6 @@ var tetris = (() => {
      */
     playing: false,
     /**
-     * ## 当前帧计数（用于标记时间轴）
-     *
-     * @type {number}
-     */
-    frame: 0,
-    /**
      * ## 录制的数据列表：
      *
      * 一般结构类似：[{ frame: number, command: Command }]
@@ -1233,6 +1227,20 @@ var tetris = (() => {
     // 用来存本局的方块顺序
     pieceSequence: [],
     pieceIndex: 0,
+    // 记录开始录像或者开发回放的起始时间
+    startTime: 0,
+    // 记录按下暂停的那一刻
+    pauseStartTime: 0,
+    // 记录这局游戏累计暂停了多少毫秒
+    totalPausedTime: 0,
+    /**
+     * ## 判断当前是否有录制的数据
+     *
+     * @returns {boolean} - Replay.data 有数据，返回 true，否则返回 false
+     */
+    get hasData() {
+      return Array.isArray(Replay.data) && Replay.data.length > 0;
+    },
     /**
      * ## 开始录制
      *
@@ -1245,9 +1253,11 @@ var tetris = (() => {
     startRecord() {
       Replay.recording = true;
       Replay.data = [];
-      Replay.frame = 0;
       Replay.pieceSequence = [];
       Replay.pieceIndex = 0;
+      Replay.startTime = Date.now();
+      Replay.pauseStartTime = 0;
+      Replay.totalPausedTime = 0;
     },
     /** ## 停止录制 */
     stopRecord() {
@@ -1264,7 +1274,6 @@ var tetris = (() => {
      */
     startPlay() {
       Replay.playing = true;
-      Replay.frame = 0;
       Replay.cursor = 0;
       Replay.pieceIndex = 0;
     },
@@ -1275,11 +1284,13 @@ var tetris = (() => {
     reset() {
       Replay.recording = false;
       Replay.playing = false;
-      Replay.frame = 0;
       Replay.cursor = 0;
       Replay.data = [];
       Replay.pieceSequence = [];
       Replay.pieceIndex = 0;
+      Replay.startTime = 0;
+      Replay.pauseStartTime = 0;
+      Replay.totalPausedTime = 0;
     }
   };
   var replay_default = Replay;
@@ -1390,15 +1401,20 @@ var tetris = (() => {
     game_default.saveHighScore();
     stop_bgm_default();
     sounds_default.gameOver();
-    store.resetBoard();
-    store.setState({
-      score: 0,
-      lines: 0,
-      level: 1
-    });
-    store.setMode("replay");
-    replay_default.startPlay();
-    spawn_default();
+    if (replay_default.hasData) {
+      store.resetBoard();
+      store.setState({
+        score: 0,
+        lines: 0,
+        level: 1
+      });
+      store.setMode("replay");
+      replay_default.startPlay();
+      replay_default.startTime = Date.now();
+      spawn_default();
+    } else {
+      store.setMode("game-over");
+    }
   };
   var over_default = over;
 
@@ -1910,8 +1926,9 @@ var tetris = (() => {
     const cmd = new command_default(action, payload);
     command_queue_default.enqueue(cmd);
     if (replay_default.recording) {
+      const elapsedTime = Date.now() - replay_default.startTime - replay_default.totalPausedTime;
       replay_default.data.push({
-        frame: replay_default.frame,
+        ms: elapsedTime,
         cmd
       });
     }
@@ -1931,18 +1948,15 @@ var tetris = (() => {
     }
     const dropInterval = Game2.getSpeed();
     engine_default.timestamp = timestamp;
-    if (replay_default.playing || replay_default.recording) {
-      replay_default.frame++;
-    }
     if (replay_default.playing) {
       const { data } = replay_default;
       const { length } = data;
+      const currentElapsed = Date.now() - replay_default.startTime;
       if (length > 0 && replay_default.cursor >= length) {
         Game2.store.setMode("game-over");
         replay_default.stopPlay();
-        return;
       }
-      while (replay_default.cursor < data.length && data[replay_default.cursor].frame === replay_default.frame) {
+      while (replay_default.playing && replay_default.cursor < data.length && data[replay_default.cursor].ms <= currentElapsed) {
         const record = data[replay_default.cursor];
         const { cmd } = record;
         dispatch_input_default({
@@ -2868,7 +2882,7 @@ var tetris = (() => {
       const nextLines = state.lines + cleared;
       const totalLines = state.baseLines + nextLines;
       const newLevel = Math.floor(totalLines / 10) + 1;
-      if (newLevel > state.level) {
+      if (newLevel > state.level && !replay_default.playing) {
         level_up_controller_default(newLevel);
       }
       store.setState((prev) => ({
@@ -3088,8 +3102,15 @@ var tetris = (() => {
       return false;
     }
     if (mode === "playing") {
+      if (replay_default.recording) {
+        replay_default.pauseStartTime = Date.now();
+      }
       pause_default();
     } else {
+      if (replay_default.recording && replay_default.pauseStartTime > 0) {
+        replay_default.totalPausedTime += Date.now() - replay_default.pauseStartTime;
+        replay_default.pauseStartTime = 0;
+      }
       play_default();
     }
   };
