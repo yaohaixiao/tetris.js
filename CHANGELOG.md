@@ -1,3 +1,17 @@
+# [0.6.0](https://github.com/yaohaixiao/tetris.js/compare/0.5.2...0.6.0) (2026-05-04)
+
+
+### Bug Fixes
+
+* 修复 render-chinese-hour-animal.js 中凌晨 1点前取数错误的问题； ([f9b6396](https://github.com/yaohaixiao/tetris.js/commit/f9b63963154515fd6af6d84facd6b451e70a7c9f))
+
+
+### Features
+
+* 接入了 replay 功能，游戏结束，会自动重放之前的操作 ([a831ea6](https://github.com/yaohaixiao/tetris.js/commit/a831ea694adf844cb2ec94a372b4079d0629253a))
+* 添加 gamepad-controller.js 模块，支持游戏手柄的控制游戏； ([4c64ae3](https://github.com/yaohaixiao/tetris.js/commit/4c64ae36e683672170dbf972a2c63a8f76bebd61))
+* 完善 replay，将自动下落作为记录捕捉到回放数据中；将 replay 播放和游戏 tick 分离； ([79831cd](https://github.com/yaohaixiao/tetris.js/commit/79831cd4aea127afdc087255fc4dd415c8b7ebcd))
+* 优化 Replay 回放效果，处理暂停的和升级界面的影响 ([0a09a17](https://github.com/yaohaixiao/tetris.js/commit/0a09a17ffc8c5e6e09769a031653506c4d37f735))
 ## [0.5.2](https://github.com/yaohaixiao/tetris.js/compare/0.5.1...0.5.2) (2026-05-01)
 
 
