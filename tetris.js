@@ -1073,13 +1073,13 @@ var tetris = (() => {
   var toggle_bgm_default = toggleBGM;
 
   // lib/services/audio/index.js
-  var Audio2 = {
+  var Audio = {
     Sounds: sounds_default,
     playBGM: play_bgm_default,
     stopBGM: stop_bgm_default,
     toggleBGM: toggle_bgm_default
   };
-  var audio_default = Audio2;
+  var audio_default = Audio;
 
   // lib/game/constants/game.js
   var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
@@ -2983,6 +2983,654 @@ var tetris = (() => {
   };
   var spawn_default = spawn;
 
+  // lib/game/core/begin.js
+  var begin = () => {
+    const { store } = game_default2;
+    const $level = document.querySelector("#level");
+    if ($level) {
+      $level.textContent = pad_start_default(store.getLevel(), 2);
+    }
+    replay_runtime_default.startRecord(engine_default.timestamp);
+    store.setMode("playing");
+    spawn_default();
+    audio_default.Sounds.levelStart();
+    setTimeout(() => {
+      audio_default.playBGM();
+    }, 250);
+    engine_default.restart();
+  };
+  var begin_default = begin;
+
+  // lib/services/animations/countdown-animation.js
+  var CountdownAnimation = class {
+    /**
+     * ## 渲染层级（UI 层，显示在最前面）
+     *
+     * @type {number}
+     */
+    layer = 100;
+    /**
+     * ## 是否阻塞用户输入
+     *
+     * @type {boolean}
+     */
+    blocking = true;
+    /**
+     * ## 动画名称标识
+     *
+     * @type {string}
+     */
+    name = "countdown";
+    constructor() {
+      this.state = {
+        show: true,
+        number: 3,
+        scale: 4,
+        count: 0,
+        acc: 0
+      };
+    }
+    /**
+     * ## 更新动画状态
+     *
+     * 每帧调用：
+     *
+     * - 控制更新节奏（基于 acc）
+     * - 更新缩放动画
+     * - 控制数字切换
+     * - 判断动画是否结束
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 是否继续存活（true=继续，false=结束）
+     */
+    update(delta) {
+      const { state } = this;
+      state.acc += delta;
+      if (state.acc < 0.01) {
+        return true;
+      }
+      state.acc = 0;
+      state.count++;
+      state.scale = Math.max(1, state.scale - 0.4);
+      if (state.count >= 50) {
+        state.count = 0;
+        state.number -= 1;
+        state.scale = 4;
+        if (state.number >= 1) {
+          audio_default.Sounds.countdown();
+        }
+      }
+      if (state.number <= 0) {
+        this.stop();
+        return false;
+      }
+      return true;
+    }
+    /**
+     * ## 倒计时结束处理
+     *
+     * - 切换游戏状态为 playing
+     * - 启动游戏主逻辑
+     */
+    stop() {
+      game_default2.store.setMode("playing");
+      game_default2.begin();
+    }
+    /**
+     * ## 渲染动画
+     *
+     * 将当前 state 传递给渲染函数
+     */
+    render() {
+      ui_default.renderCountdown(this.state);
+    }
+  };
+  var countdown_animation_default = CountdownAnimation;
+
+  // lib/services/effects/countdown.js
+  var startCountdown = () => {
+    engine_default.Animations.register(new countdown_animation_default());
+  };
+  var countdown_default = startCountdown;
+
+  // lib/services/animations/clear-lines-animation.js
+  var ClearLinesAnimation = class {
+    /**
+     * ## 渲染层级（UI 层，显示在最前面）
+     *
+     * @type {number}
+     */
+    layer = 200;
+    /**
+     * ## 是否阻塞用户输入
+     *
+     * @type {boolean}
+     */
+    blocking = true;
+    /**
+     * ## 动画名称标识
+     *
+     * @type {string}
+     */
+    name = "clear-lines";
+    /**
+     * ## 构造函数
+     *
+     * @param {number[]} lines - 需要执行消除动画的行索引数组（从 0 开始）
+     */
+    constructor(lines) {
+      this.lines = lines.map((y) => ({
+        y,
+        alpha: 1,
+        timer: 0
+      }));
+      audio_default.Sounds.clear(lines.length - 1);
+    }
+    /**
+     * ## 更新动画状态
+     *
+     * 每帧调用，用于：
+     *
+     * - 推进每一行的动画时间
+     * - 根据 timer 计算当前闪烁状态（alpha）
+     * - 判断动画是否结束
+     *
+     * @param {number} delta - 距离上一帧的时间差（单位：秒）
+     * @returns {boolean} - 是否继续存活（true = 继续，false = 结束）
+     */
+    update(delta) {
+      let done = true;
+      for (const line of this.lines) {
+        const phase = Math.floor(line.timer / 0.12);
+        line.alpha = phase % 2 === 0 ? 1 : 0;
+        line.timer += delta;
+        if (line.timer < 0.72) {
+          done = false;
+        }
+      }
+      if (done) {
+        this.stop();
+        return false;
+      }
+      return true;
+    }
+    /**
+     * ## 动画结束后的收尾逻辑
+     *
+     * 包含：
+     *
+     * 1. 实际删除已满的行
+     * 2. 更新分数与消除行数
+     * 3. 判断并处理升级
+     * 4. 更新 HUD
+     */
+    stop() {
+      const { store, CONSTANTS } = game_default2;
+      const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = CONSTANTS.GAME;
+      const { ROWS: ROWS2, COLS: COLS2 } = ui_default.CONSTANTS.BOARD;
+      const state = store.getState();
+      const lines = state.clearLines || [];
+      const cleared = lines.length;
+      const board = structuredClone(state.board);
+      for (let y = ROWS2 - 1; y >= 0; y--) {
+        const isFullLine = board[y].every(Boolean);
+        if (isFullLine) {
+          board.splice(y, 1);
+          board.unshift(Array.from({ length: COLS2 }).fill(0));
+          y++;
+        }
+      }
+      const nextLines = state.lines + cleared;
+      const totalLines = state.baseLines + nextLines;
+      const newLevel = Math.floor(totalLines / 10) + 1;
+      if (newLevel > state.level && !replay_runtime_default.playing) {
+        effects_default.startLevelUp(newLevel);
+      }
+      store.setState((prev) => ({
+        ...prev,
+        clearLines: [],
+        lines: nextLines,
+        score: prev.score + CLEAR_LINE_SCORES2[cleared] * prev.level,
+        level: Math.min(Math.max(prev.level, newLevel), MAX_LEVEL2),
+        board
+      }));
+      ui_default.updateHud(store.getState());
+    }
+    /**
+     * ## 渲染动画
+     *
+     * 在渲染阶段调用：
+     *
+     * - 根据当前 lines 数据（含 alpha）绘制闪烁效果
+     *
+     * 不修改 state，仅负责视觉表现
+     */
+    render() {
+      ui_default.renderClear({ lines: this.lines });
+    }
+  };
+  var clear_lines_animation_default = ClearLinesAnimation;
+
+  // lib/services/effects/clear-lines.js
+  var startClearLines = (lines) => {
+    const animation2 = new clear_lines_animation_default(lines);
+    engine_default.Animations.register(animation2);
+  };
+  var clear_lines_default = startClearLines;
+
+  // lib/services/animations/paused-animation.js
+  var PausedAnimation = class {
+    /**
+     * ## 渲染层级（UI 层，显示在最前面）
+     *
+     * @type {number}
+     */
+    layer = 500;
+    /**
+     * ## 是否阻塞用户输入
+     *
+     * @type {boolean}
+     */
+    blocking = true;
+    /**
+     * ## 动画名称标识
+     *
+     * @type {string}
+     */
+    name = "paused";
+    /**
+     * ## 计时器（秒），用于控制音效播放间隔
+     *
+     * @type {number}
+     */
+    timer = 0;
+    /**
+     * ## 是否处于激活
+     *
+     * @type {boolean}
+     */
+    active = true;
+    /**
+     * ## 更新暂停动画状态
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 始终返回 true，表示动画永远不会自动结束
+     */
+    update(delta) {
+      if (!this.active) {
+        return false;
+      }
+      this.timer += delta;
+      if (this.timer >= 1) {
+        audio_default.Sounds.secondTick();
+        this.timer = 0;
+      }
+      return true;
+    }
+    /**
+     * ## 暂停结束处理
+     *
+     * 将活动状态 active 设置为 true
+     */
+    stop() {
+      this.active = false;
+    }
+    /**
+     * ## 渲染暂停动画
+     *
+     * 将暂停界面绘制到屏幕上
+     */
+    render() {
+      this.active = true;
+    }
+  };
+  var paused_animation_default = PausedAnimation;
+
+  // lib/services/effects/paused.js
+  var animation = null;
+  var startPaused = () => {
+    if (animation) {
+      return;
+    }
+    animation = new paused_animation_default();
+    engine_default.Animations.register(animation);
+  };
+  var stopPaused = () => {
+    if (!animation) {
+      return;
+    }
+    animation.stop();
+    animation = null;
+  };
+
+  // lib/services/animations/level-up-animation.js
+  var LevelUpAnimation = class {
+    /**
+     * ## 渲染层级（UI 层，显示在最前面）
+     *
+     * @type {number}
+     */
+    layer = 100;
+    /**
+     * ## 是否阻塞用户输入
+     *
+     * @type {boolean}
+     */
+    blocking = true;
+    /**
+     * ## 动画名称标识
+     *
+     * @type {string}
+     */
+    name = "level-up";
+    /**
+     * ## 创建升级动画实例
+     *
+     * @class
+     * @param {number} level - 当前等级
+     */
+    constructor(level) {
+      this.level = level;
+      this.fireworks = this.createFireworks();
+      this.duration = 3;
+      this.spawnTimer = 0;
+      this.timer = 0;
+    }
+    /**
+     * ## 创建一组烟花粒子
+     *
+     * 在画布中心上方位置生成随机方向和速度的粒子
+     *
+     * @returns {object[]} 烟花粒子对象数组
+     */
+    createFireworks() {
+      const { Canvas: Canvas2, CONSTANTS } = ui_default;
+      const { FIREWORK_COLORS: FIREWORK_COLORS2 } = CONSTANTS;
+      const { width, height } = Canvas2.gameBoard;
+      const particles = [];
+      for (let i = 0; i < 40; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 5 + Math.random() * 15;
+        particles.push({
+          x: width / 2,
+          // 初始X坐标：画布中心
+          y: height / 2 - 60,
+          // 初始Y坐标：画布中心上方60像素
+          vx: Math.cos(angle) * speed,
+          // X轴速度分量
+          vy: Math.sin(angle) * speed,
+          // Y轴速度分量
+          radius: 3 + Math.random() * 4,
+          // 粒子半径（3-7像素）
+          color: FIREWORK_COLORS2[Math.floor(Math.random() * FIREWORK_COLORS2.length)],
+          // 随机颜色
+          alpha: 1
+          // 初始完全不透明
+        });
+      }
+      return particles;
+    }
+    /**
+     * ## 更新动画状态
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
+     */
+    update(delta) {
+      this.timer += delta;
+      this.spawnTimer += delta;
+      this.updateFireworks(delta);
+      if (this.spawnTimer > 0.6) {
+        this.fireworks.push(...this.createFireworks());
+        this.spawnTimer = 0;
+      }
+      if (this.timer >= this.duration) {
+        this.stop();
+        return false;
+      }
+      return true;
+    }
+    /**
+     * ## 升级动画结束处理
+     *
+     * 继续播放背景音乐
+     */
+    stop() {
+      audio_default.playBGM(this.level);
+    }
+    /**
+     * ## 更新所有烟花粒子的物理状态
+     *
+     * 包括：速度衰减、重力影响、位置更新、透明度衰减、半径增大
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     */
+    updateFireworks(delta) {
+      const gravity = 0.01;
+      for (const p of this.fireworks) {
+        p.vx *= 0.98;
+        p.vy *= 0.98;
+        p.vy += gravity * delta;
+        p.x += p.vx * delta * 8e-3;
+        p.y += p.vy * delta * 8e-3;
+        p.alpha -= delta * 0.024;
+        p.radius += delta * 10;
+      }
+      this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
+    }
+    /**
+     * ## 渲染升级动画
+     *
+     * 调用专门渲染函数显示"LEVEL UP"文字和烟花效果
+     */
+    render() {
+      const { level, fireworks } = this;
+      ui_default.renderLevelUp(level, fireworks);
+    }
+  };
+  var level_up_animation_default = LevelUpAnimation;
+
+  // lib/services/effects/level-up.js
+  var startLevelUp = (level) => {
+    const animation2 = new level_up_animation_default(level);
+    audio_default.stopBGM();
+    audio_default.Sounds.levelUp();
+    engine_default.Animations.register(animation2);
+  };
+  var level_up_default = startLevelUp;
+
+  // lib/services/effects/index.js
+  var Effects = {
+    startCountdown: countdown_default,
+    startClearLines: clear_lines_default,
+    startPaused,
+    stopPaused,
+    startLevelUp: level_up_default
+  };
+  var effects_default = Effects;
+
+  // lib/game/core/start.js
+  var start = () => {
+    const level = game_default2.store.getLevel();
+    const lines = (level - 1) * 10;
+    game_default2.store.setBaseLines(lines);
+    effects_default.startCountdown();
+  };
+  var start_default = start;
+
+  // lib/game/logic/move.js
+  var move = (ox, oy) => {
+    const { store } = game_default2;
+    const state = store.getState();
+    let { cx, cy } = state;
+    if (!collision_default(ox, oy)) {
+      cx += ox;
+      cy += oy;
+      store.setState({
+        cx,
+        cy
+      });
+      audio_default.Sounds.move();
+      return true;
+    }
+    return false;
+  };
+  var move_default = move;
+
+  // lib/game/logic/lock.js
+  var lock = () => {
+    const { store } = game_default2;
+    const state = store.getState();
+    const { curr } = state;
+    const s = curr.shape;
+    const board = structuredClone(state.board);
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          board[state.cy + y][state.cx + x] = curr.color;
+          store.setState({
+            board
+          });
+        }
+      }
+    }
+  };
+  var lock_default = lock;
+
+  // lib/game/logic/clear-lines.js
+  var clearLines = () => {
+    const { store } = game_default2;
+    const state = store.getState();
+    const { ROWS: ROWS2 } = ui_default.CONSTANTS.BOARD;
+    let clear = 0;
+    const linesToClear = [];
+    for (let y = ROWS2 - 1; y >= 0; y--) {
+      const isLineFull = state.board[y].every((cell) => !!cell);
+      if (isLineFull) {
+        linesToClear.push(y);
+        clear++;
+      }
+    }
+    if (clear === 0) {
+      return linesToClear;
+    }
+    store.setClearLines(linesToClear);
+    return linesToClear;
+  };
+  var clear_lines_default2 = clearLines;
+
+  // lib/game/core/tick.js
+  var tick = () => {
+    const mode = game_default2.store.getMode();
+    if (mode === "main-menu" || mode === "game-over" || engine_default.Animations.hasBlocking()) {
+      return;
+    }
+    if (mode === "playing") {
+      replay_runtime_default.data.push({
+        ms: engine_default.timestamp - replay_runtime_default.startTime,
+        cmd: {
+          action: "AUTO_TICK",
+          payload: {}
+        }
+      });
+    }
+    if (!move_default(0, 1)) {
+      lock_default();
+      audio_default.Sounds.fall();
+      const linesToClear = clear_lines_default2();
+      if (linesToClear.length > 0) {
+        effects_default.startClearLines(linesToClear);
+        return;
+      }
+      spawn_default();
+    }
+  };
+  var tick_default = tick;
+
+  // lib/game/core/restart.js
+  var restart = () => {
+    const { store } = game_default2;
+    const mode = store.getMode();
+    if (mode === "main-menu" || mode === "paused" || mode === "replay" || mode === "game-over") {
+      return;
+    }
+    audio_default.stopBGM();
+    store.setState({
+      mode: "playing",
+      score: 0,
+      lines: 0,
+      level: 1
+    });
+    store.resetBoard();
+    const state = store.getState();
+    ui_default.updateHud({
+      ...state,
+      needReset: true
+    });
+    spawn_default();
+    audio_default.playBGM(store.getLevel());
+    engine_default.restart();
+  };
+  var restart_default = restart;
+
+  // lib/game/core/play.js
+  var play = () => {
+    const { store } = game_default2;
+    const mode = store.getMode();
+    if (mode === "main-menu" || mode !== "paused" || mode === "replay" || mode === "game-over") {
+      return false;
+    }
+    effects_default.stopPaused();
+    store.setMode("playing");
+    audio_default.Sounds.resume();
+    audio_default.playBGM();
+    engine_default.restart();
+  };
+  var play_default = play;
+
+  // lib/game/core/pause.js
+  var pause = () => {
+    const { store } = game_default2;
+    const mode = store.getMode();
+    if (mode === "main-menu" || mode !== "playing" || mode === "replay" || mode === "game-over") {
+      return;
+    }
+    store.setMode("paused");
+    audio_default.stopBGM();
+    audio_default.Sounds.pause();
+    effects_default.startPaused();
+  };
+  var pause_default = pause;
+
+  // lib/game/core/toggle-pause.js
+  var togglePause = () => {
+    const mode = game_default2.store.getMode();
+    if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
+      return false;
+    }
+    const now = engine_default.lastTimestamp;
+    if (mode === "playing") {
+      if (replay_runtime_default.recording) {
+        replay_runtime_default.pauseStartTime = now;
+      }
+      pause_default();
+    } else {
+      if (replay_runtime_default.recording && replay_runtime_default.pauseStartTime > 0) {
+        replay_runtime_default.totalPausedTime += now - replay_runtime_default.pauseStartTime;
+        replay_runtime_default.pauseStartTime = 0;
+      }
+      play_default();
+    }
+  };
+  var toggle_pause_default = togglePause;
+
+  // lib/game/core/get-speed.js
+  var getSpeed = () => {
+    const level = game_default2.store.getLevel();
+    return Math.max(100, 1e3 - (level - 1) * 80);
+  };
+  var get_speed_default = getSpeed;
+
   // lib/core/command/command-queue.js
   var CommandQueue = {
     /**
@@ -3022,6 +3670,130 @@ var tetris = (() => {
     }
   };
   var command_queue_default = CommandQueue;
+
+  // lib/game/core/reset.js
+  var reset = () => {
+    const { store } = game_default2;
+    audio_default.stopBGM();
+    engine_default.Animations.clear();
+    command_queue_default.clear();
+    replay_runtime_default.stopRecord();
+    replay_runtime_default.stopPlay();
+    replay_runtime_default.reset();
+    engine_default.start();
+    store.resetBoard();
+    store.setState({
+      mode: "main-menu",
+      score: 0,
+      lines: 0,
+      level: 1,
+      next: null
+    });
+    const state = store.getState();
+    ui_default.updateHud(state);
+  };
+  var reset_default = reset;
+
+  // lib/game/logic/drop.js
+  var drop = () => {
+    while (true) {
+      if (!move_default(0, 1)) {
+        break;
+      }
+    }
+    const { Sounds: Sounds2 } = audio_default;
+    lock_default();
+    Sounds2.fall();
+    const linesToClear = clear_lines_default2();
+    if (linesToClear.length > 0) {
+      effects_default.startClearLines(linesToClear);
+    }
+    spawn_default();
+    Sounds2.drop();
+  };
+  var drop_default = drop;
+
+  // lib/game/logic/rotate.js
+  var rotate = () => {
+    const { store } = game_default2;
+    const state = store.getState();
+    const { curr } = state;
+    if (!curr) {
+      return;
+    }
+    const currentShape = structuredClone(curr);
+    const prev = curr.shape;
+    currentShape.shape = prev[0].map(
+      (_, i) => prev.map((r) => r[i]).toReversed()
+    );
+    store.setState({
+      curr: currentShape
+    });
+    if (collision_default(0, 0)) {
+      currentShape.shape = prev;
+      store.setState({
+        curr: currentShape
+      });
+    } else {
+      audio_default.Sounds.rotate();
+    }
+  };
+  var rotate_default = rotate;
+
+  // lib/utils/get-storage.js
+  var getStorage = (key) => localStorage.getItem(key);
+  var get_storage_default = getStorage;
+
+  // lib/utils/set-storage.js
+  var setStorage = (key, value) => {
+    localStorage.setItem(key, value);
+  };
+  var set_storage_default = setStorage;
+
+  // lib/game/index.js
+  var Game = {
+    CONSTANTS: {
+      GAME: game_default,
+      SHAPES: shapes_default
+    },
+    // 游戏状态
+    store: game_store_default(),
+    // 核心流程控制逻辑
+    begin: begin_default,
+    start: start_default,
+    tick: tick_default,
+    restart: restart_default,
+    togglePause: toggle_pause_default,
+    over: over_default,
+    getSpeed: get_speed_default,
+    reset: reset_default,
+    // 游戏方块控制逻辑
+    clearLines: clear_lines_default2,
+    collision: collision_default,
+    drop: drop_default,
+    lock: lock_default,
+    move: move_default,
+    rotate: rotate_default,
+    spawn: spawn_default,
+    selectLevel: (level) => {
+      const { store } = Game;
+      store.setLevel(level);
+      audio_default.Sounds.levelSelect();
+    },
+    loadHighScore: () => {
+      const { store } = Game;
+      const highScore = Number.parseInt(get_storage_default("tetris-high-score"), 10) || 0;
+      store.setHighScore(highScore);
+    },
+    saveHighScore: (score) => {
+      const { store } = Game;
+      if (score > store.getHighScore()) {
+        store.setHighScore(score);
+        set_storage_default("tetris-high-score", store.toString());
+      }
+    }
+  };
+  var game_default2 = Game;
 
   // lib/services/input/gamepad-controller.js
   var GAMEPAD_ACTION_MAP = {
@@ -3443,820 +4215,6 @@ var tetris = (() => {
   };
   var input_default = Input;
 
-  // lib/engine/start-game-loop.js
-  var startGameLoop = (timestamp) => {
-    if (!engine_default.timestamp) {
-      engine_default.timestamp = timestamp;
-      engine_default.accumulator = timestamp;
-    }
-    const { Animations, dispatchInput: dispatchInput2 } = engine_default;
-    const { store } = game_default2;
-    const stepDelta = timestamp - engine_default.accumulator;
-    const prev = engine_default.timestamp ?? timestamp;
-    let delta = (timestamp - prev) / 1e3;
-    if (delta > 1e3) {
-      delta = 1e3;
-    }
-    const dropInterval = game_default2.getSpeed();
-    engine_default.timestamp = timestamp;
-    replay_runtime_default.update(timestamp, dispatchInput2, store.setMode);
-    if (!replay_runtime_default.playing) {
-      input_default.Gamepad.update();
-    }
-    command_queue_default.flush({
-      Game: game_default2,
-      Audio: audio_default
-    });
-    if ((!engine_default.accumulator || stepDelta > dropInterval) && !replay_runtime_default.playing) {
-      game_default2.tick();
-      engine_default.accumulator = timestamp;
-    }
-    Animations.update(delta);
-    ui_default.render(store.getState());
-    Animations.render();
-    engine_default.rafId = requestAnimationFrame(startGameLoop);
-  };
-  var start_game_loop_default = startGameLoop;
-
-  // lib/engine/restart-game-loop.js
-  var restartGameLoop = () => {
-    engine_default.stop();
-    engine_default.rafId = requestAnimationFrame(start_game_loop_default);
-  };
-  var restart_game_loop_default = restartGameLoop;
-
-  // lib/game/core/begin.js
-  var begin = () => {
-    const { store } = game_default2;
-    const $level = document.querySelector("#level");
-    if ($level) {
-      $level.textContent = pad_start_default(store.getLevel(), 2);
-    }
-    replay_runtime_default.startRecord(engine_default.timestamp);
-    store.setMode("playing");
-    spawn_default();
-    audio_default.Sounds.levelStart();
-    setTimeout(() => {
-      audio_default.playBGM();
-    }, 250);
-    engine_default.rafId = requestAnimationFrame(restart_game_loop_default);
-  };
-  var begin_default = begin;
-
-  // lib/services/animations/countdown-animation.js
-  var CountdownAnimation = class {
-    /**
-     * ## 渲染层级（UI 层，显示在最前面）
-     *
-     * @type {number}
-     */
-    layer = 100;
-    /**
-     * ## 是否阻塞用户输入
-     *
-     * @type {boolean}
-     */
-    blocking = true;
-    /**
-     * ## 动画名称标识
-     *
-     * @type {string}
-     */
-    name = "countdown";
-    constructor() {
-      this.state = {
-        show: true,
-        number: 3,
-        scale: 4,
-        count: 0,
-        acc: 0
-      };
-    }
-    /**
-     * ## 更新动画状态
-     *
-     * 每帧调用：
-     *
-     * - 控制更新节奏（基于 acc）
-     * - 更新缩放动画
-     * - 控制数字切换
-     * - 判断动画是否结束
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {boolean} - 是否继续存活（true=继续，false=结束）
-     */
-    update(delta) {
-      const { state } = this;
-      state.acc += delta;
-      if (state.acc < 0.01) {
-        return true;
-      }
-      state.acc = 0;
-      state.count++;
-      state.scale = Math.max(1, state.scale - 0.4);
-      if (state.count >= 50) {
-        state.count = 0;
-        state.number -= 1;
-        state.scale = 4;
-        if (state.number >= 1) {
-          audio_default.Sounds.countdown();
-        }
-      }
-      if (state.number <= 0) {
-        this.stop();
-        return false;
-      }
-      return true;
-    }
-    /**
-     * ## 倒计时结束处理
-     *
-     * - 切换游戏状态为 playing
-     * - 启动游戏主逻辑
-     */
-    stop() {
-      game_default2.store.setMode("playing");
-      game_default2.begin();
-    }
-    /**
-     * ## 渲染动画
-     *
-     * 将当前 state 传递给渲染函数
-     */
-    render() {
-      ui_default.renderCountdown(this.state);
-    }
-  };
-  var countdown_animation_default = CountdownAnimation;
-
-  // lib/services/effects/countdown.js
-  var startCountdown = () => {
-    engine_default.Animations.register(new countdown_animation_default());
-  };
-  var countdown_default = startCountdown;
-
-  // lib/services/animations/clear-lines-animation.js
-  var ClearLinesAnimation = class {
-    /**
-     * ## 渲染层级（UI 层，显示在最前面）
-     *
-     * @type {number}
-     */
-    layer = 200;
-    /**
-     * ## 是否阻塞用户输入
-     *
-     * @type {boolean}
-     */
-    blocking = true;
-    /**
-     * ## 动画名称标识
-     *
-     * @type {string}
-     */
-    name = "clear-lines";
-    /**
-     * ## 构造函数
-     *
-     * @param {number[]} lines - 需要执行消除动画的行索引数组（从 0 开始）
-     */
-    constructor(lines) {
-      this.lines = lines.map((y) => ({
-        y,
-        alpha: 1,
-        timer: 0
-      }));
-      audio_default.Sounds.clear(lines.length - 1);
-    }
-    /**
-     * ## 更新动画状态
-     *
-     * 每帧调用，用于：
-     *
-     * - 推进每一行的动画时间
-     * - 根据 timer 计算当前闪烁状态（alpha）
-     * - 判断动画是否结束
-     *
-     * @param {number} delta - 距离上一帧的时间差（单位：秒）
-     * @returns {boolean} - 是否继续存活（true = 继续，false = 结束）
-     */
-    update(delta) {
-      let done = true;
-      for (const line of this.lines) {
-        const phase = Math.floor(line.timer / 0.12);
-        line.alpha = phase % 2 === 0 ? 1 : 0;
-        line.timer += delta;
-        if (line.timer < 0.72) {
-          done = false;
-        }
-      }
-      if (done) {
-        this.stop();
-        return false;
-      }
-      return true;
-    }
-    /**
-     * ## 动画结束后的收尾逻辑
-     *
-     * 包含：
-     *
-     * 1. 实际删除已满的行
-     * 2. 更新分数与消除行数
-     * 3. 判断并处理升级
-     * 4. 更新 HUD
-     */
-    stop() {
-      const { store, CONSTANTS } = game_default2;
-      const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = CONSTANTS.GAME;
-      const { ROWS: ROWS2, COLS: COLS2 } = ui_default.CONSTANTS.BOARD;
-      const state = store.getState();
-      const lines = state.clearLines || [];
-      const cleared = lines.length;
-      const board = structuredClone(state.board);
-      for (let y = ROWS2 - 1; y >= 0; y--) {
-        const isFullLine = board[y].every(Boolean);
-        if (isFullLine) {
-          board.splice(y, 1);
-          board.unshift(Array.from({ length: COLS2 }).fill(0));
-          y++;
-        }
-      }
-      const nextLines = state.lines + cleared;
-      const totalLines = state.baseLines + nextLines;
-      const newLevel = Math.floor(totalLines / 10) + 1;
-      if (newLevel > state.level && !replay_runtime_default.playing) {
-        effects_default.startLevelUp(newLevel);
-      }
-      store.setState((prev) => ({
-        ...prev,
-        clearLines: [],
-        lines: nextLines,
-        score: prev.score + CLEAR_LINE_SCORES2[cleared] * prev.level,
-        level: Math.min(Math.max(prev.level, newLevel), MAX_LEVEL2),
-        board
-      }));
-      ui_default.updateHud(store.getState());
-    }
-    /**
-     * ## 渲染动画
-     *
-     * 在渲染阶段调用：
-     *
-     * - 根据当前 lines 数据（含 alpha）绘制闪烁效果
-     *
-     * 不修改 state，仅负责视觉表现
-     */
-    render() {
-      ui_default.renderClear({ lines: this.lines });
-    }
-  };
-  var clear_lines_animation_default = ClearLinesAnimation;
-
-  // lib/services/effects/clear-lines.js
-  var startClearLines = (lines) => {
-    const animation2 = new clear_lines_animation_default(lines);
-    engine_default.Animations.register(animation2);
-  };
-  var clear_lines_default = startClearLines;
-
-  // lib/services/animations/paused-animation.js
-  var PausedAnimation = class {
-    /**
-     * ## 渲染层级（UI 层，显示在最前面）
-     *
-     * @type {number}
-     */
-    layer = 500;
-    /**
-     * ## 是否阻塞用户输入
-     *
-     * @type {boolean}
-     */
-    blocking = true;
-    /**
-     * ## 动画名称标识
-     *
-     * @type {string}
-     */
-    name = "paused";
-    /**
-     * ## 计时器（秒），用于控制音效播放间隔
-     *
-     * @type {number}
-     */
-    timer = 0;
-    /**
-     * ## 是否处于激活
-     *
-     * @type {boolean}
-     */
-    active = true;
-    /**
-     * ## 更新暂停动画状态
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {boolean} - 始终返回 true，表示动画永远不会自动结束
-     */
-    update(delta) {
-      if (!this.active) {
-        return false;
-      }
-      this.timer += delta;
-      if (this.timer >= 1) {
-        audio_default.Sounds.secondTick();
-        this.timer = 0;
-      }
-      return true;
-    }
-    /**
-     * ## 暂停结束处理
-     *
-     * 将活动状态 active 设置为 true
-     */
-    stop() {
-      this.active = false;
-    }
-    /**
-     * ## 渲染暂停动画
-     *
-     * 将暂停界面绘制到屏幕上
-     */
-    render() {
-      this.active = true;
-    }
-  };
-  var paused_animation_default = PausedAnimation;
-
-  // lib/services/effects/paused.js
-  var animation = null;
-  var startPaused = () => {
-    if (animation) {
-      return;
-    }
-    animation = new paused_animation_default();
-    engine_default.Animations.register(animation);
-  };
-  var stopPaused = () => {
-    if (!animation) {
-      return;
-    }
-    animation.stop();
-    animation = null;
-  };
-
-  // lib/services/animations/level-up-animation.js
-  var LevelUpAnimation = class {
-    /**
-     * ## 渲染层级（UI 层，显示在最前面）
-     *
-     * @type {number}
-     */
-    layer = 100;
-    /**
-     * ## 是否阻塞用户输入
-     *
-     * @type {boolean}
-     */
-    blocking = true;
-    /**
-     * ## 动画名称标识
-     *
-     * @type {string}
-     */
-    name = "level-up";
-    /**
-     * ## 创建升级动画实例
-     *
-     * @class
-     * @param {number} level - 当前等级
-     */
-    constructor(level) {
-      this.level = level;
-      this.fireworks = this.createFireworks();
-      this.duration = 3;
-      this.spawnTimer = 0;
-      this.timer = 0;
-    }
-    /**
-     * ## 创建一组烟花粒子
-     *
-     * 在画布中心上方位置生成随机方向和速度的粒子
-     *
-     * @returns {object[]} 烟花粒子对象数组
-     */
-    createFireworks() {
-      const { Canvas: Canvas2, CONSTANTS } = ui_default;
-      const { FIREWORK_COLORS: FIREWORK_COLORS2 } = CONSTANTS;
-      const { width, height } = Canvas2.gameBoard;
-      const particles = [];
-      for (let i = 0; i < 40; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 5 + Math.random() * 15;
-        particles.push({
-          x: width / 2,
-          // 初始X坐标：画布中心
-          y: height / 2 - 60,
-          // 初始Y坐标：画布中心上方60像素
-          vx: Math.cos(angle) * speed,
-          // X轴速度分量
-          vy: Math.sin(angle) * speed,
-          // Y轴速度分量
-          radius: 3 + Math.random() * 4,
-          // 粒子半径（3-7像素）
-          color: FIREWORK_COLORS2[Math.floor(Math.random() * FIREWORK_COLORS2.length)],
-          // 随机颜色
-          alpha: 1
-          // 初始完全不透明
-        });
-      }
-      return particles;
-    }
-    /**
-     * ## 更新动画状态
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
-     */
-    update(delta) {
-      this.timer += delta;
-      this.spawnTimer += delta;
-      this.updateFireworks(delta);
-      if (this.spawnTimer > 0.6) {
-        this.fireworks.push(...this.createFireworks());
-        this.spawnTimer = 0;
-      }
-      if (this.timer >= this.duration) {
-        this.stop();
-        return false;
-      }
-      return true;
-    }
-    /**
-     * ## 升级动画结束处理
-     *
-     * 继续播放背景音乐
-     */
-    stop() {
-      Audio.playBGM(this.level);
-    }
-    /**
-     * ## 更新所有烟花粒子的物理状态
-     *
-     * 包括：速度衰减、重力影响、位置更新、透明度衰减、半径增大
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     */
-    updateFireworks(delta) {
-      const gravity = 0.01;
-      for (const p of this.fireworks) {
-        p.vx *= 0.98;
-        p.vy *= 0.98;
-        p.vy += gravity * delta;
-        p.x += p.vx * delta * 8e-3;
-        p.y += p.vy * delta * 8e-3;
-        p.alpha -= delta * 0.024;
-        p.radius += delta * 10;
-      }
-      this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
-    }
-    /**
-     * ## 渲染升级动画
-     *
-     * 调用专门渲染函数显示"LEVEL UP"文字和烟花效果
-     */
-    render() {
-      const { level, fireworks } = this;
-      ui_default.renderLevelUp(level, fireworks);
-    }
-  };
-  var level_up_animation_default = LevelUpAnimation;
-
-  // lib/services/effects/level-up.js
-  var startLevelUp = (level) => {
-    const animation2 = new level_up_animation_default(level);
-    audio_default.stopBGM();
-    audio_default.Sounds.levelUp();
-    engine_default.Animations.register(animation2);
-  };
-  var level_up_default = startLevelUp;
-
-  // lib/services/effects/index.js
-  var Effects = {
-    startCountdown: countdown_default,
-    startClearLines: clear_lines_default,
-    startPaused,
-    stopPaused,
-    startLevelUp: level_up_default
-  };
-  var effects_default = Effects;
-
-  // lib/game/core/start.js
-  var start = () => {
-    const level = game_default2.store.getLevel();
-    const lines = (level - 1) * 10;
-    game_default2.store.setBaseLines(lines);
-    effects_default.startCountdown();
-  };
-  var start_default = start;
-
-  // lib/game/logic/move.js
-  var move = (ox, oy) => {
-    const { store } = game_default2;
-    const state = store.getState();
-    let { cx, cy } = state;
-    if (!collision_default(ox, oy)) {
-      cx += ox;
-      cy += oy;
-      store.setState({
-        cx,
-        cy
-      });
-      audio_default.Sounds.move();
-      return true;
-    }
-    return false;
-  };
-  var move_default = move;
-
-  // lib/game/logic/lock.js
-  var lock = () => {
-    const { store } = game_default2;
-    const state = store.getState();
-    const { curr } = state;
-    const s = curr.shape;
-    const board = structuredClone(state.board);
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          board[state.cy + y][state.cx + x] = curr.color;
-          store.setState({
-            board
-          });
-        }
-      }
-    }
-  };
-  var lock_default = lock;
-
-  // lib/game/logic/clear-lines.js
-  var clearLines = () => {
-    const { store } = game_default2;
-    const state = store.getState();
-    const { ROWS: ROWS2 } = ui_default.CONSTANTS.BOARD;
-    let clear = 0;
-    const linesToClear = [];
-    for (let y = ROWS2 - 1; y >= 0; y--) {
-      const isLineFull = state.board[y].every((cell) => !!cell);
-      if (isLineFull) {
-        linesToClear.push(y);
-        clear++;
-      }
-    }
-    if (clear === 0) {
-      return linesToClear;
-    }
-    store.setClearLines(linesToClear);
-    return linesToClear;
-  };
-  var clear_lines_default2 = clearLines;
-
-  // lib/game/core/tick.js
-  var tick = () => {
-    const mode = game_default2.store.getMode();
-    if (mode === "main-menu" || mode === "game-over" || engine_default.Animations.hasBlocking()) {
-      return;
-    }
-    if (mode === "playing") {
-      replay_runtime_default.data.push({
-        ms: engine_default.timestamp - replay_runtime_default.startTime,
-        cmd: {
-          action: "AUTO_TICK",
-          payload: {}
-        }
-      });
-    }
-    if (!move_default(0, 1)) {
-      lock_default();
-      audio_default.Sounds.fall();
-      const linesToClear = clear_lines_default2();
-      if (linesToClear.length > 0) {
-        effects_default.startClearLines(linesToClear);
-        return;
-      }
-      spawn_default();
-    }
-  };
-  var tick_default = tick;
-
-  // lib/game/core/restart.js
-  var restart = () => {
-    const { store } = game_default2;
-    const mode = store.getMode();
-    if (mode === "main-menu" || mode === "paused" || mode === "replay" || mode === "game-over") {
-      return;
-    }
-    audio_default.stopBGM();
-    store.setState({
-      mode: "playing",
-      score: 0,
-      lines: 0,
-      level: 1
-    });
-    store.resetBoard();
-    const state = store.getState();
-    ui_default.updateHud({
-      ...state,
-      needReset: true
-    });
-    spawn_default();
-    audio_default.playBGM(store.getLevel());
-    engine_default.restart();
-  };
-  var restart_default = restart;
-
-  // lib/game/core/play.js
-  var play = () => {
-    const { store } = game_default2;
-    const mode = store.getMode();
-    if (mode === "main-menu" || mode !== "paused" || mode === "replay" || mode === "game-over") {
-      return false;
-    }
-    effects_default.stopPaused();
-    store.setMode("playing");
-    audio_default.Sounds.resume();
-    audio_default.playBGM();
-    engine_default.restart();
-  };
-  var play_default = play;
-
-  // lib/game/core/pause.js
-  var pause = () => {
-    const { store } = game_default2;
-    const mode = store.getMode();
-    if (mode === "main-menu" || mode !== "playing" || mode === "replay" || mode === "game-over") {
-      return;
-    }
-    store.setMode("paused");
-    audio_default.stopBGM();
-    audio_default.Sounds.pause();
-    effects_default.startPaused();
-  };
-  var pause_default = pause;
-
-  // lib/game/core/toggle-pause.js
-  var togglePause = () => {
-    const mode = game_default2.store.getMode();
-    if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
-      return false;
-    }
-    const now = engine_default.lastTimestamp;
-    if (mode === "playing") {
-      if (replay_runtime_default.recording) {
-        replay_runtime_default.pauseStartTime = now;
-      }
-      pause_default();
-    } else {
-      if (replay_runtime_default.recording && replay_runtime_default.pauseStartTime > 0) {
-        replay_runtime_default.totalPausedTime += now - replay_runtime_default.pauseStartTime;
-        replay_runtime_default.pauseStartTime = 0;
-      }
-      play_default();
-    }
-  };
-  var toggle_pause_default = togglePause;
-
-  // lib/game/core/get-speed.js
-  var getSpeed = () => {
-    const level = game_default2.store.getLevel();
-    return Math.max(100, 1e3 - (level - 1) * 80);
-  };
-  var get_speed_default = getSpeed;
-
-  // lib/game/core/reset.js
-  var reset = () => {
-    const { store } = game_default2;
-    audio_default.stopBGM();
-    engine_default.Animations.clear();
-    command_queue_default.clear();
-    replay_runtime_default.stopRecord();
-    replay_runtime_default.stopPlay();
-    replay_runtime_default.reset();
-    engine_default.start();
-    store.resetBoard();
-    store.setState({
-      mode: "main-menu",
-      score: 0,
-      lines: 0,
-      level: 1,
-      next: null
-    });
-    const state = store.getState();
-    ui_default.updateHud(state);
-  };
-  var reset_default = reset;
-
-  // lib/game/logic/drop.js
-  var drop = () => {
-    while (true) {
-      if (!move_default(0, 1)) {
-        break;
-      }
-    }
-    const { Sounds: Sounds2 } = audio_default;
-    lock_default();
-    Sounds2.fall();
-    const linesToClear = clear_lines_default2();
-    if (linesToClear.length > 0) {
-      effects_default.startClearLines(linesToClear);
-    }
-    spawn_default();
-    Sounds2.drop();
-  };
-  var drop_default = drop;
-
-  // lib/game/logic/rotate.js
-  var rotate = () => {
-    const { store } = game_default2;
-    const state = store.getState();
-    const { curr } = state;
-    if (!curr) {
-      return;
-    }
-    const currentShape = structuredClone(curr);
-    const prev = curr.shape;
-    currentShape.shape = prev[0].map(
-      (_, i) => prev.map((r) => r[i]).toReversed()
-    );
-    store.setState({
-      curr: currentShape
-    });
-    if (collision_default(0, 0)) {
-      currentShape.shape = prev;
-      store.setState({
-        curr: currentShape
-      });
-    } else {
-      audio_default.Sounds.rotate();
-    }
-  };
-  var rotate_default = rotate;
-
-  // lib/utils/get-storage.js
-  var getStorage = (key) => localStorage.getItem(key);
-  var get_storage_default = getStorage;
-
-  // lib/utils/set-storage.js
-  var setStorage = (key, value) => {
-    localStorage.setItem(key, value);
-  };
-  var set_storage_default = setStorage;
-
-  // lib/game/index.js
-  var Game = {
-    CONSTANTS: {
-      GAME: game_default,
-      SHAPES: shapes_default
-    },
-    // 游戏状态
-    store: game_store_default(),
-    // 核心流程控制逻辑
-    begin: begin_default,
-    start: start_default,
-    tick: tick_default,
-    restart: restart_default,
-    togglePause: toggle_pause_default,
-    over: over_default,
-    getSpeed: get_speed_default,
-    reset: reset_default,
-    // 游戏方块控制逻辑
-    clearLines: clear_lines_default2,
-    collision: collision_default,
-    drop: drop_default,
-    lock: lock_default,
-    move: move_default,
-    rotate: rotate_default,
-    spawn: spawn_default,
-    selectLevel: (level) => {
-      const { store } = Game;
-      store.setLevel(level);
-      audio_default.Sounds.levelSelect();
-    },
-    loadHighScore: () => {
-      const { store } = Game;
-      const highScore = Number.parseInt(get_storage_default("tetris-high-score"), 10) || 0;
-      store.setHighScore(highScore);
-    },
-    saveHighScore: (score) => {
-      const { store } = Game;
-      if (score > store.getHighScore()) {
-        store.setHighScore(score);
-        set_storage_default("tetris-high-score", store.toString());
-      }
-    }
-  };
-  var game_default2 = Game;
-
   // lib/runtime/animation-runtime.js
   var createAnimationSystem = () => {
     const queue = [];
@@ -4437,6 +4395,48 @@ var tetris = (() => {
     };
   };
   var animation_runtime_default = createAnimationSystem;
+
+  // lib/engine/start-game-loop.js
+  var startGameLoop = (timestamp) => {
+    if (!engine_default.timestamp) {
+      engine_default.timestamp = timestamp;
+      engine_default.accumulator = timestamp;
+    }
+    const { Animations, dispatchInput: dispatchInput2 } = engine_default;
+    const { store } = game_default2;
+    const stepDelta = timestamp - engine_default.accumulator;
+    const prev = engine_default.timestamp ?? timestamp;
+    let delta = (timestamp - prev) / 1e3;
+    if (delta > 1e3) {
+      delta = 1e3;
+    }
+    const dropInterval = game_default2.getSpeed();
+    engine_default.timestamp = timestamp;
+    replay_runtime_default.update(timestamp, dispatchInput2, store.setMode);
+    if (!replay_runtime_default.playing) {
+      input_default.Gamepad.update();
+    }
+    command_queue_default.flush({
+      Game: game_default2,
+      Audio: audio_default
+    });
+    if ((!engine_default.accumulator || stepDelta > dropInterval) && !replay_runtime_default.playing) {
+      game_default2.tick();
+      engine_default.accumulator = timestamp;
+    }
+    Animations.update(delta);
+    ui_default.render(store.getState());
+    Animations.render();
+    engine_default.rafId = requestAnimationFrame(startGameLoop);
+  };
+  var start_game_loop_default = startGameLoop;
+
+  // lib/engine/restart-game-loop.js
+  var restartGameLoop = () => {
+    engine_default.stop();
+    engine_default.rafId = requestAnimationFrame(start_game_loop_default);
+  };
+  var restart_game_loop_default = restartGameLoop;
 
   // lib/engine/stop-game-loop.js
   var stopGameLoop = () => {
@@ -4708,9 +4708,9 @@ var tetris = (() => {
      * @param {object} context.Game - 游戏控制模块
      * @param {object} context.Audio - 音频控制模块
      */
-    TOGGLE_MUSIC: (_, { Game: Game2, Audio: Audio3 }) => {
+    TOGGLE_MUSIC: (_, { Game: Game2, Audio: Audio2 }) => {
       const level = Game2.store.getLevel();
-      Audio3.toggleBGM(level);
+      Audio2.toggleBGM(level);
     }
   };
   var game_playing_actions_default = GAME_PLAYING_ACTIONS;
@@ -4840,14 +4840,14 @@ var tetris = (() => {
   };
   var dispatchCommand = (cmd, context) => {
     const { action, payload } = cmd;
-    const { Game: Game2, Audio: Audio3 } = context;
+    const { Game: Game2, Audio: Audio2 } = context;
     const mode = Game2.store.getMode();
     const actions = ACTIONS_MAP[mode];
     if (!actions) {
       return;
     }
     const handler = actions[action];
-    handler?.(payload, { Game: Game2, Audio: Audio3 });
+    handler?.(payload, { Game: Game2, Audio: Audio2 });
   };
   var dispatch_command_default = dispatchCommand;
 
