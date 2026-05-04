@@ -1312,6 +1312,12 @@ var tetris = (() => {
       event_bus_default.on("replay:record", (record) => {
         Replay.addRecord(record);
       });
+      event_bus_default.on("replay:piece", (piece) => {
+        if (!Replay.recording) {
+          return;
+        }
+        Replay.pieceSequence.push(structuredClone(piece));
+      });
     },
     /**
      * ## 开始录制
@@ -1495,14 +1501,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-tetris-text.js
   var renderTetrisText = () => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN6 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
       text: "TETRIS.JS",
       x: width / 2,
       y: height * 0.1,
-      color: GREEN5,
+      color: GREEN6,
       size: 1.1
     });
   };
@@ -1510,14 +1516,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-level-text.js
   var renderLevelText = () => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN6 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
       text: "LEVEL",
       x: width / 2,
       y: height * 0.35,
-      color: GREEN5,
+      color: GREEN6,
       size: 1,
       center: true
     });
@@ -1526,14 +1532,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-level-number.js
   var renderLevelNumber = (level, y) => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN6 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width } = gameBoard2;
     render_text_default({
       text: String(level),
       x: width / 2,
       y,
-      color: GREEN5,
+      color: GREEN6,
       size: 3,
       center: true
     });
@@ -1558,14 +1564,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-enter-start-text.js
   var renderEnterStartText = () => {
-    const { TEAL: TEAL4, BLACK: BLACK2 } = colors_default;
+    const { TEAL: TEAL5, BLACK: BLACK2 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
       text: "ENTER START",
       x: width / 2,
       y: height * 0.74,
-      color: TEAL4,
+      color: TEAL5,
       strokeColor: BLACK2,
       size: 1.15,
       center: true,
@@ -1703,14 +1709,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-paused-text.js
   var renderPausedText = () => {
-    const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
+    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
       text: "PAUSED",
       x: width / 2,
       y: height / 1.4,
-      color: YELLOW4,
+      color: YELLOW5,
       strokeColor: BLACK2,
       size: 1.6,
       center: true,
@@ -2297,15 +2303,15 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-game-text.js
   var renderGameText = () => {
-    const { RED: RED4, YELLOW: YELLOW4 } = colors_default;
+    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
       text: "GAME",
       x: width / 2,
       y: height / 1.8,
-      color: RED4,
-      strokeColor: YELLOW4,
+      color: RED5,
+      strokeColor: YELLOW5,
       size: 2.3,
       center: true,
       stroke: true
@@ -2315,15 +2321,15 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-over-text.js
   var renderOverText = () => {
-    const { RED: RED4, YELLOW: YELLOW4 } = colors_default;
+    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
       text: "OVER",
       x: width / 2,
       y: height / 1.6,
-      color: RED4,
-      strokeColor: YELLOW4,
+      color: RED5,
+      strokeColor: YELLOW5,
       size: 2.3,
       center: true,
       stroke: true
@@ -2639,7 +2645,7 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-countdown-text.js
   var renderCountdownText = (count, scale = 1) => {
-    const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
+    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
     const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
     const { gameBoard: gameBoard2, gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
     const { width, height } = gameBoard2;
@@ -2649,7 +2655,7 @@ var tetris = (() => {
     ctx.translate(width / 2, height / 2);
     ctx.scale(scale, scale);
     ctx.font = `${fontSize2 * 3.25}px ${FONT_FAMILY2}`;
-    ctx.fillStyle = YELLOW4;
+    ctx.fillStyle = YELLOW5;
     ctx.strokeStyle = BLACK2;
     ctx.lineWidth = 6;
     const text = String(count);
@@ -2661,14 +2667,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-get-ready-text.js
   var renderGetReadyText = () => {
-    const { GREEN: GREEN5, BLACK: BLACK2 } = colors_default;
+    const { GREEN: GREEN6, BLACK: BLACK2 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
       text: "GET READY!",
       x: width / 2,
       y: height / 1.46,
-      color: GREEN5,
+      color: GREEN6,
       stroke: true,
       strokeColor: BLACK2,
       // 固定字号
@@ -2724,14 +2730,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-level-up-text.js
   var renderLevelUpText = () => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN6 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
       text: "LEVEL UP",
       x: width / 2,
       y: height / 2.5,
-      color: GREEN5,
+      color: GREEN6,
       size: 1.2,
       center: true
     });
@@ -2740,14 +2746,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-congrats-text.js
   var renderCongratsText = () => {
-    const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
+    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
     const { gameBoard: gameBoard2 } = canvas_default;
     const { width, height } = gameBoard2;
     render_text_default({
       text: "CONGRATS!",
       x: width / 2,
       y: height / 1.6,
-      color: YELLOW4,
+      color: YELLOW5,
       stroke: true,
       strokeColor: BLACK2,
       lineWidth: 3,
@@ -2880,6 +2886,29 @@ var tetris = (() => {
   }
   var random_shape_default = randomShape;
 
+  // lib/game/logic/get-next-piece.js
+  var getNextPiece = () => {
+    if (replay_runtime_default.playing) {
+      const piece = replay_runtime_default.pieceSequence[replay_runtime_default.pieceIndex++];
+      if (!piece) {
+        return { curr: null, next: null };
+      }
+      const next2 = replay_runtime_default.pieceSequence[replay_runtime_default.pieceIndex] || null;
+      return { curr: piece, next: next2 };
+    }
+    const state = game_default2.store.getState();
+    const { next } = state;
+    const curr = next ? {
+      ...next,
+      shape: next.shape.map((row) => [...row])
+    } : random_shape_default();
+    return {
+      curr,
+      next: random_shape_default()
+    };
+  };
+  var get_next_piece_default = getNextPiece;
+
   // lib/game/logic/collision.js
   var collision = (ox, oy) => {
     const { ROWS: ROWS2, COLS: COLS2 } = board_default;
@@ -2937,45 +2966,28 @@ var tetris = (() => {
   var spawn = () => {
     const { store } = game_default2;
     const { COLS: COLS2 } = board_default;
-    if (replay_runtime_default.playing) {
-      const piece = replay_runtime_default.pieceSequence[replay_runtime_default.pieceIndex];
-      if (!piece) {
-        return;
-      }
-      const nextPiece2 = replay_runtime_default.pieceSequence[replay_runtime_default.pieceIndex + 1] || null;
-      store.setState({
-        curr: piece,
-        next: nextPiece2 ? structuredClone(nextPiece2) : null,
-        cx: Math.floor(COLS2 / 2) - Math.floor(piece.shape[0].length / 2),
-        cy: 0
-      });
-      ui_default.renderNextPiece(store.getState());
-      replay_runtime_default.pieceIndex++;
+    const { curr, next } = get_next_piece_default();
+    if (!curr) {
       return;
     }
-    const state = store.getState();
-    const { next } = state;
-    const curr = next ? {
-      ...next,
-      shape: next.shape.map((row) => [...row])
-    } : random_shape_default();
     store.setState({
       // 当前方块 = 下一个方块，若不存在则随机生成
       curr,
       // 重新随机生成下一个预览方块
-      next: random_shape_default(),
+      next,
       // 水平居中：屏幕中间 - 方块宽度的一半
       cx: Math.floor(COLS2 / 2) - Math.floor(curr.shape[0].length / 2),
       // 垂直位置从顶部开始
       cy: 0
     });
     const currentState = store.getState();
-    ui_default.renderNextPiece(currentState);
-    if (replay_runtime_default.recording && currentState.curr) {
-      replay_runtime_default.pieceSequence.push(structuredClone(currentState.curr));
-    }
     if (collision_default(0, 0)) {
       over_default();
+      return;
+    }
+    ui_default.renderNextPiece(currentState);
+    if (replay_runtime_default.recording) {
+      event_bus_default.emit("replay:piece", currentState.curr);
     }
   };
   var spawn_default = spawn;
@@ -3089,6 +3101,40 @@ var tetris = (() => {
   };
   var countdown_default = startCountdown;
 
+  // lib/game/logic/apply-clear-lines.js
+  var applyClearLines = (state) => {
+    const { ROWS: ROWS2, COLS: COLS2 } = board_default;
+    const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = game_default;
+    const lines = state.clearLines || [];
+    const cleared = lines.length;
+    const board = structuredClone(state.board);
+    for (let y = ROWS2 - 1; y >= 0; y--) {
+      const isFullLine = board[y].every(Boolean);
+      if (isFullLine) {
+        board.splice(y, 1);
+        board.unshift(Array.from({ length: COLS2 }).fill(0));
+        y++;
+      }
+    }
+    const nextLines = state.lines + cleared;
+    const totalLines = state.baseLines + nextLines;
+    const newLevel = Math.floor(totalLines / 10) + 1;
+    const levelUp = newLevel > state.level;
+    return {
+      state: (prev) => ({
+        ...prev,
+        clearLines: [],
+        lines: nextLines,
+        score: prev.score + CLEAR_LINE_SCORES2[cleared] * prev.level,
+        level: Math.min(Math.max(prev.level, newLevel), MAX_LEVEL2),
+        board
+      }),
+      levelUp,
+      level: newLevel
+    };
+  };
+  var apply_clear_lines_default = applyClearLines;
+
   // lib/services/animations/clear-lines-animation.js
   var ClearLinesAnimation = class {
     /**
@@ -3162,34 +3208,13 @@ var tetris = (() => {
      */
     stop() {
       const { store } = game_default2;
-      const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, MAX_LEVEL: MAX_LEVEL2 } = game_default;
-      const { ROWS: ROWS2, COLS: COLS2 } = board_default;
-      const state = store.getState();
-      const lines = state.clearLines || [];
-      const cleared = lines.length;
-      const board = structuredClone(state.board);
-      for (let y = ROWS2 - 1; y >= 0; y--) {
-        const isFullLine = board[y].every(Boolean);
-        if (isFullLine) {
-          board.splice(y, 1);
-          board.unshift(Array.from({ length: COLS2 }).fill(0));
-          y++;
-        }
+      const result = apply_clear_lines_default(store.getState());
+      if (result.levelUp && !replay_runtime_default.playing) {
+        audio_default.stopBGM();
+        audio_default.Sounds.levelUp();
+        effects_default.startLevelUp(result.level);
       }
-      const nextLines = state.lines + cleared;
-      const totalLines = state.baseLines + nextLines;
-      const newLevel = Math.floor(totalLines / 10) + 1;
-      if (newLevel > state.level && !replay_runtime_default.playing) {
-        effects_default.startLevelUp(newLevel);
-      }
-      store.setState((prev) => ({
-        ...prev,
-        clearLines: [],
-        lines: nextLines,
-        score: prev.score + CLEAR_LINE_SCORES2[cleared] * prev.level,
-        level: Math.min(Math.max(prev.level, newLevel), MAX_LEVEL2),
-        board
-      }));
+      store.setState(result.state);
       ui_default.updateHud(store.getState());
     }
     /**
@@ -3299,6 +3324,11 @@ var tetris = (() => {
     animation = null;
   };
 
+  // lib/services/ui/constants/firework-colors.js
+  var { TEAL: TEAL4, YELLOW: YELLOW4, PURPLE: PURPLE3, ORANGE: ORANGE4, GREEN: GREEN5, RED: RED4 } = colors_default;
+  var FIREWORK_COLORS = [TEAL4, YELLOW4, PURPLE3, ORANGE4, GREEN5, RED4];
+  var firework_colors_default = FIREWORK_COLORS;
+
   // lib/services/animations/level-up-animation.js
   var LevelUpAnimation = class {
     /**
@@ -3340,8 +3370,7 @@ var tetris = (() => {
      * @returns {object[]} 烟花粒子对象数组
      */
     createFireworks() {
-      const { Canvas: Canvas2, CONSTANTS } = ui_default;
-      const { FIREWORK_COLORS } = CONSTANTS;
+      const { Canvas: Canvas2 } = ui_default;
       const { width, height } = Canvas2.gameBoard;
       const particles = [];
       for (let i = 0; i < 40; i++) {
@@ -3358,13 +3387,33 @@ var tetris = (() => {
           // Y轴速度分量
           radius: 3 + Math.random() * 4,
           // 粒子半径（3-7像素）
-          color: FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)],
+          color: firework_colors_default[Math.floor(Math.random() * firework_colors_default.length)],
           // 随机颜色
           alpha: 1
           // 初始完全不透明
         });
       }
       return particles;
+    }
+    /**
+     * ## 更新所有烟花粒子的物理状态
+     *
+     * 包括：速度衰减、重力影响、位置更新、透明度衰减、半径增大
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     */
+    updateFireworks(delta) {
+      const gravity = 0.01;
+      for (const p of this.fireworks) {
+        p.vx *= 0.98;
+        p.vy *= 0.98;
+        p.vy += gravity * delta;
+        p.x += p.vx * delta * 8e-3;
+        p.y += p.vy * delta * 8e-3;
+        p.alpha -= delta * 0.024;
+        p.radius += delta * 10;
+      }
+      this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
     }
     /**
      * ## 更新动画状态
@@ -3395,26 +3444,6 @@ var tetris = (() => {
       audio_default.playBGM(this.level);
     }
     /**
-     * ## 更新所有烟花粒子的物理状态
-     *
-     * 包括：速度衰减、重力影响、位置更新、透明度衰减、半径增大
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     */
-    updateFireworks(delta) {
-      const gravity = 0.01;
-      for (const p of this.fireworks) {
-        p.vx *= 0.98;
-        p.vy *= 0.98;
-        p.vy += gravity * delta;
-        p.x += p.vx * delta * 8e-3;
-        p.y += p.vy * delta * 8e-3;
-        p.alpha -= delta * 0.024;
-        p.radius += delta * 10;
-      }
-      this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
-    }
-    /**
      * ## 渲染升级动画
      *
      * 调用专门渲染函数显示"LEVEL UP"文字和烟花效果
@@ -3429,8 +3458,6 @@ var tetris = (() => {
   // lib/services/effects/level-up.js
   var startLevelUp = (level) => {
     const animation2 = new level_up_animation_default(level);
-    audio_default.stopBGM();
-    audio_default.Sounds.levelUp();
     engine_default.Animations.register(animation2);
   };
   var level_up_default = startLevelUp;
@@ -3454,88 +3481,6 @@ var tetris = (() => {
     effects_default.startCountdown();
   };
   var start_default = start;
-
-  // lib/game/logic/move.js
-  var move = (ox, oy) => {
-    const { store } = game_default2;
-    const state = store.getState();
-    let { cx, cy } = state;
-    if (!collision_default(ox, oy)) {
-      cx += ox;
-      cy += oy;
-      store.setState({
-        cx,
-        cy
-      });
-      audio_default.Sounds.move();
-      return true;
-    }
-    return false;
-  };
-  var move_default = move;
-
-  // lib/game/logic/lock.js
-  var lock = () => {
-    const { store } = game_default2;
-    const state = store.getState();
-    const { curr } = state;
-    const s = curr.shape;
-    const board = structuredClone(state.board);
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          board[state.cy + y][state.cx + x] = curr.color;
-          store.setState({
-            board
-          });
-        }
-      }
-    }
-  };
-  var lock_default = lock;
-
-  // lib/game/logic/find-full-lines.js
-  var findFullLines = () => {
-    const state = game_default2.store.getState();
-    const { ROWS: ROWS2 } = board_default;
-    const linesToClear = [];
-    for (let y = ROWS2 - 1; y >= 0; y--) {
-      const isLineFull = state.board[y].every((cell) => !!cell);
-      if (isLineFull) {
-        linesToClear.push(y);
-      }
-    }
-    return linesToClear;
-  };
-  var find_full_lines_default = findFullLines;
-
-  // lib/game/core/tick.js
-  var tick = () => {
-    const mode = game_default2.store.getMode();
-    if (mode === "main-menu" || mode === "game-over" || engine_default.Animations.hasBlocking() && !replay_runtime_default.playing) {
-      return;
-    }
-    if (mode === "playing") {
-      event_bus_default.emit("replay:record", {
-        ms: engine_default.timestamp - replay_runtime_default.startTime,
-        cmd: {
-          action: "AUTO_TICK",
-          payload: {}
-        }
-      });
-    }
-    if (!move_default(0, 1)) {
-      lock_default();
-      audio_default.Sounds.fall();
-      const linesToClear = find_full_lines_default();
-      if (linesToClear.length > 0) {
-        game_default2.store.setClearLines(linesToClear);
-        effects_default.startClearLines(linesToClear);
-      }
-      spawn_default();
-    }
-  };
-  var tick_default = tick;
 
   // lib/core/command/command-queue.js
   var CommandQueue = {
@@ -3653,12 +3598,70 @@ var tetris = (() => {
   };
   var toggle_pause_default = togglePause;
 
-  // lib/game/core/get-speed.js
-  var getSpeed = () => {
-    const level = game_default2.store.getLevel();
-    return Math.max(100, 1e3 - (level - 1) * 80);
+  // lib/game/logic/find-full-lines.js
+  var findFullLines = () => {
+    const state = game_default2.store.getState();
+    const { ROWS: ROWS2 } = board_default;
+    const linesToClear = [];
+    for (let y = ROWS2 - 1; y >= 0; y--) {
+      const isLineFull = state.board[y].every((cell) => !!cell);
+      if (isLineFull) {
+        linesToClear.push(y);
+      }
+    }
+    return linesToClear;
   };
-  var get_speed_default = getSpeed;
+  var find_full_lines_default = findFullLines;
+
+  // lib/game/logic/clear-lines.js
+  var clearLines = () => {
+    const linesToClear = find_full_lines_default();
+    if (linesToClear.length === 0) {
+      return;
+    }
+    game_default2.store.setClearLines(linesToClear);
+    effects_default.startClearLines(linesToClear);
+  };
+  var clear_lines_default2 = clearLines;
+
+  // lib/game/logic/move.js
+  var move = (ox, oy) => {
+    const { store } = game_default2;
+    const state = store.getState();
+    let { cx, cy } = state;
+    if (!collision_default(ox, oy)) {
+      cx += ox;
+      cy += oy;
+      store.setState({
+        cx,
+        cy
+      });
+      audio_default.Sounds.move();
+      return true;
+    }
+    return false;
+  };
+  var move_default = move;
+
+  // lib/game/logic/lock.js
+  var lock = () => {
+    const { store } = game_default2;
+    const state = store.getState();
+    const { curr } = state;
+    const s = curr.shape;
+    const board = structuredClone(state.board);
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          board[state.cy + y][state.cx + x] = curr.color;
+          store.setState({
+            board
+          });
+        }
+      }
+    }
+  };
+  var lock_default = lock;
 
   // lib/game/logic/drop.js
   var drop = () => {
@@ -3670,11 +3673,7 @@ var tetris = (() => {
     const { Sounds: Sounds2 } = audio_default;
     lock_default();
     Sounds2.fall();
-    const linesToClear = find_full_lines_default();
-    if (linesToClear.length > 0) {
-      game_default2.store.setClearLines(linesToClear);
-      effects_default.startClearLines(linesToClear);
-    }
+    clear_lines_default2();
     spawn_default();
     Sounds2.drop();
   };
@@ -3707,6 +3706,37 @@ var tetris = (() => {
   };
   var rotate_default = rotate;
 
+  // lib/game/logic/tick.js
+  var tick = () => {
+    const mode = game_default2.store.getMode();
+    if (mode === "main-menu" || mode === "game-over" || engine_default.Animations.hasBlocking() && !replay_runtime_default.playing) {
+      return;
+    }
+    if (mode === "playing") {
+      event_bus_default.emit("replay:record", {
+        ms: engine_default.timestamp - replay_runtime_default.startTime,
+        cmd: {
+          action: "AUTO_TICK",
+          payload: {}
+        }
+      });
+    }
+    if (!move_default(0, 1)) {
+      lock_default();
+      audio_default.Sounds.fall();
+      clear_lines_default2();
+      spawn_default();
+    }
+  };
+  var tick_default = tick;
+
+  // lib/game/utils/get-speed.js
+  var getSpeed = () => {
+    const level = game_default2.store.getLevel();
+    return Math.max(100, 1e3 - (level - 1) * 80);
+  };
+  var get_speed_default = getSpeed;
+
   // lib/utils/get-storage.js
   var getStorage = (key) => localStorage.getItem(key);
   var get_storage_default = getStorage;
@@ -3724,20 +3754,23 @@ var tetris = (() => {
     // 核心流程控制逻辑
     begin: begin_default,
     start: start_default,
-    tick: tick_default,
     restart: restart_default,
     togglePause: toggle_pause_default,
     over: over_default,
-    getSpeed: get_speed_default,
     reset: reset_default,
     // 游戏方块控制逻辑
-    clearLines: find_full_lines_default,
+    clearLines: clear_lines_default2,
     collision: collision_default,
     drop: drop_default,
+    findFullLines: find_full_lines_default,
     lock: lock_default,
     move: move_default,
     rotate: rotate_default,
     spawn: spawn_default,
+    tick: tick_default,
+    // 游戏功能函数
+    getSpeed: get_speed_default,
+    randomShape: random_shape_default,
     selectLevel: (level) => {
       const { store } = Game;
       store.setLevel(level);
