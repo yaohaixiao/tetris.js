@@ -1388,13 +1388,15 @@ var tetris = (() => {
      * - 打开 recording 状态
      * - 清空已有数据
      * - 重置 frame
+     *
+     * @param {number} now - 当前时间的时间戳数值
      */
-    startRecord() {
+    startRecord(now) {
       Replay.recording = true;
       Replay.data = [];
       Replay.pieceSequence = [];
       Replay.pieceIndex = 0;
-      Replay.startTime = Date.now();
+      Replay.startTime = now;
       Replay.pauseStartTime = 0;
       Replay.totalPausedTime = 0;
     },
@@ -1410,16 +1412,51 @@ var tetris = (() => {
      * - 打开 playing 状态
      * - 重置 frame
      * - 重置 cursor
+     *
+     * @param {number} now - 当前时间的时间戳数值
      */
-    startPlay() {
+    startPlay(now) {
       Replay.playing = true;
       Replay.cursor = 0;
       Replay.pieceIndex = 0;
-      Replay.startTime = Date.now();
+      Replay.startTime = now;
     },
     /** ## 停止播放 */
     stopPlay() {
       Replay.playing = false;
+    },
+    /**
+     * # Replay 更新函数（播放逻辑驱动）
+     *
+     * 用于在游戏主循环中驱动 replay 播放：
+     *
+     * - 根据时间推进 replay
+     * - 将录制的 command 按时间顺序注入输入系统
+     * - 控制 replay 结束状态
+     *
+     * @param {number} timestamp - 当前引擎时间戳（来自 game loop）
+     * @param {Function} dispatchInput - 输入分发函数（用于模拟玩家输入）
+     * @param {Function} setMode - 设置游戏模式（例如 game-over）
+     */
+    update(timestamp, dispatchInput2, setMode) {
+      if (!Replay.playing) {
+        return;
+      }
+      const elapsedTime = timestamp - Replay.startTime - (Replay.totalPausedTime || 0);
+      const { data } = Replay;
+      if (data.length > 0 && Replay.cursor >= data.length) {
+        setMode("game-over");
+        Replay.stopPlay();
+      }
+      while (Replay.playing && Replay.cursor < data.length && data[Replay.cursor].ms <= elapsedTime) {
+        const { cmd } = data[Replay.cursor];
+        dispatchInput2({
+          device: "replay",
+          action: cmd.action,
+          payload: cmd.payload
+        });
+        Replay.cursor++;
+      }
     },
     reset() {
       Replay.recording = false;
@@ -2891,7 +2928,7 @@ var tetris = (() => {
         level: 1
       });
       store.setMode("replay");
-      replay_runtime_default.startPlay();
+      replay_runtime_default.startPlay(engine_default.timestamp);
       spawn_default();
     } else {
       store.setMode("game-over");
@@ -3154,8 +3191,9 @@ var tetris = (() => {
      * - 转换为 Command（通过 dispatchInput）
      */
     _collectCommands() {
+      const mode = game_default2.store.getMode();
       const pad = this.activeGamepad;
-      if (!pad) {
+      if (!pad || mode === "replay") {
         return;
       }
       for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
@@ -3371,7 +3409,8 @@ var tetris = (() => {
   var onKeydown = (e) => {
     const key = e.key.toLowerCase();
     const action = resolveKeyboardAction(key);
-    if (!action) {
+    const mode = game_default2.store.getMode();
+    if (!action || mode === "replay") {
       return;
     }
     engine_default.dispatchInput({
@@ -3408,35 +3447,19 @@ var tetris = (() => {
   var startGameLoop = (timestamp) => {
     if (!engine_default.timestamp) {
       engine_default.timestamp = timestamp;
+      engine_default.accumulator = timestamp;
     }
     const { Animations, dispatchInput: dispatchInput2 } = engine_default;
     const { store } = game_default2;
     const stepDelta = timestamp - engine_default.accumulator;
-    let delta = (timestamp - engine_default.timestamp) / 1e3;
+    const prev = engine_default.timestamp ?? timestamp;
+    let delta = (timestamp - prev) / 1e3;
     if (delta > 1e3) {
       delta = 1e3;
     }
     const dropInterval = game_default2.getSpeed();
     engine_default.timestamp = timestamp;
-    if (replay_runtime_default.playing) {
-      const { data } = replay_runtime_default;
-      const { length } = data;
-      const currentElapsed = Date.now() - replay_runtime_default.startTime;
-      if (length > 0 && replay_runtime_default.cursor >= length) {
-        store.setMode("game-over");
-        replay_runtime_default.stopPlay();
-      }
-      while (replay_runtime_default.playing && replay_runtime_default.cursor < data.length && data[replay_runtime_default.cursor].ms <= currentElapsed) {
-        const record = data[replay_runtime_default.cursor];
-        const { cmd } = record;
-        dispatchInput2({
-          device: "replay",
-          action: cmd.action,
-          payload: cmd.payload
-        });
-        replay_runtime_default.cursor++;
-      }
-    }
+    replay_runtime_default.update(timestamp, dispatchInput2, store.setMode);
     if (!replay_runtime_default.playing) {
       input_default.Gamepad.update();
     }
@@ -3469,7 +3492,7 @@ var tetris = (() => {
     if ($level) {
       $level.textContent = pad_start_default(store.getLevel(), 2);
     }
-    replay_runtime_default.startRecord();
+    replay_runtime_default.startRecord(engine_default.timestamp);
     store.setMode("playing");
     spawn_default();
     audio_default.Sounds.levelStart();
@@ -4001,8 +4024,17 @@ var tetris = (() => {
   // lib/game/core/tick.js
   var tick = () => {
     const mode = game_default2.store.getMode();
-    if (mode === "main-menu" || mode === "replay" || mode === "game-over" || engine_default.Animations.hasBlocking()) {
+    if (mode === "main-menu" || mode === "game-over" || engine_default.Animations.hasBlocking()) {
       return;
+    }
+    if (mode === "playing") {
+      replay_runtime_default.data.push({
+        ms: engine_default.timestamp - replay_runtime_default.startTime,
+        cmd: {
+          action: "AUTO_TICK",
+          payload: {}
+        }
+      });
     }
     if (!move_default(0, 1)) {
       lock_default();
@@ -4078,14 +4110,15 @@ var tetris = (() => {
     if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
       return false;
     }
+    const now = engine_default.lastTimestamp;
     if (mode === "playing") {
       if (replay_runtime_default.recording) {
-        replay_runtime_default.pauseStartTime = Date.now();
+        replay_runtime_default.pauseStartTime = now;
       }
       pause_default();
     } else {
       if (replay_runtime_default.recording && replay_runtime_default.pauseStartTime > 0) {
-        replay_runtime_default.totalPausedTime += Date.now() - replay_runtime_default.pauseStartTime;
+        replay_runtime_default.totalPausedTime += now - replay_runtime_default.pauseStartTime;
         replay_runtime_default.pauseStartTime = 0;
       }
       play_default();
@@ -4459,7 +4492,7 @@ var tetris = (() => {
     const cmd = new command_default(action, payload);
     command_queue_default.enqueue(cmd);
     if (replay_runtime_default.recording) {
-      const elapsedTime = Date.now() - replay_runtime_default.startTime - replay_runtime_default.totalPausedTime;
+      const elapsedTime = engine_default.timestamp - replay_runtime_default.startTime - replay_runtime_default.totalPausedTime;
       replay_runtime_default.data.push({
         ms: elapsedTime,
         cmd
@@ -4770,6 +4803,16 @@ var tetris = (() => {
       Game2.drop();
     },
     /**
+     * ## 自动下落
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    AUTO_TICK: (_, { Game: Game2 }) => {
+      Game2.tick();
+    },
+    /**
      * 确认操作（例如：Enter / Space / OK）
      *
      * 作用：
@@ -4815,7 +4858,7 @@ var tetris = (() => {
     // 时间累积器（用于 fixed update / tick）
     accumulator: 0,
     // 上一帧时间戳
-    lastTimestamp: 0,
+    timestamp: 0,
     EventBus: event_bus_default,
     Animations: animation_runtime_default(),
     /**
