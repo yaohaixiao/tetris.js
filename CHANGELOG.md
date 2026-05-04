@@ -1,3 +1,11 @@
+## [0.6.1](https://github.com/yaohaixiao/tetris.js/compare/0.6.0...0.6.1) (2026-05-04)
+
+
+### Bug Fixes
+
+* 修复 replay 模式下，无法按 ENTER 或者手柄的 START 回到主菜单的问题； ([fc8c0ed](https://github.com/yaohaixiao/tetris.js/commit/fc8c0ed0f151c1a7b424f0e96022e31d82934b27))
+
+
 # [0.6.0](https://github.com/yaohaixiao/tetris.js/compare/0.5.2...0.6.0) (2026-05-04)
 
 
