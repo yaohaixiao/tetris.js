@@ -1,40 +1,34 @@
 ## [0.6.1](https://github.com/yaohaixiao/tetris.js/compare/0.6.0...0.6.1) (2026-05-04)
 
-
 ### Bug Fixes
 
-* 修复 replay 模式下，无法按 ENTER 或者手柄的 START 回到主菜单的问题； ([fc8c0ed](https://github.com/yaohaixiao/tetris.js/commit/fc8c0ed0f151c1a7b424f0e96022e31d82934b27))
-
+- 修复 replay 模式下，无法按 ENTER 或者手柄的 START 回到主菜单的问题； ([fc8c0ed](https://github.com/yaohaixiao/tetris.js/commit/fc8c0ed0f151c1a7b424f0e96022e31d82934b27))
 
 # [0.6.0](https://github.com/yaohaixiao/tetris.js/compare/0.5.2...0.6.0) (2026-05-04)
 
-
 ### Bug Fixes
 
-* 修复 render-chinese-hour-animal.js 中凌晨 1点前取数错误的问题； ([f9b6396](https://github.com/yaohaixiao/tetris.js/commit/f9b63963154515fd6af6d84facd6b451e70a7c9f))
-
+- 修复 render-chinese-hour-animal.js 中凌晨 1点前取数错误的问题； ([f9b6396](https://github.com/yaohaixiao/tetris.js/commit/f9b63963154515fd6af6d84facd6b451e70a7c9f))
 
 ### Features
 
-* 接入了 replay 功能，游戏结束，会自动重放之前的操作 ([a831ea6](https://github.com/yaohaixiao/tetris.js/commit/a831ea694adf844cb2ec94a372b4079d0629253a))
-* 添加 gamepad-controller.js 模块，支持游戏手柄的控制游戏； ([4c64ae3](https://github.com/yaohaixiao/tetris.js/commit/4c64ae36e683672170dbf972a2c63a8f76bebd61))
-* 完善 replay，将自动下落作为记录捕捉到回放数据中；将 replay 播放和游戏 tick 分离； ([79831cd](https://github.com/yaohaixiao/tetris.js/commit/79831cd4aea127afdc087255fc4dd415c8b7ebcd))
-* 优化 Replay 回放效果，处理暂停的和升级界面的影响 ([0a09a17](https://github.com/yaohaixiao/tetris.js/commit/0a09a17ffc8c5e6e09769a031653506c4d37f735))
+- 接入了 replay 功能，游戏结束，会自动重放之前的操作 ([a831ea6](https://github.com/yaohaixiao/tetris.js/commit/a831ea694adf844cb2ec94a372b4079d0629253a))
+- 添加 gamepad-controller.js 模块，支持游戏手柄的控制游戏； ([4c64ae3](https://github.com/yaohaixiao/tetris.js/commit/4c64ae36e683672170dbf972a2c63a8f76bebd61))
+- 完善 replay，将自动下落作为记录捕捉到回放数据中；将 replay 播放和游戏 tick 分离； ([79831cd](https://github.com/yaohaixiao/tetris.js/commit/79831cd4aea127afdc087255fc4dd415c8b7ebcd))
+- 优化 Replay 回放效果，处理暂停的和升级界面的影响 ([0a09a17](https://github.com/yaohaixiao/tetris.js/commit/0a09a17ffc8c5e6e09769a031653506c4d37f735))
+
 ## [0.5.2](https://github.com/yaohaixiao/tetris.js/compare/0.5.1...0.5.2) (2026-05-01)
 
-
 ### Bug Fixes
 
-* 去掉 clearImagesCache() 调整后多余的 URL.revoke 的处理； ([1114fbf](https://github.com/yaohaixiao/tetris.js/commit/1114fbfde67f96c82e508b5ed059c3fef4640579))
-* 暂时无法完成重力效果，连续下落的逻辑，干脆干掉这个效果； ([4b39c47](https://github.com/yaohaixiao/tetris.js/commit/4b39c47d6f0d789c5013730ebceaa76e83b6c329))
-
+- 去掉 clearImagesCache() 调整后多余的 URL.revoke 的处理； ([1114fbf](https://github.com/yaohaixiao/tetris.js/commit/1114fbfde67f96c82e508b5ed059c3fef4640579))
+- 暂时无法完成重力效果，连续下落的逻辑，干脆干掉这个效果； ([4b39c47](https://github.com/yaohaixiao/tetris.js/commit/4b39c47d6f0d789c5013730ebceaa76e83b6c329))
 
 ### Features
 
-* 调整游戏进行中的UI设计（12时辰文字的位置和大小） ([a4b9817](https://github.com/yaohaixiao/tetris.js/commit/a4b98172b601e5608a706edcb94a9b29255a58e4))
-* 调整暂停界面 UI，添加新的3个表盘的配色；优化模式时钟的代码结构； ([8ab8110](https://github.com/yaohaixiao/tetris.js/commit/8ab8110288b446717d4ba7696c54adfb85cf0d9e))
-* 优化背景音乐，添加多首背景音乐，根据级别播放不同的背景音乐 ([b5eeb01](https://github.com/yaohaixiao/tetris.js/commit/b5eeb010b7d0f8ee9a5299cff693c348704b852c))
-
+- 调整游戏进行中的UI设计（12时辰文字的位置和大小） ([a4b9817](https://github.com/yaohaixiao/tetris.js/commit/a4b98172b601e5608a706edcb94a9b29255a58e4))
+- 调整暂停界面 UI，添加新的3个表盘的配色；优化模式时钟的代码结构； ([8ab8110](https://github.com/yaohaixiao/tetris.js/commit/8ab8110288b446717d4ba7696c54adfb85cf0d9e))
+- 优化背景音乐，添加多首背景音乐，根据级别播放不同的背景音乐 ([b5eeb01](https://github.com/yaohaixiao/tetris.js/commit/b5eeb010b7d0f8ee9a5299cff693c348704b852c))
 
 ## [0.5.1](https://github.com/yaohaixiao/tetris.js/compare/0.4.0...0.5.1) (2026-04-22)
 
