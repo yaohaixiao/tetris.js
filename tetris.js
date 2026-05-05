@@ -1199,6 +1199,11 @@ var tetris = (() => {
           ...is_function_default(patch) ? patch(state) : patch
         };
       },
+      resetState: () => {
+        state = {
+          ...structuredClone(game_state_default)
+        };
+      },
       /**
        * ## 重置棋盘
        *
@@ -1308,6 +1313,7 @@ var tetris = (() => {
         state.lines = lines;
         state.level = level;
       },
+      getScore: () => state.score,
       /**
        * ## 设置最高分
        *
@@ -3124,18 +3130,19 @@ var tetris = (() => {
       return;
     }
     replay_runtime_default.stopRecord();
-    game_default2.saveHighScore();
     audio_default.stopBGM();
     audio_default.Sounds.gameOver();
     if (replay_runtime_default.hasData) {
       store.resetBoard();
       store.setState({
+        // 绘制游戏开始难度设定产生的方块信息
         board: store.getBeginningBoard(),
         score: 0,
         lines: 0,
         level: 1
       });
       store.setMode("replay");
+      ui_default.updateHud(store.getState());
       replay_runtime_default.startPlay(engine_default.timestamp);
       spawn_default();
     } else {
@@ -3181,7 +3188,8 @@ var tetris = (() => {
       mode,
       score: 0,
       lines: 0,
-      level
+      level,
+      next: null
     });
     if (mode === "playing") {
       store.setBeginningBoard(store.generateBoard());
@@ -3414,6 +3422,7 @@ var tetris = (() => {
         effects_default.startLevelUp(result.level);
       }
       store.setState(result.stateHandler);
+      game_default2.saveHighScore(store.getScore());
       ui_default.updateHud(store.getState());
     }
     /**
@@ -3739,12 +3748,6 @@ var tetris = (() => {
       level = 1;
     }
     set_beginning_state_default(mode, level);
-    store.setState({
-      score: 0,
-      lines: 0,
-      level: 1,
-      next: null
-    });
     ui_default.updateHud(store.getState());
     replay_runtime_default.startRecord(engine_default.timestamp);
   };
@@ -4001,7 +4004,7 @@ var tetris = (() => {
       const { store } = Game;
       if (score > store.getHighScore()) {
         store.setHighScore(score);
-        set_storage_default("tetris-high-score", store.toString());
+        set_storage_default("tetris-high-score", score.toString());
       }
     }
   };
