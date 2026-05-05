@@ -1833,7 +1833,7 @@ var tetris = (() => {
     const { width, height } = gameBoard2;
     let text = "E/N/H/X KEY";
     if (state.gamepadConnected) {
-      text = "A/B/X/Y KEY";
+      text = "A/B/Y/X KEY";
     }
     render_text_default({
       text,
@@ -3982,6 +3982,9 @@ var tetris = (() => {
     switchToDifficulty: () => {
       Game.store.setMode("difficulty");
     },
+    switchToMainMenu: () => {
+      Game.store.setMode("main-menu");
+    },
     selectLevel: (level) => {
       Game.store.setLevel(level);
       audio_default.Sounds.levelSelect();
@@ -4189,6 +4192,7 @@ var tetris = (() => {
           GAMEPAD_ACTION_MAP.B = "NORMAL";
           GAMEPAD_ACTION_MAP.Y = "HARD";
           GAMEPAD_ACTION_MAP.X = "EXPERT";
+          GAMEPAD_ACTION_MAP.BACK = "BACK";
           break;
         }
         case "playing": {
@@ -4198,6 +4202,54 @@ var tetris = (() => {
           GAMEPAD_ACTION_MAP.Y = "TOGGLE_PAUSE";
           break;
         }
+      }
+    }
+    _resolveAction(action, btnName, isDPad, mode, level, now) {
+      if (!isDPad || mode !== "main-menu") {
+        return action;
+      }
+      if (now - this.lastDpadTime < this.DPAD_COOLDOWN) {
+        return null;
+      }
+      this.lastDpadTime = now;
+      if (btnName === "DPAD_UP") {
+        return this._getMoveUpAction(mode, level);
+      }
+      if (btnName === "DPAD_DOWN") {
+        return this._getMoveDownAction(mode, level);
+      }
+      return action;
+    }
+    _handleStandardButtons(pad, mode, level, now) {
+      const isBetop = this._isBetop(pad.id);
+      const isBlockedMode = mode === "replay" || mode === "game-over";
+      for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
+        const isDPad = btnName.startsWith("DPAD_");
+        if (!this._isPressed(btnName)) {
+          continue;
+        }
+        if (isBetop && isDPad) {
+          continue;
+        }
+        if (isBlockedMode && btnName !== "START") {
+          return;
+        }
+        const finalAction = this._resolveAction(
+          action,
+          btnName,
+          isDPad,
+          mode,
+          level,
+          now
+        );
+        if (!finalAction) {
+          continue;
+        }
+        engine_default.dispatchInput({
+          device: "gamepad",
+          action: finalAction,
+          payload: {}
+        });
       }
     }
     /**
@@ -4215,34 +4267,7 @@ var tetris = (() => {
         return;
       }
       this._updateActionMap(mode);
-      for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
-        const isDPad = btnName.startsWith("DPAD_");
-        let command = action;
-        if (this._isPressed(btnName)) {
-          if (this._isBetop(pad.id) && isDPad) {
-            continue;
-          }
-          if ((mode === "replay" || mode === "game-over") && btnName !== "START") {
-            return;
-          }
-          if (isDPad && mode === "main-menu") {
-            if (now - this.lastDpadTime < this.DPAD_COOLDOWN) {
-              continue;
-            }
-            if (command === "DPAD_UP") {
-              command = this._getMoveUpAction(mode, level);
-            } else if (command === "DPAD_DOWN") {
-              command = this._getMoveDownAction(mode, level);
-            }
-            this.lastDpadTime = now;
-          }
-          engine_default.dispatchInput({
-            device: "gamepad",
-            action: command,
-            payload: {}
-          });
-        }
-      }
+      this._handleStandardButtons(pad, mode, level, now);
       if (mode === "replay" || mode === "game-over") {
         return;
       }
@@ -4508,6 +4533,7 @@ var tetris = (() => {
     n: "NORMAL",
     h: "HARD",
     x: "EXPERT",
+    b: "BACK",
     enter: "CONFIRM"
   };
   var resolveKeyboardAction = (key) => {
@@ -4999,6 +5025,16 @@ var tetris = (() => {
      */
     EXPERT: (_, { Game: Game2 }) => {
       Game2.selectDifficulty("expert");
+    },
+    /**
+     * ## 返回游戏等级选择
+     *
+     * @param {object} _ Action payload（当前未使用）
+     * @param {object} context - 执行上下文
+     * @param {object} context.Game - 游戏控制模块
+     */
+    BACK: (_, { Game: Game2 }) => {
+      Game2.switchToMainMenu();
     },
     /**
      * ## 确认开始游戏
