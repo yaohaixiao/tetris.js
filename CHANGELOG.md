@@ -1,19 +1,19 @@
 # [0.7.0](https://github.com/yaohaixiao/tetris.js/compare/0.6.1...0.7.0) (2026-05-05)
 
-
 ### Bug Fixes
 
-* 修复 const {store} = Game 在第一桢结构导致的报错问题； ([af8b0c0](https://github.com/yaohaixiao/tetris.js/commit/af8b0c034af0301253ebbb3acdd51e032d4abc81))
-* 修复上次发版后导致的无法更新 highScore 的 BUG ([a9849bb](https://github.com/yaohaixiao/tetris.js/commit/a9849bb12626e9c5b754bf9b7486482fbf113b13))
-
+- 修复 const {store} =
+  Game 在第一桢结构导致的报错问题； ([af8b0c0](https://github.com/yaohaixiao/tetris.js/commit/af8b0c034af0301253ebbb3acdd51e032d4abc81))
+- 修复上次发版后导致的无法更新 highScore 的 BUG
+  ([a9849bb](https://github.com/yaohaixiao/tetris.js/commit/a9849bb12626e9c5b754bf9b7486482fbf113b13))
 
 ### Features
 
-* 调整更新 highScore 分数机制，clearLines 后立刻对比触发 ([84087d1](https://github.com/yaohaixiao/tetris.js/commit/84087d1a9d357a3edc5122254ee5f116685d95c1))
-* 添加从难度选择返回等级选择的按钮支持； ([0fa5a80](https://github.com/yaohaixiao/tetris.js/commit/0fa5a80c8719cdbb5de480b68aad4fcbbd8ed970))
-* 添加游戏难度选择：easy:0 行，normal: 3 行，hard: 6 行，expert: 9 行； ([0184b10](https://github.com/yaohaixiao/tetris.js/commit/0184b10c3009620ea108b05e697a02b75d857a74))
-* 添加游戏手柄通过方向按钮上下键调整游戏等级； ([307b5d4](https://github.com/yaohaixiao/tetris.js/commit/307b5d48299da361650b6909491be7fd7824c383))
-
+- 调整更新 highScore 分数机制，clearLines 后立刻对比触发 ([84087d1](https://github.com/yaohaixiao/tetris.js/commit/84087d1a9d357a3edc5122254ee5f116685d95c1))
+- 添加从难度选择返回等级选择的按钮支持； ([0fa5a80](https://github.com/yaohaixiao/tetris.js/commit/0fa5a80c8719cdbb5de480b68aad4fcbbd8ed970))
+- 添加游戏难度选择：easy:0 行，normal: 3 行，hard: 6 行，expert:
+  9 行； ([0184b10](https://github.com/yaohaixiao/tetris.js/commit/0184b10c3009620ea108b05e697a02b75d857a74))
+- 添加游戏手柄通过方向按钮上下键调整游戏等级； ([307b5d4](https://github.com/yaohaixiao/tetris.js/commit/307b5d48299da361650b6909491be7fd7824c383))
 
 ## [0.6.1](https://github.com/yaohaixiao/tetris.js/compare/0.6.0...0.6.1) (2026-05-04)
 
