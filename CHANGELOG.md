@@ -1,3 +1,18 @@
+## [0.7.1](https://github.com/yaohaixiao/tetris.js/compare/0.7.0...0.7.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* 修复 replay.update() 方法完毕设置 game-over 导致返回主菜单选择级别变结束界面的问题； ([528bbb9](https://github.com/yaohaixiao/tetris.js/commit/528bbb90f57c8d349d8f0812d259f61761cef047))
+* 修复分数计算的错误：score: prev.score + CLEAR_LINE_SCORES[cleared] * prev.level，调整为：score: prev.score + CLEAR_LINE_SCORES[cleared] ([cc9355a](https://github.com/yaohaixiao/tetris.js/commit/cc9355a86f170a6656098d5e83495fa717e41b85))
+
+
+### Features
+
+* 优化更新分数动画，将 highScore 也添加了动画，并且调整了分数变更的表现效果； ([70c504c](https://github.com/yaohaixiao/tetris.js/commit/70c504cfd1493aef9d9ae43a5ef2b3edc5869da1))
+
+**提示：** 现在得 100000 以上的分数，难度大大增加了！
+
 # [0.7.0](https://github.com/yaohaixiao/tetris.js/compare/0.6.1...0.7.0) (2026-05-05)
 
 ### Bug Fixes
