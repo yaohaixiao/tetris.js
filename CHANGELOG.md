@@ -3,27 +3,15 @@
 
 ### Bug Fixes
 
-* 修复 EventBus 重构后，playBGM 一直播放同1曲背景音乐的问题 ([368f993](https://github.com/yaohaixiao/tetris.js/commit/368f993afc5e4211042f50e34578fa741f7a2903))
+* 修复 EventBus 重构后，playBGM 一直播放同1曲背景音乐的问题；([368f993](https://github.com/yaohaixiao/tetris.js/commit/368f993afc5e4211042f50e34578fa741f7a2903))
 
 
 ### Features
 
-* 背景音乐切换逻辑调整，每10级切换1次，毕竟最高等级能到99级; ([a67af23](https://github.com/yaohaixiao/tetris.js/commit/a67af23b63a79cc8aee4c68f2b204327bcbedea8))
-* 调整代码，将游戏最大级别，游戏画布的 cols,rows 调整成可配置；并且等级更新的游戏方块下落速度和背景音乐切换都根据配置动态计算； ([44513d9](https://github.com/yaohaixiao/tetris.js/commit/44513d933c5ecf92332818dab65ac2a8b12e19ca))
-* 调整游戏难度，调整 getSpeed() 方法，升级加快 15ms，休闲游戏，不搞得太紧张，极限反应速度由原理100ms调整到180ms; ([62b2274](https://github.com/yaohaixiao/tetris.js/commit/62b2274cae5b666f098b8a5e5cc8b609473c9e28))
+* 调整代码，将游戏最大级别，游戏画布的 cols,rows 调整成可配置；([44513d9](https://github.com/yaohaixiao/tetris.js/commit/44513d933c5ecf92332818dab65ac2a8b12e19ca))
+* 调整下落速度算法，改成达到最大管卡70%左右，就达到极限的线路速度，间隔 120ms 就下落1格； ([5ffab93](https://github.com/yaohaixiao/tetris.js/commit/5ffab93acabe1fad7731a4c4bdc6a610f6dada80))
 * 添加新背景音乐曲子，调整曲目播放顺序，调整背景音乐播放细节，根据不同 wave 配置 gate； ([672b74c](https://github.com/yaohaixiao/tetris.js/commit/672b74cf79d742702f39bcefabb13a60e96430d2))
-## [0.7.2](https://github.com/yaohaixiao/tetris.js/compare/0.7.1...0.7.2) (2026-05-07)
 
-### Bug Fixes
-
-- 修复 EventBus 重构后，playBGM 一直播放同1曲背景音乐的问题 ([368f993](https://github.com/yaohaixiao/tetris.js/commit/368f993afc5e4211042f50e34578fa741f7a2903))
-
-### Features
-
-- 调整代码，将游戏最大级别，游戏画布的 cols,rows 调整成可配置；并且等级更新的游戏方块下落速度和背景音乐切换都根据配置动态计算； ([44513d9](https://github.com/yaohaixiao/tetris.js/commit/44513d933c5ecf92332818dab65ac2a8b12e19ca))
-- 调整游戏难度，调整 getSpeed() 方法，升级加快 15ms，休闲游戏，不搞得太紧张，极限反应速度由原理100ms调整到180ms;
-  ([62b2274](https://github.com/yaohaixiao/tetris.js/commit/62b2274cae5b666f098b8a5e5cc8b609473c9e28))
-- 添加新背景音乐曲子，调整曲目播放顺序，调整背景音乐播放细节，根据不同 wave 配置 gate； ([672b74c](https://github.com/yaohaixiao/tetris.js/commit/672b74cf79d742702f39bcefabb13a60e96430d2))
 
 ## [0.7.1](https://github.com/yaohaixiao/tetris.js/compare/0.7.0...0.7.1) (2026-05-07)
 
