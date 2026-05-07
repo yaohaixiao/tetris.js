@@ -1,5 +1,5 @@
 /**
- * Commitlint.config.js - git commit 校验配置
+ * Commitlint.configuration.js - git commit 校验配置
  *
  * Commit 类型：
  *

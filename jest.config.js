@@ -1,5 +1,5 @@
 /**
- * # Jest.config.js - jest 配置
+ * # Jest.configuration.js - jest 配置
  *
  * Created By: Yaohaixiao Update: 2026.3.8
  */

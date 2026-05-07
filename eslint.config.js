@@ -1,5 +1,5 @@
 /**
- * # Eslint.config.js - eslint 配置
+ * # Eslint.configuration.js - eslint 配置
  *
  * Created By: Yaohaixiao Update: 2026.1.10
  */
@@ -81,7 +81,7 @@ export default defineConfig(
 
   // 6. Node plugin configuration
   {
-    files: ['**/*.config.js', '**/tests/**/*.js'],
+    files: ['**/*.configuration.js', '**/tests/**/*.js'],
     plugins: { n: eslintPluginN },
     rules: {
       ...eslintPluginN.configs.recommended.rules,
@@ -192,7 +192,7 @@ export default defineConfig(
     settings: {
       'import/resolver': {
         jest: {
-          jestConfigFile: './jest.config.js',
+          jestConfigFile: './jest.configuration.js',
         },
       },
     },
