@@ -1,3 +1,11 @@
+## [0.7.3](https://github.com/yaohaixiao/tetris.js/compare/0.7.2...0.7.3) (2026-05-07)
+
+
+### Bug Fixes
+
+* 修复调整 EventBus 后，将录无法结束的问题； ([a632710](https://github.com/yaohaixiao/tetris.js/commit/a632710bb44867ae96e1e852f892dcf9ecbf11b3))
+
+
 ## [0.7.2](https://github.com/yaohaixiao/tetris.js/compare/0.7.1...0.7.2) (2026-05-07)
 
 
