@@ -1,3 +1,15 @@
+## [0.7.4](https://github.com/yaohaixiao/tetris.js/compare/0.7.3...0.7.4) (2026-05-08)
+
+
+### Bug Fixes
+
+* 修复 replay:stop:record 未监听的问题 ([f6c2a0f](https://github.com/yaohaixiao/tetris.js/commit/f6c2a0f19413f412ed9bdcb99595284df8d89509))
+
+### Test
+
+- 单元测试覆盖所有核心模块；
+- E2E 测试覆盖游戏全流程；
+
 ## [0.7.3](https://github.com/yaohaixiao/tetris.js/compare/0.7.2...0.7.3) (2026-05-07)
 
 
