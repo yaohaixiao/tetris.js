@@ -80,7 +80,7 @@ describe('tick', () => {
 
     expect(EventBus.emit).not.toHaveBeenCalledWith(
       'dispatch:input',
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 

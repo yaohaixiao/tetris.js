@@ -143,11 +143,11 @@ describe('spawn', () => {
     // 不渲染也不记录
     expect(EventBus.emit).not.toHaveBeenCalledWith(
       'ui:render:next:piece',
-      expect.any(Object)
+      expect.any(Object),
     );
     expect(EventBus.emit).not.toHaveBeenCalledWith(
       'replay:add:piece',
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 

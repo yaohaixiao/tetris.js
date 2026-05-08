@@ -525,6 +525,7 @@ var tetris = (() => {
         if (Replay.hasData) {
           event_bus_default.emit("game:replay:prepare:board");
         } else {
+          event_bus_default.emit("ui:update:mode", { mode: "game-over" });
           event_bus_default.emit("game:update:mode", { mode: "game-over" });
         }
       });
@@ -811,9 +812,10 @@ var tetris = (() => {
   };
   var spawn_default = spawn;
 
-  // lib/game/utils/set-beginning-state.js
+  // lib/game/actions/set-beginning-state.js
   var setBeginningState = (mode, level2 = 1) => {
     const { store } = game_default;
+    event_bus_default.emit("ui:update:mode", { mode });
     store.setState({
       mode,
       score: 0,
@@ -910,6 +912,7 @@ var tetris = (() => {
     if (mode !== "paused") {
       return false;
     }
+    event_bus_default.emit("ui:update:mode", { mode: "playing" });
     store.setMode("playing");
     event_bus_default.emit("effects:stop:paused");
     event_bus_default.emit("audio:sounds:resume");
@@ -924,6 +927,7 @@ var tetris = (() => {
     if (mode !== "playing") {
       return;
     }
+    event_bus_default.emit("ui:update:mode", { mode: "paused" });
     store.setMode("paused");
     event_bus_default.emit("audio:stop:bgm");
     event_bus_default.emit("audio:sounds:pause");
@@ -1093,6 +1097,56 @@ var tetris = (() => {
   };
   var set_storage_default = setStorage;
 
+  // lib/game/constants/game.js
+  var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
+  var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
+  var MAX_LEVEL = 99;
+  var GAME = {
+    CLEAR_LINE_SCORES,
+    MAX_LEVEL,
+    FONT_FAMILY
+  };
+  var game_default2 = GAME;
+
+  // lib/game/actions/apply-clear-lines.js
+  var applyClearLines = () => {
+    const state = game_default.store.getState();
+    const { Board, Level } = configuration_default;
+    const { rows, cols } = Board;
+    const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default2;
+    const lines2 = state.clearLines || [];
+    const cleared = lines2.length;
+    const board2 = structuredClone(state.board);
+    for (let y = rows - 1; y >= 0; y--) {
+      const isFullLine = board2[y].every(Boolean);
+      if (isFullLine) {
+        board2.splice(y, 1);
+        board2.unshift(Array.from({ length: cols }).fill(0));
+        y++;
+      }
+    }
+    const nextLines = state.lines + cleared;
+    const totalLines = state.baseLines + nextLines;
+    const newLevel = Math.floor(totalLines / 10) + 1;
+    const { max } = Level;
+    const isMaxOut = newLevel > max;
+    const levelUp = newLevel > state.level && !isMaxOut;
+    return {
+      stateHandler: (prev) => ({
+        ...prev,
+        clearLines: [],
+        lines: nextLines,
+        score: prev.score + CLEAR_LINE_SCORES2[cleared],
+        level: Math.min(Math.max(prev.level, newLevel), max),
+        board: board2
+      }),
+      levelUp,
+      level: isMaxOut ? max : newLevel,
+      isMaxOut
+    };
+  };
+  var apply_clear_lines_default = applyClearLines;
+
   // lib/game/index.js
   var Game = {
     // 游戏状态
@@ -1116,8 +1170,11 @@ var tetris = (() => {
     tick: tick_default,
     // 游戏功能函数
     setBeginningState: set_beginning_state_default,
-    getSpeed: get_speed_default,
     randomShape: random_shape_default,
+    // 规则功能函数
+    getSpeed: get_speed_default,
+    // 指令功能函数
+    applyClearLines: apply_clear_lines_default,
     switchToDifficulty: () => {
       Game.store.setMode("difficulty");
     },
@@ -1171,17 +1228,6 @@ var tetris = (() => {
     gameBoardContext2.clearRect(0, 0, width, height);
   }
   var clear_board_default = clearBoard;
-
-  // lib/game/constants/game.js
-  var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
-  var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
-  var MAX_LEVEL = 99;
-  var GAME = {
-    CLEAR_LINE_SCORES,
-    MAX_LEVEL,
-    FONT_FAMILY
-  };
-  var game_default2 = GAME;
 
   // lib/services/ui/text/render-text.js
   var renderText = (options) => {
@@ -2552,6 +2598,9 @@ var tetris = (() => {
   var UI = {
     Canvas: canvas_default,
     hud: create_hud_default(),
+    updateMode: (mode) => {
+      canvas_default.gameBoard.dataset.mode = mode;
+    },
     updateHud(state) {
       const { mode, score: score2, lines: lines2, level: level2, highScore: highScore2, needReset = false } = state;
       if (mode === "main-menu" || needReset) {
@@ -3319,7 +3368,7 @@ var tetris = (() => {
   };
   var motifs_default = MOTIFS;
 
-  // lib/services/audio/play-tone.spec.js
+  // lib/services/audio/play-tone.js
   var audioCtx = new AudioContext();
   var playTone = (freq, dur, vol = 0.1, wave = "square") => {
     if (!freq) {
@@ -4496,6 +4545,7 @@ var tetris = (() => {
         game_default.store.setGamepadConnected(connected);
       });
       event_bus_default.on("game:update:mode", ({ mode }) => {
+        event_bus_default.emit("ui:update:mode", { mode });
         game_default.store.setMode(mode);
       });
       event_bus_default.on("game:update:level", ({ level: level2 }) => {
@@ -4510,6 +4560,8 @@ var tetris = (() => {
       });
       event_bus_default.on("game:select:level", ({ level: level2 }) => {
         game_default.selectLevel(level2);
+        const state = game_default.store.getState();
+        event_bus_default.emit("ui:update:hud", { state });
       });
       event_bus_default.on("game:switch:difficulty", () => {
         game_default.switchToDifficulty();
@@ -4564,6 +4616,7 @@ var tetris = (() => {
           lines: 0,
           level: 1
         });
+        event_bus_default.emit("ui:update:mode", { mode: "replay" });
         store.setMode("replay");
         event_bus_default.emit("ui:update:hud", { state: store.getState() });
         event_bus_default.emit("replay:start:play");
@@ -4593,6 +4646,9 @@ var tetris = (() => {
       });
       event_bus_default.on("ui:render:level:up", ({ level: level2, fireworks }) => {
         ui_default.renderLevelUp(level2, fireworks);
+      });
+      event_bus_default.on("ui:update:mode", ({ mode }) => {
+        ui_default.updateMode(mode);
       });
     }
   };
@@ -4689,45 +4745,6 @@ var tetris = (() => {
     engine_default.Animations.register(new countdown_animation_default());
   };
   var countdown_default = startCountdown;
-
-  // lib/game/actions/apply-clear-lines.js
-  var applyClearLines = () => {
-    const state = game_default.store.getState();
-    const { Board, Level } = configuration_default;
-    const { rows, cols } = Board;
-    const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default2;
-    const lines2 = state.clearLines || [];
-    const cleared = lines2.length;
-    const board2 = structuredClone(state.board);
-    for (let y = rows - 1; y >= 0; y--) {
-      const isFullLine = board2[y].every(Boolean);
-      if (isFullLine) {
-        board2.splice(y, 1);
-        board2.unshift(Array.from({ length: cols }).fill(0));
-        y++;
-      }
-    }
-    const nextLines = state.lines + cleared;
-    const totalLines = state.baseLines + nextLines;
-    const newLevel = Math.floor(totalLines / 10) + 1;
-    const { max } = Level;
-    const isMaxOut = newLevel > max;
-    const levelUp = newLevel > state.level && !isMaxOut;
-    return {
-      stateHandler: (prev) => ({
-        ...prev,
-        clearLines: [],
-        lines: nextLines,
-        score: prev.score + CLEAR_LINE_SCORES2[cleared],
-        level: Math.min(Math.max(prev.level, newLevel), max),
-        board: board2
-      }),
-      levelUp,
-      level: isMaxOut ? max : newLevel,
-      isMaxOut
-    };
-  };
-  var apply_clear_lines_default = applyClearLines;
 
   // lib/services/animations/clear-lines-animation.js
   var ClearLinesAnimation = class {
@@ -5425,6 +5442,7 @@ var tetris = (() => {
     },
     /** ## 进入难度选择界面 */
     CONFIRM: () => {
+      event_bus_default.emit("ui:update:mode", { mode: "difficulty" });
       event_bus_default.emit("game:switch:difficulty");
     }
   };
@@ -5450,6 +5468,7 @@ var tetris = (() => {
     },
     /** ## 返回游戏等级选择 */
     BACK: () => {
+      event_bus_default.emit("ui:update:mode", { mode: "main-menu" });
       event_bus_default.emit("game:switch:to:main:menu");
     },
     /** ## 确认开始游戏 */
@@ -5636,6 +5655,7 @@ var tetris = (() => {
       game_default.store.resetBoard();
       game_default.loadHighScore();
       game_default.setBeginningState("main-menu");
+      ui_default.updateMode("main-menu");
       const state = game_default.store.getState();
       ui_default.resize();
       ui_default.updateHud(state);

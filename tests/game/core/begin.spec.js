@@ -1,6 +1,4 @@
-/**
- * @jest-environment jsdom
- */
+/** @jest-environment jsdom */
 
 import begin from '@/lib/game/core/begin';
 import EventBus from '@/lib/core/event-bus';
@@ -78,7 +76,7 @@ describe('begin', () => {
 
     expect(EventBus.emit).not.toHaveBeenCalledWith(
       'audio:play:bgm',
-      expect.any(Object)
+      expect.any(Object),
     );
 
     jest.advanceTimersByTime(250);

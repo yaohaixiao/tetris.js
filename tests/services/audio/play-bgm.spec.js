@@ -91,11 +91,9 @@ describe('playBGM', () => {
     expect(stopBGM).toHaveBeenCalled();
     expect(loopPlayBGM).toHaveBeenCalledWith(
       0,
-      [
-        { freq: 659, dur: 1.2 },
-      ],
+      [{ freq: 659, dur: 1.2 }],
       120,
-      0.08
+      0.08,
     );
   });
 
@@ -104,11 +102,9 @@ describe('playBGM', () => {
 
     expect(loopPlayBGM).toHaveBeenCalledWith(
       0,
-      [
-        { freq: 659, dur: 0.8 },
-      ],
+      [{ freq: 659, dur: 0.8 }],
       180,
-      0.1
+      0.1,
     );
   });
 
@@ -117,11 +113,9 @@ describe('playBGM', () => {
 
     expect(loopPlayBGM).toHaveBeenCalledWith(
       0,
-      [
-        { freq: 523, dur: 0.8 },
-      ],
+      [{ freq: 523, dur: 0.8 }],
       180,
-      0.08
+      0.08,
     );
   });
 
@@ -130,23 +124,16 @@ describe('playBGM', () => {
 
     expect(loopPlayBGM).toHaveBeenCalledWith(
       0,
-      [
-        { freq: 880, dur: 1.2 },
-      ],
+      [{ freq: 880, dur: 1.2 }],
       110,
-      0.12
+      0.12,
     );
   });
 
   test('边界：level 12 仍为第一首', () => {
     playBGM(12);
 
-    expect(loopPlayBGM).toHaveBeenCalledWith(
-      0,
-      expect.any(Array),
-      120,
-      0.08
-    );
+    expect(loopPlayBGM).toHaveBeenCalledWith(0, expect.any(Array), 120, 0.08);
   });
 
   // ========== stopBGM 调用 ==========
@@ -162,11 +149,6 @@ describe('playBGM', () => {
   test('不传 level 默认 1', () => {
     playBGM();
 
-    expect(loopPlayBGM).toHaveBeenCalledWith(
-      0,
-      expect.any(Array),
-      120,
-      0.08
-    );
+    expect(loopPlayBGM).toHaveBeenCalledWith(0, expect.any(Array), 120, 0.08);
   });
 });

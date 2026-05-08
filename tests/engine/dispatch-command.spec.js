@@ -48,8 +48,13 @@ describe('dispatchCommand', () => {
 
   test('playing 模式下路由到 GAME_PLAYING_ACTIONS', () => {
     const GAME_PLAYING_ACTIONS = require('@/lib/game/actions/game-playing-actions');
-    dispatchCommand({ action: 'MOVE_LEFT', payload: { direction: 'left' } }, 'playing');
-    expect(GAME_PLAYING_ACTIONS.MOVE_LEFT).toHaveBeenCalledWith({ direction: 'left' });
+    dispatchCommand(
+      { action: 'MOVE_LEFT', payload: { direction: 'left' } },
+      'playing',
+    );
+    expect(GAME_PLAYING_ACTIONS.MOVE_LEFT).toHaveBeenCalledWith({
+      direction: 'left',
+    });
   });
 
   test('paused 模式下路由到 PAUSED_ACTIONS', () => {
@@ -72,13 +77,13 @@ describe('dispatchCommand', () => {
   // ========== 边界情况 ==========
   test('未定义的 mode 不报错', () => {
     expect(() =>
-      dispatchCommand({ action: 'MOVE_LEFT', payload: {} }, 'nonexistent')
+      dispatchCommand({ action: 'MOVE_LEFT', payload: {} }, 'nonexistent'),
     ).not.toThrow();
   });
 
   test('mode 对应的 actions 中没有该 action 时不报错', () => {
     expect(() =>
-      dispatchCommand({ action: 'NONEXISTENT', payload: {} }, 'main-menu')
+      dispatchCommand({ action: 'NONEXISTENT', payload: {} }, 'main-menu'),
     ).not.toThrow();
   });
 

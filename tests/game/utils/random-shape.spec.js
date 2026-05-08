@@ -3,8 +3,22 @@ import SHAPES from '@/lib/game/constants/shapes';
 
 jest.mock('@/lib/game/constants/shapes', () => [
   { type: 'I', shape: [[1, 1, 1, 1]], color: 'cyan' },
-  { type: 'O', shape: [[1, 1], [1, 1]], color: 'yellow' },
-  { type: 'T', shape: [[0, 1, 0], [1, 1, 1]], color: 'purple' },
+  {
+    type: 'O',
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+    color: 'yellow',
+  },
+  {
+    type: 'T',
+    shape: [
+      [0, 1, 0],
+      [1, 1, 1],
+    ],
+    color: 'purple',
+  },
 ]);
 
 describe('randomShape', () => {

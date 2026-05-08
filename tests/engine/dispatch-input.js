@@ -78,8 +78,14 @@ describe('dispatchInput', () => {
 
   // ========== 多次调用 ==========
   test('多次调用分别入队和记录', () => {
-    dispatchInput({ action: 'MOVE_LEFT', payload: {} }, { isBlocked: false, ms: 1000 });
-    dispatchInput({ action: 'MOVE_RIGHT', payload: {} }, { isBlocked: false, ms: 1100 });
+    dispatchInput(
+      { action: 'MOVE_LEFT', payload: {} },
+      { isBlocked: false, ms: 1000 },
+    );
+    dispatchInput(
+      { action: 'MOVE_RIGHT', payload: {} },
+      { isBlocked: false, ms: 1100 },
+    );
 
     expect(CommandQueue.enqueue).toHaveBeenCalledTimes(2);
     expect(EventBus.emit).toHaveBeenCalledTimes(2);

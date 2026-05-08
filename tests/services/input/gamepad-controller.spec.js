@@ -1,6 +1,4 @@
-/**
- * @jest-environment jsdom
- */
+/** @jest-environment jsdom */
 
 import GamepadController from '@/lib/services/input/gamepad-controller';
 import EventBus from '@/lib/core/event-bus';
@@ -163,7 +161,7 @@ describe('GamepadController', () => {
       gp._onConnect({ gamepad: pad });
       expect(EventBus.emit).toHaveBeenCalledWith(
         'game:update:gamepad:connected',
-        { connected: true }
+        { connected: true },
       );
     });
   });
@@ -187,7 +185,7 @@ describe('GamepadController', () => {
       gp._onDisconnect({ gamepad: { index: 0 } });
       expect(EventBus.emit).toHaveBeenCalledWith(
         'game:update:gamepad:connected',
-        { connected: false }
+        { connected: false },
       );
     });
   });
@@ -265,7 +263,7 @@ describe('GamepadController', () => {
         true,
         'playing',
         1,
-        Date.now()
+        Date.now(),
       );
       expect(result).toBe('ROTATE');
     });
@@ -277,7 +275,7 @@ describe('GamepadController', () => {
         true,
         'main-menu',
         1,
-        Date.now()
+        Date.now(),
       );
       expect(result).toBe('LEVEL_TWO');
     });
@@ -289,7 +287,7 @@ describe('GamepadController', () => {
         true,
         'main-menu',
         3,
-        Date.now()
+        Date.now(),
       );
       expect(result).toBe('LEVEL_TWO');
     });
@@ -303,7 +301,7 @@ describe('GamepadController', () => {
         true,
         'main-menu',
         1,
-        now + 50
+        now + 50,
       );
       expect(result).toBe('');
     });
@@ -326,7 +324,9 @@ describe('GamepadController', () => {
       const pad = createMockGamepad();
       gp.activeGamepad = pad;
 
-      jest.spyOn(gp, '_isPressed').mockImplementation((name) => name === 'START');
+      jest
+        .spyOn(gp, '_isPressed')
+        .mockImplementation((name) => name === 'START');
 
       gp._handleStandardButtons(pad, 'game-over', 1, Date.now());
       expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
@@ -342,14 +342,8 @@ describe('GamepadController', () => {
     test('addEventListeners 绑定事件', () => {
       const spy = jest.spyOn(globalThis, 'addEventListener');
       gp.addEventListeners();
-      expect(spy).toHaveBeenCalledWith(
-        'gamepadconnected',
-        gp._onConnect
-      );
-      expect(spy).toHaveBeenCalledWith(
-        'gamepaddisconnected',
-        gp._onDisconnect
-      );
+      expect(spy).toHaveBeenCalledWith('gamepadconnected', gp._onConnect);
+      expect(spy).toHaveBeenCalledWith('gamepaddisconnected', gp._onDisconnect);
     });
 
     test('重复绑定只执行一次', () => {
@@ -362,14 +356,8 @@ describe('GamepadController', () => {
     test('removeEventListeners 解绑', () => {
       const spy = jest.spyOn(globalThis, 'removeEventListener');
       gp.removeEventListeners();
-      expect(spy).toHaveBeenCalledWith(
-        'gamepadconnected',
-        gp._onConnect
-      );
-      expect(spy).toHaveBeenCalledWith(
-        'gamepaddisconnected',
-        gp._onDisconnect
-      );
+      expect(spy).toHaveBeenCalledWith('gamepadconnected', gp._onConnect);
+      expect(spy).toHaveBeenCalledWith('gamepaddisconnected', gp._onDisconnect);
     });
 
     test('链式调用', () => {
@@ -468,7 +456,9 @@ describe('GamepadController', () => {
 
     test('main-menu 上方向触发等级变化', () => {
       gp._handleBetopDpad(-1, { mode: 'main-menu', level: 1 });
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', { level: 2 });
+      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
+        level: 2,
+      });
       expect(EventBus.emit).toHaveBeenLastCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'LEVEL_TWO',
@@ -478,7 +468,9 @@ describe('GamepadController', () => {
 
     test('main-menu 下方向触发等级变化', () => {
       gp._handleBetopDpad(0.14286, { mode: 'main-menu', level: 5 });
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', { level: 4 });
+      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
+        level: 4,
+      });
       expect(EventBus.emit).toHaveBeenLastCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'LEVEL_FOUR',
@@ -488,7 +480,9 @@ describe('GamepadController', () => {
 
     test('main-menu 等级上限为 10', () => {
       gp._handleBetopDpad(-1, { mode: 'main-menu', level: 10 });
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', { level: 10 });
+      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
+        level: 10,
+      });
       expect(EventBus.emit).toHaveBeenLastCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'LEVEL_TEN',
@@ -498,7 +492,9 @@ describe('GamepadController', () => {
 
     test('main-menu 等级下限为 1', () => {
       gp._handleBetopDpad(0.14286, { mode: 'main-menu', level: 1 });
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', { level: 1 });
+      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
+        level: 1,
+      });
       expect(EventBus.emit).toHaveBeenLastCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'LEVEL_ONE',
@@ -577,13 +573,17 @@ describe('GamepadController', () => {
     test('_getMoveUpAction level 10 上限', () => {
       const result = gp._getMoveUpAction('main-menu', 10);
       expect(result).toBe('LEVEL_TEN');
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', { level: 10 });
+      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
+        level: 10,
+      });
     });
 
     test('_getMoveDownAction level 1 下限', () => {
       const result = gp._getMoveDownAction('main-menu', 1);
       expect(result).toBe('LEVEL_ONE');
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', { level: 1 });
+      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
+        level: 1,
+      });
     });
   });
 });

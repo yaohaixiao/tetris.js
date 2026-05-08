@@ -1,6 +1,4 @@
-/**
- * @jest-environment jsdom
- */
+/** @jest-environment jsdom */
 
 import createHud from '@/lib/services/ui/hud/create-hud';
 
