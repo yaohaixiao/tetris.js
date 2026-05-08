@@ -1,6 +1,4 @@
-/**
- * @jest-environment jsdom
- */
+/** @jest-environment jsdom */
 import Keyboard from '@/lib/services/input/keyboard';
 import EventBus from '@/lib/core/event-bus';
 

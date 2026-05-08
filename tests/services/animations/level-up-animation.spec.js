@@ -253,7 +253,7 @@ describe('LevelUpAnimation', () => {
       anim.render();
 
       const call = EventBus.emit.mock.calls.find(
-        (c) => c[0] === 'ui:render:level:up'
+        (c) => c[0] === 'ui:render:level:up',
       );
       expect(call[1].fireworks).toBe(anim.fireworks);
     });

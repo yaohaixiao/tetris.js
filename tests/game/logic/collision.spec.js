@@ -58,7 +58,7 @@ describe('collision', () => {
     });
 
     expect(collision(-1, 0)).toBe(false); // 左移
-    expect(collision(1, 0)).toBe(false);  // 右移
+    expect(collision(1, 0)).toBe(false); // 右移
   });
 
   // ========== 边界碰撞 ==========

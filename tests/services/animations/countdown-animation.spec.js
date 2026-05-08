@@ -197,7 +197,7 @@ describe('CountdownAnimation', () => {
       anim.render();
 
       const call = EventBus.emit.mock.calls.find(
-        (c) => c[0] === 'ui:render:countdown'
+        (c) => c[0] === 'ui:render:countdown',
       );
       expect(call[1].state.number).toBe(2);
     });
@@ -230,7 +230,7 @@ describe('CountdownAnimation', () => {
 
       // 只有 3 次音效（3→2, 2→1, 1 之后不触发）
       const countdownCalls = EventBus.emit.mock.calls.filter(
-        (call) => call[0] === 'audio:sounds:countdown'
+        (call) => call[0] === 'audio:sounds:countdown',
       );
       expect(countdownCalls.length).toBe(2); // number 3→2 和 2→1
     });

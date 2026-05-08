@@ -71,13 +71,16 @@ describe('drop', () => {
     expect(lock).toHaveBeenCalled();
     // fall 音效在 lock 之后
     const fallIndex = EventBus.emit.mock.calls.findIndex(
-      (call) => call[0] === 'audio:sounds:fall'
+      (call) => call[0] === 'audio:sounds:fall',
     );
     // clearLines 在 fall 之后
     const lockCalledBeforeClearLines =
       EventBus.emit.mock.calls.findIndex(
-        (call) => call[0] === 'audio:sounds:fall'
-      ) < EventBus.emit.mock.calls.findIndex((call) => call[0] === 'audio:sounds:drop');
+        (call) => call[0] === 'audio:sounds:fall',
+      ) <
+      EventBus.emit.mock.calls.findIndex(
+        (call) => call[0] === 'audio:sounds:drop',
+      );
     expect(lockCalledBeforeClearLines).toBe(true);
   });
 });

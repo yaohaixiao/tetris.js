@@ -24,8 +24,8 @@ describe('findFullLines', () => {
     for (let y = 0; y < ROWS; y++) {
       board.push(
         Array.from({ length: COLS }).map(() =>
-          filledRows.includes(y) ? 1 : 0
-        )
+          filledRows.includes(y) ? 1 : 0,
+        ),
       );
     }
     return board;

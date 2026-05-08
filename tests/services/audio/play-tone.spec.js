@@ -1,6 +1,4 @@
-/**
- * @jest-environment jsdom
- */
+/** @jest-environment jsdom */
 
 import playTone from '@/lib/services/audio/play-tone';
 
@@ -118,7 +116,7 @@ describe('playTone', () => {
     playTone(440, 100);
 
     const endedCall = mockOsc.addEventListener.mock.calls.find(
-      (call) => call[0] === 'ended'
+      (call) => call[0] === 'ended',
     );
     expect(endedCall).toBeDefined();
 

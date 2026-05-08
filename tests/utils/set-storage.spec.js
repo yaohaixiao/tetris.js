@@ -1,6 +1,4 @@
-/**
- * @jest-environment jsdom
- */
+/** @jest-environment jsdom */
 import setStorage from '@/lib/utils/set-storage';
 
 describe('setStorage', () => {

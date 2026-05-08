@@ -22,10 +22,10 @@ describe('AnimationSystem', () => {
       expect(() => system.register(null)).toThrow('Invalid animation');
       expect(() => system.register({})).toThrow('Invalid animation');
       expect(() => system.register({ update: jest.fn() })).toThrow(
-        'Invalid animation'
+        'Invalid animation',
       );
       expect(() => system.register({ render: jest.fn() })).toThrow(
-        'Invalid animation'
+        'Invalid animation',
       );
     });
 
@@ -187,7 +187,11 @@ describe('AnimationSystem', () => {
     });
 
     test('渲染缓存：未变脏时不重新排序', () => {
-      const anim = { update: jest.fn(() => true), render: jest.fn(), layer: 10 };
+      const anim = {
+        update: jest.fn(() => true),
+        render: jest.fn(),
+        layer: 10,
+      };
 
       system.register(anim);
       system.update(0);

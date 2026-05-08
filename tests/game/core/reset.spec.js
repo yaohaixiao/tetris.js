@@ -25,7 +25,11 @@ describe('reset', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     Game.store.getLevel.mockReturnValue(5);
-    Game.store.getState.mockReturnValue({ mode: 'main-menu', score: 0, level: 1 });
+    Game.store.getState.mockReturnValue({
+      mode: 'main-menu',
+      score: 0,
+      level: 1,
+    });
   });
 
   // ========== 默认 mode = main-menu ==========

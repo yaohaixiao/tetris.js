@@ -18,7 +18,7 @@ const HtmlTemplate = `
 <body>
   <div class="container">
     <main class="main">
-      <canvas id="${Canvas.board}"></canvas>
+      <canvas id="${Canvas.board}" data-mode="main-menu"></canvas>
     </main>
     <aside class="aside">
       <section class="panel next">

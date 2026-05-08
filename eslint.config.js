@@ -39,6 +39,7 @@ export default defineConfig(
       'tetris.js',
       '**/*.min.js',
       '**/tests/**/*.js',
+      '**/cypress/**/*.js',
     ],
   },
 

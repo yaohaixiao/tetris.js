@@ -229,7 +229,7 @@ describe('ClearLinesAnimation', () => {
       anim.render();
 
       const emitted = EventBus.emit.mock.calls.find(
-        (call) => call[0] === 'ui:render:clear'
+        (call) => call[0] === 'ui:render:clear',
       )[1];
 
       expect(emitted.state.lines[0].alpha).toBe(0);
@@ -267,12 +267,12 @@ describe('ClearLinesAnimation', () => {
       expect(EventBus.emit).toHaveBeenNthCalledWith(
         1,
         'replay:stop:clear:lines',
-        expect.any(Object)
+        expect.any(Object),
       );
       expect(EventBus.emit).toHaveBeenNthCalledWith(
         2,
         'game:update:state',
-        expect.any(Object)
+        expect.any(Object),
       );
       expect(EventBus.emit).toHaveBeenNthCalledWith(3, 'game:save:high:score');
       expect(EventBus.emit).toHaveBeenNthCalledWith(4, 'game:update:hud');

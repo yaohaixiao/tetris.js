@@ -16,7 +16,7 @@ jest.mock('@/lib/runtime/replay-runtime', () => ({
 }));
 
 jest.mock('@/lib/game/utils/random-shape', () =>
-  jest.fn(() => ({ type: 'I', shape: [[1, 1, 1, 1]] }))
+  jest.fn(() => ({ type: 'I', shape: [[1, 1, 1, 1]] })),
 );
 
 describe('getNextPiece', () => {
@@ -31,7 +31,13 @@ describe('getNextPiece', () => {
   // ========== 正常模式 ==========
   describe('正常模式', () => {
     test('state 中有 next 时返回 curr=next 的深拷贝', () => {
-      const nextPiece = { type: 'T', shape: [[0, 1, 0], [1, 1, 1]] };
+      const nextPiece = {
+        type: 'T',
+        shape: [
+          [0, 1, 0],
+          [1, 1, 1],
+        ],
+      };
       Game.store.getState.mockReturnValue({ next: nextPiece });
 
       const result = getNextPiece();

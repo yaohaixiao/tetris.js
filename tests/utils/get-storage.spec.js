@@ -1,6 +1,4 @@
-/**
- * @jest-environment jsdom
- */
+/** @jest-environment jsdom */
 import getStorage from '@/lib/utils/get-storage';
 
 describe('getStorage', () => {

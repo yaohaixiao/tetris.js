@@ -23,7 +23,7 @@ describe('loopPlayBGM', () => {
   const melody = [
     { freq: 440, dur: 1.0 },
     { freq: 523, dur: 0.5 },
-    { freq: 0, dur: 0.5 },    // 休止符
+    { freq: 0, dur: 0.5 }, // 休止符
     { freq: 659, dur: 2.0 },
   ];
 
@@ -120,7 +120,7 @@ describe('loopPlayBGM', () => {
       expect.any(Number),
       expect.any(Number),
       0.05,
-      'square'
+      'square',
     );
   });
 
@@ -131,7 +131,7 @@ describe('loopPlayBGM', () => {
       expect.any(Number),
       expect.any(Number),
       0.05,
-      'square'
+      'square',
     );
   });
 });

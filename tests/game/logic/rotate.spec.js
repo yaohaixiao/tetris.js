@@ -128,7 +128,7 @@ describe('rotate', () => {
 
     // 只检查最后没有发射 rotate 音效
     const rotateCalls = EventBus.emit.mock.calls.filter(
-      (call) => call[0] === 'audio:sounds:rotate'
+      (call) => call[0] === 'audio:sounds:rotate',
     );
     expect(rotateCalls.length).toBe(0);
   });

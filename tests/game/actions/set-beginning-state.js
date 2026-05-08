@@ -81,7 +81,7 @@ describe('setBeginningState', () => {
     setBeginningState('playing');
 
     expect(Game.store.setState).toHaveBeenCalledWith(
-      expect.objectContaining({ level: 1 })
+      expect.objectContaining({ level: 1 }),
     );
   });
 
@@ -89,7 +89,7 @@ describe('setBeginningState', () => {
     setBeginningState('playing', 10);
 
     expect(Game.store.setState).toHaveBeenCalledWith(
-      expect.objectContaining({ level: 10 })
+      expect.objectContaining({ level: 10 }),
     );
   });
 });
