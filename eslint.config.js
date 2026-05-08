@@ -38,6 +38,7 @@ export default defineConfig(
       'tetris.html',
       'tetris.js',
       '**/*.min.js',
+      '**/tests/**/*.js',
     ],
   },
 

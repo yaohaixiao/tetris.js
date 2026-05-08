@@ -1,17 +1,14 @@
 ## [0.7.2](https://github.com/yaohaixiao/tetris.js/compare/0.7.1...0.7.2) (2026-05-07)
 
-
 ### Bug Fixes
 
-* 修复 EventBus 重构后，playBGM 一直播放同1曲背景音乐的问题；([368f993](https://github.com/yaohaixiao/tetris.js/commit/368f993afc5e4211042f50e34578fa741f7a2903))
-
+- 修复 EventBus 重构后，playBGM 一直播放同1曲背景音乐的问题；([368f993](https://github.com/yaohaixiao/tetris.js/commit/368f993afc5e4211042f50e34578fa741f7a2903))
 
 ### Features
 
-* 调整代码，将游戏最大级别，游戏画布的 cols,rows 调整成可配置；([44513d9](https://github.com/yaohaixiao/tetris.js/commit/44513d933c5ecf92332818dab65ac2a8b12e19ca))
-* 调整下落速度算法，改成达到最大管卡70%左右，就达到极限的线路速度，间隔 120ms 就下落1格； ([5ffab93](https://github.com/yaohaixiao/tetris.js/commit/5ffab93acabe1fad7731a4c4bdc6a610f6dada80))
-* 添加新背景音乐曲子，调整曲目播放顺序，调整背景音乐播放细节，根据不同 wave 配置 gate； ([672b74c](https://github.com/yaohaixiao/tetris.js/commit/672b74cf79d742702f39bcefabb13a60e96430d2))
-
+- 调整代码，将游戏最大级别，游戏画布的 cols,rows 调整成可配置；([44513d9](https://github.com/yaohaixiao/tetris.js/commit/44513d933c5ecf92332818dab65ac2a8b12e19ca))
+- 调整下落速度算法，改成达到最大管卡70%左右，就达到极限的线路速度，间隔 120ms 就下落1格； ([5ffab93](https://github.com/yaohaixiao/tetris.js/commit/5ffab93acabe1fad7731a4c4bdc6a610f6dada80))
+- 添加新背景音乐曲子，调整曲目播放顺序，调整背景音乐播放细节，根据不同 wave 配置 gate； ([672b74c](https://github.com/yaohaixiao/tetris.js/commit/672b74cf79d742702f39bcefabb13a60e96430d2))
 
 ## [0.7.1](https://github.com/yaohaixiao/tetris.js/compare/0.7.0...0.7.1) (2026-05-07)
 

@@ -11,7 +11,9 @@ export default {
     '^#supports-color$': 'supports-color',
     '^@/(.*)$': '<rootDir>/$1',
   },
-  testMatch: ['**/tests/*.spec.(js)'],
+  testMatch: ['**/tests/**/*.spec.(js)'],
+  testEnvironment: 'jsdom',
+  setupFiles: ['./tests/jest.setup.js'],
   transform: {
     '^.+\\.js$': [
       'babel-jest',

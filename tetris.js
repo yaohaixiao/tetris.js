@@ -500,7 +500,7 @@ var tetris = (() => {
       event_bus_default.on("replay:start:record", () => {
         Replay.startRecord();
       });
-      event_bus_default.emit("replay:stop:record", () => {
+      event_bus_default.on("replay:stop:record", () => {
         Replay.stopRecord();
       });
       event_bus_default.on("replay:add:record", (record) => {
@@ -945,7 +945,7 @@ var tetris = (() => {
   };
   var toggle_pause_default = togglePause;
 
-  // lib/game/utils/find-full-lines.js
+  // lib/game/logic/find-full-lines.js
   var findFullLines = () => {
     const state = game_default.store.getState();
     const { Board } = configuration_default;
@@ -1075,7 +1075,7 @@ var tetris = (() => {
   };
   var tick_default = tick;
 
-  // lib/game/utils/get-speed.js
+  // lib/game/rules/get-speed.js
   var getSpeed = () => {
     const level2 = game_default.store.getLevel();
     const step = Math.ceil(1e3 / Math.floor(configuration_default.Level.max * 0.7));
@@ -2476,7 +2476,7 @@ var tetris = (() => {
   };
   var resize_default = resize;
 
-  // lib/services/ui/hud/hud-dom.js
+  // lib/services/ui/hud/hud-elements.js
   var { score, lines, level, highScore } = configuration_default.Elements.Hud;
   var HudElements = {
     /** @type {HTMLElement | null} 分数显示元素 */
@@ -2488,7 +2488,7 @@ var tetris = (() => {
     /** @type {HTMLElement | null} 最高分显示元素 */
     highScore: document.querySelector(`#${highScore}`)
   };
-  var hud_dom_default = HudElements;
+  var hud_elements_default = HudElements;
 
   // lib/services/ui/hud/create-hud.js
   var setText = (el, value, pad = 0) => el.textContent = pad ? pad_start_default(value, pad) : String(value);
@@ -2520,17 +2520,17 @@ var tetris = (() => {
         scoreTracker.target = Number(state.score) || 0;
         highScoreTracker.target = Number(state.highScore) || 0;
         if (state.lines !== prev.lines) {
-          setText(hud_dom_default.lines, state.lines, 2);
+          setText(hud_elements_default.lines, state.lines, 2);
           prev.lines = state.lines;
         }
         if (state.level !== prev.level) {
-          setText(hud_dom_default.level, state.level, 2);
+          setText(hud_elements_default.level, state.level, 2);
           prev.level = state.level;
         }
       },
       tick: () => {
-        animationScore(scoreTracker, hud_dom_default.score, 5);
-        animationScore(highScoreTracker, hud_dom_default.highScore, 5);
+        animationScore(scoreTracker, hud_elements_default.score, 5);
+        animationScore(highScoreTracker, hud_elements_default.highScore, 5);
       },
       reset: () => {
         scoreTracker.visual = 0;
@@ -2539,10 +2539,10 @@ var tetris = (() => {
         highScoreTracker.target = 0;
         prev.lines = -1;
         prev.level = -1;
-        setText(hud_dom_default.score, 0, 5);
-        setText(hud_dom_default.highScore, 0, 5);
-        setText(hud_dom_default.lines, 0, 2);
-        setText(hud_dom_default.level, 1, 2);
+        setText(hud_elements_default.score, 0, 5);
+        setText(hud_elements_default.highScore, 0, 5);
+        setText(hud_elements_default.lines, 0, 2);
+        setText(hud_elements_default.level, 1, 2);
       }
     };
   };
@@ -3319,7 +3319,7 @@ var tetris = (() => {
   };
   var motifs_default = MOTIFS;
 
-  // lib/services/audio/play-tone.js
+  // lib/services/audio/play-tone.spec.js
   var audioCtx = new AudioContext();
   var playTone = (freq, dur, vol = 0.1, wave = "square") => {
     if (!freq) {
@@ -4690,7 +4690,7 @@ var tetris = (() => {
   };
   var countdown_default = startCountdown;
 
-  // lib/game/utils/apply-clear-lines.js
+  // lib/game/actions/apply-clear-lines.js
   var applyClearLines = () => {
     const state = game_default.store.getState();
     const { Board, Level } = configuration_default;
