@@ -157,7 +157,10 @@ describe('AnimationSystem', () => {
   describe('render', () => {
     it('按 layer 从小到大的顺序渲染', () => {
       const order = [];
-      const a1 = createAnim({ layer: 10, render: jest.fn(() => order.push(10)) });
+      const a1 = createAnim({
+        layer: 10,
+        render: jest.fn(() => order.push(10)),
+      });
       const a2 = createAnim({ layer: 1, render: jest.fn(() => order.push(1)) });
       const a3 = createAnim({ layer: 5, render: jest.fn(() => order.push(5)) });
 
@@ -173,8 +176,14 @@ describe('AnimationSystem', () => {
 
     it('layer 相同时保持注册顺序', () => {
       const order = [];
-      const a1 = createAnim({ layer: 0, render: jest.fn(() => order.push('a')) });
-      const a2 = createAnim({ layer: 0, render: jest.fn(() => order.push('b')) });
+      const a1 = createAnim({
+        layer: 0,
+        render: jest.fn(() => order.push('a')),
+      });
+      const a2 = createAnim({
+        layer: 0,
+        render: jest.fn(() => order.push('b')),
+      });
 
       system.register(a1);
       system.register(a2);
