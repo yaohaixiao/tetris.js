@@ -3394,10 +3394,15 @@ var tetris = (() => {
     const { audioCtx: audioCtx2 } = audio_state_default;
     const {
       volume = 0.15,
+      // 音量峰值
       wave = "square",
+      // 默认方波
       gate = 1,
+      // 默认连奏，音符唱满时值
       articulation = {},
+      // 运音包络
       startTime = audioCtx2.currentTime
+      // 默认立即开始
     } = options;
     const osc = audioCtx2.createOscillator();
     const gain = audioCtx2.createGain();
@@ -3407,8 +3412,11 @@ var tetris = (() => {
     const noteLen = step * gate;
     const {
       attackTime = 3e-3,
+      // 起音时间，3ms 快速起音
       releaseTime = 0.02,
+      // 释音时间，20ms 平滑收尾
       sustainRatio = 0.9
+      // 延音比，保持 90% 峰值音量进入衰减段
     } = articulation;
     const t0 = startTime;
     const t1 = t0 + attackTime;
@@ -3547,605 +3555,6 @@ var tetris = (() => {
     bgmToggle: () => play_tone_default(440, 100)
   };
   var sounds_default = Sounds;
-
-  // lib/services/audio/constants/bgm/jasmine-flower.js
-  var JasmineFlower = {
-    name: "Jasmine Flower",
-    melody: [
-      // 好 (短) 一 (短) 朵 (短) 美 (长) 丽 (短) 的 (短) 茉 (长) 莉 (中) 花 (长~)
-      { freq: 659, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      { freq: 523, dur: 0.4 },
-      { freq: 587, dur: 0.4 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 1.6 },
-      { freq: 440, dur: 1.2 },
-      // 芬芳美丽满枝桠
-      { freq: 523, dur: 0.4 },
-      { freq: 587, dur: 0.4 },
-      { freq: 523, dur: 1.2 },
-      { freq: 440, dur: 0.8 },
-      { freq: 392, dur: 0.8 },
-      { freq: 440, dur: 1.6 },
-      { freq: 523, dur: 1.2 },
-      // 又香又白人人夸
-      { freq: 659, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      { freq: 523, dur: 0.4 },
-      { freq: 587, dur: 0.4 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 1.6 },
-      { freq: 440, dur: 1.2 },
-      // 让我来将你摘下
-      { freq: 523, dur: 0.4 },
-      { freq: 587, dur: 0.4 },
-      { freq: 523, dur: 1.2 },
-      { freq: 440, dur: 0.8 },
-      { freq: 392, dur: 0.8 },
-      { freq: 440, dur: 1.2 },
-      { freq: 523, dur: 0.8 },
-      { freq: 392, dur: 1.6 },
-      // 送给别人家
-      { freq: 440, dur: 0.8 },
-      { freq: 523, dur: 0.4 },
-      { freq: 587, dur: 1.2 },
-      { freq: 440, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 440, dur: 1.6 },
-      { freq: 392, dur: 2 },
-      // 茉莉花呀茉莉花
-      { freq: 330, dur: 0.8 },
-      { freq: 392, dur: 0.4 },
-      { freq: 440, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      { freq: 523, dur: 0.8 },
-      { freq: 440, dur: 1.2 },
-      { freq: 392, dur: 2.4 }
-    ],
-    duration: 540,
-    volume: 0.4,
-    wave: "sine"
-  };
-  var jasmine_flower_default = JasmineFlower;
-
-  // lib/services/audio/constants/bgm/first-division.js
-  var FirstDivision = {
-    name: "FirstDivision",
-    melody: [
-      // === 主动机（进行曲感）===
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      // === 重复推进 ===
-      { freq: 659, dur: 0.8 },
-      { freq: 698, dur: 0.8 },
-      { freq: 784, dur: 1.2 },
-      { freq: 698, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      // === 第二句（上行）===
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 698, dur: 0.8 },
-      { freq: 784, dur: 1.2 },
-      { freq: 698, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 1.2 },
-      // === 强化段（军乐推进）===
-      { freq: 659, dur: 0.8 },
-      { freq: 784, dur: 0.8 },
-      { freq: 880, dur: 1.2 },
-      { freq: 784, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 698, dur: 0.8 },
-      { freq: 784, dur: 1.2 },
-      // === 高潮（稳定推进）===
-      { freq: 784, dur: 0.8 },
-      { freq: 880, dur: 0.8 },
-      { freq: 988, dur: 1.2 },
-      { freq: 880, dur: 0.8 },
-      { freq: 784, dur: 0.8 },
-      { freq: 698, dur: 0.8 },
-      { freq: 784, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      // === 回落（收束）===
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 1.2 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 1.2 },
-      // === 循环点 ===
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 1.6 }
-    ],
-    duration: 180,
-    volume: 0.08,
-    wave: "square"
-  };
-  var first_division_default = FirstDivision;
-
-  // lib/services/audio/constants/bgm/loginska.js
-  var Loginska = {
-    name: "Loginska",
-    melody: [
-      // === A段：沉稳推进 ===
-      { freq: 659, dur: 1.2 },
-      { freq: 659, dur: 0.4 },
-      { freq: 659, dur: 0.4 },
-      { freq: 784, dur: 0.6 },
-      { freq: 880, dur: 0.6 },
-      { freq: 784, dur: 1.2 },
-      { freq: 784, dur: 0.4 },
-      { freq: 784, dur: 0.4 },
-      { freq: 659, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 659, dur: 1.2 },
-      { freq: 659, dur: 0.4 },
-      { freq: 659, dur: 0.4 },
-      { freq: 523, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 659, dur: 1.2 },
-      { freq: 659, dur: 0.4 },
-      { freq: 659, dur: 0.4 },
-      { freq: 784, dur: 0.6 },
-      { freq: 880, dur: 0.6 },
-      // === B段：上行高潮 ===
-      { freq: 784, dur: 1.2 },
-      { freq: 784, dur: 0.4 },
-      { freq: 784, dur: 0.4 },
-      { freq: 880, dur: 0.6 },
-      { freq: 988, dur: 0.6 },
-      { freq: 880, dur: 1.2 },
-      { freq: 880, dur: 0.4 },
-      { freq: 880, dur: 0.4 },
-      { freq: 784, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 587, dur: 1.2 },
-      { freq: 587, dur: 0.4 },
-      { freq: 587, dur: 0.4 },
-      { freq: 659, dur: 0.6 },
-      { freq: 523, dur: 0.6 },
-      { freq: 587, dur: 1.2 },
-      { freq: 587, dur: 0.4 },
-      { freq: 587, dur: 0.4 },
-      { freq: 659, dur: 0.6 },
-      { freq: 784, dur: 0.6 },
-      // === C段：急促下行收束 ===
-      { freq: 784, dur: 1.2 },
-      { freq: 784, dur: 0.4 },
-      { freq: 784, dur: 0.4 },
-      { freq: 659, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 659, dur: 1.2 },
-      { freq: 659, dur: 0.4 },
-      { freq: 659, dur: 0.4 },
-      { freq: 523, dur: 0.6 },
-      { freq: 494, dur: 0.6 },
-      { freq: 440, dur: 1.2 },
-      { freq: 440, dur: 0.4 },
-      { freq: 440, dur: 0.4 },
-      { freq: 440, dur: 0.6 },
-      { freq: 440, dur: 0.6 },
-      { freq: 440, dur: 1.2 },
-      { freq: 440, dur: 0.4 },
-      { freq: 440, dur: 0.4 }
-    ],
-    duration: 180,
-    volume: 0.07,
-    wave: "square"
-  };
-  var loginska_default = Loginska;
-
-  // lib/services/audio/constants/bgm/technotris.js
-  var Technotris = {
-    name: "Technotris",
-    melody: [
-      // === Intro（电子重复）===
-      { freq: 659, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 494, dur: 0.6 },
-      { freq: 494, dur: 0.6 },
-      { freq: 523, dur: 0.6 },
-      { freq: 523, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 523, dur: 0.6 },
-      { freq: 523, dur: 0.6 },
-      { freq: 494, dur: 0.6 },
-      { freq: 494, dur: 0.6 },
-      // === 主旋律A ===
-      { freq: 659, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 440, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 1.2 },
-      // === 电子重复变体 ===
-      { freq: 523, dur: 0.6 },
-      { freq: 523, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 784, dur: 0.6 },
-      { freq: 784, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      // === 上行推进 ===
-      { freq: 659, dur: 0.8 },
-      { freq: 784, dur: 0.8 },
-      { freq: 880, dur: 0.8 },
-      { freq: 784, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 784, dur: 0.8 },
-      { freq: 880, dur: 0.8 },
-      { freq: 988, dur: 0.8 },
-      { freq: 880, dur: 0.8 },
-      { freq: 784, dur: 1.2 },
-      // === 高潮 ===
-      { freq: 784, dur: 0.8 },
-      { freq: 880, dur: 0.8 },
-      { freq: 988, dur: 0.8 },
-      { freq: 1175, dur: 1.2 },
-      { freq: 988, dur: 0.8 },
-      { freq: 880, dur: 0.8 },
-      { freq: 784, dur: 0.8 },
-      { freq: 659, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 784, dur: 0.6 },
-      { freq: 784, dur: 0.6 },
-      { freq: 880, dur: 0.6 },
-      { freq: 880, dur: 0.6 },
-      // === Break ===
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      // === Drop ===
-      { freq: 784, dur: 0.6 },
-      { freq: 784, dur: 0.6 },
-      { freq: 880, dur: 0.6 },
-      { freq: 880, dur: 0.6 },
-      { freq: 988, dur: 0.6 },
-      { freq: 988, dur: 0.6 },
-      { freq: 880, dur: 0.6 },
-      { freq: 880, dur: 0.6 },
-      { freq: 784, dur: 0.6 },
-      { freq: 784, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 659, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 587, dur: 0.6 },
-      { freq: 523, dur: 0.6 },
-      { freq: 523, dur: 0.6 },
-      // === Ending ===
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 440, dur: 1.6 }
-    ],
-    duration: 180,
-    volume: 0.09,
-    wave: "square"
-  };
-  var technotris_default = Technotris;
-
-  // lib/services/audio/constants/bgm/korobeiniki.js
-  var Korobeiniki = {
-    name: "Korobeiniki",
-    melody: [
-      // === A段（经典开头）===
-      { freq: 659, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 440, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      { freq: 659, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 1.2 },
-      // === A'段（变体）===
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      { freq: 784, dur: 1.2 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 1.2 },
-      // === B段（推进）===
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 784, dur: 1.2 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 784, dur: 1.2 },
-      { freq: 880, dur: 1.2 },
-      { freq: 784, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      // === C段（高潮）===
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 784, dur: 1.2 },
-      { freq: 880, dur: 1.2 },
-      { freq: 784, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      { freq: 784, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 1.2 },
-      // === D段（变化）===
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 1.2 },
-      { freq: 784, dur: 1.2 },
-      { freq: 880, dur: 0.8 },
-      { freq: 784, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      { freq: 659, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 1.2 },
-      // === E段（回落）===
-      { freq: 440, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 1.2 },
-      { freq: 587, dur: 1.2 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 440, dur: 0.8 },
-      { freq: 494, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      { freq: 659, dur: 1.2 },
-      // === F段（再现+收束）===
-      { freq: 659, dur: 0.8 },
-      { freq: 784, dur: 0.8 },
-      { freq: 880, dur: 1.2 },
-      { freq: 784, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 659, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 587, dur: 1.2 },
-      { freq: 659, dur: 0.8 },
-      { freq: 587, dur: 0.8 },
-      { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 1.2 },
-      // === 结尾（循环点）===
-      { freq: 523, dur: 1.2 },
-      { freq: 494, dur: 0.8 },
-      { freq: 440, dur: 1.6 }
-    ],
-    duration: 140,
-    volume: 0.08,
-    wave: "square"
-  };
-  var korobeiniki_default = Korobeiniki;
-
-  // lib/services/audio/constants/bgm/beyond-the-wall.js
-  var BeyondTheWall = {
-    name: "BeyondTheWall",
-    // 推荐：全局控制（你也可以在 engine 里做分段 gate）
-    config: {
-      gate: {
-        intro: 0.92,
-        main: 0.93,
-        drive: 0.96,
-        dnb: 0.88,
-        outro: 0.91
-      }
-    },
-    melody: [
-      // 前奏：胡笳感脉冲
-      { freq: 330, dur: 0.6 },
-      { freq: 0, dur: 0.15 },
-      { freq: 392, dur: 0.6 },
-      { freq: 0, dur: 0.15 },
-      { freq: 330, dur: 0.6 },
-      { freq: 392, dur: 0.6 },
-      { freq: 330, dur: 0.6 },
-      { freq: 0, dur: 0.15 },
-      { freq: 392, dur: 0.6 },
-      { freq: 0, dur: 0.15 },
-      { freq: 440, dur: 1.8 },
-      { freq: 0, dur: 0.3 },
-      // 主旋律：苍凉开场
-      { freq: 440, dur: 1.2 },
-      { freq: 523, dur: 0.6 },
-      { freq: 587, dur: 1.2 },
-      { freq: 0, dur: 0.2 },
-      { freq: 523, dur: 0.6 },
-      { freq: 440, dur: 1.2 },
-      { freq: 392, dur: 0.6 },
-      { freq: 330, dur: 1.2 },
-      { freq: 392, dur: 1.2 },
-      { freq: 0, dur: 0.25 },
-      { freq: 440, dur: 1.2 },
-      { freq: 523, dur: 0.6 },
-      { freq: 659, dur: 1.8 },
-      { freq: 0, dur: 0.2 },
-      { freq: 587, dur: 0.6 },
-      { freq: 523, dur: 1.2 },
-      { freq: 440, dur: 0.6 },
-      { freq: 392, dur: 1.2 },
-      { freq: 330, dur: 1.2 },
-      { freq: 0, dur: 0.3 },
-      // 推进段：马蹄
-      { freq: 392, dur: 0.6 },
-      { freq: 440, dur: 0.3 },
-      { freq: 523, dur: 0.6 },
-      { freq: 587, dur: 0.3 },
-      { freq: 659, dur: 0.6 },
-      { freq: 587, dur: 0.3 },
-      { freq: 523, dur: 0.6 },
-      { freq: 440, dur: 0.3 },
-      { freq: 392, dur: 0.6 },
-      { freq: 440, dur: 0.3 },
-      { freq: 523, dur: 0.6 },
-      { freq: 587, dur: 0.3 },
-      { freq: 659, dur: 1.2 },
-      { freq: 0, dur: 0.2 },
-      { freq: 587, dur: 0.6 },
-      { freq: 523, dur: 1.2 },
-      // 高潮：边塞号角（加“断气点”）
-      { freq: 659, dur: 1.2 },
-      { freq: 784, dur: 0.6 },
-      { freq: 880, dur: 1.8 },
-      { freq: 0, dur: 0.25 },
-      { freq: 784, dur: 0.6 },
-      { freq: 659, dur: 1.2 },
-      { freq: 587, dur: 0.6 },
-      { freq: 523, dur: 1.2 },
-      { freq: 440, dur: 0.6 },
-      { freq: 0, dur: 0.2 },
-      { freq: 659, dur: 1.2 },
-      { freq: 784, dur: 0.6 },
-      { freq: 880, dur: 1.2 },
-      { freq: 0, dur: 0.25 },
-      { freq: 784, dur: 0.6 },
-      { freq: 659, dur: 1.2 },
-      { freq: 587, dur: 0.6 },
-      { freq: 523, dur: 1.8 },
-      // DnB段：改成“破碎节奏 + 空拍”
-      { freq: 440, dur: 0.4 },
-      { freq: 0, dur: 0.2 },
-      { freq: 440, dur: 0.4 },
-      { freq: 523, dur: 0.4 },
-      { freq: 0, dur: 0.2 },
-      { freq: 440, dur: 0.4 },
-      { freq: 392, dur: 0.4 },
-      { freq: 330, dur: 0.4 },
-      { freq: 0, dur: 0.2 },
-      { freq: 392, dur: 0.4 },
-      { freq: 440, dur: 0.4 },
-      { freq: 0, dur: 0.2 },
-      { freq: 523, dur: 0.4 },
-      { freq: 523, dur: 0.4 },
-      { freq: 587, dur: 0.4 },
-      { freq: 0, dur: 0.2 },
-      { freq: 523, dur: 0.4 },
-      { freq: 440, dur: 0.4 },
-      { freq: 392, dur: 0.4 },
-      { freq: 0, dur: 0.2 },
-      { freq: 440, dur: 0.4 },
-      { freq: 523, dur: 0.4 },
-      // 回落：大漠孤烟（拉长 + 留白）
-      { freq: 659, dur: 1.2 },
-      { freq: 0, dur: 0.25 },
-      { freq: 587, dur: 0.6 },
-      { freq: 523, dur: 1.2 },
-      { freq: 440, dur: 0.6 },
-      { freq: 392, dur: 1.2 },
-      { freq: 330, dur: 1.2 },
-      { freq: 0, dur: 0.3 },
-      { freq: 392, dur: 1.2 },
-      { freq: 330, dur: 0.6 },
-      { freq: 294, dur: 1.2 },
-      { freq: 0, dur: 0.25 },
-      { freq: 330, dur: 0.6 },
-      { freq: 392, dur: 1.8 },
-      // 循环衔接（更“远”）
-      { freq: 330, dur: 0.6 },
-      { freq: 0, dur: 0.15 },
-      { freq: 392, dur: 0.6 },
-      { freq: 0, dur: 0.15 },
-      { freq: 330, dur: 0.6 },
-      { freq: 392, dur: 0.6 },
-      { freq: 440, dur: 1.8 }
-    ],
-    duration: 130,
-    volume: 0.09,
-    wave: "triangle"
-  };
-  var beyond_the_wall_default = BeyondTheWall;
 
   // lib/services/audio/constants/bgm/tetris-theme.js
   var TetrisTheme = {
@@ -4299,6 +3708,903 @@ var tetris = (() => {
   };
   var tetris_theme_default = TetrisTheme;
 
+  // lib/services/audio/constants/bgm/spring-festival.js
+  var SpringFestival = {
+    name: "Spring Festival",
+    melody: [
+      // ===== 第一句：秧歌调 =====
+      { freq: 523, dur: 0.6 },
+      // 啦 (C5)
+      { freq: 587, dur: 0.3 },
+      // 啦 (D5)
+      { freq: 659, dur: 0.9 },
+      // 啦～ (E5)
+      { freq: 659, dur: 0.6 },
+      // 啦
+      { freq: 784, dur: 0.3 },
+      // 啦
+      { freq: 880, dur: 1.2 },
+      // 啦～ (A5)
+      { freq: 880, dur: 0.6 },
+      // 啦
+      { freq: 784, dur: 0.3 },
+      // 啦
+      { freq: 659, dur: 0.9 },
+      // 啦～
+      { freq: 587, dur: 0.6 },
+      // 啦
+      { freq: 523, dur: 1.5 },
+      // 啦～
+      // ===== 第二句：欢腾段落 =====
+      { freq: 659, dur: 0.3 },
+      { freq: 659, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      { freq: 880, dur: 0.3 },
+      { freq: 880, dur: 0.3 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.3 },
+      { freq: 587, dur: 0.3 },
+      { freq: 659, dur: 0.3 },
+      { freq: 659, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      { freq: 659, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      // ===== 第三句：再现秧歌，更热烈 =====
+      { freq: 523, dur: 0.4 },
+      { freq: 587, dur: 0.2 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.4 },
+      { freq: 784, dur: 0.2 },
+      { freq: 880, dur: 0.8 },
+      { freq: 1047, dur: 0.4 },
+      // 拔高 (C6)
+      { freq: 880, dur: 0.2 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 523, dur: 2 },
+      // 收束
+      // ===== 第四句：锣鼓模仿 =====
+      { freq: 659, dur: 0.2 },
+      { freq: 659, dur: 0.2 },
+      { freq: 0, dur: 0.1 },
+      { freq: 659, dur: 0.2 },
+      { freq: 0, dur: 0.1 },
+      { freq: 784, dur: 0.2 },
+      { freq: 784, dur: 0.2 },
+      { freq: 0, dur: 0.1 },
+      { freq: 784, dur: 0.2 },
+      { freq: 0, dur: 0.1 },
+      { freq: 659, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 523, dur: 0.8 },
+      { freq: 0, dur: 1 }
+      // 段落呼吸
+    ],
+    duration: 280,
+    // 较快节奏
+    volume: 0.08,
+    wave: "square",
+    // 方波更能模拟唢呐/秧歌的热闹感
+    gate: 0.7,
+    // 轻断奏，颗粒分明
+    articulation: {
+      attackTime: 3e-3,
+      releaseTime: 0.02,
+      sustainRatio: 0.5
+      // 较低延音比，音符跳跃
+    }
+  };
+  var spring_festival_default = SpringFestival;
+
+  // lib/services/audio/constants/bgm/first-division.js
+  var FirstDivision = {
+    name: "FirstDivision",
+    melody: [
+      // === 主动机（进行曲感）===
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      // === 重复推进 ===
+      { freq: 659, dur: 0.8 },
+      { freq: 698, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 698, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      // === 第二句（上行）===
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 698, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 698, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 1.2 },
+      // === 强化段（军乐推进）===
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 698, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      // === 高潮（稳定推进）===
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 988, dur: 1.2 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 698, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      // === 回落（收束）===
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 1.2 },
+      // === 循环点 ===
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.6 }
+    ],
+    duration: 180,
+    volume: 0.08,
+    wave: "square"
+  };
+  var first_division_default = FirstDivision;
+
+  // lib/services/audio/constants/bgm/gong-xi-fa-cai.js
+  var GongXiFaCai = {
+    name: "Gong Xi Fa Cai",
+    melody: [
+      // ===== 恭喜发财 恭喜发财 =====
+      { freq: 523, dur: 0.5 },
+      // 恭 (C5)
+      { freq: 587, dur: 0.5 },
+      // 喜 (D5)
+      { freq: 659, dur: 0.8 },
+      // 发 (E5)
+      { freq: 659, dur: 0.8 },
+      // 财～
+      { freq: 784, dur: 0.5 },
+      // 恭
+      { freq: 880, dur: 0.5 },
+      // 喜
+      { freq: 784, dur: 0.8 },
+      // 发
+      { freq: 659, dur: 1.5 },
+      // 财～
+      { freq: 587, dur: 0.5 },
+      // 恭
+      { freq: 659, dur: 0.5 },
+      // 喜
+      { freq: 784, dur: 0.8 },
+      // 发
+      { freq: 784, dur: 0.8 },
+      // 财～
+      { freq: 880, dur: 0.5 },
+      // 恭
+      { freq: 1047, dur: 0.5 },
+      // 喜 (C6)
+      { freq: 880, dur: 0.8 },
+      // 发
+      { freq: 784, dur: 1.5 },
+      // 财～
+      // ===== 我恭喜你发财 我恭喜你精彩 =====
+      { freq: 659, dur: 0.3 },
+      // 我
+      { freq: 784, dur: 0.3 },
+      // 恭
+      { freq: 880, dur: 0.5 },
+      // 喜
+      { freq: 880, dur: 0.3 },
+      // 你
+      { freq: 784, dur: 0.3 },
+      // 发
+      { freq: 659, dur: 1 },
+      // 财～
+      { freq: 587, dur: 0.3 },
+      // 我
+      { freq: 659, dur: 0.3 },
+      // 恭
+      { freq: 784, dur: 0.5 },
+      // 喜
+      { freq: 784, dur: 0.3 },
+      // 你
+      { freq: 659, dur: 0.3 },
+      // 精
+      { freq: 587, dur: 1 },
+      // 彩～
+      // ===== 最好的请过来 不好的请走开 =====
+      { freq: 523, dur: 0.4 },
+      // 最
+      { freq: 587, dur: 0.4 },
+      // 好
+      { freq: 659, dur: 0.4 },
+      // 的
+      { freq: 784, dur: 0.4 },
+      // 请
+      { freq: 880, dur: 0.4 },
+      // 过
+      { freq: 784, dur: 0.8 },
+      // 来～
+      { freq: 659, dur: 0.4 },
+      // 不
+      { freq: 587, dur: 0.4 },
+      // 好
+      { freq: 659, dur: 0.4 },
+      // 的
+      { freq: 784, dur: 0.4 },
+      // 请
+      { freq: 659, dur: 0.4 },
+      // 走
+      { freq: 523, dur: 1.2 },
+      // 开～
+      // ===== 礼多人不怪 =====
+      { freq: 587, dur: 0.4 },
+      // 礼
+      { freq: 659, dur: 0.4 },
+      // 多
+      { freq: 784, dur: 0.4 },
+      // 人
+      { freq: 659, dur: 0.4 },
+      // 不
+      { freq: 587, dur: 0.8 },
+      // 怪～
+      { freq: 523, dur: 1.5 },
+      // （收）
+      // ===== 间奏过渡 =====
+      { freq: 0, dur: 0.8 },
+      // ===== 恭喜发财 循环再现 =====
+      { freq: 523, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 784, dur: 0.4 },
+      { freq: 880, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.4 },
+      { freq: 1047, dur: 0.4 },
+      { freq: 880, dur: 0.6 },
+      { freq: 784, dur: 1.2 },
+      // ===== 收尾高音 =====
+      { freq: 880, dur: 0.5 },
+      { freq: 1047, dur: 0.5 },
+      { freq: 880, dur: 0.5 },
+      { freq: 784, dur: 0.5 },
+      { freq: 659, dur: 2 },
+      { freq: 0, dur: 1.5 }
+      // 段落呼吸
+    ],
+    duration: 260,
+    volume: 0.08,
+    wave: "square",
+    gate: 0.8,
+    articulation: {
+      attackTime: 3e-3,
+      releaseTime: 0.02,
+      sustainRatio: 0.6
+    }
+  };
+  var gong_xi_fa_cai_default = GongXiFaCai;
+
+  // lib/services/audio/constants/bgm/loginska.js
+  var Loginska = {
+    name: "Loginska",
+    melody: [
+      // === A段：沉稳推进 ===
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 784, dur: 1.2 },
+      { freq: 784, dur: 0.4 },
+      { freq: 784, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      // === B段：上行高潮 ===
+      { freq: 784, dur: 1.2 },
+      { freq: 784, dur: 0.4 },
+      { freq: 784, dur: 0.4 },
+      { freq: 880, dur: 0.6 },
+      { freq: 988, dur: 0.6 },
+      { freq: 880, dur: 1.2 },
+      { freq: 880, dur: 0.4 },
+      { freq: 880, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      // === C段：急促下行收束 ===
+      { freq: 784, dur: 1.2 },
+      { freq: 784, dur: 0.4 },
+      { freq: 784, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.4 }
+    ],
+    duration: 180,
+    volume: 0.07,
+    wave: "square"
+  };
+  var loginska_default = Loginska;
+
+  // lib/services/audio/constants/bgm/beyond-the-wall.js
+  var BeyondTheWall = {
+    name: "BeyondTheWall",
+    // 推荐：全局控制（你也可以在 engine 里做分段 gate）
+    config: {
+      gate: {
+        intro: 0.92,
+        main: 0.93,
+        drive: 0.96,
+        dnb: 0.88,
+        outro: 0.91
+      }
+    },
+    melody: [
+      // 前奏：胡笳感脉冲
+      { freq: 330, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 392, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 330, dur: 0.6 },
+      { freq: 392, dur: 0.6 },
+      { freq: 330, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 392, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 440, dur: 1.8 },
+      { freq: 0, dur: 0.3 },
+      // 主旋律：苍凉开场
+      { freq: 440, dur: 1.2 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 0, dur: 0.2 },
+      { freq: 523, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 392, dur: 0.6 },
+      { freq: 330, dur: 1.2 },
+      { freq: 392, dur: 1.2 },
+      { freq: 0, dur: 0.25 },
+      { freq: 440, dur: 1.2 },
+      { freq: 523, dur: 0.6 },
+      { freq: 659, dur: 1.8 },
+      { freq: 0, dur: 0.2 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      { freq: 440, dur: 0.6 },
+      { freq: 392, dur: 1.2 },
+      { freq: 330, dur: 1.2 },
+      { freq: 0, dur: 0.3 },
+      // 推进段：马蹄
+      { freq: 392, dur: 0.6 },
+      { freq: 440, dur: 0.3 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.3 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.3 },
+      { freq: 523, dur: 0.6 },
+      { freq: 440, dur: 0.3 },
+      { freq: 392, dur: 0.6 },
+      { freq: 440, dur: 0.3 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.3 },
+      { freq: 659, dur: 1.2 },
+      { freq: 0, dur: 0.2 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      // 高潮：边塞号角（加“断气点”）
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 1.8 },
+      { freq: 0, dur: 0.25 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      { freq: 440, dur: 0.6 },
+      { freq: 0, dur: 0.2 },
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 1.2 },
+      { freq: 0, dur: 0.25 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.8 },
+      // DnB段：改成“破碎节奏 + 空拍”
+      { freq: 440, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 392, dur: 0.4 },
+      { freq: 330, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 392, dur: 0.4 },
+      { freq: 440, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 440, dur: 0.4 },
+      { freq: 392, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      // 回落：大漠孤烟（拉长 + 留白）
+      { freq: 659, dur: 1.2 },
+      { freq: 0, dur: 0.25 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      { freq: 440, dur: 0.6 },
+      { freq: 392, dur: 1.2 },
+      { freq: 330, dur: 1.2 },
+      { freq: 0, dur: 0.3 },
+      { freq: 392, dur: 1.2 },
+      { freq: 330, dur: 0.6 },
+      { freq: 294, dur: 1.2 },
+      { freq: 0, dur: 0.25 },
+      { freq: 330, dur: 0.6 },
+      { freq: 392, dur: 1.8 },
+      // 循环衔接（更“远”）
+      { freq: 330, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 392, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 330, dur: 0.6 },
+      { freq: 392, dur: 0.6 },
+      { freq: 440, dur: 1.8 }
+    ],
+    duration: 130,
+    volume: 0.09,
+    wave: "triangle"
+  };
+  var beyond_the_wall_default = BeyondTheWall;
+
+  // lib/services/audio/constants/bgm/technotris.js
+  var Technotris = {
+    name: "Technotris",
+    melody: [
+      // === Intro（电子重复）===
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      // === 主旋律A ===
+      { freq: 659, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === 电子重复变体 ===
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      // === 上行推进 ===
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 988, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      // === 高潮 ===
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 988, dur: 0.8 },
+      { freq: 1175, dur: 1.2 },
+      { freq: 988, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      // === Break ===
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      // === Drop ===
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 988, dur: 0.6 },
+      { freq: 988, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      // === Ending ===
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 1.6 }
+    ],
+    duration: 180,
+    volume: 0.09,
+    wave: "square"
+  };
+  var technotris_default = Technotris;
+
+  // lib/services/audio/constants/bgm/golden-snake-dance.js
+  var GoldenSnakeDance = {
+    name: "Golden Snake Dance",
+    melody: [
+      // ===== 核心主题：赛龙舟 =====
+      { freq: 659, dur: 0.3 },
+      // 啦 (E5)
+      { freq: 587, dur: 0.3 },
+      // 啦 (D5)
+      { freq: 523, dur: 0.3 },
+      // 啦 (C5)
+      { freq: 587, dur: 0.3 },
+      // 啦
+      { freq: 659, dur: 0.6 },
+      // 啦～
+      { freq: 659, dur: 0.3 },
+      { freq: 659, dur: 0.3 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.3 },
+      { freq: 523, dur: 0.3 },
+      { freq: 440, dur: 0.3 },
+      // 啦 (A4)
+      { freq: 523, dur: 0.3 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 0.3 },
+      { freq: 587, dur: 0.3 },
+      { freq: 587, dur: 0.6 },
+      // ===== 对答段落：锣鼓模仿 =====
+      { freq: 784, dur: 0.2 },
+      // 锵 (G5)
+      { freq: 784, dur: 0.2 },
+      // 锵
+      { freq: 784, dur: 0.2 },
+      // 锵
+      { freq: 659, dur: 0.4 },
+      // 咚
+      { freq: 659, dur: 0.2 },
+      // 咚
+      { freq: 659, dur: 0.2 },
+      // 咚
+      { freq: 784, dur: 0.2 },
+      // 锵
+      { freq: 880, dur: 0.2 },
+      // 锵 (A5)
+      { freq: 784, dur: 0.2 },
+      // 锵
+      { freq: 659, dur: 0.4 },
+      // 咚
+      { freq: 659, dur: 0.2 },
+      // 咚
+      { freq: 659, dur: 0.2 },
+      // 咚
+      { freq: 880, dur: 0.2 },
+      // 锵
+      { freq: 784, dur: 0.2 },
+      // 锵
+      { freq: 659, dur: 0.2 },
+      // 锵
+      { freq: 587, dur: 0.4 },
+      // 咚
+      { freq: 587, dur: 0.2 },
+      // 咚
+      { freq: 587, dur: 0.2 },
+      // 咚
+      { freq: 784, dur: 0.2 },
+      { freq: 659, dur: 0.2 },
+      { freq: 587, dur: 0.2 },
+      { freq: 523, dur: 0.6 },
+      // 咚～
+      { freq: 523, dur: 0.3 },
+      { freq: 523, dur: 0.3 },
+      // ===== 主题再现，上行递进 =====
+      { freq: 659, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      // 拔高
+      { freq: 880, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      { freq: 1047, dur: 0.6 },
+      // 更高 (C6)
+      { freq: 1047, dur: 0.3 },
+      { freq: 1047, dur: 0.3 },
+      { freq: 1047, dur: 0.6 },
+      { freq: 880, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      { freq: 659, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      { freq: 880, dur: 0.6 },
+      { freq: 880, dur: 0.3 },
+      { freq: 880, dur: 0.3 },
+      { freq: 880, dur: 0.6 },
+      // ===== 热烈对答，加速感 =====
+      { freq: 784, dur: 0.15 },
+      { freq: 880, dur: 0.15 },
+      { freq: 784, dur: 0.15 },
+      { freq: 659, dur: 0.15 },
+      { freq: 587, dur: 0.15 },
+      { freq: 659, dur: 0.15 },
+      { freq: 784, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 784, dur: 0.15 },
+      { freq: 880, dur: 0.15 },
+      { freq: 784, dur: 0.15 },
+      { freq: 1047, dur: 0.15 },
+      { freq: 880, dur: 0.15 },
+      { freq: 784, dur: 0.15 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.4 },
+      // ===== 收束 =====
+      { freq: 659, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      { freq: 880, dur: 0.3 },
+      { freq: 784, dur: 0.3 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.3 },
+      { freq: 523, dur: 1.5 },
+      { freq: 0, dur: 1 }
+    ],
+    duration: 200,
+    // 快节奏
+    volume: 0.08,
+    wave: "square",
+    gate: 0.6,
+    // 明显断奏，模仿弹拨乐颗粒感
+    articulation: {
+      attackTime: 2e-3,
+      releaseTime: 0.015,
+      sustainRatio: 0.4
+      // 低延音，音符跳跃
+    }
+  };
+  var golden_snake_dance_default = GoldenSnakeDance;
+
+  // lib/services/audio/constants/bgm/korobeiniki.js
+  var Korobeiniki = {
+    name: "Korobeiniki",
+    melody: [
+      // === A段（经典开头）===
+      { freq: 659, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === A'段（变体）===
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === B段（推进）===
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 880, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      // === C段（高潮）===
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 880, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 1.2 },
+      // === D段（变化）===
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 1.2 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === E段（回落）===
+      { freq: 440, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 1.2 },
+      { freq: 587, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 1.2 },
+      // === F段（再现+收束）===
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === 结尾（循环点）===
+      { freq: 523, dur: 1.2 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 1.6 }
+    ],
+    duration: 140,
+    volume: 0.08,
+    wave: "square"
+  };
+  var korobeiniki_default = Korobeiniki;
+
   // lib/services/audio/constants/bgm/journey-to-west.js
   var JourneyToWest = {
     name: "JourneyToWest",
@@ -4383,11 +4689,17 @@ var tetris = (() => {
   // lib/services/audio/constants/musics.js
   var Musics = {
     /**
-     * ## 背景音乐：JasmineFlower
+     * ## 背景音乐：TetrisTheme
      *
      * @type {Music}
      */
-    JasmineFlower: jasmine_flower_default,
+    TetrisTheme: tetris_theme_default,
+    /**
+     * ## 背景音乐：SpringFestival
+     *
+     * @type {Music}
+     */
+    SpringFestival: spring_festival_default,
     /**
      * ## 背景音乐：FirstDivision
      *
@@ -4395,23 +4707,17 @@ var tetris = (() => {
      */
     FirstDivision: first_division_default,
     /**
+     * ## 背景音乐：GongXiFaCai
+     *
+     * @type {Music}
+     */
+    GongXiFaCai: gong_xi_fa_cai_default,
+    /**
      * ## 背景音乐：Loginska
      *
      * @type {Music}
      */
     Loginska: loginska_default,
-    /**
-     * ## 背景音乐：Technotris
-     *
-     * @type {Music}
-     */
-    Technotris: technotris_default,
-    /**
-     * ## 背景音乐：Korobeiniki
-     *
-     * @type {Music}
-     */
-    Korobeiniki: korobeiniki_default,
     /**
      * ## 背景音乐：BeyondTheWall
      *
@@ -4419,11 +4725,23 @@ var tetris = (() => {
      */
     BeyondTheWall: beyond_the_wall_default,
     /**
-     * ## 背景音乐：TetrisTheme
+     * ## 背景音乐：Technotris
      *
      * @type {Music}
      */
-    TetrisTheme: tetris_theme_default,
+    Technotris: technotris_default,
+    /**
+     * ## 背景音乐：GoldenSnakeDance
+     *
+     * @type {Music}
+     */
+    GoldenSnakeDance: golden_snake_dance_default,
+    /**
+     * ## 背景音乐：Korobeiniki
+     *
+     * @type {Music}
+     */
+    Korobeiniki: korobeiniki_default,
     /**
      * ## 背景音乐：JourneyToWest
      *
@@ -4434,15 +4752,20 @@ var tetris = (() => {
   var musics_default = Musics;
 
   // lib/services/audio/loop-play-bgm.js
-  var LOOKAHEAD = 25;
   var SCHEDULE_AHEAD_TIME = 0.12;
+  var LOOKAHEAD = 25;
   var loopPlayBGM = (melody, options = {}) => {
     const {
       duration = 110,
+      // 基准时长：dur 为 1.0 时对应 110ms
       volume = 0.05,
+      // 主音量
       wave = "square",
+      // 默认方波，富有颗粒感
       gate = 1,
+      // 默认连奏，不产生间隙
       articulation = {}
+      // 运音包络，playTone 内部会再次指定默认值
     } = options;
     let currentNoteIndex = 0;
     let nextNoteTime = audio_state_default.audioCtx.currentTime;
@@ -4487,36 +4810,38 @@ var tetris = (() => {
   // lib/services/audio/play-bgm.js
   var {
     TetrisTheme: TetrisTheme2,
-    JasmineFlower: JasmineFlower2,
+    SpringFestival: SpringFestival2,
     FirstDivision: FirstDivision2,
+    GongXiFaCai: GongXiFaCai2,
     Loginska: Loginska2,
-    Technotris: Technotris2,
-    Korobeiniki: Korobeiniki2,
     BeyondTheWall: BeyondTheWall2,
+    Technotris: Technotris2,
+    GoldenSnakeDance: GoldenSnakeDance2,
+    Korobeiniki: Korobeiniki2,
     JourneyToWest: JourneyToWest2
   } = musics_default;
   var MUSIC_LIST = [
-    JasmineFlower2,
     TetrisTheme2,
+    SpringFestival2,
     FirstDivision2,
+    GongXiFaCai2,
     Loginska2,
-    Technotris2,
-    Korobeiniki2,
     BeyondTheWall2,
+    Technotris2,
+    GoldenSnakeDance2,
+    Korobeiniki2,
     JourneyToWest2
   ];
   var getMusicByLevel = (level2) => {
     const { length } = MUSIC_LIST;
     const step = Math.floor(configuration_default.Level.max / length);
     const index = Math.min(Math.floor((level2 - 1) / step), length - 1);
+    console.log("step", step);
     return MUSIC_LIST[index];
   };
-  var playBGM = async (level2 = 1) => {
+  var playBGM = (level2 = 1) => {
     if (!audio_state_default.bgmEnabled) {
       return;
-    }
-    if (audio_state_default.audioCtx.state === "suspended") {
-      await audio_state_default.audioCtx.resume();
     }
     stop_bgm_default();
     const music = getMusicByLevel(level2);
@@ -4757,6 +5082,7 @@ var tetris = (() => {
         count: 0,
         acc: 0
       };
+      event_bus_default.emit("audio:sounds:countdown");
     }
     /**
      * ## 更新动画状态
