@@ -52,31 +52,55 @@ describe('loopPlayBGM', () => {
   it('启动后立即调度第一个音符', () => {
     loopPlayBGM(melody, { duration: 200 });
     expect(mockPlayTone).toHaveBeenCalledTimes(1);
-    expect(mockPlayTone).toHaveBeenCalledWith(440, 200, expect.objectContaining({ startTime: 100 }));
+    expect(mockPlayTone).toHaveBeenCalledWith(
+      440,
+      200,
+      expect.objectContaining({ startTime: 100 }),
+    );
   });
 
   it('将 options 透传给 playTone', () => {
     const articulation = { attackTime: 0.02 };
-    loopPlayBGM(melody, { duration: 250, volume: 0.2, wave: 'triangle', gate: 0.5, articulation });
-    expect(mockPlayTone).toHaveBeenCalledWith(440, 250, expect.objectContaining({
+    loopPlayBGM(melody, {
+      duration: 250,
       volume: 0.2,
       wave: 'triangle',
       gate: 0.5,
       articulation,
-    }));
+    });
+    expect(mockPlayTone).toHaveBeenCalledWith(
+      440,
+      250,
+      expect.objectContaining({
+        volume: 0.2,
+        wave: 'triangle',
+        gate: 0.5,
+        articulation,
+      }),
+    );
   });
 
   it('未传 options 时使用默认值', () => {
     loopPlayBGM(melody);
-    expect(mockPlayTone).toHaveBeenCalledWith(440, 110, expect.objectContaining({
-      volume: 0.05,
-      wave: 'square',
-      gate: 1,
-    }));
+    expect(mockPlayTone).toHaveBeenCalledWith(
+      440,
+      110,
+      expect.objectContaining({
+        volume: 0.05,
+        wave: 'square',
+        gate: 1,
+      }),
+    );
   });
 
   it('休止符不调用 playTone', () => {
-    loopPlayBGM([{ freq: 0, dur: 1.0 }, { freq: 440, dur: 1.0 }], { duration: 200 });
+    loopPlayBGM(
+      [
+        { freq: 0, dur: 1.0 },
+        { freq: 440, dur: 1.0 },
+      ],
+      { duration: 200 },
+    );
 
     // 第一个音符是休止符，不应调用 playTone
     expect(mockPlayTone).toHaveBeenCalledTimes(0);

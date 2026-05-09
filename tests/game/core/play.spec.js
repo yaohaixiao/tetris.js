@@ -75,7 +75,9 @@ describe('play', () => {
 
     play();
 
-    expect(EventBus.emit).toHaveBeenCalledWith('ui:update:mode', { mode: 'playing' });
+    expect(EventBus.emit).toHaveBeenCalledWith('ui:update:mode', {
+      mode: 'playing',
+    });
     expect(EventBus.emit).toHaveBeenCalledWith('effects:stop:paused');
     expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:resume');
     expect(EventBus.emit).toHaveBeenCalledWith('audio:play:bgm', { level: 5 });

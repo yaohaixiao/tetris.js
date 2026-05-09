@@ -1,6 +1,6 @@
 import getNextPiece from '@/lib/game/utils/get-next-piece';
 import Game from '@/lib/game';
-import Replay from '@/lib/runtime/replay-runtime';
+import Replay from '../../../lib/runtime/replay-controller.js';
 import randomShape from '@/lib/game/utils/random-shape';
 
 jest.mock('@/lib/game', () => ({
@@ -9,7 +9,7 @@ jest.mock('@/lib/game', () => ({
   },
 }));
 
-jest.mock('@/lib/runtime/replay-runtime', () => ({
+jest.mock('../../../lib/runtime/replay-controller.js', () => ({
   playing: false,
   pieceSequence: [],
   pieceIndex: 0,

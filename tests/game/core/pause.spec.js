@@ -72,7 +72,9 @@ describe('pause', () => {
 
     pause();
 
-    expect(EventBus.emit).toHaveBeenCalledWith('ui:update:mode', { mode: 'paused' });
+    expect(EventBus.emit).toHaveBeenCalledWith('ui:update:mode', {
+      mode: 'paused',
+    });
     expect(EventBus.emit).toHaveBeenCalledWith('audio:stop:bgm');
     expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:pause');
     expect(EventBus.emit).toHaveBeenCalledWith('effects:start:paused');

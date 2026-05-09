@@ -1,4 +1,4 @@
-import Replay from '@/lib/runtime/replay-runtime';
+import Replay from '../../lib/runtime/replay-controller.js';
 import EventBus from '@/lib/core/event-bus';
 
 jest.mock('@/lib/core/event-bus', () => ({

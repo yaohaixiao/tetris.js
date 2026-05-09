@@ -1,4 +1,4 @@
-import createAnimationSystem from '@/lib/runtime/animation-runtime';
+import createAnimationSystem from '../../lib/runtime/animation-system.js';
 
 describe('AnimationSystem', () => {
   let system;
