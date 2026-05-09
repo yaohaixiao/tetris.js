@@ -4836,7 +4836,6 @@ var tetris = (() => {
     const { length } = MUSIC_LIST;
     const step = Math.floor(configuration_default.Level.max / length);
     const index = Math.min(Math.floor((level2 - 1) / step), length - 1);
-    console.log("step", step);
     return MUSIC_LIST[index];
   };
   var playBGM = (level2 = 1) => {
