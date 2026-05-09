@@ -69,15 +69,15 @@ describe('play', () => {
     expect(result).toBe(false);
   });
 
-  test('事件发射顺序正确', () => {
+  test('继续时发射所有事件', () => {
     Game.store.getMode.mockReturnValue('paused');
+    Game.store.getLevel.mockReturnValue(5);
 
     play();
 
-    expect(EventBus.emit).toHaveBeenNthCalledWith(1, 'effects:stop:paused');
-    expect(EventBus.emit).toHaveBeenNthCalledWith(2, 'audio:sounds:resume');
-    expect(EventBus.emit).toHaveBeenNthCalledWith(3, 'audio:play:bgm', {
-      level: 1,
-    });
+    expect(EventBus.emit).toHaveBeenCalledWith('ui:update:mode', { mode: 'playing' });
+    expect(EventBus.emit).toHaveBeenCalledWith('effects:stop:paused');
+    expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:resume');
+    expect(EventBus.emit).toHaveBeenCalledWith('audio:play:bgm', { level: 5 });
   });
 });

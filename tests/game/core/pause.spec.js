@@ -67,13 +67,14 @@ describe('pause', () => {
     expect(EventBus.emit).not.toHaveBeenCalled();
   });
 
-  test('事件发射顺序正确', () => {
+  test('暂停时发射所有事件', () => {
     Game.store.getMode.mockReturnValue('playing');
 
     pause();
 
-    expect(EventBus.emit).toHaveBeenNthCalledWith(1, 'audio:stop:bgm');
-    expect(EventBus.emit).toHaveBeenNthCalledWith(2, 'audio:sounds:pause');
-    expect(EventBus.emit).toHaveBeenNthCalledWith(3, 'effects:start:paused');
+    expect(EventBus.emit).toHaveBeenCalledWith('ui:update:mode', { mode: 'paused' });
+    expect(EventBus.emit).toHaveBeenCalledWith('audio:stop:bgm');
+    expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:pause');
+    expect(EventBus.emit).toHaveBeenCalledWith('effects:start:paused');
   });
 });

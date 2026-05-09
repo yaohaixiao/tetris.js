@@ -8,10 +8,10 @@ const HtmlTemplate = `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preload" href="./tetris.css" as="style">
-  <link rel="preload" href="./tetris.js" as="script">
-  <link rel="preload" href="./img/bg.jpg" type="image/jpg" as="image">
-  <link rel="prefetch" href="./font/latin.woff2" type="font/woff2" as="font">
+  <link rel="preload" href="tetris.css" as="style">
+  <link rel="preload" href="tetris.js" as="script">
+  <link rel="preload" href="img/bg.jpg" as="image">
+  <link rel="prefetch" href="font/latin.woff2" type="font/woff2" as="font">
   <title>俄罗斯方块</title>
   <link href="./tetris.css" rel="stylesheet">
 </head>

@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-import createHud from '@/lib/services/ui/hud/create-hud';
+import createHud from '@/lib/services/ui/hud/create-hud.js';
 
 jest.mock('@/lib/services/ui/hud/hud-elements.js', () => ({
   score: { textContent: '' },

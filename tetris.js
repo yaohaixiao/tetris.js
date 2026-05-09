@@ -1,2 +1,5795 @@
-var tetris=(()=>{var r0="#00c8ff",t0="rgba(0, 200, 255, 0.3)",o0="#f1fa04",s0="rgba(255, 255, 0, 0.3)",n0="#d31ac1",a0="rgba(211, 26, 193, 0.3)",i0="#5050ff",d0="rgba(80, 80, 255, 0.3)",f0="#ffa500",c0="rgba(255, 127, 0, 0.3)",l0="#0afa04",u0="#5c9d31",m0="rgba(0, 255, 0, 0.3)",h0="#ff3b30",p0="rgba(255, 59, 48, 0.3)",v0="#e64a19",g0="rgba(230, 74, 25, 0.3)",q0="#444",x0="rgba(0, 0, 0, 0.3)",y0="#fff",E0="rgba(255, 255, 255, 0.3)",S0="#ff4fa3",M0="rgba(255, 79, 163, 0.3)",w0="#7b34eb",T0="rgba(123, 52, 235, 0.3)",C0="#0cc0df",L0="rgba(12, 192, 223, 0.3)",B0={TEAL:r0,RGBA_TEAL:t0,YELLOW:o0,RGBA_YELLOW:s0,PURPLE:n0,RGBA_PURPLE:a0,BLUE:i0,RGBA_BLUE:d0,ORANGE:f0,RGBA_ORANGE:c0,GREEN:l0,DARK_GREEN:u0,RGBA_GREEN:m0,RED:h0,RGBA_RED:p0,CORAL:v0,RGBA_CORAL:g0,BLACK:q0,RGBA_BLACK:x0,WHITE:y0,RGBA_WHITE:E0,PINK:S0,RGBA_PINK:M0,VIOLET:w0,RGBA_VIOLET:T0,CYAN:C0,RGBA_CYAN:L0},u=B0;var{RGBA_WHITE:ie}=u,A0={tetris:'<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512"><path d="M16.568 367.165h68.409v68.409H16.568z" style="fill:#f9d84e"/><path d="M16.568 418.472h68.409v17.102H16.568z" style="fill:#ffc20d"/><path d="M16.568 367.165H33.67v68.409H16.568z" style="fill:#ffc20d"/><path d="M84.977 367.165h68.409v68.409H84.977z" style="fill:#f9d84e"/><path d="M84.977 418.472h68.409v17.102H84.977z" style="fill:#ffc20d"/><path d="M84.977 367.165h17.102v68.409H84.977z" style="fill:#ffc20d"/><path d="M84.977 298.756h68.409v68.409H84.977z" style="fill:#f9d84e"/><path d="M84.977 350.063h68.409v17.102H84.977z" style="fill:#ffc20d"/><path d="M84.977 298.756h17.102v68.409H84.977z" style="fill:#ffc20d"/><path d="M16.568 298.756h68.409v68.409H16.568z" style="fill:#f9d84e"/><path d="M16.568 350.063h68.409v17.102H16.568z" style="fill:#ffc20d"/><path d="M16.568 298.756H33.67v68.409H16.568z" style="fill:#ffc20d"/><path d="M16.568 435.574h68.409v68.409H16.568z" style="fill:#b169bf"/><path d="M16.568 435.574H33.67v68.409H16.568z" style="fill:#844a8f"/><path d="M16.568 486.881h68.409v17.102H16.568z" style="fill:#844a8f"/><path d="M16.568 486.881H33.67v17.102H16.568z" style="fill:#844a8f"/><path d="M84.977 435.574h68.409v68.409H84.977z" style="fill:#b169bf"/><path d="M84.977 435.574h17.102v68.409H84.977z" style="fill:#844a8f"/><path d="M84.977 486.881h68.409v17.102H84.977z" style="fill:#844a8f"/><path d="M84.977 486.881h17.102v17.102H84.977z" style="fill:#844a8f"/><path d="M153.386 435.574h68.409v68.409h-68.409z" style="fill:#b169bf"/><path d="M153.386 435.574h17.102v68.409h-17.102z" style="fill:#844a8f"/><path d="M153.386 486.881h68.409v17.102h-68.409z" style="fill:#844a8f"/><path d="M153.386 486.881h17.102v17.102h-17.102z" style="fill:#844a8f"/><path d="M221.795 435.574h68.409v68.409h-68.409z" style="fill:#b169bf"/><path d="M221.795 435.574h17.102v68.409h-17.102z" style="fill:#844a8f"/><path d="M221.795 486.881h68.409v17.102h-68.409z" style="fill:#844a8f"/><path d="M221.795 486.881h17.102v17.102h-17.102z" style="fill:#844a8f"/><path d="M221.795 367.165h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M221.795 418.472h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M221.795 367.165h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M290.205 367.165h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M290.205 418.472h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M290.205 367.165h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M290.205 435.574h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M290.205 486.881h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M290.205 435.574h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M358.614 435.574h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M358.614 486.881h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M358.614 435.574h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M256 8.017h68.409v68.409H256z" style="fill:#fd5e95"/><path d="M256 59.324h68.409v17.102H256z" style="fill:#d14d7b"/><path d="M256 8.017h17.102v68.409H256z" style="fill:#d14d7b"/><path d="M324.409 8.017h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M324.409 59.324h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M324.409 8.017h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M324.409 76.426h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M324.409 127.733h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M324.409 76.426h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M392.818 76.426h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M392.818 127.733h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M392.818 76.426h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M358.614 367.165h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M358.614 418.472h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M358.614 367.165h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M427.023 367.165h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M427.023 418.472h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M427.023 367.165h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M427.023 435.574h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M427.023 486.881h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M427.023 435.574h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M358.614 298.756h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M358.614 350.063h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M358.614 298.756h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M153.386 127.733h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M153.386 179.04h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M153.386 127.733h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M153.386 196.142h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M153.386 247.449h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M153.386 196.142h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M221.795 196.142h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M221.795 247.449h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M221.795 196.142h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M153.386 264.551h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M153.386 315.858h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M153.386 264.551h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M256 84.443h60.392v60.392a8.016 8.016 0 0 0 8.017 8.017h136.818a8.016 8.016 0 0 0 8.017-8.017V76.426a8.016 8.016 0 0 0-8.017-8.017h-60.392V8.017A8.016 8.016 0 0 0 392.818 0H256a8.017 8.017 0 0 0-8.017 8.017v68.409A8.017 8.017 0 0 0 256 84.443m76.426 0h52.376v52.376h-52.376zm120.785 52.375h-52.376V84.443h52.376zm-68.409-68.409h-52.376V16.033h52.376zM264.017 16.033h52.376v52.376h-52.376zM495.432 359.148H435.04v-60.392a8.016 8.016 0 0 0-8.017-8.017h-68.409a8.016 8.016 0 0 0-8.017 8.017v60.392h-9.086a8.016 8.016 0 0 0-8.017 8.017 8.016 8.016 0 0 0 8.017 8.017h9.086v52.376h-52.376v-52.376h9.086a8.016 8.016 0 0 0 8.017-8.017 8.016 8.016 0 0 0-8.017-8.017h-85.511a8.017 8.017 0 0 0-8.017 8.017v60.392h-52.376v-86.58h60.392a8.017 8.017 0 0 0 8.017-8.017v-60.392h60.392a8.016 8.016 0 0 0 8.017-8.017v-68.409a8.016 8.016 0 0 0-8.017-8.017h-60.392v-60.392a8.017 8.017 0 0 0-8.017-8.017h-68.409a8.017 8.017 0 0 0-8.017 8.017v17.102a8.017 8.017 0 0 0 8.017 8.017 8.017 8.017 0 0 0 8.017-8.017v-9.086h52.376v52.376h-52.376v-9.086a8.017 8.017 0 0 0-8.017-8.017 8.017 8.017 0 0 0-8.017 8.017v111.699H67.875c-4.427 0-8.017 3.588-8.017 8.017s3.589 8.017 8.017 8.017h9.086v52.376H24.585v-52.376h9.086c4.427 0 8.017-3.588 8.017-8.017s-3.589-8.017-8.017-8.017H16.568a8.017 8.017 0 0 0-8.017 8.017v205.228A8.017 8.017 0 0 0 16.568 512h478.864a8.016 8.016 0 0 0 8.017-8.017V367.165a8.016 8.016 0 0 0-8.017-8.017m-8.017 68.409H435.04v-52.376h52.376zM366.63 375.182h52.376v52.376H366.63zm0-68.41h52.376v52.376H366.63zm-136.818 68.41h52.376v52.376h-52.376zm-136.818 0h52.376v52.376H92.994zm120.785-50.238h-52.376v-52.376h52.376zm68.409-68.41h-52.376v-52.376h52.376zm-68.409-52.375v52.376h-52.376v-52.376zM145.37 359.148H92.994v-52.376h52.376zm-68.41 16.034v52.376H24.585v-52.376zm-52.375 68.409H76.96v52.376H24.585zm68.409 0h52.376v52.376H92.994zm68.409 0h52.376v52.376h-52.376zm68.409 0h52.376v52.376h-52.376zm68.409 0h52.376v52.376h-52.376zm68.409 0h52.376v52.376H366.63zm120.785 52.376H435.04v-52.376h52.376z"/></svg>',gamepad:'<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" fill="none" viewBox="0 0 48 48"><path stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 30v3a7 7 0 0 1-7 7v0a7 7 0 0 1-7-7V19M29 30v3a7 7 0 0 0 7 7v0a7 7 0 0 0 7-7V19"/><rect width="38" height="22" x="5" y="8" fill="#2f88ff" stroke="#000" stroke-width="4" rx="11"/><path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M21 19h-8M17 15v8"/><rect width="4" height="4" x="32" y="15" fill="#fff" rx="2"/><rect width="4" height="4" x="28" y="20" fill="#fff" rx="2"/></svg>',tower:`<svg fill="${ie}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="800" height="800" viewBox="0 0 512 512"><path d="M341.512 495.967h-11.975l-33.221-71.978c6.644-8.584 10.613-19.341 10.613-31.012 0-18.862-10.346-35.341-25.653-44.095v-134.14c15.308-8.754 25.653-25.234 25.653-44.095 0-25.268-18.556-46.278-42.756-50.133v-11.736c9.93-3.354 17.102-12.752 17.102-23.8s-7.172-20.446-17.102-23.8V8.017a8.017 8.017 0 0 0-16.034 0v53.16c-9.93 3.354-17.102 12.752-17.102 23.8s7.172 20.446 17.102 23.8v11.736c-24.2 3.855-42.756 24.866-42.756 50.133 0 18.862 10.346 35.341 25.653 44.095V348.88c-15.308 8.754-25.653 25.234-25.653 44.095 0 11.555 3.888 22.215 10.414 30.757l-33.337 72.234h-11.975a8.017 8.017 0 0 0-8.017 8.017 8.017 8.017 0 0 0 8.017 8.017h171.026a8.017 8.017 0 0 0 8.017-8.017 8.014 8.014 0 0 0-8.016-8.016m-94.44-410.99c0-5.01 4.076-9.086 9.086-9.086s9.086 4.076 9.086 9.086-4.076 9.086-9.086 9.086-9.086-4.076-9.086-9.086m-24.485 94.597a34.7 34.7 0 0 1-1.168-8.927c0-19.155 15.584-34.739 34.739-34.739s34.739 15.584 34.739 34.739a34.6 34.6 0 0 1-1.168 8.927zm24.485 128.267V289.67h18.171v18.171zm18.171 16.034v19.16a51 51 0 0 0-9.086-.831 51 51 0 0 0-9.086.831v-19.16zm-18.171-50.238v-18.171h18.171v18.171zm0-34.205v-18.844a51 51 0 0 0 9.086.831 51 51 0 0 0 9.086-.831v18.844zm9.085-34.046c-9.366 0-17.87-3.732-24.124-9.778h48.249c-6.255 6.046-14.76 9.778-24.125 9.778m.001 152.852c16.412 0 30.192 11.444 33.806 26.767h-67.611c3.613-15.324 17.393-26.767 33.805-26.767m-25.12 137.729h-30.919l28.008-60.684c.947.63 1.921 1.223 2.911 1.789zm34.205 0h-18.171v-18.171h18.171zm0-34.205h-18.171v-18.844a51 51 0 0 0 9.086.831 51 51 0 0 0 9.086-.831v18.844zm-9.085-34.046c-16.524 0-30.381-11.601-33.879-27.084h67.757c-3.497 15.483-17.354 27.084-33.878 27.084m25.119 68.251v-58.895a50 50 0 0 0 2.667-1.633l27.936 60.528z"/></svg>`,pagoda:`<svg fill="${ie}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 286.154 286.154"><path d="M230.769 258.462h-23.077V230.77h9.231c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 4.269-8.788 4.602-8.82 4.638-.323-.069-8.548-2.091-24.263-25.662l-1.371-2.054H180V180h13.846c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 4.302-8.917 4.606-8.917 4.629-.226-.037-7.818-1.491-19.431-20.852l-1.348-2.238h-2.612v-9.231h23.077c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 4.302-8.917 4.606-8.917 4.629-.226-.037-7.818-1.491-19.431-20.852l-1.348-2.238h-2.612v-9.231h23.077c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 4.302-8.917 4.606-8.917 4.629-.226-.037-7.818-1.491-19.431-20.852l-1.348-2.238h-2.612v-9.231h18.461c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 3.475-5.82 4.338-8.215 4.551-5.035-2.695-27-15.115-42.554-33.923V0h-9.231v12.166c-15.554 18.808-37.514 31.223-42.549 33.923-2.409-.212-8.22-1.08-8.22-4.551h-9.231c0 10.952 12.078 13.846 18.462 13.846h18.461v9.231h-2.612l-1.343 2.238c-11.667 19.445-19.274 20.83-19.107 20.839-.226-.005-9.245-.286-9.245-4.615h-9.231c0 10.952 12.078 13.846 18.462 13.846h23.077v9.231h-2.612l-1.343 2.238c-11.668 19.445-19.274 20.829-19.108 20.838-.226-.005-9.245-.286-9.245-4.615h-9.231c0 10.952 12.078 13.846 18.462 13.846h23.077v9.231h-2.612l-1.343 2.238c-11.668 19.445-19.274 20.829-19.108 20.838-.226-.005-9.245-.286-9.245-4.615h-9.231c0 10.952 12.078 13.846 18.462 13.846h13.846v13.846h-11.7l-1.371 2.054c-15.812 23.718-24.042 25.615-23.848 25.638-.305-.009-9.235-.309-9.235-4.615h-9.231c0 10.952 12.078 13.846 18.462 13.846h9.231v27.692H55.385v18.462H4.615v9.231h258.462v-9.231h-32.308zm-43.989-55.386c5.806 8.498 10.763 14.364 14.912 18.462h-23.455l-9.231-18.462zm11.682 27.694v27.692h-23.077V230.77zm-80.225-9.231 9.231-18.462h31.218l9.231 18.462zm47.917 9.23v27.692H120v-27.692zm-18.461-36.923v-9.231h-9.231v9.231h-23.077V180h55.385v13.846zm-34.03-147.692c8.686-5.792 19.809-14.303 29.414-25.145 9.605 10.842 20.728 19.352 29.414 25.145zM138.461 60v4.615h-13.846v-9.23h36.923v9.231h-13.846V60zm-30.983 27.692c3.153-3.304 6.67-7.749 10.491-13.846h50.215c3.822 6.097 7.338 10.542 10.486 13.846zm30.983 13.847v4.615h-13.846v-9.231h36.923v9.231h-13.846v-4.615zm-30.983 27.692c3.153-3.305 6.67-7.749 10.491-13.846h50.215c3.822 6.097 7.338 10.542 10.486 13.846zm30.983 13.847v4.615h-13.846v-9.231h36.923v9.231h-13.846v-4.615zm-20.492 13.845h50.215c3.822 6.097 7.338 10.542 10.486 13.846h-71.192c3.153-3.304 6.67-7.749 10.491-13.846m-18.595 46.154h17.774l-9.231 18.462H84.462c4.149-4.099 9.106-9.965 14.912-18.462m11.395 27.692v27.692H87.692v-27.692zm110.769 46.154H64.615v-9.231h156.923z"/><path d="M129.231 240h9.231v9.231h-9.231zM92.308 240h9.231v9.231h-9.231zM184.615 240h9.231v9.231h-9.231zM147.692 240h9.231v9.231h-9.231zM272.308 276.923h9.231v9.231h-9.231z"/></svg>`,temple:`<svg fill="${ie}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 286.154 286.154"><path d="M263.077 258.462V240h-27.692v-55.385h23.077l1.265-9.051c-.305-.092-30.388-8.885-56.649-30.097v-11.622h46.154l1.117-9.092c-.351-.088-34.735-8.894-61.117-30.069V83.077h18.462l1.874-8.834c-.388-.175-37.68-17.026-56.022-41.751l7.288-11.575.471-.997c.258-.762 2.363-7.606-1.805-13.38C156.443 2.294 151.085 0 143.589 0h-.512c-7.495.097-12.849 2.294-15.905 6.54-4.163 5.774-2.058 12.618-1.805 13.38l7.532 12.175c-18.235 24.942-55.925 41.972-56.317 42.148l1.878 8.834h18.462v11.608c-26.331 21.129-60.771 29.982-61.122 30.069l1.122 9.092h46.154v11.622c-26.202 21.162-56.345 30.009-56.654 30.097l1.269 9.051h23.077V240H23.077v18.462H0v27.692h286.154v-27.692zM134.658 11.94c1.237-1.712 4.311-2.672 8.677-2.709 4.334.037 7.403.983 8.649 2.677 1.145 1.546.84 3.798.655 4.703l-6.983 11.082h-4.643l-6.983-11.095c-.193-.896-.488-3.103.628-4.658m6.222 24.983h4.389c11.598 16.205 30.143 29.022 43.671 36.923H97.214c13.523-7.901 32.072-20.718 43.666-36.923M180 83.077v9.231h-73.846v-9.231zM63.974 124.615c12.009-5.155 26.409-12.692 39.217-23.077h79.768c12.808 10.385 27.212 17.922 39.217 23.077zm129.872 9.231v9.231h-27.692v-9.231zm-36.923 0v9.231h-32.308v-9.231zm-41.538 0v9.231H92.308v-9.231zm-26.04 18.462h107.46c12.748 10.385 26.225 17.922 37.209 23.077H52.14c10.985-5.156 24.462-12.693 37.205-23.077m127.578 41.538v-9.231h9.231v9.231zm9.231 9.231V240h-9.231v-36.923zm-32.308 9.231V240h-4.615v-36.923h18.462V240h-4.616v-27.692zm-4.615-18.462v-9.231h18.462v9.231zm-18.462 0v-9.231H180v9.231zm9.231 9.231V240h-9.231v-36.923zm-64.615 0V240h-9.231v-36.923zm-9.231-9.231v-9.231h9.231v9.231zm9.23 55.385h55.385v9.231h-55.385zm13.847-36.923V240h-4.615v-36.923h36.923V240h-4.615v-27.692zm18.461 9.23V240h-9.231v-18.462zm13.846-27.692h-36.923v-9.231h36.923zm-78.461 18.462V240h-4.615v-36.923h18.462V240h-4.615v-27.692zm-4.615-18.462v-9.231h18.461v9.231zm-18.462 0v-9.231h9.231v9.231zm9.231 9.231V240H60v-36.923zm-36.923 46.154h73.847v9.231H32.308zm64.615 27.692H9.231v-9.231h87.692zm83.077 0h-73.846v-9.231H180zm0-27.692h73.846v9.231H180zm96.923 27.692h-87.692v-9.231h87.692z"/><path d="M96.923 110.769h9.231V120h-9.231zM115.385 110.769h9.231V120h-9.231zM133.846 110.769h9.231V120h-9.231zM189.231 161.538h9.231v9.231h-9.231zM124.615 60h9.231v9.231h-9.231z"/></svg>`,coffee:`<svg fill="${ie}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="800" height="800" viewBox="0 0 32 32"><path d="M24.6 25h.9c2.5 0 4.5-2 4.5-4.5 0-2.3-1.8-4.2-4-4.4V15c0-.6-.4-1-1-1H7c-.6 0-1 .4-1 1v5c0 3.3 1.6 6.2 4 8H5c-.6 0-1 .4-1 1s.4 1 1 1h22c.6 0 1-.4 1-1s-.4-1-1-1h-5c1.1-.8 2-1.8 2.6-3m3.4-4.5c0 1.4-1.1 2.5-2.5 2.5.3-.9.5-2 .5-3v-1.9c1.1.2 2 1.2 2 2.4M24 16v2.4c-1.1.5-4.1 1.4-7.6-.3s-6.6-.8-8.4.1V16zM8 20.5c1-.7 4-2.3 7.5-.6 1.8.9 3.5 1.1 5 1.1 1.4 0 2.6-.3 3.5-.5-.1 1-.3 2-.7 2.8-.1.1-.2.3-.2.4-1.4 2.5-4 4.2-7 4.2-4.3.1-7.8-3.2-8.1-7.4m3-9.5h3c.3 0 .5.2.5.5v.5c0 .6.4 1 1 1s1-.4 1-1v-.5c0-1.4-1.1-2.5-2.5-2.5h-3c-.3 0-.5-.2-.5-.5s.2-.5.5-.5h9.5c1.7 0 3-1.3 3-3s-1.3-3-3-3h-10c-.6 0-1 .4-1 1s.4 1 1 1h10c.6 0 1 .4 1 1s-.4 1-1 1H11C9.6 6 8.5 7.1 8.5 8.5S9.6 11 11 11"/></svg>`,happy:'<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="800" height="800" viewBox="0 0 512.003 512.003"><circle cx="256.001" cy="256.001" r="256.001" style="fill:#fddf6d"/><path d="M310.859 474.208c-141.385 0-256-114.615-256-256 0-75.537 32.722-143.422 84.757-190.281C56.738 70.303 0 156.525 0 256c0 141.385 114.615 256 256 256 65.849 0 125.883-24.87 171.243-65.718-34.918 17.853-74.473 27.926-116.384 27.926" style="fill:#fcc56b"/><path d="M245.899 187.172c-5.752 0-10.414-4.663-10.414-10.414 0-13.433-10.928-24.362-24.362-24.362s-24.362 10.93-24.362 24.362c0 5.752-4.663 10.414-10.414 10.414-5.752 0-10.414-4.663-10.414-10.414 0-24.918 20.273-45.19 45.19-45.19s45.19 20.272 45.19 45.19c.001 5.751-4.662 10.414-10.414 10.414M421.798 187.172c-5.752 0-10.414-4.663-10.414-10.414 0-13.433-10.928-24.362-24.362-24.362s-24.362 10.93-24.362 24.362c0 5.752-4.663 10.414-10.414 10.414s-10.414-4.663-10.414-10.414c0-24.918 20.273-45.19 45.19-45.19s45.19 20.272 45.19 45.19c.001 5.751-4.662 10.414-10.414 10.414" style="fill:#7f184c"/><path d="M293.248 443.08c-74.004 0-133.995-59.991-133.995-133.995h267.991c-.001 74.003-59.993 133.995-133.996 133.995" style="fill:#fff"/><path d="M172.426 367.092a134 134 0 0 0 12.472 20.829h216.699a134 134 0 0 0 12.472-20.829z" style="fill:#e6e6e6"/><path d="M145.987 240.152c-19.011 0-34.423 15.412-34.423 34.423h68.848c-.002-19.011-15.414-34.423-34.425-34.423M446.251 240.152c-19.011 0-34.423 15.412-34.423 34.423h68.848c0-19.011-15.412-34.423-34.425-34.423" style="fill:#f9a880"/><ellipse cx="292.913" cy="73.351" rx="29.854" ry="53.46" style="fill:#fceb88" transform="rotate(-74.199 292.913 73.351)"/></svg>'},P=A0;var z0={events:new Map,on(e,r){this.events.has(e)||this.events.set(e,new Set),this.events.get(e).add(r)},off(e,r){let t=this.events.get(e);t&&(t.delete(r),t.size===0&&this.events.delete(e))},emit(e,r){let t=this.events.get(e);if(t)for(let o of t)o(r)},clear(){this.events.clear()}},s=z0;var _0={queue:[],enqueue(e){this.queue.push(e)},flush(){let{queue:e}=this;for(;e.length>0;)e.shift().execute()},clear(){this.queue.length=0}},K=_0;var R0={Board:{cols:10,rows:20},Level:{min:11,max:99},Elements:{Canvas:{board:"game-board",next:"next-piece"},Hud:{score:"score",lines:"lines",level:"level",highScore:"high-score"}}},E=R0;var O0={beginningBoard:[],board:[],curr:null,cx:0,cy:0,next:null,score:0,lines:0,level:1,highScore:0,baseLines:0,clearLines:[],difficulty:"easy",mode:"main-menu",gamepadConnected:!1},Se=O0;var b0=e=>e==null||typeof e!="function"&&typeof e!="object"?!1:typeof e=="function"||Object.prototype.toString.call(e)==="[object Function]",ke=b0;var{RED:H0,GREEN:G0,BLUE:k0,YELLOW:I0,PURPLE:D0,TEAL:P0,ORANGE:V0}=u,N0=[H0,G0,k0,I0,D0,P0,V0],F0=(e,r,t)=>{let o=t||N0,n=[];for(let a=0;a<e;a+=1){let i=Array.from({length:r}).fill("");for(let g=0;g<r;g+=1)i[g]=o[Math.floor(Math.random()*o.length)];let d=r-3,m=1+Math.floor(Math.random()*d),h=new Set;for(;h.size<m;)h.add(Math.floor(Math.random()*r));for(let g of h)i[g]="";n.push(i)}return n},Ie=F0;var U0=(e,r,t)=>{let o=e.length;if(r<=0)return;let n=Ie(r,t),a=o-r;for(let i=0;i<n.length;i++)a+i>=0&&(e[a+i]=[...n[i]])},De=U0;var W0=e=>{let r={...structuredClone(e||Se)};return{getState:()=>r,setState:t=>{r={...r,...ke(t)?t(r):t}},resetState:()=>{r={...structuredClone(Se)}},resetBoard:()=>{let{Board:t}=E,{cols:o,rows:n}=t;r.board=Array.from({length:n},()=>Array.from({length:o}).fill(0))},generateBoard:()=>{let t={easy:0,normal:3,hard:6,expert:9},{board:o,difficulty:n}=r,a=o[0].length,i=t[n]||0;return De(o,i,a),o},setBeginningBoard:t=>{r.beginningBoard=structuredClone(t)},getBeginningBoard:()=>structuredClone(r.beginningBoard),setGamepadConnected:t=>{r.gamepadConnected=t},isGamepadConnected:()=>r.gamepadConnected,getDifficulty:()=>r.difficulty,setDifficulty:(t="easy")=>{r.difficulty=t},getBaseLines:()=>r.baseLines,setBaseLines:t=>{r.baseLines=t},getClearLines:()=>r.clearLines,setClearLines:t=>{r.clearLines=t},getHub:()=>{let{source:t,lines:o,level:n}=r;return{source:t,lines:o,level:n}},setHud:t=>{let{score:o,lines:n,level:a}=t;r.score=o,r.lines=n,r.level=a},getScore:()=>r.score,setHighScore:t=>{r.highScore=t},getHighScore:()=>r.highScore,getLevel:()=>r.level,setLevel:t=>{r.level=t},getMode:()=>r.mode,setMode:t=>{r.mode=t}}},Pe=W0;var l={recording:!1,playing:!1,data:[],cursor:0,pieceSequence:[],pieceIndex:0,playElapsed:0,startTime:0,timestamp:0,get hasData(){return Array.isArray(l.data)&&l.data.length>0},subscribe(){s.on("replay:start:record",()=>{l.startRecord()}),s.on("replay:stop:record",()=>{l.stopRecord()}),s.on("replay:add:record",e=>{l.recording&&l.data.push(e)}),s.on("replay:add:piece",e=>{l.recording&&l.pieceSequence.push(structuredClone(e))}),s.on("replay:start:play",()=>{l.startPlay()}),s.on("replay:reset",()=>{l.reset()}),s.on("replay:game:over",()=>{l.hasData?s.emit("game:replay:prepare:board"):(s.emit("ui:update:mode",{mode:"game-over"}),s.emit("game:update:mode",{mode:"game-over"}))}),s.on("replay:stop:clear:lines",({isLevelUp:e,level:r})=>{!e||l.playing||(s.emit("audio:stop:bgm"),s.emit("audio:sounds:level:up"),s.emit("effects:start:level:up",{level:r}))})},startRecord(){l.recording=!0,l.data=[],l.pieceSequence=[],l.pieceIndex=0,l.playElapsed=0,l.startTime=this.timestamp},stopRecord(){l.recording=!1},startPlay(){l.playing=!0,l.cursor=0,l.pieceIndex=0,l.startTime=this.timestamp},stopPlay(){l.playing=!1},syncPlayElapsed({timestamp:e,isBlocked:r}){if(!l.playing||r)return;let t=l.playElapsed,o=e-l.startTime,n=o-t;n>1e3?(l.startTime+=n-1e3,l.playElapsed=t+1e3):l.playElapsed=o},update(e){let{getSpeed:r,timestamp:t}=e;if(this.timestamp=t,!l.playing)return;let o=l.playElapsed,{data:n}=l;if(n.length>0&&l.cursor>=n.length){l.stopPlay(),s.emit("game:update:mode",{mode:"game-over"});return}let a=n[l.cursor];if(a){let i=r?.()??1e3,d=a.ms-o;if(d>i*2){let h=Math.min(d-i,1e3);l.playElapsed=o+h,l.startTime=t-l.playElapsed}}for(;l.playing&&l.cursor<n.length&&n[l.cursor].ms<=o;){let{cmd:i}=n[l.cursor];s.emit("dispatch:command",i),l.cursor++}},clear(){l.recording=!1,l.playing=!1,l.cursor=0,l.data=[],l.pieceSequence=[],l.pieceIndex=0,l.startTime=0},reset(){l.stopRecord(),l.stopPlay(),l.clear()}},z=l;var{PINK:K0,BLUE:Y0,TEAL:$0,YELLOW:X0,VIOLET:J0,ORANGE:j0,GREEN:Q0,RED:Z0}=u,et=[{shape:[[1,1,1,1]],color:$0},{shape:[[1,1,1,1,1]],color:Q0},{shape:[[1,1],[1,1]],color:j0},{shape:[[0,1,0],[1,1,1]],color:X0},{shape:[[1,0,0],[1,1,1]],color:Y0},{shape:[[0,0,1],[1,1,1]],color:K0},{shape:[[0,1,1],[1,1,0]],color:Z0},{shape:[[1,1,0],[0,1,1]],color:J0}],Me=et;function rt(){let e=Math.floor(Math.random()*Me.length),r=Me[e];return{...r,shape:r.shape.map(t=>[...t])}}var ne=rt;var tt=()=>{if(z.playing){let o=z.pieceSequence[z.pieceIndex++];if(!o)return{curr:null,next:null};let n=z.pieceSequence[z.pieceIndex]||null;return{curr:o,next:n}}let e=c.store.getState(),{next:r}=e;return{curr:r?{...r,shape:r.shape.map(o=>[...o])}:ne(),next:ne()}},Ve=tt;var ot=(e,r)=>{let{Board:t}=E,{rows:o,cols:n}=t,a=c.store.getState(),{curr:i,cx:d,cy:m,board:h}=a;if(!i)return!1;let g=i.shape;for(let x=0;x<g.length;x++)for(let q=0;q<g[x].length;q++)if(g[x][q]){let M=d+q+e,I=m+x+r,T=M<0||M>=n||I>=o,se=I>=0&&I<o&&h[I][M];if(T||se)return!0}return!1},N=ot;var st=()=>{let{store:e}=c,r=e.getMode();r==="game-over"||r==="replay"||(s.emit("replay:stop:record"),s.emit("audio:stop:bgm"),s.emit("audio:sounds:game:over"),s.emit("replay:game:over"))},de=st;var nt=()=>{let{Board:e}=E,{cols:r}=e,{store:t}=c,{curr:o,next:n}=Ve();if(!o)return;t.setState({curr:o,next:n,cx:Math.floor(r/2)-Math.floor(o.shape[0].length/2),cy:0});let a=t.getState();if(N(0,0)){de();return}s.emit("ui:render:next:piece",{state:a}),s.emit("replay:add:piece",a.curr)},_=nt;var at=(e,r=1)=>{let{store:t}=c;s.emit("ui:update:mode",{mode:e}),t.setState({mode:e,score:0,lines:0,level:r,next:null}),e==="playing"&&t.setBeginningBoard(t.generateBoard())},Y=at;var it=(e,r)=>{let t=Number(e);if(!Number.isFinite(t))return"";let o=Math.max(0,Math.floor(r)),n=t<0?"-":"",a=Math.abs(t).toString();return n+a.padStart(o,"0")},G=it;var dt=()=>{let{store:e}=c,r=document.querySelector("#level"),t=e.getLevel();r&&(r.textContent=G(e.getLevel(),2)),s.emit("replay:start:record"),e.resetBoard(),Y("playing",t),_(),s.emit("audio:sounds:level:start"),setTimeout(()=>{s.emit("audio:play:bgm",{level:t})},250)},Ne=dt;var ft=()=>{let{store:e}=c,t=(e.getLevel()-1)*10;e.setBaseLines(t),s.emit("effects:start:countdown")},Fe=ft;var ct=(e="main-menu")=>{let{store:r}=c,t=r.getLevel();s.emit("audio:stop:bgm"),s.emit("animations:clear"),s.emit("command:queue:clear"),e==="playing"&&s.emit("replay:reset"),r.resetBoard(),e==="main-menu"&&(r.setDifficulty("easy"),t=1),Y(e,t),s.emit("ui:update:hud",{state:r.getState()}),s.emit("replay:start:record")},fe=ct;var lt=()=>{let{store:e}=c;e.getMode()==="playing"&&(fe("playing"),_(),s.emit("audio:play:bgm",{level:e.getLevel()}))},Ue=lt;var ut=()=>{let{store:e}=c;if(e.getMode()!=="paused")return!1;s.emit("ui:update:mode",{mode:"playing"}),e.setMode("playing"),s.emit("effects:stop:paused"),s.emit("audio:sounds:resume"),s.emit("audio:play:bgm",{level:e.getLevel()})},We=ut;var mt=()=>{let{store:e}=c;e.getMode()==="playing"&&(s.emit("ui:update:mode",{mode:"paused"}),e.setMode("paused"),s.emit("audio:stop:bgm"),s.emit("audio:sounds:pause"),s.emit("effects:start:paused"))},Ke=mt;var ht=()=>{let e=c.store.getMode();if(e==="main-menu"||e==="replay"||e==="game-over")return!1;e==="playing"?Ke():We()},Ye=ht;var pt=()=>{let e=c.store.getState(),{Board:r}=E,{rows:t}=r,o=[];for(let n=t-1;n>=0;n--)e.board[n].every(i=>!!i)&&o.push(n);return o},ce=pt;var vt=()=>{let e=ce();e.length!==0&&(c.store.setClearLines(e),s.emit("effects:start:clear:lines",{linesToClear:e}))},$=vt;var gt=(e,r)=>{let{store:t}=c,o=t.getState(),{cx:n,cy:a}=o;return N(e,r)?!1:(n+=e,a+=r,t.setState({cx:n,cy:a}),s.emit("audio:sounds:move"),!0)},X=gt;var qt=()=>{let{store:e}=c,r=e.getState(),{curr:t}=r,o=t.shape,n=structuredClone(r.board);for(let a=0;a<o.length;a++)for(let i=0;i<o[a].length;i++)o[a][i]&&(n[r.cy+a][r.cx+i]=t.color,e.setState({board:n}))},J=qt;var xt=()=>{for(;X(0,1););J(),s.emit("audio:sounds:fall"),$(),_(),s.emit("audio:sounds:drop")},$e=xt;var yt=()=>{let{store:e}=c,r=e.getState(),{curr:t}=r;if(!t)return;let o=structuredClone(t),n=t.shape;o.shape=n[0].map((a,i)=>n.map(d=>d[i]).toReversed()),e.setState({curr:o}),N(0,0)?(o.shape=n,e.setState({curr:o})):s.emit("audio:sounds:rotate")},Xe=yt;var Et=e=>{let r=c.store.getMode();r!=="playing"&&r!=="replay"||e||(r==="playing"&&s.emit("dispatch:input",{device:"replay",action:"AUTO_TICK",payload:{}}),X(0,1)||(J(),s.emit("audio:sounds:fall"),$(),_()))},Je=Et;var St=()=>{let e=c.store.getLevel(),r=Math.ceil(1e3/Math.floor(E.Level.max*.7));return Math.max(120,1e3-(e-1)*r)},je=St;var Mt=e=>localStorage.getItem(e),Qe=Mt;var wt=(e,r)=>{localStorage.setItem(e,r)},Ze=wt;var Tt=[0,100,300,500,800,1200],Ct='"Press Start 2P", monospace, sans-serif',Lt=99,Bt={CLEAR_LINE_SCORES:Tt,MAX_LEVEL:Lt,FONT_FAMILY:Ct},j=Bt;var At=()=>{let e=c.store.getState(),{Board:r,Level:t}=E,{rows:o,cols:n}=r,{CLEAR_LINE_SCORES:a}=j,d=(e.clearLines||[]).length,m=structuredClone(e.board);for(let T=o-1;T>=0;T--)m[T].every(Boolean)&&(m.splice(T,1),m.unshift(Array.from({length:n}).fill(0)),T++);let h=e.lines+d,g=e.baseLines+h,x=Math.floor(g/10)+1,{max:q}=t,M=x>q,I=x>e.level&&!M;return{stateHandler:T=>({...T,clearLines:[],lines:h,score:T.score+a[d],level:Math.min(Math.max(T.level,x),q),board:m}),levelUp:I,level:M?q:x,isMaxOut:M}},le=At;var U={store:Pe(),begin:Ne,start:Fe,restart:Ue,togglePause:Ye,over:de,reset:fe,clearLines:$,collision:N,drop:$e,findFullLines:ce,lock:J,move:X,rotate:Xe,spawn:_,tick:Je,setBeginningState:Y,randomShape:ne,getSpeed:je,applyClearLines:le,switchToDifficulty:()=>{U.store.setMode("difficulty")},switchToMainMenu:()=>{U.store.setMode("main-menu")},selectLevel:e=>{U.store.setLevel(e),s.emit("audio:sounds:level:select")},selectDifficulty:e=>{U.store.setDifficulty(e),s.emit("audio:sounds:difficulty:select")},loadHighScore:()=>{let e=Number.parseInt(Qe("tetris-high-score"),10)||0;U.store.setHighScore(e)},saveHighScore:e=>{let{store:r}=U;e>r.getHighScore()&&(r.setHighScore(e),Ze("tetris-high-score",e.toString()))}},c=U;var{board:zt,next:_t}=E.Elements.Canvas,e1=document.querySelector(`#${zt}`),Rt=e1.getContext("2d"),r1=document.querySelector(`#${_t}`),Ot=r1.getContext("2d"),bt=0,Ht=0,Gt={gameBoard:e1,gameBoardContext:Rt,nextPiece:r1,nextPieceContext:Ot,fontSize:bt,blockSize:Ht},f=Gt;function kt(){let{gameBoard:e,gameBoardContext:r}=f,{width:t,height:o}=e;r.clearRect(0,0,t,o)}var C=kt;var It=e=>{let{text:r,x:t,y:o,color:n,strokeColor:a,size:i=1,center:d=!0,baseline:m="",stroke:h=!1,lineWidth:g=2}=e,{FONT_FAMILY:x}=j,{gameBoardContext:q,fontSize:M}=f;q.save(),d&&(q.textAlign="center"),m&&(q.textBaseline=m),q.font=`${M*i}px ${x}`,h&&(q.strokeStyle=a||n,q.lineWidth=g,q.strokeText(r,t,o)),q.fillStyle=n,q.fillText(r,t,o),q.restore()},p=It;var Dt=()=>{let{GREEN:e}=u,{gameBoard:r}=f,{width:t,height:o}=r;p({text:"TETRIS.JS",x:t/2,y:o*.1,color:e,size:1.1})},L=Dt;var Pt=()=>{let{GREEN:e}=u,{gameBoard:r}=f,{width:t,height:o}=r;p({text:"LEVEL",x:t/2,y:o*.35,color:e,size:1,center:!0})},t1=Pt;var Vt=(e,r)=>{let{GREEN:t}=u,{gameBoard:o}=f,{width:n}=o;p({text:String(e),x:n/2,y:r,color:t,size:3,center:!0})},ue=Vt;var Nt=()=>{let{WHITE:e}=u,{gameBoard:r}=f,{width:t,height:o}=r;p({text:"1-9 or T KEY",x:t/2,y:o*.58,color:e,size:1,center:!0})},o1=Nt;var Ft=()=>{let{TEAL:e,BLACK:r}=u,{gameBoard:t}=f,{width:o,height:n}=t;p({text:"ENTER CONTINUE",x:o/2,y:n*.74,color:e,strokeColor:r,size:1,center:!0,stroke:!0})},s1=Ft;var Ut=e=>{let{RGBA_BLACK:r}=u,{gameBoard:t,gameBoardContext:o}=f,{width:n,height:a}=t;o.save(),o.fillStyle=e||r,o.fillRect(0,0,n,a),o.restore()},B=Ut;var we=new Map,Wt=e=>`data:image/svg+xml;charset=utf-8,${encodeURIComponent(e)}`,R=e=>{let r=we.get(e);if(r)return r;let t=new Image;return t.src=Wt(e),we.set(e,t),t},Kt=()=>{we.clear()},n1=e=>{let r=Object.values(e);Kt();for(let t of r)R(t)};var Yt=(e,r,t,o)=>{let{gameBoardContext:n}=f;e.complete&&(n.save(),n.drawImage(e,r,t,o,o),n.restore())},F=Yt;var $t=e=>{let{gameBoard:r}=f,{width:t,height:o}=r,n=new Date().getHours(),a,i,d,m,h;switch(e){case"main-menu":case"countdown":{i=R(P.tetris),d=t,m=t/2-d/2,h=o-d;break}case"playing":{n>=0&&n<=8?(a="pagoda",d=t*1.4):n>8&&n<=14?(a="temple",d=t*1.1):(a="tower",d=t*1.6),i=R(P[a]),m=t/2-d/2,h=o-d;break}case"paused":{i=R(P.coffee),d=t*.76,m=t/2-d/2,h=o-d*.94;break}case"game-over":{i=R(P.happy),d=Math.floor(t*.42),m=t/2-d/2,h=o/2-d*1.35;break}}F(i,m,h,d)},A=$t;var Xt=e=>{let{gameBoard:r}=f,{height:t}=r;C(),B(),A("main-menu"),L(),t1(),ue(e,t*.5),o1(),s1()},a1=Xt;var Jt=e=>{a1(e.level)},i1=Jt;var jt=()=>{let{GREEN:e}=u,{gameBoard:r}=f,{width:t,height:o}=r;p({text:"DIFFICULTY",x:t/2,y:o*.35,color:e,size:1,center:!0})},d1=jt;var Qt=(e,r)=>{let{GREEN:t}=u,{gameBoard:o}=f,{width:n}=o;p({text:e.toUpperCase(),x:n/2,y:r,color:t,size:2.2,center:!0})},f1=Qt;var Zt=e=>{let{WHITE:r}=u,{gameBoard:t}=f,{width:o,height:n}=t,a="E/N/H/X KEY";e.gamepadConnected&&(a="A/B/Y/X KEY"),p({text:a,x:o/2,y:n*.58,color:r,size:1,center:!0})},c1=Zt;var e2=()=>{let{TEAL:e,BLACK:r}=u,{gameBoard:t}=f,{width:o,height:n}=t;p({text:"ENTER START",x:o/2,y:n*.74,color:e,strokeColor:r,size:1.15,center:!0,stroke:!0})},Q=e2;var r2=e=>{let{gameBoard:r}=f,{height:t}=r;C(),B(),A("main-menu"),L(),d1(),f1(e.difficulty,t*.5),c1(e),Q()},l1=r2;var t2=e=>{l1(e)},u1=t2;var o2=()=>{let{YELLOW:e,BLACK:r}=u,{gameBoard:t}=f,{width:o,height:n}=t;p({text:"PAUSED",x:o/2,y:n/1.4,color:e,strokeColor:r,size:1.6,center:!0,stroke:!0})},m1=o2;var s2=(e,r="yyyy-MM-dd HH:mm:ss")=>{let t=e.getFullYear(),o=e.getMonth()+1,n=e.getDate(),a=e.getHours(),i=e.getMinutes(),d=e.getSeconds(),m=()=>a>=12?"PM":"AM",h=r.includes("a"),g=a%12||12,x={yyyy:t,MM:G(o,2),dd:G(n,2),HH:G(a,2),hh:G(g,2),mm:G(i,2),ss:G(d,2),a:h?m():""},q=r;for(let M of Object.keys(x))q=q.replace(new RegExp(M,"g"),x[M]);return q},h1=s2;var{GREEN:n2}=u,a2=(e,r=n2,t="HH:mm:ss")=>{let{gameBoard:o}=f,{width:n,height:a}=o,i=h1(e||new Date,t);p({text:i,x:n/2,y:a/4.15,color:r,size:.94,center:!0})},p1=a2;var{CORAL:v1,RGBA_CORAL:i2,WHITE:g1,RGBA_WHITE:d2,PURPLE:f2,RGBA_PURPLE:c2,TEAL:q1,RGBA_TEAL:l2,PINK:x1,RGBA_PINK:u2,ORANGE:y1,RGBA_ORANGE:m2,GREEN:E1,RGBA_GREEN:h2,BLUE:S1,RGBA_BLUE:p2,YELLOW:M1,RGBA_YELLOW:v2,RED:w1,RGBA_RED:g2,VIOLET:T1,RGBA_VIOLET:q2,CYAN:Te,RGBA_CYAN:x2}=u,y2={Teal:{stroke:q1,face:l2,secondHand:T1},Violet:{stroke:T1,face:q2,secondHand:q1},Yellow:{stroke:M1,face:v2,secondHand:x1},Pink:{stroke:x1,face:u2,secondHand:M1},Purple:{stroke:f2,face:c2,secondHand:E1},Green:{stroke:E1,face:h2,secondHand:Te},Blue:{stroke:S1,face:p2,secondHand:v1},Coral:{stroke:v1,face:i2,secondHand:S1},Orange:{stroke:y1,face:m2,secondHand:Te},Cyan:{stroke:Te,face:x2,secondHand:y1},White:{stroke:g1,face:d2,secondHand:w1},Red:{stroke:w1,face:g2,secondHand:g1}},C1=y2;var E2=e=>{let r=e.getHours(),t=e.getMinutes(),o=e.getSeconds(),n=(r%12+t/60+o/3600)*(2*Math.PI/12),a=(t+o/60)*(2*Math.PI/60),i=o*(2*Math.PI/60);return{hAng:n,mAng:a,sAng:i}},L1=E2;var{RGBA_WHITE:O}=u,S2={rat:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m210.432 1012.898-43.574-31.69C273.812 834.156 352.175 810.01 590.686 808.502c21.397-31.26 16.25-56.266 9.378-89.708-3.557-17.138-7.222-34.843-7.222-54.434 0-68.958 25.33-104.636 63.407-136.973l34.897 41.04c-29.453 25.062-44.41 46.781-44.41 95.933 0 14.094 2.938 28.403 6.064 43.547 5.901 28.51 12.8 62.033-1.132 99.463 166.373-10.24 264.543-96.903 264.543-236.194 0-152.845-88.63-247.808-231.29-247.808-83.644 0-153.303 29.696-174.188 39.613a225 225 0 0 1-20.533 31.34l-41.742-34.116 20.884 17.058-20.91-16.977c.35-.458 36.62-45.999 36.62-97.55 0-34.815-8.946-60.765-26.57-77.069-17.515-16.249-44.786-24.603-81.219-24.953v162.654h-53.895V109.784l24.873-1.914c64.7-4.931 114.095 7.896 146.863 38.239 29.103 26.947 43.843 66.182 43.843 116.628 0 11.102-1.131 21.908-3.072 32.202 37.269-12.584 89.843-25.465 149.046-25.465 173.245 0 285.184 118.433 285.184 301.702 0 140.747-92.618 291.14-352.552 291.14-258.668 0-311.943 19.698-407.121 150.582m19.106-256.836c-12.046 0-24.388-.566-37.026-1.643l-22.097-1.86-2.425-22.016c-.243-2.398-6.306-58.098-6.306-99.516 0-103.586 21.45-178.904 53.895-259.046V107.79h53.895v274.783l-2.021 4.904c-32.014 78.282-51.874 146.324-51.874 243.55 0 22.879 2.102 51.443 3.826 70.98 99.679 2.802 172.814-35.409 222.451-116.494l48.02 24.091c-11.237 28.133-11.372 51.578-.377 67.854 9.701 14.282 28.645 23.175 49.448 23.175v53.894c-39.02 0-74.186-17.515-94.073-46.888a100.2 100.2 0 0 1-12.423-25.546c-53.22 49.179-121.128 73.943-202.913 73.97m150.42-230.588c0-34.223-13.231-44.463-29.642-44.463s-29.642 10.24-29.642 44.463c0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463"/></svg>`,ox:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 -0.5 1025 1025"><path d="M1025.347 635.58v280.63h-53.894v-71.033c-16.33-18.405-69.821-70.413-161.685-86.07v157.104h-53.894V754.526h-107.79v215.58H594.19V700.631h161.685c100.998 0 172.57 38.67 215.579 71.868V656.761c-33.685-43.628-51.712-137.458-53.706-279.498H701.979c-76.935 0-127.219-26.22-175.805-51.55a1556 1556 0 0 0-26.84-13.743c-26.839 26.004-66.209 44.92-115.738 55.511 24.441 22.986 60.874 52.116 106.469 72.839l-22.313 49.044c-76.584-34.816-129.59-88.926-150.824-113.125-10.644.62-21.477 1.024-32.687 1.024a473.7 473.7 0 0 1-123.365-15.953L67.853 547.624l68.582 53.868c31.447-21.935 101.456-62.545 188.28-62.545v53.895c-95.986 0-170.36 62.491-171.088 63.138l-16.788 14.282L0 562.904l109.73-219.81C46.43 314.449 1.347 267.372 1.347 199.869c0-110.053 120.24-145.974 161.685-145.974v53.894c-14.12 0-107.79 17.166-107.79 92.08 0 90.597 136.947 123.5 228.999 123.5 67.907 0 122.422-12.99 157.696-35.625-42.712-14.336-95.097-23.12-169.337-18.324l-3.504-53.787c95.88-6.117 160.149 8.515 211.43 28.834 3.718-9.028 5.874-18.648 5.874-28.888 0-48.856-57.83-76.288-58.395-76.558l22.393-49.017c3.665 1.644 89.897 41.823 89.897 125.575 0 18.567-3.423 35.84-9.998 51.631 7.06 3.584 13.986 7.168 20.777 10.698 46.78 24.415 87.174 45.46 150.905 45.46h269.474v26.948c0 214.69 35.22 266.59 45.999 277.37zm-729.384 25.143-98.79 118.541L283.972 917.1l45.595-28.726-65.913-104.69 37.053-44.437c57.937 45.945 138.374 69.174 239.589 69.174v-53.895c-99.894 0-175.077-24.549-223.475-72.946z"/></svg>`,rabbit:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M862.316 720.896c0 36.621-4.123 69.39-24.253 110.35l-68.365 138.86H485.053V916.21h48.37c-25.546-36.137-48.37-82.702-48.37-134.737 0-59.42 24.171-113.314 63.218-152.36l38.104 38.103a161.1 161.1 0 0 0-47.428 114.257c0 54.784 35.382 104.043 63.515 134.737h133.713l53.49-108.76c15.711-31.852 18.756-55.835 18.756-86.555 0-80.977-63.434-150.097-178.607-195.503-17.543 8.138-38.292 13.554-63.92 13.554h-80.841c-13.96 0-43.925 15.98-57.29 40.017l-47.104-26.166c20.749-37.349 67.584-67.745 104.394-67.745h80.842c37.268 0 57.478-15.441 79.09-36.46-19.617-112.398-95.232-179.12-159.932-179.12h-107.79a21.3 21.3 0 0 0-5.955 2.022 684 684 0 0 0-69.12-77.474c-35.84-34.223-61.764-58.934-94.909-79.44a42.44 42.44 0 0 0-21.8-6.792 22.82 22.82 0 0 0-17.381 7.195c-10.914 11.426-6.063 28.241 1.428 39.182 21.989 32.121 47.912 56.859 83.752 91.109 20.615 19.672 49.26 43.17 77.393 63.084C281.007 367.4 215.58 484.433 215.58 592.842c0 74.483 24.792 124.066 51.065 176.586 27.89 55.781 56.724 113.476 56.724 200.677h-53.894c0-74.482-24.792-124.065-51.066-176.586-27.89-55.78-56.724-113.475-56.724-200.677 0-90.866 42.227-197.686 93.454-274.486a804 804 0 0 1-39.047-34.115c-38.238-36.487-65.86-62.841-91.055-99.625-24.441-35.759-22.798-78.686 4.069-106.819 26.3-27.567 70.898-31.043 106.523-9 37.942 23.444 65.563 49.798 103.774 86.258 9.97 9.513 33.038 32.31 56.94 60.55h68.635c-27.621-37.78-60.416-72.73-88.522-99.543-28.834-27.54-54.73-52.116-84.534-74.024L326.306.296c31.232 23.23 57.802 48.533 87.31 76.72 53.84 51.388 94.45 100.594 121.747 146.836 82.837 26.65 150.043 116.87 165.026 230.75l1.725 13.177-9.405 9.405a820 820 0 0 1-11.803 11.587c156.322 72.408 181.41 174.727 181.41 232.125m-552.852 33.63c3.934 8.058 7.895 16.088 11.991 24.145 27.433 54.3 55.808 110.457 55.808 191.434h53.895c0-93.696-34.062-161.226-61.52-215.579zm597.908 53.895c-3.423 9.405-7.815 19.806-13.77 31.96L829.79 970.105h60.066l52.143-105.957c10.78-21.935 17.516-40.017 21.908-55.727zM514.695 390.737c0-34.223-13.231-44.463-29.642-44.463s-29.642 10.24-29.642 44.463c0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463"/></svg>`,dragon:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M552.421 1024c-69.767 0-113.826-13.959-156.402-27.46-54.488-17.273-110.808-35.004-232.422-26.516l-3.826-53.733c131.719-9.458 195.934 10.968 252.524 28.888 42.226 13.366 78.686 24.926 140.126 24.926 92.753 0 148.21-57.937 148.21-113.96 0-16.95-5.524-101.619-114.634-101.619-64.97 0-112.747 23.337-163.328 48.02-57.344 28.026-122.368 59.77-218.381 59.77C85.908 862.316 0 787.294 0 683.897c0-95.77 80.788-198.844 258.183-198.844 86.69 0 155.917 24.818 229.214 51.092 45.81 16.41 92.564 33.172 145.489 44.167 9-7.034 13.85-16.277 13.85-26.76 0-37.187-37.672-74.859-74.131-111.265L569.317 439l38.104-38.104 3.26 3.288c42.173 42.091 89.95 89.842 89.95 149.369 0 12.719-2.802 24.926-7.976 36.11a595 595 0 0 0 61.871 3.18c62.437 0 107.79-34.008 107.79-80.843 0-58.853-52.87-110.269-108.84-164.702l-8.058-7.842c-19.025 16.438-38.077 35.49-59.419 56.832l-38.103-38.104C722.7 283.352 782.794 223.286 916.21 216.253V55.619c-63.408 7.788-120.994 39.424-121.668 39.802l-15.818 8.811-14.12-11.344c-32.903-26.436-54.892-38.993-90.92-38.993-41.419 0-74.349 25.87-109.192 53.302-26.624 20.91-54.137 42.55-86.85 53.194l-8.3 1.293h-69.094L294.723 267.21l-38.103-38.13 67.395-67.396h-162.33V107.79h303.103c22.232-8.272 43.709-25.168 66.399-42.98C569.829 34.438 613.619 0 673.684 0c48.91 0 81.408 17.947 110.889 40.098C813.703 26.3 877.73 0 943.158 0h26.947v323.368h-53.894v-53.167c-54.165 3.1-92.915 15.845-127.003 36.676l1.832 1.778C852.588 368.505 916.21 430.376 916.21 512c0 60.928-43.708 109.945-107.789 127.623v61.009h53.895v-53.895h53.895v53.895h53.894v53.894h-53.894v53.895h-53.895v-53.895H808.42c-29.723 0-53.895-24.171-53.895-53.894v-53.895c-118.326 0-207.063-31.798-285.318-59.877-68.77-24.63-133.713-47.913-211.025-47.913-141.124 0-204.288 72.785-204.288 144.95 0 73.324 61.844 124.524 150.393 124.524 11.91 0 23.229-.539 34.035-1.536 10.132-10.563 31.15-36.244 31.15-67.719 0-33.118-43.088-70.98-58.152-81.596l30.936-44.14c8.3 5.794 81.111 58.664 81.111 125.736 0 19.43-4.527 37.053-10.994 52.305 30.774-10.051 58.314-23.498 86.663-37.349 53.84-26.274 109.54-53.49 186.96-53.49 116.413 0 168.53 78.093 168.53 155.513 0 82.513-75.615 167.855-202.106 167.855m-21.18-623.104-38.104-38.104 137.89-137.89 38.103 38.104zM404.48 382.545l-38.104-38.104 152.98-152.98 38.104 38.104zM686.484 163.92c15.495-9.755 43.332-31.448 43.332-31.448-25.735-27.81-49.557-33.334-67.369-29.076-19.24 4.608-37.753 24.603-37.753 24.603s42.253 22.447 61.79 35.92"/></svg>`,tiger:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M673.684 1024c-114.769 0-188.82-33.334-254.167-62.787-53.626-24.145-99.975-45.002-161.28-45.002-40.448 0-83.591 23.255-103.64 45.163l-39.747-36.433c27.648-30.154 84.318-62.625 143.387-62.625 68.392 0 119.862 21.288 172.92 45.056V673.684c0-35.166-17.542-64.108-30.638-80.815-15.199 9.836-32.068 18.89-50.742 26.947l-21.342-49.475C469.8 509.413 485.053 377.317 485.053 323.368V221.642a598 598 0 0 0-80.842-6.063h-26.948v-80.842c0-12.1-14.848-26.948-26.947-26.948-9.378 0-18.836.593-26.948 1.348v160.337h-53.894v-57.802c-136.03 102.912-158.45 266.886-161.307 295.882 9.135 9.108 38.993 25.06 71.976 38.67l38.104-59.366 12.45-1.59c90.516-11.614 146.566-93.076 146.566-161.9h53.895c0 88.334-68.797 192.243-180.87 213.343l-48.398 75.398-20.292-7.437C53.895 557.757 53.895 523.318 53.895 512c0-50.041 37.025-254.733 215.579-365.622V62.491l22.528-3.746c1.185-.188 29.48-4.85 58.314-4.85 41.553 0 80.842 39.289 80.842 80.842v27.513C679.855 172.813 1024 327.545 1024 646.737 1024 832.189 892.982 1024 673.684 1024m-13.473-323.368c-36.514 0-67.369 49.367-67.369 107.79 0 85.746 68.096 145.084 89.465 161.549 91.54-2.534 164.38-45.488 213.828-107.655H700.632V808.42H930.87c8.92-17.273 16.357-35.355 22.285-53.895H713.27l-6.467-17.65c-.512-1.294-14.363-36.244-46.592-36.244m-175.158 230.48c33.926 14.067 70.52 26.597 114.607 33.47-30.235-36.272-60.713-89.358-60.713-156.16 0-90.652 53.275-161.685 121.264-161.685 44.76 0 73.835 28.78 88.683 53.895h217.007c2.776-17.867 4.204-35.921 4.204-53.895 0-38.94-5.659-74.752-15.926-107.628L827.473 665.79l-38.104-38.104 142.633-142.632a368 368 0 0 0-57.775-81.597L719.683 557.999l-38.103-38.103 153.573-153.573a538 538 0 0 0-82.594-56.752L611.894 450.21l-38.104-38.104 128.135-128.135a794.7 794.7 0 0 0-162.978-52.924v92.321c0 50.15-11.102 156.7-95.932 236.329 18.378 23.417 42.038 63.407 42.038 113.987zM215.579 431.158v-53.895c39.774 0 53.895-29.022 53.895-53.895h53.894c0 53.572-37.025 107.79-107.79 107.79"/></svg>`,snake:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M671.528 788.857c44.329 11.965 89.627 19.564 136.893 19.564 89.169 0 161.684-60.443 161.684-134.737S897.59 538.947 808.421 538.947c-19.079 0-37.026 1.51-54.218 4.016-.755-101.403-38.211-172.356-79.414-219.648l-1.105.053a1750 1750 0 0 1-79.036-1.751c45.702 35.867 108.705 107.87 105.984 232.367 0 .431-.081.808-.108 1.24-34.924 10.994-66.156 26.731-95.097 45.19a163 163 0 0 0-15.846-42.388c-21.557-39.64-60.065-66.775-97.36-93.022C433.098 423.344 377.263 384 377.263 296.42c0-130.29 108.275-188.632 215.58-188.632 64.134 0 132.715 12.046 214.365 37.808-4.877 34.654-27.109 63.784-106.576 69.039v-52.952h-53.895v53.68c-63.273-1.025-104.529-5.201-104.987-5.255l-5.578 53.598c2.236.242 56.185 5.767 137.512 5.767 125.17 0 188.632-48.128 188.632-143.064v-19.429l-18.432-6.144c-96.095-32.013-175.859-46.942-251.042-46.942-158.666 0-269.474 99.732-269.474 242.526 0 115.55 76.423 169.391 137.836 212.615 33.684 23.713 65.51 46.107 81.004 74.698 9.54 17.543 13.285 33.415 12.342 47.75 21.154 9.109 42.119 17.84 62.949 25.978 53.652-37.268 112.478-64.62 190.922-64.62 59.446 0 107.79 36.271 107.79 80.842s-48.344 80.842-107.79 80.842c-105.472 0-203.237-42.388-297.768-83.429-94.801-41.094-184.347-79.953-281.412-79.953-106.523.027-175.346 53.572-175.346 136.435 0 79.064 67.099 136.434 159.555 136.434 142.174 0 230.427-66.883 306.796-129.886 31.42 13.42 62.787 26.058 94.45 37.134-47.077 49.637-110.969 82.566-186.61 91.27l5.066 53.626c93.453-7.007 143.144 9.35 195.719 26.543 46.457 15.225 94.127 30.855 169.822 30.855 19.995 0 41.957-1.078 66.344-3.558l-5.416-53.625c-105.283 10.78-158.1-6.548-213.935-24.872-22.15-7.276-44.625-14.633-70.306-20.345a334.9 334.9 0 0 0 96.148-82.298M213.45 810.12c-50.877 0-105.66-25.843-105.66-82.54 0-60.847 62.733-82.54 121.451-82.54 77.851 0 154.732 30.289 235.25 64.943-66.263 52.925-139.721 100.137-251.04 100.137"/></svg>`,horse:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M1024 0v404.21c0 33.334 0 134.737-92.08 134.737h-13.823l-78.363-109.056c-22.744 49.907-40.34 103.047-53.49 162.951h115.092c35.974 0 68.77 32.795 68.77 68.797 0 60.631-69.39 154.3-77.313 164.756l-43.008-32.472c25.681-34.061 66.426-100.11 66.426-132.284 0-5.983-8.92-14.902-14.902-14.902H775.976c-14.848 89.384-21.45 193.832-21.45 323.368h-53.894c0-283.971 31.097-453.605 110.888-605.049l20.318-38.535L944.64 483.517c14.444-4.42 25.465-20.938 25.465-79.306V0zM862.316 161.684h53.895V0h-53.895v80.842c-17.381-14.956-38.185-26.947-80.842-26.947H646.737v53.894h134.737c37.672 0 80.842 40.907 80.842 53.895m-107.79 0H538.947v53.895h161.685zm-453.632 604.86 99.786 149.667h64.755l-95.043-142.552 128.485-126.922h167.855a1213 1213 0 0 1 9.431-53.895H476.78zm109.973-184.4-37.862-38.32-132.419 130.803c-66.856-103.531-78.902-144.815-78.902-205.312 0-70.736 37.78-145.947 107.79-145.947h323.368l53.895-53.894H269.474c-6.71 0-13.258.566-19.699 1.482-14.848-21.504-45.137-55.377-89.142-55.377C65.967 215.579 0 349.292 0 469.315c0 70.171 16.141 136.65 49.233 202.672L6.198 723.833l41.472 34.412 66.129-79.737-8.704-16.034c-21.99-40.34-51.2-104.26-51.2-193.159 0-100.864 52.87-199.841 106.738-199.841 13.231 0 25.816 9.89 35.436 20.534-53.194 31.96-88.28 98.492-88.28 179.307 0 78.202 19.699 130.938 93.643 243.982l-55.296 54.622 134.763 202.186h64.755L215.606 775.033z"/></svg>`,goat:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M608.256 144.734c-52.493-29.157-102.157-36.945-123.203-36.945V53.895c32.579 0 91.27 11.452 149.369 43.735 75.29 41.823 130.695 94.532 171.385 150.879-49.933 39.504-108.706 74.86-159.07 74.86h-107.79v-53.895h107.79c20.507 0 48.424-11.21 80.438-31.286a471 471 0 0 0-118.919-93.454m224.418 197.498c-16.384 0-29.642 10.24-29.642 44.463 0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463c0-34.223-13.231-44.463-29.642-44.463M1024 619.789c0-272.68-122.934-497.34-337.246-616.394L660.588 50.5c253.736 140.962 304.1 389.902 309.06 542.343H885.14c-17.92-35.624-45.352-69.12-87.013-101.996l-16.788-13.285-16.734 13.393c-66.13 52.898-134.63 127.084-187.312 209.678H102.966l-8.273-20.319c64.35-63.3 66.991-77.204 66.991-195.26v-53.895h485.053v-53.895H161.684c0-80.384 14.31-110.026 66.587-137.916l-25.384-47.536c-79.522 42.416-95.098 100.11-95.098 185.452v107.79c0 107.6 0 107.6-63.65 169.283L31.07 667.001l79.549 195.315h58.206l-43.897-107.79h103.478l43.897 107.79h58.206l-43.897-107.79h259.476c-37.106 70.414-61.035 144.627-61.035 215.58h53.894c0-68.69 27.271-144.061 68.959-215.58h79.252c7.41 0 13.474 6.063 13.474 13.474v94.316h53.894V768c0-37.16-30.208-67.368-67.368-67.368h-44.652c40.771-58.018 89.438-111.428 138.914-153.627 60.092 53.032 80.896 108.22 80.896 207.521h53.895c0-38.912-2.75-74.482-11.103-107.79H1024z"/></svg>`,monkey:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M538.947 1024h-53.894c0-32.795 25.87-87.417 77.446-103.316-33.9-39.532-77.446-98.25-77.446-139.21 0-44.571 36.27-80.842 80.842-80.842h80.842v53.894h-80.842a26.947 26.947 0 0 0-26.948 26.948c0 19.725 36.676 77.473 92.133 134.737h88.603c20.21-14.148 88.738-71.465 88.738-198.603 0-108.382-93.238-202.967-168.152-278.986-49.502-50.203-88.576-89.842-98.735-128.62-11.749-44.732-21.585-112.586-26.327-148.318H377.263c-45.137 0-89.519 8.435-121.802 53.895h175.697v53.895c-97.28 0-107.79 113.07-107.79 161.684v53.895h53.895v161.684h-53.895v-107.79h-26.947c-170.253 0-188.632-94.235-188.632-134.736 0-31.044 35.22-72.327 55.728-93.723 2.694-14.687 5.847-28.35 9.431-41.014h-11.264v-53.895h31.529c46.43-94.585 124.011-107.79 184.05-107.79h185.64l2.803 23.795c.135 1.05 12.72 106.658 27.945 164.756 6.494 24.873 44.624 63.515 84.965 104.448 81.866 83.025 183.7 186.341 183.7 316.82 0 92.376-31.124 155.029-61.898 194.426 104.502-19.887 169.687-109.03 169.687-238.35 0-91.405-42.82-154.381-84.237-215.255-38.077-55.97-77.447-113.853-77.447-188.955 0-119.35 87.094-161.685 161.684-161.685v53.895c-32.417 0-107.79 10.51-107.79 107.79 0 58.502 31.556 104.933 68.097 158.639C974.282 492.598 1024 565.679 1024 673.684c0 177.287-108.301 296.421-269.474 296.421H592.842c-37.672 0-53.895 40.906-53.895 53.895M229.214 269.474a385 385 0 0 0-14.012 58.34l-1.402 8.49-6.09 6.116c-22.878 22.932-44.813 52.601-46.026 62.276 0 56.805 53.76 75.264 107.79 79.387v-52.925c0-58.691 13.473-119.62 46.51-161.684zM323.368 1024h-53.894c0-32.795 25.87-87.417 77.446-103.316-33.9-39.532-77.446-98.25-77.446-139.21 0-44.571 36.27-80.842 80.842-80.842h45.164a188.85 188.85 0 0 1 170.415-107.79h134.737v53.895H565.895c-74.294 0-134.737 60.443-134.737 134.737v26.516l-53.895.377v-26.893c0-9.162.647-18.136 1.913-26.948h-28.86c-14.848 0-26.948 12.073-26.948 26.948 0 19.725 36.676 77.473 92.133 134.737h15.657v53.894h-53.895c-37.672 0-53.895 40.906-53.895 53.895"/></svg>`,rooster:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M673.684 354.358c-16.384 0-29.642-10.213-29.642-44.463 0-34.223 13.231-44.463 29.642-44.463s29.642 10.24 29.642 44.463c0 34.25-13.258 44.463-29.642 44.463M540.106 970.105l-50.58-107.79h156.052l50.607 107.79h59.554l-51.604-109.918C811.52 846.82 916.21 764.55 916.21 646.737c0-53.033-11.911-95.42-24.523-140.315-14.443-51.389-29.372-104.529-29.372-183.054V107.79C862.316 48.344 813.972 0 754.526 0a107.924 107.924 0 0 0-107.79 106.173 101 101 0 0 0-24.117-3.315 88.71 88.71 0 0 0-88.603 88.603c0 20.669 5.228 39.72 10.671 53.922l-99.49 59.688 93.75 14.47v57.722c0 14.417-5.901 21.693-33.36 49.152l-11.13 11.13C398.228 326.52 324.985 269.473 215.741 269.473 96.768 269.474 0 366.242 0 485.214v161.523h53.895V485.214A162.01 162.01 0 0 1 215.74 323.368c82.081 0 140.422 36.245 240.64 152.253l-38.616 38.616c-49.96-52.952-94.666-83.08-158.181-83.08a151.983 151.983 0 0 0-151.795 151.795v171.574h53.895V582.952a98.01 98.01 0 0 1 97.9-97.9c46.323 0 79.63 20.912 137.027 86.017l18.971 21.53 128.081-128.08c28.537-28.538 49.18-49.152 49.18-87.256v-97.927l23.309-14.12-13.663-23.04c-.161-.243-14.578-24.9-14.578-50.688 0-19.133 15.575-34.708 34.708-34.708 5.093 0 26.786 3.18 39.559 18.647l26.327 46.026 39.775-24.09-20.373-49.368c-3.152-7.545-7.275-30.478-7.275-40.206 0-29.722 24.171-53.894 53.894-53.894s53.895 24.172 53.895 53.894v215.58c0 85.935 16.68 145.3 31.367 197.631 12.1 43.008 22.528 80.142 22.528 125.737 0 95.286-99.41 161.684-188.632 161.684H464.222l-68.42-145.704c-20.56-43.763-57.693-69.875-99.354-69.875a80.977 80.977 0 0 0-80.87 80.87v188.604h53.896V673.71c0-14.875 12.1-26.974 26.974-26.974 20.534 0 38.966 14.147 50.553 38.858l133.578 284.51z"/></svg>`,dog:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M326.063 282.947c0 34.25-13.231 44.464-29.642 44.464s-29.642-10.214-29.642-44.464c0-34.223 13.231-44.463 29.642-44.463s29.642 10.24 29.642 44.463m-56.59 147.349v311.646L190.276 916.21h59.204l73.89-162.574V377.263H296.42c-119.404 0-172.733-53.383-185.506-107.79h35.625c51.092 0 68.58-15.764 120.535-62.544 12.773-11.507 28.08-25.277 47.024-41.742l18.35-15.952-69.658-99.14-44.086 30.99 41.768 59.472c-11.183 9.863-20.884 18.594-29.48 26.328-50.257 45.272-54.757 48.694-84.453 48.694H53.895v26.947c0 88.711 66.91 178.15 215.579 187.77M486.185 268.88c2.29 71.734 28.7 136.327 75.049 182.919 57.479 57.829 141.204 87.147 248.859 87.147 18.593 0 36.19-1.158 52.628-3.449 3.746 111.266 33.63 170.334 51.496 196.015l-38.507 84.723c-93.535-74.186-186.934-115.604-498.446-115.604v53.894c34.277 0 65.698.512 94.64 1.51l-97.308 214.07H433.8l96.013-211.241c66.183 4.338 117.006 11.83 157.912 22.016L626.23 916.21h59.176l54.165-119.135c47.616 18.405 79.737 42.092 113.125 69.74l-46.943 103.29h59.204l113.07-248.779-13.823-13.204c-.485-.458-45.65-47.59-47.94-185.263C985.17 498.553 1024 447.81 1024 377.263c0-95.205-66.506-161.684-161.684-161.684v53.895c65.482 0 107.79 42.307 107.79 107.79 0 89.087-87.014 107.789-160.014 107.789-92.753 0-163.625-23.984-210.648-71.276-30.316-30.505-45.891-65.833-53.356-98.735 11.21 6.952 22.933 13.339 35.275 19.186l23.04-48.72C512.296 241.852 455.41 156.86 385.159 41.525l-46.026 28.052c49.448 81.246 92.968 148.507 147.051 199.303"/></svg>`,pig:`<svg fill="${O}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M808.421 700.632v53.894c-196.446 0-323.368 84.642-323.368 215.58h-53.895c0-163.706 148.076-269.474 377.263-269.474m-323.368 107.79v-53.896c-158.343 0-245.599 0-319.65-49.367l-6.79-4.527h-77.77c-21.694 0-26.625-14.821-26.948-26.948v-82.62C138.05 579.88 215.579 516.15 215.579 404.21V215.579h-53.895v161.684h-26.947C67.773 377.263 0 414.29 0 485.053h53.895c0-42.631 52.87-53.895 80.842-53.895h24.63c-12.234 73.755-74.213 107.79-132.42 107.79H0v134.736c0 32.499 21.53 80.842 80.842 80.842h61.683c32.687 20.507 67.126 33.146 105.957 41.014a232.9 232.9 0 0 0-32.903 120.67h53.895c0-41.93 14.012-80.303 39.424-112.505 49.987 4.447 107.062 4.716 176.155 4.716M412.106 466l-88.738 88.738V431.158h-53.894V684.84L450.21 504.104zm-88.738-304.317h-53.894v190.033a770 770 0 0 1 53.894-49.098zm323.369-53.895c-72.623 0-146.81 23.337-215.58 58.638v-58.638h-53.894v154.14c81.57-56.536 178.068-100.245 269.474-100.245 148.588 0 269.474 120.886 269.474 269.474v235.655L809.58 862.316h61.359l99.166-181.76V431.158c0-178.31-145.057-323.369-323.368-323.369"/></svg>`},B1=S2;var M2=e=>["rat","ox","ox","tiger","tiger","rabbit","rabbit","dragon","dragon","snake","snake","horse","horse","goat","goat","monkey","monkey","rooster","rooster","dog","dog","pig","pig","rat"][e],A1=M2;var w2=()=>{let{gameBoard:e}=f,{width:r}=e,n=new Date().getHours()-1,a=A1(Math.max(n,0)),i=R(B1[a]),d=Math.floor(r*.38),m=-d/2,h=-d/2;F(i,m,h,d)},z1=w2;var T2=(e,r)=>{let{gameBoardContext:t}=f;t.save(),t.beginPath(),t.arc(0,0,e,0,Math.PI*2),t.fillStyle=r.face,t.fill(),t.lineWidth=Math.floor(e*.2),t.strokeStyle=r.stroke,t.stroke(),t.restore()},_1=T2;var C2=(e,r)=>{let{gameBoardContext:t}=f,o=Math.floor(e*.06),n=e-Math.floor(e*.25);for(let a=0;a<12;a++)t.save(),t.rotate(a*Math.PI/6),t.beginPath(),t.arc(0,-n,o,0,Math.PI*2),t.fillStyle=r.stroke,t.fill(),t.restore()},R1=C2;var L2=(e,r,t)=>{let{gameBoardContext:o}=f,{hAng:n,mAng:a,sAng:i}=r;o.save(),o.rotate(n),o.lineWidth=5,o.strokeStyle=t.stroke,o.beginPath(),o.moveTo(0,0),o.lineTo(0,-e*.4),o.stroke(),o.restore(),o.save(),o.rotate(a),o.lineWidth=4,o.strokeStyle=t.stroke,o.beginPath(),o.moveTo(0,0),o.lineTo(0,-e*.65),o.stroke(),o.restore(),o.save(),o.rotate(i),o.lineWidth=2,o.strokeStyle=t.secondHand,o.beginPath(),o.moveTo(0,0),o.lineTo(0,-e*.75),o.stroke(),o.restore()},O1=L2;var B2=(e,r)=>{let{gameBoardContext:t}=f;t.save(),t.beginPath(),t.fillStyle=r.secondHand,t.arc(0,0,Math.floor(e*.05),0,Math.PI*2),t.fill(),t.restore()},b1=B2;var A2=e=>["Red","White","White","Orange","Orange","Cyan","Cyan","Blue","Blue","Coral","Coral","Purple","Purple","Green","Green","Yellow","Yellow","Pink","Pink","Teal","Teal","Violet","Violet","Red"][e],H1=A2;var z2=e=>{let{gameBoard:r,gameBoardContext:t}=f,{width:o,height:n}=r,a=o/2,i=n/2.2,d=Math.floor(o*.3),m=e||new Date,h=m.getHours(),g=L1(m),x=C1[H1(h)];t.save(),t.translate(a,i),t.lineCap="round",_1(d,x),z1(),R1(d,x),O1(d,g,x),b1(d,x),t.restore()},G1=z2;var _2=(e,r,t)=>{let{gameBoardContext:o,blockSize:n}=f,{RGBA_BLACK:a}=u,i=1,d=n-i*2,m=e*n+i,h=r*n+i;o.fillStyle=t,o.fillRect(m,h,d,d),o.strokeStyle=a,o.strokeRect(m,h,d,d)},Z=_2;var{RGBA_TEAL:b}=u,R2={zi:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M538.947 700.632v-215.58h269.474v-53.894H538.947v-39.586c26.544-18.081 94.586-65.05 177.853-127.488l-16.168-48.505H323.368v53.895h295.317a4221 4221 0 0 1-121.64 85.369l-11.992 8.003v68.312H242.526v53.895h242.527v215.579c0 48.343-13.851 53.894-134.737 53.894v53.895c105.39 0 188.631 0 188.631-107.79"/></svg>`,chou:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M808.421 700.632H648.866c13.985-172.814 43.115-357.43 70.817-385.16l-19.051-45.998H323.368v53.894h107.17c-1.94 45.757-8.192 103.963-15.764 161.685h-91.406v53.894h83.968c-9.862 68.447-20.264 130.13-25.734 161.685H215.579v53.894H808.42zM461.878 538.947h149.8a3314 3314 0 0 0-16.842 161.685H436.36c6.036-35.248 16.114-95.637 25.519-161.685m22.609-215.579h171.735c-15.198 41.122-27.405 100.595-36.89 161.685H469.207c7.383-57.506 13.42-115.362 15.279-161.685"/></svg>`,yin:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M712.677 811.25l-107.79-53.894-24.117 48.209 107.79 53.894zm-269.474-5.658-24.118-48.21-107.789 53.895 24.118 48.21zm257.429-374.434H538.947v-53.895h107.79v-53.895H377.263v53.895h107.79v53.895H323.368v323.368h53.895v-53.894h269.474v53.894h53.895zM538.947 592.842h107.79v53.895h-107.79zm-161.684 0h107.79v53.895h-107.79zm161.684-107.79h107.79v53.895h-107.79zm-161.684 0h107.79v53.895h-107.79zM754.526 215.58H531.43l-20.803-62.41-51.12 17.058 15.118 45.352h-205.15v107.79h53.894v-53.895h377.264v53.894h53.894z"/></svg>`,mao:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M592.842 323.368h107.79v323.369c-20.48 0-39.936-11.264-40.017-11.318l-27.73 46.215c3.208 1.94 32.661 18.998 67.747 18.998 30.747 0 53.894-23.148 53.894-53.895V269.474H538.947V808.42h53.895zm-107.79 242.527V323.368h-53.894v196.905l-107.79 40.42V316.767l169.095-48.316-14.82-51.82-208.17 59.473v304.801l-36.405 13.663 18.917 50.472 178.742-67.018c-5.04 69.928-55.27 106.981-165.134 122.934l7.734 53.329c52.386-7.626 211.726-30.747 211.726-188.39"/></svg>`,chen:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M471.983 777.62l-40.825-23.094V485.053h-66.075c-14.47 110.646-44.355 197.066-102.696 260.742l-39.748-36.432c83.887-91.487 100.73-246.461 100.73-466.837V215.58h377.263v53.895h-323.45c-.404 58.26-2.21 112.128-6.36 161.684h329.81v53.895H578.479a481.2 481.2 0 0 0 76.827 119.7l66.48-39.855 27.728 46.214-54.46 32.688c29.507 24.953 63.757 45.675 102.804 58.098l-16.303 51.362C647.33 710.548 558.78 586.186 520.003 485.053h-34.95V706.91l68.985-41.39 27.729 46.214zm174.754-400.357h-215.58v-53.895h215.58z"/></svg>`,si:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M728.064 692.763l-52.116-13.797c-18.729 70.898-24.522 75.56-56.159 75.56H377.263V485.053h269.474v53.894h53.895V215.58H323.368v538.947c0 29.723 24.172 53.895 53.895 53.895H619.79c77.69 0 91.19-51.065 108.275-115.658m-350.8-423.29h269.473v161.685H377.263z"/></svg>`,wu:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512m-431.158 26.947h269.474v-53.894H538.947V323.368h161.685v-53.894h-289.63c12.045-33.28 20.156-69.794 20.156-107.79h-53.895c0 121.964-105.364 233.391-106.415 234.496l38.858 37.35c2.883-3.019 43.817-46.135 77.393-110.162h97.954v161.685H215.579v53.894h269.474v323.369h53.894z"/></svg>`,wei:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512m-431.158 50.203c52.305 70.925 136.974 152.145 232.53 190.383l19.994-50.041c-109.271-43.709-202.806-152.63-238.78-217.492h255.73v-53.895H538.947v-53.895h215.58v-53.895h-215.58V161.684h-53.894v161.684h-215.58v53.895h215.58v53.895H215.579v53.895h255.757C435.362 549.915 341.8 658.836 232.53 702.545l20.022 50.041c95.528-38.238 180.197-119.485 232.502-190.383V808.42h53.894z"/></svg>`,shen:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M538.947 646.737h161.685v53.895h53.894V269.474H538.947v-107.79h-53.894v107.79h-215.58v431.158h53.895v-53.895h161.685v215.579h53.894zm0-161.684h161.685v107.79H538.947zm-215.579 0h161.685v107.79H323.368zm215.58-161.685h161.684v107.79H538.947zm-215.58 0h161.685v107.79H323.368z"/></svg>`,you:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M754.526 323.368H592.842v-26.947h161.684v-53.895H269.474v53.895h161.684v26.947H269.474v485.053h53.894v-53.895h377.264v53.895h53.894zM323.368 646.737h377.264v53.895H323.368zm0-269.474h107.79c0 103.316-72.785 107.655-81.085 107.79l.243 53.894c46.592 0 134.737-33.792 134.737-161.684h53.894v107.79c0 29.723 24.172 53.894 53.895 53.894h107.79v53.895H323.368zm377.264 0v107.79h-107.79v-107.79zm-215.58-80.842h53.895v26.947h-53.894z"/></svg>`,xu:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M594.513 662.393c33.684 44.544 75.21 74.698 124.74 90.813l11.425 3.719 10.402-6.01c40.124-23.174 67.341-128.35 67.341-158.073h-53.895c0 22.07-19.132 80.87-33.71 103.505-34.817-14.606-64.54-39.262-89.25-74.132 48.316-55.27 92.079-117.33 120.535-179.9l-49.044-22.286C679.289 472.279 643.315 524.746 603 572.685c-24.01-50.93-41.148-115.927-51.658-195.395h149.289v-53.895h-155.19a1848 1848 0 0 1-6.495-161.71h-53.894c0 58.206 2.155 112.073 6.494 161.683H323.368v26.948c0 216.549-13.177 263.545-100.702 359.047l39.747 36.432c63.327-69.093 92.807-118.272 105.715-206.848h116.925v-53.894h-111.32a1742 1742 0 0 0 3.45-107.79H497.34c12.611 98.25 35.031 177.476 67.395 238.188-61.979 65.536-128.054 117.976-173.299 142.282l25.52 47.481c47.589-25.573 114.095-77.446 177.556-142.82m125.17-411.971-80.842-80.842-38.103 38.103 80.842 80.842z"/></svg>`,hai:`<svg fill="${b}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m309.976 804.756-27.136-46.592c103.073-60.012 183.026-132.473 241.475-219.244h-174l-13.473-50.283c58.88-33.981 99.436-117.572 118.703-165.296H242.526v-53.894h538.948v53.894h-268.18c-12.396 34.089-42.47 106.604-90.436 161.685h134.01a680.6 680.6 0 0 0 46.349-107.709l51.092 17.058c-58.422 175.265-171.035 309.49-344.333 410.381m192.35-2.937-34.52-41.364c88.415-73.728 154.517-158.774 202.106-259.908l48.801 22.96a797.4 797.4 0 0 1-82.35 137.781c32.74 15.01 83.455 44.868 137.646 101.592l-38.939 37.268c-57.236-59.877-109.325-85.558-133.766-95.178a851 851 0 0 1-98.978 96.849m48.613-536.872-80.842-53.895 29.884-44.84 80.843 53.894zM512 53.895c-252.605 0-458.105 205.5-458.105 458.105S259.395 970.105 512 970.105c9.081 0 17.974-.835 26.947-1.374v-53.895c-8.946.62-17.866 1.375-26.947 1.375-222.882 0-404.21-181.33-404.21-404.211S289.117 107.79 512 107.79 916.21 289.117 916.21 512c0 195.207-139.075 358.508-323.368 396.045v54.461c214.097-38.346 377.263-225.55 377.263-450.533 0-252.578-205.5-458.078-458.105-458.078"/></svg>`},k1=R2;var O2=e=>["zi","chou","chou","yin","yin","mao","mao","chen","chen","si","si","wu","wu","wei","wei","shen","shen","you","you","xu","xu","hai","hai","zi"][e],I1=O2;var b2={night_0_3:(e,r)=>({size:Math.floor(e*.48),x:e-Math.floor(e*.48)*.7,y:r/2-Math.floor(e*.48)*1.4}),morning_4_7:(e,r)=>{let t=Math.floor(e*.52);return{size:t,x:e-t*1.1,y:r/2-t*1.7}},morning_8_11:(e,r)=>{let t=Math.floor(e*.58);return{size:t,x:e-t*1.2,y:r/2-t*1.75}},noon_12_14:e=>{let r=Math.floor(e*.68);return{size:r,x:e/2-r/2,y:-r*.1}},afternoon_14_16:(e,r)=>{let t=Math.floor(e*.58);return{size:t,x:t*.2,y:r/2-t*1.75}},evening_17_19:(e,r)=>{let t=Math.floor(e*.52);return{size:t,x:t*.1,y:r/2-t*1.7}},night_20_23:(e,r)=>{let t=Math.floor(e*.48);return{size:t,x:-t*.3,y:r/2-t*1.4}}},H2=e=>e<=3?"night_0_3":e<=7?"morning_4_7":e<=11?"morning_8_11":e<=14?"noon_12_14":e<=16?"afternoon_14_16":e<=19?"evening_17_19":"night_20_23",G2=()=>{let{gameBoard:e}=f,{width:r,height:t}=e,o=new Date().getHours(),n=I1(o),a=R(k1[n]),i=H2(o),d=b2[i],{size:m,x:h,y:g}=d(r,t);F(a,h,g,m)},D1=G2;function k2(e){let{Board:r}=E,{rows:t,cols:o}=r;C(),D1(),A("playing");for(let n=0;n<t;n++)for(let a=0;a<o;a++)e[n][a]&&Z(a,n,e[n][a])}var P1=k2;var I2=(e,r,t)=>{let{shape:o,color:n}=e,{length:a}=o;for(let i=0;i<a;i++)for(let d=0;d<o[i].length;d++)o[i][d]&&Z(r+d,t+i,n);return!0},V1=I2;var D2=e=>{let{board:r,curr:t,cx:o,cy:n}=e;r&&P1(r),t&&V1(t,o,n)},ee=D2;var P2=e=>{C(),ee(e),B(),A("paused"),L(),p1(),G1(),m1()},N1=P2;var V2=e=>{N1(e)},F1=V2;var N2=()=>{let{RED:e,YELLOW:r}=u,{gameBoard:t}=f,{width:o,height:n}=t;p({text:"GAME",x:o/2,y:n/1.8,color:e,strokeColor:r,size:2.3,center:!0,stroke:!0})},me=N2;var F2=()=>{let{RED:e,YELLOW:r}=u,{gameBoard:t}=f,{width:o,height:n}=t;p({text:"OVER",x:o/2,y:n/1.6,color:e,strokeColor:r,size:2.3,center:!0,stroke:!0})},he=F2;var U2=e=>{C(),ee(e),B(),A("game-over"),L(),me(),he(),Q()},U1=U2;var W2=e=>{U1(e)},W1=W2;var K2=()=>{let{nextPiece:e,nextPieceContext:r}=f,{width:t,height:o}=e;r.clearRect(0,0,t,o)},K1=K2;var Y2=e=>{let{next:r}=e,{RGBA_BLACK:t}=u,{nextPiece:o,nextPieceContext:n}=f,{width:a,height:i}=o;if(!r)return;let{shape:d}=r,h=Math.floor(a/5),g=Math.floor((a-d[0].length*h)/2),x=Math.floor((i-d.length*h)/2);K1();for(let q=0;q<d.length;q++)for(let M=0;M<d[q].length;M++){if(!d[q][M])continue;let I=1,T=h-I,se=g+M*h+I,Ge=x+q*h+I;n.fillStyle=r.color,n.fillRect(se,Ge,T,T),n.strokeStyle=t,n.strokeRect(se,Ge,T,T)}},pe=Y2;var $2=e=>{ee(e),pe(e)},ve=$2;var X2=e=>{ve(e)},Y1=X2;var J2=e=>{C(),ve(e),B(),A("game-over"),L(),me(),he(),Q()},$1=J2;var j2=e=>{$1(e)},X1=j2;var Q2={"main-menu":e=>{i1(e)},difficulty:e=>{u1(e)},playing:e=>{Y1(e)},paused:e=>{F1(e)},"game-over":e=>{W1(e)},replay:e=>{X1(e)}},J1=Q2;var Z2=e=>{let{mode:r}=e,t=J1[r];t&&t(e)},ae=Z2;var e4=e=>{document?.fonts?.load?document.fonts.load('40px "Press Start 2P"').then(()=>{ae(e)}):setTimeout(()=>{ae(e)},150)},j1=e4;var r4=e=>{let{Board:r}=E,{cols:t}=r,{gameBoardContext:o}=f;for(let n of e.lines){o.save(),o.globalAlpha=n.alpha;for(let a=0;a<t;a++)Z(a,n.y,n.color);o.restore()}},Q1=r4;var t4=(e,r=1)=>{let{YELLOW:t,BLACK:o}=u,{FONT_FAMILY:n}=j,{gameBoard:a,gameBoardContext:i,fontSize:d}=f,{width:m,height:h}=a;i.save(),i.textAlign="center",i.textBaseline="middle",i.translate(m/2,h/2),i.scale(r,r),i.font=`${d*3.25}px ${n}`,i.fillStyle=t,i.strokeStyle=o,i.lineWidth=6;let g=String(e);i.strokeText(g,0,0),i.fillText(g,0,0),i.restore()},Z1=t4;var o4=()=>{let{GREEN:e,BLACK:r}=u,{gameBoard:t}=f,{width:o,height:n}=t;p({text:"GET READY!",x:o/2,y:n/1.46,color:e,stroke:!0,strokeColor:r,size:1.1,center:!0,baseline:"top"})},er=o4;var s4=()=>{let{gameBoard:e}=f,{width:r,height:t}=e,o=R(P.gamepad),n=Math.floor(r*.54),a=r/2-n/2,i=t/2-n*1.2;F(o,a,i,n)},rr=s4;var n4=e=>{let{number:r,scale:t}=e;C(),B(),L(),A("countdown"),rr(),er(),Z1(r,t)},tr=n4;var a4=e=>{let{gameBoardContext:r}=f;for(let t of e)r.globalAlpha=t.alpha,r.fillStyle=t.color,r.beginPath(),r.arc(t.x,t.y,t.radius,0,Math.PI*2),r.fill(),t.x+=t.vx,t.y+=t.vy,t.alpha-=.024;r.globalAlpha=1},or=a4;var i4=()=>{let{GREEN:e}=u,{gameBoard:r}=f,{width:t,height:o}=r;p({text:"LEVEL UP",x:t/2,y:o/2.5,color:e,size:1.2,center:!0})},sr=i4;var d4=()=>{let{YELLOW:e,BLACK:r}=u,{gameBoard:t}=f,{width:o,height:n}=t;p({text:"CONGRATS!",x:o/2,y:n/1.6,color:e,stroke:!0,strokeColor:r,lineWidth:3,size:1.3,center:!0})},nr=d4;function f4(e,r){let{gameBoard:t}=f,{height:o}=t;B(),L(),sr(),ue(e,o/1.85),nr(),or(r)}var ar=f4;var c4=()=>{let{Board:e}=E,{rows:r,cols:t}=e,{gameBoard:o,nextPiece:n}=f,a=globalThis.innerHeight*.9;f.blockSize=Math.floor(a/r),o.width=f.blockSize*t,o.height=f.blockSize*r,f.fontSize=Math.floor(o.height*.032);let i=Math.min(globalThis.innerWidth*.1,globalThis.innerHeight*.18);n.width=i,n.height=i},ir=c4;var{score:l4,lines:u4,level:m4,highScore:h4}=E.Elements.Hud,p4={score:document.querySelector(`#${l4}`),lines:document.querySelector(`#${u4}`),level:document.querySelector(`#${m4}`),highScore:document.querySelector(`#${h4}`)},V=p4;var W=(e,r,t=0)=>e.textContent=t?G(r,t):String(r),dr=(e,r,t)=>{if(e.visual===e.target)return;let o=e.target-e.visual,n=Math.ceil(Math.abs(o)*.1);o>0?(e.visual+=n,e.visual>e.target&&(e.visual=e.target)):(e.visual-=n,e.visual<e.target&&(e.visual=e.target)),W(r,e.visual,t)},v4=()=>{let e={visual:0,target:0},r={visual:0,target:0},t={lines:-1,level:-1};return{update:o=>{e.target=Number(o.score)||0,r.target=Number(o.highScore)||0,o.lines!==t.lines&&(W(V.lines,o.lines,2),t.lines=o.lines),o.level!==t.level&&(W(V.level,o.level,2),t.level=o.level)},tick:()=>{dr(e,V.score,5),dr(r,V.highScore,5)},reset:()=>{e.visual=0,e.target=0,r.visual=0,r.target=0,t.lines=-1,t.level=-1,W(V.score,0,5),W(V.highScore,0,5),W(V.lines,0,2),W(V.level,1,2)}}},fr=v4;var ge={Canvas:f,hud:fr(),updateMode:e=>{f.gameBoard.dataset.mode=e},updateHud(e){let{mode:r,score:t,lines:o,level:n,highScore:a,needReset:i=!1}=e;(r==="main-menu"||i)&&ge.hud.reset(),ge.hud.update({score:t,lines:o,level:n,highScore:a})},tickHud(e){ge.hud.tick(e)},lazyRender(e){j1(e)},render(e){ae(e)},renderClear:Q1,renderCountdown:tr,renderLevelUp:ar,renderNextPiece:pe,resize:ir},w=ge;var D={A:"TOGGLE_MUSIC",B:"DROP",X:"RESTART",Y:"TOGGLE_PAUSE",START:"CONFIRM",BACK:"QUIT",DPAD_LEFT:"MOVE_LEFT",DPAD_RIGHT:"MOVE_RIGHT",DPAD_DOWN:"MOVE_DOWN",DPAD_UP:"ROTATE"},cr=["ONE","TWO","THREE","FOUR","FIX","SIX","SEVEN","EIGHT","NINE","TEN"],Ce={A:0,B:1,X:2,Y:3,LB:4,RB:5,LT:6,RT:7,BACK:8,START:9,DPAD_UP:12,DPAD_DOWN:13,DPAD_LEFT:14,DPAD_RIGHT:15},lr={A:2,B:1,X:3,Y:0,LB:4,RB:5,LT:6,RT:7,BACK:8,START:9},Le=class{activeGamepadIndex=null;DEAD_ZONE=.15;DPAD_THRESHOLD=.5;buttonStates={};axisStates={};_eventsBound=!1;DPAD_COOLDOWN=180;lastDpadTime=0;constructor(){this.curBtnMap=Ce,this.dpadAxisState={up:!1,down:!1,left:!1,right:!1},this.AXIS_MAP={LEFT_STICK_X:0,LEFT_STICK_Y:1}}update(r){return this._refreshGamepadState(),this.activeGamepad?(this._collectCommands(r),this):this}addEventListeners(){return this._eventsBound?this:(globalThis.addEventListener("gamepadconnected",this._onConnect),globalThis.addEventListener("gamepaddisconnected",this._onDisconnect),this._eventsBound=!0,this)}removeEventListeners(){return globalThis.removeEventListener("gamepadconnected",this._onConnect),globalThis.removeEventListener("gamepaddisconnected",this._onDisconnect),this._eventsBound=!1,this}_onConnect=r=>{let t=r.gamepad;return this.activeGamepadIndex!==null?this:(this.activeGamepadIndex=t.index,this.curBtnMap=this._isBetop(t.id)?lr:Ce,s.emit("game:update:gamepad:connected",{connected:!0}),this)};_onDisconnect=r=>this.activeGamepadIndex!==r.gamepad.index?this:(this.activeGamepadIndex=null,this.buttonStates={},this.axisStates={},s.emit("game:update:gamepad:connected",{connected:!1}),this);_isBetop(r){return r.includes("20bc")&&r.includes("1263")}_refreshGamepadState(){let r=navigator.getGamepads?.()||[];if(this.activeGamepadIndex===null){let t=Array.from(r).find(Boolean);t&&(this.activeGamepadIndex=t.index,this.curBtnMap=this._isBetop(t.id)?lr:Ce)}return this.activeGamepad=this.activeGamepadIndex===null?null:r[this.activeGamepadIndex],this}_updateActionMap(r){switch(r){case"difficulty":{D.A="EASY",D.B="NORMAL",D.Y="HARD",D.X="EXPERT",D.BACK="BACK";break}case"playing":{D.A="TOGGLE_MUSIC",D.B="DROP",D.X="RESTART",D.Y="TOGGLE_PAUSE";break}}return this}_resolveAction(r,t,o,n,a,i){return!o||n!=="main-menu"?r:i-this.lastDpadTime<this.DPAD_COOLDOWN?"":(this.lastDpadTime=i,t==="DPAD_UP"?this._getMoveUpAction(n,a):t==="DPAD_DOWN"?this._getMoveDownAction(n,a):r)}_handleStandardButtons(r,t,o,n){let a=this._isBetop(r.id),i=t==="replay"||t==="game-over";for(let[d,m]of Object.entries(D)){let h=d.startsWith("DPAD_");if(!this._isPressed(d)||a&&h)continue;if(i&&d!=="START")return this;let g=this._resolveAction(m,d,h,t,o,n);g&&s.emit("dispatch:input",{device:"gamepad",action:g,payload:{}})}return this}_collectCommands(r){let{mode:t,level:o}=r,n=this.activeGamepad,a=Date.now();if(!n)return this;if(this._updateActionMap(t),this._handleStandardButtons(n,t,o,a),t==="replay"||t==="game-over")return this;let i=this._getAxis(this.AXIS_MAP.LEFT_STICK_X),d=this._getAxis(this.AXIS_MAP.LEFT_STICK_Y);if(this._handleStickMove(i,d),this._isBetop(n.id)){let m=n.axes[9]??0;this._handleBetopDpad(m,r)}return this}_startAxisAction(r){return this.axisStates[r]?this:(this.axisStates[r]=!0,s.emit("dispatch:input",{device:"gamepad",action:r,payload:{}}),this)}_stopAxisAction(r){return this.axisStates[r]=!1,this}_handleStickUp(r){return r<-this.DPAD_THRESHOLD?this._startAxisAction("ROTATE"):this._stopAxisAction("ROTATE"),this}_handleStickDown(r){return r>this.DPAD_THRESHOLD?this._startAxisAction("MOVE_DOWN"):this._stopAxisAction("MOVE_DOWN"),this}_handleStickLeft(r){return r<-this.DPAD_THRESHOLD?this._startAxisAction("MOVE_LEFT"):this._stopAxisAction("MOVE_LEFT"),this}_handleStickRight(r){return r>this.DPAD_THRESHOLD?this._startAxisAction("MOVE_RIGHT"):this._stopAxisAction("MOVE_RIGHT"),this}_handleStickMove(r,t){return this._handleStickUp(t),this._handleStickDown(t),this._handleStickLeft(r),this._handleStickRight(r),this}_getMoveUpAction(r,t){let o;return r==="main-menu"?(t+=1,t>=10&&(t=10),s.emit("game:update:level",{level:t}),o=`LEVEL_${cr[t-1]}`):o="ROTATE",o}_getMoveDownAction(r,t){let o;return r==="main-menu"?(t-=1,t<=1&&(t=1),s.emit("game:update:level",{level:t}),o=`LEVEL_${cr[t-1]}`):o="MOVE_DOWN",o}_handleBetopDpadUp(r,t,o){let n=this._getMoveUpAction(r,t);return o.up||(o.up=!0,s.emit("dispatch:input",{device:"gamepad",action:n,payload:{}})),o.down=o.left=o.right=!1,this}_handleBetopDpadDown(r,t,o){let n=this._getMoveDownAction(r,t);return o.down||(o.down=!0,s.emit("dispatch:input",{device:"gamepad",action:n,payload:{}})),o.up=o.left=o.right=!1,this}_handleBetopDpadLeft(r){return r.left||(r.left=!0,s.emit("dispatch:input",{device:"gamepad",action:"MOVE_LEFT",payload:{}})),r.up=r.down=r.right=!1,this}_handleBetopDpadRight(r){return r.right||(r.right=!0,s.emit("dispatch:input",{device:"gamepad",action:"MOVE_RIGHT",payload:{}})),r.up=r.down=r.left=!1,this}_handleBetopDpad(r,t){let{mode:o,level:n}=t,a=r.toFixed(5),i=this.dpadAxisState,d=Date.now();if(o==="main-menu"&&d-this.lastDpadTime<this.DPAD_COOLDOWN)return this;switch(a){case"-1.00000":{this._handleBetopDpadUp(o,n,i),this.lastDpadTime=d;break}case"0.14286":{this._handleBetopDpadDown(o,n,i),this.lastDpadTime=d;break}case"0.71429":{this._handleBetopDpadLeft(i),this.lastDpadTime=d;break}case"-0.42857":{this._handleBetopDpadRight(i),this.lastDpadTime=d;break}default:{i.up=i.down=i.left=i.right=!1;break}}return this}_getAxis(r){if(!this.activeGamepad)return 0;let t=this.activeGamepad.axes[r]??0;return Math.abs(t)>this.DEAD_ZONE?t:0}_isPressed(r){let t=this.curBtnMap[r];if(t===void 0||!this.activeGamepad)return!1;let o=this.activeGamepad.buttons[t];if(!o)return!1;let n=o.value>.5;return n&&!this.buttonStates[r]?(this.buttonStates[r]=!0,!0):(n||(this.buttonStates[r]=!1),!1)}},ur=Le;var g4={arrowleft:"MOVE_LEFT",arrowright:"MOVE_RIGHT",arrowdown:"MOVE_DOWN",arrowup:"ROTATE"," ":"DROP",m:"TOGGLE_MUSIC",p:"TOGGLE_PAUSE",r:"RESTART",q:"QUIT",1:"LEVEL_ONE",2:"LEVEL_TWO",3:"LEVEL_THREE",4:"LEVEL_FOUR",5:"LEVEL_FIVE",6:"LEVEL_SIX",7:"LEVEL_SEVEN",8:"LEVEL_EIGHT",9:"LEVEL_NINE",t:"LEVEL_TEN",e:"EASY",n:"NORMAL",h:"HARD",x:"EXPERT",b:"BACK",enter:"CONFIRM"},q4=e=>{if(!e)return;let r=e.toLowerCase();return g4[r]},Be=class{constructor(){this.state={}}update(r){this.state=r}addEventListeners(){return globalThis.addEventListener("resize",this._onResize),document.addEventListener("keydown",this._onKeydown),this}removeEventListeners(){return globalThis.removeEventListener("resize",this._onResize),document.removeEventListener("keydown",this._onKeydown),this}_onResize=()=>(s.emit("ui:resize"),this);_onKeydown=r=>{let t=r.key.toLowerCase(),o=q4(t),{mode:n}=this.state;return!o||n==="replay"&&t!=="enter"?this:(s.emit("dispatch:input",{device:"keyboard",action:o,payload:{}}),this)}},mr=Be;var x4={Gamepad:ur,Keyboard:mr},Ae=x4;var y4={combo:{shift:0,speed:1,volume:1},tetris:{shift:2,speed:1.2,volume:1.1},perfect:{shift:5,speed:.9,volume:1.3}},hr=y4;var qe=new AudioContext,E4=(e,r,t=.1,o="square")=>{if(!e)return;let n=qe.createOscillator(),a=qe.createGain();n.type=o,n.frequency.value=e;let i=qe.currentTime,d=r/1e3;a.gain.setValueAtTime(0,i),a.gain.linearRampToValueAtTime(t,i+.01),a.gain.exponentialRampToValueAtTime(1e-4,d),a.gain.value=t,n.connect(a),a.connect(qe.destination),n.start(),n.stop(i+d),n.addEventListener("ended",()=>{n.disconnect(),a.disconnect()})},y=E4;var S4=(e,r=!1)=>r?"perfect":e===4?"tetris":"combo",M4={difficultySelect:()=>y(880,80,.1,"sine"),levelSelect:()=>y(523,80,.1,"sine"),levelStart:()=>y(1319,160,.22,"sine"),countdown:()=>y(784,180,.3,"sine"),move:()=>y(330,60),rotate:()=>y(440,60),drop:()=>y(220,100),fall:()=>y(180,200),clear:(e=1,r=!1)=>{let t=[[440,587,698],[587,698,880],[698,880,1174],[587,880,1174],[440,880,1174]],o=[260,300,380],n=[.32,.3,.25],a=[160,320,480],i=S4(e,r),d=hr[i],m=Math.min(e,t.length-1),g=t[m].map(x=>x+d.shift*12);for(let[x,q]of g.entries())setTimeout(()=>{y(q,o[x]*d.speed,n[x]*d.volume,"square")},a[x])},levelUp:()=>{y(523,220),setTimeout(()=>y(587,220),260),setTimeout(()=>y(659,240),520),setTimeout(()=>y(784,260),780),setTimeout(()=>y(880,280),1060),setTimeout(()=>y(1047,320),1360),setTimeout(()=>y(1175,360),1700),setTimeout(()=>y(1319,480),2080)},pause:()=>y(300,150),secondTick:()=>y(880,50,.085,"sine"),resume:()=>y(400,150),gameOver:()=>{y(330,200),setTimeout(()=>y(294,300),210),setTimeout(()=>y(262,500),520)},bgmToggle:()=>y(440,100)},xe=M4;var w4={bgmEnabled:!0,bgmTimer:null},H=w4;var T4={name:"Jasmine Flower",melody:[{freq:659,dur:.8},{freq:659,dur:.8},{freq:587,dur:1.2},{freq:523,dur:.4},{freq:587,dur:.4},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:1.6},{freq:440,dur:1.2},{freq:523,dur:.4},{freq:587,dur:.4},{freq:523,dur:1.2},{freq:440,dur:.8},{freq:392,dur:.8},{freq:440,dur:1.6},{freq:523,dur:1.2},{freq:659,dur:.8},{freq:659,dur:.8},{freq:587,dur:1.2},{freq:523,dur:.4},{freq:587,dur:.4},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:1.6},{freq:440,dur:1.2},{freq:523,dur:.4},{freq:587,dur:.4},{freq:523,dur:1.2},{freq:440,dur:.8},{freq:392,dur:.8},{freq:440,dur:1.2},{freq:523,dur:.8},{freq:392,dur:1.6},{freq:440,dur:.8},{freq:523,dur:.4},{freq:587,dur:1.2},{freq:440,dur:.8},{freq:523,dur:.8},{freq:440,dur:1.6},{freq:392,dur:2},{freq:330,dur:.8},{freq:392,dur:.4},{freq:440,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:523,dur:.8},{freq:440,dur:1.2},{freq:392,dur:2.4}],duration:540,volume:.09,wave:"sine"},pr=T4;var C4={name:"FirstDivision",melody:[{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:659,dur:.8},{freq:698,dur:.8},{freq:784,dur:1.2},{freq:698,dur:.8},{freq:659,dur:.8},{freq:587,dur:.8},{freq:659,dur:.8},{freq:523,dur:.8},{freq:587,dur:1.2},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:.8},{freq:698,dur:.8},{freq:784,dur:1.2},{freq:698,dur:.8},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:.8},{freq:523,dur:1.2},{freq:659,dur:.8},{freq:784,dur:.8},{freq:880,dur:1.2},{freq:784,dur:.8},{freq:659,dur:.8},{freq:587,dur:.8},{freq:659,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:.8},{freq:698,dur:.8},{freq:784,dur:1.2},{freq:784,dur:.8},{freq:880,dur:.8},{freq:988,dur:1.2},{freq:880,dur:.8},{freq:784,dur:.8},{freq:698,dur:.8},{freq:784,dur:.8},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:1.2},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:587,dur:.8},{freq:523,dur:1.2},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:1.2},{freq:523,dur:.8},{freq:494,dur:1.6}],duration:180,volume:.08,wave:"square"},vr=C4;var L4={name:"Loginska",melody:[{freq:659,dur:1.2},{freq:659,dur:.4},{freq:659,dur:.4},{freq:784,dur:.6},{freq:880,dur:.6},{freq:784,dur:1.2},{freq:784,dur:.4},{freq:784,dur:.4},{freq:659,dur:.6},{freq:587,dur:.6},{freq:659,dur:1.2},{freq:659,dur:.4},{freq:659,dur:.4},{freq:523,dur:.6},{freq:587,dur:.6},{freq:659,dur:1.2},{freq:659,dur:.4},{freq:659,dur:.4},{freq:784,dur:.6},{freq:880,dur:.6},{freq:784,dur:1.2},{freq:784,dur:.4},{freq:784,dur:.4},{freq:880,dur:.6},{freq:988,dur:.6},{freq:880,dur:1.2},{freq:880,dur:.4},{freq:880,dur:.4},{freq:784,dur:.6},{freq:659,dur:.6},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:659,dur:.6},{freq:523,dur:.6},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:659,dur:.6},{freq:784,dur:.6},{freq:784,dur:1.2},{freq:784,dur:.4},{freq:784,dur:.4},{freq:659,dur:.6},{freq:587,dur:.6},{freq:659,dur:1.2},{freq:659,dur:.4},{freq:659,dur:.4},{freq:523,dur:.6},{freq:494,dur:.6},{freq:440,dur:1.2},{freq:440,dur:.4},{freq:440,dur:.4},{freq:440,dur:.6},{freq:440,dur:.6},{freq:440,dur:1.2},{freq:440,dur:.4},{freq:440,dur:.4}],duration:180,volume:.07,wave:"square"},gr=L4;var B4={name:"Technotris",melody:[{freq:659,dur:.6},{freq:659,dur:.6},{freq:494,dur:.6},{freq:494,dur:.6},{freq:523,dur:.6},{freq:523,dur:.6},{freq:587,dur:.6},{freq:587,dur:.6},{freq:523,dur:.6},{freq:523,dur:.6},{freq:494,dur:.6},{freq:494,dur:.6},{freq:659,dur:.8},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:.8},{freq:440,dur:.8},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:.6},{freq:659,dur:.6},{freq:659,dur:.6},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:1.2},{freq:523,dur:.6},{freq:523,dur:.6},{freq:587,dur:.6},{freq:587,dur:.6},{freq:659,dur:.6},{freq:659,dur:.6},{freq:784,dur:.6},{freq:784,dur:.6},{freq:659,dur:.6},{freq:659,dur:.6},{freq:587,dur:.6},{freq:587,dur:.6},{freq:659,dur:.8},{freq:784,dur:.8},{freq:880,dur:.8},{freq:784,dur:.8},{freq:659,dur:.8},{freq:587,dur:.8},{freq:659,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:.8},{freq:784,dur:.8},{freq:880,dur:.8},{freq:988,dur:.8},{freq:880,dur:.8},{freq:784,dur:1.2},{freq:784,dur:.8},{freq:880,dur:.8},{freq:988,dur:.8},{freq:1175,dur:1.2},{freq:988,dur:.8},{freq:880,dur:.8},{freq:784,dur:.8},{freq:659,dur:.6},{freq:659,dur:.6},{freq:659,dur:.6},{freq:784,dur:.6},{freq:784,dur:.6},{freq:880,dur:.6},{freq:880,dur:.6},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:784,dur:.6},{freq:784,dur:.6},{freq:880,dur:.6},{freq:880,dur:.6},{freq:988,dur:.6},{freq:988,dur:.6},{freq:880,dur:.6},{freq:880,dur:.6},{freq:784,dur:.6},{freq:784,dur:.6},{freq:659,dur:.6},{freq:659,dur:.6},{freq:587,dur:.6},{freq:587,dur:.6},{freq:523,dur:.6},{freq:523,dur:.6},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:.8},{freq:440,dur:1.6}],duration:180,volume:.09,wave:"square"},qr=B4;var A4={name:"Korobeiniki",melody:[{freq:659,dur:.8},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:1.2},{freq:523,dur:.8},{freq:494,dur:.8},{freq:440,dur:.8},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:1.2},{freq:659,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:1.2},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:784,dur:1.2},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:1.2},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:1.2},{freq:587,dur:.8},{freq:659,dur:.8},{freq:784,dur:1.2},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:523,dur:.8},{freq:494,dur:.8},{freq:659,dur:.8},{freq:784,dur:1.2},{freq:880,dur:1.2},{freq:784,dur:.8},{freq:659,dur:1.2},{freq:587,dur:.8},{freq:659,dur:.8},{freq:784,dur:1.2},{freq:880,dur:1.2},{freq:784,dur:.8},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:784,dur:.8},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:1.2},{freq:523,dur:.8},{freq:587,dur:.8},{freq:659,dur:1.2},{freq:784,dur:1.2},{freq:880,dur:.8},{freq:784,dur:.8},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:1.2},{freq:659,dur:.8},{freq:523,dur:.8},{freq:494,dur:1.2},{freq:440,dur:.8},{freq:494,dur:.8},{freq:523,dur:1.2},{freq:587,dur:1.2},{freq:523,dur:.8},{freq:494,dur:.8},{freq:440,dur:.8},{freq:494,dur:.8},{freq:523,dur:.8},{freq:587,dur:1.2},{freq:659,dur:1.2},{freq:659,dur:.8},{freq:784,dur:.8},{freq:880,dur:1.2},{freq:784,dur:.8},{freq:659,dur:.8},{freq:587,dur:.8},{freq:659,dur:.8},{freq:523,dur:.8},{freq:587,dur:1.2},{freq:659,dur:.8},{freq:587,dur:.8},{freq:523,dur:.8},{freq:494,dur:1.2},{freq:523,dur:1.2},{freq:494,dur:.8},{freq:440,dur:1.6}],duration:140,volume:.08,wave:"square"},xr=A4;var z4={name:"BeyondTheWall",config:{gate:{intro:.92,main:.93,drive:.96,dnb:.88,outro:.91}},melody:[{freq:330,dur:.6},{freq:0,dur:.15},{freq:392,dur:.6},{freq:0,dur:.15},{freq:330,dur:.6},{freq:392,dur:.6},{freq:330,dur:.6},{freq:0,dur:.15},{freq:392,dur:.6},{freq:0,dur:.15},{freq:440,dur:1.8},{freq:0,dur:.3},{freq:440,dur:1.2},{freq:523,dur:.6},{freq:587,dur:1.2},{freq:0,dur:.2},{freq:523,dur:.6},{freq:440,dur:1.2},{freq:392,dur:.6},{freq:330,dur:1.2},{freq:392,dur:1.2},{freq:0,dur:.25},{freq:440,dur:1.2},{freq:523,dur:.6},{freq:659,dur:1.8},{freq:0,dur:.2},{freq:587,dur:.6},{freq:523,dur:1.2},{freq:440,dur:.6},{freq:392,dur:1.2},{freq:330,dur:1.2},{freq:0,dur:.3},{freq:392,dur:.6},{freq:440,dur:.3},{freq:523,dur:.6},{freq:587,dur:.3},{freq:659,dur:.6},{freq:587,dur:.3},{freq:523,dur:.6},{freq:440,dur:.3},{freq:392,dur:.6},{freq:440,dur:.3},{freq:523,dur:.6},{freq:587,dur:.3},{freq:659,dur:1.2},{freq:0,dur:.2},{freq:587,dur:.6},{freq:523,dur:1.2},{freq:659,dur:1.2},{freq:784,dur:.6},{freq:880,dur:1.8},{freq:0,dur:.25},{freq:784,dur:.6},{freq:659,dur:1.2},{freq:587,dur:.6},{freq:523,dur:1.2},{freq:440,dur:.6},{freq:0,dur:.2},{freq:659,dur:1.2},{freq:784,dur:.6},{freq:880,dur:1.2},{freq:0,dur:.25},{freq:784,dur:.6},{freq:659,dur:1.2},{freq:587,dur:.6},{freq:523,dur:1.8},{freq:440,dur:.4},{freq:0,dur:.2},{freq:440,dur:.4},{freq:523,dur:.4},{freq:0,dur:.2},{freq:440,dur:.4},{freq:392,dur:.4},{freq:330,dur:.4},{freq:0,dur:.2},{freq:392,dur:.4},{freq:440,dur:.4},{freq:0,dur:.2},{freq:523,dur:.4},{freq:523,dur:.4},{freq:587,dur:.4},{freq:0,dur:.2},{freq:523,dur:.4},{freq:440,dur:.4},{freq:392,dur:.4},{freq:0,dur:.2},{freq:440,dur:.4},{freq:523,dur:.4},{freq:659,dur:1.2},{freq:0,dur:.25},{freq:587,dur:.6},{freq:523,dur:1.2},{freq:440,dur:.6},{freq:392,dur:1.2},{freq:330,dur:1.2},{freq:0,dur:.3},{freq:392,dur:1.2},{freq:330,dur:.6},{freq:294,dur:1.2},{freq:0,dur:.25},{freq:330,dur:.6},{freq:392,dur:1.8},{freq:330,dur:.6},{freq:0,dur:.15},{freq:392,dur:.6},{freq:0,dur:.15},{freq:330,dur:.6},{freq:392,dur:.6},{freq:440,dur:1.8}],duration:130,volume:.09,wave:"triangle"},yr=z4;var _4={name:"TetrisTheme",melody:[{freq:659,dur:1.2},{freq:659,dur:.4},{freq:659,dur:.4},{freq:494,dur:.6},{freq:523,dur:.6},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:523,dur:.6},{freq:494,dur:.6},{freq:440,dur:1.2},{freq:440,dur:.4},{freq:440,dur:.4},{freq:523,dur:.6},{freq:659,dur:.6},{freq:659,dur:1.2},{freq:659,dur:.4},{freq:659,dur:.4},{freq:587,dur:.6},{freq:523,dur:.6},{freq:494,dur:1.2},{freq:494,dur:.4},{freq:494,dur:.4},{freq:523,dur:.6},{freq:587,dur:.6},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:659,dur:1.2},{freq:523,dur:1.2},{freq:523,dur:.4},{freq:523,dur:.4},{freq:440,dur:.6},{freq:440,dur:.6},{freq:440,dur:1.2},{freq:440,dur:.4},{freq:440,dur:.4},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:784,dur:.6},{freq:880,dur:.6},{freq:880,dur:1.2},{freq:880,dur:.4},{freq:880,dur:.4},{freq:784,dur:.6},{freq:659,dur:.6},{freq:523,dur:1.2},{freq:523,dur:.4},{freq:523,dur:.4},{freq:659,dur:.6},{freq:784,dur:.6},{freq:784,dur:1.2},{freq:784,dur:.4},{freq:784,dur:.4},{freq:659,dur:.6},{freq:587,dur:.6},{freq:494,dur:1.2},{freq:494,dur:.4},{freq:494,dur:.4},{freq:523,dur:.6},{freq:587,dur:.6},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:659,dur:1.2},{freq:523,dur:1.2},{freq:523,dur:.4},{freq:523,dur:.4},{freq:440,dur:.6},{freq:440,dur:.6},{freq:440,dur:1.2},{freq:440,dur:.4},{freq:440,dur:.4},{freq:659,dur:1.2},{freq:659,dur:.4},{freq:659,dur:.4},{freq:523,dur:.6},{freq:523,dur:.6},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:494,dur:.6},{freq:494,dur:.6},{freq:523,dur:1.2},{freq:523,dur:.4},{freq:523,dur:.4},{freq:440,dur:.6},{freq:440,dur:.6},{freq:415,dur:1.2},{freq:415,dur:.4},{freq:415,dur:.4},{freq:659,dur:1.2},{freq:659,dur:.4},{freq:659,dur:.4},{freq:523,dur:.6},{freq:523,dur:.6},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:494,dur:.6},{freq:494,dur:.6},{freq:523,dur:1.2},{freq:523,dur:.4},{freq:523,dur:.4},{freq:659,dur:.6},{freq:659,dur:.6},{freq:880,dur:1.2},{freq:880,dur:.4},{freq:880,dur:.4},{freq:784,dur:1.2},{freq:784,dur:.4},{freq:784,dur:.4},{freq:659,dur:.6},{freq:587,dur:.6},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:523,dur:1.2},{freq:494,dur:1.2},{freq:494,dur:.4},{freq:494,dur:.4},{freq:523,dur:.6},{freq:587,dur:.6},{freq:587,dur:1.2},{freq:587,dur:.4},{freq:587,dur:.4},{freq:659,dur:1.2},{freq:523,dur:1.2},{freq:523,dur:.4},{freq:523,dur:.4},{freq:440,dur:.6},{freq:440,dur:.6},{freq:440,dur:1.2},{freq:440,dur:.4},{freq:440,dur:.4}],duration:220,volume:.08,wave:"square"},Er=_4;var R4={name:"JourneyToWest",melody:[{freq:880,dur:1.2},{freq:880,dur:1.2},{freq:0,dur:.6},{freq:880,dur:1.2},{freq:880,dur:1.2},{freq:0,dur:.6},{freq:880,dur:1.2},{freq:880,dur:1.2},{freq:0,dur:.6},{freq:880,dur:1.2},{freq:880,dur:2.4},{freq:440,dur:3.6},{freq:440,dur:.9},{freq:440,dur:2.7},{freq:523,dur:3.6},{freq:587,dur:3.6},{freq:587,dur:.9},{freq:587,dur:2.7},{freq:659,dur:4.5},{freq:880,dur:3.6},{freq:880,dur:.9},{freq:880,dur:2.7},{freq:784,dur:3.6},{freq:659,dur:3.6},{freq:659,dur:.9},{freq:659,dur:2.7},{freq:659,dur:4.5},{freq:587,dur:3.6},{freq:587,dur:.9},{freq:587,dur:2.7},{freq:523,dur:3.6},{freq:440,dur:3.6},{freq:440,dur:.9},{freq:440,dur:2.7},{freq:440,dur:4.5},{freq:587,dur:2.7},{freq:587,dur:1.8},{freq:659,dur:2.7},{freq:784,dur:3.6},{freq:784,dur:1.8},{freq:784,dur:1.8},{freq:880,dur:3.6},{freq:988,dur:2.7},{freq:988,dur:1.8},{freq:988,dur:2.7},{freq:880,dur:3.6},{freq:784,dur:2.7},{freq:784,dur:1.8},{freq:784,dur:3.6},{freq:1175,dur:1.4},{freq:1175,dur:1.4},{freq:0,dur:.9},{freq:1175,dur:1.4},{freq:1175,dur:1.4},{freq:0,dur:.9},{freq:880,dur:2.7},{freq:880,dur:2.7},{freq:440,dur:3.6},{freq:440,dur:1.8},{freq:440,dur:3.6},{freq:440,dur:1.8},{freq:440,dur:5.4}],duration:110,volume:.12,wave:"square"},Sr=R4;var O4={JasmineFlower:pr,FirstDivision:vr,Loginska:gr,Technotris:qr,Korobeiniki:xr,BeyondTheWall:yr,TetrisTheme:Er,JourneyToWest:Sr},Mr=O4;var b4={sine:.85,square:.96,triangle:.93},wr=(e,r,t=110,o=.05,n="square")=>{e>=r.length&&(e=0);let a=r[e],{freq:i,dur:d}=a,m=b4[n],h=d*t,g=h*m;i>0&&y(i,g,o,n),H.bgmTimer=setTimeout(()=>{wr(e+1,r,t,o,n)},h)},Tr=wr;var H4=()=>{H.bgmTimer&&clearTimeout(H.bgmTimer),H.bgmTimer=null},re=H4;var{TetrisTheme:G4,JasmineFlower:k4,FirstDivision:I4,Loginska:D4,Technotris:P4,Korobeiniki:V4,BeyondTheWall:N4,JourneyToWest:F4}=Mr,Cr=[G4,k4,I4,D4,P4,V4,N4,F4],U4=e=>{let{length:r}=Cr,t=Math.floor(E.Level.max/r),o=Math.min(Math.floor((e-1)/t),r-1);return Cr[o]},W4=(e=1)=>{if(!H.bgmEnabled)return;let r=U4(e),{melody:t,duration:o,volume:n}=r;re(),Tr(0,t,o,n)},ye=W4;var K4=e=>{H.bgmEnabled=!H.bgmEnabled,xe.bgmToggle(),H.bgmEnabled?ye(e):re()},Lr=K4;var Y4={Sounds:xe,playBGM:ye,stopBGM:re,toggleBGM:Lr},S=Y4;var $4={subscribe(){s.on("audio:play:bgm",({level:e})=>{S.playBGM(e)}),s.on("audio:stop:bgm",()=>{S.stopBGM()}),s.on("audio:toggle:bgm",({level:e})=>{S.toggleBGM(e)}),s.on("audio:sounds:level:start",()=>{S.Sounds.levelStart()}),s.on("audio:sounds:game:over",()=>{S.Sounds.gameOver()}),s.on("audio:sounds:fall",()=>{S.Sounds.fall()}),s.on("audio:sounds:rotate",()=>{S.Sounds.rotate()}),s.on("audio:sounds:move",()=>{S.Sounds.move()}),s.on("audio:sounds:drop",()=>{S.Sounds.drop()}),s.on("audio:sounds:pause",()=>{S.Sounds.pause()}),s.on("audio:sounds:resume",()=>{S.Sounds.resume()}),s.on("audio:sounds:clear",({lines:e})=>{S.Sounds.clear(e)}),s.on("audio:sounds:second:tick",()=>{S.Sounds.secondTick()}),s.on("audio:sounds:level:up",()=>{S.Sounds.levelUp()}),s.on("audio:sounds:level:select",()=>{S.Sounds.levelSelect()}),s.on("audio:sounds:difficulty:select",()=>{S.Sounds.difficultySelect()}),s.on("audio:sounds:countdown",()=>{S.Sounds.countdown()})}},Br=$4;var X4={subscribe:()=>{s.on("game:update:state",({stateHandler:e})=>{c.store.setState(e)}),s.on("game:update:gamepad:connected",({connected:e})=>{c.store.setGamepadConnected(e)}),s.on("game:update:mode",({mode:e})=>{s.emit("ui:update:mode",{mode:e}),c.store.setMode(e)}),s.on("game:update:level",({level:e})=>{c.store.setLevel(e)}),s.on("game:save:high:score",()=>{c.saveHighScore(c.store.getScore())}),s.on("game:update:hud",()=>{let e=c.store.getState();s.emit("ui:update:hud",{state:e})}),s.on("game:select:level",({level:e})=>{c.selectLevel(e);let r=c.store.getState();s.emit("ui:update:hud",{state:r})}),s.on("game:switch:difficulty",()=>{c.switchToDifficulty()}),s.on("game:select:difficulty",({difficulty:e})=>{c.selectDifficulty(e)}),s.on("game:switch:to:main:menu",()=>{c.switchToMainMenu()}),s.on("game:begin",()=>{c.begin()}),s.on("game:start",()=>{c.start()}),s.on("game:toggle:pause",()=>{c.togglePause()}),s.on("game:reset",()=>{c.reset()}),s.on("game:restart",()=>{c.restart()}),s.on("game:over",()=>{c.over()}),s.on("game:move",({ox:e,oy:r})=>{c.move(e,r)}),s.on("game:rotate",()=>{c.rotate()}),s.on("game:drop",()=>{c.drop()}),s.on("game:tick",({isBlocked:e})=>{c.tick(e)}),s.on("game:toggle:bgm",()=>{let e=c.store.getLevel();s.emit("audio:toggle:bgm",{level:e})}),s.on("game:replay:prepare:board",()=>{let{store:e}=c;e.resetBoard(),e.setState({board:e.getBeginningBoard(),score:0,lines:0,level:1}),s.emit("ui:update:mode",{mode:"replay"}),e.setMode("replay"),s.emit("ui:update:hud",{state:e.getState()}),s.emit("replay:start:play"),_()})}},Ar=X4;var J4={subscribe(){s.on("ui:resize",()=>{w.resize()}),s.on("ui:render:next:piece",({state:e})=>{w.renderNextPiece(e)}),s.on("ui:update:hud",({state:e})=>{w.updateHud(e)}),s.on("ui:render:countdown",({state:e})=>{w.renderCountdown(e)}),s.on("ui:render:clear",({state:e})=>{w.renderClear(e)}),s.on("ui:render:level:up",({level:e,fireworks:r})=>{w.renderLevelUp(e,r)}),s.on("ui:update:mode",({mode:e})=>{w.updateMode(e)})}},zr=J4;var ze=class{layer=100;blocking=!0;name="countdown";constructor(){this.state={show:!0,number:3,scale:4,count:0,acc:0}}update(r){let{state:t}=this;return t.acc+=r,t.acc<.01?!0:(t.acc=0,t.count++,t.scale=Math.max(1,t.scale-.4),t.count>=50&&(t.count=0,t.number-=1,t.scale=4,t.number>=1&&s.emit("audio:sounds:countdown")),t.number<=0?(this.stop(),!1):!0)}stop(){s.emit("game:begin")}render(){let{state:r}=this;s.emit("ui:render:countdown",{state:r})}},_r=ze;var j4=()=>{v.Animations.register(new _r)},Rr=j4;var _e=class{layer=200;blocking=!0;name="clear-lines";constructor(r){this.lines=r.map(t=>({y:t,alpha:1,timer:0})),s.emit("audio:sounds:clear",{lines:r.length-1})}update(r){let t=!0;for(let o of this.lines){let n=Math.floor(o.timer/.12);o.alpha=n%2===0?1:0,o.timer+=r,o.timer<.72&&(t=!1)}return t?(this.stop(),!1):!0}stop(){let r=le(),{level:t,levelUp:o}=r,n=o;s.emit("replay:stop:clear:lines",{isLevelUp:n,level:t}),s.emit("game:update:state",{stateHandler:r.stateHandler}),s.emit("game:save:high:score"),s.emit("game:update:hud")}render(){let{lines:r}=this;s.emit("ui:render:clear",{state:{lines:r}})}},Or=_e;var Q4=e=>{let r=new Or(e);v.Animations.register(r)},br=Q4;var Re=class{layer=500;blocking=!0;name="paused";timer=0;active=!0;update(r){return this.active?(this.timer+=r,this.timer>=1&&(s.emit("audio:sounds:second:tick"),this.timer=0),!0):!1}stop(){this.active=!1}render(){this.active=!0}},Hr=Re;var te=null,Gr=()=>{te||(te=new Hr,v.Animations.register(te))},kr=()=>{te&&(te.stop(),te=null)};var{TEAL:Z4,YELLOW:e8,PURPLE:r8,ORANGE:t8,GREEN:o8,RED:s8}=u,n8=[Z4,e8,r8,t8,o8,s8],Oe=n8;var be=class{layer=100;blocking=!0;name="level-up";duration=3;spawnTimer=0;timer=0;constructor(r,t){this.level=t,this.canvas=r,this.fireworks=this.createFireworks()}createFireworks(){let{width:r,height:t}=this.canvas,o=[];for(let n=0;n<40;n++){let a=Math.random()*Math.PI*2,i=5+Math.random()*15;o.push({x:r/2,y:t/2-60,vx:Math.cos(a)*i,vy:Math.sin(a)*i,radius:3+Math.random()*4,color:Oe[Math.floor(Math.random()*Oe.length)],alpha:1})}return o}updateFireworks(r){for(let o of this.fireworks)o.vx*=.98,o.vy*=.98,o.vy+=.01*r,o.x+=o.vx*r*.008,o.y+=o.vy*r*.008,o.alpha-=r*.024,o.radius+=r*10;this.fireworks=this.fireworks.filter(o=>o.alpha>0)}update(r){return this.timer+=r,this.spawnTimer+=r,this.updateFireworks(r),this.spawnTimer>.6&&(this.fireworks.push(...this.createFireworks()),this.spawnTimer=0),this.timer>=this.duration?(this.stop(),!1):!0}stop(){let{level:r}=this;s.emit("audio:play:bgm",{level:r})}render(){let{level:r,fireworks:t}=this;s.emit("ui:render:level:up",{level:r,fireworks:t})}},Ir=be;var a8=(e,r)=>{let t=new Ir(e,r);v.Animations.register(t)},Dr=a8;var i8={startCountdown:Rr,startClearLines:br,startPaused:Gr,stopPaused:kr,startLevelUp:Dr},oe=i8;var d8={subscribe(e){let{gameBoard:r}=e;s.on("effects:start:countdown",()=>{oe.startCountdown()}),s.on("effects:start:paused",()=>{oe.startPaused()}),s.on("effects:stop:paused",()=>{oe.stopPaused()}),s.on("effects:start:clear:lines",({linesToClear:t})=>{oe.startClearLines(t)}),s.on("effects:start:level:up",({level:t})=>{oe.startLevelUp(r,t)})}},Pr=d8;var f8=()=>{let e=[],r=[],t=[],o=!1;return{register(n){if(!n||typeof n.update!="function"||typeof n.render!="function")throw new Error("Invalid animation: must implement update() and render()");n.layer??=0,n.blocking??=!1,n.name??="anonymous",r.push(n),o=!0},update(n){r.length>0&&(e.push(...r),r.length=0);for(let a=e.length-1;a>=0;a--)e[a].update(n)||(e.splice(a,1),o=!0);r.length>0&&(e.push(...r),r.length=0,o=!0)},render(){o&&(t=e.slice().toSorted((n,a)=>n.layer-a.layer),o=!1);for(let n of t)n.render()},hasBlocking(n=[]){let a=Array.isArray(n)&&n.length>0;for(let i of e)if(i.blocking&&(!a||n.includes(i.name)))return!0;return!1},clear(){e.length=0,r.length=0,t.length=0,o=!1},get size(){return e.length+r.length}}},Vr=f8;var Nr=e=>{v.timestamp||(v.timestamp=e,v.accumulator=e);let{Animations:r,Gamepad:t,Keyboard:o}=v,n=e-v.accumulator,a=v.timestamp??e,i=(e-a)/1e3;i>1e3&&(i=1e3);let d=c.getSpeed();v.timestamp=e;let m=r.hasBlocking();z.syncPlayElapsed({timestamp:v.timestamp,isBlocked:m}),z.update({getSpeed:c.getSpeed,timestamp:v.timestamp}),o.update(c.store.getState()),t.update(c.store.getState()),K.flush(),(!v.accumulator||n>d)&&!z.playing&&(c.tick(m),v.accumulator=e),r.update(i),w.tickHud(i),w.render(c.store.getState()),r.render(),v.rafId=requestAnimationFrame(Nr)},Ee=Nr;var c8=()=>{v.stop(),v.rafId=requestAnimationFrame(Ee)},Fr=c8;var l8=()=>{v.rafId&&(cancelAnimationFrame(v.rafId),v.rafId=null,v.timestamp=0,v.accumulator=0)},Ur=l8;var He=class{constructor(r,t={}){this.action=r,this.payload=t}execute(){let{action:r,payload:t}=this;s.emit("dispatch:command",{action:r,payload:t})}},Wr=He;var u8=(e,r)=>{let{action:t,payload:o}=e,{isBlocked:n,ms:a}=r;if(n||!t)return;o.isBlocked=n;let i=new Wr(t,o);K.enqueue(i),s.emit("replay:add:record",{ms:a,cmd:i})},Kr=u8;var m8={LEVEL_ONE:()=>{s.emit("game:select:level",{level:1})},LEVEL_TWO:()=>{s.emit("game:select:level",{level:2})},LEVEL_THREE:()=>{s.emit("game:select:level",{level:3})},LEVEL_FOUR:()=>{s.emit("game:select:level",{level:4})},LEVEL_FIVE:()=>{s.emit("game:select:level",{level:5})},LEVEL_SIX:()=>{s.emit("game:select:level",{level:6})},LEVEL_SEVEN:()=>{s.emit("game:select:level",{level:7})},LEVEL_EIGHT:()=>{s.emit("game:select:level",{level:8})},LEVEL_NINE:()=>{s.emit("game:select:level",{level:9})},LEVEL_TEN:()=>{s.emit("game:select:level",{level:10})},CONFIRM:()=>{s.emit("ui:update:mode",{mode:"difficulty"}),s.emit("game:switch:difficulty")}},Yr=m8;var h8={EASY:()=>{s.emit("game:select:difficulty",{difficulty:"easy"})},NORMAL:()=>{s.emit("game:select:difficulty",{difficulty:"normal"})},HARD:()=>{s.emit("game:select:difficulty",{difficulty:"hard"})},EXPERT:()=>{s.emit("game:select:difficulty",{difficulty:"expert"})},BACK:()=>{s.emit("ui:update:mode",{mode:"main-menu"}),s.emit("game:switch:to:main:menu")},CONFIRM:()=>{s.emit("game:start")}},$r=h8;var p8={MOVE_LEFT:()=>{s.emit("game:move",{ox:-1,oy:0})},MOVE_RIGHT:()=>{s.emit("game:move",{ox:1,oy:0})},MOVE_DOWN:()=>{s.emit("game:move",{ox:0,oy:1})},ROTATE:()=>{s.emit("game:rotate")},DROP:()=>{s.emit("game:drop")},TOGGLE_PAUSE:()=>{s.emit("game:toggle:pause")},RESTART:()=>{s.emit("game:restart")},QUIT:()=>{s.emit("game:over")},TOGGLE_MUSIC:()=>{s.emit("game:toggle:bgm")}},Xr=p8;var v8={TOGGLE_PAUSE:()=>{s.emit("game:toggle:pause")}},Jr=v8;var g8={CONFIRM:()=>{s.emit("game:reset")}},jr=g8;var q8={MOVE_LEFT:()=>{s.emit("game:move",{ox:-1,oy:0})},MOVE_RIGHT:()=>{s.emit("game:move",{ox:1,oy:0})},MOVE_DOWN:()=>{s.emit("game:move",{ox:0,oy:1})},ROTATE:()=>{s.emit("game:rotate")},DROP:()=>{s.emit("game:drop")},AUTO_TICK:e=>{s.emit("game:tick",e)},CONFIRM:()=>{s.emit("game:reset")}},Qr=q8;var x8={"main-menu":Yr,difficulty:$r,playing:Xr,paused:Jr,replay:Qr,"game-over":jr},y8=(e,r)=>{let{action:t,payload:o}=e,n=x8[r];if(!n)return;let a=n[t];a?.(o)},Zr=y8;var k={rafId:null,accumulator:0,timestamp:0,Animations:Vr(),launch:()=>{c.store.resetBoard(),c.loadHighScore(),c.setBeginningState("main-menu"),w.updateMode("main-menu");let e=c.store.getState();w.resize(),w.updateHud(e),w.lazyRender(e),k.Keyboard=new Ae.Keyboard,k.Gamepad=new Ae.Gamepad,k.Keyboard.addEventListeners(),k.Gamepad.addEventListeners(),k.subscribe(),k.start()},subscribe:()=>{let{gameBoard:e}=w.Canvas;z.subscribe(),Br.subscribe(),Ar.subscribe(),zr.subscribe(),Pr.subscribe({gameBoard:e}),s.on("dispatch:command",r=>{let t=c.store.getMode();Zr(r,t)}),s.on("dispatch:input",r=>{let t=k.Animations.hasBlocking(["countdown","level-up"]),o=k.timestamp-z.startTime;Kr(r,{isBlocked:t,ms:o})}),s.on("animations:clear",()=>{k.Animations.clear()}),s.on("command:queue:clear",()=>{K.clear()})},start:()=>{k.rafId=requestAnimationFrame(Ee)},stop:()=>{Ur()},restart:()=>{Fr()}},v=k;var E8=()=>{n1(P),v.launch()},e0=E8;e0();})();
-//# sourceMappingURL=tetris.js.map
+var tetris = (() => {
+  // lib/constants/colors.js
+  var TEAL = "#00c8ff";
+  var RGBA_TEAL = "rgba(0, 200, 255, 0.3)";
+  var YELLOW = "#f1fa04";
+  var RGBA_YELLOW = "rgba(255, 255, 0, 0.3)";
+  var PURPLE = "#d31ac1";
+  var RGBA_PURPLE = "rgba(211, 26, 193, 0.3)";
+  var BLUE = "#5050ff";
+  var RGBA_BLUE = "rgba(80, 80, 255, 0.3)";
+  var ORANGE = "#ffa500";
+  var RGBA_ORANGE = "rgba(255, 127, 0, 0.3)";
+  var GREEN = "#0afa04";
+  var DARK_GREEN = "#5c9d31";
+  var RGBA_GREEN = "rgba(0, 255, 0, 0.3)";
+  var RED = "#ff3b30";
+  var RGBA_RED = "rgba(255, 59, 48, 0.3)";
+  var CORAL = "#e64a19";
+  var RGBA_CORAL = "rgba(230, 74, 25, 0.3)";
+  var BLACK = "#444";
+  var RGBA_BLACK = "rgba(0, 0, 0, 0.3)";
+  var WHITE = "#fff";
+  var RGBA_WHITE = "rgba(255, 255, 255, 0.3)";
+  var PINK = "#ff4fa3";
+  var RGBA_PINK = "rgba(255, 79, 163, 0.3)";
+  var VIOLET = "#7b34eb";
+  var RGBA_VIOLET = "rgba(123, 52, 235, 0.3)";
+  var CYAN = "#0cc0df";
+  var RGBA_CYAN = "rgba(12, 192, 223, 0.3)";
+  var COLORS = {
+    TEAL,
+    RGBA_TEAL,
+    YELLOW,
+    RGBA_YELLOW,
+    PURPLE,
+    RGBA_PURPLE,
+    BLUE,
+    RGBA_BLUE,
+    ORANGE,
+    RGBA_ORANGE,
+    GREEN,
+    DARK_GREEN,
+    RGBA_GREEN,
+    RED,
+    RGBA_RED,
+    CORAL,
+    RGBA_CORAL,
+    BLACK,
+    RGBA_BLACK,
+    WHITE,
+    RGBA_WHITE,
+    PINK,
+    RGBA_PINK,
+    VIOLET,
+    RGBA_VIOLET,
+    CYAN,
+    RGBA_CYAN
+  };
+  var colors_default = COLORS;
+
+  // lib/services/ui/constants/images/scenes-background.js
+  var { RGBA_WHITE: RGBA_WHITE2 } = colors_default;
+  var ScenesBackground = {
+    tetris: `<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512"><path d="M16.568 367.165h68.409v68.409H16.568z" style="fill:#f9d84e"/><path d="M16.568 418.472h68.409v17.102H16.568z" style="fill:#ffc20d"/><path d="M16.568 367.165H33.67v68.409H16.568z" style="fill:#ffc20d"/><path d="M84.977 367.165h68.409v68.409H84.977z" style="fill:#f9d84e"/><path d="M84.977 418.472h68.409v17.102H84.977z" style="fill:#ffc20d"/><path d="M84.977 367.165h17.102v68.409H84.977z" style="fill:#ffc20d"/><path d="M84.977 298.756h68.409v68.409H84.977z" style="fill:#f9d84e"/><path d="M84.977 350.063h68.409v17.102H84.977z" style="fill:#ffc20d"/><path d="M84.977 298.756h17.102v68.409H84.977z" style="fill:#ffc20d"/><path d="M16.568 298.756h68.409v68.409H16.568z" style="fill:#f9d84e"/><path d="M16.568 350.063h68.409v17.102H16.568z" style="fill:#ffc20d"/><path d="M16.568 298.756H33.67v68.409H16.568z" style="fill:#ffc20d"/><path d="M16.568 435.574h68.409v68.409H16.568z" style="fill:#b169bf"/><path d="M16.568 435.574H33.67v68.409H16.568z" style="fill:#844a8f"/><path d="M16.568 486.881h68.409v17.102H16.568z" style="fill:#844a8f"/><path d="M16.568 486.881H33.67v17.102H16.568z" style="fill:#844a8f"/><path d="M84.977 435.574h68.409v68.409H84.977z" style="fill:#b169bf"/><path d="M84.977 435.574h17.102v68.409H84.977z" style="fill:#844a8f"/><path d="M84.977 486.881h68.409v17.102H84.977z" style="fill:#844a8f"/><path d="M84.977 486.881h17.102v17.102H84.977z" style="fill:#844a8f"/><path d="M153.386 435.574h68.409v68.409h-68.409z" style="fill:#b169bf"/><path d="M153.386 435.574h17.102v68.409h-17.102z" style="fill:#844a8f"/><path d="M153.386 486.881h68.409v17.102h-68.409z" style="fill:#844a8f"/><path d="M153.386 486.881h17.102v17.102h-17.102z" style="fill:#844a8f"/><path d="M221.795 435.574h68.409v68.409h-68.409z" style="fill:#b169bf"/><path d="M221.795 435.574h17.102v68.409h-17.102z" style="fill:#844a8f"/><path d="M221.795 486.881h68.409v17.102h-68.409z" style="fill:#844a8f"/><path d="M221.795 486.881h17.102v17.102h-17.102z" style="fill:#844a8f"/><path d="M221.795 367.165h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M221.795 418.472h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M221.795 367.165h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M290.205 367.165h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M290.205 418.472h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M290.205 367.165h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M290.205 435.574h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M290.205 486.881h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M290.205 435.574h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M358.614 435.574h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M358.614 486.881h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M358.614 435.574h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M256 8.017h68.409v68.409H256z" style="fill:#fd5e95"/><path d="M256 59.324h68.409v17.102H256z" style="fill:#d14d7b"/><path d="M256 8.017h17.102v68.409H256z" style="fill:#d14d7b"/><path d="M324.409 8.017h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M324.409 59.324h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M324.409 8.017h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M324.409 76.426h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M324.409 127.733h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M324.409 76.426h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M392.818 76.426h68.409v68.409h-68.409z" style="fill:#fd5e95"/><path d="M392.818 127.733h68.409v17.102h-68.409z" style="fill:#d14d7b"/><path d="M392.818 76.426h17.102v68.409h-17.102z" style="fill:#d14d7b"/><path d="M358.614 367.165h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M358.614 418.472h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M358.614 367.165h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M427.023 367.165h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M427.023 418.472h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M427.023 367.165h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M427.023 435.574h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M427.023 486.881h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M427.023 435.574h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M358.614 298.756h68.409v68.409h-68.409z" style="fill:#7dbb34"/><path d="M358.614 350.063h68.409v17.102h-68.409z" style="fill:#60a333"/><path d="M358.614 298.756h17.102v68.409h-17.102z" style="fill:#60a333"/><path d="M153.386 127.733h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M153.386 179.04h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M153.386 127.733h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M153.386 196.142h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M153.386 247.449h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M153.386 196.142h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M221.795 196.142h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M221.795 247.449h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M221.795 196.142h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M153.386 264.551h68.409v68.409h-68.409z" style="fill:#45cae0"/><path d="M153.386 315.858h68.409v17.102h-68.409z" style="fill:#0aadbf"/><path d="M153.386 264.551h17.102v68.409h-17.102z" style="fill:#0aadbf"/><path d="M256 84.443h60.392v60.392a8.016 8.016 0 0 0 8.017 8.017h136.818a8.016 8.016 0 0 0 8.017-8.017V76.426a8.016 8.016 0 0 0-8.017-8.017h-60.392V8.017A8.016 8.016 0 0 0 392.818 0H256a8.017 8.017 0 0 0-8.017 8.017v68.409A8.017 8.017 0 0 0 256 84.443m76.426 0h52.376v52.376h-52.376zm120.785 52.375h-52.376V84.443h52.376zm-68.409-68.409h-52.376V16.033h52.376zM264.017 16.033h52.376v52.376h-52.376zM495.432 359.148H435.04v-60.392a8.016 8.016 0 0 0-8.017-8.017h-68.409a8.016 8.016 0 0 0-8.017 8.017v60.392h-9.086a8.016 8.016 0 0 0-8.017 8.017 8.016 8.016 0 0 0 8.017 8.017h9.086v52.376h-52.376v-52.376h9.086a8.016 8.016 0 0 0 8.017-8.017 8.016 8.016 0 0 0-8.017-8.017h-85.511a8.017 8.017 0 0 0-8.017 8.017v60.392h-52.376v-86.58h60.392a8.017 8.017 0 0 0 8.017-8.017v-60.392h60.392a8.016 8.016 0 0 0 8.017-8.017v-68.409a8.016 8.016 0 0 0-8.017-8.017h-60.392v-60.392a8.017 8.017 0 0 0-8.017-8.017h-68.409a8.017 8.017 0 0 0-8.017 8.017v17.102a8.017 8.017 0 0 0 8.017 8.017 8.017 8.017 0 0 0 8.017-8.017v-9.086h52.376v52.376h-52.376v-9.086a8.017 8.017 0 0 0-8.017-8.017 8.017 8.017 0 0 0-8.017 8.017v111.699H67.875c-4.427 0-8.017 3.588-8.017 8.017s3.589 8.017 8.017 8.017h9.086v52.376H24.585v-52.376h9.086c4.427 0 8.017-3.588 8.017-8.017s-3.589-8.017-8.017-8.017H16.568a8.017 8.017 0 0 0-8.017 8.017v205.228A8.017 8.017 0 0 0 16.568 512h478.864a8.016 8.016 0 0 0 8.017-8.017V367.165a8.016 8.016 0 0 0-8.017-8.017m-8.017 68.409H435.04v-52.376h52.376zM366.63 375.182h52.376v52.376H366.63zm0-68.41h52.376v52.376H366.63zm-136.818 68.41h52.376v52.376h-52.376zm-136.818 0h52.376v52.376H92.994zm120.785-50.238h-52.376v-52.376h52.376zm68.409-68.41h-52.376v-52.376h52.376zm-68.409-52.375v52.376h-52.376v-52.376zM145.37 359.148H92.994v-52.376h52.376zm-68.41 16.034v52.376H24.585v-52.376zm-52.375 68.409H76.96v52.376H24.585zm68.409 0h52.376v52.376H92.994zm68.409 0h52.376v52.376h-52.376zm68.409 0h52.376v52.376h-52.376zm68.409 0h52.376v52.376h-52.376zm68.409 0h52.376v52.376H366.63zm120.785 52.376H435.04v-52.376h52.376z"/></svg>`,
+    gamepad: `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" fill="none" viewBox="0 0 48 48"><path stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 30v3a7 7 0 0 1-7 7v0a7 7 0 0 1-7-7V19M29 30v3a7 7 0 0 0 7 7v0a7 7 0 0 0 7-7V19"/><rect width="38" height="22" x="5" y="8" fill="#2f88ff" stroke="#000" stroke-width="4" rx="11"/><path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M21 19h-8M17 15v8"/><rect width="4" height="4" x="32" y="15" fill="#fff" rx="2"/><rect width="4" height="4" x="28" y="20" fill="#fff" rx="2"/></svg>`,
+    tower: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="800" height="800" viewBox="0 0 512 512"><path d="M341.512 495.967h-11.975l-33.221-71.978c6.644-8.584 10.613-19.341 10.613-31.012 0-18.862-10.346-35.341-25.653-44.095v-134.14c15.308-8.754 25.653-25.234 25.653-44.095 0-25.268-18.556-46.278-42.756-50.133v-11.736c9.93-3.354 17.102-12.752 17.102-23.8s-7.172-20.446-17.102-23.8V8.017a8.017 8.017 0 0 0-16.034 0v53.16c-9.93 3.354-17.102 12.752-17.102 23.8s7.172 20.446 17.102 23.8v11.736c-24.2 3.855-42.756 24.866-42.756 50.133 0 18.862 10.346 35.341 25.653 44.095V348.88c-15.308 8.754-25.653 25.234-25.653 44.095 0 11.555 3.888 22.215 10.414 30.757l-33.337 72.234h-11.975a8.017 8.017 0 0 0-8.017 8.017 8.017 8.017 0 0 0 8.017 8.017h171.026a8.017 8.017 0 0 0 8.017-8.017 8.014 8.014 0 0 0-8.016-8.016m-94.44-410.99c0-5.01 4.076-9.086 9.086-9.086s9.086 4.076 9.086 9.086-4.076 9.086-9.086 9.086-9.086-4.076-9.086-9.086m-24.485 94.597a34.7 34.7 0 0 1-1.168-8.927c0-19.155 15.584-34.739 34.739-34.739s34.739 15.584 34.739 34.739a34.6 34.6 0 0 1-1.168 8.927zm24.485 128.267V289.67h18.171v18.171zm18.171 16.034v19.16a51 51 0 0 0-9.086-.831 51 51 0 0 0-9.086.831v-19.16zm-18.171-50.238v-18.171h18.171v18.171zm0-34.205v-18.844a51 51 0 0 0 9.086.831 51 51 0 0 0 9.086-.831v18.844zm9.085-34.046c-9.366 0-17.87-3.732-24.124-9.778h48.249c-6.255 6.046-14.76 9.778-24.125 9.778m.001 152.852c16.412 0 30.192 11.444 33.806 26.767h-67.611c3.613-15.324 17.393-26.767 33.805-26.767m-25.12 137.729h-30.919l28.008-60.684c.947.63 1.921 1.223 2.911 1.789zm34.205 0h-18.171v-18.171h18.171zm0-34.205h-18.171v-18.844a51 51 0 0 0 9.086.831 51 51 0 0 0 9.086-.831v18.844zm-9.085-34.046c-16.524 0-30.381-11.601-33.879-27.084h67.757c-3.497 15.483-17.354 27.084-33.878 27.084m25.119 68.251v-58.895a50 50 0 0 0 2.667-1.633l27.936 60.528z"/></svg>`,
+    pagoda: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 286.154 286.154"><path d="M230.769 258.462h-23.077V230.77h9.231c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 4.269-8.788 4.602-8.82 4.638-.323-.069-8.548-2.091-24.263-25.662l-1.371-2.054H180V180h13.846c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 4.302-8.917 4.606-8.917 4.629-.226-.037-7.818-1.491-19.431-20.852l-1.348-2.238h-2.612v-9.231h23.077c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 4.302-8.917 4.606-8.917 4.629-.226-.037-7.818-1.491-19.431-20.852l-1.348-2.238h-2.612v-9.231h23.077c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 4.302-8.917 4.606-8.917 4.629-.226-.037-7.818-1.491-19.431-20.852l-1.348-2.238h-2.612v-9.231h18.461c6.383 0 18.462-2.894 18.462-13.846h-9.231c0 3.475-5.82 4.338-8.215 4.551-5.035-2.695-27-15.115-42.554-33.923V0h-9.231v12.166c-15.554 18.808-37.514 31.223-42.549 33.923-2.409-.212-8.22-1.08-8.22-4.551h-9.231c0 10.952 12.078 13.846 18.462 13.846h18.461v9.231h-2.612l-1.343 2.238c-11.667 19.445-19.274 20.83-19.107 20.839-.226-.005-9.245-.286-9.245-4.615h-9.231c0 10.952 12.078 13.846 18.462 13.846h23.077v9.231h-2.612l-1.343 2.238c-11.668 19.445-19.274 20.829-19.108 20.838-.226-.005-9.245-.286-9.245-4.615h-9.231c0 10.952 12.078 13.846 18.462 13.846h23.077v9.231h-2.612l-1.343 2.238c-11.668 19.445-19.274 20.829-19.108 20.838-.226-.005-9.245-.286-9.245-4.615h-9.231c0 10.952 12.078 13.846 18.462 13.846h13.846v13.846h-11.7l-1.371 2.054c-15.812 23.718-24.042 25.615-23.848 25.638-.305-.009-9.235-.309-9.235-4.615h-9.231c0 10.952 12.078 13.846 18.462 13.846h9.231v27.692H55.385v18.462H4.615v9.231h258.462v-9.231h-32.308zm-43.989-55.386c5.806 8.498 10.763 14.364 14.912 18.462h-23.455l-9.231-18.462zm11.682 27.694v27.692h-23.077V230.77zm-80.225-9.231 9.231-18.462h31.218l9.231 18.462zm47.917 9.23v27.692H120v-27.692zm-18.461-36.923v-9.231h-9.231v9.231h-23.077V180h55.385v13.846zm-34.03-147.692c8.686-5.792 19.809-14.303 29.414-25.145 9.605 10.842 20.728 19.352 29.414 25.145zM138.461 60v4.615h-13.846v-9.23h36.923v9.231h-13.846V60zm-30.983 27.692c3.153-3.304 6.67-7.749 10.491-13.846h50.215c3.822 6.097 7.338 10.542 10.486 13.846zm30.983 13.847v4.615h-13.846v-9.231h36.923v9.231h-13.846v-4.615zm-30.983 27.692c3.153-3.305 6.67-7.749 10.491-13.846h50.215c3.822 6.097 7.338 10.542 10.486 13.846zm30.983 13.847v4.615h-13.846v-9.231h36.923v9.231h-13.846v-4.615zm-20.492 13.845h50.215c3.822 6.097 7.338 10.542 10.486 13.846h-71.192c3.153-3.304 6.67-7.749 10.491-13.846m-18.595 46.154h17.774l-9.231 18.462H84.462c4.149-4.099 9.106-9.965 14.912-18.462m11.395 27.692v27.692H87.692v-27.692zm110.769 46.154H64.615v-9.231h156.923z"/><path d="M129.231 240h9.231v9.231h-9.231zM92.308 240h9.231v9.231h-9.231zM184.615 240h9.231v9.231h-9.231zM147.692 240h9.231v9.231h-9.231zM272.308 276.923h9.231v9.231h-9.231z"/></svg>`,
+    temple: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 286.154 286.154"><path d="M263.077 258.462V240h-27.692v-55.385h23.077l1.265-9.051c-.305-.092-30.388-8.885-56.649-30.097v-11.622h46.154l1.117-9.092c-.351-.088-34.735-8.894-61.117-30.069V83.077h18.462l1.874-8.834c-.388-.175-37.68-17.026-56.022-41.751l7.288-11.575.471-.997c.258-.762 2.363-7.606-1.805-13.38C156.443 2.294 151.085 0 143.589 0h-.512c-7.495.097-12.849 2.294-15.905 6.54-4.163 5.774-2.058 12.618-1.805 13.38l7.532 12.175c-18.235 24.942-55.925 41.972-56.317 42.148l1.878 8.834h18.462v11.608c-26.331 21.129-60.771 29.982-61.122 30.069l1.122 9.092h46.154v11.622c-26.202 21.162-56.345 30.009-56.654 30.097l1.269 9.051h23.077V240H23.077v18.462H0v27.692h286.154v-27.692zM134.658 11.94c1.237-1.712 4.311-2.672 8.677-2.709 4.334.037 7.403.983 8.649 2.677 1.145 1.546.84 3.798.655 4.703l-6.983 11.082h-4.643l-6.983-11.095c-.193-.896-.488-3.103.628-4.658m6.222 24.983h4.389c11.598 16.205 30.143 29.022 43.671 36.923H97.214c13.523-7.901 32.072-20.718 43.666-36.923M180 83.077v9.231h-73.846v-9.231zM63.974 124.615c12.009-5.155 26.409-12.692 39.217-23.077h79.768c12.808 10.385 27.212 17.922 39.217 23.077zm129.872 9.231v9.231h-27.692v-9.231zm-36.923 0v9.231h-32.308v-9.231zm-41.538 0v9.231H92.308v-9.231zm-26.04 18.462h107.46c12.748 10.385 26.225 17.922 37.209 23.077H52.14c10.985-5.156 24.462-12.693 37.205-23.077m127.578 41.538v-9.231h9.231v9.231zm9.231 9.231V240h-9.231v-36.923zm-32.308 9.231V240h-4.615v-36.923h18.462V240h-4.616v-27.692zm-4.615-18.462v-9.231h18.462v9.231zm-18.462 0v-9.231H180v9.231zm9.231 9.231V240h-9.231v-36.923zm-64.615 0V240h-9.231v-36.923zm-9.231-9.231v-9.231h9.231v9.231zm9.23 55.385h55.385v9.231h-55.385zm13.847-36.923V240h-4.615v-36.923h36.923V240h-4.615v-27.692zm18.461 9.23V240h-9.231v-18.462zm13.846-27.692h-36.923v-9.231h36.923zm-78.461 18.462V240h-4.615v-36.923h18.462V240h-4.615v-27.692zm-4.615-18.462v-9.231h18.461v9.231zm-18.462 0v-9.231h9.231v9.231zm9.231 9.231V240H60v-36.923zm-36.923 46.154h73.847v9.231H32.308zm64.615 27.692H9.231v-9.231h87.692zm83.077 0h-73.846v-9.231H180zm0-27.692h73.846v9.231H180zm96.923 27.692h-87.692v-9.231h87.692z"/><path d="M96.923 110.769h9.231V120h-9.231zM115.385 110.769h9.231V120h-9.231zM133.846 110.769h9.231V120h-9.231zM189.231 161.538h9.231v9.231h-9.231zM124.615 60h9.231v9.231h-9.231z"/></svg>`,
+    coffee: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="800" height="800" viewBox="0 0 32 32"><path d="M24.6 25h.9c2.5 0 4.5-2 4.5-4.5 0-2.3-1.8-4.2-4-4.4V15c0-.6-.4-1-1-1H7c-.6 0-1 .4-1 1v5c0 3.3 1.6 6.2 4 8H5c-.6 0-1 .4-1 1s.4 1 1 1h22c.6 0 1-.4 1-1s-.4-1-1-1h-5c1.1-.8 2-1.8 2.6-3m3.4-4.5c0 1.4-1.1 2.5-2.5 2.5.3-.9.5-2 .5-3v-1.9c1.1.2 2 1.2 2 2.4M24 16v2.4c-1.1.5-4.1 1.4-7.6-.3s-6.6-.8-8.4.1V16zM8 20.5c1-.7 4-2.3 7.5-.6 1.8.9 3.5 1.1 5 1.1 1.4 0 2.6-.3 3.5-.5-.1 1-.3 2-.7 2.8-.1.1-.2.3-.2.4-1.4 2.5-4 4.2-7 4.2-4.3.1-7.8-3.2-8.1-7.4m3-9.5h3c.3 0 .5.2.5.5v.5c0 .6.4 1 1 1s1-.4 1-1v-.5c0-1.4-1.1-2.5-2.5-2.5h-3c-.3 0-.5-.2-.5-.5s.2-.5.5-.5h9.5c1.7 0 3-1.3 3-3s-1.3-3-3-3h-10c-.6 0-1 .4-1 1s.4 1 1 1h10c.6 0 1 .4 1 1s-.4 1-1 1H11C9.6 6 8.5 7.1 8.5 8.5S9.6 11 11 11"/></svg>`,
+    happy: `<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="800" height="800" viewBox="0 0 512.003 512.003"><circle cx="256.001" cy="256.001" r="256.001" style="fill:#fddf6d"/><path d="M310.859 474.208c-141.385 0-256-114.615-256-256 0-75.537 32.722-143.422 84.757-190.281C56.738 70.303 0 156.525 0 256c0 141.385 114.615 256 256 256 65.849 0 125.883-24.87 171.243-65.718-34.918 17.853-74.473 27.926-116.384 27.926" style="fill:#fcc56b"/><path d="M245.899 187.172c-5.752 0-10.414-4.663-10.414-10.414 0-13.433-10.928-24.362-24.362-24.362s-24.362 10.93-24.362 24.362c0 5.752-4.663 10.414-10.414 10.414-5.752 0-10.414-4.663-10.414-10.414 0-24.918 20.273-45.19 45.19-45.19s45.19 20.272 45.19 45.19c.001 5.751-4.662 10.414-10.414 10.414M421.798 187.172c-5.752 0-10.414-4.663-10.414-10.414 0-13.433-10.928-24.362-24.362-24.362s-24.362 10.93-24.362 24.362c0 5.752-4.663 10.414-10.414 10.414s-10.414-4.663-10.414-10.414c0-24.918 20.273-45.19 45.19-45.19s45.19 20.272 45.19 45.19c.001 5.751-4.662 10.414-10.414 10.414" style="fill:#7f184c"/><path d="M293.248 443.08c-74.004 0-133.995-59.991-133.995-133.995h267.991c-.001 74.003-59.993 133.995-133.996 133.995" style="fill:#fff"/><path d="M172.426 367.092a134 134 0 0 0 12.472 20.829h216.699a134 134 0 0 0 12.472-20.829z" style="fill:#e6e6e6"/><path d="M145.987 240.152c-19.011 0-34.423 15.412-34.423 34.423h68.848c-.002-19.011-15.414-34.423-34.425-34.423M446.251 240.152c-19.011 0-34.423 15.412-34.423 34.423h68.848c0-19.011-15.412-34.423-34.425-34.423" style="fill:#f9a880"/><ellipse cx="292.913" cy="73.351" rx="29.854" ry="53.46" style="fill:#fceb88" transform="rotate(-74.199 292.913 73.351)"/></svg>`
+  };
+  var scenes_background_default = ScenesBackground;
+
+  // lib/core/event-bus/index.js
+  var EventBus = {
+    events: /* @__PURE__ */ new Map(),
+    /**
+     * ## 订阅事件
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数
+     */
+    on(event, handler) {
+      if (!this.events.has(event)) {
+        this.events.set(event, /* @__PURE__ */ new Set());
+      }
+      this.events.get(event).add(handler);
+    },
+    /**
+     * ## 取消订阅
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数
+     */
+    off(event, handler) {
+      const set = this.events.get(event);
+      if (!set) return;
+      set.delete(handler);
+      if (set.size === 0) {
+        this.events.delete(event);
+      }
+    },
+    /**
+     * ## 触发事件
+     *
+     * @param {string} event - 事件名称
+     * @param {object} [payload] - 参数对象
+     */
+    emit(event, payload) {
+      const set = this.events.get(event);
+      if (!set) return;
+      for (const handler of set) {
+        handler(payload);
+      }
+    },
+    /** ## 清空所有事件（用于重启 / 测试 / reset） */
+    clear() {
+      this.events.clear();
+    }
+  };
+  var event_bus_default = EventBus;
+
+  // lib/core/command/command-queue.js
+  var CommandQueue = {
+    /**
+     * ## 命令队列（FIFO）
+     *
+     * @type {object[]}
+     */
+    queue: [],
+    /**
+     * ## 入队一个 Command
+     *
+     * @param {object} command - 要执行的命令
+     */
+    enqueue(command) {
+      this.queue.push(command);
+    },
+    /**
+     * ## 执行并清空队列中的所有 Command
+     *
+     * 当前行为：
+     *
+     * - 一次性执行全部 command
+     * - 不做时间分帧控制
+     */
+    flush() {
+      const { queue } = this;
+      while (queue.length > 0) {
+        const cmd = queue.shift();
+        cmd.execute();
+      }
+    },
+    /** ## 清空队列（丢弃所有未执行命令） */
+    clear() {
+      this.queue.length = 0;
+    }
+  };
+  var command_queue_default = CommandQueue;
+
+  // lib/configuration.js
+  var Configuration = {
+    // 请始终保持 1:2
+    Board: {
+      cols: 10,
+      rows: 20
+    },
+    // 请始终保持 min > max
+    Level: {
+      min: 11,
+      max: 99
+    },
+    Elements: {
+      Canvas: {
+        board: "game-board",
+        next: "next-piece"
+      },
+      Hud: {
+        score: "score",
+        lines: "lines",
+        level: "level",
+        highScore: "high-score"
+      }
+    }
+  };
+  var configuration_default = Configuration;
+
+  // lib/game/state/game-state.js
+  var GameState = {
+    beginningBoard: [],
+    board: [],
+    curr: null,
+    cx: 0,
+    cy: 0,
+    next: null,
+    score: 0,
+    lines: 0,
+    level: 1,
+    highScore: 0,
+    baseLines: 0,
+    clearLines: [],
+    difficulty: "easy",
+    /*
+     * main-menu：等级选择（主菜单）
+     * playing：游戏中
+     * paused：游戏暂停
+     * game-over：游戏结束
+     */
+    mode: "main-menu",
+    gamepadConnected: false
+  };
+  var game_state_default = GameState;
+
+  // lib/utils/is-function.js
+  var isFunction = (val) => {
+    if (val == null || typeof val !== "function" && typeof val !== "object") {
+      return false;
+    }
+    return (
+      // 处理某些特殊环境下 typeof 误判为 object 的函数（极少数情况）
+      typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]"
+    );
+  };
+  var is_function_default = isFunction;
+
+  // lib/game/state/utils/generate-garbage-rows.js
+  var { RED: RED2, GREEN: GREEN2, BLUE: BLUE2, YELLOW: YELLOW2, PURPLE: PURPLE2, TEAL: TEAL2, ORANGE: ORANGE2 } = colors_default;
+  var DEFAULT_COLOR_MAP = [RED2, GREEN2, BLUE2, YELLOW2, PURPLE2, TEAL2, ORANGE2];
+  var generateGarbageRows = (rows, cols, colorMap) => {
+    const colors = colorMap || DEFAULT_COLOR_MAP;
+    const garbage = [];
+    for (let i = 0; i < rows; i += 1) {
+      const row = Array.from({ length: cols }).fill("");
+      for (let col = 0; col < cols; col += 1) {
+        row[col] = colors[Math.floor(Math.random() * colors.length)];
+      }
+      const maxHoles = cols - 3;
+      const holes = 1 + Math.floor(Math.random() * maxHoles);
+      const holePositions = /* @__PURE__ */ new Set();
+      while (holePositions.size < holes) {
+        holePositions.add(Math.floor(Math.random() * cols));
+      }
+      for (const pos of holePositions) {
+        row[pos] = "";
+      }
+      garbage.push(row);
+    }
+    return garbage;
+  };
+  var generate_garbage_rows_default = generateGarbageRows;
+
+  // lib/game/state/utils/place-garbage-on-board.js
+  var placeGarbageOnBoard = (board2, garbageRowCount, cols) => {
+    const rows = board2.length;
+    if (garbageRowCount <= 0) return;
+    const garbageRows = generate_garbage_rows_default(garbageRowCount, cols);
+    const startRow = rows - garbageRowCount;
+    for (let i = 0; i < garbageRows.length; i++) {
+      if (startRow + i >= 0) {
+        board2[startRow + i] = [...garbageRows[i]];
+      }
+    }
+  };
+  var place_garbage_on_board_default = placeGarbageOnBoard;
+
+  // lib/game/state/game-store.js
+  var createGameStore = (initialState) => {
+    let state = {
+      ...structuredClone(initialState || game_state_default)
+    };
+    return {
+      /**
+       * ## 获取完整 state
+       *
+       * @returns {object} 当前游戏状态
+       */
+      getState: () => state,
+      /**
+       * ## 更新 state（支持 patch 或函数）
+       *
+       * 支持两种模式：
+       *
+       * 1. Object patch
+       * 2. Function (prevState) => patch
+       *
+       * @param {object | Function} patch - 状态更新内容或函数
+       */
+      setState: (patch) => {
+        state = {
+          ...state,
+          ...is_function_default(patch) ? patch(state) : patch
+        };
+      },
+      resetState: () => {
+        state = {
+          ...structuredClone(game_state_default)
+        };
+      },
+      /**
+       * ## 重置棋盘
+       *
+       * 根据 BOARD 常量重新生成空棋盘
+       */
+      resetBoard: () => {
+        const { Board } = configuration_default;
+        const { cols, rows } = Board;
+        state.board = Array.from(
+          { length: rows },
+          () => Array.from({ length: cols }).fill(0)
+        );
+      },
+      /**
+       * ## 生成游戏初始化的 board 数据
+       *
+       * 根据传入的 difficulty 参数，生成不同行数的方块数据
+       *
+       * @returns {Array} - 返回生成的 board 数据
+       */
+      generateBoard: () => {
+        const DIFFICULTY_GARBAGE_ROWS = {
+          easy: 0,
+          normal: 3,
+          hard: 6,
+          expert: 9
+        };
+        const { board: board2, difficulty } = state;
+        const cols = board2[0].length;
+        const garbageRows = DIFFICULTY_GARBAGE_ROWS[difficulty] || 0;
+        place_garbage_on_board_default(board2, garbageRows, cols);
+        return board2;
+      },
+      setBeginningBoard: (board2) => {
+        state.beginningBoard = structuredClone(board2);
+      },
+      getBeginningBoard: () => structuredClone(state.beginningBoard),
+      setGamepadConnected: (connected) => {
+        state.gamepadConnected = connected;
+      },
+      isGamepadConnected: () => state.gamepadConnected,
+      /**
+       * ## 获取游戏难度等级
+       *
+       * @returns {string} - 返回游戏难度等级字符串
+       */
+      getDifficulty: () => state.difficulty,
+      /**
+       * ## 设置游戏难度等级
+       *
+       * @param {string} [difficulty='easy'] - 难度等级名称，可选值：easy，normal, hard,
+       *   export. Default is `'easy'`
+       */
+      setDifficulty: (difficulty = "easy") => {
+        state.difficulty = difficulty;
+      },
+      /**
+       * ## 获取已消除行数（baseLines）
+       *
+       * @returns {number} - 返回基础行数
+       */
+      getBaseLines: () => state.baseLines,
+      /**
+       * ## 设置基础行数
+       *
+       * @param {number} lines - 基础行数
+       */
+      setBaseLines: (lines2) => {
+        state.baseLines = lines2;
+      },
+      /**
+       * ## 获取当前已消除行（findFullLines）
+       *
+       * @returns {object[]} - 返回清理的行数数据
+       */
+      getClearLines: () => state.clearLines,
+      /**
+       * ## 设置当前消除行
+       *
+       * @param {number[]} lines - 消除行数组
+       */
+      setClearLines: (lines2) => {
+        state.clearLines = lines2;
+      },
+      /**
+       * ## 获取 HUD 数据
+       *
+       * 返回 UI 渲染所需的核心数据
+       *
+       * @returns {object} HUD 数据
+       */
+      getHub: () => {
+        const { source, lines: lines2, level: level2 } = state;
+        return {
+          source,
+          lines: lines2,
+          level: level2
+        };
+      },
+      /**
+       * ## 设置 HUD 数据
+       *
+       * @param {object} hud - HUD 数据对象
+       */
+      setHud: (hud) => {
+        const { score: score2, lines: lines2, level: level2 } = hud;
+        state.score = score2;
+        state.lines = lines2;
+        state.level = level2;
+      },
+      getScore: () => state.score,
+      /**
+       * ## 设置最高分
+       *
+       * @param {number} highScore - 历史最高分
+       */
+      setHighScore: (highScore2) => {
+        state.highScore = highScore2;
+      },
+      /**
+       * ## 获取最高分
+       *
+       * @returns {number} - 返回最高分数
+       */
+      getHighScore: () => state.highScore,
+      /**
+       * ## 获取当前等级
+       *
+       * @returns {number} - 放回当前等级
+       */
+      getLevel: () => state.level,
+      /**
+       * ## 设置当前等级
+       *
+       * @param {number} level - 当前等级
+       */
+      setLevel: (level2) => {
+        state.level = level2;
+      },
+      /**
+       * ## 获取游戏模式
+       *
+       * @returns {string} 当前模式（main-menu / playing / paused / game-over）
+       */
+      getMode: () => state.mode,
+      /**
+       * ## 设置游戏模式
+       *
+       * @param {string} mode - 游戏模式
+       */
+      setMode: (mode) => {
+        state.mode = mode;
+      }
+    };
+  };
+  var game_store_default = createGameStore;
+
+  // lib/runtime/replay-runtime.js
+  var Replay = {
+    /**
+     * ## 是否正在录制
+     *
+     * @type {boolean}
+     */
+    recording: false,
+    /**
+     * ## 是否正在播放
+     *
+     * @type {boolean}
+     */
+    playing: false,
+    /**
+     * ## 录制的数据列表：
+     *
+     * 一般结构类似：[{ frame: number, command: Command }]
+     *
+     * @type {Array}
+     */
+    data: [],
+    /**
+     * ## 播放游标（当前播放到 data 的位置）
+     *
+     * @type {number}
+     */
+    cursor: 0,
+    // 用来存本局的方块顺序
+    pieceSequence: [],
+    pieceIndex: 0,
+    playElapsed: 0,
+    // 记录开始录像或者开发回放的起始时间
+    startTime: 0,
+    timestamp: 0,
+    /**
+     * ## 判断当前是否有录制的数据
+     *
+     * @returns {boolean} - Replay.data 有数据，返回 true，否则返回 false
+     */
+    get hasData() {
+      return Array.isArray(Replay.data) && Replay.data.length > 0;
+    },
+    subscribe() {
+      event_bus_default.on("replay:start:record", () => {
+        Replay.startRecord();
+      });
+      event_bus_default.on("replay:stop:record", () => {
+        Replay.stopRecord();
+      });
+      event_bus_default.on("replay:add:record", (record) => {
+        if (!Replay.recording) {
+          return;
+        }
+        Replay.data.push(record);
+      });
+      event_bus_default.on("replay:add:piece", (piece) => {
+        if (!Replay.recording) {
+          return;
+        }
+        Replay.pieceSequence.push(structuredClone(piece));
+      });
+      event_bus_default.on("replay:start:play", () => {
+        Replay.startPlay();
+      });
+      event_bus_default.on("replay:reset", () => {
+        Replay.reset();
+      });
+      event_bus_default.on("replay:game:over", () => {
+        if (Replay.hasData) {
+          event_bus_default.emit("game:replay:prepare:board");
+        } else {
+          event_bus_default.emit("ui:update:mode", { mode: "game-over" });
+          event_bus_default.emit("game:update:mode", { mode: "game-over" });
+        }
+      });
+      event_bus_default.on("replay:stop:clear:lines", ({ isLevelUp, level: level2 }) => {
+        if (!isLevelUp || Replay.playing) {
+          return;
+        }
+        event_bus_default.emit("audio:stop:bgm");
+        event_bus_default.emit("audio:sounds:level:up");
+        event_bus_default.emit("effects:start:level:up", { level: level2 });
+      });
+    },
+    /**
+     * ## 开始录制
+     *
+     * 行为：
+     *
+     * - 打开 recording 状态
+     * - 清空已有数据
+     * - 重置 frame
+     */
+    startRecord() {
+      Replay.recording = true;
+      Replay.data = [];
+      Replay.pieceSequence = [];
+      Replay.pieceIndex = 0;
+      Replay.playElapsed = 0;
+      Replay.startTime = this.timestamp;
+    },
+    /** ## 停止录制 */
+    stopRecord() {
+      Replay.recording = false;
+    },
+    /**
+     * ## 开始播放
+     *
+     * 行为：
+     *
+     * - 打开 playing 状态
+     * - 重置 frame
+     * - 重置 cursor
+     */
+    startPlay() {
+      Replay.playing = true;
+      Replay.cursor = 0;
+      Replay.pieceIndex = 0;
+      Replay.startTime = this.timestamp;
+    },
+    /** ## 停止播放 */
+    stopPlay() {
+      Replay.playing = false;
+    },
+    syncPlayElapsed({ timestamp, isBlocked }) {
+      if (!Replay.playing || isBlocked) {
+        return;
+      }
+      const prevElapsed = Replay.playElapsed;
+      const newElapsed = timestamp - Replay.startTime;
+      const elapsedDelta = newElapsed - prevElapsed;
+      if (elapsedDelta > 1e3) {
+        Replay.startTime += elapsedDelta - 1e3;
+        Replay.playElapsed = prevElapsed + 1e3;
+      } else {
+        Replay.playElapsed = newElapsed;
+      }
+    },
+    /**
+     * # Replay 更新函数（播放逻辑驱动）
+     *
+     * 用于在游戏主循环中驱动 replay 播放：
+     *
+     * - 根据时间推进 replay
+     * - 将录制的 command 按时间顺序注入命令系统
+     * - 控制 replay 结束状态
+     *
+     * @param {object} context - 执行上下文
+     */
+    update(context) {
+      const { getSpeed: getSpeed2, timestamp } = context;
+      this.timestamp = timestamp;
+      if (!Replay.playing) {
+        return;
+      }
+      const elapsedTime = Replay.playElapsed;
+      const { data } = Replay;
+      if (data.length > 0 && Replay.cursor >= data.length) {
+        Replay.stopPlay();
+        event_bus_default.emit("game:update:mode", { mode: "game-over" });
+        return;
+      }
+      const nextCmd = data[Replay.cursor];
+      if (nextCmd) {
+        const dropInterval = getSpeed2?.() ?? 1e3;
+        const gap = nextCmd.ms - elapsedTime;
+        if (gap > dropInterval * 2) {
+          const maxSkip = 1e3;
+          const skip = Math.min(gap - dropInterval, maxSkip);
+          Replay.playElapsed = elapsedTime + skip;
+          Replay.startTime = timestamp - Replay.playElapsed;
+        }
+      }
+      while (Replay.playing && Replay.cursor < data.length && data[Replay.cursor].ms <= elapsedTime) {
+        const { cmd } = data[Replay.cursor];
+        event_bus_default.emit("dispatch:command", cmd);
+        Replay.cursor++;
+      }
+    },
+    clear() {
+      Replay.recording = false;
+      Replay.playing = false;
+      Replay.cursor = 0;
+      Replay.data = [];
+      Replay.pieceSequence = [];
+      Replay.pieceIndex = 0;
+      Replay.startTime = 0;
+    },
+    reset() {
+      Replay.stopRecord();
+      Replay.stopPlay();
+      Replay.clear();
+    }
+  };
+  var replay_runtime_default = Replay;
+
+  // lib/game/constants/shapes.js
+  var { PINK: PINK2, BLUE: BLUE3, TEAL: TEAL3, YELLOW: YELLOW3, VIOLET: VIOLET2, ORANGE: ORANGE3, GREEN: GREEN3, RED: RED3 } = colors_default;
+  var SHAPES = [
+    // I型方块（长条）：1行4列
+    { shape: [[1, 1, 1, 1]], color: TEAL3 },
+    // I型方块（长条）：1行5列
+    { shape: [[1, 1, 1, 1, 1]], color: GREEN3 },
+    // O型方块（正方形）：2x2
+    {
+      shape: [
+        [1, 1],
+        [1, 1]
+      ],
+      color: ORANGE3
+    },
+    // T型方块：2x3
+    {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1]
+      ],
+      color: YELLOW3
+    },
+    // L型方块
+    {
+      shape: [
+        [1, 0, 0],
+        [1, 1, 1]
+      ],
+      color: BLUE3
+    },
+    // J型方块
+    {
+      shape: [
+        [0, 0, 1],
+        [1, 1, 1]
+      ],
+      color: PINK2
+    },
+    // S型方块（右斜）
+    {
+      shape: [
+        [0, 1, 1],
+        [1, 1, 0]
+      ],
+      color: RED3
+    },
+    // Z型方块（左斜）
+    {
+      shape: [
+        [1, 1, 0],
+        [0, 1, 1]
+      ],
+      color: VIOLET2
+    }
+  ];
+  var shapes_default = SHAPES;
+
+  // lib/game/utils/random-shape.js
+  function randomShape() {
+    const index = Math.floor(Math.random() * shapes_default.length);
+    const piece = shapes_default[index];
+    return {
+      ...piece,
+      shape: piece.shape.map((row) => [...row])
+    };
+  }
+  var random_shape_default = randomShape;
+
+  // lib/game/utils/get-next-piece.js
+  var getNextPiece = () => {
+    if (replay_runtime_default.playing) {
+      const piece = replay_runtime_default.pieceSequence[replay_runtime_default.pieceIndex++];
+      if (!piece) {
+        return { curr: null, next: null };
+      }
+      const next3 = replay_runtime_default.pieceSequence[replay_runtime_default.pieceIndex] || null;
+      return { curr: piece, next: next3 };
+    }
+    const state = game_default.store.getState();
+    const { next: next2 } = state;
+    const curr = next2 ? {
+      ...next2,
+      shape: next2.shape.map((row) => [...row])
+    } : random_shape_default();
+    return {
+      curr,
+      next: random_shape_default()
+    };
+  };
+  var get_next_piece_default = getNextPiece;
+
+  // lib/game/logic/collision.js
+  var collision = (ox, oy) => {
+    const { Board } = configuration_default;
+    const { rows, cols } = Board;
+    const state = game_default.store.getState();
+    const { curr, cx, cy, board: board2 } = state;
+    if (!curr) {
+      return false;
+    }
+    const s = curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          const nx = cx + x + ox;
+          const ny = cy + y + oy;
+          const outOfBounds = nx < 0 || nx >= cols || ny >= rows;
+          const hitBlock = ny >= 0 && ny < rows && board2[ny][nx];
+          if (outOfBounds || hitBlock) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+  var collision_default = collision;
+
+  // lib/game/core/over.js
+  var over = () => {
+    const { store } = game_default;
+    const mode = store.getMode();
+    if (mode === "game-over" || mode === "replay") {
+      return;
+    }
+    event_bus_default.emit("replay:stop:record");
+    event_bus_default.emit("audio:stop:bgm");
+    event_bus_default.emit("audio:sounds:game:over");
+    event_bus_default.emit("replay:game:over");
+  };
+  var over_default = over;
+
+  // lib/game/logic/spawn.js
+  var spawn = () => {
+    const { Board } = configuration_default;
+    const { cols } = Board;
+    const { store } = game_default;
+    const { curr, next: next2 } = get_next_piece_default();
+    if (!curr) {
+      return;
+    }
+    store.setState({
+      // 当前方块 = 下一个方块，若不存在则随机生成
+      curr,
+      // 重新随机生成下一个预览方块
+      next: next2,
+      // 水平居中：屏幕中间 - 方块宽度的一半
+      cx: Math.floor(cols / 2) - Math.floor(curr.shape[0].length / 2),
+      // 垂直位置从顶部开始
+      cy: 0
+    });
+    const currentState = store.getState();
+    if (collision_default(0, 0)) {
+      over_default();
+      return;
+    }
+    event_bus_default.emit("ui:render:next:piece", { state: currentState });
+    event_bus_default.emit("replay:add:piece", currentState.curr);
+  };
+  var spawn_default = spawn;
+
+  // lib/game/actions/set-beginning-state.js
+  var setBeginningState = (mode, level2 = 1) => {
+    const { store } = game_default;
+    event_bus_default.emit("ui:update:mode", { mode });
+    store.setState({
+      mode,
+      score: 0,
+      lines: 0,
+      level: level2,
+      next: null
+    });
+    if (mode === "playing") {
+      store.setBeginningBoard(store.generateBoard());
+    }
+  };
+  var set_beginning_state_default = setBeginningState;
+
+  // lib/utils/pad-start.js
+  var padStart = (n, len) => {
+    const num = Number(n);
+    if (!Number.isFinite(num)) {
+      return "";
+    }
+    const targetLen = Math.max(0, Math.floor(len));
+    const sign = num < 0 ? "-" : "";
+    const absStr = Math.abs(num).toString();
+    return sign + absStr.padStart(targetLen, "0");
+  };
+  var pad_start_default = padStart;
+
+  // lib/game/core/begin.js
+  var begin = () => {
+    const { store } = game_default;
+    const $level = document.querySelector("#level");
+    const level2 = store.getLevel();
+    if ($level) {
+      $level.textContent = pad_start_default(store.getLevel(), 2);
+    }
+    event_bus_default.emit("replay:start:record");
+    store.resetBoard();
+    set_beginning_state_default("playing", level2);
+    spawn_default();
+    event_bus_default.emit("audio:sounds:level:start");
+    setTimeout(() => {
+      event_bus_default.emit("audio:play:bgm", { level: level2 });
+    }, 250);
+  };
+  var begin_default = begin;
+
+  // lib/game/core/start.js
+  var start = () => {
+    const { store } = game_default;
+    const level2 = store.getLevel();
+    const lines2 = (level2 - 1) * 10;
+    store.setBaseLines(lines2);
+    event_bus_default.emit("effects:start:countdown");
+  };
+  var start_default = start;
+
+  // lib/game/core/reset.js
+  var reset = (mode = "main-menu") => {
+    const { store } = game_default;
+    let level2 = store.getLevel();
+    event_bus_default.emit("audio:stop:bgm");
+    event_bus_default.emit("animations:clear");
+    event_bus_default.emit("command:queue:clear");
+    if (mode === "playing") {
+      event_bus_default.emit("replay:reset");
+    }
+    store.resetBoard();
+    if (mode === "main-menu") {
+      store.setDifficulty("easy");
+      level2 = 1;
+    }
+    set_beginning_state_default(mode, level2);
+    event_bus_default.emit("ui:update:hud", { state: store.getState() });
+    event_bus_default.emit("replay:start:record");
+  };
+  var reset_default = reset;
+
+  // lib/game/core/restart.js
+  var restart = () => {
+    const { store } = game_default;
+    const mode = store.getMode();
+    if (mode !== "playing") {
+      return;
+    }
+    reset_default("playing");
+    spawn_default();
+    event_bus_default.emit("audio:play:bgm", { level: store.getLevel() });
+  };
+  var restart_default = restart;
+
+  // lib/game/core/play.js
+  var play = () => {
+    const { store } = game_default;
+    const mode = store.getMode();
+    if (mode !== "paused") {
+      return false;
+    }
+    event_bus_default.emit("ui:update:mode", { mode: "playing" });
+    store.setMode("playing");
+    event_bus_default.emit("effects:stop:paused");
+    event_bus_default.emit("audio:sounds:resume");
+    event_bus_default.emit("audio:play:bgm", { level: store.getLevel() });
+  };
+  var play_default = play;
+
+  // lib/game/core/pause.js
+  var pause = () => {
+    const { store } = game_default;
+    const mode = store.getMode();
+    if (mode !== "playing") {
+      return;
+    }
+    event_bus_default.emit("ui:update:mode", { mode: "paused" });
+    store.setMode("paused");
+    event_bus_default.emit("audio:stop:bgm");
+    event_bus_default.emit("audio:sounds:pause");
+    event_bus_default.emit("effects:start:paused");
+  };
+  var pause_default = pause;
+
+  // lib/game/core/toggle-pause.js
+  var togglePause = () => {
+    const mode = game_default.store.getMode();
+    if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
+      return false;
+    }
+    if (mode === "playing") {
+      pause_default();
+    } else {
+      play_default();
+    }
+  };
+  var toggle_pause_default = togglePause;
+
+  // lib/game/logic/find-full-lines.js
+  var findFullLines = () => {
+    const state = game_default.store.getState();
+    const { Board } = configuration_default;
+    const { rows } = Board;
+    const linesToClear = [];
+    for (let y = rows - 1; y >= 0; y--) {
+      const isLineFull = state.board[y].every((cell) => !!cell);
+      if (isLineFull) {
+        linesToClear.push(y);
+      }
+    }
+    return linesToClear;
+  };
+  var find_full_lines_default = findFullLines;
+
+  // lib/game/logic/clear-lines.js
+  var clearLines = () => {
+    const linesToClear = find_full_lines_default();
+    if (linesToClear.length === 0) {
+      return;
+    }
+    game_default.store.setClearLines(linesToClear);
+    event_bus_default.emit("effects:start:clear:lines", { linesToClear });
+  };
+  var clear_lines_default = clearLines;
+
+  // lib/game/logic/move.js
+  var move = (ox, oy) => {
+    const { store } = game_default;
+    const state = store.getState();
+    let { cx, cy } = state;
+    if (!collision_default(ox, oy)) {
+      cx += ox;
+      cy += oy;
+      store.setState({
+        cx,
+        cy
+      });
+      event_bus_default.emit("audio:sounds:move");
+      return true;
+    }
+    return false;
+  };
+  var move_default = move;
+
+  // lib/game/logic/lock.js
+  var lock = () => {
+    const { store } = game_default;
+    const state = store.getState();
+    const { curr } = state;
+    const s = curr.shape;
+    const board2 = structuredClone(state.board);
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          board2[state.cy + y][state.cx + x] = curr.color;
+          store.setState({
+            board: board2
+          });
+        }
+      }
+    }
+  };
+  var lock_default = lock;
+
+  // lib/game/logic/drop.js
+  var drop = () => {
+    while (true) {
+      if (!move_default(0, 1)) {
+        break;
+      }
+    }
+    lock_default();
+    event_bus_default.emit("audio:sounds:fall");
+    clear_lines_default();
+    spawn_default();
+    event_bus_default.emit("audio:sounds:drop");
+  };
+  var drop_default = drop;
+
+  // lib/game/logic/rotate.js
+  var rotate = () => {
+    const { store } = game_default;
+    const state = store.getState();
+    const { curr } = state;
+    if (!curr) {
+      return;
+    }
+    const currentShape = structuredClone(curr);
+    const prev = curr.shape;
+    currentShape.shape = prev[0].map(
+      (_, i) => prev.map((r) => r[i]).toReversed()
+    );
+    store.setState({
+      curr: currentShape
+    });
+    if (collision_default(0, 0)) {
+      currentShape.shape = prev;
+      store.setState({
+        curr: currentShape
+      });
+    } else {
+      event_bus_default.emit("audio:sounds:rotate");
+    }
+  };
+  var rotate_default = rotate;
+
+  // lib/game/logic/tick.js
+  var tick = (isBlocked) => {
+    const mode = game_default.store.getMode();
+    if (mode !== "playing" && mode !== "replay" || isBlocked) {
+      return;
+    }
+    if (mode === "playing") {
+      event_bus_default.emit("dispatch:input", {
+        device: "replay",
+        action: "AUTO_TICK",
+        payload: {}
+      });
+    }
+    if (!move_default(0, 1)) {
+      lock_default();
+      event_bus_default.emit("audio:sounds:fall");
+      clear_lines_default();
+      spawn_default();
+    }
+  };
+  var tick_default = tick;
+
+  // lib/game/rules/get-speed.js
+  var getSpeed = () => {
+    const level2 = game_default.store.getLevel();
+    const step = Math.ceil(1e3 / Math.floor(configuration_default.Level.max * 0.7));
+    return Math.max(120, 1e3 - (level2 - 1) * step);
+  };
+  var get_speed_default = getSpeed;
+
+  // lib/utils/get-storage.js
+  var getStorage = (key) => localStorage.getItem(key);
+  var get_storage_default = getStorage;
+
+  // lib/utils/set-storage.js
+  var setStorage = (key, value) => {
+    localStorage.setItem(key, value);
+  };
+  var set_storage_default = setStorage;
+
+  // lib/game/constants/game.js
+  var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
+  var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
+  var MAX_LEVEL = 99;
+  var GAME = {
+    CLEAR_LINE_SCORES,
+    MAX_LEVEL,
+    FONT_FAMILY
+  };
+  var game_default2 = GAME;
+
+  // lib/game/actions/apply-clear-lines.js
+  var applyClearLines = () => {
+    const state = game_default.store.getState();
+    const { Board, Level } = configuration_default;
+    const { rows, cols } = Board;
+    const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default2;
+    const lines2 = state.clearLines || [];
+    const cleared = lines2.length;
+    const board2 = structuredClone(state.board);
+    for (let y = rows - 1; y >= 0; y--) {
+      const isFullLine = board2[y].every(Boolean);
+      if (isFullLine) {
+        board2.splice(y, 1);
+        board2.unshift(Array.from({ length: cols }).fill(0));
+        y++;
+      }
+    }
+    const nextLines = state.lines + cleared;
+    const totalLines = state.baseLines + nextLines;
+    const newLevel = Math.floor(totalLines / 10) + 1;
+    const { max } = Level;
+    const isMaxOut = newLevel > max;
+    const levelUp = newLevel > state.level && !isMaxOut;
+    return {
+      stateHandler: (prev) => ({
+        ...prev,
+        clearLines: [],
+        lines: nextLines,
+        score: prev.score + CLEAR_LINE_SCORES2[cleared],
+        level: Math.min(Math.max(prev.level, newLevel), max),
+        board: board2
+      }),
+      levelUp,
+      level: isMaxOut ? max : newLevel,
+      isMaxOut
+    };
+  };
+  var apply_clear_lines_default = applyClearLines;
+
+  // lib/game/index.js
+  var Game = {
+    // 游戏状态
+    store: game_store_default(),
+    // 核心流程控制逻辑
+    begin: begin_default,
+    start: start_default,
+    restart: restart_default,
+    togglePause: toggle_pause_default,
+    over: over_default,
+    reset: reset_default,
+    // 游戏方块控制逻辑
+    clearLines: clear_lines_default,
+    collision: collision_default,
+    drop: drop_default,
+    findFullLines: find_full_lines_default,
+    lock: lock_default,
+    move: move_default,
+    rotate: rotate_default,
+    spawn: spawn_default,
+    tick: tick_default,
+    // 游戏功能函数
+    setBeginningState: set_beginning_state_default,
+    randomShape: random_shape_default,
+    // 规则功能函数
+    getSpeed: get_speed_default,
+    // 指令功能函数
+    applyClearLines: apply_clear_lines_default,
+    switchToDifficulty: () => {
+      Game.store.setMode("difficulty");
+    },
+    switchToMainMenu: () => {
+      Game.store.setMode("main-menu");
+    },
+    selectLevel: (level2) => {
+      Game.store.setLevel(level2);
+      event_bus_default.emit("audio:sounds:level:select");
+    },
+    selectDifficulty: (difficulty) => {
+      Game.store.setDifficulty(difficulty);
+      event_bus_default.emit("audio:sounds:difficulty:select");
+    },
+    loadHighScore: () => {
+      const highScore2 = Number.parseInt(get_storage_default("tetris-high-score"), 10) || 0;
+      Game.store.setHighScore(highScore2);
+    },
+    saveHighScore: (score2) => {
+      const { store } = Game;
+      if (score2 > store.getHighScore()) {
+        store.setHighScore(score2);
+        set_storage_default("tetris-high-score", score2.toString());
+      }
+    }
+  };
+  var game_default = Game;
+
+  // lib/services/ui/core/canvas.js
+  var { board, next } = configuration_default.Elements.Canvas;
+  var gameBoard = document.querySelector(`#${board}`);
+  var gameBoardContext = gameBoard.getContext("2d");
+  var nextPiece = document.querySelector(`#${next}`);
+  var nextPieceContext = nextPiece.getContext("2d");
+  var fontSize = 0;
+  var blockSize = 0;
+  var Canvas = {
+    gameBoard,
+    gameBoardContext,
+    nextPiece,
+    nextPieceContext,
+    fontSize,
+    blockSize
+  };
+  var canvas_default = Canvas;
+
+  // lib/services/ui/board/clear-board.js
+  function clearBoard() {
+    const { gameBoard: gameBoard2, gameBoardContext: gameBoardContext2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    gameBoardContext2.clearRect(0, 0, width, height);
+  }
+  var clear_board_default = clearBoard;
+
+  // lib/services/ui/text/render-text.js
+  var renderText = (options) => {
+    const {
+      text,
+      x,
+      y,
+      color,
+      strokeColor,
+      size = 1,
+      center = true,
+      baseline = "",
+      stroke = false,
+      lineWidth = 2
+    } = options;
+    const { FONT_FAMILY: FONT_FAMILY2 } = game_default2;
+    const { gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
+    ctx.save();
+    if (center) {
+      ctx.textAlign = "center";
+    }
+    if (baseline) {
+      ctx.textBaseline = baseline;
+    }
+    ctx.font = `${fontSize2 * size}px ${FONT_FAMILY2}`;
+    if (stroke) {
+      ctx.strokeStyle = strokeColor || color;
+      ctx.lineWidth = lineWidth;
+      ctx.strokeText(text, x, y);
+    }
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  };
+  var render_text_default = renderText;
+
+  // lib/services/ui/text/render-tetris-text.js
+  var renderTetrisText = () => {
+    const { GREEN: GREEN7 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "TETRIS.JS",
+      x: width / 2,
+      y: height * 0.1,
+      color: GREEN7,
+      size: 1.1
+    });
+  };
+  var render_tetris_text_default = renderTetrisText;
+
+  // lib/services/ui/text/render-level-text.js
+  var renderLevelText = () => {
+    const { GREEN: GREEN7 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "LEVEL",
+      x: width / 2,
+      y: height * 0.35,
+      color: GREEN7,
+      size: 1,
+      center: true
+    });
+  };
+  var render_level_text_default = renderLevelText;
+
+  // lib/services/ui/text/render-level-number.js
+  var renderLevelNumber = (level2, y) => {
+    const { GREEN: GREEN7 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width } = gameBoard2;
+    render_text_default({
+      text: String(level2),
+      x: width / 2,
+      y,
+      color: GREEN7,
+      size: 3,
+      center: true
+    });
+  };
+  var render_level_number_default = renderLevelNumber;
+
+  // lib/services/ui/text/render-level-shortcut.js
+  var renderLevelShortcut = () => {
+    const { WHITE: WHITE3 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "1-9 or T KEY",
+      x: width / 2,
+      y: height * 0.58,
+      color: WHITE3,
+      size: 1,
+      center: true
+    });
+  };
+  var render_level_shortcut_default = renderLevelShortcut;
+
+  // lib/services/ui/text/render-enter-continue-text.js
+  var renderEnterContinueText = () => {
+    const { TEAL: TEAL6, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "ENTER CONTINUE",
+      x: width / 2,
+      y: height * 0.74,
+      color: TEAL6,
+      strokeColor: BLACK2,
+      size: 1,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_enter_continue_text_default = renderEnterContinueText;
+
+  // lib/services/ui/overlay/render-overlay.js
+  var renderOverlay = (color) => {
+    const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
+    const { width, height } = gameBoard2;
+    ctx.save();
+    ctx.fillStyle = color || RGBA_BLACK2;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  };
+  var render_overlay_default = renderOverlay;
+
+  // lib/services/ui/image/image-manager.js
+  var ImagesCache = /* @__PURE__ */ new Map();
+  var toDataURI = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  var getImage = (svg) => {
+    const cached = ImagesCache.get(svg);
+    if (cached) {
+      return cached;
+    }
+    const img = new Image();
+    img.src = toDataURI(svg);
+    ImagesCache.set(svg, img);
+    return img;
+  };
+  var clearImagesCache = () => {
+    ImagesCache.clear();
+  };
+  var preloadImages = (images) => {
+    const svgs = Object.values(images);
+    clearImagesCache();
+    for (const svg of svgs) {
+      getImage(svg);
+    }
+  };
+
+  // lib/services/ui/image/render-image.js
+  var renderImage = (img, x, y, size) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    if (!img.complete) {
+      return;
+    }
+    ctx.save();
+    ctx.drawImage(img, x, y, size, size);
+    ctx.restore();
+  };
+  var render_image_default = renderImage;
+
+  // lib/services/ui/image/render-scene-background.js
+  var renderSceneBackground = (scene) => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    const hours = (/* @__PURE__ */ new Date()).getHours();
+    let icon;
+    let img;
+    let size;
+    let x;
+    let y;
+    switch (scene) {
+      /** 主菜单 / 倒计时场景 */
+      case "main-menu":
+      case "countdown": {
+        img = getImage(scenes_background_default.tetris);
+        size = width;
+        x = width / 2 - size / 2;
+        y = height - size;
+        break;
+      }
+      /** 游戏进行中场景（根据时间切换主题背景） */
+      case "playing": {
+        if (hours >= 0 && hours <= 8) {
+          icon = "pagoda";
+          size = width * 1.4;
+        } else if (hours > 8 && hours <= 14) {
+          icon = "temple";
+          size = width * 1.1;
+        } else {
+          icon = "tower";
+          size = width * 1.6;
+        }
+        img = getImage(scenes_background_default[icon]);
+        x = width / 2 - size / 2;
+        y = height - size;
+        break;
+      }
+      /** 暂停场景 */
+      case "paused": {
+        img = getImage(scenes_background_default.coffee);
+        size = width * 0.76;
+        x = width / 2 - size / 2;
+        y = height - size * 0.94;
+        break;
+      }
+      /** 游戏结束场景 */
+      case "game-over": {
+        img = getImage(scenes_background_default.happy);
+        size = Math.floor(width * 0.42);
+        x = width / 2 - size / 2;
+        y = height / 2 - size * 1.35;
+        break;
+      }
+    }
+    render_image_default(img, x, y, size);
+  };
+  var render_scene_background_default = renderSceneBackground;
+
+  // lib/services/ui/scenes/main-menu-scene/render-main-menu.js
+  var renderMainMenu = (level2) => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { height } = gameBoard2;
+    clear_board_default();
+    render_overlay_default();
+    render_scene_background_default("main-menu");
+    render_tetris_text_default();
+    render_level_text_default();
+    render_level_number_default(level2, height * 0.5);
+    render_level_shortcut_default();
+    render_enter_continue_text_default();
+  };
+  var render_main_menu_default = renderMainMenu;
+
+  // lib/services/ui/scenes/main-menu-scene/index.js
+  var mainMenuScene = (state) => {
+    render_main_menu_default(state.level);
+  };
+  var main_menu_scene_default = mainMenuScene;
+
+  // lib/services/ui/text/render-difficulty-text.js
+  var renderDifficultText = () => {
+    const { GREEN: GREEN7 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "DIFFICULTY",
+      x: width / 2,
+      y: height * 0.35,
+      color: GREEN7,
+      size: 1,
+      center: true
+    });
+  };
+  var render_difficulty_text_default = renderDifficultText;
+
+  // lib/services/ui/text/render-difficult-words.js
+  var renderDifficultyWords = (difficulty, y) => {
+    const { GREEN: GREEN7 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width } = gameBoard2;
+    render_text_default({
+      text: difficulty.toUpperCase(),
+      x: width / 2,
+      y,
+      color: GREEN7,
+      size: 2.2,
+      center: true
+    });
+  };
+  var render_difficult_words_default = renderDifficultyWords;
+
+  // lib/services/ui/text/render-difficulty-shortcut.js
+  var renderDifficultyShortcut = (state) => {
+    const { WHITE: WHITE3 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    let text = "E/N/H/X KEY";
+    if (state.gamepadConnected) {
+      text = "A/B/Y/X KEY";
+    }
+    render_text_default({
+      text,
+      x: width / 2,
+      y: height * 0.58,
+      color: WHITE3,
+      size: 1,
+      center: true
+    });
+  };
+  var render_difficulty_shortcut_default = renderDifficultyShortcut;
+
+  // lib/services/ui/text/render-enter-start-text.js
+  var renderEnterStartText = () => {
+    const { TEAL: TEAL6, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "ENTER START",
+      x: width / 2,
+      y: height * 0.74,
+      color: TEAL6,
+      strokeColor: BLACK2,
+      size: 1.15,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_enter_start_text_default = renderEnterStartText;
+
+  // lib/services/ui/scenes/difficulty-scene/render-difficulty-scene.js
+  var renderDifficultyScene = (state) => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { height } = gameBoard2;
+    clear_board_default();
+    render_overlay_default();
+    render_scene_background_default("main-menu");
+    render_tetris_text_default();
+    render_difficulty_text_default();
+    render_difficult_words_default(state.difficulty, height * 0.5);
+    render_difficulty_shortcut_default(state);
+    render_enter_start_text_default();
+  };
+  var render_difficulty_scene_default = renderDifficultyScene;
+
+  // lib/services/ui/scenes/difficulty-scene/index.js
+  var difficultyScene = (state) => {
+    render_difficulty_scene_default(state);
+  };
+  var difficulty_scene_default = difficultyScene;
+
+  // lib/services/ui/text/render-paused-text.js
+  var renderPausedText = () => {
+    const { YELLOW: YELLOW6, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "PAUSED",
+      x: width / 2,
+      y: height / 1.4,
+      color: YELLOW6,
+      strokeColor: BLACK2,
+      size: 1.6,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_paused_text_default = renderPausedText;
+
+  // lib/utils/format-time.js
+  var formatTime = (date, format = "yyyy-MM-dd HH:mm:ss") => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const toSymbol = () => hours >= 12 ? "PM" : "AM";
+    const hasSymbol = format.includes("a");
+    const hour12 = hours % 12 || 12;
+    const symbols = {
+      yyyy: year,
+      MM: pad_start_default(month, 2),
+      dd: pad_start_default(day, 2),
+      HH: pad_start_default(hours, 2),
+      hh: pad_start_default(hour12, 2),
+      mm: pad_start_default(minutes, 2),
+      ss: pad_start_default(seconds, 2),
+      a: hasSymbol ? toSymbol() : ""
+    };
+    let time = format;
+    for (const key of Object.keys(symbols)) {
+      time = time.replace(new RegExp(key, "g"), symbols[key]);
+    }
+    return time;
+  };
+  var format_time_default = formatTime;
+
+  // lib/services/ui/effects/render-digital-clock.js
+  var { GREEN: GREEN4 } = colors_default;
+  var renderDigitalClock = (time, color = GREEN4, format = "HH:mm:ss") => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    const text = format_time_default(time || /* @__PURE__ */ new Date(), format);
+    render_text_default({
+      text,
+      x: width / 2,
+      y: height / 4.15,
+      color,
+      size: 0.94,
+      center: true
+    });
+  };
+  var render_digital_clock_default = renderDigitalClock;
+
+  // lib/services/ui/effects/clock/constants/clock-themes.js
+  var {
+    CORAL: CORAL2,
+    RGBA_CORAL: RGBA_CORAL2,
+    WHITE: WHITE2,
+    RGBA_WHITE: RGBA_WHITE3,
+    PURPLE: PURPLE3,
+    RGBA_PURPLE: RGBA_PURPLE2,
+    TEAL: TEAL4,
+    RGBA_TEAL: RGBA_TEAL2,
+    PINK: PINK3,
+    RGBA_PINK: RGBA_PINK2,
+    ORANGE: ORANGE4,
+    RGBA_ORANGE: RGBA_ORANGE2,
+    GREEN: GREEN5,
+    RGBA_GREEN: RGBA_GREEN2,
+    BLUE: BLUE4,
+    RGBA_BLUE: RGBA_BLUE2,
+    YELLOW: YELLOW4,
+    RGBA_YELLOW: RGBA_YELLOW2,
+    RED: RED4,
+    RGBA_RED: RGBA_RED2,
+    VIOLET: VIOLET3,
+    RGBA_VIOLET: RGBA_VIOLET2,
+    CYAN: CYAN2,
+    RGBA_CYAN: RGBA_CYAN2
+  } = colors_default;
+  var ClockThemes = {
+    Teal: {
+      stroke: TEAL4,
+      face: RGBA_TEAL2,
+      secondHand: VIOLET3
+    },
+    Violet: {
+      stroke: VIOLET3,
+      face: RGBA_VIOLET2,
+      secondHand: TEAL4
+    },
+    Yellow: {
+      stroke: YELLOW4,
+      face: RGBA_YELLOW2,
+      secondHand: PINK3
+    },
+    Pink: {
+      stroke: PINK3,
+      face: RGBA_PINK2,
+      secondHand: YELLOW4
+    },
+    Purple: {
+      stroke: PURPLE3,
+      face: RGBA_PURPLE2,
+      secondHand: GREEN5
+    },
+    Green: {
+      stroke: GREEN5,
+      face: RGBA_GREEN2,
+      secondHand: CYAN2
+    },
+    Blue: {
+      stroke: BLUE4,
+      face: RGBA_BLUE2,
+      secondHand: CORAL2
+    },
+    Coral: {
+      stroke: CORAL2,
+      face: RGBA_CORAL2,
+      secondHand: BLUE4
+    },
+    Orange: {
+      stroke: ORANGE4,
+      face: RGBA_ORANGE2,
+      secondHand: CYAN2
+    },
+    Cyan: {
+      stroke: CYAN2,
+      face: RGBA_CYAN2,
+      secondHand: ORANGE4
+    },
+    White: {
+      stroke: WHITE2,
+      face: RGBA_WHITE3,
+      secondHand: RED4
+    },
+    Red: {
+      stroke: RED4,
+      face: RGBA_RED2,
+      secondHand: WHITE2
+    }
+  };
+  var clock_themes_default = ClockThemes;
+
+  // lib/services/ui/effects/clock/utils/get-clock-angles.js
+  var getClockAngles = (time) => {
+    const h = time.getHours();
+    const m = time.getMinutes();
+    const s = time.getSeconds();
+    const hAng = (h % 12 + m / 60 + s / 3600) * (2 * Math.PI / 12);
+    const mAng = (m + s / 60) * (2 * Math.PI / 60);
+    const sAng = s * (2 * Math.PI / 60);
+    return {
+      hAng,
+      mAng,
+      sAng
+    };
+  };
+  var get_clock_angles_default = getClockAngles;
+
+  // lib/services/ui/constants/images/chinese-hour-animals.js
+  var { RGBA_WHITE: RGBA_WHITE4 } = colors_default;
+  var ChineseHourAnimals = {
+    rat: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m210.432 1012.898-43.574-31.69C273.812 834.156 352.175 810.01 590.686 808.502c21.397-31.26 16.25-56.266 9.378-89.708-3.557-17.138-7.222-34.843-7.222-54.434 0-68.958 25.33-104.636 63.407-136.973l34.897 41.04c-29.453 25.062-44.41 46.781-44.41 95.933 0 14.094 2.938 28.403 6.064 43.547 5.901 28.51 12.8 62.033-1.132 99.463 166.373-10.24 264.543-96.903 264.543-236.194 0-152.845-88.63-247.808-231.29-247.808-83.644 0-153.303 29.696-174.188 39.613a225 225 0 0 1-20.533 31.34l-41.742-34.116 20.884 17.058-20.91-16.977c.35-.458 36.62-45.999 36.62-97.55 0-34.815-8.946-60.765-26.57-77.069-17.515-16.249-44.786-24.603-81.219-24.953v162.654h-53.895V109.784l24.873-1.914c64.7-4.931 114.095 7.896 146.863 38.239 29.103 26.947 43.843 66.182 43.843 116.628 0 11.102-1.131 21.908-3.072 32.202 37.269-12.584 89.843-25.465 149.046-25.465 173.245 0 285.184 118.433 285.184 301.702 0 140.747-92.618 291.14-352.552 291.14-258.668 0-311.943 19.698-407.121 150.582m19.106-256.836c-12.046 0-24.388-.566-37.026-1.643l-22.097-1.86-2.425-22.016c-.243-2.398-6.306-58.098-6.306-99.516 0-103.586 21.45-178.904 53.895-259.046V107.79h53.895v274.783l-2.021 4.904c-32.014 78.282-51.874 146.324-51.874 243.55 0 22.879 2.102 51.443 3.826 70.98 99.679 2.802 172.814-35.409 222.451-116.494l48.02 24.091c-11.237 28.133-11.372 51.578-.377 67.854 9.701 14.282 28.645 23.175 49.448 23.175v53.894c-39.02 0-74.186-17.515-94.073-46.888a100.2 100.2 0 0 1-12.423-25.546c-53.22 49.179-121.128 73.943-202.913 73.97m150.42-230.588c0-34.223-13.231-44.463-29.642-44.463s-29.642 10.24-29.642 44.463c0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463"/></svg>`,
+    ox: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 -0.5 1025 1025"><path d="M1025.347 635.58v280.63h-53.894v-71.033c-16.33-18.405-69.821-70.413-161.685-86.07v157.104h-53.894V754.526h-107.79v215.58H594.19V700.631h161.685c100.998 0 172.57 38.67 215.579 71.868V656.761c-33.685-43.628-51.712-137.458-53.706-279.498H701.979c-76.935 0-127.219-26.22-175.805-51.55a1556 1556 0 0 0-26.84-13.743c-26.839 26.004-66.209 44.92-115.738 55.511 24.441 22.986 60.874 52.116 106.469 72.839l-22.313 49.044c-76.584-34.816-129.59-88.926-150.824-113.125-10.644.62-21.477 1.024-32.687 1.024a473.7 473.7 0 0 1-123.365-15.953L67.853 547.624l68.582 53.868c31.447-21.935 101.456-62.545 188.28-62.545v53.895c-95.986 0-170.36 62.491-171.088 63.138l-16.788 14.282L0 562.904l109.73-219.81C46.43 314.449 1.347 267.372 1.347 199.869c0-110.053 120.24-145.974 161.685-145.974v53.894c-14.12 0-107.79 17.166-107.79 92.08 0 90.597 136.947 123.5 228.999 123.5 67.907 0 122.422-12.99 157.696-35.625-42.712-14.336-95.097-23.12-169.337-18.324l-3.504-53.787c95.88-6.117 160.149 8.515 211.43 28.834 3.718-9.028 5.874-18.648 5.874-28.888 0-48.856-57.83-76.288-58.395-76.558l22.393-49.017c3.665 1.644 89.897 41.823 89.897 125.575 0 18.567-3.423 35.84-9.998 51.631 7.06 3.584 13.986 7.168 20.777 10.698 46.78 24.415 87.174 45.46 150.905 45.46h269.474v26.948c0 214.69 35.22 266.59 45.999 277.37zm-729.384 25.143-98.79 118.541L283.972 917.1l45.595-28.726-65.913-104.69 37.053-44.437c57.937 45.945 138.374 69.174 239.589 69.174v-53.895c-99.894 0-175.077-24.549-223.475-72.946z"/></svg>`,
+    rabbit: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M862.316 720.896c0 36.621-4.123 69.39-24.253 110.35l-68.365 138.86H485.053V916.21h48.37c-25.546-36.137-48.37-82.702-48.37-134.737 0-59.42 24.171-113.314 63.218-152.36l38.104 38.103a161.1 161.1 0 0 0-47.428 114.257c0 54.784 35.382 104.043 63.515 134.737h133.713l53.49-108.76c15.711-31.852 18.756-55.835 18.756-86.555 0-80.977-63.434-150.097-178.607-195.503-17.543 8.138-38.292 13.554-63.92 13.554h-80.841c-13.96 0-43.925 15.98-57.29 40.017l-47.104-26.166c20.749-37.349 67.584-67.745 104.394-67.745h80.842c37.268 0 57.478-15.441 79.09-36.46-19.617-112.398-95.232-179.12-159.932-179.12h-107.79a21.3 21.3 0 0 0-5.955 2.022 684 684 0 0 0-69.12-77.474c-35.84-34.223-61.764-58.934-94.909-79.44a42.44 42.44 0 0 0-21.8-6.792 22.82 22.82 0 0 0-17.381 7.195c-10.914 11.426-6.063 28.241 1.428 39.182 21.989 32.121 47.912 56.859 83.752 91.109 20.615 19.672 49.26 43.17 77.393 63.084C281.007 367.4 215.58 484.433 215.58 592.842c0 74.483 24.792 124.066 51.065 176.586 27.89 55.781 56.724 113.476 56.724 200.677h-53.894c0-74.482-24.792-124.065-51.066-176.586-27.89-55.78-56.724-113.475-56.724-200.677 0-90.866 42.227-197.686 93.454-274.486a804 804 0 0 1-39.047-34.115c-38.238-36.487-65.86-62.841-91.055-99.625-24.441-35.759-22.798-78.686 4.069-106.819 26.3-27.567 70.898-31.043 106.523-9 37.942 23.444 65.563 49.798 103.774 86.258 9.97 9.513 33.038 32.31 56.94 60.55h68.635c-27.621-37.78-60.416-72.73-88.522-99.543-28.834-27.54-54.73-52.116-84.534-74.024L326.306.296c31.232 23.23 57.802 48.533 87.31 76.72 53.84 51.388 94.45 100.594 121.747 146.836 82.837 26.65 150.043 116.87 165.026 230.75l1.725 13.177-9.405 9.405a820 820 0 0 1-11.803 11.587c156.322 72.408 181.41 174.727 181.41 232.125m-552.852 33.63c3.934 8.058 7.895 16.088 11.991 24.145 27.433 54.3 55.808 110.457 55.808 191.434h53.895c0-93.696-34.062-161.226-61.52-215.579zm597.908 53.895c-3.423 9.405-7.815 19.806-13.77 31.96L829.79 970.105h60.066l52.143-105.957c10.78-21.935 17.516-40.017 21.908-55.727zM514.695 390.737c0-34.223-13.231-44.463-29.642-44.463s-29.642 10.24-29.642 44.463c0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463"/></svg>`,
+    dragon: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M552.421 1024c-69.767 0-113.826-13.959-156.402-27.46-54.488-17.273-110.808-35.004-232.422-26.516l-3.826-53.733c131.719-9.458 195.934 10.968 252.524 28.888 42.226 13.366 78.686 24.926 140.126 24.926 92.753 0 148.21-57.937 148.21-113.96 0-16.95-5.524-101.619-114.634-101.619-64.97 0-112.747 23.337-163.328 48.02-57.344 28.026-122.368 59.77-218.381 59.77C85.908 862.316 0 787.294 0 683.897c0-95.77 80.788-198.844 258.183-198.844 86.69 0 155.917 24.818 229.214 51.092 45.81 16.41 92.564 33.172 145.489 44.167 9-7.034 13.85-16.277 13.85-26.76 0-37.187-37.672-74.859-74.131-111.265L569.317 439l38.104-38.104 3.26 3.288c42.173 42.091 89.95 89.842 89.95 149.369 0 12.719-2.802 24.926-7.976 36.11a595 595 0 0 0 61.871 3.18c62.437 0 107.79-34.008 107.79-80.843 0-58.853-52.87-110.269-108.84-164.702l-8.058-7.842c-19.025 16.438-38.077 35.49-59.419 56.832l-38.103-38.104C722.7 283.352 782.794 223.286 916.21 216.253V55.619c-63.408 7.788-120.994 39.424-121.668 39.802l-15.818 8.811-14.12-11.344c-32.903-26.436-54.892-38.993-90.92-38.993-41.419 0-74.349 25.87-109.192 53.302-26.624 20.91-54.137 42.55-86.85 53.194l-8.3 1.293h-69.094L294.723 267.21l-38.103-38.13 67.395-67.396h-162.33V107.79h303.103c22.232-8.272 43.709-25.168 66.399-42.98C569.829 34.438 613.619 0 673.684 0c48.91 0 81.408 17.947 110.889 40.098C813.703 26.3 877.73 0 943.158 0h26.947v323.368h-53.894v-53.167c-54.165 3.1-92.915 15.845-127.003 36.676l1.832 1.778C852.588 368.505 916.21 430.376 916.21 512c0 60.928-43.708 109.945-107.789 127.623v61.009h53.895v-53.895h53.895v53.895h53.894v53.894h-53.894v53.895h-53.895v-53.895H808.42c-29.723 0-53.895-24.171-53.895-53.894v-53.895c-118.326 0-207.063-31.798-285.318-59.877-68.77-24.63-133.713-47.913-211.025-47.913-141.124 0-204.288 72.785-204.288 144.95 0 73.324 61.844 124.524 150.393 124.524 11.91 0 23.229-.539 34.035-1.536 10.132-10.563 31.15-36.244 31.15-67.719 0-33.118-43.088-70.98-58.152-81.596l30.936-44.14c8.3 5.794 81.111 58.664 81.111 125.736 0 19.43-4.527 37.053-10.994 52.305 30.774-10.051 58.314-23.498 86.663-37.349 53.84-26.274 109.54-53.49 186.96-53.49 116.413 0 168.53 78.093 168.53 155.513 0 82.513-75.615 167.855-202.106 167.855m-21.18-623.104-38.104-38.104 137.89-137.89 38.103 38.104zM404.48 382.545l-38.104-38.104 152.98-152.98 38.104 38.104zM686.484 163.92c15.495-9.755 43.332-31.448 43.332-31.448-25.735-27.81-49.557-33.334-67.369-29.076-19.24 4.608-37.753 24.603-37.753 24.603s42.253 22.447 61.79 35.92"/></svg>`,
+    tiger: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M673.684 1024c-114.769 0-188.82-33.334-254.167-62.787-53.626-24.145-99.975-45.002-161.28-45.002-40.448 0-83.591 23.255-103.64 45.163l-39.747-36.433c27.648-30.154 84.318-62.625 143.387-62.625 68.392 0 119.862 21.288 172.92 45.056V673.684c0-35.166-17.542-64.108-30.638-80.815-15.199 9.836-32.068 18.89-50.742 26.947l-21.342-49.475C469.8 509.413 485.053 377.317 485.053 323.368V221.642a598 598 0 0 0-80.842-6.063h-26.948v-80.842c0-12.1-14.848-26.948-26.947-26.948-9.378 0-18.836.593-26.948 1.348v160.337h-53.894v-57.802c-136.03 102.912-158.45 266.886-161.307 295.882 9.135 9.108 38.993 25.06 71.976 38.67l38.104-59.366 12.45-1.59c90.516-11.614 146.566-93.076 146.566-161.9h53.895c0 88.334-68.797 192.243-180.87 213.343l-48.398 75.398-20.292-7.437C53.895 557.757 53.895 523.318 53.895 512c0-50.041 37.025-254.733 215.579-365.622V62.491l22.528-3.746c1.185-.188 29.48-4.85 58.314-4.85 41.553 0 80.842 39.289 80.842 80.842v27.513C679.855 172.813 1024 327.545 1024 646.737 1024 832.189 892.982 1024 673.684 1024m-13.473-323.368c-36.514 0-67.369 49.367-67.369 107.79 0 85.746 68.096 145.084 89.465 161.549 91.54-2.534 164.38-45.488 213.828-107.655H700.632V808.42H930.87c8.92-17.273 16.357-35.355 22.285-53.895H713.27l-6.467-17.65c-.512-1.294-14.363-36.244-46.592-36.244m-175.158 230.48c33.926 14.067 70.52 26.597 114.607 33.47-30.235-36.272-60.713-89.358-60.713-156.16 0-90.652 53.275-161.685 121.264-161.685 44.76 0 73.835 28.78 88.683 53.895h217.007c2.776-17.867 4.204-35.921 4.204-53.895 0-38.94-5.659-74.752-15.926-107.628L827.473 665.79l-38.104-38.104 142.633-142.632a368 368 0 0 0-57.775-81.597L719.683 557.999l-38.103-38.103 153.573-153.573a538 538 0 0 0-82.594-56.752L611.894 450.21l-38.104-38.104 128.135-128.135a794.7 794.7 0 0 0-162.978-52.924v92.321c0 50.15-11.102 156.7-95.932 236.329 18.378 23.417 42.038 63.407 42.038 113.987zM215.579 431.158v-53.895c39.774 0 53.895-29.022 53.895-53.895h53.894c0 53.572-37.025 107.79-107.79 107.79"/></svg>`,
+    snake: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M671.528 788.857c44.329 11.965 89.627 19.564 136.893 19.564 89.169 0 161.684-60.443 161.684-134.737S897.59 538.947 808.421 538.947c-19.079 0-37.026 1.51-54.218 4.016-.755-101.403-38.211-172.356-79.414-219.648l-1.105.053a1750 1750 0 0 1-79.036-1.751c45.702 35.867 108.705 107.87 105.984 232.367 0 .431-.081.808-.108 1.24-34.924 10.994-66.156 26.731-95.097 45.19a163 163 0 0 0-15.846-42.388c-21.557-39.64-60.065-66.775-97.36-93.022C433.098 423.344 377.263 384 377.263 296.42c0-130.29 108.275-188.632 215.58-188.632 64.134 0 132.715 12.046 214.365 37.808-4.877 34.654-27.109 63.784-106.576 69.039v-52.952h-53.895v53.68c-63.273-1.025-104.529-5.201-104.987-5.255l-5.578 53.598c2.236.242 56.185 5.767 137.512 5.767 125.17 0 188.632-48.128 188.632-143.064v-19.429l-18.432-6.144c-96.095-32.013-175.859-46.942-251.042-46.942-158.666 0-269.474 99.732-269.474 242.526 0 115.55 76.423 169.391 137.836 212.615 33.684 23.713 65.51 46.107 81.004 74.698 9.54 17.543 13.285 33.415 12.342 47.75 21.154 9.109 42.119 17.84 62.949 25.978 53.652-37.268 112.478-64.62 190.922-64.62 59.446 0 107.79 36.271 107.79 80.842s-48.344 80.842-107.79 80.842c-105.472 0-203.237-42.388-297.768-83.429-94.801-41.094-184.347-79.953-281.412-79.953-106.523.027-175.346 53.572-175.346 136.435 0 79.064 67.099 136.434 159.555 136.434 142.174 0 230.427-66.883 306.796-129.886 31.42 13.42 62.787 26.058 94.45 37.134-47.077 49.637-110.969 82.566-186.61 91.27l5.066 53.626c93.453-7.007 143.144 9.35 195.719 26.543 46.457 15.225 94.127 30.855 169.822 30.855 19.995 0 41.957-1.078 66.344-3.558l-5.416-53.625c-105.283 10.78-158.1-6.548-213.935-24.872-22.15-7.276-44.625-14.633-70.306-20.345a334.9 334.9 0 0 0 96.148-82.298M213.45 810.12c-50.877 0-105.66-25.843-105.66-82.54 0-60.847 62.733-82.54 121.451-82.54 77.851 0 154.732 30.289 235.25 64.943-66.263 52.925-139.721 100.137-251.04 100.137"/></svg>`,
+    horse: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M1024 0v404.21c0 33.334 0 134.737-92.08 134.737h-13.823l-78.363-109.056c-22.744 49.907-40.34 103.047-53.49 162.951h115.092c35.974 0 68.77 32.795 68.77 68.797 0 60.631-69.39 154.3-77.313 164.756l-43.008-32.472c25.681-34.061 66.426-100.11 66.426-132.284 0-5.983-8.92-14.902-14.902-14.902H775.976c-14.848 89.384-21.45 193.832-21.45 323.368h-53.894c0-283.971 31.097-453.605 110.888-605.049l20.318-38.535L944.64 483.517c14.444-4.42 25.465-20.938 25.465-79.306V0zM862.316 161.684h53.895V0h-53.895v80.842c-17.381-14.956-38.185-26.947-80.842-26.947H646.737v53.894h134.737c37.672 0 80.842 40.907 80.842 53.895m-107.79 0H538.947v53.895h161.685zm-453.632 604.86 99.786 149.667h64.755l-95.043-142.552 128.485-126.922h167.855a1213 1213 0 0 1 9.431-53.895H476.78zm109.973-184.4-37.862-38.32-132.419 130.803c-66.856-103.531-78.902-144.815-78.902-205.312 0-70.736 37.78-145.947 107.79-145.947h323.368l53.895-53.894H269.474c-6.71 0-13.258.566-19.699 1.482-14.848-21.504-45.137-55.377-89.142-55.377C65.967 215.579 0 349.292 0 469.315c0 70.171 16.141 136.65 49.233 202.672L6.198 723.833l41.472 34.412 66.129-79.737-8.704-16.034c-21.99-40.34-51.2-104.26-51.2-193.159 0-100.864 52.87-199.841 106.738-199.841 13.231 0 25.816 9.89 35.436 20.534-53.194 31.96-88.28 98.492-88.28 179.307 0 78.202 19.699 130.938 93.643 243.982l-55.296 54.622 134.763 202.186h64.755L215.606 775.033z"/></svg>`,
+    goat: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M608.256 144.734c-52.493-29.157-102.157-36.945-123.203-36.945V53.895c32.579 0 91.27 11.452 149.369 43.735 75.29 41.823 130.695 94.532 171.385 150.879-49.933 39.504-108.706 74.86-159.07 74.86h-107.79v-53.895h107.79c20.507 0 48.424-11.21 80.438-31.286a471 471 0 0 0-118.919-93.454m224.418 197.498c-16.384 0-29.642 10.24-29.642 44.463 0 34.25 13.23 44.463 29.642 44.463s29.642-10.213 29.642-44.463c0-34.223-13.231-44.463-29.642-44.463M1024 619.789c0-272.68-122.934-497.34-337.246-616.394L660.588 50.5c253.736 140.962 304.1 389.902 309.06 542.343H885.14c-17.92-35.624-45.352-69.12-87.013-101.996l-16.788-13.285-16.734 13.393c-66.13 52.898-134.63 127.084-187.312 209.678H102.966l-8.273-20.319c64.35-63.3 66.991-77.204 66.991-195.26v-53.895h485.053v-53.895H161.684c0-80.384 14.31-110.026 66.587-137.916l-25.384-47.536c-79.522 42.416-95.098 100.11-95.098 185.452v107.79c0 107.6 0 107.6-63.65 169.283L31.07 667.001l79.549 195.315h58.206l-43.897-107.79h103.478l43.897 107.79h58.206l-43.897-107.79h259.476c-37.106 70.414-61.035 144.627-61.035 215.58h53.894c0-68.69 27.271-144.061 68.959-215.58h79.252c7.41 0 13.474 6.063 13.474 13.474v94.316h53.894V768c0-37.16-30.208-67.368-67.368-67.368h-44.652c40.771-58.018 89.438-111.428 138.914-153.627 60.092 53.032 80.896 108.22 80.896 207.521h53.895c0-38.912-2.75-74.482-11.103-107.79H1024z"/></svg>`,
+    monkey: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M538.947 1024h-53.894c0-32.795 25.87-87.417 77.446-103.316-33.9-39.532-77.446-98.25-77.446-139.21 0-44.571 36.27-80.842 80.842-80.842h80.842v53.894h-80.842a26.947 26.947 0 0 0-26.948 26.948c0 19.725 36.676 77.473 92.133 134.737h88.603c20.21-14.148 88.738-71.465 88.738-198.603 0-108.382-93.238-202.967-168.152-278.986-49.502-50.203-88.576-89.842-98.735-128.62-11.749-44.732-21.585-112.586-26.327-148.318H377.263c-45.137 0-89.519 8.435-121.802 53.895h175.697v53.895c-97.28 0-107.79 113.07-107.79 161.684v53.895h53.895v161.684h-53.895v-107.79h-26.947c-170.253 0-188.632-94.235-188.632-134.736 0-31.044 35.22-72.327 55.728-93.723 2.694-14.687 5.847-28.35 9.431-41.014h-11.264v-53.895h31.529c46.43-94.585 124.011-107.79 184.05-107.79h185.64l2.803 23.795c.135 1.05 12.72 106.658 27.945 164.756 6.494 24.873 44.624 63.515 84.965 104.448 81.866 83.025 183.7 186.341 183.7 316.82 0 92.376-31.124 155.029-61.898 194.426 104.502-19.887 169.687-109.03 169.687-238.35 0-91.405-42.82-154.381-84.237-215.255-38.077-55.97-77.447-113.853-77.447-188.955 0-119.35 87.094-161.685 161.684-161.685v53.895c-32.417 0-107.79 10.51-107.79 107.79 0 58.502 31.556 104.933 68.097 158.639C974.282 492.598 1024 565.679 1024 673.684c0 177.287-108.301 296.421-269.474 296.421H592.842c-37.672 0-53.895 40.906-53.895 53.895M229.214 269.474a385 385 0 0 0-14.012 58.34l-1.402 8.49-6.09 6.116c-22.878 22.932-44.813 52.601-46.026 62.276 0 56.805 53.76 75.264 107.79 79.387v-52.925c0-58.691 13.473-119.62 46.51-161.684zM323.368 1024h-53.894c0-32.795 25.87-87.417 77.446-103.316-33.9-39.532-77.446-98.25-77.446-139.21 0-44.571 36.27-80.842 80.842-80.842h45.164a188.85 188.85 0 0 1 170.415-107.79h134.737v53.895H565.895c-74.294 0-134.737 60.443-134.737 134.737v26.516l-53.895.377v-26.893c0-9.162.647-18.136 1.913-26.948h-28.86c-14.848 0-26.948 12.073-26.948 26.948 0 19.725 36.676 77.473 92.133 134.737h15.657v53.894h-53.895c-37.672 0-53.895 40.906-53.895 53.895"/></svg>`,
+    rooster: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M673.684 354.358c-16.384 0-29.642-10.213-29.642-44.463 0-34.223 13.231-44.463 29.642-44.463s29.642 10.24 29.642 44.463c0 34.25-13.258 44.463-29.642 44.463M540.106 970.105l-50.58-107.79h156.052l50.607 107.79h59.554l-51.604-109.918C811.52 846.82 916.21 764.55 916.21 646.737c0-53.033-11.911-95.42-24.523-140.315-14.443-51.389-29.372-104.529-29.372-183.054V107.79C862.316 48.344 813.972 0 754.526 0a107.924 107.924 0 0 0-107.79 106.173 101 101 0 0 0-24.117-3.315 88.71 88.71 0 0 0-88.603 88.603c0 20.669 5.228 39.72 10.671 53.922l-99.49 59.688 93.75 14.47v57.722c0 14.417-5.901 21.693-33.36 49.152l-11.13 11.13C398.228 326.52 324.985 269.473 215.741 269.473 96.768 269.474 0 366.242 0 485.214v161.523h53.895V485.214A162.01 162.01 0 0 1 215.74 323.368c82.081 0 140.422 36.245 240.64 152.253l-38.616 38.616c-49.96-52.952-94.666-83.08-158.181-83.08a151.983 151.983 0 0 0-151.795 151.795v171.574h53.895V582.952a98.01 98.01 0 0 1 97.9-97.9c46.323 0 79.63 20.912 137.027 86.017l18.971 21.53 128.081-128.08c28.537-28.538 49.18-49.152 49.18-87.256v-97.927l23.309-14.12-13.663-23.04c-.161-.243-14.578-24.9-14.578-50.688 0-19.133 15.575-34.708 34.708-34.708 5.093 0 26.786 3.18 39.559 18.647l26.327 46.026 39.775-24.09-20.373-49.368c-3.152-7.545-7.275-30.478-7.275-40.206 0-29.722 24.171-53.894 53.894-53.894s53.895 24.172 53.895 53.894v215.58c0 85.935 16.68 145.3 31.367 197.631 12.1 43.008 22.528 80.142 22.528 125.737 0 95.286-99.41 161.684-188.632 161.684H464.222l-68.42-145.704c-20.56-43.763-57.693-69.875-99.354-69.875a80.977 80.977 0 0 0-80.87 80.87v188.604h53.896V673.71c0-14.875 12.1-26.974 26.974-26.974 20.534 0 38.966 14.147 50.553 38.858l133.578 284.51z"/></svg>`,
+    dog: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M326.063 282.947c0 34.25-13.231 44.464-29.642 44.464s-29.642-10.214-29.642-44.464c0-34.223 13.231-44.463 29.642-44.463s29.642 10.24 29.642 44.463m-56.59 147.349v311.646L190.276 916.21h59.204l73.89-162.574V377.263H296.42c-119.404 0-172.733-53.383-185.506-107.79h35.625c51.092 0 68.58-15.764 120.535-62.544 12.773-11.507 28.08-25.277 47.024-41.742l18.35-15.952-69.658-99.14-44.086 30.99 41.768 59.472c-11.183 9.863-20.884 18.594-29.48 26.328-50.257 45.272-54.757 48.694-84.453 48.694H53.895v26.947c0 88.711 66.91 178.15 215.579 187.77M486.185 268.88c2.29 71.734 28.7 136.327 75.049 182.919 57.479 57.829 141.204 87.147 248.859 87.147 18.593 0 36.19-1.158 52.628-3.449 3.746 111.266 33.63 170.334 51.496 196.015l-38.507 84.723c-93.535-74.186-186.934-115.604-498.446-115.604v53.894c34.277 0 65.698.512 94.64 1.51l-97.308 214.07H433.8l96.013-211.241c66.183 4.338 117.006 11.83 157.912 22.016L626.23 916.21h59.176l54.165-119.135c47.616 18.405 79.737 42.092 113.125 69.74l-46.943 103.29h59.204l113.07-248.779-13.823-13.204c-.485-.458-45.65-47.59-47.94-185.263C985.17 498.553 1024 447.81 1024 377.263c0-95.205-66.506-161.684-161.684-161.684v53.895c65.482 0 107.79 42.307 107.79 107.79 0 89.087-87.014 107.789-160.014 107.789-92.753 0-163.625-23.984-210.648-71.276-30.316-30.505-45.891-65.833-53.356-98.735 11.21 6.952 22.933 13.339 35.275 19.186l23.04-48.72C512.296 241.852 455.41 156.86 385.159 41.525l-46.026 28.052c49.448 81.246 92.968 148.507 147.051 199.303"/></svg>`,
+    pig: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M808.421 700.632v53.894c-196.446 0-323.368 84.642-323.368 215.58h-53.895c0-163.706 148.076-269.474 377.263-269.474m-323.368 107.79v-53.896c-158.343 0-245.599 0-319.65-49.367l-6.79-4.527h-77.77c-21.694 0-26.625-14.821-26.948-26.948v-82.62C138.05 579.88 215.579 516.15 215.579 404.21V215.579h-53.895v161.684h-26.947C67.773 377.263 0 414.29 0 485.053h53.895c0-42.631 52.87-53.895 80.842-53.895h24.63c-12.234 73.755-74.213 107.79-132.42 107.79H0v134.736c0 32.499 21.53 80.842 80.842 80.842h61.683c32.687 20.507 67.126 33.146 105.957 41.014a232.9 232.9 0 0 0-32.903 120.67h53.895c0-41.93 14.012-80.303 39.424-112.505 49.987 4.447 107.062 4.716 176.155 4.716M412.106 466l-88.738 88.738V431.158h-53.894V684.84L450.21 504.104zm-88.738-304.317h-53.894v190.033a770 770 0 0 1 53.894-49.098zm323.369-53.895c-72.623 0-146.81 23.337-215.58 58.638v-58.638h-53.894v154.14c81.57-56.536 178.068-100.245 269.474-100.245 148.588 0 269.474 120.886 269.474 269.474v235.655L809.58 862.316h61.359l99.166-181.76V431.158c0-178.31-145.057-323.369-323.368-323.369"/></svg>`
+  };
+  var chinese_hour_animals_default = ChineseHourAnimals;
+
+  // lib/services/ui/image/utils/get-chinese-hour-animal.js
+  var getChineseHourAnimal = (hour) => {
+    const map = [
+      "rat",
+      "ox",
+      "ox",
+      "tiger",
+      "tiger",
+      "rabbit",
+      "rabbit",
+      "dragon",
+      "dragon",
+      "snake",
+      "snake",
+      "horse",
+      "horse",
+      "goat",
+      "goat",
+      "monkey",
+      "monkey",
+      "rooster",
+      "rooster",
+      "dog",
+      "dog",
+      "pig",
+      "pig",
+      "rat"
+    ];
+    return map[hour];
+  };
+  var get_chinese_hour_animal_default = getChineseHourAnimal;
+
+  // lib/services/ui/image/render-chinese-hour-animal.js
+  var renderChineseHourAnimal = () => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width } = gameBoard2;
+    const time = /* @__PURE__ */ new Date();
+    const hour = time.getHours();
+    const index = hour - 1;
+    const animal = get_chinese_hour_animal_default(Math.max(index, 0));
+    const img = getImage(chinese_hour_animals_default[animal]);
+    const size = Math.floor(width * 0.38);
+    const x = -size / 2;
+    const y = -size / 2;
+    render_image_default(img, x, y, size);
+  };
+  var render_chinese_hour_animal_default = renderChineseHourAnimal;
+
+  // lib/services/ui/effects/clock/render-clock-dial.js
+  var renderClockDial = (radius, theme) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fillStyle = theme.face;
+    ctx.fill();
+    ctx.lineWidth = Math.floor(radius * 0.2);
+    ctx.strokeStyle = theme.stroke;
+    ctx.stroke();
+    ctx.restore();
+  };
+  var render_clock_dial_default = renderClockDial;
+
+  // lib/services/ui/effects/clock/render-clock-ticks.js
+  var renderClockTicks = (radius, theme) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    const dotRadius = Math.floor(radius * 0.06);
+    const dotDistance = radius - Math.floor(radius * 0.25);
+    for (let i = 0; i < 12; i++) {
+      ctx.save();
+      ctx.rotate(i * Math.PI / 6);
+      ctx.beginPath();
+      ctx.arc(0, -dotDistance, dotRadius, 0, Math.PI * 2);
+      ctx.fillStyle = theme.stroke;
+      ctx.fill();
+      ctx.restore();
+    }
+  };
+  var render_clock_ticks_default = renderClockTicks;
+
+  // lib/services/ui/effects/clock/render-clock-hands.js
+  var renderClockHands = (radius, angles, theme) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    const { hAng, mAng, sAng } = angles;
+    ctx.save();
+    ctx.rotate(hAng);
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = theme.stroke;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -radius * 0.4);
+    ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.rotate(mAng);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = theme.stroke;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -radius * 0.65);
+    ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.rotate(sAng);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = theme.secondHand;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -radius * 0.75);
+    ctx.stroke();
+    ctx.restore();
+  };
+  var render_clock_hands_default = renderClockHands;
+
+  // lib/services/ui/effects/clock/render-clock-center.js
+  var renderClockCenter = (radius, theme) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = theme.secondHand;
+    ctx.arc(0, 0, Math.floor(radius * 0.05), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  var render_clock_center_default = renderClockCenter;
+
+  // lib/services/ui/effects/clock/utils/get-chinese-hour-dial-theme.js
+  var getChineseHourDialTheme = (hour) => {
+    const map = [
+      "Red",
+      "White",
+      "White",
+      "Orange",
+      "Orange",
+      "Cyan",
+      "Cyan",
+      "Blue",
+      "Blue",
+      "Coral",
+      "Coral",
+      "Purple",
+      "Purple",
+      "Green",
+      "Green",
+      "Yellow",
+      "Yellow",
+      "Pink",
+      "Pink",
+      "Teal",
+      "Teal",
+      "Violet",
+      "Violet",
+      "Red"
+    ];
+    return map[hour];
+  };
+  var get_chinese_hour_dial_theme_default = getChineseHourDialTheme;
+
+  // lib/services/ui/effects/clock/render-analog-clock.js
+  var renderAnalogClock = (time) => {
+    const { gameBoard: gameBoard2, gameBoardContext: ctx } = canvas_default;
+    const { width, height } = gameBoard2;
+    const centerX = width / 2;
+    const centerY = height / 2.2;
+    const radius = Math.floor(width * 0.3);
+    const displayTime = time || /* @__PURE__ */ new Date();
+    const hours = displayTime.getHours();
+    const angles = get_clock_angles_default(displayTime);
+    const theme = clock_themes_default[get_chinese_hour_dial_theme_default(hours)];
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.lineCap = "round";
+    render_clock_dial_default(radius, theme);
+    render_chinese_hour_animal_default();
+    render_clock_ticks_default(radius, theme);
+    render_clock_hands_default(radius, angles, theme);
+    render_clock_center_default(radius, theme);
+    ctx.restore();
+  };
+  var render_analog_clock_default = renderAnalogClock;
+
+  // lib/services/ui/core/render-block.js
+  var renderBlock = (x, y, color) => {
+    const { gameBoardContext: ctx, blockSize: blockSize2 } = canvas_default;
+    const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
+    const gap = 1;
+    const size = blockSize2 - gap * 2;
+    const px = x * blockSize2 + gap;
+    const py = y * blockSize2 + gap;
+    ctx.fillStyle = color;
+    ctx.fillRect(px, py, size, size);
+    ctx.strokeStyle = RGBA_BLACK2;
+    ctx.strokeRect(px, py, size, size);
+  };
+  var render_block_default = renderBlock;
+
+  // lib/services/ui/constants/images/chinese-hour-characters.js
+  var { RGBA_TEAL: RGBA_TEAL3 } = colors_default;
+  var ChineseHourCharacters = {
+    zi: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M538.947 700.632v-215.58h269.474v-53.894H538.947v-39.586c26.544-18.081 94.586-65.05 177.853-127.488l-16.168-48.505H323.368v53.895h295.317a4221 4221 0 0 1-121.64 85.369l-11.992 8.003v68.312H242.526v53.895h242.527v215.579c0 48.343-13.851 53.894-134.737 53.894v53.895c105.39 0 188.631 0 188.631-107.79"/></svg>`,
+    chou: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M808.421 700.632H648.866c13.985-172.814 43.115-357.43 70.817-385.16l-19.051-45.998H323.368v53.894h107.17c-1.94 45.757-8.192 103.963-15.764 161.685h-91.406v53.894h83.968c-9.862 68.447-20.264 130.13-25.734 161.685H215.579v53.894H808.42zM461.878 538.947h149.8a3314 3314 0 0 0-16.842 161.685H436.36c6.036-35.248 16.114-95.637 25.519-161.685m22.609-215.579h171.735c-15.198 41.122-27.405 100.595-36.89 161.685H469.207c7.383-57.506 13.42-115.362 15.279-161.685"/></svg>`,
+    yin: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M712.677 811.25l-107.79-53.894-24.117 48.209 107.79 53.894zm-269.474-5.658-24.118-48.21-107.789 53.895 24.118 48.21zm257.429-374.434H538.947v-53.895h107.79v-53.895H377.263v53.895h107.79v53.895H323.368v323.368h53.895v-53.894h269.474v53.894h53.895zM538.947 592.842h107.79v53.895h-107.79zm-161.684 0h107.79v53.895h-107.79zm161.684-107.79h107.79v53.895h-107.79zm-161.684 0h107.79v53.895h-107.79zM754.526 215.58H531.43l-20.803-62.41-51.12 17.058 15.118 45.352h-205.15v107.79h53.894v-53.895h377.264v53.894h53.894z"/></svg>`,
+    mao: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M592.842 323.368h107.79v323.369c-20.48 0-39.936-11.264-40.017-11.318l-27.73 46.215c3.208 1.94 32.661 18.998 67.747 18.998 30.747 0 53.894-23.148 53.894-53.895V269.474H538.947V808.42h53.895zm-107.79 242.527V323.368h-53.894v196.905l-107.79 40.42V316.767l169.095-48.316-14.82-51.82-208.17 59.473v304.801l-36.405 13.663 18.917 50.472 178.742-67.018c-5.04 69.928-55.27 106.981-165.134 122.934l7.734 53.329c52.386-7.626 211.726-30.747 211.726-188.39"/></svg>`,
+    chen: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M471.983 777.62l-40.825-23.094V485.053h-66.075c-14.47 110.646-44.355 197.066-102.696 260.742l-39.748-36.432c83.887-91.487 100.73-246.461 100.73-466.837V215.58h377.263v53.895h-323.45c-.404 58.26-2.21 112.128-6.36 161.684h329.81v53.895H578.479a481.2 481.2 0 0 0 76.827 119.7l66.48-39.855 27.728 46.214-54.46 32.688c29.507 24.953 63.757 45.675 102.804 58.098l-16.303 51.362C647.33 710.548 558.78 586.186 520.003 485.053h-34.95V706.91l68.985-41.39 27.729 46.214zm174.754-400.357h-215.58v-53.895h215.58z"/></svg>`,
+    si: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M728.064 692.763l-52.116-13.797c-18.729 70.898-24.522 75.56-56.159 75.56H377.263V485.053h269.474v53.894h53.895V215.58H323.368v538.947c0 29.723 24.172 53.895 53.895 53.895H619.79c77.69 0 91.19-51.065 108.275-115.658m-350.8-423.29h269.473v161.685H377.263z"/></svg>`,
+    wu: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512m-431.158 26.947h269.474v-53.894H538.947V323.368h161.685v-53.894h-289.63c12.045-33.28 20.156-69.794 20.156-107.79h-53.895c0 121.964-105.364 233.391-106.415 234.496l38.858 37.35c2.883-3.019 43.817-46.135 77.393-110.162h97.954v161.685H215.579v53.894h269.474v323.369h53.894z"/></svg>`,
+    wei: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512m-431.158 50.203c52.305 70.925 136.974 152.145 232.53 190.383l19.994-50.041c-109.271-43.709-202.806-152.63-238.78-217.492h255.73v-53.895H538.947v-53.895h215.58v-53.895h-215.58V161.684h-53.894v161.684h-215.58v53.895h215.58v53.895H215.579v53.895h255.757C435.362 549.915 341.8 658.836 232.53 702.545l20.022 50.041c95.528-38.238 180.197-119.485 232.502-190.383V808.42h53.894z"/></svg>`,
+    shen: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M538.947 646.737h161.685v53.895h53.894V269.474H538.947v-107.79h-53.894v107.79h-215.58v431.158h53.895v-53.895h161.685v215.579h53.894zm0-161.684h161.685v107.79H538.947zm-215.579 0h161.685v107.79H323.368zm215.58-161.685h161.684v107.79H538.947zm-215.58 0h161.685v107.79H323.368z"/></svg>`,
+    you: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M754.526 323.368H592.842v-26.947h161.684v-53.895H269.474v53.895h161.684v26.947H269.474v485.053h53.894v-53.895h377.264v53.895h53.894zM323.368 646.737h377.264v53.895H323.368zm0-269.474h107.79c0 103.316-72.785 107.655-81.085 107.79l.243 53.894c46.592 0 134.737-33.792 134.737-161.684h53.894v107.79c0 29.723 24.172 53.894 53.895 53.894h107.79v53.895H323.368zm377.264 0v107.79h-107.79v-107.79zm-215.58-80.842h53.895v26.947h-53.894z"/></svg>`,
+    xu: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M594.513 662.393c33.684 44.544 75.21 74.698 124.74 90.813l11.425 3.719 10.402-6.01c40.124-23.174 67.341-128.35 67.341-158.073h-53.895c0 22.07-19.132 80.87-33.71 103.505-34.817-14.606-64.54-39.262-89.25-74.132 48.316-55.27 92.079-117.33 120.535-179.9l-49.044-22.286C679.289 472.279 643.315 524.746 603 572.685c-24.01-50.93-41.148-115.927-51.658-195.395h149.289v-53.895h-155.19a1848 1848 0 0 1-6.495-161.71h-53.894c0 58.206 2.155 112.073 6.494 161.683H323.368v26.948c0 216.549-13.177 263.545-100.702 359.047l39.747 36.432c63.327-69.093 92.807-118.272 105.715-206.848h116.925v-53.894h-111.32a1742 1742 0 0 0 3.45-107.79H497.34c12.611 98.25 35.031 177.476 67.395 238.188-61.979 65.536-128.054 117.976-173.299 142.282l25.52 47.481c47.589-25.573 114.095-77.446 177.556-142.82m125.17-411.971-80.842-80.842-38.103 38.103 80.842 80.842z"/></svg>`,
+    hai: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m309.976 804.756-27.136-46.592c103.073-60.012 183.026-132.473 241.475-219.244h-174l-13.473-50.283c58.88-33.981 99.436-117.572 118.703-165.296H242.526v-53.894h538.948v53.894h-268.18c-12.396 34.089-42.47 106.604-90.436 161.685h134.01a680.6 680.6 0 0 0 46.349-107.709l51.092 17.058c-58.422 175.265-171.035 309.49-344.333 410.381m192.35-2.937-34.52-41.364c88.415-73.728 154.517-158.774 202.106-259.908l48.801 22.96a797.4 797.4 0 0 1-82.35 137.781c32.74 15.01 83.455 44.868 137.646 101.592l-38.939 37.268c-57.236-59.877-109.325-85.558-133.766-95.178a851 851 0 0 1-98.978 96.849m48.613-536.872-80.842-53.895 29.884-44.84 80.843 53.894zM512 53.895c-252.605 0-458.105 205.5-458.105 458.105S259.395 970.105 512 970.105c9.081 0 17.974-.835 26.947-1.374v-53.895c-8.946.62-17.866 1.375-26.947 1.375-222.882 0-404.21-181.33-404.21-404.211S289.117 107.79 512 107.79 916.21 289.117 916.21 512c0 195.207-139.075 358.508-323.368 396.045v54.461c214.097-38.346 377.263-225.55 377.263-450.533 0-252.578-205.5-458.078-458.105-458.078"/></svg>`
+  };
+  var chinese_hour_characters_default = ChineseHourCharacters;
+
+  // lib/services/ui/image/utils/get-chinese-hour-character.js
+  var getChineseHourCharacter = (hour) => {
+    const map = [
+      "zi",
+      "chou",
+      "chou",
+      "yin",
+      "yin",
+      "mao",
+      "mao",
+      "chen",
+      "chen",
+      "si",
+      "si",
+      "wu",
+      "wu",
+      "wei",
+      "wei",
+      "shen",
+      "shen",
+      "you",
+      "you",
+      "xu",
+      "xu",
+      "hai",
+      "hai",
+      "zi"
+    ];
+    return map[hour];
+  };
+  var get_chinese_hour_character_default = getChineseHourCharacter;
+
+  // lib/services/ui/image/render-chinese-hour-character.js
+  var LAYOUT_STRATEGIES = {
+    // 深夜 0-3 点
+    night_0_3: (width, height) => ({
+      size: Math.floor(width * 0.48),
+      x: width - Math.floor(width * 0.48) * 0.7,
+      y: height / 2 - Math.floor(width * 0.48) * 1.4
+    }),
+    // 清晨 4-7 点
+    morning_4_7: (width, height) => {
+      const size = Math.floor(width * 0.52);
+      return {
+        size,
+        x: width - size * 1.1,
+        y: height / 2 - size * 1.7
+      };
+    },
+    // 上午 8-11 点
+    morning_8_11: (width, height) => {
+      const size = Math.floor(width * 0.58);
+      return {
+        size,
+        x: width - size * 1.2,
+        y: height / 2 - size * 1.75
+      };
+    },
+    // 中午 12-14 点
+    noon_12_14: (width) => {
+      const size = Math.floor(width * 0.68);
+      return {
+        size,
+        x: width / 2 - size / 2,
+        y: -size * 0.1
+      };
+    },
+    // 下午 14-16 点
+    afternoon_14_16: (width, height) => {
+      const size = Math.floor(width * 0.58);
+      return {
+        size,
+        x: size * 0.2,
+        y: height / 2 - size * 1.75
+      };
+    },
+    // 傍晚 17-19 点
+    evening_17_19: (width, height) => {
+      const size = Math.floor(width * 0.52);
+      return {
+        size,
+        x: size * 0.1,
+        y: height / 2 - size * 1.7
+      };
+    },
+    // 夜晚 20-23 点
+    night_20_23: (width, height) => {
+      const size = Math.floor(width * 0.48);
+      return {
+        size,
+        x: -size * 0.3,
+        y: height / 2 - size * 1.4
+      };
+    }
+  };
+  var getStrategyKey = (hour) => {
+    if (hour <= 3) {
+      return "night_0_3";
+    }
+    if (hour <= 7) {
+      return "morning_4_7";
+    }
+    if (hour <= 11) {
+      return "morning_8_11";
+    }
+    if (hour <= 14) {
+      return "noon_12_14";
+    }
+    if (hour <= 16) {
+      return "afternoon_14_16";
+    }
+    if (hour <= 19) {
+      return "evening_17_19";
+    }
+    return "night_20_23";
+  };
+  var renderChineseHourCharacter = () => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    const hour = (/* @__PURE__ */ new Date()).getHours();
+    const character = get_chinese_hour_character_default(hour);
+    const img = getImage(chinese_hour_characters_default[character]);
+    const key = getStrategyKey(hour);
+    const strategy = LAYOUT_STRATEGIES[key];
+    const { size, x, y } = strategy(width, height);
+    render_image_default(img, x, y, size);
+  };
+  var render_chinese_hour_character_default = renderChineseHourCharacter;
+
+  // lib/services/ui/board/render-board.js
+  function renderBoard(board2) {
+    const { Board } = configuration_default;
+    const { rows, cols } = Board;
+    clear_board_default();
+    render_chinese_hour_character_default();
+    render_scene_background_default("playing");
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        if (board2[y][x]) {
+          render_block_default(x, y, board2[y][x]);
+        }
+      }
+    }
+  }
+  var render_board_default = renderBoard;
+
+  // lib/services/ui/board/render-active-pieces.js
+  var renderActivePieces = (curr, cx, cy) => {
+    const { shape, color } = curr;
+    const { length } = shape;
+    for (let y = 0; y < length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (shape[y][x]) {
+          render_block_default(cx + x, cy + y, color);
+        }
+      }
+    }
+    return true;
+  };
+  var render_active_pieces_default = renderActivePieces;
+
+  // lib/services/ui/board/render-active-only.js
+  var renderActiveOnly = (state) => {
+    const { board: board2, curr, cx, cy } = state;
+    if (board2) {
+      render_board_default(board2);
+    }
+    if (curr) {
+      render_active_pieces_default(curr, cx, cy);
+    }
+  };
+  var render_active_only_default = renderActiveOnly;
+
+  // lib/services/ui/scenes/paused-scene/render-paused.js
+  var renderPaused = (state) => {
+    clear_board_default();
+    render_active_only_default(state);
+    render_overlay_default();
+    render_scene_background_default("paused");
+    render_tetris_text_default();
+    render_digital_clock_default();
+    render_analog_clock_default();
+    render_paused_text_default();
+  };
+  var render_paused_default = renderPaused;
+
+  // lib/services/ui/scenes/paused-scene/index.js
+  var pausedScene = (state) => {
+    render_paused_default(state);
+  };
+  var paused_scene_default = pausedScene;
+
+  // lib/services/ui/text/render-game-text.js
+  var renderGameText = () => {
+    const { RED: RED6, YELLOW: YELLOW6 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "GAME",
+      x: width / 2,
+      y: height / 1.8,
+      color: RED6,
+      strokeColor: YELLOW6,
+      size: 2.3,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_game_text_default = renderGameText;
+
+  // lib/services/ui/text/render-over-text.js
+  var renderOverText = () => {
+    const { RED: RED6, YELLOW: YELLOW6 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "OVER",
+      x: width / 2,
+      y: height / 1.6,
+      color: RED6,
+      strokeColor: YELLOW6,
+      size: 2.3,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_over_text_default = renderOverText;
+
+  // lib/services/ui/scenes/game-over-scene/render-game-over.js
+  var renderGameOver = (state) => {
+    clear_board_default();
+    render_active_only_default(state);
+    render_overlay_default();
+    render_scene_background_default("game-over");
+    render_tetris_text_default();
+    render_game_text_default();
+    render_over_text_default();
+    render_enter_start_text_default();
+  };
+  var render_game_over_default = renderGameOver;
+
+  // lib/services/ui/scenes/game-over-scene/index.js
+  var gameOverScene = (state) => {
+    render_game_over_default(state);
+  };
+  var game_over_scene_default = gameOverScene;
+
+  // lib/services/ui/next/clear-next-piece.js
+  var clearNextPiece = () => {
+    const { nextPiece: nextPiece2, nextPieceContext: nextPieceContext2 } = canvas_default;
+    const { width, height } = nextPiece2;
+    nextPieceContext2.clearRect(0, 0, width, height);
+  };
+  var clear_next_piece_default = clearNextPiece;
+
+  // lib/services/ui/next/render-next-piece.js
+  var renderNextPiece = (state) => {
+    const { next: next2 } = state;
+    const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
+    const { nextPiece: nextPiece2, nextPieceContext: ctx } = canvas_default;
+    const { width, height } = nextPiece2;
+    if (!next2) {
+      return;
+    }
+    const { shape } = next2;
+    const gridSize = 5;
+    const blockSize2 = Math.floor(width / gridSize);
+    const ox = Math.floor((width - shape[0].length * blockSize2) / 2);
+    const oy = Math.floor((height - shape.length * blockSize2) / 2);
+    clear_next_piece_default();
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (!shape[y][x]) {
+          continue;
+        }
+        const gap = 1;
+        const size = blockSize2 - gap;
+        const px = ox + x * blockSize2 + gap;
+        const py = oy + y * blockSize2 + gap;
+        ctx.fillStyle = next2.color;
+        ctx.fillRect(px, py, size, size);
+        ctx.strokeStyle = RGBA_BLACK2;
+        ctx.strokeRect(px, py, size, size);
+      }
+    }
+  };
+  var render_next_piece_default = renderNextPiece;
+
+  // lib/services/ui/scenes/playing-scene/render-playing.js
+  var renderPlaying = (state) => {
+    render_active_only_default(state);
+    render_next_piece_default(state);
+  };
+  var render_playing_default = renderPlaying;
+
+  // lib/services/ui/scenes/playing-scene/index.js
+  var playingScene = (state) => {
+    render_playing_default(state);
+  };
+  var playing_scene_default = playingScene;
+
+  // lib/services/ui/scenes/replay-scene/render-replay.js
+  var renderReplay = (state) => {
+    clear_board_default();
+    render_playing_default(state);
+    render_overlay_default();
+    render_scene_background_default("game-over");
+    render_tetris_text_default();
+    render_game_text_default();
+    render_over_text_default();
+    render_enter_start_text_default();
+  };
+  var render_replay_default = renderReplay;
+
+  // lib/services/ui/scenes/replay-scene/index.js
+  var replayScene = (state) => {
+    render_replay_default(state);
+  };
+  var replay_scene_default = replayScene;
+
+  // lib/services/ui/scenes/index.js
+  var Scenes = {
+    /**
+     * ## 主菜单场景
+     *
+     * @param {object} state 游戏状态
+     */
+    "main-menu": (state) => {
+      main_menu_scene_default(state);
+    },
+    difficulty: (state) => {
+      difficulty_scene_default(state);
+    },
+    /**
+     * ## 游戏进行中场景
+     *
+     * @param {object} state 游戏状态
+     */
+    playing: (state) => {
+      playing_scene_default(state);
+    },
+    /**
+     * ## 暂停场景
+     *
+     * @param {object} state 游戏状态
+     */
+    paused: (state) => {
+      paused_scene_default(state);
+    },
+    /**
+     * ## 游戏结束场景
+     *
+     * @param {object} state 游戏状态
+     */
+    "game-over": (state) => {
+      game_over_scene_default(state);
+    },
+    replay: (state) => {
+      replay_scene_default(state);
+    }
+  };
+  var scenes_default = Scenes;
+
+  // lib/services/ui/scene-manager/render-scene.js
+  var renderScene = (state) => {
+    const { mode } = state;
+    const scene = scenes_default[mode];
+    if (!scene) {
+      return;
+    }
+    scene(state);
+  };
+  var render_scene_default = renderScene;
+
+  // lib/services/ui/scene-manager/lazy-render-scene.js
+  var lazyRenderScene = (state) => {
+    if (document?.fonts?.load) {
+      document.fonts.load('40px "Press Start 2P"').then(() => {
+        render_scene_default(state);
+      });
+    } else {
+      setTimeout(() => {
+        render_scene_default(state);
+      }, 150);
+    }
+  };
+  var lazy_render_scene_default = lazyRenderScene;
+
+  // lib/services/ui/board/render-clear.js
+  var renderClear = (state) => {
+    const { Board } = configuration_default;
+    const { cols } = Board;
+    const { gameBoardContext: ctx } = canvas_default;
+    for (const line of state.lines) {
+      ctx.save();
+      ctx.globalAlpha = line.alpha;
+      for (let x = 0; x < cols; x++) {
+        render_block_default(x, line.y, line.color);
+      }
+      ctx.restore();
+    }
+  };
+  var render_clear_default = renderClear;
+
+  // lib/services/ui/text/render-countdown-text.js
+  var renderCountdownText = (count, scale = 1) => {
+    const { YELLOW: YELLOW6, BLACK: BLACK2 } = colors_default;
+    const { FONT_FAMILY: FONT_FAMILY2 } = game_default2;
+    const { gameBoard: gameBoard2, gameBoardContext: ctx, fontSize: fontSize2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.translate(width / 2, height / 2);
+    ctx.scale(scale, scale);
+    ctx.font = `${fontSize2 * 3.25}px ${FONT_FAMILY2}`;
+    ctx.fillStyle = YELLOW6;
+    ctx.strokeStyle = BLACK2;
+    ctx.lineWidth = 6;
+    const text = String(count);
+    ctx.strokeText(text, 0, 0);
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+  };
+  var render_countdown_text_default = renderCountdownText;
+
+  // lib/services/ui/text/render-get-ready-text.js
+  var renderGetReadyText = () => {
+    const { GREEN: GREEN7, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "GET READY!",
+      x: width / 2,
+      y: height / 1.46,
+      color: GREEN7,
+      stroke: true,
+      strokeColor: BLACK2,
+      // 固定字号
+      size: 1.1,
+      center: true,
+      // 对齐方式与你原逻辑一致
+      baseline: "top"
+    });
+  };
+  var render_get_ready_text_default = renderGetReadyText;
+
+  // lib/services/ui/image/render-gamepad.js
+  var renderGamepad = () => {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    const img = getImage(scenes_background_default.gamepad);
+    const size = Math.floor(width * 0.54);
+    const x = width / 2 - size / 2;
+    const y = height / 2 - size * 1.2;
+    render_image_default(img, x, y, size);
+  };
+  var render_gamepad_default = renderGamepad;
+
+  // lib/services/ui/effects/render-countdown.js
+  var renderCountdown = (state) => {
+    const { number, scale } = state;
+    clear_board_default();
+    render_overlay_default();
+    render_tetris_text_default();
+    render_scene_background_default("countdown");
+    render_gamepad_default();
+    render_get_ready_text_default();
+    render_countdown_text_default(number, scale);
+  };
+  var render_countdown_default = renderCountdown;
+
+  // lib/services/ui/effects/render-fireworks.js
+  var renderFireworks = (fireworks) => {
+    const { gameBoardContext: ctx } = canvas_default;
+    for (const fire of fireworks) {
+      ctx.globalAlpha = fire.alpha;
+      ctx.fillStyle = fire.color;
+      ctx.beginPath();
+      ctx.arc(fire.x, fire.y, fire.radius, 0, Math.PI * 2);
+      ctx.fill();
+      fire.x += fire.vx;
+      fire.y += fire.vy;
+      fire.alpha -= 0.024;
+    }
+    ctx.globalAlpha = 1;
+  };
+  var render_fireworks_default = renderFireworks;
+
+  // lib/services/ui/text/render-level-up-text.js
+  var renderLevelUpText = () => {
+    const { GREEN: GREEN7 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "LEVEL UP",
+      x: width / 2,
+      y: height / 2.5,
+      color: GREEN7,
+      size: 1.2,
+      center: true
+    });
+  };
+  var render_level_up_text_default = renderLevelUpText;
+
+  // lib/services/ui/text/render-congrats-text.js
+  var renderCongratsText = () => {
+    const { YELLOW: YELLOW6, BLACK: BLACK2 } = colors_default;
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { width, height } = gameBoard2;
+    render_text_default({
+      text: "CONGRATS!",
+      x: width / 2,
+      y: height / 1.6,
+      color: YELLOW6,
+      stroke: true,
+      strokeColor: BLACK2,
+      lineWidth: 3,
+      size: 1.3,
+      center: true
+    });
+  };
+  var render_congrats_text_default = renderCongratsText;
+
+  // lib/services/ui/effects/render-level-up.js
+  function renderLevelUp(level2, fireworks) {
+    const { gameBoard: gameBoard2 } = canvas_default;
+    const { height } = gameBoard2;
+    render_overlay_default();
+    render_tetris_text_default();
+    render_level_up_text_default();
+    render_level_number_default(level2, height / 1.85);
+    render_congrats_text_default();
+    render_fireworks_default(fireworks);
+  }
+  var render_level_up_default = renderLevelUp;
+
+  // lib/services/ui/core/resize.js
+  var resize = () => {
+    const { Board } = configuration_default;
+    const { rows, cols } = Board;
+    const { gameBoard: gameBoard2, nextPiece: nextPiece2 } = canvas_default;
+    const h = globalThis.innerHeight * 0.9;
+    canvas_default.blockSize = Math.floor(h / rows);
+    gameBoard2.width = canvas_default.blockSize * cols;
+    gameBoard2.height = canvas_default.blockSize * rows;
+    canvas_default.fontSize = Math.floor(gameBoard2.height * 0.032);
+    const nextSize = Math.min(
+      globalThis.innerWidth * 0.1,
+      globalThis.innerHeight * 0.18
+    );
+    nextPiece2.width = nextSize;
+    nextPiece2.height = nextSize;
+  };
+  var resize_default = resize;
+
+  // lib/services/ui/hud/hud-elements.js
+  var { score, lines, level, highScore } = configuration_default.Elements.Hud;
+  var HudElements = {
+    /** @type {HTMLElement | null} 分数显示元素 */
+    score: document.querySelector(`#${score}`),
+    /** @type {HTMLElement | null} 行数显示元素 */
+    lines: document.querySelector(`#${lines}`),
+    /** @type {HTMLElement | null} 等级显示元素 */
+    level: document.querySelector(`#${level}`),
+    /** @type {HTMLElement | null} 最高分显示元素 */
+    highScore: document.querySelector(`#${highScore}`)
+  };
+  var hud_elements_default = HudElements;
+
+  // lib/services/ui/hud/create-hud.js
+  var setText = (el, value, pad = 0) => el.textContent = pad ? pad_start_default(value, pad) : String(value);
+  var animationScore = (tracker, element, padding) => {
+    if (tracker.visual === tracker.target) {
+      return;
+    }
+    const diff = tracker.target - tracker.visual;
+    const step = Math.ceil(Math.abs(diff) * 0.1);
+    if (diff > 0) {
+      tracker.visual += step;
+      if (tracker.visual > tracker.target) {
+        tracker.visual = tracker.target;
+      }
+    } else {
+      tracker.visual -= step;
+      if (tracker.visual < tracker.target) {
+        tracker.visual = tracker.target;
+      }
+    }
+    setText(element, tracker.visual, padding);
+  };
+  var createHud = () => {
+    const scoreTracker = { visual: 0, target: 0 };
+    const highScoreTracker = { visual: 0, target: 0 };
+    const prev = { lines: -1, level: -1 };
+    return {
+      update: (state) => {
+        scoreTracker.target = Number(state.score) || 0;
+        highScoreTracker.target = Number(state.highScore) || 0;
+        if (state.lines !== prev.lines) {
+          setText(hud_elements_default.lines, state.lines, 2);
+          prev.lines = state.lines;
+        }
+        if (state.level !== prev.level) {
+          setText(hud_elements_default.level, state.level, 2);
+          prev.level = state.level;
+        }
+      },
+      tick: () => {
+        animationScore(scoreTracker, hud_elements_default.score, 5);
+        animationScore(highScoreTracker, hud_elements_default.highScore, 5);
+      },
+      reset: () => {
+        scoreTracker.visual = 0;
+        scoreTracker.target = 0;
+        highScoreTracker.visual = 0;
+        highScoreTracker.target = 0;
+        prev.lines = -1;
+        prev.level = -1;
+        setText(hud_elements_default.score, 0, 5);
+        setText(hud_elements_default.highScore, 0, 5);
+        setText(hud_elements_default.lines, 0, 2);
+        setText(hud_elements_default.level, 1, 2);
+      }
+    };
+  };
+  var create_hud_default = createHud;
+
+  // lib/services/ui/index.js
+  var UI = {
+    Canvas: canvas_default,
+    hud: create_hud_default(),
+    updateMode: (mode) => {
+      canvas_default.gameBoard.dataset.mode = mode;
+    },
+    updateHud(state) {
+      const { mode, score: score2, lines: lines2, level: level2, highScore: highScore2, needReset = false } = state;
+      if (mode === "main-menu" || needReset) {
+        UI.hud.reset();
+      }
+      UI.hud.update({
+        score: score2,
+        lines: lines2,
+        level: level2,
+        highScore: highScore2
+      });
+    },
+    tickHud(delta) {
+      UI.hud.tick(delta);
+    },
+    lazyRender(state) {
+      lazy_render_scene_default(state);
+    },
+    render(state) {
+      render_scene_default(state);
+    },
+    renderClear: render_clear_default,
+    renderCountdown: render_countdown_default,
+    renderLevelUp: render_level_up_default,
+    renderNextPiece: render_next_piece_default,
+    resize: resize_default
+  };
+  var ui_default = UI;
+
+  // lib/services/input/gamepad-controller.js
+  var GAMEPAD_ACTION_MAP = {
+    A: "TOGGLE_MUSIC",
+    B: "DROP",
+    X: "RESTART",
+    Y: "TOGGLE_PAUSE",
+    START: "CONFIRM",
+    BACK: "QUIT",
+    DPAD_LEFT: "MOVE_LEFT",
+    DPAD_RIGHT: "MOVE_RIGHT",
+    DPAD_DOWN: "MOVE_DOWN",
+    DPAD_UP: "ROTATE"
+  };
+  var LEVELS = [
+    "ONE",
+    "TWO",
+    "THREE",
+    "FOUR",
+    "FIX",
+    "SIX",
+    "SEVEN",
+    "EIGHT",
+    "NINE",
+    "TEN"
+  ];
+  var STANDARD_BTN_MAP = {
+    A: 0,
+    B: 1,
+    X: 2,
+    Y: 3,
+    LB: 4,
+    RB: 5,
+    LT: 6,
+    RT: 7,
+    BACK: 8,
+    START: 9,
+    DPAD_UP: 12,
+    DPAD_DOWN: 13,
+    DPAD_LEFT: 14,
+    DPAD_RIGHT: 15
+  };
+  var BETOP_20BC_1263_BTN_MAP = {
+    A: 2,
+    B: 1,
+    X: 3,
+    Y: 0,
+    LB: 4,
+    RB: 5,
+    LT: 6,
+    RT: 7,
+    BACK: 8,
+    START: 9
+  };
+  var GamepadController = class {
+    /**
+     * ## 当前激活手柄 Index
+     *
+     * @type {number | null}
+     */
+    activeGamepadIndex = null;
+    /**
+     * ## 摇杆死区（避免漂移）
+     *
+     * @type {number}
+     */
+    DEAD_ZONE = 0.15;
+    /**
+     * ## 方向触发阈值
+     *
+     * @type {number}
+     */
+    DPAD_THRESHOLD = 0.5;
+    /**
+     * ## 按钮防抖状态
+     *
+     * Key: btnName value: boolean（是否已触发）
+     *
+     * @type {object}
+     */
+    buttonStates = {};
+    /**
+     * ## 轴防抖状态（避免连续触发）
+     *
+     * Key: action
+     *
+     * @type {object}
+     */
+    axisStates = {};
+    /**
+     * ## 是否已绑定事件
+     *
+     * @type {boolean}
+     */
+    _eventsBound = false;
+    /**
+     * ## DPAD 方向按键的冷却时间
+     *
+     * @type {number}
+     */
+    DPAD_COOLDOWN = 180;
+    /**
+     * ## DPAD 方向按键上次触发时间
+     *
+     * @type {number}
+     */
+    lastDpadTime = 0;
+    /**
+     * ## 构造函数
+     *
+     * @class
+     */
+    constructor() {
+      this.curBtnMap = STANDARD_BTN_MAP;
+      this.dpadAxisState = {
+        up: false,
+        down: false,
+        left: false,
+        right: false
+      };
+      this.AXIS_MAP = {
+        LEFT_STICK_X: 0,
+        LEFT_STICK_Y: 1
+      };
+    }
+    /**
+     * ## 每帧调用
+     *
+     * 流程：
+     *
+     * 1. 刷新 Gamepad snapshot
+     * 2. 如果存在 active gamepad
+     * 3. 收集输入 → dispatch
+     *
+     * @param {object} state - 游戏状态信息
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    update(state) {
+      this._refreshGamepadState();
+      if (!this.activeGamepad) {
+        return this;
+      }
+      this._collectCommands(state);
+      return this;
+    }
+    /**
+     * ## 绑定 Gamepad 连接事件
+     *
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    addEventListeners() {
+      if (this._eventsBound) {
+        return this;
+      }
+      globalThis.addEventListener("gamepadconnected", this._onConnect);
+      globalThis.addEventListener("gamepaddisconnected", this._onDisconnect);
+      this._eventsBound = true;
+      return this;
+    }
+    /**
+     * ## 销毁事件绑定
+     *
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    removeEventListeners() {
+      globalThis.removeEventListener("gamepadconnected", this._onConnect);
+      globalThis.removeEventListener("gamepaddisconnected", this._onDisconnect);
+      this._eventsBound = false;
+      return this;
+    }
+    /**
+     * ## 手柄连接
+     *
+     * - 设置 activeGamepad
+     * - 自动识别 BETOP 并切换 mapping
+     *
+     * @param {object} e - 事件对象
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _onConnect = (e) => {
+      const pad = e.gamepad;
+      if (this.activeGamepadIndex !== null) {
+        return this;
+      }
+      this.activeGamepadIndex = pad.index;
+      this.curBtnMap = this._isBetop(pad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+      event_bus_default.emit("game:update:gamepad:connected", { connected: true });
+      return this;
+    };
+    /**
+     * ## 手柄断开
+     *
+     * - 清空状态
+     *
+     * @private
+     * @param {object} e - 事件对象
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _onDisconnect = (e) => {
+      if (this.activeGamepadIndex !== e.gamepad.index) {
+        return this;
+      }
+      this.activeGamepadIndex = null;
+      this.buttonStates = {};
+      this.axisStates = {};
+      event_bus_default.emit("game:update:gamepad:connected", { connected: false });
+      return this;
+    };
+    /**
+     * ## 判断是否为 BETOP（北通） 手柄
+     *
+     * @param {string} id - 手柄 id 字符串
+     * @returns {boolean} - 返回判断结果，是北通返回 true，否则返回 false
+     */
+    _isBetop(id) {
+      return id.includes("20bc") && id.includes("1263");
+    }
+    /**
+     * ## 刷新 Gamepad 状态
+     *
+     * - 必须每帧调用 navigator.getGamepads()
+     * - 因为 Gamepad 对象是 snapshot，不是实时引用
+     *
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _refreshGamepadState() {
+      const pads = navigator.getGamepads?.() || [];
+      if (this.activeGamepadIndex === null) {
+        const firstPad = Array.from(pads).find(Boolean);
+        if (firstPad) {
+          this.activeGamepadIndex = firstPad.index;
+          this.curBtnMap = this._isBetop(firstPad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+        }
+      }
+      this.activeGamepad = this.activeGamepadIndex === null ? null : pads[this.activeGamepadIndex];
+      return this;
+    }
+    /**
+     * ## 根据游戏当前模式更新按键的响应动作
+     *
+     * @private
+     * @param {string} mode - 游戏模式
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _updateActionMap(mode) {
+      switch (mode) {
+        case "difficulty": {
+          GAMEPAD_ACTION_MAP.A = "EASY";
+          GAMEPAD_ACTION_MAP.B = "NORMAL";
+          GAMEPAD_ACTION_MAP.Y = "HARD";
+          GAMEPAD_ACTION_MAP.X = "EXPERT";
+          GAMEPAD_ACTION_MAP.BACK = "BACK";
+          break;
+        }
+        case "playing": {
+          GAMEPAD_ACTION_MAP.A = "TOGGLE_MUSIC";
+          GAMEPAD_ACTION_MAP.B = "DROP";
+          GAMEPAD_ACTION_MAP.X = "RESTART";
+          GAMEPAD_ACTION_MAP.Y = "TOGGLE_PAUSE";
+          break;
+        }
+      }
+      return this;
+    }
+    /**
+     * ## 解析手柄按钮的响应动作名称
+     *
+     * @private
+     * @param {string} action - 按键执行动作名称
+     * @param {string} btnName - 按键名称
+     * @param {boolean} isDPad - 是否为 DPad 方向键
+     * @param {string} mode - 游戏当前模式
+     * @param {string} level - 游戏当前等级
+     * @param {number} now - 当前时间的时间戳
+     * @returns {string} - 返回解析后的按键执行动作名称
+     */
+    _resolveAction(action, btnName, isDPad, mode, level2, now) {
+      if (!isDPad || mode !== "main-menu") {
+        return action;
+      }
+      if (now - this.lastDpadTime < this.DPAD_COOLDOWN) {
+        return "";
+      }
+      this.lastDpadTime = now;
+      if (btnName === "DPAD_UP") {
+        return this._getMoveUpAction(mode, level2);
+      }
+      if (btnName === "DPAD_DOWN") {
+        return this._getMoveDownAction(mode, level2);
+      }
+      return action;
+    }
+    /**
+     * ## 处理标准游戏手柄的按钮响应
+     *
+     * @private
+     * @param {object} pad - Gamepad 对象
+     * @param {string} mode - 游戏当前模式
+     * @param {string} level - 游戏当前级别
+     * @param {number} now - 当前时间的时间戳
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _handleStandardButtons(pad, mode, level2, now) {
+      const isBetop = this._isBetop(pad.id);
+      const isBlockedMode = mode === "replay" || mode === "game-over";
+      for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
+        const isDPad = btnName.startsWith("DPAD_");
+        if (!this._isPressed(btnName)) {
+          continue;
+        }
+        if (isBetop && isDPad) {
+          continue;
+        }
+        if (isBlockedMode && btnName !== "START") {
+          return this;
+        }
+        const finalAction = this._resolveAction(
+          action,
+          btnName,
+          isDPad,
+          mode,
+          level2,
+          now
+        );
+        if (!finalAction) {
+          continue;
+        }
+        event_bus_default.emit("dispatch:input", {
+          device: "gamepad",
+          action: finalAction,
+          payload: {}
+        });
+      }
+      return this;
+    }
+    /**
+     * ## 收集所有输入
+     *
+     * - 转换为 Command（通过 dispatchInput）
+     *
+     * @private
+     * @param {object} state - 游戏状态信息
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _collectCommands(state) {
+      const { mode, level: level2 } = state;
+      const pad = this.activeGamepad;
+      const now = Date.now();
+      if (!pad) {
+        return this;
+      }
+      this._updateActionMap(mode);
+      this._handleStandardButtons(pad, mode, level2, now);
+      if (mode === "replay" || mode === "game-over") {
+        return this;
+      }
+      const x = this._getAxis(this.AXIS_MAP.LEFT_STICK_X);
+      const y = this._getAxis(this.AXIS_MAP.LEFT_STICK_Y);
+      this._handleStickMove(x, y);
+      if (this._isBetop(pad.id)) {
+        const dpadVal = pad.axes[9] ?? 0;
+        this._handleBetopDpad(dpadVal, state);
+      }
+      return this;
+    }
+    /**
+     * ## 开始轴动作（触发一次）
+     *
+     * 仅在未触发时触发 dispatch
+     *
+     * @param {string} action - 动作名称
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _startAxisAction(action) {
+      if (this.axisStates[action]) {
+        return this;
+      }
+      this.axisStates[action] = true;
+      event_bus_default.emit("dispatch:input", {
+        device: "gamepad",
+        action,
+        payload: {}
+      });
+      return this;
+    }
+    /**
+     * ## 停止轴动作（重置状态）
+     *
+     * @param {string} action - 动作名称
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _stopAxisAction(action) {
+      this.axisStates[action] = false;
+      return this;
+    }
+    _handleStickUp(y) {
+      if (y < -this.DPAD_THRESHOLD) {
+        this._startAxisAction("ROTATE");
+      } else {
+        this._stopAxisAction("ROTATE");
+      }
+      return this;
+    }
+    _handleStickDown(y) {
+      if (y > this.DPAD_THRESHOLD) {
+        this._startAxisAction("MOVE_DOWN");
+      } else {
+        this._stopAxisAction("MOVE_DOWN");
+      }
+      return this;
+    }
+    _handleStickLeft(x) {
+      if (x < -this.DPAD_THRESHOLD) {
+        this._startAxisAction("MOVE_LEFT");
+      } else {
+        this._stopAxisAction("MOVE_LEFT");
+      }
+      return this;
+    }
+    _handleStickRight(x) {
+      if (x > this.DPAD_THRESHOLD) {
+        this._startAxisAction("MOVE_RIGHT");
+      } else {
+        this._stopAxisAction("MOVE_RIGHT");
+      }
+      return this;
+    }
+    /**
+     * ## 摇杆移动处理（带防抖）
+     *
+     * @param {number} x - X轴偏移数值
+     * @param {number} y - Y轴偏移数值
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _handleStickMove(x, y) {
+      this._handleStickUp(y);
+      this._handleStickDown(y);
+      this._handleStickLeft(x);
+      this._handleStickRight(x);
+      return this;
+    }
+    _getMoveUpAction(mode, level2) {
+      let action;
+      if (mode === "main-menu") {
+        level2 += 1;
+        if (level2 >= 10) {
+          level2 = 10;
+        }
+        event_bus_default.emit("game:update:level", { level: level2 });
+        action = `LEVEL_${LEVELS[level2 - 1]}`;
+      } else {
+        action = "ROTATE";
+      }
+      return action;
+    }
+    _getMoveDownAction(mode, level2) {
+      let action;
+      if (mode === "main-menu") {
+        level2 -= 1;
+        if (level2 <= 1) {
+          level2 = 1;
+        }
+        event_bus_default.emit("game:update:level", { level: level2 });
+        action = `LEVEL_${LEVELS[level2 - 1]}`;
+      } else {
+        action = "MOVE_DOWN";
+      }
+      return action;
+    }
+    _handleBetopDpadUp(mode, level2, st) {
+      const action = this._getMoveUpAction(mode, level2);
+      if (!st.up) {
+        st.up = true;
+        event_bus_default.emit("dispatch:input", {
+          device: "gamepad",
+          action,
+          payload: {}
+        });
+      }
+      st.down = st.left = st.right = false;
+      return this;
+    }
+    _handleBetopDpadDown(mode, level2, st) {
+      const action = this._getMoveDownAction(mode, level2);
+      if (!st.down) {
+        st.down = true;
+        event_bus_default.emit("dispatch:input", {
+          device: "gamepad",
+          action,
+          payload: {}
+        });
+      }
+      st.up = st.left = st.right = false;
+      return this;
+    }
+    _handleBetopDpadLeft(st) {
+      if (!st.left) {
+        st.left = true;
+        event_bus_default.emit("dispatch:input", {
+          device: "gamepad",
+          action: "MOVE_LEFT",
+          payload: {}
+        });
+      }
+      st.up = st.down = st.right = false;
+      return this;
+    }
+    _handleBetopDpadRight(st) {
+      if (!st.right) {
+        st.right = true;
+        event_bus_default.emit("dispatch:input", {
+          device: "gamepad",
+          action: "MOVE_RIGHT",
+          payload: {}
+        });
+      }
+      st.up = st.down = st.left = false;
+      return this;
+    }
+    /**
+     * ## BETOP DPAD（axis9）解析
+     *
+     * 不同方向对应固定浮点值
+     *
+     * @param {number} val - 按键的值
+     * @param {object} state - 游戏状态信息
+     * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
+     */
+    _handleBetopDpad(val, state) {
+      const { mode, level: level2 } = state;
+      const v = val.toFixed(5);
+      const st = this.dpadAxisState;
+      const now = Date.now();
+      if (mode === "main-menu" && now - this.lastDpadTime < this.DPAD_COOLDOWN) {
+        return this;
+      }
+      switch (v) {
+        // 上
+        case "-1.00000": {
+          this._handleBetopDpadUp(mode, level2, st);
+          this.lastDpadTime = now;
+          break;
+        }
+        // 下
+        case "0.14286": {
+          this._handleBetopDpadDown(mode, level2, st);
+          this.lastDpadTime = now;
+          break;
+        }
+        // 左
+        case "0.71429": {
+          this._handleBetopDpadLeft(st);
+          this.lastDpadTime = now;
+          break;
+        }
+        // 右
+        case "-0.42857": {
+          this._handleBetopDpadRight(st);
+          this.lastDpadTime = now;
+          break;
+        }
+        // 松开手柄充值状态
+        default: {
+          st.up = st.down = st.left = st.right = false;
+          break;
+        }
+      }
+      return this;
+    }
+    /**
+     * ## 获取轴值（带 dead zone）
+     *
+     * @param {number} index - 索引值
+     * @returns {number} - 返回获取的轴值
+     */
+    _getAxis(index) {
+      if (!this.activeGamepad) {
+        return 0;
+      }
+      const val = this.activeGamepad.axes[index] ?? 0;
+      return Math.abs(val) > this.DEAD_ZONE ? val : 0;
+    }
+    /**
+     * ## 判断按钮是否“刚按下”（防抖）
+     *
+     * @param {string} btnName - 按钮名称
+     * @returns {boolean} - 按钮按下返回 true，否则返回 false
+     */
+    _isPressed(btnName) {
+      const idx = this.curBtnMap[btnName];
+      if (idx === void 0 || !this.activeGamepad) {
+        return false;
+      }
+      const btn = this.activeGamepad.buttons[idx];
+      if (!btn) {
+        return false;
+      }
+      const pressed = btn.value > 0.5;
+      if (pressed && !this.buttonStates[btnName]) {
+        this.buttonStates[btnName] = true;
+        return true;
+      }
+      if (!pressed) {
+        this.buttonStates[btnName] = false;
+      }
+      return false;
+    }
+  };
+  var gamepad_controller_default = GamepadController;
+
+  // lib/services/input/keyboard.js
+  var KEYBOARDS_ACTION_MAP = {
+    arrowleft: "MOVE_LEFT",
+    arrowright: "MOVE_RIGHT",
+    arrowdown: "MOVE_DOWN",
+    arrowup: "ROTATE",
+    " ": "DROP",
+    m: "TOGGLE_MUSIC",
+    p: "TOGGLE_PAUSE",
+    r: "RESTART",
+    q: "QUIT",
+    1: "LEVEL_ONE",
+    2: "LEVEL_TWO",
+    3: "LEVEL_THREE",
+    4: "LEVEL_FOUR",
+    5: "LEVEL_FIVE",
+    6: "LEVEL_SIX",
+    7: "LEVEL_SEVEN",
+    8: "LEVEL_EIGHT",
+    9: "LEVEL_NINE",
+    t: "LEVEL_TEN",
+    e: "EASY",
+    n: "NORMAL",
+    h: "HARD",
+    x: "EXPERT",
+    b: "BACK",
+    enter: "CONFIRM"
+  };
+  var resolveKeyboardAction = (key) => {
+    if (!key) {
+      return;
+    }
+    const normalizedKey = key.toLowerCase();
+    return KEYBOARDS_ACTION_MAP[normalizedKey];
+  };
+  var Keyboard = class {
+    /**
+     * ## 构造函数
+     *
+     * @class
+     */
+    constructor() {
+      this.state = {};
+    }
+    update(state) {
+      this.state = state;
+    }
+    /**
+     * ## 绑定游戏中键盘操作相关的事件
+     *
+     * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
+     */
+    addEventListeners() {
+      globalThis.addEventListener("resize", this._onResize);
+      document.addEventListener("keydown", this._onKeydown);
+      return this;
+    }
+    /**
+     * ## 解除游戏中键盘操作相关的事件绑定
+     *
+     * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
+     */
+    removeEventListeners() {
+      globalThis.removeEventListener("resize", this._onResize);
+      document.removeEventListener("keydown", this._onKeydown);
+      return this;
+    }
+    /**
+     * ## resize 事件的功能函数
+     *
+     * @private
+     * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
+     */
+    _onResize = () => {
+      event_bus_default.emit("ui:resize");
+      return this;
+    };
+    /**
+     * ## keydown 事件的功能函数
+     *
+     * @private
+     * @param {Event} e - 事件对象
+     * @param {string} e.key - 事件名称
+     * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
+     */
+    _onKeydown = (e) => {
+      const key = e.key.toLowerCase();
+      const action = resolveKeyboardAction(key);
+      const { mode } = this.state;
+      if (!action || mode === "replay" && key !== "enter") {
+        return this;
+      }
+      event_bus_default.emit("dispatch:input", {
+        device: "keyboard",
+        action,
+        payload: {}
+      });
+      return this;
+    };
+  };
+  var keyboard_default = Keyboard;
+
+  // lib/services/input/index.js
+  var Input = {
+    Gamepad: gamepad_controller_default,
+    Keyboard: keyboard_default
+  };
+  var input_default = Input;
+
+  // lib/services/audio/constants/motifs.js
+  var MOTIFS = {
+    combo: {
+      shift: 0,
+      speed: 1,
+      volume: 1
+    },
+    tetris: {
+      shift: 2,
+      speed: 1.2,
+      volume: 1.1
+    },
+    perfect: {
+      shift: 5,
+      speed: 0.9,
+      volume: 1.3
+    }
+  };
+  var motifs_default = MOTIFS;
+
+  // lib/services/audio/state/audio-state.js
+  var audioCtx = new AudioContext();
+  var AudioState = {
+    audioCtx,
+    /** 是否启用背景音乐 true = 播放 BGM false = 静音 BGM */
+    bgmEnabled: true,
+    /**
+     * BGM 定时器引用
+     *
+     * 常见用途：
+     *
+     * - SetInterval / setTimeout 控制循环播放
+     * - 或用于调度下一段 BGM clip
+     */
+    bgmTimer: null
+  };
+  var audio_state_default = AudioState;
+
+  // lib/services/audio/play-tone.js
+  var playTone = (freq, dur, options = {}) => {
+    if (!freq || dur <= 0) {
+      return;
+    }
+    const { audioCtx: audioCtx2 } = audio_state_default;
+    const {
+      volume = 0.15,
+      wave = "square",
+      gate = 1,
+      articulation = {},
+      startTime = audioCtx2.currentTime
+    } = options;
+    const osc = audioCtx2.createOscillator();
+    const gain = audioCtx2.createGain();
+    osc.type = wave;
+    osc.frequency.setValueAtTime(freq, startTime);
+    const step = dur / 1e3;
+    const noteLen = step * gate;
+    const {
+      attackTime = 3e-3,
+      releaseTime = 0.02,
+      sustainRatio = 0.9
+    } = articulation;
+    const t0 = startTime;
+    const t1 = t0 + attackTime;
+    const t2 = t0 + Math.max(noteLen - releaseTime, attackTime);
+    const t3 = t0 + noteLen;
+    gain.gain.setValueAtTime(1e-4, t0);
+    gain.gain.linearRampToValueAtTime(volume, t1);
+    gain.gain.setValueAtTime(volume * sustainRatio, t2);
+    gain.gain.exponentialRampToValueAtTime(1e-4, t3);
+    osc.connect(gain);
+    gain.connect(audioCtx2.destination);
+    osc.start(t0);
+    osc.stop(t3 + 0.05);
+    osc.addEventListener("ended", () => {
+      osc.disconnect();
+      gain.disconnect();
+    });
+  };
+  var play_tone_default = playTone;
+
+  // lib/services/audio/sounds.js
+  var getMotif = (lines2, isPerfectClear = false) => {
+    if (isPerfectClear) {
+      return "perfect";
+    }
+    if (lines2 === 4) {
+      return "tetris";
+    }
+    return "combo";
+  };
+  var Sounds = {
+    // 难度选择音效
+    difficultySelect: () => {
+      const options = {
+        volume: 0.15,
+        wave: "sine"
+      };
+      play_tone_default(880, 80, options);
+    },
+    // 等级选择音效（正弦波柔和音效）
+    levelSelect: () => {
+      const options = {
+        volume: 0.15,
+        wave: "sine"
+      };
+      play_tone_default(523, 80, options);
+    },
+    // 等级开始音效
+    levelStart: () => {
+      const options = {
+        volume: 0.22,
+        wave: "sine"
+      };
+      play_tone_default(1319, 160, options);
+    },
+    // 开始倒计时音效
+    countdown: () => {
+      const options = {
+        volume: 0.3,
+        wave: "sine"
+      };
+      play_tone_default(784, 180, options);
+    },
+    // 方块移动音效
+    move: () => play_tone_default(330, 60),
+    // 方块旋转音效
+    rotate: () => play_tone_default(440, 60),
+    // 方块快速下落音效
+    drop: () => play_tone_default(220, 100),
+    // 方块落地音效
+    fall: () => play_tone_default(180, 200),
+    /**
+     * ## 消行动效音播放（基于和弦 + 动机系统）
+     *
+     * 根据消除行数生成不同音乐动机，并播放对应和弦音效
+     *
+     * @param {number} lines - 消除行数
+     * @param {boolean} isPerfectClear - 是否全清
+     */
+    clear: (lines2 = 1, isPerfectClear = false) => {
+      const frequencies = [
+        [440, 587, 698],
+        [587, 698, 880],
+        [698, 880, 1174],
+        [587, 880, 1174],
+        [440, 880, 1174]
+      ];
+      const speeds = [260, 300, 380];
+      const volumes = [0.32, 0.3, 0.25];
+      const timeouts = [160, 320, 480];
+      const motif = getMotif(lines2, isPerfectClear);
+      const cfg = motifs_default[motif];
+      const index = Math.min(lines2, frequencies.length - 1);
+      const baseChord = frequencies[index];
+      const chord = baseChord.map((freq) => freq + cfg.shift * 12);
+      for (const [i, freq] of chord.entries()) {
+        setTimeout(() => {
+          const options = {
+            volume: volumes[i] * cfg.volume,
+            wave: "square"
+          };
+          play_tone_default(freq, speeds[i] * cfg.speed, options);
+        }, timeouts[i]);
+      }
+    },
+    // 升级庆祝音效
+    levelUp: () => {
+      play_tone_default(523, 220);
+      setTimeout(() => play_tone_default(587, 220), 260);
+      setTimeout(() => play_tone_default(659, 240), 520);
+      setTimeout(() => play_tone_default(784, 260), 780);
+      setTimeout(() => play_tone_default(880, 280), 1060);
+      setTimeout(() => play_tone_default(1047, 320), 1360);
+      setTimeout(() => play_tone_default(1175, 360), 1700);
+      setTimeout(() => play_tone_default(1319, 480), 2080);
+    },
+    // 暂停游戏音效
+    pause: () => play_tone_default(300, 150),
+    // 秒针走动音效
+    secondTick: () => {
+      const options = {
+        volume: 0.085,
+        wave: "sine"
+      };
+      play_tone_default(880, 50, options);
+    },
+    // 恢复游戏音效
+    resume: () => play_tone_default(400, 150),
+    // 游戏结束音效（悲伤旋律）
+    gameOver: () => {
+      play_tone_default(330, 200);
+      setTimeout(() => play_tone_default(294, 300), 210);
+      setTimeout(() => play_tone_default(262, 500), 520);
+    },
+    // 背景音乐开关音效
+    bgmToggle: () => play_tone_default(440, 100)
+  };
+  var sounds_default = Sounds;
+
+  // lib/services/audio/constants/bgm/jasmine-flower.js
+  var JasmineFlower = {
+    name: "Jasmine Flower",
+    melody: [
+      // 好 (短) 一 (短) 朵 (短) 美 (长) 丽 (短) 的 (短) 茉 (长) 莉 (中) 花 (长~)
+      { freq: 659, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 1.6 },
+      { freq: 440, dur: 1.2 },
+      // 芬芳美丽满枝桠
+      { freq: 523, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 523, dur: 1.2 },
+      { freq: 440, dur: 0.8 },
+      { freq: 392, dur: 0.8 },
+      { freq: 440, dur: 1.6 },
+      { freq: 523, dur: 1.2 },
+      // 又香又白人人夸
+      { freq: 659, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 1.6 },
+      { freq: 440, dur: 1.2 },
+      // 让我来将你摘下
+      { freq: 523, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 523, dur: 1.2 },
+      { freq: 440, dur: 0.8 },
+      { freq: 392, dur: 0.8 },
+      { freq: 440, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 392, dur: 1.6 },
+      // 送给别人家
+      { freq: 440, dur: 0.8 },
+      { freq: 523, dur: 0.4 },
+      { freq: 587, dur: 1.2 },
+      { freq: 440, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 440, dur: 1.6 },
+      { freq: 392, dur: 2 },
+      // 茉莉花呀茉莉花
+      { freq: 330, dur: 0.8 },
+      { freq: 392, dur: 0.4 },
+      { freq: 440, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 440, dur: 1.2 },
+      { freq: 392, dur: 2.4 }
+    ],
+    duration: 540,
+    volume: 0.4,
+    wave: "sine"
+  };
+  var jasmine_flower_default = JasmineFlower;
+
+  // lib/services/audio/constants/bgm/first-division.js
+  var FirstDivision = {
+    name: "FirstDivision",
+    melody: [
+      // === 主动机（进行曲感）===
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      // === 重复推进 ===
+      { freq: 659, dur: 0.8 },
+      { freq: 698, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 698, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      // === 第二句（上行）===
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 698, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 698, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 1.2 },
+      // === 强化段（军乐推进）===
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 698, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      // === 高潮（稳定推进）===
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 988, dur: 1.2 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 698, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      // === 回落（收束）===
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 1.2 },
+      // === 循环点 ===
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.6 }
+    ],
+    duration: 180,
+    volume: 0.08,
+    wave: "square"
+  };
+  var first_division_default = FirstDivision;
+
+  // lib/services/audio/constants/bgm/loginska.js
+  var Loginska = {
+    name: "Loginska",
+    melody: [
+      // === A段：沉稳推进 ===
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 784, dur: 1.2 },
+      { freq: 784, dur: 0.4 },
+      { freq: 784, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      // === B段：上行高潮 ===
+      { freq: 784, dur: 1.2 },
+      { freq: 784, dur: 0.4 },
+      { freq: 784, dur: 0.4 },
+      { freq: 880, dur: 0.6 },
+      { freq: 988, dur: 0.6 },
+      { freq: 880, dur: 1.2 },
+      { freq: 880, dur: 0.4 },
+      { freq: 880, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      // === C段：急促下行收束 ===
+      { freq: 784, dur: 1.2 },
+      { freq: 784, dur: 0.4 },
+      { freq: 784, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.4 }
+    ],
+    duration: 180,
+    volume: 0.07,
+    wave: "square"
+  };
+  var loginska_default = Loginska;
+
+  // lib/services/audio/constants/bgm/technotris.js
+  var Technotris = {
+    name: "Technotris",
+    melody: [
+      // === Intro（电子重复）===
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      // === 主旋律A ===
+      { freq: 659, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === 电子重复变体 ===
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      // === 上行推进 ===
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 988, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      // === 高潮 ===
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 988, dur: 0.8 },
+      { freq: 1175, dur: 1.2 },
+      { freq: 988, dur: 0.8 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      // === Break ===
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      // === Drop ===
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 988, dur: 0.6 },
+      { freq: 988, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      // === Ending ===
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 1.6 }
+    ],
+    duration: 180,
+    volume: 0.09,
+    wave: "square"
+  };
+  var technotris_default = Technotris;
+
+  // lib/services/audio/constants/bgm/korobeiniki.js
+  var Korobeiniki = {
+    name: "Korobeiniki",
+    melody: [
+      // === A段（经典开头）===
+      { freq: 659, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === A'段（变体）===
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === B段（推进）===
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 880, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      // === C段（高潮）===
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 1.2 },
+      { freq: 880, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 1.2 },
+      // === D段（变化）===
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 1.2 },
+      { freq: 880, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === E段（回落）===
+      { freq: 440, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 1.2 },
+      { freq: 587, dur: 1.2 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 0.8 },
+      { freq: 494, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 1.2 },
+      // === F段（再现+收束）===
+      { freq: 659, dur: 0.8 },
+      { freq: 784, dur: 0.8 },
+      { freq: 880, dur: 1.2 },
+      { freq: 784, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 659, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 587, dur: 1.2 },
+      { freq: 659, dur: 0.8 },
+      { freq: 587, dur: 0.8 },
+      { freq: 523, dur: 0.8 },
+      { freq: 494, dur: 1.2 },
+      // === 结尾（循环点）===
+      { freq: 523, dur: 1.2 },
+      { freq: 494, dur: 0.8 },
+      { freq: 440, dur: 1.6 }
+    ],
+    duration: 140,
+    volume: 0.08,
+    wave: "square"
+  };
+  var korobeiniki_default = Korobeiniki;
+
+  // lib/services/audio/constants/bgm/beyond-the-wall.js
+  var BeyondTheWall = {
+    name: "BeyondTheWall",
+    // 推荐：全局控制（你也可以在 engine 里做分段 gate）
+    config: {
+      gate: {
+        intro: 0.92,
+        main: 0.93,
+        drive: 0.96,
+        dnb: 0.88,
+        outro: 0.91
+      }
+    },
+    melody: [
+      // 前奏：胡笳感脉冲
+      { freq: 330, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 392, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 330, dur: 0.6 },
+      { freq: 392, dur: 0.6 },
+      { freq: 330, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 392, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 440, dur: 1.8 },
+      { freq: 0, dur: 0.3 },
+      // 主旋律：苍凉开场
+      { freq: 440, dur: 1.2 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 0, dur: 0.2 },
+      { freq: 523, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 392, dur: 0.6 },
+      { freq: 330, dur: 1.2 },
+      { freq: 392, dur: 1.2 },
+      { freq: 0, dur: 0.25 },
+      { freq: 440, dur: 1.2 },
+      { freq: 523, dur: 0.6 },
+      { freq: 659, dur: 1.8 },
+      { freq: 0, dur: 0.2 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      { freq: 440, dur: 0.6 },
+      { freq: 392, dur: 1.2 },
+      { freq: 330, dur: 1.2 },
+      { freq: 0, dur: 0.3 },
+      // 推进段：马蹄
+      { freq: 392, dur: 0.6 },
+      { freq: 440, dur: 0.3 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.3 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.3 },
+      { freq: 523, dur: 0.6 },
+      { freq: 440, dur: 0.3 },
+      { freq: 392, dur: 0.6 },
+      { freq: 440, dur: 0.3 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.3 },
+      { freq: 659, dur: 1.2 },
+      { freq: 0, dur: 0.2 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      // 高潮：边塞号角（加“断气点”）
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 1.8 },
+      { freq: 0, dur: 0.25 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      { freq: 440, dur: 0.6 },
+      { freq: 0, dur: 0.2 },
+      { freq: 659, dur: 1.2 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 1.2 },
+      { freq: 0, dur: 0.25 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.8 },
+      // DnB段：改成“破碎节奏 + 空拍”
+      { freq: 440, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 392, dur: 0.4 },
+      { freq: 330, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 392, dur: 0.4 },
+      { freq: 440, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 440, dur: 0.4 },
+      { freq: 392, dur: 0.4 },
+      { freq: 0, dur: 0.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      // 回落：大漠孤烟（拉长 + 留白）
+      { freq: 659, dur: 1.2 },
+      { freq: 0, dur: 0.25 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      { freq: 440, dur: 0.6 },
+      { freq: 392, dur: 1.2 },
+      { freq: 330, dur: 1.2 },
+      { freq: 0, dur: 0.3 },
+      { freq: 392, dur: 1.2 },
+      { freq: 330, dur: 0.6 },
+      { freq: 294, dur: 1.2 },
+      { freq: 0, dur: 0.25 },
+      { freq: 330, dur: 0.6 },
+      { freq: 392, dur: 1.8 },
+      // 循环衔接（更“远”）
+      { freq: 330, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 392, dur: 0.6 },
+      { freq: 0, dur: 0.15 },
+      { freq: 330, dur: 0.6 },
+      { freq: 392, dur: 0.6 },
+      { freq: 440, dur: 1.8 }
+    ],
+    duration: 130,
+    volume: 0.09,
+    wave: "triangle"
+  };
+  var beyond_the_wall_default = BeyondTheWall;
+
+  // lib/services/audio/constants/bgm/tetris-theme.js
+  var TetrisTheme = {
+    name: "TetrisTheme",
+    melody: [
+      // === A段：经典律动 (长-短-短) ===
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 494, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 587, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 494, dur: 1.2 },
+      { freq: 494, dur: 0.4 },
+      { freq: 494, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 1.2 },
+      { freq: 523, dur: 1.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.4 },
+      // === A'段：高音区 ===
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 880, dur: 0.6 },
+      { freq: 880, dur: 1.2 },
+      { freq: 880, dur: 0.4 },
+      { freq: 880, dur: 0.4 },
+      { freq: 784, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 784, dur: 0.6 },
+      { freq: 784, dur: 1.2 },
+      { freq: 784, dur: 0.4 },
+      { freq: 784, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 494, dur: 1.2 },
+      { freq: 494, dur: 0.4 },
+      { freq: 494, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 1.2 },
+      { freq: 523, dur: 1.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.4 },
+      // === B段：下行区 ===
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 494, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 0.6 },
+      { freq: 415, dur: 1.2 },
+      { freq: 415, dur: 0.4 },
+      { freq: 415, dur: 0.4 },
+      { freq: 659, dur: 1.2 },
+      { freq: 659, dur: 0.4 },
+      { freq: 659, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 494, dur: 0.6 },
+      { freq: 494, dur: 0.6 },
+      { freq: 523, dur: 1.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 659, dur: 0.6 },
+      { freq: 880, dur: 1.2 },
+      { freq: 880, dur: 0.4 },
+      { freq: 880, dur: 0.4 },
+      // === 结尾收束 ===
+      { freq: 784, dur: 1.2 },
+      { freq: 784, dur: 0.4 },
+      { freq: 784, dur: 0.4 },
+      { freq: 659, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 523, dur: 1.2 },
+      { freq: 494, dur: 1.2 },
+      { freq: 494, dur: 0.4 },
+      { freq: 494, dur: 0.4 },
+      { freq: 523, dur: 0.6 },
+      { freq: 587, dur: 0.6 },
+      { freq: 587, dur: 1.2 },
+      { freq: 587, dur: 0.4 },
+      { freq: 587, dur: 0.4 },
+      { freq: 659, dur: 1.2 },
+      { freq: 523, dur: 1.2 },
+      { freq: 523, dur: 0.4 },
+      { freq: 523, dur: 0.4 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 0.6 },
+      { freq: 440, dur: 1.2 },
+      { freq: 440, dur: 0.4 },
+      { freq: 440, dur: 0.4 }
+    ],
+    duration: 220,
+    volume: 0.08,
+    wave: "square",
+    gate: 0.6
+  };
+  var tetris_theme_default = TetrisTheme;
+
+  // lib/services/audio/constants/bgm/journey-to-west.js
+  var JourneyToWest = {
+    name: "JourneyToWest",
+    melody: [
+      // === 前奏：标志性的"丢丢丢丢" ===
+      { freq: 880, dur: 1.2 },
+      { freq: 880, dur: 1.2 },
+      { freq: 0, dur: 0.6 },
+      // 休止
+      { freq: 880, dur: 1.2 },
+      { freq: 880, dur: 1.2 },
+      { freq: 0, dur: 0.6 },
+      { freq: 880, dur: 1.2 },
+      { freq: 880, dur: 1.2 },
+      { freq: 0, dur: 0.6 },
+      { freq: 880, dur: 1.2 },
+      { freq: 880, dur: 2.4 },
+      // === 主旋律（附点节奏 3-1-1） ===
+      { freq: 440, dur: 3.6 },
+      { freq: 440, dur: 0.9 },
+      { freq: 440, dur: 2.7 },
+      { freq: 523, dur: 3.6 },
+      { freq: 587, dur: 3.6 },
+      { freq: 587, dur: 0.9 },
+      { freq: 587, dur: 2.7 },
+      { freq: 659, dur: 4.5 },
+      // === 冲上云霄 ===
+      { freq: 880, dur: 3.6 },
+      { freq: 880, dur: 0.9 },
+      { freq: 880, dur: 2.7 },
+      { freq: 784, dur: 3.6 },
+      { freq: 659, dur: 3.6 },
+      { freq: 659, dur: 0.9 },
+      { freq: 659, dur: 2.7 },
+      { freq: 659, dur: 4.5 },
+      // === 转折 ===
+      { freq: 587, dur: 3.6 },
+      { freq: 587, dur: 0.9 },
+      { freq: 587, dur: 2.7 },
+      { freq: 523, dur: 3.6 },
+      { freq: 440, dur: 3.6 },
+      { freq: 440, dur: 0.9 },
+      { freq: 440, dur: 2.7 },
+      { freq: 440, dur: 4.5 },
+      // === 燃段 ===
+      { freq: 587, dur: 2.7 },
+      { freq: 587, dur: 1.8 },
+      { freq: 659, dur: 2.7 },
+      { freq: 784, dur: 3.6 },
+      { freq: 784, dur: 1.8 },
+      { freq: 784, dur: 1.8 },
+      { freq: 880, dur: 3.6 },
+      { freq: 988, dur: 2.7 },
+      { freq: 988, dur: 1.8 },
+      { freq: 988, dur: 2.7 },
+      { freq: 880, dur: 3.6 },
+      { freq: 784, dur: 2.7 },
+      { freq: 784, dur: 1.8 },
+      { freq: 784, dur: 3.6 },
+      // === 回响：超高音 ===
+      { freq: 1175, dur: 1.4 },
+      { freq: 1175, dur: 1.4 },
+      { freq: 0, dur: 0.9 },
+      { freq: 1175, dur: 1.4 },
+      { freq: 1175, dur: 1.4 },
+      { freq: 0, dur: 0.9 },
+      { freq: 880, dur: 2.7 },
+      { freq: 880, dur: 2.7 },
+      // === 结尾 ===
+      { freq: 440, dur: 3.6 },
+      { freq: 440, dur: 1.8 },
+      { freq: 440, dur: 3.6 },
+      { freq: 440, dur: 1.8 },
+      { freq: 440, dur: 5.4 }
+    ],
+    duration: 110,
+    volume: 0.12,
+    wave: "square"
+  };
+  var journey_to_west_default = JourneyToWest;
+
+  // lib/services/audio/constants/musics.js
+  var Musics = {
+    /**
+     * ## 背景音乐：JasmineFlower
+     *
+     * @type {Music}
+     */
+    JasmineFlower: jasmine_flower_default,
+    /**
+     * ## 背景音乐：FirstDivision
+     *
+     * @type {Music}
+     */
+    FirstDivision: first_division_default,
+    /**
+     * ## 背景音乐：Loginska
+     *
+     * @type {Music}
+     */
+    Loginska: loginska_default,
+    /**
+     * ## 背景音乐：Technotris
+     *
+     * @type {Music}
+     */
+    Technotris: technotris_default,
+    /**
+     * ## 背景音乐：Korobeiniki
+     *
+     * @type {Music}
+     */
+    Korobeiniki: korobeiniki_default,
+    /**
+     * ## 背景音乐：BeyondTheWall
+     *
+     * @type {Music}
+     */
+    BeyondTheWall: beyond_the_wall_default,
+    /**
+     * ## 背景音乐：TetrisTheme
+     *
+     * @type {Music}
+     */
+    TetrisTheme: tetris_theme_default,
+    /**
+     * ## 背景音乐：JourneyToWest
+     *
+     * @type {Music}
+     */
+    JourneyToWest: journey_to_west_default
+  };
+  var musics_default = Musics;
+
+  // lib/services/audio/loop-play-bgm.js
+  var LOOKAHEAD = 25;
+  var SCHEDULE_AHEAD_TIME = 0.12;
+  var loopPlayBGM = (melody, options = {}) => {
+    const {
+      duration = 110,
+      volume = 0.05,
+      wave = "square",
+      gate = 1,
+      articulation = {}
+    } = options;
+    let currentNoteIndex = 0;
+    let nextNoteTime = audio_state_default.audioCtx.currentTime;
+    const scheduleNote = (note, time) => {
+      const { freq, dur } = note;
+      const stepDur = dur * duration;
+      if (freq > 0) {
+        play_tone_default(freq, stepDur, {
+          volume,
+          wave,
+          gate,
+          articulation,
+          startTime: time
+        });
+      }
+      nextNoteTime += stepDur / 1e3;
+    };
+    const scheduler = () => {
+      while (nextNoteTime < audio_state_default.audioCtx.currentTime + SCHEDULE_AHEAD_TIME) {
+        const note = melody[currentNoteIndex];
+        scheduleNote(note, nextNoteTime);
+        currentNoteIndex += 1;
+        if (currentNoteIndex >= melody.length) {
+          currentNoteIndex = 0;
+        }
+      }
+      audio_state_default.bgmTimer = setTimeout(scheduler, LOOKAHEAD);
+    };
+    scheduler();
+  };
+  var loop_play_bgm_default = loopPlayBGM;
+
+  // lib/services/audio/stop-bgm.js
+  var stopBGM = () => {
+    if (audio_state_default.bgmTimer) {
+      clearTimeout(audio_state_default.bgmTimer);
+    }
+    audio_state_default.bgmTimer = null;
+  };
+  var stop_bgm_default = stopBGM;
+
+  // lib/services/audio/play-bgm.js
+  var {
+    TetrisTheme: TetrisTheme2,
+    JasmineFlower: JasmineFlower2,
+    FirstDivision: FirstDivision2,
+    Loginska: Loginska2,
+    Technotris: Technotris2,
+    Korobeiniki: Korobeiniki2,
+    BeyondTheWall: BeyondTheWall2,
+    JourneyToWest: JourneyToWest2
+  } = musics_default;
+  var MUSIC_LIST = [
+    JasmineFlower2,
+    TetrisTheme2,
+    FirstDivision2,
+    Loginska2,
+    Technotris2,
+    Korobeiniki2,
+    BeyondTheWall2,
+    JourneyToWest2
+  ];
+  var getMusicByLevel = (level2) => {
+    const { length } = MUSIC_LIST;
+    const step = Math.floor(configuration_default.Level.max / length);
+    const index = Math.min(Math.floor((level2 - 1) / step), length - 1);
+    return MUSIC_LIST[index];
+  };
+  var playBGM = async (level2 = 1) => {
+    if (!audio_state_default.bgmEnabled) {
+      return;
+    }
+    if (audio_state_default.audioCtx.state === "suspended") {
+      await audio_state_default.audioCtx.resume();
+    }
+    stop_bgm_default();
+    const music = getMusicByLevel(level2);
+    const { melody, duration, volume, wave, gate, articulation } = music;
+    loop_play_bgm_default(melody, {
+      duration,
+      volume,
+      wave,
+      gate,
+      articulation
+    });
+  };
+  var play_bgm_default = playBGM;
+
+  // lib/services/audio/toggle-bgm.js
+  var toggleBGM = (level2) => {
+    audio_state_default.bgmEnabled = !audio_state_default.bgmEnabled;
+    sounds_default.bgmToggle();
+    if (audio_state_default.bgmEnabled) {
+      play_bgm_default(level2);
+    } else {
+      stop_bgm_default();
+    }
+  };
+  var toggle_bgm_default = toggleBGM;
+
+  // lib/services/audio/index.js
+  var Audio = {
+    Sounds: sounds_default,
+    playBGM: play_bgm_default,
+    stopBGM: stop_bgm_default,
+    toggleBGM: toggle_bgm_default
+  };
+  var audio_default = Audio;
+
+  // lib/runtime/audio-runtime.js
+  var AudioRuntime = {
+    subscribe() {
+      event_bus_default.on("audio:play:bgm", ({ level: level2 }) => {
+        audio_default.playBGM(level2);
+      });
+      event_bus_default.on("audio:stop:bgm", () => {
+        audio_default.stopBGM();
+      });
+      event_bus_default.on("audio:toggle:bgm", ({ level: level2 }) => {
+        audio_default.toggleBGM(level2);
+      });
+      event_bus_default.on("audio:sounds:level:start", () => {
+        audio_default.Sounds.levelStart();
+      });
+      event_bus_default.on("audio:sounds:game:over", () => {
+        audio_default.Sounds.gameOver();
+      });
+      event_bus_default.on("audio:sounds:fall", () => {
+        audio_default.Sounds.fall();
+      });
+      event_bus_default.on("audio:sounds:rotate", () => {
+        audio_default.Sounds.rotate();
+      });
+      event_bus_default.on("audio:sounds:move", () => {
+        audio_default.Sounds.move();
+      });
+      event_bus_default.on("audio:sounds:drop", () => {
+        audio_default.Sounds.drop();
+      });
+      event_bus_default.on("audio:sounds:pause", () => {
+        audio_default.Sounds.pause();
+      });
+      event_bus_default.on("audio:sounds:resume", () => {
+        audio_default.Sounds.resume();
+      });
+      event_bus_default.on("audio:sounds:clear", ({ lines: lines2 }) => {
+        audio_default.Sounds.clear(lines2);
+      });
+      event_bus_default.on("audio:sounds:second:tick", () => {
+        audio_default.Sounds.secondTick();
+      });
+      event_bus_default.on("audio:sounds:level:up", () => {
+        audio_default.Sounds.levelUp();
+      });
+      event_bus_default.on("audio:sounds:level:select", () => {
+        audio_default.Sounds.levelSelect();
+      });
+      event_bus_default.on("audio:sounds:difficulty:select", () => {
+        audio_default.Sounds.difficultySelect();
+      });
+      event_bus_default.on("audio:sounds:countdown", () => {
+        audio_default.Sounds.countdown();
+      });
+    }
+  };
+  var audio_runtime_default = AudioRuntime;
+
+  // lib/runtime/game-runtime.js
+  var GameRuntime = {
+    subscribe: () => {
+      event_bus_default.on("game:update:state", ({ stateHandler }) => {
+        game_default.store.setState(stateHandler);
+      });
+      event_bus_default.on("game:update:gamepad:connected", ({ connected }) => {
+        game_default.store.setGamepadConnected(connected);
+      });
+      event_bus_default.on("game:update:mode", ({ mode }) => {
+        event_bus_default.emit("ui:update:mode", { mode });
+        game_default.store.setMode(mode);
+      });
+      event_bus_default.on("game:update:level", ({ level: level2 }) => {
+        game_default.store.setLevel(level2);
+      });
+      event_bus_default.on("game:save:high:score", () => {
+        game_default.saveHighScore(game_default.store.getScore());
+      });
+      event_bus_default.on("game:update:hud", () => {
+        const state = game_default.store.getState();
+        event_bus_default.emit("ui:update:hud", { state });
+      });
+      event_bus_default.on("game:select:level", ({ level: level2 }) => {
+        game_default.selectLevel(level2);
+        const state = game_default.store.getState();
+        event_bus_default.emit("ui:update:hud", { state });
+      });
+      event_bus_default.on("game:switch:difficulty", () => {
+        game_default.switchToDifficulty();
+      });
+      event_bus_default.on("game:select:difficulty", ({ difficulty }) => {
+        game_default.selectDifficulty(difficulty);
+      });
+      event_bus_default.on("game:switch:to:main:menu", () => {
+        game_default.switchToMainMenu();
+      });
+      event_bus_default.on("game:begin", () => {
+        game_default.begin();
+      });
+      event_bus_default.on("game:start", () => {
+        game_default.start();
+      });
+      event_bus_default.on("game:toggle:pause", () => {
+        game_default.togglePause();
+      });
+      event_bus_default.on("game:reset", () => {
+        game_default.reset();
+      });
+      event_bus_default.on("game:restart", () => {
+        game_default.restart();
+      });
+      event_bus_default.on("game:over", () => {
+        game_default.over();
+      });
+      event_bus_default.on("game:move", ({ ox, oy }) => {
+        game_default.move(ox, oy);
+      });
+      event_bus_default.on("game:rotate", () => {
+        game_default.rotate();
+      });
+      event_bus_default.on("game:drop", () => {
+        game_default.drop();
+      });
+      event_bus_default.on("game:tick", ({ isBlocked }) => {
+        game_default.tick(isBlocked);
+      });
+      event_bus_default.on("game:toggle:bgm", () => {
+        const level2 = game_default.store.getLevel();
+        event_bus_default.emit("audio:toggle:bgm", { level: level2 });
+      });
+      event_bus_default.on("game:replay:prepare:board", () => {
+        const { store } = game_default;
+        store.resetBoard();
+        store.setState({
+          // 绘制游戏开始难度设定产生的方块信息
+          board: store.getBeginningBoard(),
+          score: 0,
+          lines: 0,
+          level: 1
+        });
+        event_bus_default.emit("ui:update:mode", { mode: "replay" });
+        store.setMode("replay");
+        event_bus_default.emit("ui:update:hud", { state: store.getState() });
+        event_bus_default.emit("replay:start:play");
+        spawn_default();
+      });
+    }
+  };
+  var game_runtime_default = GameRuntime;
+
+  // lib/runtime/ui-runtime.js
+  var UIRuntime = {
+    subscribe() {
+      event_bus_default.on("ui:resize", () => {
+        ui_default.resize();
+      });
+      event_bus_default.on("ui:render:next:piece", ({ state }) => {
+        ui_default.renderNextPiece(state);
+      });
+      event_bus_default.on("ui:update:hud", ({ state }) => {
+        ui_default.updateHud(state);
+      });
+      event_bus_default.on("ui:render:countdown", ({ state }) => {
+        ui_default.renderCountdown(state);
+      });
+      event_bus_default.on("ui:render:clear", ({ state }) => {
+        ui_default.renderClear(state);
+      });
+      event_bus_default.on("ui:render:level:up", ({ level: level2, fireworks }) => {
+        ui_default.renderLevelUp(level2, fireworks);
+      });
+      event_bus_default.on("ui:update:mode", ({ mode }) => {
+        ui_default.updateMode(mode);
+      });
+    }
+  };
+  var ui_runtime_default = UIRuntime;
+
+  // lib/services/animations/countdown-animation.js
+  var CountdownAnimation = class {
+    /**
+     * ## 渲染层级（UI 层，显示在最前面）
+     *
+     * @type {number}
+     */
+    layer = 100;
+    /**
+     * ## 是否阻塞用户输入
+     *
+     * @type {boolean}
+     */
+    blocking = true;
+    /**
+     * ## 动画名称标识
+     *
+     * @type {string}
+     */
+    name = "countdown";
+    constructor() {
+      this.state = {
+        show: true,
+        number: 3,
+        scale: 4,
+        count: 0,
+        acc: 0
+      };
+    }
+    /**
+     * ## 更新动画状态
+     *
+     * 每帧调用：
+     *
+     * - 控制更新节奏（基于 acc）
+     * - 更新缩放动画
+     * - 控制数字切换
+     * - 判断动画是否结束
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 是否继续存活（true=继续，false=结束）
+     */
+    update(delta) {
+      const { state } = this;
+      state.acc += delta;
+      if (state.acc < 0.01) {
+        return true;
+      }
+      state.acc = 0;
+      state.count++;
+      state.scale = Math.max(1, state.scale - 0.4);
+      if (state.count >= 50) {
+        state.count = 0;
+        state.number -= 1;
+        state.scale = 4;
+        if (state.number >= 1) {
+          event_bus_default.emit("audio:sounds:countdown");
+        }
+      }
+      if (state.number <= 0) {
+        this.stop();
+        return false;
+      }
+      return true;
+    }
+    /**
+     * ## 倒计时结束处理
+     *
+     * - 切换游戏状态为 playing
+     * - 启动游戏主逻辑
+     */
+    stop() {
+      event_bus_default.emit("game:begin");
+    }
+    /**
+     * ## 渲染动画
+     *
+     * 将当前 state 传递给渲染函数
+     */
+    render() {
+      const { state } = this;
+      event_bus_default.emit("ui:render:countdown", { state });
+    }
+  };
+  var countdown_animation_default = CountdownAnimation;
+
+  // lib/services/effects/countdown.js
+  var startCountdown = () => {
+    engine_default.Animations.register(new countdown_animation_default());
+  };
+  var countdown_default = startCountdown;
+
+  // lib/services/animations/clear-lines-animation.js
+  var ClearLinesAnimation = class {
+    /**
+     * ## 渲染层级（UI 层，显示在最前面）
+     *
+     * @type {number}
+     */
+    layer = 200;
+    /**
+     * ## 是否阻塞用户输入
+     *
+     * @type {boolean}
+     */
+    blocking = true;
+    /**
+     * ## 动画名称标识
+     *
+     * @type {string}
+     */
+    name = "clear-lines";
+    /**
+     * ## 构造函数
+     *
+     * @param {number[]} lines - 需要执行消除动画的行索引数组（从 0 开始）
+     */
+    constructor(lines2) {
+      this.lines = lines2.map((y) => ({
+        y,
+        alpha: 1,
+        timer: 0
+      }));
+      event_bus_default.emit("audio:sounds:clear", { lines: lines2.length - 1 });
+    }
+    /**
+     * ## 更新动画状态
+     *
+     * 每帧调用，用于：
+     *
+     * - 推进每一行的动画时间
+     * - 根据 timer 计算当前闪烁状态（alpha）
+     * - 判断动画是否结束
+     *
+     * @param {number} delta - 距离上一帧的时间差（单位：秒）
+     * @returns {boolean} - 是否继续存活（true = 继续，false = 结束）
+     */
+    update(delta) {
+      let done = true;
+      for (const line of this.lines) {
+        const phase = Math.floor(line.timer / 0.12);
+        line.alpha = phase % 2 === 0 ? 1 : 0;
+        line.timer += delta;
+        if (line.timer < 0.72) {
+          done = false;
+        }
+      }
+      if (done) {
+        this.stop();
+        return false;
+      }
+      return true;
+    }
+    /**
+     * ## 动画结束后的收尾逻辑
+     *
+     * 包含：
+     *
+     * 1. 实际删除已满的行
+     * 2. 更新分数与消除行数
+     * 3. 判断并处理升级
+     * 4. 更新 HUD
+     */
+    stop() {
+      const result = apply_clear_lines_default();
+      const { level: level2, levelUp } = result;
+      const isLevelUp = levelUp;
+      event_bus_default.emit("replay:stop:clear:lines", { isLevelUp, level: level2 });
+      event_bus_default.emit("game:update:state", { stateHandler: result.stateHandler });
+      event_bus_default.emit("game:save:high:score");
+      event_bus_default.emit("game:update:hud");
+    }
+    /**
+     * ## 渲染动画
+     *
+     * 在渲染阶段调用：
+     *
+     * - 根据当前 lines 数据（含 alpha）绘制闪烁效果
+     *
+     * 不修改 state，仅负责视觉表现
+     */
+    render() {
+      const { lines: lines2 } = this;
+      event_bus_default.emit("ui:render:clear", { state: { lines: lines2 } });
+    }
+  };
+  var clear_lines_animation_default = ClearLinesAnimation;
+
+  // lib/services/effects/clear-lines.js
+  var startClearLines = (lines2) => {
+    const animation2 = new clear_lines_animation_default(lines2);
+    engine_default.Animations.register(animation2);
+  };
+  var clear_lines_default2 = startClearLines;
+
+  // lib/services/animations/paused-animation.js
+  var PausedAnimation = class {
+    /**
+     * ## 渲染层级（UI 层，显示在最前面）
+     *
+     * @type {number}
+     */
+    layer = 500;
+    /**
+     * ## 是否阻塞用户输入
+     *
+     * @type {boolean}
+     */
+    blocking = true;
+    /**
+     * ## 动画名称标识
+     *
+     * @type {string}
+     */
+    name = "paused";
+    /**
+     * ## 计时器（秒），用于控制音效播放间隔
+     *
+     * @type {number}
+     */
+    timer = 0;
+    /**
+     * ## 是否处于激活
+     *
+     * @type {boolean}
+     */
+    active = true;
+    /**
+     * ## 更新暂停动画状态
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 始终返回 true，表示动画永远不会自动结束
+     */
+    update(delta) {
+      if (!this.active) {
+        return false;
+      }
+      this.timer += delta;
+      if (this.timer >= 1) {
+        event_bus_default.emit("audio:sounds:second:tick");
+        this.timer = 0;
+      }
+      return true;
+    }
+    /**
+     * ## 暂停结束处理
+     *
+     * 将活动状态 active 设置为 true
+     */
+    stop() {
+      this.active = false;
+    }
+    /**
+     * ## 渲染暂停动画
+     *
+     * 将暂停界面绘制到屏幕上
+     */
+    render() {
+      this.active = true;
+    }
+  };
+  var paused_animation_default = PausedAnimation;
+
+  // lib/services/effects/paused.js
+  var animation = null;
+  var startPaused = () => {
+    if (animation) {
+      return;
+    }
+    animation = new paused_animation_default();
+    engine_default.Animations.register(animation);
+  };
+  var stopPaused = () => {
+    if (!animation) {
+      return;
+    }
+    animation.stop();
+    animation = null;
+  };
+
+  // lib/services/ui/constants/firework-colors.js
+  var { TEAL: TEAL5, YELLOW: YELLOW5, PURPLE: PURPLE4, ORANGE: ORANGE5, GREEN: GREEN6, RED: RED5 } = colors_default;
+  var FIREWORK_COLORS = [TEAL5, YELLOW5, PURPLE4, ORANGE5, GREEN6, RED5];
+  var firework_colors_default = FIREWORK_COLORS;
+
+  // lib/services/animations/level-up-animation.js
+  var LevelUpAnimation = class {
+    /**
+     * ## 渲染层级（UI 层，显示在最前面）
+     *
+     * @type {number}
+     */
+    layer = 100;
+    /**
+     * ## 是否阻塞用户输入
+     *
+     * @type {boolean}
+     */
+    blocking = true;
+    /**
+     * ## 动画名称标识
+     *
+     * @type {string}
+     */
+    name = "level-up";
+    // 动画总时长（秒）
+    duration = 3;
+    // 新烟花生成计时器（秒）
+    spawnTimer = 0;
+    // 动画总计时器（秒）
+    timer = 0;
+    /**
+     * ## 创建升级动画实例
+     *
+     * @class
+     * @param {object} canvas - Canvas 画布 DOM 元素
+     * @param {number} level - 当前等级
+     */
+    constructor(canvas, level2) {
+      this.level = level2;
+      this.canvas = canvas;
+      this.fireworks = this.createFireworks();
+    }
+    /**
+     * ## 创建一组烟花粒子
+     *
+     * 在画布中心上方位置生成随机方向和速度的粒子
+     *
+     * @returns {object[]} 烟花粒子对象数组
+     */
+    createFireworks() {
+      const { width, height } = this.canvas;
+      const particles = [];
+      for (let i = 0; i < 40; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 5 + Math.random() * 15;
+        particles.push({
+          x: width / 2,
+          // 初始X坐标：画布中心
+          y: height / 2 - 60,
+          // 初始Y坐标：画布中心上方60像素
+          vx: Math.cos(angle) * speed,
+          // X轴速度分量
+          vy: Math.sin(angle) * speed,
+          // Y轴速度分量
+          radius: 3 + Math.random() * 4,
+          // 粒子半径（3-7像素）
+          color: firework_colors_default[Math.floor(Math.random() * firework_colors_default.length)],
+          // 随机颜色
+          alpha: 1
+          // 初始完全不透明
+        });
+      }
+      return particles;
+    }
+    /**
+     * ## 更新所有烟花粒子的物理状态
+     *
+     * 包括：速度衰减、重力影响、位置更新、透明度衰减、半径增大
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     */
+    updateFireworks(delta) {
+      const gravity = 0.01;
+      for (const p of this.fireworks) {
+        p.vx *= 0.98;
+        p.vy *= 0.98;
+        p.vy += gravity * delta;
+        p.x += p.vx * delta * 8e-3;
+        p.y += p.vy * delta * 8e-3;
+        p.alpha -= delta * 0.024;
+        p.radius += delta * 10;
+      }
+      this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
+    }
+    /**
+     * ## 更新动画状态
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
+     */
+    update(delta) {
+      this.timer += delta;
+      this.spawnTimer += delta;
+      this.updateFireworks(delta);
+      if (this.spawnTimer > 0.6) {
+        this.fireworks.push(...this.createFireworks());
+        this.spawnTimer = 0;
+      }
+      if (this.timer >= this.duration) {
+        this.stop();
+        return false;
+      }
+      return true;
+    }
+    /**
+     * ## 升级动画结束处理
+     *
+     * 继续播放背景音乐
+     */
+    stop() {
+      const { level: level2 } = this;
+      event_bus_default.emit("audio:play:bgm", { level: level2 });
+    }
+    /**
+     * ## 渲染升级动画
+     *
+     * 调用专门渲染函数显示"LEVEL UP"文字和烟花效果
+     */
+    render() {
+      const { level: level2, fireworks } = this;
+      event_bus_default.emit("ui:render:level:up", { level: level2, fireworks });
+    }
+  };
+  var level_up_animation_default = LevelUpAnimation;
+
+  // lib/services/effects/level-up.js
+  var startLevelUp = (canvas, level2) => {
+    const animation2 = new level_up_animation_default(canvas, level2);
+    engine_default.Animations.register(animation2);
+  };
+  var level_up_default = startLevelUp;
+
+  // lib/services/effects/index.js
+  var Effects = {
+    startCountdown: countdown_default,
+    startClearLines: clear_lines_default2,
+    startPaused,
+    stopPaused,
+    startLevelUp: level_up_default
+  };
+  var effects_default = Effects;
+
+  // lib/runtime/effects-runtime.js
+  var EffectsRuntime = {
+    subscribe(dependencies) {
+      const { gameBoard: gameBoard2 } = dependencies;
+      event_bus_default.on("effects:start:countdown", () => {
+        effects_default.startCountdown();
+      });
+      event_bus_default.on("effects:start:paused", () => {
+        effects_default.startPaused();
+      });
+      event_bus_default.on("effects:stop:paused", () => {
+        effects_default.stopPaused();
+      });
+      event_bus_default.on("effects:start:clear:lines", ({ linesToClear }) => {
+        effects_default.startClearLines(linesToClear);
+      });
+      event_bus_default.on("effects:start:level:up", ({ level: level2 }) => {
+        effects_default.startLevelUp(gameBoard2, level2);
+      });
+    }
+  };
+  var effects_runtime_default = EffectsRuntime;
+
+  // lib/runtime/animation-runtime.js
+  var createAnimationSystem = () => {
+    const queue = [];
+    const pending = [];
+    let sorted = [];
+    let dirty = false;
+    return {
+      /**
+       * ## 注册动画
+       *
+       * 将动画对象注册到系统中。为了提高性能，新注册的动画不会立即生效， 而是在下一次 update() 调用时才被合并到活跃队列中。
+       *
+       * @example
+       *   ```javascript
+       *   const myAnim = {
+       *     name: 'explosion',
+       *     layer: 100,
+       *     blocking: true,
+       *     update(delta) {
+       *       // 返回 false 时动画会自动被移除
+       *       return this.frameCount++ < 60;
+       *     },
+       *     render() {
+       *       // 每帧绘制动画
+       *       drawExplosion();
+       *     }
+       *   };
+       *   system.register(myAnim);
+       *   ```;
+       *
+       * @param {Animation} animation - 动画对象，必须包含 update() 和 render() 方法
+       * @throws {Error} 如果动画对象无效（缺少必要方法）则抛出错误
+       */
+      register(animation2) {
+        if (!animation2 || typeof animation2.update !== "function" || typeof animation2.render !== "function") {
+          throw new Error(
+            "Invalid animation: must implement update() and render()"
+          );
+        }
+        animation2.layer ??= 0;
+        animation2.blocking ??= false;
+        animation2.name ??= "anonymous";
+        pending.push(animation2);
+        dirty = true;
+      },
+      /**
+       * ## 更新所有动画
+       *
+       * 在游戏逻辑循环中调用，更新所有活跃动画的状态。 会依次执行以下操作：
+       *
+       * 1. 将待注册的动画合并到活跃队列
+       * 2. 遍历所有动画并调用其 update() 方法
+       * 3. 自动移除已结束的动画（update() 返回 false）
+       *
+       * @example
+       *   ```javascript
+       *   let lastTime = performance.now();
+       *
+       *   function update() {
+       *     const now = performance.now();
+       *     const delta = Math.min(0.033, (now - lastTime) / 1000);
+       *     lastTime = now;
+       *
+       *     system.update(delta);
+       *     requestAnimationFrame(update);
+       *   }
+       *   ```;
+       *
+       * @param {number} delta - 距离上一帧的时间差（秒），用于平滑动画
+       */
+      update(delta) {
+        if (pending.length > 0) {
+          queue.push(...pending);
+          pending.length = 0;
+        }
+        for (let i = queue.length - 1; i >= 0; i--) {
+          const anim = queue[i];
+          const alive = anim.update(delta);
+          if (!alive) {
+            queue.splice(i, 1);
+            dirty = true;
+          }
+        }
+        if (pending.length > 0) {
+          queue.push(...pending);
+          pending.length = 0;
+          dirty = true;
+        }
+      },
+      /**
+       * ## 渲染所有动画
+       *
+       * 在渲染循环中调用，绘制所有动画效果。 采用排序缓存机制，只在必要时重新计算渲染顺序，提升性能。
+       *
+       * 渲染顺序由动画的 layer 属性决定：
+       *
+       * - Layer 值越小，越先渲染（在底层）
+       * - Layer 值越大，越后渲染（在顶层）
+       */
+      render() {
+        if (dirty) {
+          sorted = queue.slice().toSorted((a, b) => a.layer - b.layer);
+          dirty = false;
+        }
+        for (const animation2 of sorted) {
+          animation2.render();
+        }
+      },
+      /**
+       * ## 检查是否存在阻塞性动画
+       *
+       * 用于判断是否需要阻塞用户输入或游戏逻辑。 常用于等待关键动画（如倒计时、升级特效）播放完成。
+       *
+       * @example
+       *   ```javascript
+       *   // 检查是否有任何阻塞动画
+       *   if (system.hasBlocking()) {
+       *     // 禁止用户输入
+       *     return;
+       *   }
+       *
+       *   // 只检查特定的阻塞动画
+       *   if (system.hasBlocking(['countdown', 'level-up'])) {
+       *     // 等待倒计时或升级动画结束
+       *   }
+       *   ```;
+       *
+       * @param {string[]} [names=[]] - 可选的动画名称列表。 如果提供，只检查指定名称的动画；
+       *   如果为空数组，检查所有阻塞性动画。. Default is `[]`
+       * @returns {boolean} 如果存在匹配的阻塞动画则返回 true，否则返回 false
+       */
+      hasBlocking(names = []) {
+        const hasNames = Array.isArray(names) && names.length > 0;
+        for (const animation2 of queue) {
+          if (!animation2.blocking) continue;
+          if (!hasNames || names.includes(animation2.name)) {
+            return true;
+          }
+        }
+        return false;
+      },
+      /**
+       * ## 清空所有动画
+       *
+       * 移除系统中的所有动画，重置内部状态。 通常在游戏重置、场景切换或紧急清理时使用。
+       *
+       * @example
+       *   ```javascript
+       *   // 游戏结束时清理所有动画
+       *   function onGameOver() {
+       *     system.clear();
+       *     showGameOverScreen();
+       *   }
+       *   ```;
+       */
+      clear() {
+        queue.length = 0;
+        pending.length = 0;
+        sorted.length = 0;
+        dirty = false;
+      },
+      /**
+       * ## 获取系统中动画的总数量（调试用）
+       *
+       * @example
+       *   ```javascript
+       *   console.log(`当前动画数量: ${system.size}`);
+       *   if (system.size > 100) {
+       *   console.warn('动画数量过多，可能存在内存泄漏');
+       *   }
+       *   ```
+       *
+       * @returns {number} 活跃动画和待处理动画的总数
+       */
+      get size() {
+        return queue.length + pending.length;
+      }
+    };
+  };
+  var animation_runtime_default = createAnimationSystem;
+
+  // lib/engine/start-game-loop.js
+  var startGameLoop = (timestamp) => {
+    if (!engine_default.timestamp) {
+      engine_default.timestamp = timestamp;
+      engine_default.accumulator = timestamp;
+    }
+    const { Animations, Gamepad, Keyboard: Keyboard2 } = engine_default;
+    const stepDelta = timestamp - engine_default.accumulator;
+    const prev = engine_default.timestamp ?? timestamp;
+    let delta = (timestamp - prev) / 1e3;
+    if (delta > 1e3) {
+      delta = 1e3;
+    }
+    const dropInterval = game_default.getSpeed();
+    engine_default.timestamp = timestamp;
+    const isBlocked = Animations.hasBlocking();
+    replay_runtime_default.syncPlayElapsed({
+      timestamp: engine_default.timestamp,
+      isBlocked
+    });
+    replay_runtime_default.update({
+      getSpeed: game_default.getSpeed,
+      timestamp: engine_default.timestamp
+    });
+    Keyboard2.update(game_default.store.getState());
+    Gamepad.update(game_default.store.getState());
+    command_queue_default.flush();
+    if ((!engine_default.accumulator || stepDelta > dropInterval) && !replay_runtime_default.playing) {
+      game_default.tick(isBlocked);
+      engine_default.accumulator = timestamp;
+    }
+    Animations.update(delta);
+    ui_default.tickHud(delta);
+    ui_default.render(game_default.store.getState());
+    Animations.render();
+    engine_default.rafId = requestAnimationFrame(startGameLoop);
+  };
+  var start_game_loop_default = startGameLoop;
+
+  // lib/engine/restart-game-loop.js
+  var restartGameLoop = () => {
+    engine_default.stop();
+    engine_default.rafId = requestAnimationFrame(start_game_loop_default);
+  };
+  var restart_game_loop_default = restartGameLoop;
+
+  // lib/engine/stop-game-loop.js
+  var stopGameLoop = () => {
+    if (!engine_default.rafId) {
+      return;
+    }
+    cancelAnimationFrame(engine_default.rafId);
+    engine_default.rafId = null;
+    engine_default.timestamp = 0;
+    engine_default.accumulator = 0;
+  };
+  var stop_game_loop_default = stopGameLoop;
+
+  // lib/core/command/command.js
+  var Command = class {
+    /**
+     * ## 创建一个命令实例
+     *
+     * @param {string} action - 命令类型（如 MOVE / ROTATE）
+     * @param {object} [payload={}] - 命令参数（如方向、等级等）. Default is `{}`
+     */
+    constructor(action, payload = {}) {
+      this.action = action;
+      this.payload = payload;
+    }
+    /**
+     * ## 执行命令
+     *
+     * 将命令交给统一的 dispatch 系统处理， 而不是在 Command 内部写逻辑。
+     */
+    execute() {
+      const { action, payload } = this;
+      event_bus_default.emit("dispatch:command", {
+        action,
+        payload
+      });
+    }
+  };
+  var command_default = Command;
+
+  // lib/engine/dispatch-input.js
+  var dispatchInput = (input, context) => {
+    const { action, payload } = input;
+    const { isBlocked, ms } = context;
+    if (isBlocked || !action) {
+      return;
+    }
+    payload.isBlocked = isBlocked;
+    const cmd = new command_default(action, payload);
+    command_queue_default.enqueue(cmd);
+    event_bus_default.emit("replay:add:record", {
+      // 扣除暂停时间，得到纯净的“游玩时长”  - Replay.totalPausedDuration
+      ms,
+      cmd
+    });
+  };
+  var dispatch_input_default = dispatchInput;
+
+  // lib/game/actions/main-menu-actions.js
+  var MAIN_MENU_ACTIONS = {
+    /**
+     * ## 选择难度 1
+     *
+     * 通过 EventBus 发布消息，解耦对外部模块的依赖
+     */
+    LEVEL_ONE: () => {
+      event_bus_default.emit("game:select:level", { level: 1 });
+    },
+    /** ## 选择难度 2 */
+    LEVEL_TWO: () => {
+      event_bus_default.emit("game:select:level", { level: 2 });
+    },
+    /** ## 选择难度 3 */
+    LEVEL_THREE: () => {
+      event_bus_default.emit("game:select:level", { level: 3 });
+    },
+    /** ## 选择难度 4 */
+    LEVEL_FOUR: () => {
+      event_bus_default.emit("game:select:level", { level: 4 });
+    },
+    /** ## 选择难度 5 */
+    LEVEL_FIVE: () => {
+      event_bus_default.emit("game:select:level", { level: 5 });
+    },
+    /** ## 选择难度 6 */
+    LEVEL_SIX: () => {
+      event_bus_default.emit("game:select:level", { level: 6 });
+    },
+    /** ## 选择难度 7 */
+    LEVEL_SEVEN: () => {
+      event_bus_default.emit("game:select:level", { level: 7 });
+    },
+    /** ## 选择难度 8 */
+    LEVEL_EIGHT: () => {
+      event_bus_default.emit("game:select:level", { level: 8 });
+    },
+    /** ## 选择难度 9 */
+    LEVEL_NINE: () => {
+      event_bus_default.emit("game:select:level", { level: 9 });
+    },
+    /** ## 选择难度 10 */
+    LEVEL_TEN: () => {
+      event_bus_default.emit("game:select:level", { level: 10 });
+    },
+    /** ## 进入难度选择界面 */
+    CONFIRM: () => {
+      event_bus_default.emit("ui:update:mode", { mode: "difficulty" });
+      event_bus_default.emit("game:switch:difficulty");
+    }
+  };
+  var main_menu_actions_default = MAIN_MENU_ACTIONS;
+
+  // lib/game/actions/difficulty-actions.js
+  var DIFFICULT_ACTIONS = {
+    /** ## 选择难度 easy */
+    EASY: () => {
+      event_bus_default.emit("game:select:difficulty", { difficulty: "easy" });
+    },
+    /** ## 选择难度 normal */
+    NORMAL: () => {
+      event_bus_default.emit("game:select:difficulty", { difficulty: "normal" });
+    },
+    /** ## 选择难度 hard */
+    HARD: () => {
+      event_bus_default.emit("game:select:difficulty", { difficulty: "hard" });
+    },
+    /** ## 选择难度 expert */
+    EXPERT: () => {
+      event_bus_default.emit("game:select:difficulty", { difficulty: "expert" });
+    },
+    /** ## 返回游戏等级选择 */
+    BACK: () => {
+      event_bus_default.emit("ui:update:mode", { mode: "main-menu" });
+      event_bus_default.emit("game:switch:to:main:menu");
+    },
+    /** ## 确认开始游戏 */
+    CONFIRM: () => {
+      event_bus_default.emit("game:start");
+    }
+  };
+  var difficulty_actions_default = DIFFICULT_ACTIONS;
+
+  // lib/game/actions/game-playing-actions.js
+  var GAME_PLAYING_ACTIONS = {
+    /** ## 向左移动 */
+    MOVE_LEFT: () => {
+      event_bus_default.emit("game:move", {
+        ox: -1,
+        oy: 0
+      });
+    },
+    /** ## 向右移动 */
+    MOVE_RIGHT: () => {
+      event_bus_default.emit("game:move", {
+        ox: 1,
+        oy: 0
+      });
+    },
+    /** ## 向下移动（软降） */
+    MOVE_DOWN: () => {
+      event_bus_default.emit("game:move", {
+        ox: 0,
+        oy: 1
+      });
+    },
+    /** ## 旋转方块 */
+    ROTATE: () => {
+      event_bus_default.emit("game:rotate");
+    },
+    /** ## 硬降（直接落地） */
+    DROP: () => {
+      event_bus_default.emit("game:drop");
+    },
+    /** ## 暂停 / 继续切换 */
+    TOGGLE_PAUSE: () => {
+      event_bus_default.emit("game:toggle:pause");
+    },
+    /** ## 重新开始游戏 */
+    RESTART: () => {
+      event_bus_default.emit("game:restart");
+    },
+    /**
+     * ## 强制结束游戏
+     *
+     * 注意：直接调用 over 属于“全局副作用”
+     */
+    QUIT: () => {
+      event_bus_default.emit("game:over");
+    },
+    /** ## 背景音乐开关 */
+    TOGGLE_MUSIC: () => {
+      event_bus_default.emit("game:toggle:bgm");
+    }
+  };
+  var game_playing_actions_default = GAME_PLAYING_ACTIONS;
+
+  // lib/game/actions/paused-actions.js
+  var PAUSED_ACTIONS = {
+    /** ## 切换暂停状态（继续游戏 / 重新进入游戏循环） */
+    TOGGLE_PAUSE: () => {
+      event_bus_default.emit("game:toggle:pause");
+    }
+  };
+  var paused_actions_default = PAUSED_ACTIONS;
+
+  // lib/game/actions/game-over-actions.js
+  var GAME_OVER_ACTIONS = {
+    /**
+     * 确认操作（例如：Enter / Space / OK）
+     *
+     * 作用：
+     *
+     * - 重置游戏状态
+     * - 返回主菜单
+     */
+    CONFIRM: () => {
+      event_bus_default.emit("game:reset");
+    }
+  };
+  var game_over_actions_default = GAME_OVER_ACTIONS;
+
+  // lib/game/actions/replay-actions.js
+  var REPLAY_ACTIONS = {
+    /** ## 向左移动 */
+    MOVE_LEFT: () => {
+      event_bus_default.emit("game:move", {
+        ox: -1,
+        oy: 0
+      });
+    },
+    /** ## 向右移动 */
+    MOVE_RIGHT: () => {
+      event_bus_default.emit("game:move", {
+        ox: 1,
+        oy: 0
+      });
+    },
+    /** ## 向下移动（软降） */
+    MOVE_DOWN: () => {
+      event_bus_default.emit("game:move", {
+        ox: 0,
+        oy: 1
+      });
+    },
+    /** ## 旋转方块 */
+    ROTATE: () => {
+      event_bus_default.emit("game:rotate");
+    },
+    /** ## 硬降（直接落地） */
+    DROP: () => {
+      event_bus_default.emit("game:drop");
+    },
+    /**
+     * ## 自动下落
+     *
+     * @param {object} payload - 命令的参数
+     */
+    AUTO_TICK: (payload) => {
+      event_bus_default.emit("game:tick", payload);
+    },
+    /**
+     * 确认操作（例如：Enter / Space / OK）
+     *
+     * 作用：
+     *
+     * - 重置游戏状态
+     * - 返回主菜单
+     */
+    CONFIRM: () => {
+      event_bus_default.emit("game:reset");
+    }
+  };
+  var replay_actions_default = REPLAY_ACTIONS;
+
+  // lib/engine/dispatch-command.js
+  var ACTIONS_MAP = {
+    "main-menu": main_menu_actions_default,
+    difficulty: difficulty_actions_default,
+    playing: game_playing_actions_default,
+    paused: paused_actions_default,
+    replay: replay_actions_default,
+    "game-over": game_over_actions_default
+  };
+  var dispatchCommand = (cmd, mode) => {
+    const { action, payload } = cmd;
+    const actions = ACTIONS_MAP[mode];
+    if (!actions) {
+      return;
+    }
+    const handler = actions[action];
+    handler?.(payload);
+  };
+  var dispatch_command_default = dispatchCommand;
+
+  // lib/engine/index.js
+  var Engine = {
+    // Runtime 状态
+    rafId: null,
+    // 时间累积器（用于 fixed update / tick）
+    accumulator: 0,
+    // 上一帧时间戳
+    timestamp: 0,
+    Animations: animation_runtime_default(),
+    /**
+     * ## 初始化游戏
+     *
+     * 执行完整游戏初始化流程：
+     *
+     * - 重置棋盘
+     * - 加载存档
+     * - 初始化状态
+     * - 绑定输入
+     * - 渲染主菜单
+     * - 启动 game loop
+     */
+    launch: () => {
+      game_default.store.resetBoard();
+      game_default.loadHighScore();
+      game_default.setBeginningState("main-menu");
+      ui_default.updateMode("main-menu");
+      const state = game_default.store.getState();
+      ui_default.resize();
+      ui_default.updateHud(state);
+      ui_default.lazyRender(state);
+      Engine.Keyboard = new input_default.Keyboard();
+      Engine.Gamepad = new input_default.Gamepad();
+      Engine.Keyboard.addEventListeners();
+      Engine.Gamepad.addEventListeners();
+      Engine.subscribe();
+      Engine.start();
+    },
+    subscribe: () => {
+      const { gameBoard: gameBoard2 } = ui_default.Canvas;
+      replay_runtime_default.subscribe();
+      audio_runtime_default.subscribe();
+      game_runtime_default.subscribe();
+      ui_runtime_default.subscribe();
+      effects_runtime_default.subscribe({ gameBoard: gameBoard2 });
+      event_bus_default.on("dispatch:command", (cmd) => {
+        const mode = game_default.store.getMode();
+        dispatch_command_default(cmd, mode);
+      });
+      event_bus_default.on("dispatch:input", (input) => {
+        const isBlocked = Engine.Animations.hasBlocking([
+          "countdown",
+          "level-up"
+        ]);
+        const ms = Engine.timestamp - replay_runtime_default.startTime;
+        dispatch_input_default(input, { isBlocked, ms });
+      });
+      event_bus_default.on("animations:clear", () => {
+        Engine.Animations.clear();
+      });
+      event_bus_default.on("command:queue:clear", () => {
+        command_queue_default.clear();
+      });
+    },
+    /** ## 启动主循环 */
+    start: () => {
+      Engine.rafId = requestAnimationFrame(start_game_loop_default);
+    },
+    /** ## 停止游戏循环 */
+    stop: () => {
+      stop_game_loop_default();
+    },
+    /** ## 重启游戏循环 */
+    restart: () => {
+      restart_game_loop_default();
+    }
+  };
+  var engine_default = Engine;
+
+  // lib/main.js
+  var main = () => {
+    preloadImages(scenes_background_default);
+    engine_default.launch();
+  };
+  var main_default = main;
+
+  // lib/tetris.js
+  main_default();
+})();
