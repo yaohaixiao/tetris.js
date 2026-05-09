@@ -1,15 +1,12 @@
 ## [0.7.5](https://github.com/yaohaixiao/tetris.js/compare/0.7.4...0.7.5) (2026-05-09)
 
-
 ### Bug Fixes
 
-* 修复 countdown 界面第一个数字动画没有音效的问题； ([316cf7c](https://github.com/yaohaixiao/tetris.js/commit/316cf7c13c492e780029866fd9d20157ddf6385e))
-
+- 修复 countdown 界面第一个数字动画没有音效的问题； ([316cf7c](https://github.com/yaohaixiao/tetris.js/commit/316cf7c13c492e780029866fd9d20157ddf6385e))
 
 ### Features
 
-* 背景曲目调整： ([07c7db5](https://github.com/yaohaixiao/tetris.js/commit/07c7db570f1abba43ca805256fae9e10f91e8536))
-
+- 背景曲目调整： ([07c7db5](https://github.com/yaohaixiao/tetris.js/commit/07c7db570f1abba43ca805256fae9e10f91e8536))
 
 ## [0.7.4](https://github.com/yaohaixiao/tetris.js/compare/0.7.3...0.7.4) (2026-05-08)
 
