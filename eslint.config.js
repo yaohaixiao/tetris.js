@@ -51,7 +51,7 @@ export default defineConfig(
     },
   },
 
-  // 4. Base configurations for all relevant files
+  // 4. Index configurations for all relevant files
   eslintJs.configs.recommended, // Basic ESLint recommended rules
 
   // 5. JSDoc configuration

@@ -1,139 +1,90 @@
-import getNextPiece from '@/lib/game/utils/get-next-piece';
-import Game from '@/lib/game';
-import Replay from '../../../lib/runtime/replay-controller.js';
-import randomShape from '@/lib/game/utils/random-shape';
+import getNextPiece from '@/lib/game/utils/get-next-piece.js';
 
-jest.mock('@/lib/game', () => ({
+// Mock Game 模块
+jest.mock('@/lib/game/index.js', () => ({
   store: {
     getState: jest.fn(),
   },
+  Replay: {
+    playing: false,
+    getNextPiece: jest.fn(),
+  },
 }));
 
-jest.mock('../../../lib/runtime/replay-controller.js', () => ({
-  playing: false,
-  pieceSequence: [],
-  pieceIndex: 0,
-}));
+// Mock randomShape
+jest.mock('@/lib/game/utils/random-shape.js', () => jest.fn());
 
-jest.mock('@/lib/game/utils/random-shape', () =>
-  jest.fn(() => ({ type: 'I', shape: [[1, 1, 1, 1]] })),
-);
+import Game from '@/lib/game/index.js';
+import randomShape from '@/lib/game/utils/random-shape.js';
 
 describe('getNextPiece', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    Replay.playing = false;
-    Replay.pieceSequence = [];
-    Replay.pieceIndex = 0;
-    randomShape.mockReturnValue({ type: 'I', shape: [[1, 1, 1, 1]] });
+    Game.Replay.playing = false;
+    Game.Replay.getNextPiece.mockReset();
+    Game.store.getState.mockReset();
+    randomShape.mockReset();
   });
 
-  // ========== 正常模式 ==========
+  describe('回放模式', () => {
+    it('应该委托给 Replay.getNextPiece', () => {
+      Game.Replay.playing = true;
+      const mockPiece = { curr: { type: 'T' }, next: { type: 'I' } };
+      Game.Replay.getNextPiece.mockReturnValue(mockPiece);
+
+      const result = getNextPiece();
+
+      expect(Game.Replay.getNextPiece).toHaveBeenCalled();
+      expect(result).toBe(mockPiece);
+    });
+  });
+
   describe('正常模式', () => {
-    test('state 中有 next 时返回 curr=next 的深拷贝', () => {
-      const nextPiece = {
-        type: 'T',
+    it('有 next 时应该深拷贝 next 作为 curr', () => {
+      const existingNext = {
+        type: 'J',
         shape: [
-          [0, 1, 0],
+          [1, 0, 0],
           [1, 1, 1],
         ],
       };
-      Game.store.getState.mockReturnValue({ next: nextPiece });
+      Game.store.getState.mockReturnValue({ next: existingNext });
+      randomShape.mockReturnValue({ type: 'S', shape: [[1]] });
 
       const result = getNextPiece();
 
-      expect(result.curr).toEqual(nextPiece);
-      // 不是同一个引用（深拷贝）
-      expect(result.curr.shape).not.toBe(nextPiece.shape);
-      // 调用 randomShape 生成新的 next
-      expect(result.next).toEqual({ type: 'I', shape: [[1, 1, 1, 1]] });
+      // curr 是 existingNext 的深拷贝
+      expect(result.curr).toEqual(existingNext);
+      expect(result.curr).not.toBe(existingNext);
+      expect(result.curr.shape).not.toBe(existingNext.shape);
+
+      // next 是随机生成的新方块
+      expect(result.next).toEqual({ type: 'S', shape: [[1]] });
     });
 
-    test('state 中 next 为 null 时 curr 由 randomShape 生成', () => {
+    it('没有 next 时应该随机生成 curr', () => {
       Game.store.getState.mockReturnValue({ next: null });
+      randomShape
+        .mockReturnValueOnce({ type: 'Z', shape: [[1, 1]] }) // curr
+        .mockReturnValueOnce({ type: 'O', shape: [[1, 1]] }); // next
 
       const result = getNextPiece();
 
-      expect(result.curr).toEqual({ type: 'I', shape: [[1, 1, 1, 1]] });
-      expect(result.next).toEqual({ type: 'I', shape: [[1, 1, 1, 1]] });
+      expect(result.curr).toEqual({ type: 'Z', shape: [[1, 1]] });
+      expect(result.next).toEqual({ type: 'O', shape: [[1, 1]] });
+      expect(randomShape).toHaveBeenCalledTimes(2);
     });
 
-    test('state 中 next 为 undefined 时 curr 由 randomShape 生成', () => {
+    it('next 为 undefined 时也应该随机生成', () => {
       Game.store.getState.mockReturnValue({});
+      randomShape
+        .mockReturnValueOnce({ type: 'L', shape: [[1]] })
+        .mockReturnValueOnce({ type: 'T', shape: [[2]] });
 
       const result = getNextPiece();
 
-      expect(result.curr).toEqual({ type: 'I', shape: [[1, 1, 1, 1]] });
-    });
-  });
-
-  // ========== Replay 模式 ==========
-  describe('Replay 模式', () => {
-    test('取 pieceSequence 中的当前和下一个', () => {
-      Replay.playing = true;
-      Replay.pieceSequence = [
-        { type: 'T', shape: [[0, 1, 0]] },
-        { type: 'L', shape: [[1, 1, 1]] },
-      ];
-      Replay.pieceIndex = 0;
-
-      const result = getNextPiece();
-
-      expect(result.curr).toEqual({ type: 'T', shape: [[0, 1, 0]] });
-      expect(result.next).toEqual({ type: 'L', shape: [[1, 1, 1]] });
-      expect(Replay.pieceIndex).toBe(1);
-    });
-
-    test('pieceIndex 越界时返回 curr=null, next=null', () => {
-      Replay.playing = true;
-      Replay.pieceSequence = [{ type: 'T', shape: [[0, 1, 0]] }];
-      Replay.pieceIndex = 1; // 已到末尾
-
-      const result = getNextPiece();
-
-      expect(result.curr).toBeNull();
-      expect(result.next).toBeNull();
-    });
-
-    test('pieceSequence 为空时返回 null', () => {
-      Replay.playing = true;
-      Replay.pieceSequence = [];
-      Replay.pieceIndex = 0;
-
-      const result = getNextPiece();
-
-      expect(result.curr).toBeNull();
-      expect(result.next).toBeNull();
-    });
-
-    test('最后一个 piece 时 next 为 null', () => {
-      Replay.playing = true;
-      Replay.pieceSequence = [{ type: 'S', shape: [[0, 1, 1]] }];
-      Replay.pieceIndex = 0;
-
-      const result = getNextPiece();
-
-      expect(result.curr).toEqual({ type: 'S', shape: [[0, 1, 1]] });
-      expect(result.next).toBeNull();
-      expect(Replay.pieceIndex).toBe(1);
-    });
-
-    test('多次调用正常推进 pieceIndex', () => {
-      Replay.playing = true;
-      Replay.pieceSequence = [
-        { type: 'O', shape: [[1, 1]] },
-        { type: 'I', shape: [[1, 1, 1, 1]] },
-        { type: 'Z', shape: [[1, 1, 0]] },
-      ];
-      Replay.pieceIndex = 0;
-
-      const result1 = getNextPiece();
-      expect(result1.curr.type).toBe('O');
-      expect(Replay.pieceIndex).toBe(1);
-
-      const result2 = getNextPiece();
-      expect(result2.curr.type).toBe('I');
-      expect(Replay.pieceIndex).toBe(2);
+      expect(result.curr).toEqual({ type: 'L', shape: [[1]] });
+      expect(result.next).toEqual({ type: 'T', shape: [[2]] });
     });
   });
 });
