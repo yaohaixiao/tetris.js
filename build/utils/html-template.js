@@ -1,6 +1,6 @@
 import Configuration from '../../lib/configuration.js';
 
-const { Canvas, Hud } = Configuration.Elements;
+const { Main, Hud } = Configuration.Elements;
 
 const HtmlTemplate = `
 <!DOCTYPE html>
@@ -18,12 +18,12 @@ const HtmlTemplate = `
 <body>
   <div class="container">
     <main class="main">
-      <canvas id="${Canvas.board}" data-mode="main-menu"></canvas>
+      <canvas id="${Main.board}" data-mode="main-menu"></canvas>
     </main>
     <aside class="aside">
       <section class="panel next">
         <h3 class="next-title">NEXT</h3>
-        <canvas id="${Canvas.next}" class="next-piece"></canvas>
+        <canvas id="${Main.next}" class="next-piece"></canvas>
       </section>
       <section class="panel data">
         <p class="panel-text">SCORE:<br><span id="${Hud.score}">00000</span></p>

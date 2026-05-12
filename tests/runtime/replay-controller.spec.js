@@ -21,10 +21,10 @@ describe('ReplayController', () => {
   beforeEach(() => {
     replay = new ReplayController();
 
-      // 把继承的方法变成 spy，其他测试才能用 toHaveBeenCalledWith
-      jest.spyOn(replay, 'emit');
-      jest.spyOn(replay, 'on');
-      jest.spyOn(replay, 'off');
+    // 把继承的方法变成 spy，其他测试才能用 toHaveBeenCalledWith
+    jest.spyOn(replay, 'emit');
+    jest.spyOn(replay, 'on');
+    jest.spyOn(replay, 'off');
   });
 
   // ==================== 基础属性 ====================
