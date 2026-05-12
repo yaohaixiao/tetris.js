@@ -1798,67 +1798,19 @@ var tetris = (() => {
   };
   var audio_default = Audio;
 
-  // lib/utils/is-symbol.js
-  var isSymbol = (val) => typeof val === "symbol";
-  var is_symbol_default = isSymbol;
-
-  // lib/utils/has-own.js
-  var hasOwn = (obj, prop) => {
-    if (obj === null || obj === void 0) {
-      return false;
-    }
-    if (!is_string_default(prop) && !is_symbol_default(prop)) {
-      return false;
-    }
-    const { hasOwnProperty } = Object.prototype;
-    return hasOwnProperty.call(obj, prop);
-  };
-  var has_own_default = hasOwn;
-
-  // lib/utils/is-object.js
-  var isObject = (o) => o !== null && (typeof o === "object" || is_function_default(o));
-  var is_object_default = isObject;
-
-  // lib/utils/extend.js
-  var extend = (origin, source) => {
-    for (const prop in source) {
-      if (has_own_default(source, prop)) {
-        origin[prop] = source[prop];
-      }
-    }
-    return origin;
-  };
-  var extend_default = extend;
-
   // lib/core/index.js
   var Base = class {
     /**
      * ## 构造函数
      *
      * @class
+     * @param {object} [deps={}] - （所有）依赖对象. Default is `{}`
      */
-    constructor() {
-      this.deps = {
-        Store: null,
-        Game: null
-      };
+    constructor(deps = {}) {
+      this.inject(deps);
     }
-    initialize(deps) {
-      this.dep(deps);
-    }
-    dep(dep, value) {
-      const { deps } = this;
-      if (is_string_default(dep)) {
-        if (value && has_own_default(deps, dep)) {
-          deps[dep] = value;
-        }
-        return deps[dep];
-      }
-      if (is_object_default(dep)) {
-        extend_default(deps, dep);
-      } else if (arguments.length === 0) {
-        return deps;
-      }
+    inject(deps = {}) {
+      Object.assign(this, deps);
     }
     emit(event, payload) {
       event_bus_default.emit(event, payload);
@@ -3614,7 +3566,7 @@ var tetris = (() => {
   // lib/services/ui/index.js
   var UI = class extends core_default {
     constructor(deps) {
-      super();
+      super(deps);
       this.initialize(deps);
     }
     initialize(deps) {
@@ -3622,13 +3574,12 @@ var tetris = (() => {
       const { Hud, Main } = Elements;
       this.Hud = create_hud_default(hud_elements_default(Hud));
       this.Canvas = new canvas_default(Main);
-      this.dep(deps);
     }
     updateMode(mode) {
       this.Canvas.gameBoard.dataset.mode = mode;
     }
     updateHud() {
-      const state = this.dep("Store").getState();
+      const state = this.Store.getState();
       const { mode, score, lines, level, highScore, needReset = false } = state;
       if (mode === "main-menu" || needReset) {
         this.Hud.reset();
@@ -3644,11 +3595,11 @@ var tetris = (() => {
       this.Hud.tick(delta);
     }
     lazyRender() {
-      const state = this.dep("Store").getState();
+      const state = this.Store.getState();
       lazy_render_scene_default(this.Canvas, state);
     }
     render() {
-      const state = this.dep("Store").getState();
+      const state = this.Store.getState();
       render_scene_default(this.Canvas, state);
     }
     resize() {
@@ -3667,14 +3618,14 @@ var tetris = (() => {
       this.updateMode(mode);
     };
     _onUpdateHud = () => {
-      const state = this.dep("Store").getState();
+      const state = this.Store.getState();
       this.updateHud(state);
     };
     _onResize = () => {
       this.resize();
     };
     _onRenderNextPiece = () => {
-      const state = this.dep("Store").getState();
+      const state = this.Store.getState();
       render_next_piece_default(this.Canvas, state);
     };
     _onRenderCountdown = ({ state }) => {
@@ -3698,11 +3649,10 @@ var tetris = (() => {
      * @param {object} deps - 依赖模块
      */
     constructor(deps) {
-      super();
-      this.initialize(deps);
+      super(deps);
+      this.initialize();
     }
-    initialize(deps) {
-      this.dep(deps);
+    initialize() {
       this.layer = 100;
       this.blocking = true;
       this.name = "countdown";
@@ -3758,7 +3708,7 @@ var tetris = (() => {
      * - 启动游戏主逻辑
      */
     stop() {
-      this.dep("Game").emit("game:begin");
+      this.Game.emit("game:begin");
     }
     /**
      * ## 渲染动画
@@ -3767,7 +3717,7 @@ var tetris = (() => {
      */
     render() {
       const { state } = this;
-      this.dep("Game").UI.emit("ui:render:countdown", { state });
+      this.UI.emit("ui:render:countdown", { state });
     }
   };
   var countdown_animation_default = CountdownAnimation;
@@ -3895,12 +3845,11 @@ var tetris = (() => {
      * @param {object} deps - 依赖模块
      */
     constructor(deps) {
-      super();
+      super(deps);
       this.initialize(deps);
     }
     initialize(deps) {
       const { lines } = deps;
-      this.dep(deps);
       this.layer = 200;
       this.blocking = true;
       this.name = "clear-lines";
@@ -3953,7 +3902,7 @@ var tetris = (() => {
      * 4. 更新 HUD
      */
     stop() {
-      const Game2 = this.dep("Game");
+      const { Game: Game2 } = this;
       const result = apply_clear_lines_default(Game2);
       const { level, levelUp } = result;
       const isLevelUp = levelUp;
@@ -3973,7 +3922,7 @@ var tetris = (() => {
      */
     render() {
       const { lines } = this;
-      this.dep("Game").UI.emit("ui:render:clear", { state: { lines } });
+      this.UI.emit("ui:render:clear", { state: { lines } });
     }
   };
   var clear_lines_animation_default = ClearLinesAnimation;
@@ -3999,12 +3948,11 @@ var tetris = (() => {
      * @param {object} deps - 依赖参数
      */
     constructor(deps) {
-      super();
+      super(deps);
       this.initialize(deps);
     }
     initialize(deps) {
       const { level } = deps;
-      this.dep(deps);
       this.layer = 100;
       this.blocking = true;
       this.name = "level-up";
@@ -4022,9 +3970,8 @@ var tetris = (() => {
      * @returns {object[]} 烟花粒子对象数组
      */
     createFireworks() {
-      const Game2 = this.dep("Game");
-      console.log("createFireworks", Game2);
-      const { width, height } = Game2.UI.Canvas.gameBoard;
+      const { UI: UI2 } = this;
+      const { width, height } = UI2.Canvas.gameBoard;
       const particles = [];
       for (let i = 0; i < 40; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -4094,7 +4041,7 @@ var tetris = (() => {
      * 继续播放背景音乐
      */
     stop() {
-      const maxLevel = this.dep("Game").options.Level.max;
+      const { maxLevel } = this;
       const { level } = this;
       this.emit("audio:play:bgm", { level, maxLevel });
     }
@@ -4105,7 +4052,7 @@ var tetris = (() => {
      */
     render() {
       const { level, fireworks } = this;
-      this.dep("Game").UI.emit("ui:render:level:up", { level, fireworks });
+      this.UI.emit("ui:render:level:up", { level, fireworks });
     }
   };
   var level_up_animation_default = LevelUpAnimation;
@@ -4160,10 +4107,7 @@ var tetris = (() => {
      * @param {object} deps - 依赖模块
      */
     constructor(deps) {
-      super();
-      if (deps) {
-        this.initialize(deps);
-      }
+      super(deps);
     }
     /**
      * ## 绑定游戏中键盘操作相关的事件
@@ -4192,7 +4136,7 @@ var tetris = (() => {
      * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
      */
     _onResize = () => {
-      this.dep("Game").UI.emit("ui:resize");
+      this.UI.emit("ui:resize");
       return this;
     };
     /**
@@ -4204,10 +4148,10 @@ var tetris = (() => {
      * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
      */
     _onKeydown = (e) => {
+      const { Game: Game2, Store } = this;
       const key = e.key.toLowerCase();
       const action = resolveKeyboardAction(key);
-      const mode = this.dep("Game").Store.getMode();
-      const { deps } = this;
+      const mode = Store.getMode();
       if (!action || mode === "replay" && key !== "enter") {
         return this;
       }
@@ -4215,7 +4159,7 @@ var tetris = (() => {
         device: "keyboard",
         action,
         payload: {
-          deps
+          Game: Game2
         }
       });
       return this;
@@ -4284,7 +4228,7 @@ var tetris = (() => {
      * @param {object} deps - 依赖模块
      */
     constructor(deps) {
-      super();
+      super(deps);
       this.activeGamepadIndex = null;
       this.DEAD_ZONE = 0.15;
       this.DPAD_THRESHOLD = 0.5;
@@ -4304,7 +4248,6 @@ var tetris = (() => {
         LEFT_STICK_X: 0,
         LEFT_STICK_Y: 1
       };
-      this.initialize(deps);
     }
     /**
      * ## 每帧调用
@@ -4366,7 +4309,7 @@ var tetris = (() => {
       }
       this.activeGamepadIndex = pad.index;
       this.curBtnMap = this._isBetop(pad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
-      this.dep("Game").emit("game:update:gamepad:connected", { connected: true });
+      this.Game.emit("game:update:gamepad:connected", { connected: true });
       return this;
     };
     /**
@@ -4385,7 +4328,7 @@ var tetris = (() => {
       this.activeGamepadIndex = null;
       this.buttonStates = {};
       this.axisStates = {};
-      this.dep("Game").emit("game:update:gamepad:connected", {
+      this.Game.emit("game:update:gamepad:connected", {
         connected: false
       });
       return this;
@@ -4487,7 +4430,7 @@ var tetris = (() => {
     _handleStandardButtons(pad, mode, level, now) {
       const isBetop = this._isBetop(pad.id);
       const isBlockedMode = mode === "replay" || mode === "game-over";
-      const { deps } = this;
+      const { Game: Game2 } = this;
       for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
         const isDPad = btnName.startsWith("DPAD_");
         if (!this._isPressed(btnName)) {
@@ -4513,7 +4456,7 @@ var tetris = (() => {
         this.emit("dispatch:input", {
           device: "gamepad",
           action: finalAction,
-          payload: { deps }
+          payload: { Game: Game2 }
         });
       }
       return this;
@@ -4527,7 +4470,7 @@ var tetris = (() => {
      * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
      */
     _collectCommands() {
-      const state = this.dep("Game").Store.getState();
+      const state = this.Store.getState();
       const { mode, level } = state;
       const pad = this.activeGamepad;
       const now = Date.now();
@@ -4560,12 +4503,12 @@ var tetris = (() => {
       if (this.axisStates[action]) {
         return this;
       }
-      const { deps } = this;
+      const { Game: Game2 } = this;
       this.axisStates[action] = true;
       this.emit("dispatch:input", {
         device: "gamepad",
         action,
-        payload: { deps }
+        payload: { Game: Game2 }
       });
       return this;
     }
@@ -4632,7 +4575,7 @@ var tetris = (() => {
         if (level >= 10) {
           level = 10;
         }
-        this.dep("Game").emit("game:update:level", { level });
+        this.Game.emit("game:update:level", { level });
         action = `LEVEL_${LEVELS[level - 1]}`;
       } else {
         action = "ROTATE";
@@ -4646,7 +4589,7 @@ var tetris = (() => {
         if (level <= 1) {
           level = 1;
         }
-        this.dep("Game").emit("game:update:level", { level });
+        this.Game.emit("game:update:level", { level });
         action = `LEVEL_${LEVELS[level - 1]}`;
       } else {
         action = "MOVE_DOWN";
@@ -4655,13 +4598,13 @@ var tetris = (() => {
     }
     _handleBetopDpadUp(mode, level, st) {
       const action = this._getMoveUpAction(mode, level);
-      const { deps } = this;
+      const { Game: Game2 } = this;
       if (!st.up) {
         st.up = true;
         this.emit("dispatch:input", {
           device: "gamepad",
           action,
-          payload: { deps }
+          payload: { Game: Game2 }
         });
       }
       st.down = st.left = st.right = false;
@@ -4669,39 +4612,39 @@ var tetris = (() => {
     }
     _handleBetopDpadDown(mode, level, st) {
       const action = this._getMoveDownAction(mode, level);
-      const { deps } = this;
+      const { Game: Game2 } = this;
       if (!st.down) {
         st.down = true;
         this.emit("dispatch:input", {
           device: "gamepad",
           action,
-          payload: { deps }
+          payload: { Game: Game2 }
         });
       }
       st.up = st.left = st.right = false;
       return this;
     }
     _handleBetopDpadLeft(st) {
-      const { deps } = this;
+      const { Game: Game2 } = this;
       if (!st.left) {
         st.left = true;
         this.emit("dispatch:input", {
           device: "gamepad",
           action: "MOVE_LEFT",
-          payload: { deps }
+          payload: { Game: Game2 }
         });
       }
       st.up = st.down = st.right = false;
       return this;
     }
     _handleBetopDpadRight(st) {
-      const { deps } = this;
+      const { Game: Game2 } = this;
       if (!st.right) {
         st.right = true;
         this.emit("dispatch:input", {
           device: "gamepad",
           action: "MOVE_RIGHT",
-          payload: { deps }
+          payload: { Game: Game2 }
         });
       }
       st.up = st.down = st.left = false;
@@ -4814,7 +4757,7 @@ var tetris = (() => {
      * @param {object} deps - 依赖模块
      */
     constructor(deps) {
-      super();
+      super(deps);
       this.recording = false;
       this.playing = false;
       this.data = [];
@@ -4824,7 +4767,6 @@ var tetris = (() => {
       this.playElapsed = 0;
       this.startTime = 0;
       this.timestamp = 0;
-      this.initialize(deps);
     }
     getNextPiece() {
       if (!this.playing) {
@@ -5050,8 +4992,7 @@ var tetris = (() => {
      * @private
      */
     _onGameOver = () => {
-      const Game2 = this.dep("Game");
-      const { UI: UI2 } = Game2;
+      const { Game: Game2, UI: UI2 } = this;
       if (this.hasData) {
         Game2.emit("game:replay:prepare:board", {
           nextPiece: this.getNextPiece()
@@ -5077,7 +5018,7 @@ var tetris = (() => {
       }
       this.emit("audio:stop:bgm");
       this.emit("audio:play:sound", { sound: "LEVEL_UP" });
-      this.dep("Game").emit("game:start:level:up", { level });
+      this.Game.emit("game:start:level:up", { level });
     };
   };
   var replay_controller_default = ReplayController;
@@ -5469,14 +5410,11 @@ var tetris = (() => {
       return;
     }
     if (mode === "playing") {
-      const deps = {
-        Game: context
-      };
       context.emit("dispatch:input", {
         device: "replay",
         action: "AUTO_TICK",
         payload: {
-          deps
+          Game: context
         }
       });
     }
@@ -5542,13 +5480,17 @@ var tetris = (() => {
         Elements
       });
       this.Keyboard = new keyboard_default({
-        Game: this
+        Store: this.Store,
+        Game: this,
+        UI: this.UI
       });
       this.Gamepad = new gamepad_controller_default({
         Game: this
       });
       this.Replay = new replay_controller_default({
-        Game: this
+        Game: this,
+        Store: this.Store,
+        UI: this.UI
       });
     }
     selectLevel(level) {
@@ -5772,7 +5714,8 @@ var tetris = (() => {
     };
     _onStartCountdown = () => {
       countdown_default({
-        Game: this
+        Game: this,
+        UI: this.UI
       });
     };
     _onStartPaused = () => {
@@ -5784,12 +5727,15 @@ var tetris = (() => {
     _onStartClearLines = ({ linesToClear }) => {
       clear_lines_default({
         Game: this,
+        UI: this.UI,
         lines: linesToClear
       });
     };
     _onStartLevelUp = ({ level }) => {
       level_up_default({
         Game: this,
+        UI: this.UI,
+        maxLevel: this.options.Level.max,
         level
       });
     };
@@ -6030,7 +5976,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_ONE: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6042,7 +5988,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_TWO: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6054,7 +6000,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_THREE: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6066,7 +6012,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_FOUR: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6078,7 +6024,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_FIVE: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6090,7 +6036,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_SIX: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6102,7 +6048,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_SEVEN: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6114,7 +6060,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_EIGHT: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6126,7 +6072,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_NINE: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6138,7 +6084,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     LEVEL_TEN: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6150,7 +6096,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     CONFIRM: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6167,7 +6113,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     EASY: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6179,7 +6125,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     NORMAL: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6191,7 +6137,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     HARD: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6203,7 +6149,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     EXPERT: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6215,7 +6161,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     BACK: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6227,7 +6173,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     CONFIRM: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6244,7 +6190,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     MOVE_LEFT: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6259,7 +6205,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     MOVE_RIGHT: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6274,7 +6220,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     MOVE_DOWN: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6289,7 +6235,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     ROTATE: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6301,7 +6247,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     DROP: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6313,7 +6259,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     TOGGLE_PAUSED: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6325,7 +6271,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     RESTART: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6339,7 +6285,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     QUIT: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6351,7 +6297,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     TOGGLE_MUSIC: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6370,7 +6316,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     TOGGLE_PAUSED: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6392,7 +6338,7 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     CONFIRM: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6409,11 +6355,11 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     MOVE_LEFT: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
-      Game2.emit("game:move", {
+      Game2.emit("game:block:move", {
         ox: -1,
         oy: 0
       });
@@ -6424,11 +6370,11 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     MOVE_RIGHT: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
-      Game2.emit("game:move", {
+      Game2.emit("game:block:move", {
         ox: 1,
         oy: 0
       });
@@ -6439,11 +6385,11 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     MOVE_DOWN: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
-      Game2.emit("game:move", {
+      Game2.emit("game:block:move", {
         ox: 0,
         oy: 1
       });
@@ -6454,11 +6400,11 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     ROTATE: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
-      Game2.emit("game:rotate");
+      Game2.emit("game:block:rotate");
     },
     /**
      * ## 硬降（直接落地）
@@ -6466,11 +6412,11 @@ var tetris = (() => {
      * @param {object} payload - 按键事件传递的参数对象
      */
     DROP: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
-      Game2.emit("game:drop");
+      Game2.emit("game:block:drop");
     },
     /**
      * ## 自动下落
@@ -6478,7 +6424,7 @@ var tetris = (() => {
      * @param {object} payload - 命令参数
      */
     AUTO_TICK: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
@@ -6495,7 +6441,7 @@ var tetris = (() => {
      * @param {object} payload - 命令参数
      */
     CONFIRM: (payload) => {
-      const Game2 = payload?.deps?.Game;
+      const Game2 = payload?.Game;
       if (!Game2) {
         return;
       }
