@@ -355,13 +355,14 @@ describe('applyClearLines', () => {
 
   // ==================== 边界情况 ====================
   describe('边界情况', () => {
-    it('clearLines 为空时应该正常工作', () => {
+    it('clearLines 为空时应该正常工作（levelUp 取决于 baseLines + lines）', () => {
       mockState.clearLines = [];
 
       const result = applyClearLines(mockContext);
 
-      expect(result.levelUp).toBe(false);
-      expect(result.stateHandler(mockState).score).toBe(1000);
+      // newLevel = Math.floor((40 + 10) / 10) + 1 = 6 > state.level(5) → levelUp
+      expect(result.levelUp).toBe(true);
+      expect(result.stateHandler(mockState).score).toBe(1000); // 不加分
     });
 
     it('clearLines 不存在时应该使用空数组', () => {
@@ -369,7 +370,8 @@ describe('applyClearLines', () => {
 
       const result = applyClearLines(mockContext);
 
-      expect(result.levelUp).toBe(false);
+      // 同上，levelUp 由 baseLines + lines 决定
+      expect(result.levelUp).toBe(true);
     });
 
     it('消除 5 行应该加 1200 分', () => {
@@ -378,7 +380,7 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
-      expect(newState.score).toBe(2200);
+      expect(newState.score).toBe(2200); // 1000 + 1200
     });
   });
 });

@@ -1,127 +1,200 @@
 import findFullLines from '@/lib/game/logic/find-full-lines.js';
-import Game from '@/lib/game/index.js';
-import Configuration from '@/lib/configuration.js';
-
-jest.mock('@/lib/game/index.js', () => ({
-  store: {
-    getState: jest.fn(),
-  },
-}));
-
-jest.mock('@/lib/configuration.js', () => ({
-  Board: {
-    rows: 20,
-    cols: 10,
-  },
-}));
 
 describe('findFullLines', () => {
-  const ROWS = 20;
-  const COLS = 10;
-
-  const makeBoard = (filledRows = []) => {
-    const board = [];
-    for (let y = 0; y < ROWS; y++) {
-      board.push(
-        Array.from({ length: COLS }).map(() =>
-          filledRows.includes(y) ? 1 : 0,
-        ),
-      );
-    }
-    return board;
-  };
+  let mockContext;
+  let mockStore;
+  let mockState;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // 创建 20行 × 10列 的空棋盘（全为 0）
+    const emptyBoard = Array.from({ length: 20 }, () =>
+      Array.from({ length: 10 }, () => 0),
+    );
+
+    mockState = {
+      board: emptyBoard,
+    };
+
+    mockStore = {
+      getState: jest.fn().mockReturnValue(mockState),
+    };
+
+    mockContext = {
+      Store: mockStore,
+      options: {
+        Elements: {
+          Main: {
+            rows: 20,
+          },
+        },
+      },
+    };
   });
 
-  // ========== 基础检测 ==========
-  test('无满行时返回空数组', () => {
-    Game.store.getState.mockReturnValue({
-      board: makeBoard([]),
+  // ==================== 基本功能 ====================
+  describe('基本功能', () => {
+    it('应该调用 Store.getState 获取状态', () => {
+      findFullLines(mockContext);
+
+      expect(mockStore.getState).toHaveBeenCalled();
     });
 
-    const result = findFullLines();
-    expect(result).toEqual([]);
+    it('应该返回数组', () => {
+      const result = findFullLines(mockContext);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
   });
 
-  test('底下一行满行', () => {
-    Game.store.getState.mockReturnValue({
-      board: makeBoard([19]),
+  // ==================== 满行检测 ====================
+  describe('满行检测', () => {
+    it('有满行时应该返回对应行号', () => {
+      // 设置第 19 行为满行
+      mockState.board[19] = Array.from({ length: 10 }, () => '#FF0000');
+
+      const result = findFullLines(mockContext);
+
+      expect(result).toEqual([19]);
     });
 
-    const result = findFullLines();
-    expect(result).toEqual([19]);
-  });
+    it('应该返回所有满行号', () => {
+      mockState.board[17] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board[18] = Array.from({ length: 10 }, () => '#00FF00');
+      mockState.board[19] = Array.from({ length: 10 }, () => '#0000FF');
 
-  test('底部多行满行', () => {
-    Game.store.getState.mockReturnValue({
-      board: makeBoard([17, 18, 19]),
+      const result = findFullLines(mockContext);
+
+      expect(result).toEqual([19, 18, 17]); // 从底部向上，所以 19 最先
     });
 
-    const result = findFullLines();
-    expect(result).toEqual([19, 18, 17]); // 从下往上
-  });
+    it('没有满行时应该返回空数组', () => {
+      const result = findFullLines(mockContext);
 
-  test('中间行满行', () => {
-    Game.store.getState.mockReturnValue({
-      board: makeBoard([5, 10, 15]),
+      expect(result).toEqual([]);
     });
 
-    const result = findFullLines();
-    expect(result).toEqual([15, 10, 5]);
+    it('部分填充的行不应该被识别为满行', () => {
+      // 只有 9 个格子有值
+      const row = Array.from({ length: 10 }, () => '#FF0000');
+      row[5] = 0; // 一个空格
+      mockState.board[19] = row;
+
+      const result = findFullLines(mockContext);
+
+      expect(result).toEqual([]);
+    });
   });
 
-  test('全部满行', () => {
-    const allRows = Array.from({ length: ROWS }, (_, i) => i);
-    Game.store.getState.mockReturnValue({
-      board: makeBoard(allRows),
+  // ==================== 从底部向上遍历 ====================
+  describe('从底部向上遍历', () => {
+    it('应该按从底部到顶部的顺序返回行号', () => {
+      mockState.board[0] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board[10] = Array.from({ length: 10 }, () => '#00FF00');
+      mockState.board[19] = Array.from({ length: 10 }, () => '#0000FF');
+
+      const result = findFullLines(mockContext);
+
+      // 从底部向上遍历：先 19，再 10，再 0
+      expect(result).toEqual([19, 10, 0]);
     });
 
-    const result = findFullLines();
-    expect(result).toEqual(allRows.reverse());
+    it('满行不连续时应该正确收集', () => {
+      mockState.board[5] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board[15] = Array.from({ length: 10 }, () => '#00FF00');
+
+      const result = findFullLines(mockContext);
+
+      expect(result).toEqual([15, 5]);
+    });
   });
 
-  // ========== 不完整行 ==========
-  test('行中有空位不视为满行', () => {
-    const board = makeBoard([19]);
-    board[19][3] = 0; // 留一个空位
-    Game.store.getState.mockReturnValue({ board });
+  // ==================== every 判满逻辑 ====================
+  describe('every 判满逻辑', () => {
+    it('所有格子都有真值应该判定为满行', () => {
+      mockState.board[19] = Array.from({ length: 10 }, () => 'non-empty');
 
-    const result = findFullLines();
-    expect(result).toEqual([]);
-  });
+      const result = findFullLines(mockContext);
 
-  test('行中全是 0 不是满行', () => {
-    Game.store.getState.mockReturnValue({
-      board: makeBoard([]),
+      expect(result).toEqual([19]);
     });
 
-    const result = findFullLines();
-    expect(result).toEqual([]);
-  });
+    it('有一个格子为 0 就不判定为满行', () => {
+      mockState.board[19] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board[19][0] = 0;
 
-  // ========== 方块类型 ==========
-  test('不同方块值都视为满行', () => {
-    Game.store.getState.mockReturnValue({
-      board: (() => {
-        const board = makeBoard([]);
-        // 用不同数字代表不同方块类型
-        board[19] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        return board;
-      })(),
+      const result = findFullLines(mockContext);
+
+      expect(result).toEqual([]);
     });
 
-    const result = findFullLines();
-    expect(result).toEqual([19]);
+    it('有一个格子为空字符串就不判定为满行', () => {
+      mockState.board[19] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board[19][3] = '';
+
+      const result = findFullLines(mockContext);
+
+      expect(result).toEqual([]);
+    });
+
+    it('有一个格子为 null 就不判定为满行', () => {
+      mockState.board[19] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board[19][7] = null;
+
+      const result = findFullLines(mockContext);
+
+      expect(result).toEqual([]);
+    });
+
+    it('有一个格子为 undefined 就不判定为满行', () => {
+      mockState.board[19] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board[19][2] = undefined;
+
+      const result = findFullLines(mockContext);
+
+      expect(result).toEqual([]);
+    });
   });
 
-  test('falsy 值（0/undefined/null）视为空格', () => {
-    const board = makeBoard([]);
-    board[19] = [1, 0, 1, undefined, 1, null, 1, 1, 1, 1];
-    Game.store.getState.mockReturnValue({ board });
+  // ==================== 边界情况 ====================
+  describe('边界情况', () => {
+    it('空棋盘时应该返回空数组', () => {
+      const result = findFullLines(mockContext);
 
-    const result = findFullLines();
-    expect(result).toEqual([]);
+      expect(result).toEqual([]);
+    });
+
+    it('棋盘只有 1 行时应该正常检测', () => {
+      mockContext.options.Elements.Main.rows = 1;
+      mockState.board = [Array.from({ length: 10 }, () => '#FF0000')];
+
+      const result = findFullLines(mockContext);
+
+      expect(result).toEqual([0]);
+    });
+
+    it('棋盘所有行都是满行时应该返回所有行号', () => {
+      mockState.board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => '#FF0000'),
+      );
+
+      const result = findFullLines(mockContext);
+
+      expect(result).toHaveLength(20);
+      // 从底部向上
+      expect(result[0]).toBe(19);
+      expect(result[19]).toBe(0);
+    });
+
+    it('board 行宽度为 0 时 every 返回 true', () => {
+      mockContext.options.Elements.Main.rows = 1;
+      mockState.board = [[]]; // 空行，every 对空数组返回 true
+
+      const result = findFullLines(mockContext);
+
+      // 空数组的 every 总是返回 true
+      expect(result).toEqual([0]);
+    });
   });
 });

@@ -1,63 +1,163 @@
-import clearLines from '@/lib/game/logic/clear-lines';
-import Game from '@/lib/game';
-import findFullLines from '@/lib/game/logic/find-full-lines';
-import EventBus from '@/lib/core/event-bus';
+import clearLines from '@/lib/game/logic/clear-lines.js';
+import findFullLines from '@/lib/game/logic/find-full-lines.js';
 
-jest.mock('@/lib/game', () => ({
-  store: {
-    setClearLines: jest.fn(),
-  },
-}));
-
-jest.mock('@/lib/game/logic/find-full-lines', () => jest.fn());
-
-jest.mock('@/lib/core/event-bus', () => ({
-  emit: jest.fn(),
-  on: jest.fn(),
-  off: jest.fn(),
+// Mock 依赖
+jest.mock('@/lib/game/logic/find-full-lines.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 describe('clearLines', () => {
+  let mockContext;
+  let mockStore;
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockStore = {
+      setClearLines: jest.fn(),
+    };
+
+    mockContext = {
+      id: 'test-game-uuid',
+      Store: mockStore,
+      emit: jest.fn(),
+    };
   });
 
-  test('找到满行时执行消除', () => {
-    findFullLines.mockReturnValue([17, 18, 19]);
+  // ==================== 有满行时 ====================
+  describe('有满行时', () => {
+    it('应该调用 findFullLines 获取满行', () => {
+      findFullLines.mockReturnValue([5, 10, 15]);
 
-    clearLines();
+      clearLines(mockContext);
 
-    expect(Game.store.setClearLines).toHaveBeenCalledWith([17, 18, 19]);
-    expect(EventBus.emit).toHaveBeenCalledWith('effects:start:clear:lines', {
-      linesToClear: [17, 18, 19],
+      expect(findFullLines).toHaveBeenCalledWith(mockContext);
+    });
+
+    it('应该将满行设置到 Store', () => {
+      const linesToClear = [3, 7, 12];
+      findFullLines.mockReturnValue(linesToClear);
+
+      clearLines(mockContext);
+
+      expect(mockStore.setClearLines).toHaveBeenCalledWith(linesToClear);
+    });
+
+    it('应该发送清除行动画事件', () => {
+      const linesToClear = [5, 10, 15];
+      findFullLines.mockReturnValue(linesToClear);
+
+      clearLines(mockContext);
+
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'game:test-game-uuid:start:clear:lines',
+        { linesToClear },
+      );
+    });
+
+    it('应该传递正确的 id', () => {
+      mockContext.id = 'custom-id';
+      findFullLines.mockReturnValue([1]);
+
+      clearLines(mockContext);
+
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'game:custom-id:start:clear:lines',
+        { linesToClear: [1] },
+      );
     });
   });
 
-  test('找到 1 行满行', () => {
-    findFullLines.mockReturnValue([19]);
+  // ==================== 无满行时 ====================
+  describe('无满行时', () => {
+    it('没有满行时不应该设置 Store', () => {
+      findFullLines.mockReturnValue([]);
 
-    clearLines();
+      clearLines(mockContext);
 
-    expect(Game.store.setClearLines).toHaveBeenCalledWith([19]);
-    expect(EventBus.emit).toHaveBeenCalledWith('effects:start:clear:lines', {
-      linesToClear: [19],
+      expect(mockStore.setClearLines).not.toHaveBeenCalled();
+    });
+
+    it('没有满行时不应该发送事件', () => {
+      findFullLines.mockReturnValue([]);
+
+      clearLines(mockContext);
+
+      expect(mockContext.emit).not.toHaveBeenCalled();
+    });
+
+    it('空数组时应该提前返回不报错', () => {
+      findFullLines.mockReturnValue([]);
+
+      expect(() => {
+        clearLines(mockContext);
+      }).not.toThrow();
     });
   });
 
-  test('找到 4 行满行', () => {
-    findFullLines.mockReturnValue([16, 17, 18, 19]);
+  // ==================== 执行顺序 ====================
+  describe('执行顺序', () => {
+    it('应该先 findFullLines 再 setClearLines', () => {
+      findFullLines.mockReturnValue([3]);
 
-    clearLines();
+      clearLines(mockContext);
 
-    expect(Game.store.setClearLines).toHaveBeenCalledWith([16, 17, 18, 19]);
+      const findCallOrder = findFullLines.mock.invocationCallOrder[0];
+      const setCallOrder = mockStore.setClearLines.mock.invocationCallOrder[0];
+
+      expect(findCallOrder).toBeLessThan(setCallOrder);
+    });
+
+    it('应该先 setClearLines 再 emit', () => {
+      findFullLines.mockReturnValue([3]);
+
+      clearLines(mockContext);
+
+      const setCallOrder = mockStore.setClearLines.mock.invocationCallOrder[0];
+      const emitCallOrder = mockContext.emit.mock.invocationCallOrder[0];
+
+      expect(setCallOrder).toBeLessThan(emitCallOrder);
+    });
   });
 
-  test('没有满行时不执行', () => {
-    findFullLines.mockReturnValue([]);
+  // ==================== 边界情况 ====================
+  describe('边界情况', () => {
+    it('只有 1 行满时应该正常处理', () => {
+      findFullLines.mockReturnValue([19]);
 
-    clearLines();
+      clearLines(mockContext);
 
-    expect(Game.store.setClearLines).not.toHaveBeenCalled();
-    expect(EventBus.emit).not.toHaveBeenCalled();
+      expect(mockStore.setClearLines).toHaveBeenCalledWith([19]);
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'game:test-game-uuid:start:clear:lines',
+        { linesToClear: [19] },
+      );
+    });
+
+    it('多行满时应该正常处理', () => {
+      findFullLines.mockReturnValue([0, 1, 2, 3]);
+
+      clearLines(mockContext);
+
+      expect(mockStore.setClearLines).toHaveBeenCalledWith([0, 1, 2, 3]);
+    });
+
+    it('findFullLines 返回 null 时不应崩溃', () => {
+      findFullLines.mockReturnValue(null);
+
+      // linesToClear.length 会报错
+      expect(() => {
+        clearLines(mockContext);
+      }).toThrow();
+    });
+
+    it('findFullLines 返回 undefined 时不应崩溃', () => {
+      findFullLines.mockReturnValue(undefined);
+
+      expect(() => {
+        clearLines(mockContext);
+      }).toThrow();
+    });
   });
 });

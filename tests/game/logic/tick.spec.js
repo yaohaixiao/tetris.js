@@ -1,136 +1,295 @@
-import tick from '@/lib/game/logic/tick';
-import EventBus from '@/lib/core/event-bus';
-import Game from '@/lib/game';
-import move from '@/lib/game/logic/move';
-import lock from '@/lib/game/logic/lock';
-import clearLines from '@/lib/game/logic/clear-lines';
-import spawn from '@/lib/game/logic/spawn';
+import tick from '@/lib/game/logic/tick.js';
+import move from '@/lib/game/logic/move.js';
+import lock from '@/lib/game/logic/lock.js';
+import clearLines from '@/lib/game/logic/clear-lines.js';
+import spawn from '@/lib/game/logic/spawn.js';
 
-jest.mock('@/lib/core/event-bus', () => ({
-  emit: jest.fn(),
-  on: jest.fn(),
-  off: jest.fn(),
+// Mock 依赖
+jest.mock('@/lib/game/logic/move.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
-jest.mock('@/lib/game', () => ({
-  store: {
-    getMode: jest.fn(() => 'playing'),
-  },
+jest.mock('@/lib/game/logic/lock.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
-jest.mock('@/lib/game/logic/move', () => jest.fn());
-jest.mock('@/lib/game/logic/lock', () => jest.fn());
-jest.mock('@/lib/game/logic/clear-lines', () => jest.fn());
-jest.mock('@/lib/game/logic/spawn', () => jest.fn());
+jest.mock('@/lib/game/logic/clear-lines.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock('@/lib/game/logic/spawn.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 describe('tick', () => {
+  let mockContext;
+  let mockStore;
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockStore = {
+      getMode: jest.fn(),
+    };
+
+    mockContext = {
+      Store: mockStore,
+      emit: jest.fn(),
+    };
   });
 
-  // ========== mode 拦截 ==========
-  test('main-menu 模式时不执行', () => {
-    Game.store.getMode.mockReturnValue('main-menu');
-    tick(false);
+  // ==================== 模式限制 ====================
+  describe('模式限制', () => {
+    it('mode 为 playing 且未阻塞时应该正常执行', () => {
+      mockStore.getMode.mockReturnValue('playing');
+      move.mockReturnValue(true); // 移动成功，不会锁
 
-    expect(EventBus.emit).not.toHaveBeenCalled();
-    expect(move).not.toHaveBeenCalled();
-  });
+      tick(mockContext, false);
 
-  test('game-over 模式时不执行', () => {
-    Game.store.getMode.mockReturnValue('game-over');
-    tick(false);
+      expect(move).toHaveBeenCalled();
+    });
 
-    expect(move).not.toHaveBeenCalled();
-  });
+    it('mode 为 replay 且未阻塞时应该正常执行', () => {
+      mockStore.getMode.mockReturnValue('replay');
+      move.mockReturnValue(true);
 
-  test('paused 模式时不执行', () => {
-    Game.store.getMode.mockReturnValue('paused');
-    tick(false);
+      tick(mockContext, false);
 
-    expect(move).not.toHaveBeenCalled();
-  });
+      expect(move).toHaveBeenCalled();
+    });
 
-  test('isBlocked = true 时不执行', () => {
-    Game.store.getMode.mockReturnValue('playing');
-    tick(true);
+    it('mode 为 playing 但 isBlocked 为 true 时不应该执行', () => {
+      mockStore.getMode.mockReturnValue('playing');
 
-    expect(move).not.toHaveBeenCalled();
-  });
+      tick(mockContext, true);
 
-  // ========== playing 模式 ==========
-  test('playing 时发射 AUTO_TICK', () => {
-    Game.store.getMode.mockReturnValue('playing');
-    move.mockReturnValue(true);
+      expect(move).not.toHaveBeenCalled();
+    });
 
-    tick(false);
+    it('mode 为 paused 时不应该执行', () => {
+      mockStore.getMode.mockReturnValue('paused');
 
-    expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
-      device: 'replay',
-      action: 'AUTO_TICK',
-      payload: {},
+      tick(mockContext, false);
+
+      expect(move).not.toHaveBeenCalled();
+    });
+
+    it('mode 为 game-over 时不应该执行', () => {
+      mockStore.getMode.mockReturnValue('game-over');
+
+      tick(mockContext, false);
+
+      expect(move).not.toHaveBeenCalled();
+    });
+
+    it('mode 为 main-menu 时不应该执行', () => {
+      mockStore.getMode.mockReturnValue('main-menu');
+
+      tick(mockContext, false);
+
+      expect(move).not.toHaveBeenCalled();
+    });
+
+    it('mode 为 difficulty 时不应该执行', () => {
+      mockStore.getMode.mockReturnValue('difficulty');
+
+      tick(mockContext, false);
+
+      expect(move).not.toHaveBeenCalled();
     });
   });
 
-  test('replay 模式下不发射 AUTO_TICK', () => {
-    Game.store.getMode.mockReturnValue('replay');
-    move.mockReturnValue(true);
+  // ==================== playing 模式发送 AUTOTICK ====================
+  describe('playing 模式发送 AUTO_TICK', () => {
+    it('mode 为 playing 时应该发送 AUTO_TICK 事件', () => {
+      mockStore.getMode.mockReturnValue('playing');
+      move.mockReturnValue(true);
 
-    tick(false);
+      tick(mockContext, false);
 
-    expect(EventBus.emit).not.toHaveBeenCalledWith(
-      'dispatch:input',
-      expect.any(Object),
-    );
+      expect(mockContext.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'replay',
+        action: 'AUTO_TICK',
+        payload: {
+          Game: mockContext,
+        },
+      });
+    });
+
+    it('mode 为 replay 时不应该发送 AUTO_TICK 事件', () => {
+      mockStore.getMode.mockReturnValue('replay');
+      move.mockReturnValue(true);
+
+      tick(mockContext, false);
+
+      const autoTickCalls = mockContext.emit.mock.calls.filter(
+        ([event]) => event === 'dispatch:input',
+      );
+
+      expect(autoTickCalls).toHaveLength(0);
+    });
+
+    it('isBlocked 为 true 时不应该发送 AUTO_TICK 事件', () => {
+      mockStore.getMode.mockReturnValue('playing');
+
+      tick(mockContext, true);
+
+      expect(mockContext.emit).not.toHaveBeenCalled();
+    });
   });
 
-  // ========== move 成功 ==========
-  test('move 成功时不执行 lock/spawn', () => {
-    Game.store.getMode.mockReturnValue('playing');
-    move.mockReturnValue(true);
+  // ==================== 移动成功 ====================
+  describe('移动成功', () => {
+    it('move 返回 true 时不应该锁定', () => {
+      mockStore.getMode.mockReturnValue('playing');
+      move.mockReturnValue(true);
 
-    tick(false);
+      tick(mockContext, false);
 
-    expect(lock).not.toHaveBeenCalled();
-    expect(clearLines).not.toHaveBeenCalled();
-    expect(spawn).not.toHaveBeenCalled();
+      expect(lock).not.toHaveBeenCalled();
+      expect(clearLines).not.toHaveBeenCalled();
+      expect(spawn).not.toHaveBeenCalled();
+    });
+
+    it('move 返回 true 时不应该播放音效', () => {
+      mockStore.getMode.mockReturnValue('playing');
+      move.mockReturnValue(true);
+
+      tick(mockContext, false);
+
+      const soundCalls = mockContext.emit.mock.calls.filter(
+        ([event]) => event === 'audio:play:sound',
+      );
+
+      // 只有 AUTO_TICK emit，没有 FALL 音效
+      expect(soundCalls).toHaveLength(0);
+    });
+
+    it('move 应该以 (context, 0, 1) 参数调用', () => {
+      mockStore.getMode.mockReturnValue('playing');
+      move.mockReturnValue(true);
+
+      tick(mockContext, false);
+
+      expect(move).toHaveBeenCalledWith(mockContext, 0, 1);
+    });
   });
 
-  // ========== move 失败 ==========
-  test('move 失败时执行 lock → fall → clearLines → spawn', () => {
-    Game.store.getMode.mockReturnValue('playing');
-    move.mockReturnValue(false);
+  // ==================== 移动失败 → 锁定流程 ====================
+  describe('移动失败 → 锁定流程', () => {
+    beforeEach(() => {
+      mockStore.getMode.mockReturnValue('playing');
+      move.mockReturnValue(false);
+    });
 
-    tick(false);
+    it('move 返回 false 时应该锁定方块', () => {
+      tick(mockContext, false);
 
-    expect(lock).toHaveBeenCalled();
-    expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:fall');
-    expect(clearLines).toHaveBeenCalled();
-    expect(spawn).toHaveBeenCalled();
+      expect(lock).toHaveBeenCalledWith(mockContext);
+    });
+
+    it('应该播放 FALL 音效', () => {
+      tick(mockContext, false);
+
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
+        sound: 'FALL',
+      });
+    });
+
+    it('应该执行消行', () => {
+      tick(mockContext, false);
+
+      expect(clearLines).toHaveBeenCalledWith(mockContext);
+    });
+
+    it('应该生成新方块', () => {
+      tick(mockContext, false);
+
+      expect(spawn).toHaveBeenCalledWith(mockContext);
+    });
   });
 
-  test('move 失败时顺序正确', () => {
-    Game.store.getMode.mockReturnValue('playing');
-    move.mockReturnValue(false);
+  // ==================== 锁定流程执行顺序 ====================
+  describe('锁定流程执行顺序', () => {
+    beforeEach(() => {
+      mockStore.getMode.mockReturnValue('playing');
+      move.mockReturnValue(false);
+    });
 
-    tick(false);
+    it('应该先 lock 再 clearLines', () => {
+      tick(mockContext, false);
 
-    // lock 被调过
-    expect(lock).toHaveBeenCalled();
-    // fall 音效被发过
-    expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:fall');
-    // 两者都被调过
-    expect(lock).toHaveBeenCalled();
-    expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:fall');
+      const lockOrder = lock.mock.invocationCallOrder[0];
+      const clearLinesOrder = clearLines.mock.invocationCallOrder[0];
+
+      expect(lockOrder).toBeLessThan(clearLinesOrder);
+    });
+
+    it('应该先 clearLines 再 spawn', () => {
+      tick(mockContext, false);
+
+      const clearLinesOrder = clearLines.mock.invocationCallOrder[0];
+      const spawnOrder = spawn.mock.invocationCallOrder[0];
+
+      expect(clearLinesOrder).toBeLessThan(spawnOrder);
+    });
+
+    it('播放 FALL 音效应该在 lock 之后', () => {
+      tick(mockContext, false);
+
+      const lockOrder = lock.mock.invocationCallOrder[0];
+
+      const fallSoundIndex = mockContext.emit.mock.calls.findIndex(
+        ([event, payload]) =>
+          event === 'audio:play:sound' && payload.sound === 'FALL',
+      );
+
+      expect(lockOrder).toBeLessThan(
+        mockContext.emit.mock.invocationCallOrder[fallSoundIndex],
+      );
+    });
   });
 
-  test('replay 模式下 move 失败也执行 lock/spawn', () => {
-    Game.store.getMode.mockReturnValue('replay');
-    move.mockReturnValue(false);
+  // ==================== 边界情况 ====================
+  describe('边界情况', () => {
+    it('mode 为 null 时不应该执行', () => {
+      mockStore.getMode.mockReturnValue(null);
 
-    tick(false);
+      tick(mockContext, false);
 
-    expect(lock).toHaveBeenCalled();
-    expect(spawn).toHaveBeenCalled();
+      expect(move).not.toHaveBeenCalled();
+    });
+
+    it('mode 为 undefined 时不应该执行', () => {
+      mockStore.getMode.mockReturnValue(undefined);
+
+      tick(mockContext, false);
+
+      expect(move).not.toHaveBeenCalled();
+    });
+
+    it('replay 模式 move 失败也应该执行锁定流程', () => {
+      mockStore.getMode.mockReturnValue('replay');
+      move.mockReturnValue(false);
+
+      tick(mockContext, false);
+
+      expect(lock).toHaveBeenCalled();
+      expect(clearLines).toHaveBeenCalled();
+      expect(spawn).toHaveBeenCalled();
+    });
+
+    it('replay 模式 move 成功不应该锁定', () => {
+      mockStore.getMode.mockReturnValue('replay');
+      move.mockReturnValue(true);
+
+      tick(mockContext, false);
+
+      expect(lock).not.toHaveBeenCalled();
+    });
   });
 });

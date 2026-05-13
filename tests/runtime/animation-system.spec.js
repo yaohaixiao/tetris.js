@@ -14,7 +14,9 @@ describe('AnimationSystem', () => {
   });
 
   beforeEach(() => {
-    animSystem = new AnimationSystem();
+    animSystem = new AnimationSystem({
+      Game: { id: 'test-game-uuid' },
+    });
   });
 
   // ==================== 构造函数 ====================

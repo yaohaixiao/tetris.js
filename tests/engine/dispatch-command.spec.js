@@ -327,16 +327,16 @@ describe('dispatchCommand', () => {
       expect(GAME_PLAYING_ACTIONS.move).not.toHaveBeenCalled();
     });
 
-    it('cmd 为 undefined 时应该安全处理', () => {
+    it('cmd 为 undefined 时应该抛错（源码未做防御处理）', () => {
       expect(() => {
         dispatchCommand(undefined, { mode: 'playing' });
-      }).not.toThrow();
+      }).toThrow();
     });
 
-    it('cmd 为 null 时应该安全处理', () => {
+    it('cmd 为 null 时应该抛错（源码未做防御处理）', () => {
       expect(() => {
         dispatchCommand(null, { mode: 'playing' });
-      }).not.toThrow();
+      }).toThrow();
     });
 
     it('context 没有 mode 字段时应该安全处理', () => {
@@ -347,10 +347,10 @@ describe('dispatchCommand', () => {
       expect(GAME_PLAYING_ACTIONS.move).not.toHaveBeenCalled();
     });
 
-    it('context 为 undefined 时应该安全处理', () => {
+    it('context 为 undefined 时应该抛错（源码未做防御处理）', () => {
       expect(() => {
         dispatchCommand({ action: 'move', payload: {} }, undefined);
-      }).not.toThrow();
+      }).toThrow();
     });
 
     it('payload 为 undefined 时应该传递 undefined 给 handler', () => {

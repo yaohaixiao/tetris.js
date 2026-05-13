@@ -174,10 +174,10 @@ describe('LevelUpAnimation', () => {
 
       anim.updateFireworks(0.016);
 
-      // 速度衰减 2%（乘以 0.98）
+      // vx 乘了 0.98
       expect(anim.fireworks[0].vx).toBeCloseTo(initialVx * 0.98, 10);
-      // vy 还受重力影响，不能直接比较
-      expect(anim.fireworks[0].vy).toBeLessThan(initialVy * 0.98 + 0.01 * 0.016);
+      // vy 乘了 0.98 再加重力
+      expect(anim.fireworks[0].vy).toBeCloseTo(initialVy * 0.98 + 0.01 * 0.016, 10);
     });
 
     it('alpha <= 0 的粒子应该被移除', () => {
