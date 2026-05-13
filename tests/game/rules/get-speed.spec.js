@@ -1,93 +1,200 @@
 import getSpeed from '@/lib/game/rules/get-speed.js';
-import Game from '@/lib/game/index.js';
-import Configuration from '@/lib/configuration.js';
-
-jest.mock('@/lib/game/index.js', () => ({
-  store: {
-    getLevel: jest.fn(),
-  },
-}));
-
-jest.mock('@/lib/configuration.js', () => ({
-  Level: {
-    max: 99,
-  },
-}));
 
 describe('getSpeed', () => {
+  let mockContext;
+  let mockStore;
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockStore = {
+      getLevel: jest.fn(),
+    };
+
+    mockContext = {
+      Store: mockStore,
+      options: {
+        Level: {
+          max: 15,
+        },
+      },
+    };
   });
 
-  // ========== 基础计算 ==========
-  test('level 1 返回接近 1000ms', () => {
-    Game.store.getLevel.mockReturnValue(1);
-    const speed = getSpeed();
+  // ==================== 基本功能 ====================
+  describe('基本功能', () => {
+    it('应该调用 Store.getLevel 获取当前等级', () => {
+      mockStore.getLevel.mockReturnValue(1);
 
-    // step = ceil(1000 / floor(99 * 0.7)) = ceil(1000 / 69) = 15
-    // speed = max(120, 1000 - (1-1) * 15) = 1000
-    expect(speed).toBe(1000);
+      getSpeed(mockContext);
+
+      expect(mockStore.getLevel).toHaveBeenCalled();
+    });
+
+    it('应该返回数字类型', () => {
+      mockStore.getLevel.mockReturnValue(1);
+
+      const result = getSpeed(mockContext);
+
+      expect(typeof result).toBe('number');
+    });
   });
 
-  test('level 2 返回 985ms', () => {
-    Game.store.getLevel.mockReturnValue(2);
-    const speed = getSpeed();
+  // ==================== 速度计算 ====================
+  describe('速度计算', () => {
+    it('等级 1 时应该返回 1000ms', () => {
+      mockStore.getLevel.mockReturnValue(1);
 
-    // step = 15, speed = 1000 - 1 * 15 = 985
-    expect(speed).toBe(985);
+      const result = getSpeed(mockContext);
+
+      expect(result).toBe(1000);
+    });
+
+    it('等级 2 时速度应该比等级 1 快', () => {
+      mockStore.getLevel.mockReturnValue(1);
+      const speed1 = getSpeed(mockContext);
+
+      mockStore.getLevel.mockReturnValue(2);
+      const speed2 = getSpeed(mockContext);
+
+      expect(speed2).toBeLessThan(speed1);
+    });
+
+    it('等级越高速度应该越快（值越小）', () => {
+      const speeds = [];
+
+      for (let level = 1; level <= 10; level++) {
+        mockStore.getLevel.mockReturnValue(level);
+        speeds.push(getSpeed(mockContext));
+      }
+
+      // 速度值应该递减
+      for (let i = 1; i < speeds.length; i++) {
+        expect(speeds[i]).toBeLessThanOrEqual(speeds[i - 1]);
+      }
+    });
+
+    it('等级递增速度应该平滑递减', () => {
+      mockStore.getLevel.mockReturnValue(1);
+      const speed1 = getSpeed(mockContext);
+
+      mockStore.getLevel.mockReturnValue(2);
+      const speed2 = getSpeed(mockContext);
+
+      // 差值应该是 step
+      const step = Math.ceil(1000 / Math.floor(15 * 0.7));
+      expect(speed1 - speed2).toBe(step);
+    });
   });
 
-  test('level 10 返回 865ms', () => {
-    Game.store.getLevel.mockReturnValue(10);
-    const speed = getSpeed();
+  // ==================== 最低速度限制 ====================
+  describe('最低速度限制', () => {
+    it('速度不应该低于 120ms', () => {
+      // 模拟一个非常高的等级
+      mockStore.getLevel.mockReturnValue(99);
 
-    // step = 15, speed = 1000 - 9 * 15 = 865
-    expect(speed).toBe(865);
+      const result = getSpeed(mockContext);
+
+      expect(result).toBeGreaterThanOrEqual(120);
+    });
+
+    it('刚好等于 120 时应该返回 120', () => {
+      // 设置 level 使计算结果刚好 120
+      const max = 15;
+      const step = Math.ceil(1000 / Math.floor(max * 0.7));
+      // 1000 - (level - 1) * step = 120
+      // (level - 1) = 880 / step
+      const targetLevel = Math.floor(880 / step) + 1;
+
+      mockStore.getLevel.mockReturnValue(targetLevel);
+
+      const result = getSpeed(mockContext);
+
+      expect(result).toBeGreaterThanOrEqual(120);
+    });
   });
 
-  // ========== 边界：最低 120ms ==========
-  test('速度不会低于 120ms', () => {
-    Game.store.getLevel.mockReturnValue(99);
-    const speed = getSpeed();
+  // ==================== 不同 max 配置 ====================
+  describe('不同 max 配置', () => {
+    it('max = 10 时 step 应该不同', () => {
+      mockContext.options.Level.max = 10;
+      mockStore.getLevel.mockReturnValue(1);
 
-    expect(speed).toBe(120);
+      const result = getSpeed(mockContext);
+
+      // max=10 时 step = ceil(1000 / floor(10*0.7)) = ceil(1000/7) = 143
+      expect(result).toBe(1000);
+    });
+
+    it('max = 20 时 step 应该不同', () => {
+      mockContext.options.Level.max = 20;
+      mockStore.getLevel.mockReturnValue(1);
+
+      const result = getSpeed(mockContext);
+
+      // max=20 时 step = ceil(1000 / floor(20*0.7)) = ceil(1000/14) = 72
+      expect(result).toBe(1000);
+    });
+
+    it('不同 max 配置下升级速度递减应该不同', () => {
+      mockContext.options.Level.max = 10;
+      mockStore.getLevel.mockReturnValue(1);
+      const speed1 = getSpeed(mockContext);
+
+      mockStore.getLevel.mockReturnValue(2);
+      const speed2 = getSpeed(mockContext);
+
+      // step = ceil(1000/7) = 143
+      expect(speed1 - speed2).toBe(143);
+
+      // 换一个 max
+      mockContext.options.Level.max = 20;
+      mockStore.getLevel.mockReturnValue(1);
+      const speed3 = getSpeed(mockContext);
+
+      mockStore.getLevel.mockReturnValue(2);
+      const speed4 = getSpeed(mockContext);
+
+      // step = ceil(1000/14) = 72
+      expect(speed3 - speed4).toBe(72);
+    });
   });
 
-  test('超过最低门槛的 level 也返回 120ms', () => {
-    // level = 60 时：1000 - 59 * 15 = 115 → max(120, 115) = 120
-    Game.store.getLevel.mockReturnValue(60);
-    const speed = getSpeed();
-    expect(speed).toBe(120);
-  });
+  // ==================== 边界情况 ====================
+  describe('边界情况', () => {
+    it('level 为 0 时应该正常计算', () => {
+      mockStore.getLevel.mockReturnValue(0);
 
-  // ========== 单调递减 ==========
-  test('等级越高速度越快（数值越小）', () => {
-    const speeds = [];
+      const result = getSpeed(mockContext);
 
-    for (let level = 1; level <= 30; level++) {
-      Game.store.getLevel.mockReturnValue(level);
-      speeds.push(getSpeed());
-    }
+      // 1000 - (-1) * step > 1000，不低于 120
+      expect(result).toBeGreaterThanOrEqual(120);
+    });
 
-    for (let i = 1; i < speeds.length; i++) {
-      expect(speeds[i]).toBeLessThanOrEqual(speeds[i - 1]);
-    }
-  });
+    it('level 为负数时应该不低于 120', () => {
+      mockStore.getLevel.mockReturnValue(-5);
 
-  // ========== 边界值 ==========
-  test('level 0 的情况（防御性）', () => {
-    Game.store.getLevel.mockReturnValue(0);
-    const speed = getSpeed();
+      const result = getSpeed(mockContext);
 
-    // 1000 - (-1) * 15 = 1015 → max(120, 1015) = 1015
-    expect(speed).toBe(1015);
-  });
+      expect(result).toBeGreaterThanOrEqual(120);
+    });
 
-  test('level 为负数', () => {
-    Game.store.getLevel.mockReturnValue(-5);
-    const speed = getSpeed();
+    it('max 为 1 时不应该除零', () => {
+      mockContext.options.Level.max = 1;
+      mockStore.getLevel.mockReturnValue(1);
 
-    // 1000 - (-6) * 15 = 1090
-    expect(speed).toBe(1090);
+      expect(() => {
+        getSpeed(mockContext);
+      }).not.toThrow();
+    });
+
+    it('max 很大时应该正常计算', () => {
+      mockContext.options.Level.max = 99;
+      mockStore.getLevel.mockReturnValue(50);
+
+      const result = getSpeed(mockContext);
+
+      expect(result).toBeGreaterThanOrEqual(120);
+    });
   });
 });

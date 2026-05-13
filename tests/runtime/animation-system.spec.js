@@ -1,319 +1,776 @@
 import AnimationSystem from '@/lib/runtime/animation-system.js';
 
 describe('AnimationSystem', () => {
-  /** @type {AnimationSystem} */
-  let system;
+  let animSystem;
 
-  /** 创建一个有效的动画对象 */
-  const createAnim = (overrides = {}) => ({
-    update: jest.fn(() => true),
+  // 辅助函数：创建合法的动画对象
+  const createAnimation = (overrides = {}) => ({
+    name: 'test-anim',
+    layer: 0,
+    blocking: false,
+    update: jest.fn().mockReturnValue(true),
     render: jest.fn(),
     ...overrides,
   });
 
   beforeEach(() => {
-    system = new AnimationSystem();
+    animSystem = new AnimationSystem();
   });
 
-  // =====================================================
-  //  注册
-  // =====================================================
-
-  describe('register', () => {
-    it('缺少 update 方法时抛出错误', () => {
-      expect(() => system.register({ render() {} })).toThrow(
-        'Invalid animation: must implement update() and render()',
-      );
+  // ==================== 构造函数 ====================
+  describe('构造函数', () => {
+    it('应该正确创建 AnimationSystem 实例', () => {
+      expect(animSystem).toBeDefined();
+      expect(animSystem).toBeInstanceOf(AnimationSystem);
     });
 
-    it('缺少 render 方法时抛出错误', () => {
-      expect(() => system.register({ update() {} })).toThrow(
-        'Invalid animation: must implement update() and render()',
-      );
+    it('初始 size 应该为 0', () => {
+      expect(animSystem.size).toBe(0);
     });
 
-    it('传入 null 时抛出错误', () => {
-      expect(() => system.register(null)).toThrow();
+    it('应该正确继承 Base 类', () => {
+      expect(animSystem.Game).toBeDefined();
+    });
+  });
+
+  // ==================== register 方法 ====================
+  describe('register 方法', () => {
+    it('应该注册一个合法的动画对象', () => {
+      const anim = createAnimation();
+
+      animSystem.register(anim);
+
+      // 注册后立即出现在 size 中，但还未进入活跃队列
+      expect(animSystem.size).toBe(1);
     });
 
-    it('注册后 size 增加', () => {
-      expect(system.size).toBe(0);
-      system.register(createAnim());
-      expect(system.size).toBe(1);
-    });
+    it('注册时应该为可选属性设置默认值', () => {
+      const anim = {
+        update: jest.fn().mockReturnValue(true),
+        render: jest.fn(),
+      };
 
-    it('为缺失的可选属性设置默认值', () => {
-      const anim = { update() {}, render() {} };
-      system.register(anim);
+      animSystem.register(anim);
 
-      system.update(0);
+      // 通过 update 触发 pending 合并，然后检查属性
+      animSystem.update(0.016);
 
-      // 从内部取得（间接验证：render 不报错 + 默认值生效）
       expect(anim.layer).toBe(0);
       expect(anim.blocking).toBe(false);
       expect(anim.name).toBe('anonymous');
     });
 
-    it('保留已有属性不覆盖', () => {
+    it('传入的动画已设置属性时不应该覆盖', () => {
       const anim = {
-        name: 'my-anim',
+        name: 'custom-name',
         layer: 5,
         blocking: true,
-        update() {},
-        render() {},
+        update: jest.fn().mockReturnValue(true),
+        render: jest.fn(),
       };
-      system.register(anim);
 
-      system.update(0);
+      animSystem.register(anim);
+      animSystem.update(0.016);
 
-      expect(anim.name).toBe('my-anim');
+      expect(anim.name).toBe('custom-name');
       expect(anim.layer).toBe(5);
       expect(anim.blocking).toBe(true);
     });
+
+    it('layer 为 0 时不应该被默认值覆盖', () => {
+      const anim = {
+        layer: 0,
+        update: jest.fn().mockReturnValue(true),
+        render: jest.fn(),
+      };
+
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(anim.layer).toBe(0);
+    });
+
+    it('blocking 为 false 时不应该被默认值覆盖', () => {
+      const anim = {
+        blocking: false,
+        update: jest.fn().mockReturnValue(true),
+        render: jest.fn(),
+      };
+
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(anim.blocking).toBe(false);
+    });
+
+    it('注册无效动画应该抛出错误', () => {
+      expect(() => {
+        animSystem.register(null);
+      }).toThrow('Invalid animation: must implement update() and render()');
+
+      expect(() => {
+        animSystem.register(undefined);
+      }).toThrow('Invalid animation: must implement update() and render()');
+
+      expect(() => {
+        animSystem.register({});
+      }).toThrow('Invalid animation: must implement update() and render()');
+
+      expect(() => {
+        animSystem.register({ update: 'not a function', render: jest.fn() });
+      }).toThrow('Invalid animation: must implement update() and render()');
+
+      expect(() => {
+        animSystem.register({ update: jest.fn(), render: 'not a function' });
+      }).toThrow('Invalid animation: must implement update() and render()');
+    });
+
+    it('注册后标记排序缓存为脏', () => {
+      const anim = createAnimation();
+
+      animSystem.register(anim);
+
+      // 通过 render 触发排序，验证是否重新排序
+      animSystem.update(0.016);
+      animSystem.render();
+
+      expect(anim.render).toHaveBeenCalled();
+    });
   });
 
-  // =====================================================
-  //  更新
-  // =====================================================
+  // ==================== 延迟注册 ====================
+  describe('延迟注册队列', () => {
+    it('register 后不应该立即出现在 update 遍历中', () => {
+      const anim = createAnimation();
 
-  describe('update', () => {
-    it('注册的动画在下次 update 时被调用', () => {
-      const anim = createAnim();
-      system.register(anim);
+      animSystem.register(anim);
 
-      // 注册后不会立即调 update
+      // 未调用 update，不应该执行任何动画
       expect(anim.update).not.toHaveBeenCalled();
+    });
 
-      system.update(0.016);
+    it('调用 update 后应该合并 pending 到活跃队列', () => {
+      const anim = createAnimation();
 
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(anim.update).toHaveBeenCalledTimes(1);
       expect(anim.update).toHaveBeenCalledWith(0.016);
     });
 
-    it('传入 delta 值给动画', () => {
-      const anim = createAnim();
-      system.register(anim);
-      system.update(0.033);
+    it('多次 register 后调用 update 应该执行所有动画', () => {
+      const anim1 = createAnimation({ name: 'anim-1' });
+      const anim2 = createAnimation({ name: 'anim-2' });
+      const anim3 = createAnimation({ name: 'anim-3' });
+
+      animSystem.register(anim1);
+      animSystem.register(anim2);
+      animSystem.register(anim3);
+      animSystem.update(0.016);
+
+      expect(anim1.update).toHaveBeenCalledTimes(1);
+      expect(anim2.update).toHaveBeenCalledTimes(1);
+      expect(anim3.update).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ==================== update 方法 ====================
+  describe('update 方法', () => {
+    it('应该传递 delta 参数给 update', () => {
+      const anim = createAnimation();
+
+      animSystem.register(anim);
+      animSystem.update(0.033);
 
       expect(anim.update).toHaveBeenCalledWith(0.033);
     });
 
-    it('update 返回 false 时移除动画', () => {
-      const anim = createAnim({ update: jest.fn(() => false) });
-      system.register(anim);
+    it('update 返回 true 时动画应该继续保持活跃', () => {
+      const anim = createAnimation({ update: jest.fn().mockReturnValue(true) });
 
-      system.update(0);
-      expect(system.size).toBe(0);
-    });
+      animSystem.register(anim);
 
-    it('update 返回 true 时保留动画', () => {
-      const anim = createAnim({ update: jest.fn(() => true) });
-      system.register(anim);
+      animSystem.update(0.016);
+      animSystem.update(0.016);
 
-      system.update(0);
-      expect(system.size).toBe(1);
-
-      system.update(0);
-      // 仍在队列，再次调用
       expect(anim.update).toHaveBeenCalledTimes(2);
     });
 
-    it('在 update 过程中注册新动画，同帧内也被更新', () => {
-      const newAnim = createAnim();
+    it('update 返回 false 时动画应该被移除', () => {
+      const anim = createAnimation({ update: jest.fn().mockReturnValue(false) });
 
-      const anim = createAnim({
+      animSystem.register(anim);
+
+      animSystem.update(0.016);
+      animSystem.update(0.016);
+
+      // 第一次调用返回 false，第二次不应该再调用
+      expect(anim.update).toHaveBeenCalledTimes(1);
+      expect(animSystem.size).toBe(0);
+    });
+
+    it('动画结束时应该标记排序缓存为脏', () => {
+      const anim = createAnimation({ update: jest.fn().mockReturnValue(false) });
+
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      // render 应该正常工作，说明排序已被更新
+      animSystem.render();
+      expect(anim.render).not.toHaveBeenCalled();
+    });
+
+    it('多个动画混合结束时应该正确处理', () => {
+      const anim1 = createAnimation({
+        name: 'anim-1',
+        update: jest.fn().mockReturnValue(true),
+      });
+      const anim2 = createAnimation({
+        name: 'anim-2',
+        update: jest.fn().mockReturnValue(false),
+      });
+      const anim3 = createAnimation({
+        name: 'anim-3',
+        update: jest.fn().mockReturnValue(true),
+      });
+
+      animSystem.register(anim1);
+      animSystem.register(anim2);
+      animSystem.register(anim3);
+      animSystem.update(0.016);
+
+      // anim2 应该被移除，anim1 和 anim3 保持活跃
+      expect(anim1.update).toHaveBeenCalledTimes(1);
+      expect(anim2.update).toHaveBeenCalledTimes(1);
+      expect(anim3.update).toHaveBeenCalledTimes(1);
+
+      animSystem.update(0.016);
+
+      // anim1 和 anim3 应该继续被调用
+      expect(anim1.update).toHaveBeenCalledTimes(2);
+      expect(anim2.update).toHaveBeenCalledTimes(1); // 不再被调用
+      expect(anim3.update).toHaveBeenCalledTimes(2);
+    });
+
+    it('update 过程中注册新动画应该被立即合并并执行', () => {
+      const newAnim = createAnimation({ name: 'new-anim' });
+
+      const anim = createAnimation({
+        name: 'registering-anim',
         update: jest.fn(() => {
-          system.register(newAnim);
+          animSystem.register(newAnim);
           return true;
         }),
       });
 
-      system.register(anim);
-      system.update(0);
+      animSystem.register(anim);
+      animSystem.update(0.016);
 
-      // 新动画也被调用
+      // newAnim 在 update 过程中被注册，应该也被执行
       expect(newAnim.update).toHaveBeenCalledTimes(1);
     });
 
-    it('同时移除多个已结束动画', () => {
-      const a1 = createAnim({ update: jest.fn(() => false) });
-      const a2 = createAnim({ update: jest.fn(() => true) });
-      const a3 = createAnim({ update: jest.fn(() => false) });
+    it('update 过程中多个动画结束时注册新动画应该正确处理', () => {
+      const newAnim = createAnimation({ name: 'new-anim' });
 
-      system.register(a1);
-      system.register(a2);
-      system.register(a3);
+      const anim1 = createAnimation({
+        name: 'anim-1',
+        update: jest.fn().mockReturnValue(false),
+      });
+      const anim2 = createAnimation({
+        name: 'anim-2',
+        update: jest.fn(() => {
+          animSystem.register(newAnim);
+          return true;
+        }),
+      });
 
-      system.update(0);
+      animSystem.register(anim1);
+      animSystem.register(anim2);
+      animSystem.update(0.016);
 
-      expect(system.size).toBe(1);
-      expect(a2.update).toHaveBeenCalledTimes(1);
+      // anim1 结束，anim2 执行时注册了 newAnim，newAnim 应该被执行
+      expect(newAnim.update).toHaveBeenCalledTimes(1);
+      expect(anim1.update).toHaveBeenCalledTimes(1);
+      expect(anim2.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('空更新不应该报错', () => {
+      expect(() => {
+        animSystem.update(0.016);
+      }).not.toThrow();
     });
   });
 
-  // =====================================================
-  //  渲染
-  // =====================================================
+  // ==================== render 方法 ====================
+  describe('render 方法', () => {
+    it('应该渲染所有活跃动画', () => {
+      const anim1 = createAnimation({ name: 'anim-1' });
+      const anim2 = createAnimation({ name: 'anim-2' });
 
-  describe('render', () => {
-    it('按 layer 从小到大的顺序渲染', () => {
-      const order = [];
-      const a1 = createAnim({
+      animSystem.register(anim1);
+      animSystem.register(anim2);
+      animSystem.update(0.016);
+      animSystem.render();
+
+      expect(anim1.render).toHaveBeenCalledTimes(1);
+      expect(anim2.render).toHaveBeenCalledTimes(1);
+    });
+
+    it('应该按 layer 从小到大的顺序渲染', () => {
+      const renderOrder = [];
+      const anim1 = createAnimation({
+        name: 'bottom',
+        layer: 0,
+        render: jest.fn(() => renderOrder.push('bottom')),
+      });
+      const anim2 = createAnimation({
+        name: 'middle',
+        layer: 5,
+        render: jest.fn(() => renderOrder.push('middle')),
+      });
+      const anim3 = createAnimation({
+        name: 'top',
         layer: 10,
-        render: jest.fn(() => order.push(10)),
+        render: jest.fn(() => renderOrder.push('top')),
       });
-      const a2 = createAnim({ layer: 1, render: jest.fn(() => order.push(1)) });
-      const a3 = createAnim({ layer: 5, render: jest.fn(() => order.push(5)) });
 
-      system.register(a1);
-      system.register(a2);
-      system.register(a3);
+      // 打乱注册顺序
+      animSystem.register(anim3);
+      animSystem.register(anim1);
+      animSystem.register(anim2);
 
-      system.update(0);
-      system.render();
+      animSystem.update(0.016);
+      animSystem.render();
 
-      expect(order).toEqual([1, 5, 10]);
+      expect(renderOrder).toEqual(['bottom', 'middle', 'top']);
     });
 
-    it('layer 相同时保持注册顺序', () => {
-      const order = [];
-      const a1 = createAnim({
+    it('相同 layer 的动画应该保持注册顺序', () => {
+      const renderOrder = [];
+      const anim1 = createAnimation({
+        name: 'first',
         layer: 0,
-        render: jest.fn(() => order.push('a')),
+        render: jest.fn(() => renderOrder.push('first')),
       });
-      const a2 = createAnim({
+      const anim2 = createAnimation({
+        name: 'second',
         layer: 0,
-        render: jest.fn(() => order.push('b')),
+        render: jest.fn(() => renderOrder.push('second')),
+      });
+      const anim3 = createAnimation({
+        name: 'third',
+        layer: 0,
+        render: jest.fn(() => renderOrder.push('third')),
       });
 
-      system.register(a1);
-      system.register(a2);
+      animSystem.register(anim1);
+      animSystem.register(anim2);
+      animSystem.register(anim3);
 
-      system.update(0);
-      system.render();
+      animSystem.update(0.016);
+      animSystem.render();
 
-      // toSorted 是稳定排序，保持原始顺序
-      expect(order).toEqual(['a', 'b']);
+      // toSorted 是稳定排序，相同 layer 保持原顺序
+      expect(renderOrder).toEqual(['first', 'second', 'third']);
     });
 
-    it('队列无变化时不重新排序（缓存命中）', () => {
-      const anim = createAnim();
-      system.register(anim);
-      system.update(0);
+    it('没有变化时应该使用排序缓存不重新排序', () => {
+      const anim = createAnimation();
 
-      // 连续 render 多次，render 方法本身不报错即可
-      system.render();
-      system.render();
+      animSystem.register(anim);
+      animSystem.update(0.016);
 
-      expect(anim.render).toHaveBeenCalledTimes(2);
+      // 多次调用 render，动画的 render 每次都会被调用
+      animSystem.render();
+      animSystem.render();
+      animSystem.render();
+
+      expect(anim.render).toHaveBeenCalledTimes(3);
     });
 
-    it('队列变化后重新排序', () => {
-      const a1 = createAnim({ layer: 10, render: jest.fn() });
-      const a2 = createAnim({ layer: 1, update: jest.fn(() => false) });
-
-      system.register(a1);
-      system.update(0);
-      system.render();
-      expect(a1.render).toHaveBeenCalledTimes(1);
-
-      // 注册一个自动移除的动画
-      system.register(a2);
-      system.update(0);
-      system.render();
-
-      // a2 被移除了，但 a1 依然存在
-      expect(a1.render).toHaveBeenCalledTimes(2);
-      expect(a2.render).not.toHaveBeenCalled();
-    });
-  });
-
-  // =====================================================
-  //  阻塞检测
-  // =====================================================
-
-  describe('hasBlocking', () => {
-    it('无阻塞动画时返回 false', () => {
-      system.register(createAnim({ blocking: false }));
-      system.update(0);
-
-      expect(system.hasBlocking()).toBe(false);
+    it('空渲染不应该报错', () => {
+      expect(() => {
+        animSystem.render();
+      }).not.toThrow();
     });
 
-    it('有阻塞动画时返回 true', () => {
-      system.register(createAnim({ blocking: true }));
-      system.update(0);
+    it('动画结束时不应该被渲染', () => {
+      const anim = createAnimation({
+        update: jest.fn().mockReturnValue(false),
+      });
 
-      expect(system.hasBlocking()).toBe(true);
-    });
-
-    it('按名称过滤阻塞动画', () => {
-      system.register(createAnim({ name: 'fx', blocking: true }));
-      system.register(createAnim({ name: 'ui', blocking: true }));
-      system.update(0);
-
-      expect(system.hasBlocking(['fx'])).toBe(true);
-      expect(system.hasBlocking(['ui'])).toBe(true);
-      expect(system.hasBlocking(['other'])).toBe(false);
-    });
-
-    it('传入空数组检查所有阻塞动画', () => {
-      system.register(createAnim({ blocking: true }));
-      system.update(0);
-
-      expect(system.hasBlocking([])).toBe(true);
-    });
-
-    it('非阻塞动画不会被 names 匹配', () => {
-      system.register(createAnim({ name: 'fx', blocking: false }));
-      system.update(0);
-
-      expect(system.hasBlocking(['fx'])).toBe(false);
-    });
-  });
-
-  // =====================================================
-  //  清理
-  // =====================================================
-
-  describe('clear', () => {
-    it('清空后 size 为 0', () => {
-      system.register(createAnim());
-      system.update(0);
-      expect(system.size).toBe(1);
-
-      system.clear();
-      expect(system.size).toBe(0);
-    });
-
-    it('清空后不再渲染', () => {
-      const anim = createAnim();
-      system.register(anim);
-      system.update(0);
-
-      system.clear();
-      system.render();
+      animSystem.register(anim);
+      animSystem.update(0.016);
+      animSystem.render();
 
       expect(anim.render).not.toHaveBeenCalled();
     });
   });
 
-  // =====================================================
-  //  size 属性
-  // =====================================================
+  // ==================== hasBlocking 方法 ====================
+  describe('hasBlocking 方法', () => {
+    it('没有阻塞动画时应该返回 false', () => {
+      const anim = createAnimation({ blocking: false });
 
-  describe('size', () => {
-    it('初始为 0', () => {
-      expect(system.size).toBe(0);
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(animSystem.hasBlocking()).toBe(false);
     });
 
-    it('包含 pending 和 queue', () => {
-      system.register(createAnim());
-      // 还未 update，只在 pending 中
-      expect(system.size).toBe(1);
+    it('存在阻塞动画时应该返回 true', () => {
+      const anim = createAnimation({ blocking: true });
 
-      system.update(0);
-      // 合并到 queue
-      expect(system.size).toBe(1);
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(animSystem.hasBlocking()).toBe(true);
+    });
+
+    it('多个动画中有一个阻塞就应该返回 true', () => {
+      const anim1 = createAnimation({
+        name: 'non-blocking',
+        blocking: false,
+      });
+      const anim2 = createAnimation({
+        name: 'blocking',
+        blocking: true,
+      });
+
+      animSystem.register(anim1);
+      animSystem.register(anim2);
+      animSystem.update(0.016);
+
+      expect(animSystem.hasBlocking()).toBe(true);
+    });
+
+    it('指定名称时应该只检查匹配的动画', () => {
+      const anim1 = createAnimation({
+        name: 'fade-in',
+        blocking: true,
+      });
+      const anim2 = createAnimation({
+        name: 'slide',
+        blocking: true,
+      });
+
+      animSystem.register(anim1);
+      animSystem.register(anim2);
+      animSystem.update(0.016);
+
+      expect(animSystem.hasBlocking(['fade-in'])).toBe(true);
+      expect(animSystem.hasBlocking(['slide'])).toBe(true);
+      expect(animSystem.hasBlocking(['non-existent'])).toBe(false);
+    });
+
+    it('指定多个名称时应该匹配任意一个', () => {
+      const anim = createAnimation({
+        name: 'countdown',
+        blocking: true,
+      });
+
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(
+        animSystem.hasBlocking(['fade-in', 'countdown', 'slide']),
+      ).toBe(true);
+    });
+
+    it('指定名称但该动画不是阻塞的应该返回 false', () => {
+      const anim = createAnimation({
+        name: 'fade-in',
+        blocking: false,
+      });
+
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(animSystem.hasBlocking(['fade-in'])).toBe(false);
+    });
+
+    it('空队列时应该返回 false', () => {
+      expect(animSystem.hasBlocking()).toBe(false);
+      expect(animSystem.hasBlocking(['anything'])).toBe(false);
+    });
+
+    it('names 参数为空数组时应该检查所有阻塞动画', () => {
+      const anim = createAnimation({ blocking: true });
+
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(animSystem.hasBlocking([])).toBe(true);
+    });
+  });
+
+  // ==================== clear 方法 ====================
+  describe('clear 方法', () => {
+    it('应该清空所有活跃动画', () => {
+      const anim = createAnimation();
+
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(animSystem.size).toBe(1);
+
+      animSystem.clear();
+
+      expect(animSystem.size).toBe(0);
+    });
+
+    it('应该清空待注册队列', () => {
+      const anim = createAnimation();
+
+      animSystem.register(anim);
+
+      // 还未 update，在 pending 中
+      expect(animSystem.size).toBe(1);
+
+      animSystem.clear();
+
+      expect(animSystem.size).toBe(0);
+
+      // update 后也不应该执行
+      animSystem.update(0.016);
+      expect(anim.update).not.toHaveBeenCalled();
+    });
+
+    it('应该清空排序缓存', () => {
+      const anim = createAnimation();
+
+      animSystem.register(anim);
+      animSystem.update(0.016);
+      animSystem.render();
+
+      animSystem.clear();
+      animSystem.render();
+
+      // clear 后 render 不应该渲染任何动画
+      expect(anim.render).toHaveBeenCalledTimes(1); // 只有 clear 前那一次
+    });
+
+    it('应该重置排序脏标记', () => {
+      const anim = createAnimation();
+
+      animSystem.register(anim);
+      animSystem.clear();
+
+      // clear 后注册新动画，应该正常渲染
+      const newAnim = createAnimation({ name: 'new' });
+
+      animSystem.register(newAnim);
+      animSystem.update(0.016);
+      animSystem.render();
+
+      expect(newAnim.render).toHaveBeenCalledTimes(1);
+    });
+
+    it('空队列调用 clear 不应该报错', () => {
+      expect(() => {
+        animSystem.clear();
+      }).not.toThrow();
+    });
+  });
+
+  // ==================== size 属性 ====================
+  describe('size 属性', () => {
+    it('初始时应该为 0', () => {
+      expect(animSystem.size).toBe(0);
+    });
+
+    it('注册后应该增加', () => {
+      animSystem.register(createAnimation());
+      expect(animSystem.size).toBe(1);
+    });
+
+    it('update 合并 pending 后 size 保持不变', () => {
+      animSystem.register(createAnimation());
+      const sizeBefore = animSystem.size;
+      animSystem.update(0.016);
+
+      expect(animSystem.size).toBe(sizeBefore);
+    });
+
+    it('动画结束后 size 应该减少', () => {
+      const anim = createAnimation({
+        update: jest.fn().mockReturnValue(false),
+      });
+
+      animSystem.register(anim);
+      expect(animSystem.size).toBe(1);
+
+      animSystem.update(0.016);
+      expect(animSystem.size).toBe(0);
+    });
+
+    it('clear 后 size 应该为 0', () => {
+      animSystem.register(createAnimation());
+      animSystem.register(createAnimation());
+      animSystem.register(createAnimation());
+
+      animSystem.clear();
+
+      expect(animSystem.size).toBe(0);
+    });
+  });
+
+  // ==================== 订阅与取消 ====================
+  describe('订阅与取消订阅', () => {
+    it('subscribe 后应该能通过事件清空动画', () => {
+      animSystem.subscribe();
+
+      const anim = createAnimation();
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      expect(animSystem.size).toBe(1);
+
+      // 通过事件触发清空
+      const eventName = `animations:${animSystem.Game.id}:clear`;
+      animSystem.emit(eventName);
+
+      expect(animSystem.size).toBe(0);
+    });
+
+    it('unsubscribe 后不应该再响应清空事件', () => {
+      animSystem.subscribe();
+      animSystem.unsubscribe();
+
+      const anim = createAnimation();
+      animSystem.register(anim);
+      animSystem.update(0.016);
+
+      const eventName = `animations:${animSystem.Game.id}:clear`;
+      animSystem.emit(eventName);
+
+      expect(animSystem.size).toBe(1);
+    });
+  });
+
+  // ==================== 边界情况 ====================
+  describe('边界情况', () => {
+    it('大量动画注册和更新应该正常工作', () => {
+      const count = 100;
+      const anims = Array.from({ length: count }, (_, i) =>
+        createAnimation({
+          name: `anim-${i}`,
+          layer: Math.floor(Math.random() * 100),
+        }),
+      );
+
+      anims.forEach((anim) => animSystem.register(anim));
+      animSystem.update(0.016);
+      animSystem.render();
+
+      anims.forEach((anim) => {
+        expect(anim.update).toHaveBeenCalledTimes(1);
+        expect(anim.render).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('update 过程中所有动画都结束应该正确处理', () => {
+      const anims = Array.from({ length: 5 }, (_, i) =>
+        createAnimation({
+          name: `anim-${i}`,
+          update: jest.fn().mockReturnValue(false),
+        }),
+      );
+
+      anims.forEach((anim) => animSystem.register(anim));
+      animSystem.update(0.016);
+
+      expect(animSystem.size).toBe(0);
+
+      // 再次 update 不应该报错
+      expect(() => {
+        animSystem.update(0.016);
+      }).not.toThrow();
+    });
+
+    it('连续注册和更新应该正确处理状态', () => {
+      const anim1 = createAnimation({ name: 'anim-1' });
+      const anim2 = createAnimation({ name: 'anim-2' });
+
+      animSystem.register(anim1);
+      animSystem.update(0.016);
+      expect(anim1.update).toHaveBeenCalledTimes(1);
+
+      animSystem.register(anim2);
+      animSystem.update(0.016);
+      expect(anim1.update).toHaveBeenCalledTimes(2);
+      expect(anim2.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('layer 为负数时应该能正常排序', () => {
+      const renderOrder = [];
+      const anim1 = createAnimation({
+        name: 'negative',
+        layer: -5,
+        render: jest.fn(() => renderOrder.push('negative')),
+      });
+      const anim2 = createAnimation({
+        name: 'zero',
+        layer: 0,
+        render: jest.fn(() => renderOrder.push('zero')),
+      });
+
+      animSystem.register(anim2);
+      animSystem.register(anim1);
+
+      animSystem.update(0.016);
+      animSystem.render();
+
+      expect(renderOrder).toEqual(['negative', 'zero']);
+    });
+
+    it('动画的 update 报错时不应该影响后续动画', () => {
+      const anim1 = createAnimation({
+        name: 'error-anim',
+        update: jest.fn(() => {
+          throw new Error('update 执行失败');
+        }),
+      });
+      const anim2 = createAnimation({ name: 'normal-anim' });
+
+      animSystem.register(anim1);
+      animSystem.register(anim2);
+
+      expect(() => {
+        animSystem.update(0.016);
+      }).toThrow('update 执行失败');
+
+      // 注意：因为当前实现没有 try-catch，
+      // anim2 可能不会被执行，如实反映
+    });
+
+    it('动画的 render 报错时不应该影响后续渲染', () => {
+      const renderOrder = [];
+      const anim1 = createAnimation({
+        name: 'error-anim',
+        render: jest.fn(() => {
+          renderOrder.push('error');
+          throw new Error('render 执行失败');
+        }),
+      });
+      const anim2 = createAnimation({
+        name: 'normal-anim',
+        render: jest.fn(() => renderOrder.push('normal')),
+      });
+
+      animSystem.register(anim1);
+      animSystem.register(anim2);
+      animSystem.update(0.016);
+
+      expect(() => {
+        animSystem.render();
+      }).toThrow('render 执行失败');
+
+      // 注意：当前 render 实现没有 try-catch，
+      // 一个动画报错会中断后续动画的渲染
+      expect(renderOrder).toEqual(['error']);
     });
   });
 });

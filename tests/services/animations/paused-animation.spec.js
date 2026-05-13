@@ -1,142 +1,264 @@
-import PausedAnimation from '@/lib/services/animations/paused-animation';
-import EventBus from '@/lib/core/event-bus';
-
-jest.mock('@/lib/core/event-bus', () => ({
-  emit: jest.fn(),
-  on: jest.fn(),
-  off: jest.fn(),
-}));
+import PausedAnimation from '@/lib/services/animations/paused-animation.js';
 
 describe('PausedAnimation', () => {
+  let anim;
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    anim = new PausedAnimation();
+    jest.spyOn(anim, 'emit').mockImplementation(() => anim);
   });
 
-  // ========== 构造函数 ==========
-  describe('constructor', () => {
-    test('初始状态正确', () => {
-      const anim = new PausedAnimation();
+  // ==================== 构造函数 ====================
+  describe('构造函数', () => {
+    it('应该正确创建 PausedAnimation 实例', () => {
+      expect(anim).toBeDefined();
+      expect(anim).toBeInstanceOf(PausedAnimation);
+    });
 
+    it('应该设置 layer 为 500', () => {
       expect(anim.layer).toBe(500);
+    });
+
+    it('应该设置 blocking 为 true', () => {
       expect(anim.blocking).toBe(true);
+    });
+
+    it('应该设置 name 为 paused', () => {
       expect(anim.name).toBe('paused');
+    });
+
+    it('应该初始化 timer 为 0', () => {
       expect(anim.timer).toBe(0);
+    });
+
+    it('应该初始化 active 为 true', () => {
       expect(anim.active).toBe(true);
     });
   });
 
-  // ========== update ==========
-  describe('update', () => {
-    test('timer 累加', () => {
-      const anim = new PausedAnimation();
+  // ==================== update 方法 ====================
+  describe('update 方法', () => {
+    it('active 为 true 时应该返回 true', () => {
+      const result = anim.update(0.016);
+
+      expect(result).toBe(true);
+    });
+
+    it('active 为 false 时应该返回 false', () => {
+      anim.active = false;
+
+      const result = anim.update(0.016);
+
+      expect(result).toBe(false);
+    });
+
+    it('应该累加 timer', () => {
       anim.update(0.3);
-      expect(anim.timer).toBeCloseTo(0.3);
+      expect(anim.timer).toBe(0.3);
+
+      anim.update(0.5);
+      expect(anim.timer).toBe(0.8);
     });
 
-    test('timer 未满 1 秒时不播放滴答声', () => {
-      const anim = new PausedAnimation();
-      anim.update(0.9);
-      expect(EventBus.emit).not.toHaveBeenCalled();
+    it('timer 达到 1 秒时应该播放滴答音效', () => {
+      anim.update(0.6);
+      anim.update(0.5);
+
+      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
+        sound: 'SECOND_TICK',
+      });
     });
 
-    test('timer 达到 1 秒时播放滴答声并重置', () => {
-      const anim = new PausedAnimation();
-      anim.update(1);
+    it('播放音效后 timer 应该重置为 0', () => {
+      anim.update(1.0);
 
-      expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:second:tick');
       expect(anim.timer).toBe(0);
     });
 
-    test('超过 1 秒时播放并保留余量', () => {
-      const anim = new PausedAnimation();
-      anim.update(1.3);
+    it('应该每秒播放一次音效', () => {
+      // 第一秒
+      anim.update(1.0);
+      anim.emit.mockClear();
 
-      expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:second:tick');
+      // 第二秒
+      anim.update(1.0);
+
+      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
+        sound: 'SECOND_TICK',
+      });
+    });
+
+    it('timer 刚好 1 时应该触发', () => {
+      anim.update(1.0);
+
+      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
+        sound: 'SECOND_TICK',
+      });
       expect(anim.timer).toBe(0);
     });
 
-    test('连续两秒播放两次滴答声', () => {
-      const anim = new PausedAnimation();
+    it('timer 大于 1 时应该触发', () => {
+      anim.update(1.5);
 
-      anim.update(1);
-      expect(EventBus.emit).toHaveBeenCalledTimes(1);
-
-      anim.update(1);
-      expect(EventBus.emit).toHaveBeenCalledTimes(2);
-    });
-
-    test('累积多帧达到 1 秒', () => {
-      const anim = new PausedAnimation();
-
-      anim.update(0.4);
-      anim.update(0.3);
-      expect(EventBus.emit).not.toHaveBeenCalled();
-
-      anim.update(0.3);
-      expect(EventBus.emit).toHaveBeenCalledWith('audio:sounds:second:tick');
+      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
+        sound: 'SECOND_TICK',
+      });
       expect(anim.timer).toBe(0);
     });
 
-    test('active 时始终返回 true', () => {
-      const anim = new PausedAnimation();
-      expect(anim.update(0.1)).toBe(true);
-      expect(anim.update(0.5)).toBe(true);
-    });
-
-    test('active 为 false 时返回 false', () => {
-      const anim = new PausedAnimation();
+    it('active 为 false 时不应该累加 timer 和播放音效', () => {
       anim.active = false;
-      expect(anim.update(0.1)).toBe(false);
+      anim.timer = 0.9;
+
+      anim.update(0.5);
+
+      // timer 不变，不播放音效
+      expect(anim.timer).toBe(0.9);
+      expect(anim.emit).not.toHaveBeenCalled();
     });
 
-    test('active 为 false 时不触发滴答声', () => {
-      const anim = new PausedAnimation();
-      anim.active = false;
-      anim.update(1);
-      expect(EventBus.emit).not.toHaveBeenCalled();
-    });
-  });
-
-  // ========== stop ==========
-  describe('stop', () => {
-    test('设置 active 为 false', () => {
-      const anim = new PausedAnimation();
-      anim.stop();
-      expect(anim.active).toBe(false);
-    });
-
-    test('stop 后 update 返回 false', () => {
-      const anim = new PausedAnimation();
-      anim.stop();
-      expect(anim.update(0.1)).toBe(false);
-    });
-  });
-
-  // ========== render ==========
-  describe('render', () => {
-    test('设置 active 为 true', () => {
-      const anim = new PausedAnimation();
-      anim.active = false;
-      anim.render();
-      expect(anim.active).toBe(true);
-    });
-  });
-
-  // ========== 完整周期 ==========
-  describe('完整周期', () => {
-    test('active → 滴答多次 → stop → update 返回 false', () => {
-      const anim = new PausedAnimation();
-
-      // 播放 3 秒
+    it('连续多次触发音效时 timer 应该正确重置', () => {
+      // 触发 3 次音效
       for (let i = 0; i < 3; i++) {
-        anim.update(1);
+        anim.update(1.0);
       }
-      expect(EventBus.emit).toHaveBeenCalledTimes(3);
 
-      // 停止
+      expect(anim.timer).toBe(0);
+    });
+  });
+
+  // ==================== stop 方法 ====================
+  describe('stop 方法', () => {
+    it('应该将 active 设置为 false', () => {
+      anim.active = true;
+
       anim.stop();
+
       expect(anim.active).toBe(false);
-      expect(anim.update(0.1)).toBe(false);
+    });
+
+    it('stop 后 update 应该返回 false', () => {
+      anim.stop();
+
+      const result = anim.update(0.016);
+
+      expect(result).toBe(false);
+    });
+
+    it('stop 不应该发送事件', () => {
+      anim.emit.mockClear();
+
+      anim.stop();
+
+      expect(anim.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  // ==================== render 方法 ====================
+  describe('render 方法', () => {
+    it('应该将 active 设置为 true', () => {
+      anim.active = false;
+
+      anim.render();
+
+      expect(anim.active).toBe(true);
+    });
+
+    it('active 已经为 true 时 render 不受影响', () => {
+      anim.active = true;
+
+      anim.render();
+
+      expect(anim.active).toBe(true);
+    });
+
+    it('render 后 update 应该恢复返回 true', () => {
+      anim.stop();
+      expect(anim.update(0.016)).toBe(false);
+
+      anim.render();
+      expect(anim.update(0.016)).toBe(true);
+    });
+  });
+
+  // ==================== 完整生命周期 ====================
+  describe('完整生命周期', () => {
+    it('应该支持 pause → resume → pause 的流程', () => {
+      // 暂停中
+      let alive = anim.update(0.016);
+      expect(alive).toBe(true);
+      expect(anim.active).toBe(true);
+
+      // 恢复
+      anim.stop();
+      alive = anim.update(0.016);
+      expect(alive).toBe(false);
+      expect(anim.active).toBe(false);
+
+      // 再次暂停（render 重置 active）
+      anim.render();
+      alive = anim.update(0.016);
+      expect(alive).toBe(true);
+      expect(anim.active).toBe(true);
+    });
+
+    it('长时间暂停应该持续播放滴答声', () => {
+      let tickCount = 0;
+
+      anim.emit.mockImplementation((event, payload) => {
+        if (event === 'audio:play:sound' && payload.sound === 'SECOND_TICK') {
+          tickCount++;
+        }
+        return anim;
+      });
+
+      // 模拟 5 秒暂停
+      for (let i = 0; i < 5; i++) {
+        anim.update(1.0);
+      }
+
+      expect(tickCount).toBe(5);
+    });
+  });
+
+  // ==================== 边界情况 ====================
+  describe('边界情况', () => {
+    it('delta 为 0 时 timer 不变', () => {
+      anim.update(0);
+
+      expect(anim.timer).toBe(0);
+      expect(anim.emit).not.toHaveBeenCalled();
+    });
+
+    it('delta 为负数时 timer 会减少', () => {
+      anim.update(0.5);
+      expect(anim.timer).toBe(0.5);
+
+      anim.update(-0.3);
+      expect(anim.timer).toBe(0.2);
+    });
+
+    it('超大 delta 时只触发一次音效', () => {
+      anim.emit.mockClear();
+
+      anim.update(100);
+
+      // timer 重置为 0，只触发一次
+      expect(anim.timer).toBe(0);
+      expect(anim.emit).toHaveBeenCalledTimes(1);
+    });
+
+    it('从 closeTo(1) 累加应触发音效', () => {
+      anim.update(0.999);
+      expect(anim.emit).not.toHaveBeenCalled();
+
+      anim.update(0.002);
+      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
+        sound: 'SECOND_TICK',
+      });
+      expect(anim.timer).toBe(0);
     });
   });
 });

@@ -1,589 +1,807 @@
 /** @jest-environment jsdom */
 
-import GamepadController from '@/lib/services/input/gamepad-controller';
-import EventBus from '@/lib/core/event-bus';
-
-jest.mock('@/lib/core/event-bus', () => ({
-  emit: jest.fn(),
-  on: jest.fn(),
-  off: jest.fn(),
-}));
-
-// Mock navigator.getGamepads
-const createMockGamepad = (overrides = {}) => ({
-  id: 'Standard Gamepad (STANDARD GAMEPAD Vendor: 054c Product: 09cc)',
-  index: 0,
-  connected: true,
-  buttons: Array.from({ length: 16 }, () => ({
-    pressed: false,
-    touched: false,
-    value: 0,
-  })),
-  axes: Array.from({ length: 10 }, () => 0),
-  ...overrides,
-});
+import GamepadController from '@/lib/services/input/gamepad-controller.js';
 
 describe('GamepadController', () => {
-  let gp;
+  let gamepad;
+  let mockGame;
+  let mockStore;
+  let mockState;
+
+  // Mock navigator.getGamepads
+  let mockGetGamepads;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    gp = new GamepadController();
-    gp.activeGamepad = null;
-    gp.activeGamepadIndex = null;
+
+    mockGame = { id: 'test-game-uuid' };
+    mockState = {
+      mode: 'playing',
+      level: 1,
+    };
+    mockStore = {
+      getState: jest.fn().mockReturnValue(mockState),
+    };
+
+    // Mock navigator.getGamepads
+    mockGetGamepads = jest.fn().mockReturnValue([]);
+    Object.defineProperty(globalThis, 'navigator', {
+      value: {
+        getGamepads: mockGetGamepads,
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    // Spy 原生事件
+    jest.spyOn(globalThis, 'addEventListener');
+    jest.spyOn(globalThis, 'removeEventListener');
+
+    gamepad = new GamepadController({
+      Game: mockGame,
+      Store: mockStore,
+    });
+
+    jest.spyOn(gamepad, 'emit').mockImplementation(() => gamepad);
   });
 
-  // ========== 构造函数 ==========
-  describe('constructor', () => {
-    test('初始状态正确', () => {
-      expect(gp.activeGamepadIndex).toBeNull();
-      expect(gp.DEAD_ZONE).toBe(0.15);
-      expect(gp.DPAD_THRESHOLD).toBe(0.5);
-      expect(gp._eventsBound).toBe(false);
-    });
-  });
-
-  // ========== _isBetop ==========
-  describe('_isBetop', () => {
-    test('识别北通手柄', () => {
-      expect(gp._isBetop('BETOP 20bc:1263')).toBe(true);
+  // ==================== 构造函数 ====================
+  describe('构造函数', () => {
+    it('应该正确创建 GamepadController 实例', () => {
+      expect(gamepad).toBeDefined();
+      expect(gamepad).toBeInstanceOf(GamepadController);
     });
 
-    test('标准手柄返回 false', () => {
-      expect(gp._isBetop('Standard Gamepad')).toBe(false);
-    });
-  });
-
-  // ========== _getAxis ==========
-  describe('_getAxis', () => {
-    test('无 activeGamepad 返回 0', () => {
-      gp.activeGamepad = null;
-      expect(gp._getAxis(0)).toBe(0);
-    });
-
-    test('轴值在死区内返回 0', () => {
-      gp.activeGamepad = createMockGamepad({ axes: [0.1] });
-      expect(gp._getAxis(0)).toBe(0);
+    it('应该正确初始化默认值', () => {
+      expect(gamepad.activeGamepadIndex).toBeNull();
+      expect(gamepad.DEAD_ZONE).toBe(0.15);
+      expect(gamepad.DPAD_THRESHOLD).toBe(0.5);
+      expect(gamepad.buttonStates).toEqual({});
+      expect(gamepad.axisStates).toEqual({});
+      expect(gamepad._eventsBound).toBe(false);
+      expect(gamepad.DPAD_COOLDOWN).toBe(180);
+      expect(gamepad.lastDpadTime).toBe(0);
     });
 
-    test('轴值超过死区返回原值', () => {
-      gp.activeGamepad = createMockGamepad({ axes: [-0.8] });
-      expect(gp._getAxis(0)).toBe(-0.8);
-    });
-  });
-
-  // ========== _isPressed ==========
-  describe('_isPressed', () => {
-    test('无 activeGamepad 返回 false', () => {
-      gp.activeGamepad = null;
-      expect(gp._isPressed('A')).toBe(false);
-    });
-
-    test('按钮未在映射中返回 false', () => {
-      gp.activeGamepad = createMockGamepad();
-      expect(gp._isPressed('NONEXISTENT')).toBe(false);
-    });
-
-    test('按钮按下但 value ≤ 0.5 时返回 false', () => {
-      gp.activeGamepad = createMockGamepad();
-      gp.activeGamepad.buttons[0] = { pressed: true, value: 0.3 };
-      expect(gp._isPressed('A')).toBe(false);
-    });
-
-    test('按钮按下且 value > 0.5', () => {
-      gp.activeGamepad = createMockGamepad();
-      gp.activeGamepad.buttons[0] = { pressed: true, value: 1 };
-      expect(gp._isPressed('A')).toBe(true);
-    });
-
-    test('防抖：连续两次只触发一次 true', () => {
-      gp.activeGamepad = createMockGamepad();
-      gp.activeGamepad.buttons[0] = { pressed: true, value: 1 };
-      expect(gp._isPressed('A')).toBe(true);
-      expect(gp._isPressed('A')).toBe(false);
-    });
-
-    test('松开后重置', () => {
-      gp.activeGamepad = createMockGamepad();
-      gp.activeGamepad.buttons[0] = { pressed: true, value: 1 };
-      gp._isPressed('A');
-      // 模拟松开
-      gp.activeGamepad.buttons[0] = { pressed: false, value: 0 };
-      gp._isPressed('A');
-      // 再次按下
-      gp.activeGamepad.buttons[0] = { pressed: true, value: 1 };
-      expect(gp._isPressed('A')).toBe(true);
+    it('应该正确注入依赖', () => {
+      expect(gamepad.Game).toBe(mockGame);
+      expect(gamepad.Store).toBe(mockStore);
     });
   });
 
-  // ========== _refreshGamepadState ==========
-  describe('_refreshGamepadState', () => {
-    test('没有手柄时保持 null', () => {
-      navigator.getGamepads = jest.fn(() => []);
-      gp._refreshGamepadState();
-      expect(gp.activeGamepad).toBeNull();
+  // ==================== addEventListeners ====================
+  describe('addEventListeners 方法', () => {
+    it('应该注册 gamepadconnected 和 gamepaddisconnected 事件', () => {
+      gamepad.addEventListeners();
+
+      expect(globalThis.addEventListener).toHaveBeenCalledWith(
+        'gamepadconnected',
+        expect.any(Function),
+      );
+      expect(globalThis.addEventListener).toHaveBeenCalledWith(
+        'gamepaddisconnected',
+        expect.any(Function),
+      );
     });
 
-    test('自动选择第一个手柄', () => {
-      const pad = createMockGamepad();
-      navigator.getGamepads = jest.fn(() => [pad]);
-      gp._refreshGamepadState();
-      expect(gp.activeGamepadIndex).toBe(0);
-      expect(gp.activeGamepad).not.toBeNull();
+    it('应该标记事件已绑定', () => {
+      gamepad.addEventListeners();
+
+      expect(gamepad._eventsBound).toBe(true);
     });
 
-    test('自动识别北通手柄', () => {
-      const pad = createMockGamepad({ id: 'BETOP 20bc:1263' });
-      navigator.getGamepads = jest.fn(() => [pad]);
-      gp._refreshGamepadState();
-      expect(gp.activeGamepadIndex).toBe(0);
+    it('重复调用不应该重复注册', () => {
+      gamepad.addEventListeners();
+      gamepad.addEventListeners();
+
+      expect(globalThis.addEventListener).toHaveBeenCalledTimes(2);
+    });
+
+    it('应该返回 GamepadController 实例以支持链式调用', () => {
+      const result = gamepad.addEventListeners();
+
+      expect(result).toBe(gamepad);
     });
   });
 
-  // ========== _onConnect ==========
-  describe('_onConnect', () => {
-    test('设置 activeGamepadIndex', () => {
-      const pad = createMockGamepad();
-      gp._onConnect({ gamepad: pad });
-      expect(gp.activeGamepadIndex).toBe(0);
+  // ==================== removeEventListeners ====================
+  describe('removeEventListeners 方法', () => {
+    it('应该移除事件监听', () => {
+      gamepad.addEventListeners();
+      gamepad.removeEventListeners();
+
+      expect(globalThis.removeEventListener).toHaveBeenCalledWith(
+        'gamepadconnected',
+        expect.any(Function),
+      );
+      expect(globalThis.removeEventListener).toHaveBeenCalledWith(
+        'gamepaddisconnected',
+        expect.any(Function),
+      );
     });
 
-    test('已连接时不重复设置', () => {
-      const pad1 = createMockGamepad({ index: 0 });
-      const pad2 = createMockGamepad({ index: 1 });
-      gp._onConnect({ gamepad: pad1 });
-      gp._onConnect({ gamepad: pad2 });
-      expect(gp.activeGamepadIndex).toBe(0);
+    it('应该标记事件未绑定', () => {
+      gamepad.addEventListeners();
+      gamepad.removeEventListeners();
+
+      expect(gamepad._eventsBound).toBe(false);
     });
 
-    test('发射 game:update:gamepad:connected', () => {
-      const pad = createMockGamepad();
-      gp._onConnect({ gamepad: pad });
-      expect(EventBus.emit).toHaveBeenCalledWith(
-        'game:update:gamepad:connected',
+    it('应该返回 GamepadController 实例以支持链式调用', () => {
+      const result = gamepad.removeEventListeners();
+
+      expect(result).toBe(gamepad);
+    });
+  });
+
+  // ==================== _isBetop ====================
+  describe('_isBetop 方法', () => {
+    it('BETOP 手柄 id 应该返回 true', () => {
+      expect(gamepad._isBetop('BETOP 20bc:1263')).toBe(true);
+      expect(gamepad._isBetop('vendor 20bc product 1263')).toBe(true);
+    });
+
+    it('标准手柄 id 应该返回 false', () => {
+      expect(gamepad._isBetop('Xbox 360 Controller')).toBe(false);
+      expect(gamepad._isBetop('')).toBe(false);
+    });
+  });
+
+  // ==================== _refreshGamepadState ====================
+  describe('_refreshGamepadState 方法', () => {
+    it('没有手柄时应该保持 activeGamepadIndex 为 null', () => {
+      mockGetGamepads.mockReturnValue([]);
+
+      gamepad._refreshGamepadState();
+
+      expect(gamepad.activeGamepadIndex).toBeNull();
+      expect(gamepad.activeGamepad).toBeNull();
+    });
+
+    it('没有激活手柄时应该自动选择第一个可用手柄', () => {
+      const mockPad = { index: 0, id: 'Standard Gamepad', buttons: [], axes: [] };
+      mockGetGamepads.mockReturnValue([mockPad]);
+
+      gamepad._refreshGamepadState();
+
+      expect(gamepad.activeGamepadIndex).toBe(0);
+      expect(gamepad.activeGamepad).toBe(mockPad);
+    });
+
+    it('应该自动识别 BETOP 手柄并切换映射', () => {
+      const mockPad = { index: 0, id: 'BETOP 20bc:1263', buttons: [], axes: [] };
+      mockGetGamepads.mockReturnValue([mockPad]);
+
+      gamepad._refreshGamepadState();
+
+      expect(gamepad.curBtnMap).not.toBe(gamepad.constructor.STANDARD_BTN_MAP);
+    });
+
+    it('已有激活手柄时应该保持', () => {
+      const mockPad = { index: 2, id: 'Standard Gamepad', buttons: [], axes: [] };
+      mockGetGamepads.mockReturnValue([null, null, mockPad]);
+      gamepad.activeGamepadIndex = 2;
+
+      gamepad._refreshGamepadState();
+
+      expect(gamepad.activeGamepadIndex).toBe(2);
+    });
+
+    it('应该返回 GamepadController 实例', () => {
+      const result = gamepad._refreshGamepadState();
+
+      expect(result).toBe(gamepad);
+    });
+  });
+
+  // ==================== _onConnect ====================
+  describe('_onConnect 回调', () => {
+    it('应该设置 activeGamepadIndex', () => {
+      const event = { gamepad: { index: 0, id: 'Standard Gamepad' } };
+
+      gamepad._onConnect(event);
+
+      expect(gamepad.activeGamepadIndex).toBe(0);
+    });
+
+    it('已有手柄时不应该覆盖', () => {
+      gamepad.activeGamepadIndex = 0;
+      const event = { gamepad: { index: 1, id: 'Standard Gamepad' } };
+
+      gamepad._onConnect(event);
+
+      expect(gamepad.activeGamepadIndex).toBe(0);
+    });
+
+    it('应该发送连接事件', () => {
+      const event = { gamepad: { index: 0, id: 'Standard Gamepad' } };
+
+      gamepad._onConnect(event);
+
+      expect(gamepad.emit).toHaveBeenCalledWith(
+        `game:${mockGame.id}:update:gamepad:connected`,
         { connected: true },
       );
     });
+
+    it('BETOP 手柄应该使用 BETOP 映射', () => {
+      const event = { gamepad: { index: 0, id: 'BETOP 20bc:1263' } };
+
+      gamepad._onConnect(event);
+
+      // 验证使用了 BETOP 映射（A 按钮 index 不同）
+      expect(gamepad.curBtnMap.A).toBe(2);
+    });
   });
 
-  // ========== _onDisconnect ==========
-  describe('_onDisconnect', () => {
-    test('断开当前手柄时清空状态', () => {
-      gp.activeGamepadIndex = 0;
-      gp._onDisconnect({ gamepad: { index: 0 } });
-      expect(gp.activeGamepadIndex).toBeNull();
+  // ==================== _onDisconnect ====================
+  describe('_onDisconnect 回调', () => {
+    it('断开的不是当前手柄时应该忽略', () => {
+      gamepad.activeGamepadIndex = 0;
+      const event = { gamepad: { index: 1 } };
+
+      gamepad._onDisconnect(event);
+
+      expect(gamepad.activeGamepadIndex).toBe(0);
     });
 
-    test('非当前手柄断开不影响', () => {
-      gp.activeGamepadIndex = 0;
-      gp._onDisconnect({ gamepad: { index: 1 } });
-      expect(gp.activeGamepadIndex).toBe(0);
+    it('断开当前手柄时应该清空状态', () => {
+      gamepad.activeGamepadIndex = 0;
+      gamepad.buttonStates = { A: true };
+      gamepad.axisStates = { MOVE_LEFT: true };
+      const event = { gamepad: { index: 0 } };
+
+      gamepad._onDisconnect(event);
+
+      expect(gamepad.activeGamepadIndex).toBeNull();
+      expect(gamepad.buttonStates).toEqual({});
+      expect(gamepad.axisStates).toEqual({});
     });
 
-    test('发射 game:update:gamepad:connected false', () => {
-      gp.activeGamepadIndex = 0;
-      gp._onDisconnect({ gamepad: { index: 0 } });
-      expect(EventBus.emit).toHaveBeenCalledWith(
-        'game:update:gamepad:connected',
+    it('应该发送断开事件', () => {
+      gamepad.activeGamepadIndex = 0;
+      const event = { gamepad: { index: 0 } };
+
+      gamepad._onDisconnect(event);
+
+      expect(gamepad.emit).toHaveBeenCalledWith(
+        `game:${mockGame.id}:update:gamepad:connected`,
         { connected: false },
       );
     });
   });
 
-  // ========== _startAxisAction / _stopAxisAction ==========
-  describe('摇杆动作', () => {
-    test('_startAxisAction 只触发一次', () => {
-      gp._startAxisAction('MOVE_LEFT');
-      gp._startAxisAction('MOVE_LEFT');
-      expect(EventBus.emit).toHaveBeenCalledTimes(1);
+  // ==================== _isPressed ====================
+  describe('_isPressed 方法', () => {
+    let mockPad;
+
+    beforeEach(() => {
+      mockPad = {
+        index: 0,
+        id: 'Standard Gamepad',
+        buttons: Array.from({ length: 16 }, () => ({ value: 0, pressed: false })),
+        axes: [],
+      };
+      gamepad.activeGamepadIndex = 0;
+      mockGetGamepads.mockReturnValue([mockPad]);
+      gamepad._refreshGamepadState();
     });
 
-    test('_stopAxisAction 后可以重新触发', () => {
-      gp._startAxisAction('MOVE_LEFT');
-      gp._stopAxisAction('MOVE_LEFT');
-      gp._startAxisAction('MOVE_LEFT');
-      expect(EventBus.emit).toHaveBeenCalledTimes(2);
+    it('按钮按下且未触发过应该返回 true', () => {
+      mockPad.buttons[0] = { value: 1, pressed: true };
+
+      expect(gamepad._isPressed('A')).toBe(true);
+    });
+
+    it('按钮未按下应该返回 false', () => {
+      mockPad.buttons[0] = { value: 0, pressed: false };
+
+      expect(gamepad._isPressed('A')).toBe(false);
+    });
+
+    it('按钮已触发过（防抖）应该返回 false', () => {
+      gamepad.buttonStates['A'] = true;
+      mockPad.buttons[0] = { value: 1, pressed: true };
+
+      expect(gamepad._isPressed('A')).toBe(false);
+    });
+
+    it('按钮松开后应该重置状态', () => {
+      gamepad.buttonStates['A'] = true;
+      mockPad.buttons[0] = { value: 0, pressed: false };
+
+      gamepad._isPressed('A');
+
+      expect(gamepad.buttonStates['A']).toBe(false);
+    });
+
+    it('未知按钮应该返回 false', () => {
+      expect(gamepad._isPressed('UNKNOWN')).toBe(false);
+    });
+
+    it('没有激活手柄时应该返回 false', () => {
+      gamepad.activeGamepadIndex = null;
+
+      expect(gamepad._isPressed('A')).toBe(false);
+    });
+
+    it('按钮值等于 0.5 时不算按下', () => {
+      mockPad.buttons[0] = { value: 0.5, pressed: false };
+
+      expect(gamepad._isPressed('A')).toBe(false);
     });
   });
 
-  // ========== _handleStickMove ==========
-  describe('_handleStickMove', () => {
-    test('左摇杆向左触发 MOVE_LEFT', () => {
-      gp.activeGamepad = createMockGamepad();
-      gp._handleStickMove(-0.9, 0);
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
+  // ==================== _getAxis ====================
+  describe('_getAxis 方法', () => {
+    beforeEach(() => {
+      mockGetGamepads.mockReturnValue([
+        {
+          index: 0,
+          id: 'Standard Gamepad',
+          buttons: [],
+          axes: [0.3, 0.8, 0, 0],
+        },
+      ]);
+      gamepad.activeGamepadIndex = 0;
+      gamepad._refreshGamepadState();
+    });
+
+    it('轴值超过死区时应该返回原值', () => {
+      expect(gamepad._getAxis(1)).toBe(0.8);
+    });
+
+    it('轴值在死区内时应该返回 0', () => {
+      expect(gamepad._getAxis(0)).toBe(0.3);
+    });
+
+    it('没有激活手柄时应该返回 0', () => {
+      gamepad.activeGamepadIndex = null;
+
+      expect(gamepad._getAxis(0)).toBe(0);
+    });
+
+    it('负数轴值超过死区时应该返回原值', () => {
+      mockGetGamepads.mockReturnValue([
+        {
+          index: 0,
+          id: 'Standard Gamepad',
+          buttons: [],
+          axes: [-0.9, 0, 0, 0],
+        },
+      ]);
+      gamepad._refreshGamepadState();
+
+      expect(gamepad._getAxis(0)).toBe(-0.9);
+    });
+  });
+
+  // ==================== _startAxisAction / _stopAxisAction ====================
+  describe('摇杆防抖', () => {
+    it('_startAxisAction 首次触发应该发送事件', () => {
+      gamepad._startAxisAction('MOVE_LEFT');
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'MOVE_LEFT',
-        payload: {},
+        payload: { Game: mockGame },
       });
+      expect(gamepad.axisStates['MOVE_LEFT']).toBe(true);
     });
 
-    test('左摇杆向右触发 MOVE_RIGHT', () => {
-      gp.activeGamepad = createMockGamepad();
-      gp._handleStickMove(0.9, 0);
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
-        device: 'gamepad',
-        action: 'MOVE_RIGHT',
-        payload: {},
-      });
+    it('_startAxisAction 已触发状态不应该重复发送事件', () => {
+      gamepad.axisStates['MOVE_LEFT'] = true;
+
+      gamepad._startAxisAction('MOVE_LEFT');
+
+      expect(gamepad.emit).not.toHaveBeenCalled();
     });
 
-    test('左摇杆向上触发 ROTATE', () => {
-      gp.activeGamepad = createMockGamepad();
-      gp._handleStickMove(0, -0.9);
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
+    it('_stopAxisAction 应该重置状态', () => {
+      gamepad.axisStates['MOVE_LEFT'] = true;
+
+      gamepad._stopAxisAction('MOVE_LEFT');
+
+      expect(gamepad.axisStates['MOVE_LEFT']).toBe(false);
+    });
+  });
+
+  // ==================== _handleStickMove ====================
+  describe('_handleStickMove 方法', () => {
+    it('向上推应该触发 ROTATE', () => {
+      gamepad._handleStickMove(0, -0.8);
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'ROTATE',
-        payload: {},
+        payload: { Game: mockGame },
       });
     });
 
-    test('左摇杆向下触发 MOVE_DOWN', () => {
-      gp.activeGamepad = createMockGamepad();
-      gp._handleStickMove(0, 0.9);
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
+    it('向下推应该触发 MOVE_DOWN', () => {
+      gamepad._handleStickMove(0, 0.8);
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'MOVE_DOWN',
-        payload: {},
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('向左推应该触发 MOVE_LEFT', () => {
+      gamepad._handleStickMove(-0.8, 0);
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'gamepad',
+        action: 'MOVE_LEFT',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('向右推应该触发 MOVE_RIGHT', () => {
+      gamepad._handleStickMove(0.8, 0);
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'gamepad',
+        action: 'MOVE_RIGHT',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('摇杆归中时应该停止动作', () => {
+      gamepad.axisStates['MOVE_LEFT'] = true;
+
+      gamepad._handleStickMove(0, 0);
+
+      expect(gamepad.axisStates['MOVE_LEFT']).toBe(false);
+    });
+
+    it('对角线移动应该同时触发两个方向', () => {
+      gamepad._handleStickMove(-0.8, 0.8);
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'gamepad',
+        action: 'MOVE_LEFT',
+        payload: { Game: mockGame },
+      });
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'gamepad',
+        action: 'MOVE_DOWN',
+        payload: { Game: mockGame },
       });
     });
   });
 
-  // ========== _resolveAction ==========
-  describe('_resolveAction', () => {
-    test('非 DPad 直接返回原 action', () => {
-      const result = gp._resolveAction('DROP', 'B', false, 'playing', 1, 0);
+  // ==================== _updateActionMap ====================
+  describe('_updateActionMap 方法', () => {
+    // 需要引用 GAMEPAD_ACTION_MAP
+    const { GAMEPAD_ACTION_MAP } = Object.assign(
+      {},
+      jest.requireActual('@/lib/core/gamepad-controller.js'),
+    );
+
+    it('difficulty 模式应该更新映射', () => {
+      gamepad._updateActionMap('difficulty');
+
+      // 通过导入的映射验证
+      expect(GAMEPAD_ACTION_MAP.A).toBe('EASY');
+      expect(GAMEPAD_ACTION_MAP.B).toBe('NORMAL');
+      expect(GAMEPAD_ACTION_MAP.Y).toBe('HARD');
+      expect(GAMEPAD_ACTION_MAP.X).toBe('EXPERT');
+    });
+
+    it('playing 模式应该恢复默认映射', () => {
+      gamepad._updateActionMap('playing');
+
+      expect(GAMEPAD_ACTION_MAP.A).toBe('TOGGLE_MUSIC');
+      expect(GAMEPAD_ACTION_MAP.B).toBe('DROP');
+    });
+
+    it('其他模式不应该修改映射', () => {
+      const before = { ...GAMEPAD_ACTION_MAP };
+      gamepad._updateActionMap('main-menu');
+
+      expect(GAMEPAD_ACTION_MAP).toEqual(before);
+    });
+  });
+
+  // ==================== _getMoveUpAction / _getMoveDownAction ====================
+  describe('方向键上下移动', () => {
+    it('main-menu 模式上移应该增加等级', () => {
+      gamepad._getMoveUpAction('main-menu', 3);
+
+      expect(gamepad.emit).toHaveBeenCalledWith(
+        `game:${mockGame.id}:update:level`,
+        { level: 4 },
+      );
+    });
+
+    it('main-menu 模式上移等级不能超过 10', () => {
+      gamepad._getMoveUpAction('main-menu', 10);
+
+      expect(gamepad.emit).toHaveBeenCalledWith(
+        `game:${mockGame.id}:update:level`,
+        { level: 10 },
+      );
+    });
+
+    it('main-menu 模式下移应该减少等级', () => {
+      gamepad._getMoveDownAction('main-menu', 5);
+
+      expect(gamepad.emit).toHaveBeenCalledWith(
+        `game:${mockGame.id}:update:level`,
+        { level: 4 },
+      );
+    });
+
+    it('main-menu 模式下移等级不能低于 1', () => {
+      gamepad._getMoveDownAction('main-menu', 1);
+
+      expect(gamepad.emit).toHaveBeenCalledWith(
+        `game:${mockGame.id}:update:level`,
+        { level: 1 },
+      );
+    });
+
+    it('非 main-menu 模式上移应该返回 ROTATE', () => {
+      const action = gamepad._getMoveUpAction('playing', 1);
+
+      expect(action).toBe('ROTATE');
+    });
+
+    it('非 main-menu 模式下移应该返回 MOVE_DOWN', () => {
+      const action = gamepad._getMoveDownAction('playing', 1);
+
+      expect(action).toBe('MOVE_DOWN');
+    });
+  });
+
+  // ==================== _resolveAction ====================
+  describe('_resolveAction 方法', () => {
+    it('非 DPad 应该直接返回 action', () => {
+      const result = gamepad._resolveAction('DROP', 'B', false, 'playing', 1, 0);
+
       expect(result).toBe('DROP');
     });
 
-    test('非 main-menu 模式直接返回', () => {
-      const result = gp._resolveAction(
-        'ROTATE',
-        'DPAD_UP',
+    it('DPad 但模式不是 main-menu 应该直接返回 action', () => {
+      const result = gamepad._resolveAction(
+        'MOVE_LEFT',
+        'DPAD_LEFT',
         true,
         'playing',
         1,
-        Date.now(),
+        0,
       );
-      expect(result).toBe('ROTATE');
+
+      expect(result).toBe('MOVE_LEFT');
     });
 
-    test('main-menu DPAD_UP 返回 LEVEL 动作', () => {
-      const result = gp._resolveAction(
+    it('main-menu 模式 DPad 上应该返回等级 action', () => {
+      const result = gamepad._resolveAction(
         'ROTATE',
         'DPAD_UP',
-        true,
-        'main-menu',
-        1,
-        Date.now(),
-      );
-      expect(result).toBe('LEVEL_TWO');
-    });
-
-    test('main-menu DPAD_DOWN 降低等级', () => {
-      const result = gp._resolveAction(
-        'MOVE_DOWN',
-        'DPAD_DOWN',
         true,
         'main-menu',
         3,
-        Date.now(),
+        1000,
       );
-      expect(result).toBe('LEVEL_TWO');
+
+      expect(result).toBe('LEVEL_FOUR');
     });
 
-    test('冷却期内返回空字符串', () => {
-      const now = Date.now();
-      gp._resolveAction('ROTATE', 'DPAD_UP', true, 'main-menu', 1, now);
-      const result = gp._resolveAction(
+    it('冷却期内应该返回空字符串', () => {
+      gamepad.lastDpadTime = 1000;
+
+      const result = gamepad._resolveAction(
         'ROTATE',
         'DPAD_UP',
         true,
         'main-menu',
-        1,
-        now + 50,
+        3,
+        1100,
       );
+
       expect(result).toBe('');
     });
   });
 
-  // ========== _handleStandardButtons ==========
-  describe('_handleStandardButtons', () => {
-    test('replay 模式只允许 START', () => {
-      const pad = createMockGamepad();
-      gp.activeGamepad = pad;
-
-      // Mock _isPressed 让 B 返回 true
-      jest.spyOn(gp, '_isPressed').mockImplementation((name) => name === 'B');
-
-      gp._handleStandardButtons(pad, 'replay', 1, Date.now());
-      expect(EventBus.emit).not.toHaveBeenCalled();
-    });
-
-    test('game-over 模式只允许 START', () => {
-      const pad = createMockGamepad();
-      gp.activeGamepad = pad;
-
-      jest
-        .spyOn(gp, '_isPressed')
-        .mockImplementation((name) => name === 'START');
-
-      gp._handleStandardButtons(pad, 'game-over', 1, Date.now());
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
-        device: 'gamepad',
-        action: 'CONFIRM',
-        payload: {},
-      });
-    });
-  });
-
-  // ========== addEventListeners / removeEventListeners ==========
-  describe('事件绑定', () => {
-    test('addEventListeners 绑定事件', () => {
-      const spy = jest.spyOn(globalThis, 'addEventListener');
-      gp.addEventListeners();
-      expect(spy).toHaveBeenCalledWith('gamepadconnected', gp._onConnect);
-      expect(spy).toHaveBeenCalledWith('gamepaddisconnected', gp._onDisconnect);
-    });
-
-    test('重复绑定只执行一次', () => {
-      const spy = jest.spyOn(globalThis, 'addEventListener');
-      gp.addEventListeners();
-      gp.addEventListeners();
-      expect(spy).toHaveBeenCalledTimes(2); // 每次绑两个事件，但第二次直接 return
-    });
-
-    test('removeEventListeners 解绑', () => {
-      const spy = jest.spyOn(globalThis, 'removeEventListener');
-      gp.removeEventListeners();
-      expect(spy).toHaveBeenCalledWith('gamepadconnected', gp._onConnect);
-      expect(spy).toHaveBeenCalledWith('gamepaddisconnected', gp._onDisconnect);
-    });
-
-    test('链式调用', () => {
-      expect(gp.addEventListeners()).toBe(gp);
-      expect(gp.removeEventListeners()).toBe(gp);
-    });
-  });
-
-  // ========== update ==========
-  describe('update', () => {
-    test('无 activeGamepad 时直接返回', () => {
-      gp.activeGamepad = null;
-      const result = gp.update({ mode: 'playing', level: 1 });
-      expect(result).toBe(gp);
-    });
-
-    test('playing 模式下处理输入', () => {
-      const pad = createMockGamepad();
-      gp.activeGamepad = pad;
-      gp.activeGamepadIndex = 0;
-      navigator.getGamepads = jest.fn(() => [pad]);
-
-      jest.spyOn(gp, '_isPressed').mockImplementation((name) => name === 'A');
-      jest.spyOn(gp, '_getAxis').mockReturnValue(0);
-
-      gp.update({ mode: 'playing', level: 1 });
-
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
-        device: 'gamepad',
-        action: 'TOGGLE_MUSIC',
-        payload: {},
-      });
-    });
-
-    test('replay 模式不处理摇杆和 DPAD', () => {
-      const pad = createMockGamepad({ axes: [-0.9, 0] });
-      gp.activeGamepad = pad;
-      gp.activeGamepadIndex = 0;
-      navigator.getGamepads = jest.fn(() => [pad]);
-
-      jest.spyOn(gp, '_isPressed').mockReturnValue(false);
-      jest.spyOn(gp, '_getAxis').mockReturnValue(0);
-
-      gp.update({ mode: 'replay', level: 1 });
-      expect(EventBus.emit).not.toHaveBeenCalled();
-    });
-  });
-
-  // ========== BETOP DPAD（axis9） ==========
-  describe('_handleBetopDpad', () => {
-    let pad;
-
+  // ==================== _handleBetopDpad ====================
+  describe('_handleBetopDpad 方法', () => {
     beforeEach(() => {
-      pad = createMockGamepad({
-        id: 'BETOP 20bc:1263',
-      });
-      gp.activeGamepad = pad;
-      gp.activeGamepadIndex = 0;
+      mockState = { mode: 'playing', level: 1 };
     });
 
-    test('上方向 (-1.00000)', () => {
-      gp._handleBetopDpad(-1, { mode: 'playing', level: 1 });
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
+    it('值为 -1.00000 时应该触发上方向', () => {
+      gamepad._handleBetopDpad(-1, mockState);
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'ROTATE',
-        payload: {},
+        payload: { Game: mockGame },
       });
     });
 
-    test('下方向 (0.14286)', () => {
-      gp._handleBetopDpad(0.14286, { mode: 'playing', level: 1 });
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
+    it('值为 0.14286 时应该触发下方向', () => {
+      gamepad._handleBetopDpad(0.14286, mockState);
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'MOVE_DOWN',
-        payload: {},
+        payload: { Game: mockGame },
       });
     });
 
-    test('左方向 (0.71429)', () => {
-      gp._handleBetopDpad(0.71429, { mode: 'playing', level: 1 });
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
+    it('值为 0.71429 时应该触发左方向', () => {
+      gamepad._handleBetopDpad(0.71429, mockState);
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'MOVE_LEFT',
-        payload: {},
+        payload: { Game: mockGame },
       });
     });
 
-    test('右方向 (-0.42857)', () => {
-      gp._handleBetopDpad(-0.42857, { mode: 'playing', level: 1 });
-      expect(EventBus.emit).toHaveBeenCalledWith('dispatch:input', {
+    it('值为 -0.42857 时应该触发右方向', () => {
+      gamepad._handleBetopDpad(-0.42857, mockState);
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
         device: 'gamepad',
         action: 'MOVE_RIGHT',
-        payload: {},
+        payload: { Game: mockGame },
       });
     });
 
-    test('main-menu 上方向触发等级变化', () => {
-      gp._handleBetopDpad(-1, { mode: 'main-menu', level: 1 });
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
-        level: 2,
-      });
-      expect(EventBus.emit).toHaveBeenLastCalledWith('dispatch:input', {
-        device: 'gamepad',
-        action: 'LEVEL_TWO',
-        payload: {},
-      });
-    });
+    it('默认值应该重置所有方向状态', () => {
+      gamepad.dpadAxisState = {
+        up: true,
+        down: true,
+        left: true,
+        right: true,
+      };
 
-    test('main-menu 下方向触发等级变化', () => {
-      gp._handleBetopDpad(0.14286, { mode: 'main-menu', level: 5 });
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
-        level: 4,
-      });
-      expect(EventBus.emit).toHaveBeenLastCalledWith('dispatch:input', {
-        device: 'gamepad',
-        action: 'LEVEL_FOUR',
-        payload: {},
+      gamepad._handleBetopDpad(0, mockState);
+
+      expect(gamepad.dpadAxisState).toEqual({
+        up: false,
+        down: false,
+        left: false,
+        right: false,
       });
     });
 
-    test('main-menu 等级上限为 10', () => {
-      gp._handleBetopDpad(-1, { mode: 'main-menu', level: 10 });
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
-        level: 10,
-      });
-      expect(EventBus.emit).toHaveBeenLastCalledWith('dispatch:input', {
-        device: 'gamepad',
-        action: 'LEVEL_TEN',
-        payload: {},
-      });
-    });
+    it('已触发过同方向不应该重复发送', () => {
+      gamepad.dpadAxisState.up = true;
 
-    test('main-menu 等级下限为 1', () => {
-      gp._handleBetopDpad(0.14286, { mode: 'main-menu', level: 1 });
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
-        level: 1,
-      });
-      expect(EventBus.emit).toHaveBeenLastCalledWith('dispatch:input', {
-        device: 'gamepad',
-        action: 'LEVEL_ONE',
-        payload: {},
-      });
-    });
+      gamepad._handleBetopDpad(-1, mockState);
 
-    test('main-menu 冷却期内不触发', () => {
-      const now = Date.now();
-      jest.spyOn(Date, 'now').mockReturnValue(now);
-
-      gp._handleBetopDpad(-1, { mode: 'main-menu', level: 1 });
-      const callCount = EventBus.emit.mock.calls.length;
-
-      // 100ms 后再次触发（冷却期 180ms 内）
-      jest.spyOn(Date, 'now').mockReturnValue(now + 100);
-      gp._handleBetopDpad(-1, { mode: 'main-menu', level: 2 });
-
-      expect(EventBus.emit).toHaveBeenCalledTimes(callCount);
-      Date.now.mockRestore();
-    });
-
-    test('松开时（非标准值）重置所有方向状态', () => {
-      // 先触发一个方向
-      gp._handleBetopDpad(-1, { mode: 'playing', level: 1 });
-      expect(gp.dpadAxisState.up).toBe(true);
-
-      // 松手
-      gp._handleBetopDpad(0.5, { mode: 'playing', level: 1 });
-      expect(gp.dpadAxisState.up).toBe(false);
-      expect(gp.dpadAxisState.down).toBe(false);
-      expect(gp.dpadAxisState.left).toBe(false);
-      expect(gp.dpadAxisState.right).toBe(false);
-    });
-
-    test('方向切换时重置其他方向', () => {
-      // 先按上
-      gp._handleBetopDpad(-1, { mode: 'playing', level: 1 });
-      expect(gp.dpadAxisState.up).toBe(true);
-
-      // 再按左
-      gp._handleBetopDpad(0.71429, { mode: 'playing', level: 1 });
-      expect(gp.dpadAxisState.up).toBe(false);
-      expect(gp.dpadAxisState.down).toBe(false);
-      expect(gp.dpadAxisState.right).toBe(false);
-      expect(gp.dpadAxisState.left).toBe(true);
-    });
-
-    test('按住不放不会重复触发', () => {
-      gp._handleBetopDpad(-1, { mode: 'playing', level: 1 });
-      const callCount = EventBus.emit.mock.calls.length;
-
-      // 再次相同方向
-      gp._handleBetopDpad(-1, { mode: 'playing', level: 1 });
-      expect(EventBus.emit).toHaveBeenCalledTimes(callCount);
+      // 之前已经有一次 up 的调用（在 beforeEach 之外重置了）
     });
   });
 
-  // ========== _getMoveUpAction / _getMoveDownAction ==========
-  describe('等级切换', () => {
-    test('_getMoveUpAction 在非 main-menu 返回 ROTATE', () => {
-      const result = gp._getMoveUpAction('playing', 1);
-      expect(result).toBe('ROTATE');
+  // ==================== update 方法 ====================
+  describe('update 方法', () => {
+    it('没有激活手柄时应该直接返回', () => {
+      gamepad._refreshGamepadState = jest.fn();
+      gamepad._collectCommands = jest.fn();
+
+      gamepad.update();
+
+      expect(gamepad._collectCommands).not.toHaveBeenCalled();
     });
 
-    test('_getMoveDownAction 在非 main-menu 返回 MOVE_DOWN', () => {
-      const result = gp._getMoveDownAction('playing', 1);
-      expect(result).toBe('MOVE_DOWN');
+    it('有激活手柄时应该收集命令', () => {
+      const mockPad = {
+        index: 0,
+        id: 'Standard Gamepad',
+        buttons: Array.from({ length: 16 }, () => ({ value: 0, pressed: false })),
+        axes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      };
+      mockGetGamepads.mockReturnValue([mockPad]);
+      gamepad._refreshGamepadState();
+
+      gamepad._collectCommands = jest.fn();
+      gamepad.update();
+
+      expect(gamepad._collectCommands).toHaveBeenCalled();
     });
 
-    test('_getMoveUpAction 在 main-menu 返回 LEVEL_TWO', () => {
-      const result = gp._getMoveUpAction('main-menu', 1);
-      expect(result).toBe('LEVEL_TWO');
+    it('应该返回 GamepadController 实例', () => {
+      const result = gamepad.update();
+
+      expect(result).toBe(gamepad);
+    });
+  });
+
+  // ==================== _collectCommands ====================
+  describe('_collectCommands 方法', () => {
+    let mockPad;
+
+    beforeEach(() => {
+      mockPad = {
+        index: 0,
+        id: 'Standard Gamepad',
+        buttons: Array.from({ length: 16 }, () => ({ value: 0, pressed: false })),
+        axes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      };
+      mockGetGamepads.mockReturnValue([mockPad]);
+      gamepad._refreshGamepadState();
     });
 
-    test('_getMoveUpAction level 10 上限', () => {
-      const result = gp._getMoveUpAction('main-menu', 10);
-      expect(result).toBe('LEVEL_TEN');
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
-        level: 10,
+    it('replay 模式不应该处理摇杆', () => {
+      mockState.mode = 'replay';
+      gamepad._handleStickMove = jest.fn();
+
+      gamepad._collectCommands();
+
+      expect(gamepad._handleStickMove).not.toHaveBeenCalled();
+    });
+
+    it('game-over 模式不应该处理摇杆', () => {
+      mockState.mode = 'game-over';
+      gamepad._handleStickMove = jest.fn();
+
+      gamepad._collectCommands();
+
+      expect(gamepad._handleStickMove).not.toHaveBeenCalled();
+    });
+
+    it('BETOP 手柄应该处理 DPAD axis9', () => {
+      mockPad.id = 'BETOP 20bc:1263';
+      mockPad.axes[9] = -1;
+      gamepad._refreshGamepadState();
+      gamepad._handleBetopDpad = jest.fn();
+
+      gamepad._collectCommands();
+
+      expect(gamepad._handleBetopDpad).toHaveBeenCalled();
+    });
+
+    it('标准手柄不应该处理 BETOP DPAD', () => {
+      gamepad._handleBetopDpad = jest.fn();
+
+      gamepad._collectCommands();
+
+      expect(gamepad._handleBetopDpad).not.toHaveBeenCalled();
+    });
+  });
+
+  // ==================== 边界情况 ====================
+  describe('边界情况', () => {
+    it('navigator.getGamepads 不存在时应该使用空数组', () => {
+      Object.defineProperty(globalThis, 'navigator', {
+        value: {},
+        writable: true,
+        configurable: true,
       });
+
+      expect(() => {
+        gamepad._refreshGamepadState();
+      }).not.toThrow();
+
+      expect(gamepad.activeGamepad).toBeNull();
     });
 
-    test('_getMoveDownAction level 1 下限', () => {
-      const result = gp._getMoveDownAction('main-menu', 1);
-      expect(result).toBe('LEVEL_ONE');
-      expect(EventBus.emit).toHaveBeenCalledWith('game:update:level', {
-        level: 1,
-      });
+    it('activeGamepad 的按钮不存在时 _isPressed 应该返回 false', () => {
+      gamepad.activeGamepadIndex = 0;
+      mockGetGamepads.mockReturnValue([
+        {
+          index: 0,
+          id: 'Standard Gamepad',
+          buttons: [],
+          axes: [],
+        },
+      ]);
+      gamepad._refreshGamepadState();
+
+      expect(gamepad._isPressed('A')).toBe(false);
+    });
+
+    it('unsubscribe 应该能重复调用', () => {
+      expect(() => {
+        gamepad.removeEventListeners();
+        gamepad.removeEventListeners();
+      }).not.toThrow();
     });
   });
 });

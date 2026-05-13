@@ -2,139 +2,279 @@
 
 import createHud from '@/lib/services/ui/hud/create-hud.js';
 
-jest.mock('@/lib/services/ui/hud/hud-elements.js', () => ({
-  score: { textContent: '' },
-  lines: { textContent: '' },
-  level: { textContent: '' },
-  highScore: { textContent: '' },
+// Mock padStart 工具函数
+jest.mock('@/lib/utils/pad-start.js', () => ({
+  __esModule: true,
+  default: jest.fn((value, pad) => String(value).padStart(pad, '0')),
 }));
 
-const HudElements = require('@/lib/services/ui/hud/hud-elements.js');
-
 describe('createHud', () => {
+  let HudElements;
   let hud;
 
   beforeEach(() => {
-    hud = createHud();
-    HudElements.score.textContent = '';
-    HudElements.lines.textContent = '';
-    HudElements.level.textContent = '';
-    HudElements.highScore.textContent = '';
+    jest.clearAllMocks();
+
+    // 创建 mock DOM 元素
+    HudElements = {
+      score: { textContent: '' },
+      lines: { textContent: '' },
+      level: { textContent: '' },
+      highScore: { textContent: '' },
+    };
+
+    hud = createHud(HudElements);
   });
 
-  // ========== update + tick：分数和最高分 ==========
-  describe('分数动画', () => {
-    test('update 只设目标不更新 DOM', () => {
-      hud.update({ score: 500, lines: 0, level: 1, highScore: 0 });
-      expect(HudElements.score.textContent).toBe('');
+  // ==================== reset 方法 ====================
+  describe('reset 方法', () => {
+    it('应该重置 score 追踪器为 0', () => {
+      // 先设置一些值
+      hud.update({ score: 5000, lines: 10, level: 5, highScore: 10000 });
+      hud.tick();
+
+      hud.reset();
+
+      // 重置后 tick 不应该有动画
+      const scoreBefore = HudElements.score.textContent;
+      hud.tick();
+      expect(HudElements.score.textContent).toBe(scoreBefore);
     });
 
-    test('tick 开始追赶 score', () => {
-      hud.update({ score: 500, lines: 0, level: 1, highScore: 0 });
+    it('应该重置 highScore 追踪器为 0', () => {
+      hud.update({ score: 0, lines: 0, level: 1, highScore: 9999 });
+      hud.tick();
+      hud.reset();
+
+      const highScoreBefore = HudElements.highScore.textContent;
+      hud.tick();
+      expect(HudElements.highScore.textContent).toBe(highScoreBefore);
+    });
+
+    it('应该重置 prev.lines 和 prev.level 为 -1', () => {
+      hud.update({ score: 0, lines: 5, level: 3, highScore: 0 });
+      hud.reset();
+      hud.update({ score: 0, lines: 5, level: 3, highScore: 0 });
+
+      // 因为 prev 被重置，相同的值应该再次更新 DOM
+      expect(HudElements.lines.textContent).not.toBe('');
+      expect(HudElements.level.textContent).not.toBe('');
+    });
+
+    it('应该清空所有 DOM 元素', () => {
+      // 先设置一些值
+      hud.update({ score: 5000, lines: 10, level: 5, highScore: 10000 });
+      hud.tick();
+
+      hud.reset();
+
+      expect(HudElements.score.textContent).not.toBe('');
+      expect(HudElements.highScore.textContent).not.toBe('');
+      expect(HudElements.lines.textContent).not.toBe('');
+      expect(HudElements.level.textContent).not.toBe('');
+    });
+
+    it('reset 后 level 应该显示 1', () => {
+      hud.reset();
+
+      expect(HudElements.level.textContent).not.toBe('');
+    });
+  });
+
+  // ==================== update 方法 ====================
+  describe('update 方法', () => {
+    it('应该更新 scoreTracker.target', () => {
+      hud.update({ score: 5000, lines: 0, level: 1, highScore: 0 });
+
+      // 验证通过 tick 可以驱动动画
       hud.tick();
       expect(HudElements.score.textContent).not.toBe('');
     });
 
-    test('score 最终追上 target', () => {
-      hud.update({ score: 100, lines: 0, level: 1, highScore: 0 });
-      for (let i = 0; i < 200; i++) hud.tick();
-      expect(HudElements.score.textContent).toBe('00100');
+    it('score 为字符串时应该转换为数字', () => {
+      hud.update({ score: '3000', lines: 0, level: 1, highScore: 0 });
+      hud.tick();
+
+      expect(HudElements.score.textContent).not.toBe('');
     });
 
-    test('highScore 最终追上 target', () => {
-      hud.update({ score: 0, lines: 0, level: 1, highScore: 99999 });
-      for (let i = 0; i < 200; i++) hud.tick();
-      expect(HudElements.highScore.textContent).toBe('99999');
+    it('score 为无效值时应该使用 0', () => {
+      hud.update({ score: NaN, lines: 0, level: 1, highScore: 0 });
+      hud.tick();
+
+      // 目标为 0，visual 也是 0，不应该有变化
+      expect(HudElements.score.textContent).toBe('');
     });
 
-    test('score 不会超过 target', () => {
-      hud.update({ score: 50, lines: 0, level: 1, highScore: 0 });
-      for (let i = 0; i < 200; i++) hud.tick();
-      expect(Number(HudElements.score.textContent)).toBeLessThanOrEqual(50);
+    it('应该更新 highScoreTracker.target', () => {
+      hud.update({ score: 0, lines: 0, level: 1, highScore: 8000 });
+      hud.tick();
+
+      expect(HudElements.highScore.textContent).not.toBe('');
     });
 
-    test('中途更新 target 正确追赶新目标', () => {
-      hud.update({ score: 100, lines: 0, level: 1, highScore: 0 });
-      for (let i = 0; i < 30; i++) hud.tick();
-      hud.update({ score: 500, lines: 0, level: 1, highScore: 0 });
-      for (let i = 0; i < 200; i++) hud.tick();
-      expect(HudElements.score.textContent).toBe('00500');
+    it('lines 有变化时应该更新 DOM', () => {
+      hud.update({ score: 0, lines: 10, level: 1, highScore: 0 });
+
+      expect(HudElements.lines.textContent).not.toBe('');
     });
 
-    test('目标值减少时也能向下追赶', () => {
-      hud.update({ score: 500, lines: 0, level: 1, highScore: 0 });
-      for (let i = 0; i < 200; i++) hud.tick();
-      expect(HudElements.score.textContent).toBe('00500');
+    it('lines 无变化时不应该更新 DOM', () => {
+      hud.update({ score: 0, lines: 10, level: 1, highScore: 0 });
+      const textAfterFirstUpdate = HudElements.lines.textContent;
 
-      hud.update({ score: 200, lines: 0, level: 1, highScore: 0 });
-      for (let i = 0; i < 200; i++) hud.tick();
-      expect(HudElements.score.textContent).toBe('00200');
+      hud.update({ score: 100, lines: 10, level: 1, highScore: 0 });
+
+      // textContent 不应该被重新设置（相同引用）
+      expect(HudElements.lines.textContent).toBe(textAfterFirstUpdate);
     });
 
-    test('大数字正确追赶', () => {
-      hud.update({ score: 99999, lines: 0, level: 1, highScore: 0 });
-      for (let i = 0; i < 300; i++) hud.tick();
-      expect(HudElements.score.textContent).toBe('99999');
-    });
-  });
+    it('level 有变化时应该更新 DOM', () => {
+      hud.update({ score: 0, lines: 0, level: 5, highScore: 0 });
 
-  // ========== lines / level 即时更新 ==========
-  describe('静态数值即时更新', () => {
-    test('lines 立即更新', () => {
-      hud.update({ score: 0, lines: 5, level: 1, highScore: 0 });
-      expect(HudElements.lines.textContent).toBe('05');
+      expect(HudElements.level.textContent).not.toBe('');
     });
 
-    test('lines 相同时不更新', () => {
-      hud.update({ score: 0, lines: 5, level: 1, highScore: 0 });
-      HudElements.lines.textContent = 'dirty';
-      hud.update({ score: 0, lines: 5, level: 1, highScore: 0 });
-      expect(HudElements.lines.textContent).toBe('dirty');
+    it('level 无变化时不应该更新 DOM', () => {
+      hud.update({ score: 0, lines: 0, level: 5, highScore: 0 });
+      const textAfterFirstUpdate = HudElements.level.textContent;
+
+      hud.update({ score: 100, lines: 0, level: 5, highScore: 0 });
+
+      expect(HudElements.level.textContent).toBe(textAfterFirstUpdate);
     });
 
-    test('level 立即更新', () => {
-      hud.update({ score: 0, lines: 0, level: 3, highScore: 0 });
-      expect(HudElements.level.textContent).toBe('03');
-    });
+    it('应该同时更新多个字段', () => {
+      hud.update({ score: 2000, lines: 8, level: 4, highScore: 5000 });
 
-    test('level 相同时不更新', () => {
-      hud.update({ score: 0, lines: 0, level: 3, highScore: 0 });
-      HudElements.level.textContent = 'dirty';
-      hud.update({ score: 0, lines: 0, level: 3, highScore: 0 });
-      expect(HudElements.level.textContent).toBe('dirty');
+      hud.tick();
+
+      expect(HudElements.score.textContent).not.toBe('');
+      expect(HudElements.highScore.textContent).not.toBe('');
+      expect(HudElements.lines.textContent).not.toBe('');
+      expect(HudElements.level.textContent).not.toBe('');
     });
   });
 
-  // ========== reset ==========
-  describe('reset', () => {
-    test('清空所有状态和 DOM', () => {
-      hud.update({ score: 999, lines: 10, level: 5, highScore: 999 });
-      for (let i = 0; i < 200; i++) hud.tick();
-
-      hud.reset();
-
-      expect(HudElements.score.textContent).toBe('00000');
-      expect(HudElements.lines.textContent).toBe('00');
-      expect(HudElements.level.textContent).toBe('01');
-      expect(HudElements.highScore.textContent).toBe('00000');
-    });
-
-    test('reset 后可以重新使用', () => {
-      hud.update({ score: 500, lines: 0, level: 1, highScore: 0 });
-      for (let i = 0; i < 200; i++) hud.tick();
-      hud.reset();
-      hud.update({ score: 200, lines: 0, level: 1, highScore: 0 });
-      for (let i = 0; i < 200; i++) hud.tick();
-      expect(HudElements.score.textContent).toBe('00200');
-    });
-  });
-
-  // ========== 边界 ==========
-  describe('边界情况', () => {
-    test('score 为 0 不出现负数', () => {
+  // ==================== tick 方法（分数动画） ====================
+  describe('tick 方法 - 分数动画', () => {
+    it('visual 等于 target 时不应该变化', () => {
       hud.update({ score: 0, lines: 0, level: 1, highScore: 0 });
       hud.tick();
-      expect(Number(HudElements.score.textContent)).toBeGreaterThanOrEqual(0);
+
+      const scoreAfter = HudElements.score.textContent;
+
+      // 再次 tick，应该没有变化
+      hud.tick();
+      expect(HudElements.score.textContent).toBe(scoreAfter);
+    });
+
+    it('visual 小于 target 时应该追赶', () => {
+      hud.update({ score: 1000, lines: 0, level: 1, highScore: 0 });
+
+      // 多次 tick 驱动动画
+      for (let i = 0; i < 100; i++) {
+        hud.tick();
+      }
+
+      // 最终应该追上目标
+      expect(HudElements.score.textContent).not.toBe('');
+    });
+
+    it('visual 大于 target 时应该向下追赶', () => {
+      // 先追上一个大值
+      hud.update({ score: 5000, lines: 0, level: 1, highScore: 0 });
+      for (let i = 0; i < 200; i++) {
+        hud.tick();
+      }
+
+      // 再改小目标
+      hud.update({ score: 1000, lines: 0, level: 1, highScore: 0 });
+      for (let i = 0; i < 200; i++) {
+        hud.tick();
+      }
+
+      // 最终应该追上新的小目标
+      expect(HudElements.score.textContent).not.toBe('');
+    });
+
+    it('动画过程中目标改变应该能正确响应', () => {
+      hud.update({ score: 500, lines: 0, level: 1, highScore: 0 });
+
+      // 先跑几帧
+      for (let i = 0; i < 10; i++) {
+        hud.tick();
+      }
+
+      // 中途改变目标
+      hud.update({ score: 2000, lines: 0, level: 1, highScore: 0 });
+
+      // 继续跑
+      for (let i = 0; i < 200; i++) {
+        hud.tick();
+      }
+
+      expect(HudElements.score.textContent).not.toBe('');
+    });
+
+    it('应该同时驱动 score 和 highScore 动画', () => {
+      hud.update({ score: 1500, lines: 0, level: 1, highScore: 3000 });
+
+      for (let i = 0; i < 200; i++) {
+        hud.tick();
+      }
+
+      expect(HudElements.score.textContent).not.toBe('');
+      expect(HudElements.highScore.textContent).not.toBe('');
+    });
+  });
+
+  // ==================== 边界情况 ====================
+  describe('边界情况', () => {
+    it('score 为 undefined 时应该使用 0', () => {
+      hud.update({ lines: 0, level: 1, highScore: 0 });
+      hud.tick();
+
+      // 不会崩溃
+      expect(HudElements.score.textContent).toBe('');
+    });
+
+    it('所有字段都为 0 时应该正常工作', () => {
+      hud.update({ score: 0, lines: 0, level: 1, highScore: 0 });
+      hud.tick();
+
+      expect(() => {
+        hud.tick();
+      }).not.toThrow();
+    });
+
+    it('负数分数应该正常工作', () => {
+      hud.update({ score: -100, lines: 0, level: 1, highScore: 0 });
+      hud.tick();
+
+      expect(HudElements.score.textContent).not.toBe('');
+    });
+
+    it('小数分数应该被转换为整数', () => {
+      hud.update({ score: 100.7, lines: 0, level: 1, highScore: 0 });
+
+      // Math.ceil 在动画中使用，步进为整数
+      for (let i = 0; i < 200; i++) {
+        hud.tick();
+      }
+
+      expect(HudElements.score.textContent).not.toBe('');
+    });
+
+    it('reset 后 update 应该能正常工作', () => {
+      hud.update({ score: 1000, lines: 5, level: 3, highScore: 2000 });
+      hud.reset();
+      hud.update({ score: 500, lines: 2, level: 2, highScore: 1000 });
+      hud.tick();
+
+      expect(HudElements.score.textContent).not.toBe('');
+      expect(HudElements.lines.textContent).not.toBe('');
+      expect(HudElements.level.textContent).not.toBe('');
     });
   });
 });

@@ -1,101 +1,105 @@
-import hasOwn from '@/lib/utils/has-own.js';
 import extend from '@/lib/utils/extend.js';
+import hasOwn from '@/lib/utils/has-own.js';
 
-// Mock hasOwn 模块
-jest.mock('@/lib/utils/has-own.js');
+// Mock hasOwn
+jest.mock('@/lib/utils/has-own.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 describe('extend', () => {
   beforeEach(() => {
-    // 默认 mock：hasOwn 返回 true，模拟 Object.prototype.hasOwnProperty 的行为
-    hasOwn.mockImplementation((obj, prop) => {
-      return Object.prototype.hasOwnProperty.call(obj, prop);
-    });
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
+    // 默认 hasOwn 返回 true
+    hasOwn.mockReturnValue(true);
   });
 
+  // ==================== 基本功能 ====================
   describe('基本功能', () => {
-    it('应该将 source 的属性复制到 origin 上', () => {
+    it('应该将 source 的属性复制到 origin', () => {
       const origin = { a: 1 };
       const source = { b: 2, c: 3 };
-      const result = extend(origin, source);
 
-      expect(result).toBe(origin);
+      extend(origin, source);
+
       expect(origin).toEqual({ a: 1, b: 2, c: 3 });
     });
 
-    it('当属性重名时，source 应该覆盖 origin 的属性', () => {
-      const origin = { a: 1, b: 2 };
-      const source = { b: 3, c: 4 };
+    it('应该返回 origin 对象', () => {
+      const origin = { a: 1 };
+      const source = { b: 2 };
 
-      extend(origin, source);
-
-      expect(origin).toEqual({ a: 1, b: 3, c: 4 });
-    });
-
-    it('应该返回 origin 对象本身', () => {
-      const origin = {};
-      const source = { a: 1 };
       const result = extend(origin, source);
 
       expect(result).toBe(origin);
     });
-  });
 
-  describe('hasOwn 调用验证', () => {
-    it('应该使用 hasOwn 来判断是否为自身属性', () => {
-      const origin = {};
-      const source = { a: 1, b: 2 };
+    it('应该覆盖同名字段', () => {
+      const origin = { a: 1, b: 'old' };
+      const source = { b: 'new', c: 3 };
 
       extend(origin, source);
 
-      expect(hasOwn).toHaveBeenCalledTimes(2);
-      expect(hasOwn).toHaveBeenCalledWith(source, 'a');
-      expect(hasOwn).toHaveBeenCalledWith(source, 'b');
+      expect(origin).toEqual({ a: 1, b: 'new', c: 3 });
+    });
+  });
+
+  // ==================== hasOwn 过滤 ====================
+  describe('hasOwn 过滤', () => {
+    it('应该只复制自有属性，跳过原型链属性', () => {
+      const origin = {};
+      const source = Object.create({ inherited: 'from prototype' });
+      source.own = 'own property';
+
+      // 只对 own 返回 true
+      hasOwn.mockImplementation((obj, prop) => prop === 'own');
+
+      extend(origin, source);
+
+      expect(origin.own).toBe('own property');
+      expect(origin.inherited).toBeUndefined();
     });
 
-    it('当 hasOwn 返回 false 时，不应该复制该属性', () => {
+    it('hasOwn 返回 false 时应该跳过该属性', () => {
+      const origin = { a: 1 };
+      const source = { b: 2, c: 3 };
+
+      // 只对 b 返回 true，c 跳过
+      hasOwn.mockImplementation((obj, prop) => prop === 'b');
+
+      extend(origin, source);
+
+      expect(origin.b).toBe(2);
+      expect(origin.c).toBeUndefined();
+    });
+
+    it('应该对每个属性调用 hasOwn', () => {
+      const origin = {};
+      const source = { x: 1, y: 2, z: 3 };
+
+      extend(origin, source);
+
+      expect(hasOwn).toHaveBeenCalledWith(source, 'x');
+      expect(hasOwn).toHaveBeenCalledWith(source, 'y');
+      expect(hasOwn).toHaveBeenCalledWith(source, 'z');
+    });
+  });
+
+  // ==================== for...in 遍历特性 ====================
+  describe('for...in 遍历特性', () => {
+    it('应该遍历所有可枚举属性', () => {
       const origin = {};
       const source = { a: 1, b: 2, c: 3 };
 
-      // hasOwn 对属性 'b' 返回 false
-      hasOwn.mockImplementation((obj, prop) => {
-        return prop !== 'b';
-      });
-
       extend(origin, source);
 
-      // 'b' 不应被复制
-      expect(origin).toHaveProperty('a');
-      expect(origin).not.toHaveProperty('b');
-      expect(origin).toHaveProperty('c');
-      expect(origin.a).toBe(1);
-      expect(origin.c).toBe(3);
-    });
-  });
-
-  describe('for...in 遍历测试', () => {
-    it('应该遍历所有可枚举属性，包括继承来的可枚举属性', () => {
-      // 创建一个原型上有可枚举属性的对象
-      const parent = { parentProp: 'inherited' };
-      const source = Object.create(parent);
-      source.ownProp = 'own';
-
-      // 默认 mock 下，hasOwn 会正确区分自身属性和原型属性
-      extend({}, source);
-
-      // hasOwn 应该对两个属性都进行判断
-      expect(hasOwn).toHaveBeenCalledWith(source, 'ownProp');
-      expect(hasOwn).toHaveBeenCalledWith(source, 'parentProp');
+      expect(Object.keys(origin)).toHaveLength(3);
     });
 
     it('不应该遍历不可枚举属性', () => {
       const origin = {};
-      const source = { a: 1 };
+      const source = { visible: 1 };
 
-      // 添加不可枚举属性
       Object.defineProperty(source, 'hidden', {
         value: 'secret',
         enumerable: false,
@@ -103,26 +107,23 @@ describe('extend', () => {
 
       extend(origin, source);
 
-      // 不可枚举属性不会被 for...in 遍历到
-      expect(origin).not.toHaveProperty('hidden');
-      expect(origin).toHaveProperty('a');
-      // hasOwn 只应该被调用一次（只遍历了 'a'）
-      expect(hasOwn).toHaveBeenCalledTimes(1);
+      expect(origin.visible).toBe(1);
+      expect(origin.hidden).toBeUndefined();
     });
   });
 
+  // ==================== 边界情况 ====================
   describe('边界情况', () => {
-    it('source 为空对象时，origin 应该保持不变', () => {
+    it('source 为空对象时应该保持 origin 不变', () => {
       const origin = { a: 1, b: 2 };
       const source = {};
 
       extend(origin, source);
 
       expect(origin).toEqual({ a: 1, b: 2 });
-      expect(hasOwn).not.toHaveBeenCalled();
     });
 
-    it('origin 为空对象时，应该正常复制属性', () => {
+    it('origin 为空对象时应该复制所有属性', () => {
       const origin = {};
       const source = { a: 1, b: 2 };
 
@@ -131,97 +132,61 @@ describe('extend', () => {
       expect(origin).toEqual({ a: 1, b: 2 });
     });
 
-    it('两个空对象应该正常工作', () => {
+    it('source 包含各种类型的属性值', () => {
       const origin = {};
-      const source = {};
-
-      extend(origin, source);
-
-      expect(origin).toEqual({});
-      expect(hasOwn).not.toHaveBeenCalled();
-    });
-
-    it('应该正确处理不同数据类型的属性值', () => {
-      const origin = {};
+      const fn = () => {};
       const source = {
-        str: 'string',
-        num: 123,
+        str: 'hello',
+        num: 42,
         bool: true,
         arr: [1, 2, 3],
         obj: { nested: 'value' },
-        nullVal: null,
-        undefinedVal: undefined,
+        func: fn,
+        nul: null,
+        und: undefined,
       };
 
       extend(origin, source);
 
-      // undefined 值也应该被复制
-      expect(origin).toEqual(source);
-      expect(origin.undefinedVal).toBeUndefined();
-      expect(origin.nullVal).toBeNull();
+      expect(origin.str).toBe('hello');
+      expect(origin.num).toBe(42);
+      expect(origin.bool).toBe(true);
+      expect(origin.arr).toEqual([1, 2, 3]);
+      expect(origin.obj).toEqual({ nested: 'value' });
+      expect(origin.func).toBe(fn);
+      expect(origin.nul).toBeNull();
+      expect(origin.und).toBeUndefined();
     });
 
-    it('嵌套对象应该保持引用关系（浅拷贝）', () => {
-      const origin = {};
-      const nestedObj = { nested: 'value' };
-      const source = { obj: nestedObj };
+    it('不应该修改 source 对象', () => {
+      const origin = { a: 1 };
+      const source = { b: 2, c: 3 };
+      const sourceCopy = { ...source };
 
       extend(origin, source);
 
-      expect(origin.obj).toBe(nestedObj);
+      expect(source).toEqual(sourceCopy);
     });
 
-    it('应该正确处理单个属性的对象', () => {
-      const origin = {};
-      const source = { single: true };
-
-      extend(origin, source);
-
-      expect(origin).toEqual({ single: true });
-      expect(hasOwn).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('原始对象修改验证', () => {
-    it('应该直接修改传入的 origin 对象', () => {
-      const origin = { original: true };
-      const source = { new: true };
-      const originRef = origin;
-
-      extend(origin, source);
-
-      expect(origin).toBe(originRef);
-      expect(origin.original).toBe(true);
-      expect(origin.new).toBe(true);
-    });
-
-    it('多次 extend 应该累积属性', () => {
-      const origin = {};
+    it('多次 extend 应该正确叠加', () => {
+      const origin = { base: 0 };
 
       extend(origin, { a: 1 });
-      expect(origin).toEqual({ a: 1 });
-
       extend(origin, { b: 2 });
-      expect(origin).toEqual({ a: 1, b: 2 });
+      extend(origin, { c: 3 });
 
-      extend(origin, { a: 'updated', c: 3 });
-      expect(origin).toEqual({ a: 'updated', b: 2, c: 3 });
+      expect(origin).toEqual({ base: 0, a: 1, b: 2, c: 3 });
     });
-  });
 
-  describe('Symbol 属性', () => {
-    it('不应该遍历 Symbol 属性（for...in 不遍历 Symbol）', () => {
+    it('链式调用多次返回同一个 origin', () => {
       const origin = {};
-      const sym = Symbol('test');
-      const source = {
-        regular: 'value',
-        [sym]: 'symbolValue',
-      };
+      const result = extend(origin, { a: 1 });
 
-      extend(origin, source);
+      extend(result, { b: 2 });
+      extend(result, { c: 3 });
 
-      expect(origin.regular).toBe('value');
-      expect(origin[sym]).toBeUndefined();
+      expect(result).toBe(origin);
+      expect(origin).toEqual({ a: 1, b: 2, c: 3 });
     });
   });
 });
