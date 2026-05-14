@@ -29,7 +29,14 @@ describe('Command', () => {
     });
 
     it('应该支持所有定义的 action 类型', () => {
-      const actions = ['MOVE', 'ROTATE', 'DROP', 'START_GAME', 'PAUSE', 'RESUME'];
+      const actions = [
+        'MOVE',
+        'ROTATE',
+        'DROP',
+        'START_GAME',
+        'PAUSE',
+        'RESUME',
+      ];
 
       actions.forEach((action) => {
         const cmd = new Command(action);

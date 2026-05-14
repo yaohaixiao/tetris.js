@@ -197,7 +197,9 @@ describe('begin', () => {
 
       // 1. replay:start:record
       // 2. audio:play:sound (GAME_STARTED)
-      const recordIndex = callNames.indexOf('replay:test-game-uuid:start:record');
+      const recordIndex = callNames.indexOf(
+        'replay:test-game-uuid:start:record',
+      );
       const soundIndex = callNames.indexOf('audio:play:sound');
 
       expect(recordIndex).toBeLessThan(soundIndex);

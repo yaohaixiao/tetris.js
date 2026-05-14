@@ -101,7 +101,8 @@ describe('Keyboard', () => {
       keyboard.removeEventListeners();
 
       const addResizeCallback = globalThis.addEventListener.mock.calls[0][1];
-      const removeResizeCallback = globalThis.removeEventListener.mock.calls[0][1];
+      const removeResizeCallback =
+        globalThis.removeEventListener.mock.calls[0][1];
 
       expect(addResizeCallback).toBe(removeResizeCallback);
     });
@@ -111,7 +112,8 @@ describe('Keyboard', () => {
       keyboard.removeEventListeners();
 
       const addKeydownCallback = document.addEventListener.mock.calls[0][1];
-      const removeKeydownCallback = document.removeEventListener.mock.calls[0][1];
+      const removeKeydownCallback =
+        document.removeEventListener.mock.calls[0][1];
 
       expect(addKeydownCallback).toBe(removeKeydownCallback);
     });
@@ -128,9 +130,7 @@ describe('Keyboard', () => {
     it('应该发送 ui:resize 事件', () => {
       keyboard._onResize();
 
-      expect(keyboard.emit).toHaveBeenCalledWith(
-        `ui:${mockGame.id}:resize`,
-      );
+      expect(keyboard.emit).toHaveBeenCalledWith(`ui:${mockGame.id}:resize`);
     });
 
     it('应该返回 Keyboard 实例', () => {

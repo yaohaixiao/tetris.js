@@ -202,12 +202,12 @@ describe('dispatchInput', () => {
 
       dispatchInput(input, { isBlocked: false, ms: 0 });
       expect(replayHandler).toHaveBeenCalledWith(
-        expect.objectContaining({ ms: 0 })
+        expect.objectContaining({ ms: 0 }),
       );
 
       dispatchInput(input, { isBlocked: false, ms: 9999 });
       expect(replayHandler).toHaveBeenLastCalledWith(
-        expect.objectContaining({ ms: 9999 })
+        expect.objectContaining({ ms: 9999 }),
       );
     });
 
@@ -268,15 +268,15 @@ describe('dispatchInput', () => {
 
       dispatchInput(
         { action: 'MOVE', payload: { Game: { id: gameId } } },
-        context
+        context,
       );
       dispatchInput(
         { action: 'ROTATE', payload: { Game: { id: gameId } } },
-        context
+        context,
       );
       dispatchInput(
         { action: 'DROP', payload: { Game: { id: gameId } } },
-        context
+        context,
       );
 
       expect(handler).toHaveBeenCalledTimes(3);

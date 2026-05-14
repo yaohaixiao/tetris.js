@@ -93,7 +93,9 @@ describe('over', () => {
 
       const calls = mockContext.emit.mock.calls.map(([event]) => event);
 
-      const stopRecordIndex = calls.indexOf('replay:test-game-uuid:stop:record');
+      const stopRecordIndex = calls.indexOf(
+        'replay:test-game-uuid:stop:record',
+      );
       const stopBgmIndex = calls.indexOf('audio:stop:bgm');
       const gameOverSoundIndex = calls.indexOf('audio:play:sound');
       const gameOverIndex = calls.indexOf('replay:test-game-uuid:game:over');

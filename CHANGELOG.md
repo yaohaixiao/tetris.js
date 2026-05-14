@@ -4,7 +4,6 @@
 
 - 架构和功能基本问题，发布 1.0.0 版本；
 
-
 ## [0.7.5](https://github.com/yaohaixiao/tetris.js/compare/0.7.4...0.7.5) (2026-05-09)
 
 ### Bug Fixes

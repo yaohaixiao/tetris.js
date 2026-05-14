@@ -21,8 +21,8 @@ describe('collision', () => {
         ],
         color: '#FFA500',
       },
-      cx: 4,  // 方块左上角 X 坐标
-      cy: 0,  // 方块左上角 Y 坐标
+      cx: 4, // 方块左上角 X 坐标
+      cy: 0, // 方块左上角 Y 坐标
       board: emptyBoard,
     };
 

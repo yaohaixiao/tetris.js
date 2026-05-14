@@ -212,44 +212,26 @@ var tetris = (() => {
   };
   var motifs_default = MOTIFS;
 
-  // lib/services/audio/state/audio-state.js
-  var audioCtx = new AudioContext();
-  var AudioState = {
-    audioCtx,
-    /** 是否启用背景音乐 true = 播放 BGM false = 静音 BGM */
-    bgmEnabled: true,
-    /**
-     * BGM 定时器引用
-     *
-     * 常见用途：
-     *
-     * - SetInterval / setTimeout 控制循环播放
-     * - 或用于调度下一段 BGM clip
-     */
-    bgmTimer: null
-  };
-  var audio_state_default = AudioState;
-
   // lib/services/audio/play-tone.js
   var playTone = (freq, dur, options = {}) => {
     if (!freq || dur <= 0) {
       return;
     }
-    const { audioCtx: audioCtx2 } = audio_state_default;
+    const { Context } = audio_default;
     const {
-      volume = 0.15,
       // 音量峰值
-      wave = "square",
+      volume = 0.15,
       // 默认方波
-      gate = 1,
+      wave = "square",
       // 默认连奏，音符唱满时值
-      articulation = {},
+      gate = 1,
       // 运音包络
-      startTime = audioCtx2.currentTime
+      articulation = {},
       // 默认立即开始
+      startTime = Context.currentTime
     } = options;
-    const osc = audioCtx2.createOscillator();
-    const gain = audioCtx2.createGain();
+    const osc = Context.createOscillator();
+    const gain = Context.createGain();
     osc.type = wave;
     osc.frequency.setValueAtTime(freq, startTime);
     const step = dur / 1e3;
@@ -271,7 +253,7 @@ var tetris = (() => {
     gain.gain.linearRampToValueAtTime(volume * sustainRatio, t2);
     gain.gain.exponentialRampToValueAtTime(1e-4, t3);
     osc.connect(gain);
-    gain.connect(audioCtx2.destination);
+    gain.connect(Context.destination);
     osc.start(t0);
     osc.stop(t3 + 0.05);
     osc.addEventListener("ended", () => {
@@ -359,24 +341,80 @@ var tetris = (() => {
       const index = Math.min(lines, frequencies.length - 1);
       const baseChord = frequencies[index];
       const chord = baseChord.map((freq) => freq + cfg.shift * 12);
+      const queue = [];
       for (const [i, freq] of chord.entries()) {
-        setTimeout(() => {
-          play_tone_default(freq, speeds[i] * cfg.speed, {
-            volume: volumes[i] * cfg.volume
-          });
-        }, timeouts[i]);
+        queue.push({
+          fn: () => {
+            const now = audio_default.Context.currentTime;
+            play_tone_default(freq, speeds[i] * cfg.speed, {
+              volume: volumes[i] * cfg.volume,
+              startTime: now + timeouts[i] / 1e3
+            });
+          }
+        });
       }
+      engine_default.Scheduler.sequence(queue);
     },
     // 升级庆祝音效
     LEVEL_UP: () => {
-      play_tone_default(523, 220);
-      setTimeout(() => play_tone_default(587, 220), 260);
-      setTimeout(() => play_tone_default(659, 240), 520);
-      setTimeout(() => play_tone_default(784, 260), 780);
-      setTimeout(() => play_tone_default(880, 280), 1060);
-      setTimeout(() => play_tone_default(1047, 320), 1360);
-      setTimeout(() => play_tone_default(1175, 360), 1700);
-      setTimeout(() => play_tone_default(1319, 480), 2080);
+      const now = audio_default.Context.currentTime;
+      engine_default.Scheduler.sequence([
+        {
+          fn: () => {
+            play_tone_default(523, 220);
+          }
+        },
+        {
+          fn: () => {
+            play_tone_default(587, 220, {
+              startTime: now + 0.26
+            });
+          }
+        },
+        {
+          fn: () => {
+            play_tone_default(659, 240, {
+              startTime: now + 0.52
+            });
+          }
+        },
+        {
+          delay: 260,
+          fn: () => {
+            play_tone_default(784, 260, {
+              startTime: now + 0.78
+            });
+          }
+        },
+        {
+          fn: () => {
+            play_tone_default(880, 280, {
+              startTime: now + 1.06
+            });
+          }
+        },
+        {
+          fn: () => {
+            play_tone_default(1047, 320, {
+              startTime: now + 1.36
+            });
+          }
+        },
+        {
+          fn: () => {
+            play_tone_default(1175, 360, {
+              startTime: now + 1.7
+            });
+          }
+        },
+        {
+          fn: () => {
+            play_tone_default(1319, 480, {
+              startTime: now + 2.08
+            });
+          }
+        }
+      ]);
     },
     // 暂停游戏音效
     PAUSED: () => play_tone_default(300, 150),
@@ -391,9 +429,20 @@ var tetris = (() => {
     RESUME: () => play_tone_default(400, 150),
     // 游戏结束音效（悲伤旋律）
     GAME_OVER: () => {
-      play_tone_default(330, 200);
-      setTimeout(() => play_tone_default(294, 300), 210);
-      setTimeout(() => play_tone_default(262, 500), 520);
+      const now = audio_default.Context.currentTime;
+      engine_default.Scheduler.sequence([
+        { fn: () => play_tone_default(330, 200) },
+        {
+          fn: () => play_tone_default(294, 300, {
+            startTime: now + 0.21
+          })
+        },
+        {
+          fn: () => play_tone_default(262, 500, {
+            startTime: now + 0.52
+          })
+        }
+      ]);
     },
     // 背景音乐开关音效
     BGM_TOGGLED: () => play_tone_default(440, 100)
@@ -1611,48 +1660,38 @@ var tetris = (() => {
       articulation = {}
       // 运音包络，playTone 内部会再次指定默认值
     } = options;
+    const { Scheduler: Scheduler2 } = engine_default;
     if (duration <= 0) {
       return;
     }
     let currentNoteIndex = 0;
-    let nextNoteTime = audio_state_default.audioCtx.currentTime;
+    let nextNoteTime = audio_default.Context.currentTime;
     const scheduleNote = (note, time) => {
       const { freq, dur } = note;
       const stepDur = dur * duration;
       if (freq > 0) {
-        play_tone_default(freq, stepDur, {
-          volume,
-          wave,
-          gate,
-          articulation,
-          startTime: time
-        });
+        Scheduler2.delayAt(() => {
+          play_tone_default(note.freq, stepDur, {
+            volume,
+            wave,
+            gate,
+            articulation,
+            startTime: time
+          });
+        }, time);
       }
       nextNoteTime += stepDur / 1e3;
     };
     const scheduler = () => {
-      while (nextNoteTime < audio_state_default.audioCtx.currentTime + SCHEDULE_AHEAD_TIME) {
+      while (nextNoteTime < audio_default.Context.currentTime + SCHEDULE_AHEAD_TIME) {
         const note = melody[currentNoteIndex];
         scheduleNote(note, nextNoteTime);
-        currentNoteIndex += 1;
-        if (currentNoteIndex >= melody.length) {
-          currentNoteIndex = 0;
-        }
+        currentNoteIndex = (currentNoteIndex + 1) % melody.length;
       }
-      audio_state_default.bgmTimer = setTimeout(scheduler, LOOKAHEAD);
     };
-    scheduler();
+    audio_default.bgmSchedulerId = Scheduler2.interval(scheduler, LOOKAHEAD);
   };
   var loop_play_bgm_default = loopPlayBGM;
-
-  // lib/services/audio/stop-bgm.js
-  var stopBGM = () => {
-    if (audio_state_default.bgmTimer) {
-      clearTimeout(audio_state_default.bgmTimer);
-    }
-    audio_state_default.bgmTimer = null;
-  };
-  var stop_bgm_default = stopBGM;
 
   // lib/services/audio/play-bgm.js
   var {
@@ -1686,10 +1725,6 @@ var tetris = (() => {
     return MUSIC_LIST[index];
   };
   var playBGM = (level = 1, maxLevel = 99) => {
-    if (!audio_state_default.bgmEnabled) {
-      return;
-    }
-    stop_bgm_default();
     const music = getMusicByLevel(level, maxLevel);
     const { melody, duration, volume, wave, gate, articulation } = music;
     loop_play_bgm_default(melody, {
@@ -1702,10 +1737,16 @@ var tetris = (() => {
   };
   var play_bgm_default = playBGM;
 
+  // lib/services/audio/stop-bgm.js
+  var stopBGM = () => {
+    engine_default.Scheduler.cancel(audio_default.bgmSchedulerId);
+    audio_default.bgmSchedulerId = 0;
+  };
+  var stop_bgm_default = stopBGM;
+
   // lib/services/audio/toggle-bgm.js
   var toggleBGM = (level, maxLevel = 99) => {
-    audio_state_default.bgmEnabled = !audio_state_default.bgmEnabled;
-    if (audio_state_default.bgmEnabled) {
+    if (audio_default.bgmSchedulerId === 0) {
       play_bgm_default(level, maxLevel);
     } else {
       stop_bgm_default();
@@ -1715,12 +1756,14 @@ var tetris = (() => {
 
   // lib/services/audio/index.js
   var Audio = {
+    Context: new AudioContext(),
     Sounds: sounds_default,
+    bgmSchedulerId: 0,
     playBGM: play_bgm_default,
     stopBGM: stop_bgm_default,
     toggleBGM: toggle_bgm_default,
     emit(event, handler) {
-      event_bus_default.on(event, handler);
+      event_bus_default.emit(event, handler);
     },
     on(event, payload) {
       event_bus_default.on(event, payload);
@@ -1758,6 +1801,184 @@ var tetris = (() => {
     }
   };
   var audio_default = Audio;
+
+  // lib/engine/scheduler.js
+  var Scheduler = class {
+    /**
+     * ## 构造函数
+     *
+     * @class
+     */
+    constructor() {
+      this.tasks = /* @__PURE__ */ new Map();
+      this.nextId = 1;
+      this.dirty = false;
+    }
+    /**
+     * ## 外部 Game Loop 调用
+     *
+     * @param {number} [gameTime=performance.now()] - 游戏循环时间. Default is
+     *   `performance.now()`
+     * @param {number} [audioTime=Audio.Context.currentTime] - 游戏循环时间. Default is
+     *   `Audio.Context.currentTime`
+     * @returns {void}
+     */
+    tick(gameTime = performance.now(), audioTime = audio_default.Context.currentTime) {
+      if (this.tasks.size === 0) {
+        return;
+      }
+      for (const task of this.tasks.values()) {
+        if (task.cancelled) {
+          this.dirty = true;
+          continue;
+        }
+        switch (task.type) {
+          case "delayAt": {
+            if (audioTime < task.audioTime) {
+              continue;
+            }
+            task.fn();
+            this.tasks.delete(task.id);
+            break;
+          }
+          case "delay": {
+            if (gameTime < task.time) {
+              continue;
+            }
+            task.fn();
+            this.tasks.delete(task.id);
+            break;
+          }
+          case "interval": {
+            if (gameTime < task.nextTime) {
+              continue;
+            }
+            task.fn();
+            task.nextTime = gameTime + task.interval;
+            break;
+          }
+        }
+      }
+      if (this.dirty) {
+        for (const [id, task] of this.tasks) {
+          if (!task.cancelled) {
+            continue;
+          }
+          this.tasks.delete(id);
+        }
+        this.dirty = false;
+      }
+    }
+    /**
+     * ## 基于 AudioContext 时间调度一次任务
+     *
+     * @param {Function} fn - 任务函数
+     * @param {number} audioTime - Audio 播放时间
+     * @returns {number} - 返回任务 id
+     */
+    delayAt(fn, audioTime) {
+      const id = this.nextId++;
+      this.tasks.set(id, {
+        id,
+        type: "delayAt",
+        audioTime,
+        fn,
+        cancelled: false
+      });
+      return id;
+    }
+    /**
+     * ## 延迟任务（setTimeout replacement）
+     *
+     * @param {Function} fn - 执行任务的处理函数
+     * @param {number} delay - 执行任务的时间延迟
+     * @returns {number} - 返回任务 id
+     */
+    delay(fn, delay = 0) {
+      const id = this.nextId++;
+      this.tasks.set(id, {
+        id,
+        type: "delay",
+        time: performance.now() + delay,
+        fn,
+        cancelled: false
+      });
+      return id;
+    }
+    /**
+     * ## 周期任务（setInterval replacement）
+     *
+     * @param {Function} fn - 执行任务的处理函数
+     * @param {number} interval - 执行任务的时间间隔
+     * @returns {number} - 返回任务 id
+     */
+    interval(fn, interval = 1e3) {
+      const id = this.nextId++;
+      this.tasks.set(id, {
+        id,
+        type: "interval",
+        interval,
+        nextTime: performance.now() + interval,
+        fn,
+        cancelled: false
+      });
+      return id;
+    }
+    /**
+     * ## 任务列队
+     *
+     * - 执行列队中的一系列任务
+     *
+     * @param {Array} list - 任务列表数据
+     * @returns {Array} - 列队任务的 id 值数组
+     */
+    sequence(list) {
+      const ids = [];
+      let t = 0;
+      for (const item of list) {
+        const { delay = 0, fn } = item;
+        t += delay;
+        ids.push(this.delay(fn, t));
+      }
+      return ids;
+    }
+    /**
+     * ## 取消任务
+     *
+     * 通过任务 id 取消任务
+     *
+     * @param {number} id - 任务 id
+     */
+    cancel(id) {
+      const task = this.tasks.get(id);
+      if (!task) {
+        return;
+      }
+      task.cancelled = true;
+      this.dirty = true;
+    }
+    /**
+     * ## 清空所有任务
+     *
+     * - 清空任务
+     * - 恢复 dirty
+     */
+    clear() {
+      this.tasks.clear();
+      this.dirty = false;
+    }
+    /**
+     * ## Debug helper
+     *
+     * 帮助测试用
+     *
+     * @returns {number} - 返回任务数量
+     */
+    size() {
+      return this.tasks.size;
+    }
+  };
+  var scheduler_default = Scheduler;
 
   // lib/core/index.js
   var Base = class {
@@ -4021,14 +4242,15 @@ var tetris = (() => {
      * 2. 如果存在 active gamepad
      * 3. 收集输入 → dispatch
      *
+     * @param {number} now - 当前时间的时间戳
      * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
      */
-    update() {
+    update(now) {
       this._refreshGamepadState();
       if (!this.activeGamepad) {
         return this;
       }
-      this._collectCommands();
+      this._collectCommands(now);
       return this;
     }
     /**
@@ -4232,13 +4454,13 @@ var tetris = (() => {
      * - 转换为 Command（通过 dispatchInput）
      *
      * @private
+     * @param {number} now - 当前时间的时间戳
      * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
      */
-    _collectCommands() {
+    _collectCommands(now) {
       const state = this.Store.getState();
       const { mode, level } = state;
       const pad = this.activeGamepad;
-      const now = Date.now();
       if (!pad) {
         return this;
       }
@@ -5371,7 +5593,7 @@ var tetris = (() => {
     set_beginning_state_default(context, "playing", level);
     spawn_default(context);
     context.emit("audio:play:sound", { sound: "GAME_STARTED" });
-    setTimeout(() => {
+    engine_default.Scheduler.delay(() => {
       const maxLevel = context.options.Level.max;
       context.emit("audio:play:bgm", { level, maxLevel });
     }, 250);
@@ -5952,33 +6174,34 @@ var tetris = (() => {
 
   // lib/engine/start-game-loop.js
   var startGameLoop = (timestamp) => {
-    if (!engine_default.timestamp) {
-      engine_default.timestamp = timestamp;
-      engine_default.accumulator = timestamp;
+    if (!engine_default.lastTickTime) {
+      engine_default.lastTickTime = timestamp;
+      engine_default.fixedAccumulator = timestamp;
     }
-    const { Game: Game2 } = engine_default;
+    const { Game: Game2, Scheduler: Scheduler2 } = engine_default;
     const { UI: UI2, Replay, Gamepad, Animations, CommandQueue: CommandQueue2 } = Game2;
     const isBlocked = Animations.hasBlocking();
-    const stepDelta = timestamp - engine_default.accumulator;
-    const prev = engine_default.timestamp ?? timestamp;
+    const stepDelta = timestamp - engine_default.fixedAccumulator;
+    const prev = engine_default.lastTickTime ?? timestamp;
     let delta = (timestamp - prev) / 1e3;
     if (delta > 1e3) {
       delta = 1e3;
     }
-    engine_default.timestamp = timestamp;
+    engine_default.lastTickTime = timestamp;
+    Scheduler2.tick(timestamp);
     Replay.syncPlayElapsed({
-      timestamp: engine_default.timestamp,
+      timestamp: engine_default.lastTickTime,
       isBlocked
     });
     Replay.update({
       speed: Game2.getSpeed(),
-      timestamp: engine_default.timestamp
+      timestamp: engine_default.lastTickTime
     });
-    Gamepad.update();
+    Gamepad.update(timestamp);
     CommandQueue2.flush();
-    if ((!engine_default.accumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
+    if ((!engine_default.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
       Game2.tick(isBlocked);
-      engine_default.accumulator = timestamp;
+      engine_default.fixedAccumulator = timestamp;
     }
     Animations.update(delta);
     UI2.tickHud(delta);
@@ -6002,8 +6225,8 @@ var tetris = (() => {
     }
     cancelAnimationFrame(engine_default.rafId);
     engine_default.rafId = null;
-    engine_default.timestamp = 0;
-    engine_default.accumulator = 0;
+    engine_default.lastTickTime = 0;
+    engine_default.fixedAccumulator = 0;
   };
   var stop_game_loop_default = stopGameLoop;
 
@@ -6563,9 +6786,10 @@ var tetris = (() => {
     // Runtime 状态
     rafId: null,
     // 时间累积器（用于 fixed update / tick）
-    accumulator: 0,
+    fixedAccumulator: 0,
     // 上一帧时间戳
-    timestamp: 0,
+    lastTickTime: 0,
+    Scheduler: new scheduler_default(),
     Game: new game_default2(configuration_default),
     /**
      * ## 初始化游戏
@@ -6621,7 +6845,7 @@ var tetris = (() => {
           "countdown",
           "level-up"
         ]);
-        const ms = Engine.timestamp - Replay.startTime;
+        const ms = Engine.lastTickTime - Replay.startTime;
         dispatch_input_default(input, { isBlocked, ms });
       });
     },

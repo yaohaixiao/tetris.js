@@ -15,7 +15,9 @@ describe('placeGarbageOnBoard', () => {
     jest.clearAllMocks();
 
     // 创建一个 20 行 × 10 列的空棋盘
-    board = Array.from({ length: 20 }, () => Array.from({ length: cols }, () => ''));
+    board = Array.from({ length: 20 }, () =>
+      Array.from({ length: cols }, () => ''),
+    );
   });
 
   // ==================== 基本功能 ====================

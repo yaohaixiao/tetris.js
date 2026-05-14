@@ -155,7 +155,12 @@ describe('GamepadController', () => {
     });
 
     it('没有激活手柄时应该自动选择第一个可用手柄', () => {
-      const mockPad = { index: 0, id: 'Standard Gamepad', buttons: [], axes: [] };
+      const mockPad = {
+        index: 0,
+        id: 'Standard Gamepad',
+        buttons: [],
+        axes: [],
+      };
       mockGetGamepads.mockReturnValue([mockPad]);
 
       gamepad._refreshGamepadState();
@@ -165,7 +170,12 @@ describe('GamepadController', () => {
     });
 
     it('应该自动识别 BETOP 手柄并切换映射', () => {
-      const mockPad = { index: 0, id: 'BETOP 20bc:1263', buttons: [], axes: [] };
+      const mockPad = {
+        index: 0,
+        id: 'BETOP 20bc:1263',
+        buttons: [],
+        axes: [],
+      };
       mockGetGamepads.mockReturnValue([mockPad]);
 
       gamepad._refreshGamepadState();
@@ -175,7 +185,12 @@ describe('GamepadController', () => {
     });
 
     it('已有激活手柄时应该保持', () => {
-      const mockPad = { index: 2, id: 'Standard Gamepad', buttons: [], axes: [] };
+      const mockPad = {
+        index: 2,
+        id: 'Standard Gamepad',
+        buttons: [],
+        axes: [],
+      };
       mockGetGamepads.mockReturnValue([null, null, mockPad]);
       gamepad.activeGamepadIndex = 2;
 
@@ -275,7 +290,10 @@ describe('GamepadController', () => {
       mockPad = {
         index: 0,
         id: 'Standard Gamepad',
-        buttons: Array.from({ length: 16 }, () => ({ value: 0, pressed: false })),
+        buttons: Array.from({ length: 16 }, () => ({
+          value: 0,
+          pressed: false,
+        })),
         axes: [],
       };
       gamepad.activeGamepadIndex = 0;
@@ -549,7 +567,14 @@ describe('GamepadController', () => {
   // ==================== _resolveAction ====================
   describe('_resolveAction 方法', () => {
     it('非 DPad 应该直接返回 action', () => {
-      const result = gamepad._resolveAction('DROP', 'B', false, 'playing', 1, 0);
+      const result = gamepad._resolveAction(
+        'DROP',
+        'B',
+        false,
+        'playing',
+        1,
+        0,
+      );
 
       expect(result).toBe('DROP');
     });
@@ -676,7 +701,10 @@ describe('GamepadController', () => {
       const mockPad = {
         index: 0,
         id: 'Standard Gamepad',
-        buttons: Array.from({ length: 16 }, () => ({ value: 0, pressed: false })),
+        buttons: Array.from({ length: 16 }, () => ({
+          value: 0,
+          pressed: false,
+        })),
         axes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       };
       mockGetGamepads.mockReturnValue([mockPad]);
@@ -703,7 +731,10 @@ describe('GamepadController', () => {
       mockPad = {
         index: 0,
         id: 'Standard Gamepad',
-        buttons: Array.from({ length: 16 }, () => ({ value: 0, pressed: false })),
+        buttons: Array.from({ length: 16 }, () => ({
+          value: 0,
+          pressed: false,
+        })),
         axes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       };
       mockGetGamepads.mockReturnValue([mockPad]);

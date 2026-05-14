@@ -24,7 +24,8 @@ describe('playTone', () => {
     jest.clearAllMocks();
 
     // 动态导入 AudioState 获取 mock 的 audioCtx 引用
-    const AudioState = require('@/lib/services/audio/state/audio-state.js').default;
+    const AudioState =
+      require('@/lib/services/audio/state/audio-state.js').default;
     audioCtx = AudioState.audioCtx;
 
     // 创建 mock 音频节点

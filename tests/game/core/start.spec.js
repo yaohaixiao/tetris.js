@@ -112,7 +112,8 @@ describe('start', () => {
     it('应该先设置基准行数再发送事件', () => {
       start(mockContext);
 
-      const setBaseLinesOrder = mockStore.setBaseLines.mock.invocationCallOrder[0];
+      const setBaseLinesOrder =
+        mockStore.setBaseLines.mock.invocationCallOrder[0];
       const emitOrder = mockContext.emit.mock.invocationCallOrder[0];
 
       expect(setBaseLinesOrder).toBeLessThan(emitOrder);

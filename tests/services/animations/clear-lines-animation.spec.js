@@ -237,7 +237,9 @@ describe('ClearLinesAnimation', () => {
     it('应该发送保存最高分事件', () => {
       const anim = createAnim();
       anim.stop();
-      expect(anim.emit).toHaveBeenCalledWith(`game:${mockGame.id}:save:high:score`);
+      expect(anim.emit).toHaveBeenCalledWith(
+        `game:${mockGame.id}:save:high:score`,
+      );
     });
 
     it('应该发送 HUD 更新事件', () => {
@@ -253,10 +255,9 @@ describe('ClearLinesAnimation', () => {
       const anim = createAnim();
       anim.update(0.12);
       anim.render();
-      expect(anim.emit).toHaveBeenCalledWith(
-        `ui:${mockGame.id}:render:clear`,
-        { state: { lines: anim.lines } },
-      );
+      expect(anim.emit).toHaveBeenCalledWith(`ui:${mockGame.id}:render:clear`, {
+        state: { lines: anim.lines },
+      });
     });
 
     it('应该传递当前 lines 引用', () => {

@@ -174,10 +174,7 @@ describe('dispatchCommand', () => {
 
     it('handler 不存在时应该静默忽略', () => {
       expect(() => {
-        dispatchCommand(
-          { action: 'unknown', payload: {} },
-          { mode: 'paused' },
-        );
+        dispatchCommand({ action: 'unknown', payload: {} }, { mode: 'paused' });
       }).not.toThrow();
 
       expect(PAUSED_ACTIONS.resume).not.toHaveBeenCalled();
@@ -239,10 +236,7 @@ describe('dispatchCommand', () => {
 
     it('handler 不存在时应该静默忽略', () => {
       expect(() => {
-        dispatchCommand(
-          { action: 'unknown', payload: {} },
-          { mode: 'replay' },
-        );
+        dispatchCommand({ action: 'unknown', payload: {} }, { mode: 'replay' });
       }).not.toThrow();
 
       expect(REPLAY_ACTIONS.play).not.toHaveBeenCalled();
@@ -360,10 +354,7 @@ describe('dispatchCommand', () => {
     });
 
     it('payload 为 null 时应该传递 null 给 handler', () => {
-      dispatchCommand(
-        { action: 'move', payload: null },
-        { mode: 'playing' },
-      );
+      dispatchCommand({ action: 'move', payload: null }, { mode: 'playing' });
 
       expect(GAME_PLAYING_ACTIONS.move).toHaveBeenCalledWith(null);
     });

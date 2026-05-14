@@ -84,11 +84,7 @@ describe('ReplayController', () => {
 
     it('多次调用应该依次返回方块序列', () => {
       replay.playing = true;
-      replay.pieceSequence = [
-        { type: 'I' },
-        { type: 'O' },
-        { type: 'T' },
-      ];
+      replay.pieceSequence = [{ type: 'I' }, { type: 'O' }, { type: 'T' }];
 
       expect(replay.getNextPiece()).toEqual({
         curr: { type: 'I' },

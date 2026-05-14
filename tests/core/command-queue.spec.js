@@ -218,8 +218,9 @@ describe('CommandQueue', () => {
       const handler = jest.fn();
       EventBus.on('dispatch:command', handler);
 
-      const commands = Array.from({ length: 100 }, (_, i) =>
-        new Command(`CMD_${i}`)
+      const commands = Array.from(
+        { length: 100 },
+        (_, i) => new Command(`CMD_${i}`),
       );
 
       commands.forEach((cmd) => commandQueue.enqueue(cmd));
@@ -359,8 +360,9 @@ describe('CommandQueue', () => {
       EventBus.on('dispatch:command', handler);
 
       const count = 1000;
-      const commands = Array.from({ length: count }, (_, i) =>
-        new Command(`CMD_${i}`)
+      const commands = Array.from(
+        { length: count },
+        (_, i) => new Command(`CMD_${i}`),
       );
 
       commands.forEach((cmd) => commandQueue.enqueue(cmd));

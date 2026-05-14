@@ -21,7 +21,9 @@ describe('GameStore', () => {
 
     mockGameState = {
       beginningBoard: [],
-      board: Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0)),
+      board: Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      ),
       curr: null,
       cx: 0,
       cy: 0,
@@ -239,7 +241,10 @@ describe('GameStore', () => {
   // ==================== setBeginningBoard / getBeginningBoard ====================
   describe('beginningBoard', () => {
     it('应该深拷贝设置初始棋盘', () => {
-      const board = [['#FF0000', ''], ['', '#00FF00']];
+      const board = [
+        ['#FF0000', ''],
+        ['', '#00FF00'],
+      ];
 
       store.setBeginningBoard(board);
 

@@ -131,7 +131,14 @@ describe('LevelUpAnimation', () => {
 
     it('粒子颜色应该来自 FIREWORK_COLORS', () => {
       const fireworks = anim.createFireworks();
-      const validColors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
+      const validColors = [
+        '#FF0000',
+        '#00FF00',
+        '#0000FF',
+        '#FFFF00',
+        '#FF00FF',
+        '#00FFFF',
+      ];
 
       fireworks.forEach((p) => {
         expect(validColors).toContain(p.color);
@@ -177,7 +184,10 @@ describe('LevelUpAnimation', () => {
       // vx 乘了 0.98
       expect(anim.fireworks[0].vx).toBeCloseTo(initialVx * 0.98, 10);
       // vy 乘了 0.98 再加重力
-      expect(anim.fireworks[0].vy).toBeCloseTo(initialVy * 0.98 + 0.01 * 0.016, 10);
+      expect(anim.fireworks[0].vy).toBeCloseTo(
+        initialVy * 0.98 + 0.01 * 0.016,
+        10,
+      );
     });
 
     it('alpha <= 0 的粒子应该被移除', () => {
@@ -392,7 +402,10 @@ describe('LevelUpAnimation', () => {
       anim.update(10);
 
       // timer >= 3，返回 false
-      expect(anim.emit).toHaveBeenCalledWith('audio:play:bgm', expect.any(Object));
+      expect(anim.emit).toHaveBeenCalledWith(
+        'audio:play:bgm',
+        expect.any(Object),
+      );
     });
 
     it('所有粒子都消失后不应崩溃', () => {

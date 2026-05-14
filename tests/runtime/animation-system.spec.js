@@ -200,7 +200,9 @@ describe('AnimationSystem', () => {
     });
 
     it('update 返回 false 时动画应该被移除', () => {
-      const anim = createAnimation({ update: jest.fn().mockReturnValue(false) });
+      const anim = createAnimation({
+        update: jest.fn().mockReturnValue(false),
+      });
 
       animSystem.register(anim);
 
@@ -213,7 +215,9 @@ describe('AnimationSystem', () => {
     });
 
     it('动画结束时应该标记排序缓存为脏', () => {
-      const anim = createAnimation({ update: jest.fn().mockReturnValue(false) });
+      const anim = createAnimation({
+        update: jest.fn().mockReturnValue(false),
+      });
 
       animSystem.register(anim);
       animSystem.update(0.016);
@@ -476,9 +480,9 @@ describe('AnimationSystem', () => {
       animSystem.register(anim);
       animSystem.update(0.016);
 
-      expect(
-        animSystem.hasBlocking(['fade-in', 'countdown', 'slide']),
-      ).toBe(true);
+      expect(animSystem.hasBlocking(['fade-in', 'countdown', 'slide'])).toBe(
+        true,
+      );
     });
 
     it('指定名称但该动画不是阻塞的应该返回 false', () => {

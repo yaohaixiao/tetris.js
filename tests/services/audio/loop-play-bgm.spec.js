@@ -41,9 +41,13 @@ describe('loopPlayBGM', () => {
     loopPlayBGM([{ freq: 440, dur: 1 }]);
 
     expect(playTone).toHaveBeenCalledWith(
-      440, 110,
+      440,
+      110,
       expect.objectContaining({
-        volume: 0.05, wave: 'square', gate: 1, articulation: {},
+        volume: 0.05,
+        wave: 'square',
+        gate: 1,
+        articulation: {},
       }),
     );
   });
@@ -57,7 +61,8 @@ describe('loopPlayBGM', () => {
   it('应支持自定义 volume', () => {
     loopPlayBGM([{ freq: 440, dur: 1 }], { volume: 0.3 });
     expect(playTone).toHaveBeenCalledWith(
-      440, expect.any(Number),
+      440,
+      expect.any(Number),
       expect.objectContaining({ volume: 0.3 }),
     );
   });
@@ -65,7 +70,8 @@ describe('loopPlayBGM', () => {
   it('应支持自定义 wave', () => {
     loopPlayBGM([{ freq: 440, dur: 1 }], { wave: 'sine' });
     expect(playTone).toHaveBeenCalledWith(
-      440, expect.any(Number),
+      440,
+      expect.any(Number),
       expect.objectContaining({ wave: 'sine' }),
     );
   });
@@ -73,7 +79,8 @@ describe('loopPlayBGM', () => {
   it('应支持自定义 gate', () => {
     loopPlayBGM([{ freq: 440, dur: 1 }], { gate: 0.5 });
     expect(playTone).toHaveBeenCalledWith(
-      440, expect.any(Number),
+      440,
+      expect.any(Number),
       expect.objectContaining({ gate: 0.5 }),
     );
   });
@@ -82,7 +89,8 @@ describe('loopPlayBGM', () => {
     const art = { attackTime: 0.01, releaseTime: 0.05, sustainRatio: 0.5 };
     loopPlayBGM([{ freq: 440, dur: 1 }], { articulation: art });
     expect(playTone).toHaveBeenCalledWith(
-      440, expect.any(Number),
+      440,
+      expect.any(Number),
       expect.objectContaining({ articulation: art }),
     );
   });
@@ -113,7 +121,8 @@ describe('loopPlayBGM', () => {
   it('第一个音符 startTime=currentTime', () => {
     loopPlayBGM([{ freq: 440, dur: 1 }]);
     expect(playTone).toHaveBeenCalledWith(
-      440, expect.any(Number),
+      440,
+      expect.any(Number),
       expect.objectContaining({ startTime: 100 }),
     );
   });
@@ -125,18 +134,27 @@ describe('loopPlayBGM', () => {
 
   it('startTime 逐步推进', () => {
     loopPlayBGM(
-      [{ freq: 440, dur: 1 }, { freq: 880, dur: 2 }],
+      [
+        { freq: 440, dur: 1 },
+        { freq: 880, dur: 2 },
+      ],
       { duration: 100 },
     );
     // note1: startTime=100
     // note2: startTime=100.1
-    expect(playTone).toHaveBeenNthCalledWith(2, 880, 200, expect.objectContaining({ startTime: 100.1 }));
+    expect(playTone).toHaveBeenNthCalledWith(
+      2,
+      880,
+      200,
+      expect.objectContaining({ startTime: 100.1 }),
+    );
   });
 
   // ==================== 调度窗口 ====================
   it('长音符只调度一个', () => {
     const melody = Array.from({ length: 100 }, (_, i) => ({
-      freq: 440 + i * 10, dur: 1,
+      freq: 440 + i * 10,
+      dur: 1,
     }));
     loopPlayBGM(melody, { duration: 1000 });
     expect(playTone).toHaveBeenCalledTimes(1);
@@ -144,7 +162,8 @@ describe('loopPlayBGM', () => {
 
   it('短音符窗口内可以调度多轮', () => {
     const melody = Array.from({ length: 5 }, (_, i) => ({
-      freq: 440 + i * 10, dur: 0.1,
+      freq: 440 + i * 10,
+      dur: 0.1,
     }));
     loopPlayBGM(melody, { duration: 100 });
     // 5个音符×10ms=50ms，可以循环2轮（50+50=100<120），第三轮开始超窗口

@@ -100,7 +100,7 @@ describe('reset', () => {
       expect(setBeginningState).toHaveBeenCalledWith(
         mockContext,
         'main-menu',
-        1,  // main-menu 时 level 被重置为 1
+        1, // main-menu 时 level 被重置为 1
       );
       expect(mockContext.emit).toHaveBeenCalledWith(
         'ui:test-game-uuid:update:mode',
@@ -153,11 +153,7 @@ describe('reset', () => {
 
       reset(mockContext, 'playing');
 
-      expect(setBeginningState).toHaveBeenCalledWith(
-        mockContext,
-        'playing',
-        8,
-      );
+      expect(setBeginningState).toHaveBeenCalledWith(mockContext, 'playing', 8);
     });
 
     it('mode 为 playing 时不应该播放切换场景音效', () => {
@@ -197,7 +193,9 @@ describe('reset', () => {
 
       const stopBgmIndex = calls.indexOf('audio:stop:bgm');
       const animClearIndex = calls.indexOf('animations:test-game-uuid:clear');
-      const queueClearIndex = calls.indexOf('command:queue:test-game-uuid:clear');
+      const queueClearIndex = calls.indexOf(
+        'command:queue:test-game-uuid:clear',
+      );
 
       // stopBgm 应该最先
       expect(stopBgmIndex).toBe(0);

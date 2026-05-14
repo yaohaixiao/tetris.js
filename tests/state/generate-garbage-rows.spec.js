@@ -78,7 +78,15 @@ describe('generateGarbageRows', () => {
     });
 
     it('未提供颜色映射时应该使用默认颜色', () => {
-      const defaultColors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#800080', '#008080', '#FFA500'];
+      const defaultColors = [
+        '#FF0000',
+        '#00FF00',
+        '#0000FF',
+        '#FFFF00',
+        '#800080',
+        '#008080',
+        '#FFA500',
+      ];
       const result = generateGarbageRows(3, 10);
 
       result.forEach((row) => {
