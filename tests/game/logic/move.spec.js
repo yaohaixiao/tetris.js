@@ -79,7 +79,7 @@ describe('move', () => {
 
       move(mockContext, 0, 1);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
         sound: 'MOVE',
       });
     });

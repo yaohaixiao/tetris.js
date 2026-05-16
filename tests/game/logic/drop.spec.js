@@ -84,7 +84,7 @@ describe('drop', () => {
     it('应该播放落地音效', () => {
       drop(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
         sound: 'FALL',
       });
     });
@@ -106,7 +106,7 @@ describe('drop', () => {
     it('应该播放快速下落完成音效', () => {
       drop(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
         sound: 'DROP',
       });
     });
@@ -176,13 +176,13 @@ describe('drop', () => {
       const lockOrder = lock.mock.invocationCallOrder[0];
       const fallSoundCall = mockContext.emit.mock.calls.find(
         ([event, payload]) =>
-          event === 'audio:play:sound' && payload.sound === 'FALL',
+          event === 'audio:resume:sound' && payload.sound === 'FALL',
       );
 
       // 查找该调用的顺序
       const fallSoundIndex = mockContext.emit.mock.calls.findIndex(
         ([event, payload]) =>
-          event === 'audio:play:sound' && payload.sound === 'FALL',
+          event === 'audio:resume:sound' && payload.sound === 'FALL',
       );
 
       expect(lockOrder).toBeLessThan(
@@ -198,7 +198,7 @@ describe('drop', () => {
       const spawnOrder = spawn.mock.invocationCallOrder[0];
       const dropSoundIndex = mockContext.emit.mock.calls.findIndex(
         ([event, payload]) =>
-          event === 'audio:play:sound' && payload.sound === 'DROP',
+          event === 'audio:resume:sound' && payload.sound === 'DROP',
       );
 
       expect(spawnOrder).toBeLessThan(
@@ -212,7 +212,7 @@ describe('drop', () => {
       drop(mockContext);
 
       const soundCalls = mockContext.emit.mock.calls.filter(
-        ([event]) => event === 'audio:play:sound',
+        ([event]) => event === 'audio:resume:sound',
       );
 
       expect(soundCalls).toHaveLength(2);

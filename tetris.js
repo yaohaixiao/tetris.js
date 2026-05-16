@@ -400,7 +400,7 @@ var tetris = (() => {
   };
   var motifs_default = MOTIFS;
 
-  // lib/services/audio/play-tone.js
+  // lib/services/audio/resume-tone.js
   var playTone = (audio, freq, dur, options = {}) => {
     if (!freq || dur <= 0) {
       return;
@@ -1835,7 +1835,7 @@ var tetris = (() => {
   };
   var musics_default = Musics;
 
-  // lib/services/audio/loop-play-bgm.js
+  // lib/services/audio/loop-resume-bgm.js
   var SCHEDULE_AHEAD_TIME = 0.12;
   var LOOKAHEAD = 25;
   var loopPlayBGM = (audio, melody, options = {}) => {
@@ -1879,7 +1879,7 @@ var tetris = (() => {
   };
   var loop_play_bgm_default = loopPlayBGM;
 
-  // lib/services/audio/play-bgm.js
+  // lib/services/audio/resume-bgm.js
   var {
     TetrisTheme: TetrisTheme2,
     SpringFestival: SpringFestival2,
@@ -1904,14 +1904,15 @@ var tetris = (() => {
     Korobeiniki2,
     JourneyToWest2
   ];
-  var getMusicByLevel = (level, maxLevel = 99) => {
+  var getMusicByLevel = (audio, level) => {
     const { length } = MUSIC_LIST;
+    const maxLevel = audio.Level.max;
     const step = Math.floor(maxLevel / length);
     const index = Math.min(Math.floor((level - 1) / step), length - 1);
     return MUSIC_LIST[index];
   };
-  var playBGM = (audio, level = 1, maxLevel = 99) => {
-    const music = getMusicByLevel(level, maxLevel);
+  var playBGM = (audio, level = 1) => {
+    const music = getMusicByLevel(audio, level);
     const { melody, duration, volume, wave, gate, articulation } = music;
     loop_play_bgm_default(audio, melody, {
       duration,
@@ -1931,9 +1932,9 @@ var tetris = (() => {
   var stop_bgm_default = stopBGM;
 
   // lib/services/audio/toggle-bgm.js
-  var toggleBGM = (audio, level, maxLevel = 99) => {
+  var toggleBGM = (audio, level) => {
     if (audio.bgmSchedulerId === 0) {
-      play_bgm_default(audio, level, maxLevel);
+      play_bgm_default(audio, level);
     } else {
       stop_bgm_default(audio);
     }
@@ -1955,36 +1956,36 @@ var tetris = (() => {
       });
       this.bgmSchedulerId = 0;
     }
-    playBGM(level, maxLevel) {
-      play_bgm_default(this, level, maxLevel);
+    playBGM(level) {
+      play_bgm_default(this, level);
     }
     stopBGM() {
       stop_bgm_default(this);
     }
-    toggleBGM(level, maxLevel) {
-      toggle_bgm_default(this, level, maxLevel);
+    toggleBGM(level) {
+      toggle_bgm_default(this, level);
     }
     subscribe() {
-      this.on("audio:play:bgm", this._onPlayBGM);
+      this.on("audio:resume:bgm", this._onPlayBGM);
       this.on("audio:stop:bgm", this._onStopBGM);
       this.on("audio:toggle:bgm", this._onToggleBGM);
-      this.on("audio:play:sound", this._onPlaySound);
+      this.on("audio:resume:sound", this._onPlaySound);
     }
     unsubscribe() {
-      this.off("audio:play:bgm", this._onPlayBGM);
+      this.off("audio:resume:bgm", this._onPlayBGM);
       this.off("audio:stop:bgm", this._onStopBGM);
       this.off("audio:toggle:bgm", this._onToggleBGM);
-      this.off("audio:play:sound", this._onPlaySound);
+      this.off("audio:resume:sound", this._onPlaySound);
     }
-    _onPlayBGM = ({ level, maxLevel = 99 }) => {
-      this.playBGM(level, maxLevel);
+    _onPlayBGM = ({ level }) => {
+      this.playBGM(level);
     };
     _onStopBGM = () => {
       this.stopBGM();
     };
-    _onToggleBGM = ({ level, maxLevel = 99 }) => {
-      this.emit("audio:play:sound", { sound: "BGM_TOGGLED" });
-      this.toggleBGM(level, maxLevel);
+    _onToggleBGM = ({ level }) => {
+      this.emit("audio:resume:sound", { sound: "BGM_TOGGLED" });
+      this.toggleBGM(level);
     };
     _onPlaySound = ({ sound, lines }) => {
       const handler = this.Sounds[sound];
@@ -2550,10 +2551,8 @@ var tetris = (() => {
   // lib/game/constants/game.js
   var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
   var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
-  var MAX_LEVEL = 99;
   var GAME = {
     CLEAR_LINE_SCORES,
-    MAX_LEVEL,
     FONT_FAMILY
   };
   var game_default = GAME;
@@ -4992,7 +4991,7 @@ var tetris = (() => {
         return;
       }
       this.emit("audio:stop:bgm");
-      this.emit("audio:play:sound", { sound: "LEVEL_UP" });
+      this.emit("audio:resume:sound", { sound: "LEVEL_UP" });
       this.emit(`game:${this.Game.id}:start:level:up`, { level });
     };
   };
@@ -5025,12 +5024,12 @@ var tetris = (() => {
       this._intervalId = 0;
     }
     _countdown() {
-      this.emit("audio:play:sound", { sound: "COUNTDOWN" });
+      this.emit("audio:resume:sound", { sound: "COUNTDOWN" });
       this._intervalId = this.Scheduler.interval(() => {
         this.state.number -= 1;
         this.state.scale = 4;
         if (this.state.number >= 1) {
-          this.emit("audio:play:sound", { sound: "COUNTDOWN" });
+          this.emit("audio:resume:sound", { sound: "COUNTDOWN" });
         }
         if (this.state.number <= 0) {
           this.stop();
@@ -5093,7 +5092,7 @@ var tetris = (() => {
         return;
       }
       this._tickId = this.Scheduler.interval(() => {
-        this.emit("audio:play:sound", { sound: "SECOND_TICK" });
+        this.emit("audio:resume:sound", { sound: "SECOND_TICK" });
       }, 1e3);
     }
     /**
@@ -5108,7 +5107,7 @@ var tetris = (() => {
       }
       this.timer += delta;
       if (this.timer >= 1) {
-        this.emit("audio:play:sound", { sound: "SECOND_TICK" });
+        this.emit("audio:resume:sound", { sound: "SECOND_TICK" });
         this.timer = 0;
       }
       return true;
@@ -5137,9 +5136,9 @@ var tetris = (() => {
   var paused_animation_default = PausedAnimation;
 
   // lib/game/actions/apply-clear-lines.js
-  var applyClearLines = (context) => {
-    const { Elements, Level } = context;
-    const state = context.Store.getState();
+  var applyClearLines = (game) => {
+    const { Elements, Level, Store } = game;
+    const state = Store.getState();
     const { rows, cols } = Elements.Main;
     const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
     const lines = state.clearLines || [];
@@ -5197,7 +5196,7 @@ var tetris = (() => {
         alpha: 1,
         timer: 0
       }));
-      this.emit("audio:play:sound", {
+      this.emit("audio:resume:sound", {
         sound: "CLEAR",
         lines: lines.length - 1
       });
@@ -5396,7 +5395,7 @@ var tetris = (() => {
       this.active = false;
       Scheduler2.cancel(this._spawnId);
       Scheduler2.cancel(this._endId);
-      this.emit("audio:play:bgm", { level });
+      this.emit("audio:resume:bgm", { level });
     }
     /**
      * ## 渲染升级动画
@@ -5480,8 +5479,8 @@ var tetris = (() => {
   var random_shape_default = randomShape;
 
   // lib/game/utils/get-next-piece.js
-  var getNextPiece = (context) => {
-    const { Replay, Store } = context;
+  var getNextPiece = (game) => {
+    const { Replay, Store } = game;
     if (Replay.playing) {
       return Replay.getNextPiece();
     }
@@ -5499,10 +5498,10 @@ var tetris = (() => {
   var get_next_piece_default = getNextPiece;
 
   // lib/game/logic/collision.js
-  var collision = (context, ox, oy) => {
-    const { Elements } = context;
+  var collision = (game, ox, oy) => {
+    const { Elements, Store } = game;
     const { rows, cols } = Elements.Main;
-    const state = context.Store.getState();
+    const state = Store.getState();
     const { curr, cx, cy, board } = state;
     if (!curr) {
       return false;
@@ -5526,24 +5525,24 @@ var tetris = (() => {
   var collision_default = collision;
 
   // lib/game/core/over.js
-  var over = (context) => {
-    const { id, Store } = context;
+  var over = (game) => {
+    const { id, Store } = game;
     const mode = Store.getMode();
     if (mode === "game-over" || mode === "replay") {
       return;
     }
-    context.emit(`replay:${id}:stop:record`);
-    context.emit("audio:stop:bgm");
-    context.emit("audio:play:sound", { sound: "GAME_OVER" });
-    context.emit(`replay:${id}:game:over`);
+    game.emit(`replay:${id}:stop:record`);
+    game.emit("audio:stop:bgm");
+    game.emit("audio:resume:sound", { sound: "GAME_OVER" });
+    game.emit(`replay:${id}:game:over`);
   };
   var over_default = over;
 
   // lib/game/logic/spawn.js
-  var spawn = (context) => {
-    const { id, Elements, Store } = context;
+  var spawn = (game) => {
+    const { id, Elements, Store } = game;
     const { cols } = Elements.Main;
-    const { curr, next } = get_next_piece_default(context);
+    const { curr, next } = get_next_piece_default(game);
     if (!curr) {
       return;
     }
@@ -5558,19 +5557,19 @@ var tetris = (() => {
       cy: 0
     });
     const state = Store.getState();
-    if (collision_default(context, 0, 0)) {
-      over_default(context);
+    if (collision_default(game, 0, 0)) {
+      over_default(game);
       return;
     }
-    context.emit(`ui:${id}:render:next:piece`, { state });
-    context.emit(`replay:${id}:add:piece`, state.curr);
+    game.emit(`ui:${id}:render:next:piece`, { state });
+    game.emit(`replay:${id}:add:piece`, state.curr);
   };
   var spawn_default = spawn;
 
   // lib/game/actions/set-beginning-state.js
-  var setBeginningState = (context, mode, level = 1) => {
-    const { Store } = context;
-    context.emit("ui:update:mode", { mode });
+  var setBeginningState = (game, mode, level = 1) => {
+    const { Store } = game;
+    game.emit("ui:update:mode", { mode });
     Store.setState({
       mode,
       score: 0,
@@ -5585,128 +5584,125 @@ var tetris = (() => {
   var set_beginning_state_default = setBeginningState;
 
   // lib/game/core/begin.js
-  var begin = (context) => {
-    const { Store, id, Scheduler: Scheduler2 } = context;
+  var begin = (game) => {
+    const { Store, id, Scheduler: Scheduler2 } = game;
     const $level = document.querySelector("#level");
     const level = Store.getLevel();
     if ($level) {
       $level.textContent = pad_start_default(Store.getLevel(), 2);
     }
-    context.emit(`replay:${id}:start:record`);
+    game.emit(`replay:${id}:start:record`);
     Store.resetBoard();
-    set_beginning_state_default(context, "playing", level);
-    spawn_default(context);
-    context.emit("audio:play:sound", { sound: "GAME_STARTED" });
+    set_beginning_state_default(game, "playing", level);
+    spawn_default(game);
+    game.emit("audio:resume:sound", { sound: "GAME_STARTED" });
     Scheduler2.delay(() => {
-      const maxLevel = context.Level.max;
-      context.emit("audio:play:bgm", { level, maxLevel });
+      game.emit("audio:resume:bgm", { level });
     }, 250);
   };
   var begin_default = begin;
 
   // lib/game/core/start.js
-  var start = (context) => {
-    const { id, Store } = context;
+  var start = (game) => {
+    const { id, Store } = game;
     const level = Store.getLevel();
     const lines = (level - 1) * 10;
     Store.setBaseLines(lines);
-    context.emit(`game:${id}:start:countdown`, { context });
+    game.emit(`game:${id}:start:countdown`, { game });
   };
   var start_default = start;
 
-  // lib/game/core/play.js
-  var play = (context) => {
-    const { id, Store, Level } = context;
-    const mode = context.Store.getMode();
+  // lib/game/core/resume.js
+  var play = (game) => {
+    const { id, Store } = game;
+    const mode = Store.getMode();
     if (mode !== "paused") {
       return;
     }
     const level = Store.getLevel();
-    const maxLevel = Level.max;
-    context.emit(`ui:${id}:update:mode`, { mode: "playing" });
+    game.emit(`ui:${id}:update:mode`, { mode: "playing" });
     Store.setMode("playing");
-    context.emit(`game:${id}:stop:paused`);
-    context.emit("audio:play:sound", { sound: "RESUME" });
-    context.emit("audio:play:bgm", { level, maxLevel });
+    game.emit(`game:${id}:stop:paused`);
+    game.emit("audio:resume:sound", { sound: "RESUME" });
+    game.emit("audio:resume:bgm", { level });
   };
   var play_default = play;
 
   // lib/game/core/pause.js
-  var pause = (context) => {
-    const { id, Store } = context;
+  var pause = (game) => {
+    const { id, Store } = game;
     const mode = Store.getMode();
     if (mode !== "playing") {
       return;
     }
-    context.emit(`ui:${id}:update:mode`, { mode: "paused" });
+    game.emit(`ui:${id}:update:mode`, { mode: "paused" });
     Store.setMode("paused");
-    context.emit("audio:stop:bgm");
-    context.emit("audio:play:sound", { sound: "PAUSED" });
-    context.emit(`game:${id}:start:paused`);
+    game.emit("audio:stop:bgm");
+    game.emit("audio:resume:sound", { sound: "PAUSED" });
+    game.emit(`game:${id}:start:paused`);
   };
   var pause_default = pause;
 
   // lib/game/core/toggle-pause.js
-  var togglePause = (context) => {
-    const mode = context.Store.getMode();
+  var togglePause = (game) => {
+    const mode = game.Store.getMode();
     if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
       return;
     }
     if (mode === "playing") {
-      pause_default(context);
+      pause_default(game);
     } else {
-      play_default(context);
+      play_default(game);
     }
   };
   var toggle_pause_default = togglePause;
 
   // lib/game/core/reset.js
-  var reset = (context, mode = "main-menu") => {
-    const { id, Store } = context;
+  var reset = (game, mode = "main-menu") => {
+    const { id, Store } = game;
     let level = Store.getLevel();
-    context.emit("audio:stop:bgm");
-    context.emit(`animations:${id}:clear`);
-    context.emit(`command:queue:${id}:clear`);
+    game.emit("audio:stop:bgm");
+    game.emit(`animations:${id}:clear`);
+    game.emit(`command:queue:${id}:clear`);
     Store.resetBoard();
     if (mode === "main-menu") {
       Store.setDifficulty("easy");
       level = 1;
-      context.emit("audio:play:sound", { sound: "SWITCH_SCENE" });
+      game.emit("audio:resume:sound", { sound: "SWITCH_SCENE" });
     }
-    set_beginning_state_default(context, mode, level);
-    context.emit(`ui:${id}:update:hud`, { state: Store.getState() });
-    context.emit(`ui:${id}:update:mode`, { mode });
+    set_beginning_state_default(game, mode, level);
+    game.emit(`ui:${id}:update:hud`, { state: Store.getState() });
+    game.emit(`ui:${id}:update:mode`, { mode });
   };
   var reset_default = reset;
 
   // lib/game/core/restart.js
-  var restart = (context) => {
-    const { Store, Level } = context;
+  var restart = (game) => {
+    const { Store } = game;
     const mode = Store.getMode();
     if (mode !== "playing") {
       return;
     }
     const level = Store.getLevel();
-    const maxLevel = Level.max;
-    reset_default(context, "playing");
-    spawn_default(context);
-    context.emit("audio:play:bgm", { level, maxLevel });
+    reset_default(game, "playing");
+    spawn_default(game);
+    game.emit("audio:resume:bgm", { level });
   };
   var restart_default = restart;
 
   // lib/game/logic/move.js
-  var move = (context, ox, oy) => {
-    const { Store } = context;
+  var move = (game, ox, oy) => {
+    const { Store } = game;
     const state = Store.getState();
     let { cx, cy } = state;
-    if (!collision_default(context, ox, oy)) {
+    if (!collision_default(game, ox, oy)) {
       cx += ox;
       cy += oy;
       Store.setState({
         cx,
         cy
       });
-      context.emit("audio:play:sound", { sound: "MOVE" });
+      game.emit("audio:resume:sound", { sound: "MOVE" });
       return true;
     }
     return false;
@@ -5714,8 +5710,8 @@ var tetris = (() => {
   var move_default = move;
 
   // lib/game/logic/rotate.js
-  var rotate = (context) => {
-    const { Store } = context;
+  var rotate = (game) => {
+    const { Store } = game;
     const state = Store.getState();
     const { curr } = state;
     if (!curr) {
@@ -5729,20 +5725,20 @@ var tetris = (() => {
     Store.setState({
       curr: currentShape
     });
-    if (collision_default(context, 0, 0)) {
+    if (collision_default(game, 0, 0)) {
       currentShape.shape = prev;
       Store.setState({
         curr: currentShape
       });
     } else {
-      context.emit("audio:play:sound", { sound: "ROTATE" });
+      game.emit("audio:resume:sound", { sound: "ROTATE" });
     }
   };
   var rotate_default = rotate;
 
   // lib/game/logic/lock.js
-  var lock = (context) => {
-    const { Store } = context;
+  var lock = (game) => {
+    const { Store } = game;
     const state = Store.getState();
     const { curr } = state;
     const s = curr.shape;
@@ -5761,9 +5757,9 @@ var tetris = (() => {
   var lock_default = lock;
 
   // lib/game/logic/find-full-lines.js
-  var findFullLines = (context) => {
-    const { Elements } = context;
-    const state = context.Store.getState();
+  var findFullLines = (game) => {
+    const { Elements, Store } = game;
+    const state = Store.getState();
     const { rows } = Elements.Main;
     const linesToClear = [];
     for (let y = rows - 1; y >= 0; y--) {
@@ -5777,59 +5773,59 @@ var tetris = (() => {
   var find_full_lines_default = findFullLines;
 
   // lib/game/logic/clear-lines.js
-  var clearLines = (context) => {
-    const { id } = context;
-    const linesToClear = find_full_lines_default(context);
+  var clearLines = (game) => {
+    const { id } = game;
+    const linesToClear = find_full_lines_default(game);
     if (linesToClear.length === 0) {
       return;
     }
-    context.Store.setClearLines(linesToClear);
-    context.emit(`game:${id}:start:clear:lines`, { linesToClear });
+    game.Store.setClearLines(linesToClear);
+    game.emit(`game:${id}:start:clear:lines`, { linesToClear });
   };
   var clear_lines_default = clearLines;
 
   // lib/game/logic/tick.js
-  var tick = (context, isBlocked) => {
-    const mode = context.Store.getMode();
+  var tick = (game, isBlocked) => {
+    const mode = game.Store.getMode();
     if (mode !== "playing" && mode !== "replay" || isBlocked) {
       return;
     }
     if (mode === "playing") {
-      context.emit("dispatch:input", {
+      game.emit("dispatch:input", {
         device: "replay",
         action: "AUTO_TICK",
         payload: {
-          Game: context
+          Game: game
         }
       });
     }
-    if (!move_default(context, 0, 1)) {
-      lock_default(context);
-      context.emit("audio:play:sound", { sound: "FALL" });
-      clear_lines_default(context);
-      spawn_default(context);
+    if (!move_default(game, 0, 1)) {
+      lock_default(game);
+      game.emit("audio:resume:sound", { sound: "FALL" });
+      clear_lines_default(game);
+      spawn_default(game);
     }
   };
   var tick_default = tick;
 
   // lib/game/logic/drop.js
-  var drop = (context) => {
+  var drop = (game) => {
     while (true) {
-      if (!move_default(context, 0, 1)) {
+      if (!move_default(game, 0, 1)) {
         break;
       }
     }
-    lock_default(context);
-    context.emit("audio:play:sound", { sound: "FALL" });
-    clear_lines_default(context);
-    spawn_default(context);
-    context.emit("audio:play:sound", { sound: "DROP" });
+    lock_default(game);
+    game.emit("audio:resume:sound", { sound: "FALL" });
+    clear_lines_default(game);
+    spawn_default(game);
+    game.emit("audio:resume:sound", { sound: "DROP" });
   };
   var drop_default = drop;
 
   // lib/game/rules/get-speed.js
-  var getSpeed = (context) => {
-    const { Store, Level } = context;
+  var getSpeed = (game) => {
+    const { Store, Level } = game;
     const level = Store.getLevel();
     const step = Math.ceil(1e3 / Math.floor(Level.max * 0.7));
     return Math.max(120, 1e3 - (level - 1) * step);
@@ -5894,20 +5890,20 @@ var tetris = (() => {
     }
     selectLevel(level) {
       this.Store.setLevel(level);
-      this.emit("audio:play:sound", { sound: "LEVEL_CHANGED" });
+      this.emit("audio:resume:sound", { sound: "LEVEL_CHANGED" });
     }
     switchToDifficulty() {
       this.Store.setMode("difficulty");
-      this.emit("audio:play:sound", { sound: "SWITCH_SCENE" });
+      this.emit("audio:resume:sound", { sound: "SWITCH_SCENE" });
     }
     selectDifficulty(difficulty) {
       this.Store.setDifficulty(difficulty);
-      this.emit("audio:play:sound", { sound: "DIFFICULTY_CHANGED" });
+      this.emit("audio:resume:sound", { sound: "DIFFICULTY_CHANGED" });
     }
     switchToMainMenu() {
       this.emit(`ui:${this.id}:update:mode`, { mode: "main-menu" });
       this.Store.setMode("main-menu");
-      this.emit("audio:play:sound", { sound: "SWITCH_SCENE" });
+      this.emit("audio:resume:sound", { sound: "SWITCH_SCENE" });
     }
     loadHighScore() {
       const highScore = Number.parseInt(get_storage_default("tetris-high-score"), 10) || 0;
@@ -6804,13 +6800,12 @@ var tetris = (() => {
     Game: null,
     initialize: (options) => {
       Engine.Scheduler = new scheduler_default();
-      Engine.Audio = new audio_default({
-        Scheduler: Engine.Scheduler
-      });
-      Engine.Game = new game_default2({
+      const normalizedOptions = {
         ...options,
         Scheduler: Engine.Scheduler
-      });
+      };
+      Engine.Audio = new audio_default(normalizedOptions);
+      Engine.Game = new game_default2(normalizedOptions);
     },
     /**
      * ## 初始化游戏

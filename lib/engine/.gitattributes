@@ -1,0 +1,15 @@
+# 自动检测文本文件并规范化换行符
+* text=auto
+
+# JavaScript 文件统一使用 LF
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+
+# JSON 和配置文件
+*.json text eol=lf
+
+# 测试文件
+*.spec.js text eol=lf
+*.test.js text eol=lf

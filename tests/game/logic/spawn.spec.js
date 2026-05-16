@@ -3,7 +3,6 @@ import getNextPiece from '@/lib/game/utils/get-next-piece.js';
 import collision from '@/lib/game/logic/collision.js';
 import over from '@/lib/game/core/over.js';
 
-// Mock 依赖
 jest.mock('@/lib/game/utils/get-next-piece.js', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -41,16 +40,13 @@ describe('spawn', () => {
       id: 'test-game-uuid',
       Store: mockStore,
       emit: jest.fn(),
-      options: {
-        Elements: {
-          Main: {
-            cols: 10,
-          },
+      Elements: {
+        Main: {
+          cols: 10,
         },
       },
     };
 
-    // 默认 getNextPiece 返回有效方块
     getNextPiece.mockReturnValue({
       curr: {
         shape: [
@@ -65,7 +61,6 @@ describe('spawn', () => {
       },
     });
 
-    // 默认无碰撞
     collision.mockReturnValue(false);
   });
 
@@ -91,7 +86,6 @@ describe('spawn', () => {
 
       const setStateCall = mockStore.setState.mock.calls[0][0];
 
-      // Math.floor(10/2) - Math.floor(2/2) = 5 - 1 = 4
       expect(setStateCall.cx).toBe(4);
     });
 
@@ -111,7 +105,6 @@ describe('spawn', () => {
 
       const setStateCall = mockStore.setState.mock.calls[0][0];
 
-      // Math.floor(10/2) - Math.floor(3/2) = 5 - 1 = 4
       expect(setStateCall.cx).toBe(4);
     });
 
@@ -128,7 +121,6 @@ describe('spawn', () => {
 
       const setStateCall = mockStore.setState.mock.calls[0][0];
 
-      // Math.floor(10/2) - Math.floor(4/2) = 5 - 2 = 3
       expect(setStateCall.cx).toBe(3);
     });
 
@@ -273,7 +265,6 @@ describe('spawn', () => {
     it('碰撞检测使用更新后的 state', () => {
       spawn(mockContext);
 
-      // collision 被调用时，Store.getState 应该已经被更新
       expect(mockStore.getState).toHaveBeenCalled();
     });
   });
@@ -281,13 +272,12 @@ describe('spawn', () => {
   // ==================== 边界情况 ====================
   describe('边界情况', () => {
     it('cols 为奇数时应该正确居中', () => {
-      mockContext.options.Elements.Main.cols = 9;
+      mockContext.Elements.Main.cols = 9;
 
       spawn(mockContext);
 
       const setStateCall = mockStore.setState.mock.calls[0][0];
 
-      // Math.floor(9/2) - Math.floor(2/2) = 4 - 1 = 3
       expect(setStateCall.cx).toBe(3);
     });
 

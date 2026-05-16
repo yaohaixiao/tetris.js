@@ -1,9 +1,9 @@
 import togglePause from '@/lib/game/core/toggle-pause.js';
-import play from '@/lib/game/core/play.js';
+import resume from '../../../lib/game/core/resume.js';
 import pause from '@/lib/game/core/pause.js';
 
 // Mock 依赖
-jest.mock('@/lib/game/core/play.js', () => ({
+jest.mock('../../../lib/game/core/resume.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));
@@ -37,7 +37,7 @@ describe('togglePause', () => {
       togglePause(mockContext);
 
       expect(pause).not.toHaveBeenCalled();
-      expect(play).not.toHaveBeenCalled();
+      expect(resume).not.toHaveBeenCalled();
     });
 
     it('mode 为 replay 时不应该执行', () => {
@@ -46,7 +46,7 @@ describe('togglePause', () => {
       togglePause(mockContext);
 
       expect(pause).not.toHaveBeenCalled();
-      expect(play).not.toHaveBeenCalled();
+      expect(resume).not.toHaveBeenCalled();
     });
 
     it('mode 为 game-over 时不应该执行', () => {
@@ -55,7 +55,7 @@ describe('togglePause', () => {
       togglePause(mockContext);
 
       expect(pause).not.toHaveBeenCalled();
-      expect(play).not.toHaveBeenCalled();
+      expect(resume).not.toHaveBeenCalled();
     });
   });
 
@@ -67,73 +67,73 @@ describe('togglePause', () => {
       togglePause(mockContext);
 
       expect(pause).toHaveBeenCalledWith(mockContext);
-      expect(play).not.toHaveBeenCalled();
+      expect(resume).not.toHaveBeenCalled();
     });
   });
 
   // ==================== 继续逻辑 ====================
   describe('继续逻辑', () => {
-    it('mode 为 paused 时应该调用 play', () => {
+    it('mode 为 paused 时应该调用 resume', () => {
       mockStore.getMode.mockReturnValue('paused');
 
       togglePause(mockContext);
 
-      expect(play).toHaveBeenCalledWith(mockContext);
+      expect(resume).toHaveBeenCalledWith(mockContext);
       expect(pause).not.toHaveBeenCalled();
     });
 
-    it('mode 为 difficulty 时应该调用 play', () => {
+    it('mode 为 difficulty 时应该调用 resume', () => {
       mockStore.getMode.mockReturnValue('difficulty');
 
       togglePause(mockContext);
 
-      expect(play).toHaveBeenCalledWith(mockContext);
+      expect(resume).toHaveBeenCalledWith(mockContext);
       expect(pause).not.toHaveBeenCalled();
     });
   });
 
   // ==================== 互斥性 ====================
   describe('互斥性', () => {
-    it('pause 和 play 不应该同时被调用', () => {
+    it('pause 和 resume 不应该同时被调用', () => {
       mockStore.getMode.mockReturnValue('playing');
       togglePause(mockContext);
       expect(pause).toHaveBeenCalledTimes(1);
-      expect(play).not.toHaveBeenCalled();
+      expect(resume).not.toHaveBeenCalled();
 
       jest.clearAllMocks();
 
       mockStore.getMode.mockReturnValue('paused');
       togglePause(mockContext);
-      expect(play).toHaveBeenCalledTimes(1);
+      expect(resume).toHaveBeenCalledTimes(1);
       expect(pause).not.toHaveBeenCalled();
     });
   });
 
   // ==================== 边界情况 ====================
   describe('边界情况', () => {
-    it('mode 为 null 时应该调用 play（else 分支）', () => {
+    it('mode 为 null 时应该调用 resume（else 分支）', () => {
       mockStore.getMode.mockReturnValue(null);
 
       togglePause(mockContext);
 
       // null !== 'playing'，走 else 分支
-      expect(play).toHaveBeenCalled();
+      expect(resume).toHaveBeenCalled();
     });
 
-    it('mode 为 undefined 时应该调用 play（else 分支）', () => {
+    it('mode 为 undefined 时应该调用 resume（else 分支）', () => {
       mockStore.getMode.mockReturnValue(undefined);
 
       togglePause(mockContext);
 
-      expect(play).toHaveBeenCalled();
+      expect(resume).toHaveBeenCalled();
     });
 
-    it('mode 为未知值时应该调用 play（else 分支）', () => {
+    it('mode 为未知值时应该调用 resume（else 分支）', () => {
       mockStore.getMode.mockReturnValue('unknown-mode');
 
       togglePause(mockContext);
 
-      expect(play).toHaveBeenCalled();
+      expect(resume).toHaveBeenCalled();
     });
   });
 });

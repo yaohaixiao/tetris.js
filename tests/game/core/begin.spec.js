@@ -1,11 +1,9 @@
-/** @jest-environment jsdom */
-
 import begin from '@/lib/game/core/begin.js';
 import spawn from '@/lib/game/logic/spawn.js';
 import setBeginningState from '@/lib/game/actions/set-beginning-state.js';
 import padStart from '@/lib/utils/pad-start.js';
+import Scheduler from '@/lib/engine/scheduler';
 
-// Mock 依赖
 jest.mock('@/lib/game/logic/spawn.js', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -24,11 +22,13 @@ jest.mock('@/lib/utils/pad-start.js', () => ({
 describe('begin', () => {
   let mockContext;
   let mockStore;
+  let scheduler;
   let levelElement;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
+
+    scheduler = new Scheduler();
 
     mockStore = {
       getLevel: jest.fn().mockReturnValue(5),
@@ -38,12 +38,8 @@ describe('begin', () => {
     mockContext = {
       id: 'test-game-uuid',
       Store: mockStore,
+      Scheduler: scheduler,
       emit: jest.fn(),
-      options: {
-        Level: {
-          max: 15,
-        },
-      },
     };
 
     // 创建 DOM 元素
@@ -53,11 +49,9 @@ describe('begin', () => {
   });
 
   afterEach(() => {
-    // 清理 DOM
     if (levelElement.parentNode) {
       levelElement.parentNode.removeChild(levelElement);
     }
-    jest.useRealTimers();
   });
 
   // ==================== DOM 更新 ====================
@@ -69,8 +63,6 @@ describe('begin', () => {
     });
 
     it('应该使用 padStart 格式化等级', () => {
-      mockStore.getLevel.mockReturnValue(5);
-
       begin(mockContext);
 
       expect(padStart).toHaveBeenCalledWith(5, 2);
@@ -142,47 +134,49 @@ describe('begin', () => {
     it('应该播放游戏开始音效', () => {
       begin(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
         sound: 'GAME_STARTED',
       });
     });
 
-    it('应该延迟 250ms 播放背景音乐', () => {
+    it('延迟 250ms 后播放背景音乐（只传 level）', () => {
       begin(mockContext);
 
       expect(mockContext.emit).not.toHaveBeenCalledWith(
-        'audio:play:bgm',
+        'audio:resume:bgm',
         expect.any(Object),
       );
 
-      jest.advanceTimersByTime(250);
+      // Scheduler delay 需要两次 tick
+      scheduler.tick(0);
+      scheduler.tick(250);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:bgm', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:bgm', {
         level: 5,
-        maxLevel: 15,
       });
     });
 
-    it('延迟播放 BGM 应该传递正确的 level 和 maxLevel', () => {
+    it('延迟播放 BGM 应该传递正确的 level', () => {
       mockStore.getLevel.mockReturnValue(10);
-      mockContext.options.Level.max = 20;
 
       begin(mockContext);
-      jest.advanceTimersByTime(250);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:bgm', {
+      scheduler.tick(0);
+      scheduler.tick(250);
+
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:bgm', {
         level: 10,
-        maxLevel: 20,
       });
     });
 
     it('BGM 不应该在 250ms 之前播放', () => {
       begin(mockContext);
 
-      jest.advanceTimersByTime(200);
+      scheduler.tick(0);
+      scheduler.tick(200);
 
       expect(mockContext.emit).not.toHaveBeenCalledWith(
-        'audio:play:bgm',
+        'audio:resume:bgm',
         expect.any(Object),
       );
     });
@@ -195,12 +189,10 @@ describe('begin', () => {
 
       const callNames = mockContext.emit.mock.calls.map(([event]) => event);
 
-      // 1. replay:start:record
-      // 2. audio:play:sound (GAME_STARTED)
       const recordIndex = callNames.indexOf(
         'replay:test-game-uuid:start:record',
       );
-      const soundIndex = callNames.indexOf('audio:play:sound');
+      const soundIndex = callNames.indexOf('audio:resume:sound');
 
       expect(recordIndex).toBeLessThan(soundIndex);
       expect(mockStore.resetBoard).toHaveBeenCalled();
@@ -232,7 +224,6 @@ describe('begin', () => {
 
       begin(mockContext);
 
-      // 后续流程仍然应该执行
       expect(mockStore.resetBoard).toHaveBeenCalled();
       expect(setBeginningState).toHaveBeenCalled();
       expect(spawn).toHaveBeenCalled();

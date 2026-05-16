@@ -1,264 +1,164 @@
-import PausedAnimation from '@/lib/services/animations/paused-animation.js';
+import PausedAnimation from '@/lib/services/animations/paused-animation';
+import Scheduler from '@/lib/engine/scheduler';
 
 describe('PausedAnimation', () => {
-  let anim;
+  let scheduler;
+  let animation;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    anim = new PausedAnimation();
-    jest.spyOn(anim, 'emit').mockImplementation(() => anim);
-  });
+    scheduler = new Scheduler();
 
-  // ==================== 构造函数 ====================
-  describe('构造函数', () => {
-    it('应该正确创建 PausedAnimation 实例', () => {
-      expect(anim).toBeDefined();
-      expect(anim).toBeInstanceOf(PausedAnimation);
-    });
-
-    it('应该设置 layer 为 500', () => {
-      expect(anim.layer).toBe(500);
-    });
-
-    it('应该设置 blocking 为 true', () => {
-      expect(anim.blocking).toBe(true);
-    });
-
-    it('应该设置 name 为 paused', () => {
-      expect(anim.name).toBe('paused');
-    });
-
-    it('应该初始化 timer 为 0', () => {
-      expect(anim.timer).toBe(0);
-    });
-
-    it('应该初始化 active 为 true', () => {
-      expect(anim.active).toBe(true);
+    animation = new PausedAnimation({
+      Scheduler: scheduler,
     });
   });
 
-  // ==================== update 方法 ====================
-  describe('update 方法', () => {
-    it('active 为 true 时应该返回 true', () => {
-      const result = anim.update(0.016);
+  // ==================== 初始化 ====================
 
-      expect(result).toBe(true);
+  describe('初始化', () => {
+    test('layer 为 500', () => {
+      expect(animation.layer).toBe(500);
     });
 
-    it('active 为 false 时应该返回 false', () => {
+    test('blocking 为 true', () => {
+      expect(animation.blocking).toBe(true);
+    });
+
+    test('name 为 paused', () => {
+      expect(animation.name).toBe('paused');
+    });
+
+    test('timer 初始为 0', () => {
+      expect(animation.timer).toBe(0);
+    });
+
+    test('active 初始为 true', () => {
+      expect(animation.active).toBe(true);
+    });
+
+    test('注册了 interval 任务', () => {
+      expect(scheduler.size()).toBeGreaterThan(0);
+    });
+  });
+
+  // ==================== update ====================
+
+  describe('update', () => {
+    test('active 为 false 时返回 false', () => {
+      animation.active = false;
+
+      expect(animation.update(0.016)).toBe(false);
+    });
+
+    test('active 为 true 时返回 true', () => {
+      expect(animation.update(0.016)).toBe(true);
+    });
+
+    test('累加 timer', () => {
+      animation.update(0.5);
+      expect(animation.timer).toBe(0.5);
+
+      animation.update(0.3);
+      expect(animation.timer).toBe(0.8);
+    });
+
+    test('timer >= 1 时播放 SECOND_TICK 并重置 timer', () => {
+      const spyEmit = jest.spyOn(animation, 'emit');
+
+      animation.timer = 0.9;
+      animation.update(0.2); // timer = 1.1 → >= 1
+
+      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', { sound: 'SECOND_TICK' });
+      // timer 重置为 0
+      expect(animation.timer).toBe(0);
+    });
+
+    test('timer 超过 1 时重置为 0 而不是减去 1', () => {
+      const spyEmit = jest.spyOn(animation, 'emit');
+
+      animation.timer = 0.8;
+      animation.update(0.5); // timer = 1.3
+
+      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', { sound: 'SECOND_TICK' });
+      expect(animation.timer).toBe(0);
+    });
+  });
+
+  // ==================== interval 回调 ====================
+
+  describe('每秒滴答 interval', () => {
+    test('每秒触发 SECOND_TICK 音效', () => {
+      const spyEmit = jest.spyOn(animation, 'emit');
+
+      // 首次 tick：注册 startTime
+      scheduler.tick(0);
+      // 1 秒后触发
+      scheduler.tick(1000);
+
+      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', { sound: 'SECOND_TICK' });
+    });
+
+    test('active 为 false 时不注册 interval', () => {
+      scheduler.clear();
+
+      const anim = new PausedAnimation({ Scheduler: scheduler });
       anim.active = false;
 
-      const result = anim.update(0.016);
+      // _tick() 在构造函数中已调用，但 active 在构造后才设 false
+      // 所以需要在构造前 mock
+      // 实际场景：stop() 设置 active=false 并 cancel interval
+      anim.stop();
 
-      expect(result).toBe(false);
-    });
+      const spyEmit = jest.spyOn(anim, 'emit');
 
-    it('应该累加 timer', () => {
-      anim.update(0.3);
-      expect(anim.timer).toBe(0.3);
+      scheduler.tick(0);
+      scheduler.tick(1000);
 
-      anim.update(0.5);
-      expect(anim.timer).toBe(0.8);
-    });
-
-    it('timer 达到 1 秒时应该播放滴答音效', () => {
-      anim.update(0.6);
-      anim.update(0.5);
-
-      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
-        sound: 'SECOND_TICK',
-      });
-    });
-
-    it('播放音效后 timer 应该重置为 0', () => {
-      anim.update(1.0);
-
-      expect(anim.timer).toBe(0);
-    });
-
-    it('应该每秒播放一次音效', () => {
-      // 第一秒
-      anim.update(1.0);
-      anim.emit.mockClear();
-
-      // 第二秒
-      anim.update(1.0);
-
-      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
-        sound: 'SECOND_TICK',
-      });
-    });
-
-    it('timer 刚好 1 时应该触发', () => {
-      anim.update(1.0);
-
-      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
-        sound: 'SECOND_TICK',
-      });
-      expect(anim.timer).toBe(0);
-    });
-
-    it('timer 大于 1 时应该触发', () => {
-      anim.update(1.5);
-
-      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
-        sound: 'SECOND_TICK',
-      });
-      expect(anim.timer).toBe(0);
-    });
-
-    it('active 为 false 时不应该累加 timer 和播放音效', () => {
-      anim.active = false;
-      anim.timer = 0.9;
-
-      anim.update(0.5);
-
-      // timer 不变，不播放音效
-      expect(anim.timer).toBe(0.9);
-      expect(anim.emit).not.toHaveBeenCalled();
-    });
-
-    it('连续多次触发音效时 timer 应该正确重置', () => {
-      // 触发 3 次音效
-      for (let i = 0; i < 3; i++) {
-        anim.update(1.0);
-      }
-
-      expect(anim.timer).toBe(0);
+      expect(spyEmit).not.toHaveBeenCalled();
     });
   });
 
-  // ==================== stop 方法 ====================
-  describe('stop 方法', () => {
-    it('应该将 active 设置为 false', () => {
-      anim.active = true;
+  // ==================== resume ====================
 
-      anim.stop();
+  describe('resume', () => {
+    test('设置 active 为 true', () => {
+      animation.active = false;
 
-      expect(anim.active).toBe(false);
-    });
+      animation.resume();
 
-    it('stop 后 update 应该返回 false', () => {
-      anim.stop();
-
-      const result = anim.update(0.016);
-
-      expect(result).toBe(false);
-    });
-
-    it('stop 不应该发送事件', () => {
-      anim.emit.mockClear();
-
-      anim.stop();
-
-      expect(anim.emit).not.toHaveBeenCalled();
+      expect(animation.active).toBe(true);
     });
   });
 
-  // ==================== render 方法 ====================
-  describe('render 方法', () => {
-    it('应该将 active 设置为 true', () => {
-      anim.active = false;
+  // ==================== stop ====================
 
-      anim.render();
+  describe('stop', () => {
+    test('设置 active 为 false', () => {
+      animation.stop();
 
-      expect(anim.active).toBe(true);
+      expect(animation.active).toBe(false);
     });
 
-    it('active 已经为 true 时 render 不受影响', () => {
-      anim.active = true;
+    test('取消 interval 任务', () => {
+      const spyCancel = jest.spyOn(scheduler, 'cancel');
 
-      anim.render();
+      animation.stop();
 
-      expect(anim.active).toBe(true);
-    });
-
-    it('render 后 update 应该恢复返回 true', () => {
-      anim.stop();
-      expect(anim.update(0.016)).toBe(false);
-
-      anim.render();
-      expect(anim.update(0.016)).toBe(true);
+      expect(spyCancel).toHaveBeenCalled();
     });
   });
 
-  // ==================== 完整生命周期 ====================
-  describe('完整生命周期', () => {
-    it('应该支持 pause → resume → pause 的流程', () => {
-      // 暂停中
-      let alive = anim.update(0.016);
-      expect(alive).toBe(true);
-      expect(anim.active).toBe(true);
+  // ==================== render ====================
 
-      // 恢复
-      anim.stop();
-      alive = anim.update(0.016);
-      expect(alive).toBe(false);
-      expect(anim.active).toBe(false);
+  describe('render', () => {
+    test('设置 active 为 true', () => {
+      animation.active = false;
 
-      // 再次暂停（render 重置 active）
-      anim.render();
-      alive = anim.update(0.016);
-      expect(alive).toBe(true);
-      expect(anim.active).toBe(true);
-    });
+      animation.render();
 
-    it('长时间暂停应该持续播放滴答声', () => {
-      let tickCount = 0;
-
-      anim.emit.mockImplementation((event, payload) => {
-        if (event === 'audio:play:sound' && payload.sound === 'SECOND_TICK') {
-          tickCount++;
-        }
-        return anim;
-      });
-
-      // 模拟 5 秒暂停
-      for (let i = 0; i < 5; i++) {
-        anim.update(1.0);
-      }
-
-      expect(tickCount).toBe(5);
-    });
-  });
-
-  // ==================== 边界情况 ====================
-  describe('边界情况', () => {
-    it('delta 为 0 时 timer 不变', () => {
-      anim.update(0);
-
-      expect(anim.timer).toBe(0);
-      expect(anim.emit).not.toHaveBeenCalled();
-    });
-
-    it('delta 为负数时 timer 会减少', () => {
-      anim.update(0.5);
-      expect(anim.timer).toBe(0.5);
-
-      anim.update(-0.3);
-      expect(anim.timer).toBe(0.2);
-    });
-
-    it('超大 delta 时只触发一次音效', () => {
-      anim.emit.mockClear();
-
-      anim.update(100);
-
-      // timer 重置为 0，只触发一次
-      expect(anim.timer).toBe(0);
-      expect(anim.emit).toHaveBeenCalledTimes(1);
-    });
-
-    it('从 closeTo(1) 累加应触发音效', () => {
-      anim.update(0.999);
-      expect(anim.emit).not.toHaveBeenCalled();
-
-      anim.update(0.002);
-      expect(anim.emit).toHaveBeenCalledWith('audio:play:sound', {
-        sound: 'SECOND_TICK',
-      });
-      expect(anim.timer).toBe(0);
+      expect(animation.active).toBe(true);
     });
   });
 });

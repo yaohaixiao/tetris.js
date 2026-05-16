@@ -1,193 +1,278 @@
-/** @jest-environment jsdom */
+import loopPlayBGM from '@/lib/services/audio/loop-play-bgm';
+import playTone from '@/lib/services/audio/play-tone';
+import Scheduler from '@/lib/engine/scheduler';
 
-import AudioState from '@/lib/services/audio/state/audio-state.js';
-import playTone from '@/lib/services/audio/play-tone.js';
-import loopPlayBGM from '@/lib/services/audio/loop-play-bgm.js';
-
-jest.mock('@/lib/services/audio/state/audio-state.js', () => ({
-  __esModule: true,
-  default: {
-    audioCtx: { currentTime: 100 },
-    bgmEnabled: true,
-    bgmTimer: null,
-  },
-}));
-
-jest.mock('@/lib/services/audio/play-tone.js', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
+jest.mock('@/lib/services/audio/play-tone', () => jest.fn());
 
 describe('loopPlayBGM', () => {
-  let realSetTimeout;
+  let scheduler;
+  let audio;
 
-  beforeAll(() => {
-    realSetTimeout = globalThis.setTimeout;
-    globalThis.setTimeout = jest.fn(() => 12345);
-  });
-
-  afterAll(() => {
-    globalThis.setTimeout = realSetTimeout;
-  });
+  const melody = [
+    { freq: 440, dur: 1 },
+    { freq: 880, dur: 2 },
+    { freq: 0, dur: 0.5 },
+    { freq: 660, dur: 1 },
+  ];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    AudioState.audioCtx.currentTime = 100;
-    AudioState.bgmTimer = null;
+
+    scheduler = new Scheduler();
+
+    audio = {
+      Context: { currentTime: 100 },
+      Scheduler: scheduler,
+    };
   });
 
-  // ==================== 默认参数 ====================
-  it('不传 options 时应使用默认值', () => {
-    loopPlayBGM([{ freq: 440, dur: 1 }]);
+  describe('参数校验', () => {
+    test('melody 为空数组时提前返回', () => {
+      loopPlayBGM(audio, []);
 
-    expect(playTone).toHaveBeenCalledWith(
-      440,
-      110,
-      expect.objectContaining({
-        volume: 0.05,
-        wave: 'square',
-        gate: 1,
-        articulation: {},
-      }),
-    );
+      expect(scheduler.size()).toBe(0);
+    });
+
+    test('melody 为 null/undefined 时提前返回', () => {
+      loopPlayBGM(audio, null);
+      loopPlayBGM(audio, undefined);
+
+      expect(scheduler.size()).toBe(0);
+    });
+
+    test('duration <= 0 时提前返回', () => {
+      loopPlayBGM(audio, melody, { duration: 0 });
+      loopPlayBGM(audio, melody, { duration: -100 });
+
+      expect(scheduler.size()).toBe(0);
+    });
   });
 
-  // ==================== 自定义参数 ====================
-  it('应支持自定义 duration', () => {
-    loopPlayBGM([{ freq: 440, dur: 1 }], { duration: 200 });
-    expect(playTone).toHaveBeenCalledWith(440, 200, expect.any(Object));
+  describe('BGM 调度注册', () => {
+    test('注册 interval 任务到 scheduler', () => {
+      jest.spyOn(scheduler, 'interval');
+
+      loopPlayBGM(audio, melody);
+
+      expect(scheduler.interval).toHaveBeenCalled();
+    });
+
+    test('interval 间隔为 25ms (LOOKAHEAD)', () => {
+      jest.spyOn(scheduler, 'interval');
+
+      loopPlayBGM(audio, melody);
+
+      expect(scheduler.interval).toHaveBeenCalledWith(
+        expect.any(Function),
+        25,
+      );
+    });
+
+    test('将 interval id 存到 audio.bgmSchedulerId', () => {
+      loopPlayBGM(audio, melody);
+
+      expect(audio.bgmSchedulerId).toBeGreaterThan(0);
+    });
   });
 
-  it('应支持自定义 volume', () => {
-    loopPlayBGM([{ freq: 440, dur: 1 }], { volume: 0.3 });
-    expect(playTone).toHaveBeenCalledWith(
-      440,
-      expect.any(Number),
-      expect.objectContaining({ volume: 0.3 }),
-    );
-  });
+  describe('预调度逻辑', () => {
+    test('首次 tick 将未来 0.12s 内的音符排入时间线', () => {
+      loopPlayBGM(audio, melody);
 
-  it('应支持自定义 wave', () => {
-    loopPlayBGM([{ freq: 440, dur: 1 }], { wave: 'sine' });
-    expect(playTone).toHaveBeenCalledWith(
-      440,
-      expect.any(Number),
-      expect.objectContaining({ wave: 'sine' }),
-    );
-  });
+      scheduler.tick(100);
+      scheduler.tick(125);
 
-  it('应支持自定义 gate', () => {
-    loopPlayBGM([{ freq: 440, dur: 1 }], { gate: 0.5 });
-    expect(playTone).toHaveBeenCalledWith(
-      440,
-      expect.any(Number),
-      expect.objectContaining({ gate: 0.5 }),
-    );
-  });
+      expect(playTone).toHaveBeenCalledTimes(2);
 
-  it('应支持自定义 articulation', () => {
-    const art = { attackTime: 0.01, releaseTime: 0.05, sustainRatio: 0.5 };
-    loopPlayBGM([{ freq: 440, dur: 1 }], { articulation: art });
-    expect(playTone).toHaveBeenCalledWith(
-      440,
-      expect.any(Number),
-      expect.objectContaining({ articulation: art }),
-    );
-  });
+      // 第1个音符：melody[0], startTime = 100
+      expect(playTone).toHaveBeenNthCalledWith(
+        1,
+        audio,
+        440,
+        110,
+        expect.objectContaining({
+          volume: 0.05,
+          wave: 'square',
+          gate: 1,
+        }),
+      );
+      expect(playTone.mock.calls[0][3].startTime).toBe(100);
 
-  // ==================== 休止符 ====================
-  it('休止符不调用 playTone', () => {
-    // 两个音符总时长 220ms > 120ms，只调度第一个休止符
-    loopPlayBGM([{ freq: 0, dur: 1 }]);
-    expect(playTone).not.toHaveBeenCalled();
-  });
+      // 第2个音符：melody[1], startTime = 100.11
+      expect(playTone).toHaveBeenNthCalledWith(
+        2,
+        audio,
+        880,
+        220,
+        expect.objectContaining({
+          volume: 0.05,
+          wave: 'square',
+          gate: 1,
+        }),
+      );
+      expect(playTone.mock.calls[1][3].startTime).toBe(100.11);
+    });
 
-  it('混合音符中跳过休止符', () => {
-    // 三个音符，总时长 99ms < 120ms，全部调度一轮
-    // 归零后第二轮 note1 又被调度一次
-    // 实际调用次数取决于窗口内能循环几轮
-    loopPlayBGM([
-      { freq: 440, dur: 0.3 },
-      { freq: 0, dur: 0.3 },
-      { freq: 880, dur: 0.3 },
-    ]);
-    // 第一轮: note1 调, note2 跳过, note3 调 → 2次
-    // 第二轮: note1 再调 → 1次，然后 note2 后 nextNoteTime 超窗口
-    // 总共 3 次
-    expect(playTone).toHaveBeenCalledTimes(3);
-  });
+    test('休止符（freq=0）不调用 playTone', () => {
+      const restMelody = [{ freq: 0, dur: 1 }];
 
-  // ==================== 音符定时 ====================
-  it('第一个音符 startTime=currentTime', () => {
-    loopPlayBGM([{ freq: 440, dur: 1 }]);
-    expect(playTone).toHaveBeenCalledWith(
-      440,
-      expect.any(Number),
-      expect.objectContaining({ startTime: 100 }),
-    );
-  });
+      loopPlayBGM(audio, restMelody);
 
-  it('dur × duration = 实际时长', () => {
-    loopPlayBGM([{ freq: 440, dur: 1.5 }], { duration: 200 });
-    expect(playTone).toHaveBeenCalledWith(440, 300, expect.any(Object));
-  });
+      scheduler.tick(100);
+      scheduler.tick(125);
 
-  it('startTime 逐步推进', () => {
-    loopPlayBGM(
-      [
+      expect(playTone).not.toHaveBeenCalled();
+    });
+
+    test('后续 tick 继续推进音符', () => {
+      loopPlayBGM(audio, melody);
+
+      scheduler.tick(100);
+      scheduler.tick(125);
+      const firstCallCount = playTone.mock.calls.length;
+
+      // 推进 currentTime 使 limit 扩大
+      audio.Context.currentTime = 100.4;
+
+      scheduler.tick(150);
+
+      expect(playTone.mock.calls.length).toBeGreaterThan(firstCallCount);
+    });
+
+    test('旋律循环：播完最后一个音符后回到开头', () => {
+      const shortMelody = [
         { freq: 440, dur: 1 },
-        { freq: 880, dur: 2 },
-      ],
-      { duration: 100 },
-    );
-    // note1: startTime=100
-    // note2: startTime=100.1
-    expect(playTone).toHaveBeenNthCalledWith(
-      2,
-      880,
-      200,
-      expect.objectContaining({ startTime: 100.1 }),
-    );
+        { freq: 880, dur: 1 },
+      ];
+
+      loopPlayBGM(audio, shortMelody, { duration: 100 });
+
+      // 第一轮调度
+      scheduler.tick(100);
+      scheduler.tick(125);
+
+      expect(playTone).toHaveBeenCalledTimes(2);
+      expect(playTone.mock.calls[0][1]).toBe(440);
+      expect(playTone.mock.calls[1][1]).toBe(880);
+
+      jest.clearAllMocks();
+
+      // 第一轮后：
+      // melody[0] startTime = 100
+      // melody[1] startTime = 100 + 0.1 = 100.1
+      // nextNoteTime = 100.1 + 0.1 = 100.2, currentNoteIndex = 0（已循环）
+      //
+      // 推进 currentTime
+      audio.Context.currentTime = 100.25;
+
+      // nextTime = 125+25 = 150
+      scheduler.tick(150);
+
+      // limit = 100.25 + 0.12 = 100.37
+      // nextNoteTime = 100.2 < 100.37 → 排入 melody[0]
+      // nextNoteTime → 100.3 < 100.37 → 排入 melody[1]
+
+      expect(playTone).toHaveBeenCalledTimes(2);
+
+      // 第一个是循环后的 melody[0]，频率 440
+      expect(playTone.mock.calls[0][1]).toBe(440);
+      expect(playTone.mock.calls[0][2]).toBe(100);
+
+      // startTime 浮点精度：100.2 → 100.19999999999999
+      expect(playTone.mock.calls[0][3].startTime).toBeCloseTo(100.2, 5);
+    });
   });
 
-  // ==================== 调度窗口 ====================
-  it('长音符只调度一个', () => {
-    const melody = Array.from({ length: 100 }, (_, i) => ({
-      freq: 440 + i * 10,
-      dur: 1,
-    }));
-    loopPlayBGM(melody, { duration: 1000 });
-    expect(playTone).toHaveBeenCalledTimes(1);
+  describe('自定义参数', () => {
+    test('自定义 volume', () => {
+      loopPlayBGM(audio, melody, { volume: 0.08 });
+
+      scheduler.tick(100);
+      scheduler.tick(125);
+
+      expect(playTone).toHaveBeenCalledWith(
+        audio,
+        expect.any(Number),
+        expect.any(Number),
+        expect.objectContaining({ volume: 0.08 }),
+      );
+    });
+
+    test('自定义 wave', () => {
+      loopPlayBGM(audio, melody, { wave: 'sine' });
+
+      scheduler.tick(100);
+      scheduler.tick(125);
+
+      expect(playTone).toHaveBeenCalledWith(
+        audio,
+        expect.any(Number),
+        expect.any(Number),
+        expect.objectContaining({ wave: 'sine' }),
+      );
+    });
+
+    test('自定义 gate', () => {
+      loopPlayBGM(audio, melody, { gate: 0.5 });
+
+      scheduler.tick(100);
+      scheduler.tick(125);
+
+      expect(playTone).toHaveBeenCalledWith(
+        audio,
+        expect.any(Number),
+        expect.any(Number),
+        expect.objectContaining({ gate: 0.5 }),
+      );
+    });
+
+    test('自定义 duration', () => {
+      loopPlayBGM(audio, melody, { duration: 200 });
+
+      scheduler.tick(100);
+      scheduler.tick(125);
+
+      expect(playTone).toHaveBeenNthCalledWith(
+        1,
+        audio,
+        expect.any(Number),
+        200,
+        expect.any(Object),
+      );
+    });
+
+    test('自定义 articulation', () => {
+      loopPlayBGM(audio, melody, {
+        articulation: { attackTime: 0.01, sustainRatio: 0.5 },
+      });
+
+      scheduler.tick(100);
+      scheduler.tick(125);
+
+      expect(playTone).toHaveBeenCalledWith(
+        audio,
+        expect.any(Number),
+        expect.any(Number),
+        expect.objectContaining({
+          articulation: { attackTime: 0.01, sustainRatio: 0.5 },
+        }),
+      );
+    });
   });
 
-  it('短音符窗口内可以调度多轮', () => {
-    const melody = Array.from({ length: 5 }, (_, i) => ({
-      freq: 440 + i * 10,
-      dur: 0.1,
-    }));
-    loopPlayBGM(melody, { duration: 100 });
-    // 5个音符×10ms=50ms，可以循环2轮（50+50=100<120），第三轮开始超窗口
-    // 2轮 = 10 个，加上可能多一两个，实际调了 12 次
-    expect(playTone).toHaveBeenCalledTimes(12);
-  });
+  describe('停止 BGM', () => {
+    test('外部通过 scheduler.cancel 可停止循环', () => {
+      loopPlayBGM(audio, melody);
 
-  // ==================== 边界情况 ====================
-  it('空旋律时会崩溃（源码未处理）', () => {
-    expect(() => loopPlayBGM([])).toThrow(TypeError);
-  });
+      const id = audio.bgmSchedulerId;
 
-  it('duration <= 0 时直接返回', () => {
-    loopPlayBGM([{ freq: 440, dur: 1 }], { duration: 0 });
-    expect(playTone).not.toHaveBeenCalled();
-  });
+      scheduler.cancel(id);
 
-  it('freq 为负数视为休止符', () => {
-    loopPlayBGM([{ freq: -440, dur: 1 }]);
-    expect(playTone).not.toHaveBeenCalled();
-  });
+      jest.clearAllMocks();
 
-  it('应设置 bgmTimer', () => {
-    loopPlayBGM([{ freq: 440, dur: 1 }]);
-    expect(AudioState.bgmTimer).toBe(12345);
+      scheduler.tick(200);
+
+      expect(playTone).not.toHaveBeenCalled();
+    });
   });
 });

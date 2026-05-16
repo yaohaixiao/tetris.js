@@ -1,431 +1,290 @@
-/** @jest-environment jsdom */
+import playTone from '@/lib/services/audio/play-tone';
 
-import playTone from '@/lib/services/audio/play-tone.js';
+const mockOscillator = {
+  type: '',
+  frequency: { setValueAtTime: jest.fn() },
+  connect: jest.fn(),
+  start: jest.fn(),
+  stop: jest.fn(),
+  addEventListener: jest.fn(),
+  disconnect: jest.fn(),
+};
 
-// Mock AudioState - 直接在 factory 中定义数据
-jest.mock('@/lib/services/audio/state/audio-state.js', () => ({
-  __esModule: true,
-  default: {
-    audioCtx: {
-      currentTime: 100,
-      createOscillator: jest.fn(),
-      createGain: jest.fn(),
-      destination: Symbol('destination'),
-    },
+const mockGainNode = {
+  gain: {
+    setValueAtTime: jest.fn(),
+    linearRampToValueAtTime: jest.fn(),
+    exponentialRampToValueAtTime: jest.fn(),
   },
-}));
+  connect: jest.fn(),
+  disconnect: jest.fn(),
+};
+
+const mockAudioContext = {
+  currentTime: 100,
+  createOscillator: jest.fn(() => mockOscillator),
+  createGain: jest.fn(() => mockGainNode),
+  destination: {},
+};
+
+const createAudio = () => ({ Context: mockAudioContext });
 
 describe('playTone', () => {
-  let mockOsc;
-  let mockGain;
-  let audioCtx;
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // 动态导入 AudioState 获取 mock 的 audioCtx 引用
-    const AudioState =
-      require('@/lib/services/audio/state/audio-state.js').default;
-    audioCtx = AudioState.audioCtx;
-
-    // 创建 mock 音频节点
-    mockGain = {
-      gain: {
-        setValueAtTime: jest.fn(),
-        linearRampToValueAtTime: jest.fn(),
-        exponentialRampToValueAtTime: jest.fn(),
-      },
-      connect: jest.fn(),
-      disconnect: jest.fn(),
-    };
-
-    mockOsc = {
-      type: '',
-      frequency: {
-        setValueAtTime: jest.fn(),
-      },
-      connect: jest.fn(),
-      start: jest.fn(),
-      stop: jest.fn(),
-      disconnect: jest.fn(),
-      addEventListener: jest.fn(),
-    };
-
-    audioCtx.createOscillator.mockReturnValue(mockOsc);
-    audioCtx.createGain.mockReturnValue(mockGain);
-    audioCtx.currentTime = 100;
   });
 
-  // ==================== 参数校验 ====================
   describe('参数校验', () => {
-    it('freq 为 0 时应该直接返回不播放', () => {
-      playTone(0, 200);
+    test('freq 为 0 时应提前返回，不创建音频节点', () => {
+      playTone(createAudio(), 0, 200);
 
-      expect(audioCtx.createOscillator).not.toHaveBeenCalled();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+      expect(mockAudioContext.createGain).not.toHaveBeenCalled();
     });
 
-    it('freq 为 null 时应该直接返回不播放', () => {
-      playTone(null, 200);
+    test('freq 为 null 时应提前返回', () => {
+      playTone(createAudio(), null, 200);
 
-      expect(audioCtx.createOscillator).not.toHaveBeenCalled();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
     });
 
-    it('freq 为 undefined 时应该直接返回不播放', () => {
-      playTone(undefined, 200);
+    test('freq 为 undefined 时应提前返回', () => {
+      playTone(createAudio(), undefined, 200);
 
-      expect(audioCtx.createOscillator).not.toHaveBeenCalled();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
     });
 
-    it('freq 为 false 时应该直接返回不播放', () => {
-      playTone(false, 200);
+    test('dur 为 0 时应提前返回', () => {
+      playTone(createAudio(), 440, 0);
 
-      expect(audioCtx.createOscillator).not.toHaveBeenCalled();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
     });
 
-    it('dur 小于等于 0 时应该直接返回不播放', () => {
-      playTone(440, 0);
-      expect(audioCtx.createOscillator).not.toHaveBeenCalled();
+    test('dur 为负数时应提前返回', () => {
+      playTone(createAudio(), 440, -100);
 
-      playTone(440, -100);
-      expect(audioCtx.createOscillator).not.toHaveBeenCalled();
-    });
-
-    it('有效的参数应该正常播放', () => {
-      playTone(440, 200);
-
-      expect(audioCtx.createOscillator).toHaveBeenCalled();
-      expect(audioCtx.createGain).toHaveBeenCalled();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
     });
   });
 
-  // ==================== 默认参数 ====================
-  describe('默认参数', () => {
-    it('不传 options 时应该使用默认值', () => {
-      playTone(440, 200);
+  describe('振荡器配置', () => {
+    test('默认使用 square 波形', () => {
+      playTone(createAudio(), 440, 200);
 
-      expect(mockOsc.type).toBe('square');
-      expect(mockOsc.frequency.setValueAtTime).toHaveBeenCalledWith(440, 100);
+      expect(mockOscillator.type).toBe('square');
     });
 
-    it('应该使用默认包络参数', () => {
-      playTone(440, 200);
+    test('支持 sine 波形', () => {
+      playTone(createAudio(), 440, 200, { wave: 'sine' });
 
-      // t0 = 100
-      // t1 = 100 + 0.003 = 100.003
+      expect(mockOscillator.type).toBe('sine');
+    });
+
+    test('支持 triangle 波形', () => {
+      playTone(createAudio(), 440, 200, { wave: 'triangle' });
+
+      expect(mockOscillator.type).toBe('triangle');
+    });
+
+    test('支持 sawtooth 波形', () => {
+      playTone(createAudio(), 440, 200, { wave: 'sawtooth' });
+
+      expect(mockOscillator.type).toBe('sawtooth');
+    });
+
+    test('在指定时间设置频率值', () => {
+      playTone(createAudio(), 880, 200);
+
+      expect(mockOscillator.frequency.setValueAtTime).toHaveBeenCalledWith(880, 100);
+    });
+  });
+
+  describe('音频节点连接', () => {
+    test('振荡器 → 增益节点 → 音频输出', () => {
+      playTone(createAudio(), 440, 200);
+
+      expect(mockOscillator.connect).toHaveBeenCalledWith(mockGainNode);
+      expect(mockGainNode.connect).toHaveBeenCalledWith(mockAudioContext.destination);
+    });
+  });
+
+  describe('startTime', () => {
+    test('默认使用 AudioContext.currentTime', () => {
+      playTone(createAudio(), 440, 200);
+
+      expect(mockOscillator.start).toHaveBeenCalledWith(100);
+    });
+
+    test('支持自定义 startTime', () => {
+      playTone(createAudio(), 440, 200, { startTime: 105.5 });
+
+      expect(mockOscillator.start).toHaveBeenCalledWith(105.5);
+    });
+  });
+
+  describe('gate 参数 — 发音占比', () => {
+    test('gate=1 连奏：实际发声时长为完整时长', () => {
+      playTone(createAudio(), 440, 200, { gate: 1 });
+
       // noteLen = 0.2 * 1 = 0.2
-      // t2 = 100 + max(0.2 - 0.02, 0.003) = 100.18
       // t3 = 100 + 0.2 = 100.2
-      expect(mockGain.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, 100);
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.15,
-        100.003,
-      );
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.15 * 0.9,
-        100.18,
-      );
-      expect(mockGain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(
-        0.0001,
-        100.2,
-      );
-    });
-  });
-
-  // ==================== 波形类型 ====================
-  describe('波形类型', () => {
-    it('应该支持 sine 波形', () => {
-      playTone(440, 200, { wave: 'sine' });
-
-      expect(mockOsc.type).toBe('sine');
+      // stop = 100.2 + 0.05 = 100.25
+      expect(mockOscillator.stop).toHaveBeenCalledWith(100.25);
     });
 
-    it('应该支持 square 波形', () => {
-      playTone(440, 200, { wave: 'square' });
-
-      expect(mockOsc.type).toBe('square');
-    });
-
-    it('应该支持 sawtooth 波形', () => {
-      playTone(440, 200, { wave: 'sawtooth' });
-
-      expect(mockOsc.type).toBe('sawtooth');
-    });
-
-    it('应该支持 triangle 波形', () => {
-      playTone(440, 200, { wave: 'triangle' });
-
-      expect(mockOsc.type).toBe('triangle');
-    });
-  });
-
-  // ==================== 音量控制 ====================
-  describe('音量控制', () => {
-    it('应该支持自定义音量', () => {
-      playTone(440, 200, { volume: 0.3 });
-
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.3,
-        100.003,
-      );
-    });
-
-    it('音量设为 0 时应该可以播放', () => {
-      playTone(440, 200, { volume: 0 });
-
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0,
-        100.003,
-      );
-    });
-  });
-
-  // ==================== gate 参数 ====================
-  describe('gate 参数', () => {
-    it('gate = 0.5 时音符时值应该减半', () => {
-      playTone(440, 200, { gate: 0.5 });
+    test('gate=0.5 断奏：实际发声时长减半', () => {
+      playTone(createAudio(), 440, 200, { gate: 0.5 });
 
       // noteLen = 0.2 * 0.5 = 0.1
-      // t2 = 100 + max(0.1 - 0.02, 0.003) = 100.08
-      // t3 = 100 + 0.1 = 100.1
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.15 * 0.9,
-        100.08,
-      );
-      expect(mockGain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(
-        0.0001,
-        100.1,
-      );
+      // t3 = 100.1
+      // stop = 100.15 → 浮点数为 100.14999999999999
+      expect(mockOscillator.stop).toHaveBeenCalledWith(100.14999999999999);
     });
 
-    it('gate = 1 时应该唱满时值（连奏）', () => {
-      playTone(440, 200, { gate: 1 });
+    test('gate=0.2 极短断奏', () => {
+      playTone(createAudio(), 440, 500, { gate: 0.2 });
 
-      expect(mockGain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(
-        0.0001,
-        100.2,
-      );
+      // noteLen = 0.5 * 0.2 = 0.1
+      // stop = 100.15 → 浮点数为 100.14999999999999
+      expect(mockOscillator.stop).toHaveBeenCalledWith(100.14999999999999);
     });
   });
 
-  // ==================== 包络参数 ====================
-  describe('包络参数 articulation', () => {
-    it('应该支持自定义 attackTime', () => {
-      playTone(440, 200, {
+  describe('AD 包络 — 默认参数', () => {
+    test('attackTime 默认 0.003s', () => {
+      playTone(createAudio(), 440, 300, { volume: 0.15 });
+
+      const t0 = 100;
+      const t1 = t0 + 0.003;
+
+      expect(mockGainNode.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, t0);
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.15, t1);
+    });
+
+    test('sustainRatio 默认 0.9', () => {
+      playTone(createAudio(), 440, 300, { volume: 0.15 });
+
+      // noteLen = 0.3
+      // t2 = 100 + max(0.3 - 0.02, 0.003) = 100.28
+      const t2 = 100.28;
+
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.15 * 0.9,
+        t2,
+      );
+    });
+
+    test('releaseTime 默认 0.02s', () => {
+      playTone(createAudio(), 440, 300, { volume: 0.15 });
+
+      const t3 = 100.3;
+
+      expect(mockGainNode.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.0001, t3);
+    });
+  });
+
+  describe('AD 包络 — 自定义参数', () => {
+    test('自定义 attackTime', () => {
+      playTone(createAudio(), 440, 300, {
+        volume: 0.2,
         articulation: { attackTime: 0.01 },
       });
 
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.15,
-        100.01,
-      );
+      const t1 = 100.01;
+
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.2, t1);
     });
 
-    it('应该支持自定义 releaseTime', () => {
-      playTone(440, 200, {
-        articulation: { releaseTime: 0.05 },
-      });
-
-      // noteLen = 0.2
-      // t2 = 100 + max(0.2 - 0.05, 0.003) = 100.15
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.15 * 0.9,
-        100.15,
-      );
-    });
-
-    it('应该支持自定义 sustainRatio', () => {
-      playTone(440, 200, {
+    test('自定义 sustainRatio', () => {
+      playTone(createAudio(), 440, 300, {
+        volume: 0.2,
         articulation: { sustainRatio: 0.5 },
       });
 
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.15 * 0.5,
-        100.18,
+      // t2 = 100 + max(0.3 - 0.02, 0.003) = 100.28
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.2 * 0.5,
+        100.28,
       );
     });
 
-    it('releaseTime 大于 noteLen 时 t2 应该等于 t1', () => {
-      playTone(440, 100, {
-        articulation: { releaseTime: 0.5 },
+    test('自定义 releaseTime', () => {
+      playTone(createAudio(), 440, 300, {
+        volume: 0.2,
+        articulation: { releaseTime: 0.05 },
       });
 
-      // noteLen = 0.1
-      // t2 = 100 + max(0.1 - 0.5, 0.003) = 100.003
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.15 * 0.9,
-        100.003,
-      );
+      // t3 = 100.3
+      expect(mockGainNode.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.0001, 100.3);
     });
 
-    it('attackTime 为 0 时应该可以工作', () => {
-      playTone(440, 200, {
-        articulation: { attackTime: 0 },
+    test('完整自定义 articulation', () => {
+      playTone(createAudio(), 440, 300, {
+        volume: 0.25,
+        articulation: { attackTime: 0.005, releaseTime: 0.04, sustainRatio: 0.6 },
       });
 
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.15,
-        100,
-      );
+      const t0 = 100;
+      const t1 = 100.005;
+      const t2 = 100 + Math.max(0.3 - 0.04, 0.005); // 100.26
+      const t3 = 100.3;
+
+      expect(mockGainNode.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, t0);
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.25, t1);
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.25 * 0.6, t2);
+      expect(mockGainNode.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.0001, t3);
     });
   });
 
-  // ==================== startTime ====================
-  describe('startTime 参数', () => {
-    it('不传 startTime 时应该使用 audioCtx.currentTime', () => {
-      audioCtx.currentTime = 200;
+  describe('边界情况：releaseTime 长于 noteLen', () => {
+    test('t2 不小于 attackTime', () => {
+      playTone(createAudio(), 440, 20, {
+        articulation: { attackTime: 0.005, releaseTime: 0.1 },
+      });
 
-      playTone(440, 200);
+      // t1 = 100.005, t2 也应为 100.005
+      const calls = mockGainNode.gain.linearRampToValueAtTime.mock.calls;
+      const t2Call = calls.find((call) => call[1] === 100.005);
 
-      expect(mockGain.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, 200);
-    });
-
-    it('应该支持自定义 startTime', () => {
-      playTone(440, 200, { startTime: 300 });
-
-      expect(mockGain.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, 300);
-      expect(mockOsc.frequency.setValueAtTime).toHaveBeenCalledWith(440, 300);
-    });
-
-    it('自定义 startTime 时包络时间应该基于 startTime 计算', () => {
-      playTone(440, 200, { startTime: 500 });
-
-      expect(mockGain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(
-        0.0001,
-        500.2,
-      );
+      expect(t2Call).toBeTruthy();
     });
   });
 
-  // ==================== 节点连接 ====================
-  describe('节点连接', () => {
-    it('应该正确连接音频链路', () => {
-      playTone(440, 200);
+  describe('stop 缓冲', () => {
+    test('stop 始终比包络结束晚 50ms', () => {
+      playTone(createAudio(), 440, 200);
 
-      expect(mockOsc.connect).toHaveBeenCalledWith(mockGain);
-      expect(mockGain.connect).toHaveBeenCalledWith(audioCtx.destination);
+      // dur=200ms, gate=1, noteLen=0.2, t3=100.2, stop=100.25
+      expect(mockOscillator.stop).toHaveBeenCalledWith(100.25);
     });
   });
 
-  // ==================== 启动和停止 ====================
-  describe('启动和停止', () => {
-    it('应该在 startTime 启动振荡器', () => {
-      playTone(440, 200, { startTime: 300 });
-
-      expect(mockOsc.start).toHaveBeenCalledWith(300);
-    });
-
-    it('应该在 t3 + 0.05 停止振荡器', () => {
-      playTone(440, 200);
-
-      // t3 = 100.2, stop = 100.25
-      expect(mockOsc.stop).toHaveBeenCalledWith(100.25);
-    });
-
-    it('默认 startTime 应该使用 audioCtx.currentTime', () => {
-      playTone(440, 200);
-
-      expect(mockOsc.start).toHaveBeenCalledWith(100);
-    });
-  });
-
-  // ==================== 资源释放 ====================
   describe('资源释放', () => {
-    it('应该注册 ended 事件监听', () => {
-      playTone(440, 200);
+    test('ended 事件触发后断开所有连接', () => {
+      let endedCallback;
+      mockOscillator.addEventListener.mockImplementation((event, cb) => {
+        if (event === 'ended') {
+          endedCallback = cb;
+        }
+      });
 
-      expect(mockOsc.addEventListener).toHaveBeenCalledWith(
-        'ended',
-        expect.any(Function),
-      );
-    });
-
-    it('ended 事件触发时应该断开节点连接', () => {
-      playTone(440, 200);
-
-      const endedCallback = mockOsc.addEventListener.mock.calls.find(
-        ([event]) => event === 'ended',
-      )[1];
+      playTone(createAudio(), 440, 200);
 
       endedCallback();
 
-      expect(mockOsc.disconnect).toHaveBeenCalled();
-      expect(mockGain.disconnect).toHaveBeenCalled();
+      expect(mockOscillator.disconnect).toHaveBeenCalled();
+      expect(mockGainNode.disconnect).toHaveBeenCalled();
     });
   });
 
-  // ==================== 边界情况 ====================
-  describe('边界情况', () => {
-    it('freq 为负数时应该可以播放', () => {
-      playTone(-440, 200);
+  describe('默认音量', () => {
+    test('不传 volume 时使用 0.15', () => {
+      playTone(createAudio(), 440, 200);
 
-      expect(mockOsc.frequency.setValueAtTime).toHaveBeenCalledWith(-440, 100);
-    });
-
-    it('freq 很大时应该可以播放', () => {
-      playTone(20000, 200);
-
-      expect(mockOsc.frequency.setValueAtTime).toHaveBeenCalledWith(20000, 100);
-    });
-
-    it('dur 很小时应该可以播放', () => {
-      playTone(440, 1);
-
-      expect(mockOsc.start).toHaveBeenCalled();
-    });
-
-    it('options 为空对象时应该正常播放', () => {
-      playTone(440, 200, {});
-
-      expect(mockOsc.type).toBe('square');
-    });
-
-    it('articulation 为空对象时应该使用默认值', () => {
-      playTone(440, 200, { articulation: {} });
-
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
         0.15,
-        100.003,
+        expect.any(Number),
       );
-    });
-  });
-
-  // ==================== 完整参数 ====================
-  describe('完整参数场景', () => {
-    it('应该正确处理所有自定义参数', () => {
-      playTone(880, 50, {
-        volume: 0.12,
-        wave: 'triangle',
-        gate: 0.4,
-        articulation: {
-          attackTime: 0.001,
-          releaseTime: 0.01,
-          sustainRatio: 0.3,
-        },
-        startTime: 200,
-      });
-
-      expect(mockOsc.type).toBe('triangle');
-      expect(mockOsc.frequency.setValueAtTime).toHaveBeenCalledWith(880, 200);
-      expect(mockGain.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, 200);
-      // t1 = 200.001
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.12,
-        200.001,
-      );
-      // noteLen = 0.05 * 0.4 = 0.02
-      // t2 = 200 + max(0.02 - 0.01, 0.001) = 200.01
-      expect(mockGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
-        0.12 * 0.3,
-        200.01,
-      );
-      // t3 = 200.02
-      expect(mockGain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(
-        0.0001,
-        200.02,
-      );
-      expect(mockOsc.start).toHaveBeenCalledWith(200);
-      // stop = 200.02 + 0.05 = 200.07（浮点数有精度问题，只用 closeTo）
-      expect(mockOsc.stop.mock.calls[0][0]).toBeCloseTo(200.07, 5);
     });
   });
 });

@@ -134,7 +134,7 @@ describe('reset', () => {
     it('mode 为 main-menu 时应该播放切换场景音效', () => {
       reset(mockContext, 'main-menu');
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
         sound: 'SWITCH_SCENE',
       });
     });
@@ -160,7 +160,7 @@ describe('reset', () => {
       reset(mockContext, 'playing');
 
       expect(mockContext.emit).not.toHaveBeenCalledWith(
-        'audio:play:sound',
+        'audio:resume:sound',
         expect.objectContaining({ sound: 'SWITCH_SCENE' }),
       );
     });

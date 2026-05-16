@@ -162,7 +162,7 @@ describe('tick', () => {
       tick(mockContext, false);
 
       const soundCalls = mockContext.emit.mock.calls.filter(
-        ([event]) => event === 'audio:play:sound',
+        ([event]) => event === 'audio:resume:sound',
       );
 
       // 只有 AUTO_TICK emit，没有 FALL 音效
@@ -195,7 +195,7 @@ describe('tick', () => {
     it('应该播放 FALL 音效', () => {
       tick(mockContext, false);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
         sound: 'FALL',
       });
     });
@@ -245,7 +245,7 @@ describe('tick', () => {
 
       const fallSoundIndex = mockContext.emit.mock.calls.findIndex(
         ([event, payload]) =>
-          event === 'audio:play:sound' && payload.sound === 'FALL',
+          event === 'audio:resume:sound' && payload.sound === 'FALL',
       );
 
       expect(lockOrder).toBeLessThan(

@@ -1,4 +1,4 @@
-import findFullLines from '@/lib/game/logic/find-full-lines.js';
+import findFullLines from '@/lib/game/logic/find-full-lines';
 
 describe('findFullLines', () => {
   let mockContext;
@@ -23,11 +23,9 @@ describe('findFullLines', () => {
 
     mockContext = {
       Store: mockStore,
-      options: {
-        Elements: {
-          Main: {
-            rows: 20,
-          },
+      Elements: {
+        Main: {
+          rows: 20,
         },
       },
     };
@@ -51,7 +49,6 @@ describe('findFullLines', () => {
   // ==================== 满行检测 ====================
   describe('满行检测', () => {
     it('有满行时应该返回对应行号', () => {
-      // 设置第 19 行为满行
       mockState.board[19] = Array.from({ length: 10 }, () => '#FF0000');
 
       const result = findFullLines(mockContext);
@@ -66,7 +63,7 @@ describe('findFullLines', () => {
 
       const result = findFullLines(mockContext);
 
-      expect(result).toEqual([19, 18, 17]); // 从底部向上，所以 19 最先
+      expect(result).toEqual([19, 18, 17]);
     });
 
     it('没有满行时应该返回空数组', () => {
@@ -76,9 +73,8 @@ describe('findFullLines', () => {
     });
 
     it('部分填充的行不应该被识别为满行', () => {
-      // 只有 9 个格子有值
       const row = Array.from({ length: 10 }, () => '#FF0000');
-      row[5] = 0; // 一个空格
+      row[5] = 0;
       mockState.board[19] = row;
 
       const result = findFullLines(mockContext);
@@ -96,7 +92,6 @@ describe('findFullLines', () => {
 
       const result = findFullLines(mockContext);
 
-      // 从底部向上遍历：先 19，再 10，再 0
       expect(result).toEqual([19, 10, 0]);
     });
 
@@ -166,7 +161,7 @@ describe('findFullLines', () => {
     });
 
     it('棋盘只有 1 行时应该正常检测', () => {
-      mockContext.options.Elements.Main.rows = 1;
+      mockContext.Elements.Main.rows = 1;
       mockState.board = [Array.from({ length: 10 }, () => '#FF0000')];
 
       const result = findFullLines(mockContext);
@@ -182,18 +177,16 @@ describe('findFullLines', () => {
       const result = findFullLines(mockContext);
 
       expect(result).toHaveLength(20);
-      // 从底部向上
       expect(result[0]).toBe(19);
       expect(result[19]).toBe(0);
     });
 
     it('board 行宽度为 0 时 every 返回 true', () => {
-      mockContext.options.Elements.Main.rows = 1;
-      mockState.board = [[]]; // 空行，every 对空数组返回 true
+      mockContext.Elements.Main.rows = 1;
+      mockState.board = [[]];
 
       const result = findFullLines(mockContext);
 
-      // 空数组的 every 总是返回 true
       expect(result).toEqual([0]);
     });
   });

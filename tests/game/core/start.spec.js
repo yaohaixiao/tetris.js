@@ -32,16 +32,15 @@ describe('start', () => {
 
       start(mockContext);
 
-      // lines = (5 - 1) * 10 = 40
       expect(mockStore.setBaseLines).toHaveBeenCalledWith(40);
     });
 
-    it('应该发送倒计时事件', () => {
+    it('应该发送倒计时事件，传递 { game }', () => {
       start(mockContext);
 
       expect(mockContext.emit).toHaveBeenCalledWith(
         'game:test-game-uuid:start:countdown',
-        { context: mockContext },
+        { game: mockContext },
       );
     });
   });
@@ -61,7 +60,6 @@ describe('start', () => {
 
       start(mockContext);
 
-      // (3 - 1) * 10 = 20
       expect(mockStore.setBaseLines).toHaveBeenCalledWith(20);
     });
 
@@ -70,7 +68,6 @@ describe('start', () => {
 
       start(mockContext);
 
-      // (10 - 1) * 10 = 90
       expect(mockStore.setBaseLines).toHaveBeenCalledWith(90);
     });
 
@@ -79,7 +76,6 @@ describe('start', () => {
 
       start(mockContext);
 
-      // (99 - 1) * 10 = 980
       expect(mockStore.setBaseLines).toHaveBeenCalledWith(980);
     });
   });
@@ -93,17 +89,17 @@ describe('start', () => {
 
       expect(mockContext.emit).toHaveBeenCalledWith(
         'game:custom-game-id:start:countdown',
-        { context: mockContext },
+        { game: mockContext },
       );
     });
 
-    it('应该将 context 本身作为参数传递', () => {
+    it('应该将 game 本身作为参数传递', () => {
       start(mockContext);
 
       const emitCall = mockContext.emit.mock.calls[0];
 
-      expect(emitCall[1]).toEqual({ context: mockContext });
-      expect(emitCall[1].context).toBe(mockContext);
+      expect(emitCall[1]).toEqual({ game: mockContext });
+      expect(emitCall[1].game).toBe(mockContext);
     });
   });
 
@@ -127,7 +123,6 @@ describe('start', () => {
 
       start(mockContext);
 
-      // (0 - 1) * 10 = -10
       expect(mockStore.setBaseLines).toHaveBeenCalledWith(-10);
     });
 
@@ -136,7 +131,6 @@ describe('start', () => {
 
       start(mockContext);
 
-      // (-2 - 1) * 10 = -30
       expect(mockStore.setBaseLines).toHaveBeenCalledWith(-30);
     });
   });

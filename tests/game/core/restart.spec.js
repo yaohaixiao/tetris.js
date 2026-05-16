@@ -1,10 +1,7 @@
-/** @jest-environment jsdom */
-
 import restart from '@/lib/game/core/restart.js';
 import reset from '@/lib/game/core/reset.js';
 import spawn from '@/lib/game/logic/spawn.js';
 
-// Mock 依赖
 jest.mock('@/lib/game/core/reset.js', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -30,11 +27,6 @@ describe('restart', () => {
     mockContext = {
       Store: mockStore,
       emit: jest.fn(),
-      options: {
-        Level: {
-          max: 15,
-        },
-      },
     };
   });
 
@@ -52,12 +44,11 @@ describe('restart', () => {
       expect(spawn).toHaveBeenCalledWith(mockContext);
     });
 
-    it('应该播放背景音乐', () => {
+    it('应该播放背景音乐，只传 level', () => {
       restart(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:bgm', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:bgm', {
         level: 5,
-        maxLevel: 15,
       });
     });
   });
@@ -115,32 +106,18 @@ describe('restart', () => {
       restart(mockContext);
 
       expect(mockStore.getLevel).toHaveBeenCalled();
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:bgm', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:bgm', {
         level: 10,
-        maxLevel: 15,
       });
     });
 
-    it('应该获取最大等级传递给 BGM', () => {
-      mockContext.options.Level.max = 20;
-
-      restart(mockContext);
-
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:bgm', {
-        level: 5,
-        maxLevel: 20,
-      });
-    });
-
-    it('level 和 maxLevel 不同时应该正确传递', () => {
+    it('level 不同时应该正确传递', () => {
       mockStore.getLevel.mockReturnValue(8);
-      mockContext.options.Level.max = 30;
 
       restart(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:bgm', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:bgm', {
         level: 8,
-        maxLevel: 30,
       });
     });
   });
@@ -184,9 +161,8 @@ describe('restart', () => {
 
       restart(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:bgm', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:bgm', {
         level: 1,
-        maxLevel: 15,
       });
     });
 

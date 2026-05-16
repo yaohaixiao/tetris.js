@@ -21,8 +21,8 @@ describe('collision', () => {
         ],
         color: '#FFA500',
       },
-      cx: 4, // 方块左上角 X 坐标
-      cy: 0, // 方块左上角 Y 坐标
+      cx: 4,
+      cy: 0,
       board: emptyBoard,
     };
 
@@ -32,12 +32,10 @@ describe('collision', () => {
 
     mockContext = {
       Store: mockStore,
-      options: {
-        Elements: {
-          Main: {
-            rows: 20,
-            cols: 10,
-          },
+      Elements: {
+        Main: {
+          rows: 20,
+          cols: 10,
         },
       },
     };
@@ -67,41 +65,38 @@ describe('collision', () => {
   // ==================== 边界碰撞 ====================
   describe('边界碰撞', () => {
     it('方块移出左边界时应该返回 true', () => {
-      // cx = 4，ox = -5 → nx = -1，超出左边界
+      // cx=4, ox=-5 → nx=4+0+(-5)=-1 < 0 → 碰撞
       const result = collision(mockContext, -5, 0);
 
       expect(result).toBe(true);
     });
 
     it('方块移出右边界时应该返回 true', () => {
-      // cx = 4，方块宽 2，ox = 5 → nx = 9，nx + 1 = 10 = cols，超出右边界
+      // cx=4, 方块宽2, ox=5 → nx=4+1+5=10 >= 10 → 碰撞
       const result = collision(mockContext, 5, 0);
 
       expect(result).toBe(true);
     });
 
     it('方块掉落出底部时应该返回 true', () => {
-      // cy = 18，方块高 2，oy = 1 → ny = 19，ny + 1 = 20 = rows，超出底部
       baseState.cy = 18;
-
+      // cy=18, 方块高2, oy=1 → ny=18+1+1=20 >= 20 → 碰撞
       const result = collision(mockContext, 0, 1);
 
       expect(result).toBe(true);
     });
 
     it('方块刚好在边界内时应该返回 false', () => {
-      // cx = 0，ox = 0 → nx = 0，刚好在左边界
       baseState.cx = 0;
-
+      // cx=0, ox=0 → nx=0 >= 0 → 未出界
       const result = collision(mockContext, 0, 0);
 
       expect(result).toBe(false);
     });
 
     it('方块刚好在右边界内时应该返回 false', () => {
-      // cx = 8，方块宽 2，nx = 8 ~ 9，刚好在右边界内
       baseState.cx = 8;
-
+      // cx=8, 方块宽2 → nx 最大=9 < 10 → 未出界
       const result = collision(mockContext, 0, 0);
 
       expect(result).toBe(false);
@@ -111,32 +106,33 @@ describe('collision', () => {
   // ==================== 方块重叠碰撞 ====================
   describe('方块重叠碰撞', () => {
     it('与已有方块重叠时应该返回 true', () => {
-      // 在棋盘上放置一个方块
       baseState.board[3][5] = '#FF0000';
 
-      // 偏移后方块会占据 board[3][5]
+      // ox=1, oy=3 → 方块 shape[1][1]=1 时 ny=0+1+3=4, nx=4+1+1=6
+      // 实际重叠位置需要精确计算：
+      // shape[0][0]=1 → ny=3, nx=5 → board[3][5] 有方块 → 碰撞
       const result = collision(mockContext, 1, 3);
 
       expect(result).toBe(true);
     });
 
     it('没有重叠时应该返回 false', () => {
-      // 在棋盘上放置方块，但偏移后不重叠
       baseState.board[3][5] = '#FF0000';
 
-      // 偏移到其他位置
+      // ox=3, oy=3 → shape[0][0]: ny=3, nx=7 → board[3][7]=0 → 无碰撞
       const result = collision(mockContext, 3, 3);
 
       expect(result).toBe(false);
     });
 
-    it('ny < 0 时不应该访问 board[-1]', () => {
+    it('ny < 0 时不检查重叠（只检查边界）', () => {
       baseState.cy = 0;
 
-      // ny = 0 + 0 + (-1) = -1，此时不应读取 board[-1]
+      // oy=-1 → ny=-1 < 0，hitBlock 条件 ny >= 0 为 false
+      // outOfBounds: nx=4 >= 0 < 10 → false
+      // 无碰撞
       const result = collision(mockContext, 0, -1);
 
-      // 没有越出左右边界，ny < 0 不检查碰撞，应返回 false
       expect(result).toBe(false);
     });
   });
@@ -168,9 +164,8 @@ describe('collision', () => {
         color: '#008080',
       };
       baseState.cx = 7;
-      baseState.cy = 0;
 
-      // 向右移 1 格，第四个格子会超出右边界（7 + 3 + 1 = 11 >= 10）
+      // ox=1 → nx=7+3+1=11 >= 10 → 出右边界
       const result = collision(mockContext, 1, 0);
 
       expect(result).toBe(true);
@@ -184,10 +179,9 @@ describe('collision', () => {
         ],
         color: '#FFFF00',
       };
-      baseState.cx = 4;
       baseState.cy = 19;
 
-      // T 型方块高 2 行，cy = 19 时第二行 ny = 20 = rows，出界
+      // cy=19, 方块高2, oy=0 → ny=19+1+0=20 >= 20 → 出底部
       const result = collision(mockContext, 0, 0);
 
       expect(result).toBe(true);
@@ -204,7 +198,7 @@ describe('collision', () => {
       baseState.cx = 0;
       baseState.cy = 0;
 
-      // 即使 cx=0 靠近左边界，(0,0) 位置 shape[0][0]=0，不应该触发碰撞
+      // shape[0][0]=0 跳过检查，shape[1][0]=1 时 nx=0, ny=1 在界内 → false
       const result = collision(mockContext, 0, 0);
 
       expect(result).toBe(false);
@@ -232,11 +226,11 @@ describe('collision', () => {
     });
 
     it('棋盘底部有方块时下落应检测碰撞', () => {
-      // 在底部放一行方块
       baseState.board[19] = Array.from({ length: 10 }, () => '#FF0000');
       baseState.cy = 17;
 
-      // 方块高 2 行，oy=1 时 ny=18，第二行 ny=19 和已有方块重叠
+      // oy=1 → shape[0][0]: ny=18, shape[1][0]: ny=19
+      // ny=19 时 board[19][4] 有方块 → 碰撞
       const result = collision(mockContext, 0, 1);
 
       expect(result).toBe(true);
