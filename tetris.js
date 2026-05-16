@@ -192,6 +192,162 @@ var tetris = (() => {
   };
   var event_bus_default = EventBus;
 
+  // lib/engine/scheduler.js
+  var Scheduler = class {
+    /**
+     * ## 构造函数
+     *
+     * @class
+     */
+    constructor() {
+      this.tasks = /* @__PURE__ */ new Map();
+      this.nextId = 1;
+      this.dirty = false;
+    }
+    /**
+     * ## 外部 Game Loop 调用
+     *
+     * @param {number} [gameTime=performance.now()] - 游戏循环时间. Default is
+     *   `performance.now()`
+     * @returns {void}
+     */
+    tick(gameTime = performance.now()) {
+      if (this.tasks.size === 0) {
+        return;
+      }
+      for (const task of this.tasks.values()) {
+        if (task.cancelled) {
+          this.dirty = true;
+          continue;
+        }
+        switch (task.type) {
+          case "delay": {
+            if (task.startTime === void 0) {
+              task.startTime = gameTime;
+            }
+            if (gameTime - task.startTime < task.delay) {
+              continue;
+            }
+            task.fn();
+            this.tasks.delete(task.id);
+            break;
+          }
+          case "interval": {
+            if (task.startTime === void 0) {
+              task.startTime = gameTime;
+              task.nextTime = gameTime + task.interval;
+            }
+            if (gameTime < task.nextTime) {
+              continue;
+            }
+            task.fn();
+            task.nextTime = gameTime + task.interval;
+            break;
+          }
+        }
+      }
+      if (this.dirty) {
+        for (const [id, task] of this.tasks) {
+          if (!task.cancelled) {
+            continue;
+          }
+          this.tasks.delete(id);
+        }
+        this.dirty = false;
+      }
+    }
+    /**
+     * ## 延迟任务（setTimeout replacement）
+     *
+     * @param {Function} fn - 执行任务的处理函数
+     * @param {number} delay - 执行任务的时间延迟
+     * @returns {number} - 返回任务 id
+     */
+    delay(fn, delay = 0) {
+      const id = this.nextId++;
+      this.tasks.set(id, {
+        id,
+        type: "delay",
+        delay,
+        fn,
+        cancelled: false
+      });
+      return id;
+    }
+    /**
+     * ## 周期任务（setInterval replacement）
+     *
+     * @param {Function} fn - 执行任务的处理函数
+     * @param {number} interval - 执行任务的时间间隔
+     * @returns {number} - 返回任务 id
+     */
+    interval(fn, interval = 1e3) {
+      const id = this.nextId++;
+      this.tasks.set(id, {
+        id,
+        type: "interval",
+        interval,
+        fn,
+        cancelled: false
+      });
+      return id;
+    }
+    /**
+     * ## 任务列队
+     *
+     * - 执行列队中的一系列任务
+     *
+     * @param {Array} list - 任务列表数据
+     * @returns {Array} - 列队任务的 id 值数组
+     */
+    sequence(list) {
+      const ids = [];
+      let t = 0;
+      for (const item of list) {
+        const { delay = 0, fn } = item;
+        t += delay;
+        ids.push(this.delay(fn, t));
+      }
+      return ids;
+    }
+    /**
+     * ## 取消任务
+     *
+     * 通过任务 id 取消任务
+     *
+     * @param {number} id - 任务 id
+     */
+    cancel(id) {
+      const task = this.tasks.get(id);
+      if (!task) {
+        return;
+      }
+      task.cancelled = true;
+      this.dirty = true;
+    }
+    /**
+     * ## 清空所有任务
+     *
+     * - 清空任务
+     * - 恢复 dirty
+     */
+    clear() {
+      this.tasks.clear();
+      this.dirty = false;
+    }
+    /**
+     * ## Debug helper
+     *
+     * 帮助测试用
+     *
+     * @returns {number} - 返回任务数量
+     */
+    size() {
+      return this.tasks.size;
+    }
+  };
+  var scheduler_default = Scheduler;
+
   // lib/services/audio/constants/motifs.js
   var MOTIFS = {
     combo: {
@@ -1650,42 +1806,37 @@ var tetris = (() => {
   var loopPlayBGM = (melody, options = {}) => {
     const {
       duration = 110,
-      // 基准时长：dur 为 1.0 时对应 110ms
       volume = 0.05,
-      // 主音量
       wave = "square",
-      // 默认方波，富有颗粒感
       gate = 1,
-      // 默认连奏，不产生间隙
       articulation = {}
-      // 运音包络，playTone 内部会再次指定默认值
     } = options;
     const { Scheduler: Scheduler2 } = engine_default;
-    if (duration <= 0) {
+    if (duration <= 0 || !melody?.length) {
       return;
     }
     let currentNoteIndex = 0;
     let nextNoteTime = audio_default.Context.currentTime;
     const scheduleNote = (note, time) => {
-      const { freq, dur } = note;
-      const stepDur = dur * duration;
-      if (freq > 0) {
-        Scheduler2.delayAt(() => {
-          play_tone_default(note.freq, stepDur, {
-            volume,
-            wave,
-            gate,
-            articulation,
-            startTime: time
-          });
-        }, time);
+      const stepDur = note.dur * duration;
+      if (note.freq > 0) {
+        play_tone_default(note.freq, stepDur, {
+          volume,
+          wave,
+          gate,
+          articulation,
+          startTime: time
+        });
       }
-      nextNoteTime += stepDur / 1e3;
     };
     const scheduler = () => {
-      while (nextNoteTime < audio_default.Context.currentTime + SCHEDULE_AHEAD_TIME) {
+      const audioNow = audio_default.Context.currentTime;
+      const limit = audioNow + SCHEDULE_AHEAD_TIME;
+      while (nextNoteTime < limit) {
         const note = melody[currentNoteIndex];
         scheduleNote(note, nextNoteTime);
+        const stepDur = note.dur * duration;
+        nextNoteTime += stepDur / 1e3;
         currentNoteIndex = (currentNoteIndex + 1) % melody.length;
       }
     };
@@ -1801,184 +1952,6 @@ var tetris = (() => {
     }
   };
   var audio_default = Audio;
-
-  // lib/engine/scheduler.js
-  var Scheduler = class {
-    /**
-     * ## 构造函数
-     *
-     * @class
-     */
-    constructor() {
-      this.tasks = /* @__PURE__ */ new Map();
-      this.nextId = 1;
-      this.dirty = false;
-    }
-    /**
-     * ## 外部 Game Loop 调用
-     *
-     * @param {number} [gameTime=performance.now()] - 游戏循环时间. Default is
-     *   `performance.now()`
-     * @param {number} [audioTime=Audio.Context.currentTime] - 游戏循环时间. Default is
-     *   `Audio.Context.currentTime`
-     * @returns {void}
-     */
-    tick(gameTime = performance.now(), audioTime = audio_default.Context.currentTime) {
-      if (this.tasks.size === 0) {
-        return;
-      }
-      for (const task of this.tasks.values()) {
-        if (task.cancelled) {
-          this.dirty = true;
-          continue;
-        }
-        switch (task.type) {
-          case "delayAt": {
-            if (audioTime < task.audioTime) {
-              continue;
-            }
-            task.fn();
-            this.tasks.delete(task.id);
-            break;
-          }
-          case "delay": {
-            if (gameTime < task.time) {
-              continue;
-            }
-            task.fn();
-            this.tasks.delete(task.id);
-            break;
-          }
-          case "interval": {
-            if (gameTime < task.nextTime) {
-              continue;
-            }
-            task.fn();
-            task.nextTime = gameTime + task.interval;
-            break;
-          }
-        }
-      }
-      if (this.dirty) {
-        for (const [id, task] of this.tasks) {
-          if (!task.cancelled) {
-            continue;
-          }
-          this.tasks.delete(id);
-        }
-        this.dirty = false;
-      }
-    }
-    /**
-     * ## 基于 AudioContext 时间调度一次任务
-     *
-     * @param {Function} fn - 任务函数
-     * @param {number} audioTime - Audio 播放时间
-     * @returns {number} - 返回任务 id
-     */
-    delayAt(fn, audioTime) {
-      const id = this.nextId++;
-      this.tasks.set(id, {
-        id,
-        type: "delayAt",
-        audioTime,
-        fn,
-        cancelled: false
-      });
-      return id;
-    }
-    /**
-     * ## 延迟任务（setTimeout replacement）
-     *
-     * @param {Function} fn - 执行任务的处理函数
-     * @param {number} delay - 执行任务的时间延迟
-     * @returns {number} - 返回任务 id
-     */
-    delay(fn, delay = 0) {
-      const id = this.nextId++;
-      this.tasks.set(id, {
-        id,
-        type: "delay",
-        time: performance.now() + delay,
-        fn,
-        cancelled: false
-      });
-      return id;
-    }
-    /**
-     * ## 周期任务（setInterval replacement）
-     *
-     * @param {Function} fn - 执行任务的处理函数
-     * @param {number} interval - 执行任务的时间间隔
-     * @returns {number} - 返回任务 id
-     */
-    interval(fn, interval = 1e3) {
-      const id = this.nextId++;
-      this.tasks.set(id, {
-        id,
-        type: "interval",
-        interval,
-        nextTime: performance.now() + interval,
-        fn,
-        cancelled: false
-      });
-      return id;
-    }
-    /**
-     * ## 任务列队
-     *
-     * - 执行列队中的一系列任务
-     *
-     * @param {Array} list - 任务列表数据
-     * @returns {Array} - 列队任务的 id 值数组
-     */
-    sequence(list) {
-      const ids = [];
-      let t = 0;
-      for (const item of list) {
-        const { delay = 0, fn } = item;
-        t += delay;
-        ids.push(this.delay(fn, t));
-      }
-      return ids;
-    }
-    /**
-     * ## 取消任务
-     *
-     * 通过任务 id 取消任务
-     *
-     * @param {number} id - 任务 id
-     */
-    cancel(id) {
-      const task = this.tasks.get(id);
-      if (!task) {
-        return;
-      }
-      task.cancelled = true;
-      this.dirty = true;
-    }
-    /**
-     * ## 清空所有任务
-     *
-     * - 清空任务
-     * - 恢复 dirty
-     */
-    clear() {
-      this.tasks.clear();
-      this.dirty = false;
-    }
-    /**
-     * ## Debug helper
-     *
-     * 帮助测试用
-     *
-     * @returns {number} - 返回任务数量
-     */
-    size() {
-      return this.tasks.size;
-    }
-  };
-  var scheduler_default = Scheduler;
 
   // lib/core/index.js
   var Base = class {
@@ -5026,6 +4999,7 @@ var tetris = (() => {
     constructor(options) {
       super(options);
       this.initialize();
+      this._countdown();
     }
     initialize() {
       this.layer = 100;
@@ -5038,43 +5012,30 @@ var tetris = (() => {
         count: 0,
         acc: 0
       };
+      this._intervalId = 0;
+    }
+    _countdown() {
       this.emit("audio:play:sound", { sound: "COUNTDOWN" });
+      this._intervalId = this.Scheduler.interval(() => {
+        this.state.number -= 1;
+        this.state.scale = 4;
+        if (this.state.number >= 1) {
+          this.emit("audio:play:sound", { sound: "COUNTDOWN" });
+        }
+        if (this.state.number <= 0) {
+          this.stop();
+        }
+      }, 1e3);
     }
     /**
      * ## 更新动画状态
-     *
-     * 每帧调用：
-     *
-     * - 控制更新节奏（基于 acc）
-     * - 更新缩放动画
-     * - 控制数字切换
-     * - 判断动画是否结束
      *
      * @param {number} delta - 距离上一帧的时间差（秒）
      * @returns {boolean} - 是否继续存活（true=继续，false=结束）
      */
     update(delta) {
-      const { state } = this;
-      state.acc += delta;
-      if (state.acc < 0.01) {
-        return true;
-      }
-      state.acc = 0;
-      state.count++;
-      state.scale = Math.max(1, state.scale - 0.4);
-      if (state.count >= 50) {
-        state.count = 0;
-        state.number -= 1;
-        state.scale = 4;
-        if (state.number >= 1) {
-          this.emit("audio:play:sound", { sound: "COUNTDOWN" });
-        }
-      }
-      if (state.number <= 0) {
-        this.stop();
-        return false;
-      }
-      return true;
+      this.state.scale = Math.max(1, this.state.scale - delta * 40);
+      return this.state.number > 0;
     }
     /**
      * ## 倒计时结束处理
@@ -5084,6 +5045,7 @@ var tetris = (() => {
      */
     stop() {
       const { Game: Game2 } = this;
+      this.Scheduler.cancel(this._intervalId);
       this.emit(`game:${Game2.id}:begin`);
     }
     /**
@@ -5104,14 +5066,25 @@ var tetris = (() => {
      * ## 构造函数
      *
      * @class
+     * @param {object} options - 配置（依赖的执行上下文）对象
      */
-    constructor() {
-      super();
+    constructor(options) {
+      super(options);
       this.layer = 500;
       this.blocking = true;
       this.name = "paused";
       this.timer = 0;
       this.active = true;
+      this._tickId = 0;
+      this._tick();
+    }
+    _tick() {
+      if (!this.active) {
+        return;
+      }
+      this._tickId = this.Scheduler.interval(() => {
+        this.emit("audio:play:sound", { sound: "SECOND_TICK" });
+      }, 1e3);
     }
     /**
      * ## 更新暂停动画状态
@@ -5130,6 +5103,9 @@ var tetris = (() => {
       }
       return true;
     }
+    resume() {
+      this.active = true;
+    }
     /**
      * ## 暂停结束处理
      *
@@ -5137,6 +5113,7 @@ var tetris = (() => {
      */
     stop() {
       this.active = false;
+      this.Scheduler.cancel(this._tickId);
     }
     /**
      * ## 渲染暂停动画
@@ -5151,9 +5128,8 @@ var tetris = (() => {
 
   // lib/game/actions/apply-clear-lines.js
   var applyClearLines = (context) => {
-    const { options } = context;
+    const { Elements, Level } = context;
     const state = context.Store.getState();
-    const { Elements, Level } = options;
     const { rows, cols } = Elements.Main;
     const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
     const lines = state.clearLines || [];
@@ -5260,12 +5236,30 @@ var tetris = (() => {
       const result = apply_clear_lines_default(Game2);
       const { level, levelUp } = result;
       const isLevelUp = levelUp;
-      this.emit(`replay:${uuid}:stop:clear:lines`, { isLevelUp, level });
-      this.emit(`game:${uuid}:update:state`, {
-        stateHandler: result.stateHandler
-      });
-      this.emit(`game:${uuid}:save:high:score`);
-      this.emit(`game:${uuid}:update:hud`);
+      engine_default.Scheduler.sequence([
+        {
+          fn: () => {
+            this.emit(`replay:${uuid}:stop:clear:lines`, { isLevelUp, level });
+          }
+        },
+        {
+          fn: () => {
+            this.emit(`game:${uuid}:update:state`, {
+              stateHandler: result.stateHandler
+            });
+          }
+        },
+        {
+          fn: () => {
+            this.emit(`game:${uuid}:save:high:score`);
+          }
+        },
+        {
+          fn: () => {
+            this.emit(`game:${uuid}:update:hud`);
+          }
+        }
+      ]);
     }
     /**
      * ## 渲染动画
@@ -5310,6 +5304,14 @@ var tetris = (() => {
       this.timer = 0;
       this.level = level;
       this.fireworks = this.createFireworks();
+      this.active = true;
+      const { Scheduler: Scheduler2 } = this;
+      this._spawnId = Scheduler2.interval(() => {
+        this.fireworks.push(...this.createFireworks());
+      }, 600);
+      this._endId = Scheduler2.delay(() => {
+        this.stop();
+      }, 3e3);
     }
     /**
      * ## 创建一组烟花粒子
@@ -5371,18 +5373,8 @@ var tetris = (() => {
      * @returns {boolean} - 动画是否仍在进行中（true=进行中，false=已完成）
      */
     update(delta) {
-      this.timer += delta;
-      this.spawnTimer += delta;
       this.updateFireworks(delta);
-      if (this.spawnTimer > 0.6) {
-        this.fireworks.push(...this.createFireworks());
-        this.spawnTimer = 0;
-      }
-      if (this.timer >= this.duration) {
-        this.stop();
-        return false;
-      }
-      return true;
+      return this.active;
     }
     /**
      * ## 升级动画结束处理
@@ -5390,9 +5382,11 @@ var tetris = (() => {
      * 继续播放背景音乐
      */
     stop() {
-      const { maxLevel } = this;
-      const { level } = this;
-      this.emit("audio:play:bgm", { level, maxLevel });
+      const { level, Scheduler: Scheduler2 } = this;
+      this.active = false;
+      Scheduler2.cancel(this._spawnId);
+      Scheduler2.cancel(this._endId);
+      this.emit("audio:play:bgm", { level });
     }
     /**
      * ## 渲染升级动画
@@ -5496,8 +5490,8 @@ var tetris = (() => {
 
   // lib/game/logic/collision.js
   var collision = (context, ox, oy) => {
-    const { options } = context;
-    const { rows, cols } = options.Elements.Main;
+    const { Elements } = context;
+    const { rows, cols } = Elements.Main;
     const state = context.Store.getState();
     const { curr, cx, cy, board } = state;
     if (!curr) {
@@ -5537,8 +5531,8 @@ var tetris = (() => {
 
   // lib/game/logic/spawn.js
   var spawn = (context) => {
-    const { id, options, Store } = context;
-    const { cols } = options.Elements.Main;
+    const { id, Elements, Store } = context;
+    const { cols } = Elements.Main;
     const { curr, next } = get_next_piece_default(context);
     if (!curr) {
       return;
@@ -5582,7 +5576,7 @@ var tetris = (() => {
 
   // lib/game/core/begin.js
   var begin = (context) => {
-    const { Store, id } = context;
+    const { Store, id, Scheduler: Scheduler2 } = context;
     const $level = document.querySelector("#level");
     const level = Store.getLevel();
     if ($level) {
@@ -5593,8 +5587,8 @@ var tetris = (() => {
     set_beginning_state_default(context, "playing", level);
     spawn_default(context);
     context.emit("audio:play:sound", { sound: "GAME_STARTED" });
-    engine_default.Scheduler.delay(() => {
-      const maxLevel = context.options.Level.max;
+    Scheduler2.delay(() => {
+      const maxLevel = context.Level.max;
       context.emit("audio:play:bgm", { level, maxLevel });
     }, 250);
   };
@@ -5612,13 +5606,13 @@ var tetris = (() => {
 
   // lib/game/core/play.js
   var play = (context) => {
-    const { id, Store, options } = context;
+    const { id, Store, Level } = context;
     const mode = context.Store.getMode();
     if (mode !== "paused") {
       return;
     }
     const level = Store.getLevel();
-    const maxLevel = options.Level.max;
+    const maxLevel = Level.max;
     context.emit(`ui:${id}:update:mode`, { mode: "playing" });
     Store.setMode("playing");
     context.emit(`game:${id}:stop:paused`);
@@ -5677,13 +5671,13 @@ var tetris = (() => {
 
   // lib/game/core/restart.js
   var restart = (context) => {
-    const { Store, options } = context;
+    const { Store, Level } = context;
     const mode = Store.getMode();
     if (mode !== "playing") {
       return;
     }
     const level = Store.getLevel();
-    const maxLevel = options.Level.max;
+    const maxLevel = Level.max;
     reset_default(context, "playing");
     spawn_default(context);
     context.emit("audio:play:bgm", { level, maxLevel });
@@ -5758,9 +5752,8 @@ var tetris = (() => {
 
   // lib/game/logic/find-full-lines.js
   var findFullLines = (context) => {
-    const { options } = context;
+    const { Elements } = context;
     const state = context.Store.getState();
-    const { Elements } = options;
     const { rows } = Elements.Main;
     const linesToClear = [];
     for (let y = rows - 1; y >= 0; y--) {
@@ -5826,9 +5819,9 @@ var tetris = (() => {
 
   // lib/game/rules/get-speed.js
   var getSpeed = (context) => {
-    const { options } = context;
-    const level = context.Store.getLevel();
-    const step = Math.ceil(1e3 / Math.floor(options.Level.max * 0.7));
+    const { Store, Level } = context;
+    const level = Store.getLevel();
+    const step = Math.ceil(1e3 / Math.floor(Level.max * 0.7));
     return Math.max(120, 1e3 - (level - 1) * step);
   };
   var get_speed_default = getSpeed;
@@ -5852,17 +5845,16 @@ var tetris = (() => {
      * @param {object} options - 配置（依赖的执行上下文）对象
      */
     constructor(options) {
-      super();
-      this.initialize(options);
+      super(options);
+      this.initialize();
     }
-    initialize(options) {
-      const { Elements } = options;
+    initialize() {
+      const { Elements, Scheduler: Scheduler2 } = this;
       const Store = new game_store_default({
         ...Elements.Main,
         GameState: game_state_default
       });
       this.id = crypto.randomUUID();
-      this.options = options;
       this.effect = null;
       this.Store = Store;
       this.Animations = new animation_system_default({
@@ -5885,7 +5877,9 @@ var tetris = (() => {
       });
       this.Replay = new replay_controller_default({
         Game: this,
-        Store
+        Store,
+        // 以后快进做准备
+        Scheduler: Scheduler2
       });
     }
     selectLevel(level) {
@@ -5958,13 +5952,17 @@ var tetris = (() => {
     startCountdown() {
       this.Animations.register(
         new countdown_animation_default({
+          Scheduler: this.Scheduler,
           Game: this
         })
       );
     }
     startPaused() {
-      this.effect = new paused_animation_default();
+      this.effect = new paused_animation_default({
+        Scheduler: this.Scheduler
+      });
       this.Animations.register(this.effect);
+      this.effect.resume();
     }
     stopPaused() {
       if (!this.effect) {
@@ -5984,6 +5982,7 @@ var tetris = (() => {
     startLevelUp(level) {
       this.Animations.register(
         new level_up_animation_default({
+          Scheduler: this.Scheduler,
           Game: this,
           UI: this.UI,
           level
@@ -6131,8 +6130,9 @@ var tetris = (() => {
       this.tick(isBlocked);
     };
     _onToggleBGM = () => {
-      const level = this.Store.getLevel();
-      const maxLevel = this.options.Level.max;
+      const { Store, Level } = this;
+      const level = Store.getLevel();
+      const maxLevel = Level.max;
       this.emit("audio:toggle:bgm", { level, maxLevel });
     };
     _onReplayPrepareBoard = () => {
@@ -6789,8 +6789,15 @@ var tetris = (() => {
     fixedAccumulator: 0,
     // 上一帧时间戳
     lastTickTime: 0,
-    Scheduler: new scheduler_default(),
-    Game: new game_default2(configuration_default),
+    Scheduler: null,
+    Game: null,
+    initialize: (options) => {
+      Engine.Scheduler = new scheduler_default();
+      Engine.Game = new game_default2({
+        ...options,
+        Scheduler: Engine.Scheduler
+      });
+    },
     /**
      * ## 初始化游戏
      *
@@ -6804,6 +6811,7 @@ var tetris = (() => {
      * - 启动 game loop
      */
     launch: () => {
+      Engine.initialize(configuration_default);
       const { Game: Game2 } = Engine;
       const { Store, UI: UI2 } = Game2;
       Store.resetBoard();
