@@ -348,6 +348,38 @@ var tetris = (() => {
   };
   var scheduler_default = Scheduler;
 
+  // lib/core/index.js
+  var Base = class {
+    /**
+     * ## 构造函数
+     *
+     * @class
+     * @param {object} [deps={}] - （所有）依赖对象. Default is `{}`
+     */
+    constructor(deps = {}) {
+      this.inject(deps);
+    }
+    inject(deps = {}) {
+      Object.assign(this, deps);
+    }
+    emit(event, payload) {
+      event_bus_default.emit(event, payload);
+    }
+    on(event, handler) {
+      event_bus_default.on(event, handler);
+    }
+    once(event, handler) {
+      event_bus_default.once(event, handler);
+    }
+    off(event, handler) {
+      event_bus_default.off(event, handler);
+    }
+    clear() {
+      event_bus_default.clear();
+    }
+  };
+  var core_default = Base;
+
   // lib/services/audio/constants/motifs.js
   var MOTIFS = {
     combo: {
@@ -369,11 +401,11 @@ var tetris = (() => {
   var motifs_default = MOTIFS;
 
   // lib/services/audio/play-tone.js
-  var playTone = (freq, dur, options = {}) => {
+  var playTone = (audio, freq, dur, options = {}) => {
     if (!freq || dur <= 0) {
       return;
     }
-    const { Context } = audio_default;
+    const { Context } = audio;
     const {
       // 音量峰值
       volume = 0.15,
@@ -429,50 +461,53 @@ var tetris = (() => {
     }
     return "combo";
   };
-  var Sounds = {
+  var Sounds = class extends core_default {
+    constructor(options) {
+      super(options);
+    }
     // 等级选择音效（正弦波柔和音效）
-    LEVEL_CHANGED: () => {
-      play_tone_default(520, 80, {
+    LEVEL_CHANGED = () => {
+      play_tone_default(this, 520, 80, {
         volume: 0.2,
         wave: "triangle"
       });
-    },
+    };
     // 主菜单/难度选择场景切换音效
-    SWITCH_SCENE: () => {
-      play_tone_default(620, 80, {
+    SWITCH_SCENE = () => {
+      play_tone_default(this, 620, 80, {
         volume: 0.2,
         wave: "triangle"
       });
-    },
+    };
     // 难度选择音效
-    DIFFICULTY_CHANGED: () => {
-      play_tone_default(880, 80, {
+    DIFFICULTY_CHANGED = () => {
+      play_tone_default(this, 880, 80, {
         volume: 0.2,
         wave: "triangle"
       });
-    },
+    };
     // 等级开始音效
-    GAME_STARTED: () => {
-      play_tone_default(1319, 160, {
+    GAME_STARTED = () => {
+      play_tone_default(this, 1319, 160, {
         volume: 0.22,
         wave: "triangle"
       });
-    },
+    };
     // 开始倒计时音效
-    COUNTDOWN: () => {
-      play_tone_default(784, 180, {
+    COUNTDOWN = () => {
+      play_tone_default(this, 784, 180, {
         volume: 0.4,
         wave: "sine"
       });
-    },
+    };
     // 方块移动音效
-    MOVE: () => play_tone_default(330, 60),
+    MOVE = () => play_tone_default(this, 330, 60);
     // 方块旋转音效
-    ROTATE: () => play_tone_default(440, 60),
+    ROTATE = () => play_tone_default(this, 440, 60);
     // 方块快速下落音效
-    DROP: () => play_tone_default(220, 100),
+    DROP = () => play_tone_default(this, 220, 100);
     // 方块落地音效
-    FALL: () => play_tone_default(180, 200),
+    FALL = () => play_tone_default(this, 180, 200);
     /**
      * ## 消行动效音播放（基于和弦 + 动机系统）
      *
@@ -481,7 +516,7 @@ var tetris = (() => {
      * @param {number} lines - 消除行数
      * @param {boolean} isPerfectClear - 是否全清
      */
-    CLEAR: (lines = 1, isPerfectClear = false) => {
+    CLEAR = (lines = 1, isPerfectClear = false) => {
       const frequencies = [
         [440, 587, 698],
         [587, 698, 880],
@@ -501,35 +536,35 @@ var tetris = (() => {
       for (const [i, freq] of chord.entries()) {
         queue.push({
           fn: () => {
-            const now = audio_default.Context.currentTime;
-            play_tone_default(freq, speeds[i] * cfg.speed, {
+            const now = this.Context.currentTime;
+            play_tone_default(this, freq, speeds[i] * cfg.speed, {
               volume: volumes[i] * cfg.volume,
               startTime: now + timeouts[i] / 1e3
             });
           }
         });
       }
-      engine_default.Scheduler.sequence(queue);
-    },
+      this.Scheduler.sequence(queue);
+    };
     // 升级庆祝音效
-    LEVEL_UP: () => {
-      const now = audio_default.Context.currentTime;
-      engine_default.Scheduler.sequence([
+    LEVEL_UP = () => {
+      const now = this.Context.currentTime;
+      this.Scheduler.sequence([
         {
           fn: () => {
-            play_tone_default(523, 220);
+            play_tone_default(this, 523, 220);
           }
         },
         {
           fn: () => {
-            play_tone_default(587, 220, {
+            play_tone_default(this, 587, 220, {
               startTime: now + 0.26
             });
           }
         },
         {
           fn: () => {
-            play_tone_default(659, 240, {
+            play_tone_default(this, 659, 240, {
               startTime: now + 0.52
             });
           }
@@ -537,71 +572,71 @@ var tetris = (() => {
         {
           delay: 260,
           fn: () => {
-            play_tone_default(784, 260, {
+            play_tone_default(this, 784, 260, {
               startTime: now + 0.78
             });
           }
         },
         {
           fn: () => {
-            play_tone_default(880, 280, {
+            play_tone_default(this, 880, 280, {
               startTime: now + 1.06
             });
           }
         },
         {
           fn: () => {
-            play_tone_default(1047, 320, {
+            play_tone_default(this, 1047, 320, {
               startTime: now + 1.36
             });
           }
         },
         {
           fn: () => {
-            play_tone_default(1175, 360, {
+            play_tone_default(this, 1175, 360, {
               startTime: now + 1.7
             });
           }
         },
         {
           fn: () => {
-            play_tone_default(1319, 480, {
+            play_tone_default(this, 1319, 480, {
               startTime: now + 2.08
             });
           }
         }
       ]);
-    },
+    };
     // 暂停游戏音效
-    PAUSED: () => play_tone_default(300, 150),
+    PAUSED = () => play_tone_default(this, 300, 150);
     // 秒针走动音效
-    SECOND_TICK: () => {
-      play_tone_default(880, 50, {
+    SECOND_TICK = () => {
+      play_tone_default(this, 880, 50, {
         volume: 0.085,
         wave: "triangle"
       });
-    },
+    };
     // 恢复游戏音效
-    RESUME: () => play_tone_default(400, 150),
+    RESUME = () => play_tone_default(this, 400, 150);
     // 游戏结束音效（悲伤旋律）
-    GAME_OVER: () => {
-      const now = audio_default.Context.currentTime;
-      engine_default.Scheduler.sequence([
-        { fn: () => play_tone_default(330, 200) },
+    GAME_OVER = () => {
+      const now = this.Context.currentTime;
+      this.Scheduler.sequence([
+        { fn: () => play_tone_default(this, 330, 200) },
         {
-          fn: () => play_tone_default(294, 300, {
+          fn: () => play_tone_default(this, 294, 300, {
             startTime: now + 0.21
           })
         },
         {
-          fn: () => play_tone_default(262, 500, {
+          fn: () => play_tone_default(this, 262, 500, {
             startTime: now + 0.52
           })
         }
       ]);
-    },
+    };
     // 背景音乐开关音效
-    BGM_TOGGLED: () => play_tone_default(440, 100)
+    BGM_TOGGLED = () => play_tone_default(this, 440, 100);
   };
   var sounds_default = Sounds;
 
@@ -1803,7 +1838,7 @@ var tetris = (() => {
   // lib/services/audio/loop-play-bgm.js
   var SCHEDULE_AHEAD_TIME = 0.12;
   var LOOKAHEAD = 25;
-  var loopPlayBGM = (melody, options = {}) => {
+  var loopPlayBGM = (audio, melody, options = {}) => {
     const {
       duration = 110,
       volume = 0.05,
@@ -1811,16 +1846,16 @@ var tetris = (() => {
       gate = 1,
       articulation = {}
     } = options;
-    const { Scheduler: Scheduler2 } = engine_default;
+    const { Scheduler: Scheduler2, Context } = audio;
     if (duration <= 0 || !melody?.length) {
       return;
     }
     let currentNoteIndex = 0;
-    let nextNoteTime = audio_default.Context.currentTime;
+    let nextNoteTime = Context.currentTime;
     const scheduleNote = (note, time) => {
       const stepDur = note.dur * duration;
       if (note.freq > 0) {
-        play_tone_default(note.freq, stepDur, {
+        play_tone_default(audio, note.freq, stepDur, {
           volume,
           wave,
           gate,
@@ -1830,7 +1865,7 @@ var tetris = (() => {
       }
     };
     const scheduler = () => {
-      const audioNow = audio_default.Context.currentTime;
+      const audioNow = Context.currentTime;
       const limit = audioNow + SCHEDULE_AHEAD_TIME;
       while (nextNoteTime < limit) {
         const note = melody[currentNoteIndex];
@@ -1840,7 +1875,7 @@ var tetris = (() => {
         currentNoteIndex = (currentNoteIndex + 1) % melody.length;
       }
     };
-    audio_default.bgmSchedulerId = Scheduler2.interval(scheduler, LOOKAHEAD);
+    audio.bgmSchedulerId = Scheduler2.interval(scheduler, LOOKAHEAD);
   };
   var loop_play_bgm_default = loopPlayBGM;
 
@@ -1875,10 +1910,10 @@ var tetris = (() => {
     const index = Math.min(Math.floor((level - 1) / step), length - 1);
     return MUSIC_LIST[index];
   };
-  var playBGM = (level = 1, maxLevel = 99) => {
+  var playBGM = (audio, level = 1, maxLevel = 99) => {
     const music = getMusicByLevel(level, maxLevel);
     const { melody, duration, volume, wave, gate, articulation } = music;
-    loop_play_bgm_default(melody, {
+    loop_play_bgm_default(audio, melody, {
       duration,
       volume,
       wave,
@@ -1889,101 +1924,76 @@ var tetris = (() => {
   var play_bgm_default = playBGM;
 
   // lib/services/audio/stop-bgm.js
-  var stopBGM = () => {
-    engine_default.Scheduler.cancel(audio_default.bgmSchedulerId);
-    audio_default.bgmSchedulerId = 0;
+  var stopBGM = (audio) => {
+    audio.Scheduler.cancel(audio.bgmSchedulerId);
+    audio.bgmSchedulerId = 0;
   };
   var stop_bgm_default = stopBGM;
 
   // lib/services/audio/toggle-bgm.js
-  var toggleBGM = (level, maxLevel = 99) => {
-    if (audio_default.bgmSchedulerId === 0) {
-      play_bgm_default(level, maxLevel);
+  var toggleBGM = (audio, level, maxLevel = 99) => {
+    if (audio.bgmSchedulerId === 0) {
+      play_bgm_default(audio, level, maxLevel);
     } else {
-      stop_bgm_default();
+      stop_bgm_default(audio);
     }
   };
   var toggle_bgm_default = toggleBGM;
 
   // lib/services/audio/index.js
-  var Audio = {
-    Context: new AudioContext(),
-    Sounds: sounds_default,
-    bgmSchedulerId: 0,
-    playBGM: play_bgm_default,
-    stopBGM: stop_bgm_default,
-    toggleBGM: toggle_bgm_default,
-    emit(event, handler) {
-      event_bus_default.emit(event, handler);
-    },
-    on(event, payload) {
-      event_bus_default.on(event, payload);
-    },
-    off(event, handler) {
-      event_bus_default.off(event, handler);
-    },
+  var Audio = class extends core_default {
+    constructor(options) {
+      super(options);
+      this.initialize(options);
+    }
+    initialize(options) {
+      const Context = new AudioContext();
+      this.Context = Context;
+      this.Sounds = new sounds_default({
+        ...options,
+        Context
+      });
+      this.bgmSchedulerId = 0;
+    }
+    playBGM(level, maxLevel) {
+      play_bgm_default(this, level, maxLevel);
+    }
+    stopBGM() {
+      stop_bgm_default(this);
+    }
+    toggleBGM(level, maxLevel) {
+      toggle_bgm_default(this, level, maxLevel);
+    }
     subscribe() {
-      Audio.on("audio:play:bgm", Audio._onPlayBGM);
-      Audio.on("audio:stop:bgm", Audio._onStopBGM);
-      Audio.on("audio:toggle:bgm", Audio._onToggleBGM);
-      Audio.on("audio:play:sound", Audio._onPlaySound);
-    },
+      this.on("audio:play:bgm", this._onPlayBGM);
+      this.on("audio:stop:bgm", this._onStopBGM);
+      this.on("audio:toggle:bgm", this._onToggleBGM);
+      this.on("audio:play:sound", this._onPlaySound);
+    }
     unsubscribe() {
-      Audio.off("audio:play:bgm", Audio._onPlayBGM);
-      Audio.off("audio:stop:bgm", Audio._onStopBGM);
-      Audio.off("audio:toggle:bgm", Audio._onToggleBGM);
-      Audio.off("audio:play:sound", Audio._onPlaySound);
-    },
-    _onPlayBGM({ level, maxLevel = 99 }) {
-      Audio.playBGM(level, maxLevel);
-    },
-    _onStopBGM() {
-      Audio.stopBGM();
-    },
-    _onToggleBGM({ level, maxLevel = 99 }) {
-      Audio.emit("audio:play:sound", { sound: "BGM_TOGGLED" });
-      Audio.toggleBGM(level, maxLevel);
-    },
-    _onPlaySound({ sound, lines }) {
-      const handler = Audio.Sounds[sound];
+      this.off("audio:play:bgm", this._onPlayBGM);
+      this.off("audio:stop:bgm", this._onStopBGM);
+      this.off("audio:toggle:bgm", this._onToggleBGM);
+      this.off("audio:play:sound", this._onPlaySound);
+    }
+    _onPlayBGM = ({ level, maxLevel = 99 }) => {
+      this.playBGM(level, maxLevel);
+    };
+    _onStopBGM = () => {
+      this.stopBGM();
+    };
+    _onToggleBGM = ({ level, maxLevel = 99 }) => {
+      this.emit("audio:play:sound", { sound: "BGM_TOGGLED" });
+      this.toggleBGM(level, maxLevel);
+    };
+    _onPlaySound = ({ sound, lines }) => {
+      const handler = this.Sounds[sound];
       if (is_function_default(handler)) {
         handler(lines);
       }
-    }
+    };
   };
   var audio_default = Audio;
-
-  // lib/core/index.js
-  var Base = class {
-    /**
-     * ## 构造函数
-     *
-     * @class
-     * @param {object} [deps={}] - （所有）依赖对象. Default is `{}`
-     */
-    constructor(deps = {}) {
-      this.inject(deps);
-    }
-    inject(deps = {}) {
-      Object.assign(this, deps);
-    }
-    emit(event, payload) {
-      event_bus_default.emit(event, payload);
-    }
-    on(event, handler) {
-      event_bus_default.on(event, handler);
-    }
-    once(event, handler) {
-      event_bus_default.once(event, handler);
-    }
-    off(event, handler) {
-      event_bus_default.off(event, handler);
-    }
-    clear() {
-      event_bus_default.clear();
-    }
-  };
-  var core_default = Base;
 
   // lib/state/game-state.js
   var GameState = {
@@ -6790,9 +6800,13 @@ var tetris = (() => {
     // 上一帧时间戳
     lastTickTime: 0,
     Scheduler: null,
+    Audio: null,
     Game: null,
     initialize: (options) => {
       Engine.Scheduler = new scheduler_default();
+      Engine.Audio = new audio_default({
+        Scheduler: Engine.Scheduler
+      });
       Engine.Game = new game_default2({
         ...options,
         Scheduler: Engine.Scheduler
@@ -6828,9 +6842,9 @@ var tetris = (() => {
       event_bus_default.on(event, payload);
     },
     subscribe: () => {
-      const { Game: Game2 } = Engine;
+      const { Game: Game2, Audio: Audio2 } = Engine;
       Engine._subscribe();
-      audio_default.subscribe();
+      Audio2.subscribe();
       Game2.subscribe();
     },
     _subscribe() {
