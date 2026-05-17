@@ -4027,7 +4027,7 @@ var tetris = (() => {
   };
   var ui_default = UI;
 
-  // lib/services/input/keyboard.js
+  // lib/services/input/keyboard-controller.js
   var KEYBOARDS_ACTION_MAP = {
     arrowleft: "MOVE_LEFT",
     arrowright: "MOVE_RIGHT",
@@ -4075,7 +4075,7 @@ var tetris = (() => {
     /**
      * ## 绑定游戏中键盘操作相关的事件
      *
-     * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
+     * @returns {Keyboard} - 返回 KeyboardController 对象，可链式调用
      */
     addEventListeners() {
       globalThis.addEventListener("resize", this._onResize);
@@ -4085,7 +4085,7 @@ var tetris = (() => {
     /**
      * ## 解除游戏中键盘操作相关的事件绑定
      *
-     * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
+     * @returns {Keyboard} - 返回 KeyboardController 对象，可链式调用
      */
     removeEventListeners() {
       globalThis.removeEventListener("resize", this._onResize);
@@ -4096,7 +4096,7 @@ var tetris = (() => {
      * ## resize 事件的功能函数
      *
      * @private
-     * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
+     * @returns {Keyboard} - 返回 KeyboardController 对象，可链式调用
      */
     _onResize = () => {
       this.emit(`ui:${this.Game.id}:resize`);
@@ -4108,7 +4108,7 @@ var tetris = (() => {
      * @private
      * @param {Event} e - 事件对象
      * @param {string} e.key - 事件名称
-     * @returns {Keyboard} - 返回 Keyboard 对象，可链式调用
+     * @returns {Keyboard} - 返回 KeyboardController 对象，可链式调用
      */
     _onKeydown = (e) => {
       const { Game: Game2, Store } = this;
@@ -5874,7 +5874,7 @@ var tetris = (() => {
         Store,
         Elements
       });
-      this.Keyboard = new keyboard_default({
+      this.KeyboardController = new keyboard_default({
         Game: this,
         Store
       });

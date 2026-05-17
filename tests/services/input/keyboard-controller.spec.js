@@ -1,8 +1,8 @@
 /** @jest-environment jsdom */
 
-import Keyboard from '@/lib/services/input/keyboard.js';
+import KeyboardController from '@/lib/services/input/keyboard-controller.js';
 
-describe('Keyboard', () => {
+describe('KeyboardController', () => {
   let keyboard;
   let mockGame;
   let mockStore;
@@ -15,7 +15,7 @@ describe('Keyboard', () => {
       getMode: jest.fn().mockReturnValue('playing'),
     };
 
-    keyboard = new Keyboard({
+    keyboard = new KeyboardController({
       Game: mockGame,
       Store: mockStore,
     });
@@ -36,9 +36,9 @@ describe('Keyboard', () => {
 
   // ==================== 构造函数 ====================
   describe('构造函数', () => {
-    it('应该正确创建 Keyboard 实例', () => {
+    it('应该正确创建 KeyboardController 实例', () => {
       expect(keyboard).toBeDefined();
-      expect(keyboard).toBeInstanceOf(Keyboard);
+      expect(keyboard).toBeInstanceOf(KeyboardController);
     });
 
     it('应该正确注入依赖', () => {
@@ -67,7 +67,7 @@ describe('Keyboard', () => {
       );
     });
 
-    it('应该返回 Keyboard 实例以支持链式调用', () => {
+    it('应该返回 KeyboardController 实例以支持链式调用', () => {
       const result = keyboard.addEventListeners();
 
       expect(result).toBe(keyboard);
@@ -118,7 +118,7 @@ describe('Keyboard', () => {
       expect(addKeydownCallback).toBe(removeKeydownCallback);
     });
 
-    it('应该返回 Keyboard 实例以支持链式调用', () => {
+    it('应该返回 KeyboardController 实例以支持链式调用', () => {
       const result = keyboard.removeEventListeners();
 
       expect(result).toBe(keyboard);
@@ -133,7 +133,7 @@ describe('Keyboard', () => {
       expect(keyboard.emit).toHaveBeenCalledWith(`ui:${mockGame.id}:resize`);
     });
 
-    it('应该返回 Keyboard 实例', () => {
+    it('应该返回 KeyboardController 实例', () => {
       const result = keyboard._onResize();
 
       expect(result).toBe(keyboard);
@@ -244,13 +244,13 @@ describe('Keyboard', () => {
       });
     });
 
-    it('应该返回 Keyboard 实例', () => {
+    it('应该返回 KeyboardController 实例', () => {
       const result = keyboard._onKeydown({ key: 'ArrowLeft' });
 
       expect(result).toBe(keyboard);
     });
 
-    it('无效按键时也应该返回 Keyboard 实例', () => {
+    it('无效按键时也应该返回 KeyboardController 实例', () => {
       const result = keyboard._onKeydown({ key: 'z' });
 
       expect(result).toBe(keyboard);
