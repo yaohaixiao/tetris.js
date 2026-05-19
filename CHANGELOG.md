@@ -1,3 +1,17 @@
+# [1.1.0](https://github.com/yaohaixiao/tetris.js/compare/1.0.0...1.1.0) (2026-05-19)
+
+
+### Bug Fixes
+
+* 修复 audio/index.js 中 emit() 方法接入错误的问题； ([eee6c50](https://github.com/yaohaixiao/tetris.js/commit/eee6c50f3bd703dc1aa2fb15f6b81ebfe603c775))
+
+
+### Features
+
+* 根据时间显示不同颜色的数字时钟； ([db59f6d](https://github.com/yaohaixiao/tetris.js/commit/db59f6df89b077ef8a65f9cec8a09ac660b8d566))
+* 添加 普通用户/AI 切换功能，用户可以挂机，实现简单的 AI； ([8306ee8](https://github.com/yaohaixiao/tetris.js/commit/8306ee8e2e4df10545f4286f5272b0fe47566bf5))
+* 添加 AI 功能； ([23cd85d](https://github.com/yaohaixiao/tetris.js/commit/23cd85df37d5d9d85d9c37a498b0b0e77f43e69b))
+
 # [1.0.0](https://github.com/yaohaixiao/tetris.js/compare/0.7.5...1.0.0) (2026-05-13)
 
 ## 完成核心功能的单元测试和E2E测试
