@@ -25,6 +25,9 @@ const HtmlTemplate = `
         <h3 class="next-title">NEXT</h3>
         <canvas id="${Main.next}" class="next-piece"></canvas>
       </section>
+      <section class="panel controller">
+        <p class="panel-text highlight"><span id="${Hud.controller}">Human</span></p>
+      </section>
       <section class="panel data">
         <p class="panel-text">SCORE:<br><span id="${Hud.score}">00000</span></p>
         <p class="panel-text">LINE:<br><span id="${Hud.lines}">00</span></p>
@@ -32,7 +35,6 @@ const HtmlTemplate = `
         <p class="panel-text highlight">HI-SCORE:<br><span id="${Hud.highScore}">00000</span></p>
       </section>
       <section class="panel shutcuts">
-        <p class="panel-text">Enter START</p>
         <p class="panel-text">↑ ROTATE</p>
         <p class="panel-text">← → MOVE</p>
         <p class="panel-text">↓ SPEED</p>
