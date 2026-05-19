@@ -13,6 +13,7 @@ describe('Tetris E2E', () => {
     cy.get('#lines').should('be.visible');
     cy.get('#level').should('be.visible');
     cy.get('#high-score').should('be.visible');
+    cy.get('#controller').should('be.visible');
   });
 
   // ========== 主菜单：等级选择 ==========
@@ -138,7 +139,150 @@ describe('Tetris E2E', () => {
     });
   });
 
-  // ========== Replay 回放 ==========
+  // ========== AI 切换与控制 ==========
+  describe('AI 切换与控制', () => {
+    const startGame = () => {
+      cy.get('body').type('1');
+      cy.get('body').type('{enter}');
+      cy.get('body').type('e');
+      cy.get('body').type('{enter}');
+      cy.wait(4500);
+    };
+
+    it('初始状态 controller 显示 HUMAN', () => {
+      startGame();
+      cy.get('#controller').should('contain', 'HUMAN');
+    });
+
+    it('按 S 键切换为 AI 模式，controller 显示 AI', () => {
+      startGame();
+
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'AI');
+    });
+
+    it('AI 模式下按 S 键切换回 HUMAN', () => {
+      startGame();
+
+      // 切换为 AI
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'AI');
+
+      // 切换回 HUMAN
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'HUMAN');
+    });
+
+    it('AI 模式下 S 键可以切换回 HUMAN', () => {
+      startGame();
+
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'AI');
+
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'HUMAN');
+    });
+
+    it('AI 模式下 M 键（TOGGLE_MUSIC）可以正常使用', () => {
+      startGame();
+
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'AI');
+
+      cy.get('body').type('m');
+      cy.wait(300);
+      cy.get('body').type('m');
+
+      cy.get('#game-board').should('be.visible');
+    });
+
+    it('AI 模式下 P 键（TOGGLE_PAUSED）可以正常使用', () => {
+      startGame();
+
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'AI');
+
+      cy.get('body').type('p');
+      cy.wait(500);
+      cy.get('body').type('p');
+      cy.wait(500);
+
+      cy.get('#game-board').should('be.visible');
+    });
+
+    it('AI 模式下 R 键（RESTART）可以正常使用', () => {
+      startGame();
+
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'AI');
+
+      cy.get('body').type('r');
+      cy.wait(2000);
+
+      cy.get('#game-board').should('be.visible');
+    });
+
+    it('AI 模式下 Q 键（QUIT）可以正常使用', () => {
+      startGame();
+
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'AI');
+
+      cy.get('body').type('q');
+      cy.wait(500);
+
+      cy.get('#game-board').should('be.visible');
+    });
+
+    it('AI 模式下方向键和空格键不影响游戏（AI 仍在运行）', () => {
+      startGame();
+
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'AI');
+
+      // 这些按键在 AI 模式下被屏蔽，但不应报错
+      cy.get('body').type('{leftarrow}');
+      cy.get('body').type('{rightarrow}');
+      cy.get('body').type('{uparrow}');
+      cy.get('body').type('{downarrow}');
+      cy.get('body').type(' ');
+
+      cy.get('#game-board').should('be.visible');
+      cy.get('#controller').should('contain', 'AI');
+    });
+
+    it('AI 模式下切换到 HUMAN 后可正常操作方块', () => {
+      startGame();
+
+      // 切换为 AI
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'AI');
+
+      // 切换回 HUMAN
+      cy.get('body').type('s');
+      cy.get('#controller').should('contain', 'HUMAN');
+
+      // 人类可以正常操作
+      cy.get('body').type('{leftarrow}');
+      cy.get('body').type('{rightarrow}');
+      cy.get('body').type('{uparrow}');
+      cy.get('body').type(' ');
+
+      cy.get('#game-board').should('be.visible');
+    });
+
+    it('多次 S 键切换不报错', () => {
+      startGame();
+
+      cy.get('body').type('s');
+      cy.get('body').type('s');
+      cy.get('body').type('s');
+      cy.get('body').type('s');
+
+      cy.get('#game-board').should('be.visible');
+    });
+  });
+
   // ========== Replay 回放 ==========
   describe('Replay 回放', () => {
     const playAndTriggerReplay = () => {
@@ -184,6 +328,7 @@ describe('Tetris E2E', () => {
       cy.get('body').type('p');
       cy.get('body').type('r');
       cy.get('body').type('m');
+      cy.get('body').type('s');
       cy.get('body').type('{enter}');
 
       cy.get('#game-board').should('be.visible');
