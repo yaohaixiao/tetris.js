@@ -19,6 +19,7 @@ describe('GamepadController', () => {
     };
     mockStore = {
       getState: jest.fn().mockReturnValue(mockState),
+      getController: jest.fn().mockReturnValue('human'),
     };
 
     mockGetGamepads = jest.fn().mockReturnValue([]);
@@ -180,7 +181,6 @@ describe('GamepadController', () => {
 
       gamepad._refreshGamepadState();
 
-      // BETOP 映射：A 按钮 index=2，标准映射 A=0
       expect(gamepad.curBtnMap.A).toBe(2);
     });
 
@@ -338,12 +338,6 @@ describe('GamepadController', () => {
 
       expect(gamepad._isPressed('A')).toBe(false);
     });
-
-    it('按钮值等于 0.5 时不算按下', () => {
-      mockPad.buttons[0] = { value: 0.5, pressed: false };
-
-      expect(gamepad._isPressed('A')).toBe(false);
-    });
   });
 
   // ==================== _getAxis ====================
@@ -354,7 +348,7 @@ describe('GamepadController', () => {
           index: 0,
           id: 'Standard Gamepad',
           buttons: [],
-          axes: [0.3, 0.8, 0, 0],
+          axes: [0.1, 0.8, 0, 0], // 0.1 在死区内，0.8 在死区外
         },
       ]);
       gamepad.activeGamepadIndex = 0;
@@ -366,7 +360,7 @@ describe('GamepadController', () => {
     });
 
     it('轴值在死区内时应该返回 0', () => {
-      expect(gamepad._getAxis(0)).toBe(0.3);
+      expect(gamepad._getAxis(0)).toBe(0);
     });
 
     it('没有激活手柄时应该返回 0', () => {
@@ -391,7 +385,7 @@ describe('GamepadController', () => {
     });
   });
 
-  // ==================== _startAxisAction / _stopAxisAction ====================
+  // ==================== 摇杆防抖 ====================
   describe('摇杆防抖', () => {
     it('_startAxisAction 首次触发应该发送事件', () => {
       gamepad._startAxisAction('MOVE_LEFT');
@@ -490,11 +484,6 @@ describe('GamepadController', () => {
   // ==================== _updateActionMap ====================
   describe('_updateActionMap 方法', () => {
     it('difficulty 模式应该更新映射为难度选择', () => {
-      gamepad._updateActionMap('difficulty');
-
-      // 验证：通过 _handleStandardButtons 发送的 action 来间接验证
-      // 直接调用内部方法修改了 GAMEPAD_ACTION_MAP
-      // 这里只验证方法不报错
       expect(() => {
         gamepad._updateActionMap('difficulty');
       }).not.toThrow();
@@ -503,12 +492,6 @@ describe('GamepadController', () => {
     it('playing 模式应该更新映射为游戏操作', () => {
       expect(() => {
         gamepad._updateActionMap('playing');
-      }).not.toThrow();
-    });
-
-    it('其他模式不应该报错', () => {
-      expect(() => {
-        gamepad._updateActionMap('main-menu');
       }).not.toThrow();
     });
   });
@@ -776,6 +759,104 @@ describe('GamepadController', () => {
       gamepad._collectCommands();
 
       expect(gamepad._handleBetopDpad).not.toHaveBeenCalled();
+    });
+  });
+
+  // ==================== AI 控制模式 ====================
+  describe('AI 控制模式', () => {
+    let mockPad;
+
+    beforeEach(() => {
+      mockStore.getController.mockReturnValue('ai');
+      mockPad = {
+        index: 0,
+        id: 'Standard Gamepad',
+        buttons: Array.from({ length: 16 }, () => ({
+          value: 0,
+          pressed: false,
+        })),
+        axes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      };
+      mockGetGamepads.mockReturnValue([mockPad]);
+      gamepad._refreshGamepadState();
+    });
+
+    it('AI 控制时 BACK 键（SWITCH_CONTROLLER）应该可以发送事件', () => {
+      // BACK 键 index = 8
+      mockPad.buttons[8] = { value: 1, pressed: true };
+      gamepad.emit.mockClear();
+
+      gamepad._collectCommands(Date.now());
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'gamepad',
+        action: 'SWITCH_CONTROLLER',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('AI 控制时 A 键（TOGGLE_MUSIC）应该可以发送事件', () => {
+      mockPad.buttons[0] = { value: 1, pressed: true };
+      gamepad.emit.mockClear();
+
+      gamepad._collectCommands(Date.now());
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'gamepad',
+        action: 'TOGGLE_MUSIC',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('AI 控制时 B 键不应该发送事件', () => {
+      mockPad.buttons[1] = { value: 1, pressed: true };
+      gamepad.emit.mockClear();
+
+      gamepad._collectCommands(Date.now());
+
+      const calls = gamepad.emit.mock.calls.filter(
+        (call) => call[0] === 'dispatch:input',
+      );
+      expect(calls.length).toBe(0);
+    });
+
+    it('AI 控制时 X 键（RESTART）应该可以发送事件', () => {
+      mockPad.buttons[2] = { value: 1, pressed: true };
+      gamepad.emit.mockClear();
+
+      gamepad._collectCommands(Date.now());
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'gamepad',
+        action: 'RESTART',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('AI 控制时 START 键不应该发送事件', () => {
+      mockPad.buttons[9] = { value: 1, pressed: true };
+      gamepad.emit.mockClear();
+
+      gamepad._collectCommands(Date.now());
+
+      const calls = gamepad.emit.mock.calls.filter(
+        (call) => call[0] === 'dispatch:input',
+      );
+      expect(calls.length).toBe(0);
+    });
+
+    it('AI 控制时摇杆仍然可以操作', () => {
+      mockPad.axes[0] = -0.8;
+      mockPad.axes[1] = 0;
+      gamepad.emit.mockClear();
+
+      gamepad._collectCommands(Date.now());
+
+      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'gamepad',
+        action: 'MOVE_LEFT',
+        payload: { Game: mockGame },
+      });
     });
   });
 

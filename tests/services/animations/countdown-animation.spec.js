@@ -58,7 +58,9 @@ describe('CountdownAnimation', () => {
         Game: mockGame,
       });
 
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', { sound: 'COUNTDOWN' });
+      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+        sound: 'COUNTDOWN',
+      });
 
       spyEmit.mockRestore();
       anim.stop();
@@ -106,7 +108,9 @@ describe('CountdownAnimation', () => {
       scheduler.tick(1000);
 
       expect(animation.state.number).toBe(1);
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', { sound: 'COUNTDOWN' });
+      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+        sound: 'COUNTDOWN',
+      });
     });
 
     test('number 减到 0 时调用 stop', () => {

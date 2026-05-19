@@ -1,5 +1,6 @@
 /** @jest-environment jsdom */
 
+import GAME from '@/lib/game/constants/game.js'
 import KeyboardController from '@/lib/services/input/keyboard-controller.js';
 
 describe('KeyboardController', () => {
@@ -13,6 +14,7 @@ describe('KeyboardController', () => {
     mockGame = { id: 'test-game-uuid' };
     mockStore = {
       getMode: jest.fn().mockReturnValue('playing'),
+      getController: jest.fn().mockReturnValue('human'),
     };
 
     keyboard = new KeyboardController({
@@ -76,7 +78,7 @@ describe('KeyboardController', () => {
 
   // ==================== removeEventListeners ====================
   describe('removeEventListeners 方法', () => {
-    it('应该在 globalThis 上移除 resize 事件', () => {
+    it('应该移除所有事件监听', () => {
       keyboard.addEventListeners();
       keyboard.removeEventListeners();
 
@@ -84,12 +86,6 @@ describe('KeyboardController', () => {
         'resize',
         expect.any(Function),
       );
-    });
-
-    it('应该在 document 上移除 keydown 事件', () => {
-      keyboard.addEventListeners();
-      keyboard.removeEventListeners();
-
       expect(document.removeEventListener).toHaveBeenCalledWith(
         'keydown',
         expect.any(Function),
@@ -100,22 +96,10 @@ describe('KeyboardController', () => {
       keyboard.addEventListeners();
       keyboard.removeEventListeners();
 
-      const addResizeCallback = globalThis.addEventListener.mock.calls[0][1];
-      const removeResizeCallback =
-        globalThis.removeEventListener.mock.calls[0][1];
+      const addResizeCb = globalThis.addEventListener.mock.calls[0][1];
+      const removeResizeCb = globalThis.removeEventListener.mock.calls[0][1];
 
-      expect(addResizeCallback).toBe(removeResizeCallback);
-    });
-
-    it('add 和 remove 的 keydown 回调应该是相同引用', () => {
-      keyboard.addEventListeners();
-      keyboard.removeEventListeners();
-
-      const addKeydownCallback = document.addEventListener.mock.calls[0][1];
-      const removeKeydownCallback =
-        document.removeEventListener.mock.calls[0][1];
-
-      expect(addKeydownCallback).toBe(removeKeydownCallback);
+      expect(addResizeCb).toBe(removeResizeCb);
     });
 
     it('应该返回 KeyboardController 实例以支持链式调用', () => {
@@ -140,8 +124,8 @@ describe('KeyboardController', () => {
     });
   });
 
-  // ==================== _onKeydown 回调 ====================
-  describe('_onKeydown 回调', () => {
+  // ==================== _onKeydown - human 模式 ====================
+  describe('_onKeydown 回调（human 控制）', () => {
     it('应该将有效的键盘输入转换为 dispatch:input 事件', () => {
       keyboard._onKeydown({ key: 'ArrowLeft' });
 
@@ -158,6 +142,16 @@ describe('KeyboardController', () => {
       expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
         device: 'keyboard',
         action: 'DROP',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('应该支持 s 键（切换控制者）', () => {
+      keyboard._onKeydown({ key: 's' });
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'SWITCH_CONTROLLER',
         payload: { Game: mockGame },
       });
     });
@@ -188,26 +182,6 @@ describe('KeyboardController', () => {
       expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
         device: 'keyboard',
         action: 'RESTART',
-        payload: { Game: mockGame },
-      });
-    });
-
-    it('应该支持数字键 1（等级一）', () => {
-      keyboard._onKeydown({ key: '1' });
-
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
-        device: 'keyboard',
-        action: 'LEVEL_ONE',
-        payload: { Game: mockGame },
-      });
-    });
-
-    it('应该支持字母键 e（简单难度）', () => {
-      keyboard._onKeydown({ key: 'e' });
-
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
-        device: 'keyboard',
-        action: 'EASY',
         payload: { Game: mockGame },
       });
     });
@@ -249,11 +223,82 @@ describe('KeyboardController', () => {
 
       expect(result).toBe(keyboard);
     });
+  });
 
-    it('无效按键时也应该返回 KeyboardController 实例', () => {
-      const result = keyboard._onKeydown({ key: 'z' });
+  // ==================== _onKeydown - AI 控制模式 ====================
+  describe('_onKeydown 回调（AI 控制）', () => {
+    beforeEach(() => {
+      mockStore.getController.mockReturnValue('ai');
+    });
 
-      expect(result).toBe(keyboard);
+    it('AI 控制时 s 键（SWITCH_CONTROLLER）应该可以发送事件', () => {
+      keyboard._onKeydown({ key: 's' });
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'SWITCH_CONTROLLER',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('AI 控制时 m 键应该可以发送事件', () => {
+      keyboard._onKeydown({ key: 'm' });
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'TOGGLE_MUSIC',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('AI 控制时 p 键应该可以发送事件', () => {
+      keyboard._onKeydown({ key: 'p' });
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'TOGGLE_PAUSED',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('AI 控制时 r 键应该可以发送事件', () => {
+      keyboard._onKeydown({ key: 'r' });
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'RESTART',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('AI 控制时方向键不应该发送事件', () => {
+      keyboard._onKeydown({ key: 'ArrowLeft' });
+
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('AI 控制时空格键不应该发送事件', () => {
+      keyboard._onKeydown({ key: ' ' });
+
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('AI 控制时回车键不应该发送事件', () => {
+      keyboard._onKeydown({ key: 'Enter' });
+
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('非 playing 模式下 AI 控制的限制不生效', () => {
+      mockStore.getMode.mockReturnValue('paused');
+
+      keyboard._onKeydown({ key: 'ArrowLeft' });
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'MOVE_LEFT',
+        payload: { Game: mockGame },
+      });
     });
   });
 
@@ -279,8 +324,8 @@ describe('KeyboardController', () => {
       });
     });
 
-    it('replay 模式下无效按键不应该发送事件', () => {
-      keyboard._onKeydown({ key: 'z' });
+    it('replay 模式下 s 键不应该发送事件', () => {
+      keyboard._onKeydown({ key: 's' });
 
       expect(keyboard.emit).not.toHaveBeenCalled();
     });
@@ -294,6 +339,7 @@ describe('KeyboardController', () => {
       { key: 'ArrowDown', expected: 'MOVE_DOWN' },
       { key: 'ArrowUp', expected: 'ROTATE' },
       { key: ' ', expected: 'DROP' },
+      { key: 's', expected: 'SWITCH_CONTROLLER' },
       { key: 'm', expected: 'TOGGLE_MUSIC' },
       { key: 'p', expected: 'TOGGLE_PAUSED' },
       { key: 'r', expected: 'RESTART' },

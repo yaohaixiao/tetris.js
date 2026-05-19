@@ -62,10 +62,7 @@ describe('loopPlayBGM', () => {
 
       loopPlayBGM(audio, melody);
 
-      expect(scheduler.interval).toHaveBeenCalledWith(
-        expect.any(Function),
-        25,
-      );
+      expect(scheduler.interval).toHaveBeenCalledWith(expect.any(Function), 25);
     });
 
     test('将 interval id 存到 audio.bgmSchedulerId', () => {

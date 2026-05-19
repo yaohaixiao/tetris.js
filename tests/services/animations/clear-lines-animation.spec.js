@@ -10,11 +10,13 @@ jest.mock('@/lib/engine', () => ({
   },
 }));
 
-jest.mock('@/lib/game/actions/apply-clear-lines', () => jest.fn(() => ({
-  level: 5,
-  levelUp: true,
-  stateHandler: jest.fn(),
-})));
+jest.mock('@/lib/game/actions/apply-clear-lines', () =>
+  jest.fn(() => ({
+    level: 5,
+    levelUp: true,
+    stateHandler: jest.fn(),
+  })),
+);
 
 describe('ClearLinesAnimation', () => {
   let mockGame;
@@ -59,7 +61,10 @@ describe('ClearLinesAnimation', () => {
     test('构造时发射 CLEAR 音效，lines.length - 1', () => {
       const spyEmit = jest.spyOn(ClearLinesAnimation.prototype, 'emit');
 
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines: [5, 10, 15] });
+      const anim = new ClearLinesAnimation({
+        Game: mockGame,
+        lines: [5, 10, 15],
+      });
 
       expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
         sound: 'CLEAR',
@@ -211,7 +216,9 @@ describe('ClearLinesAnimation', () => {
       const queue = Engine.Scheduler.sequence.mock.calls[0][0];
       queue[2].fn();
 
-      expect(spyEmit).toHaveBeenCalledWith('game:test-uuid-002:save:high:score');
+      expect(spyEmit).toHaveBeenCalledWith(
+        'game:test-uuid-002:save:high:score',
+      );
 
       spyEmit.mockRestore();
     });
@@ -242,10 +249,9 @@ describe('ClearLinesAnimation', () => {
 
       anim.render();
 
-      expect(spyEmit).toHaveBeenCalledWith(
-        'ui:test-uuid-002:render:clear',
-        { state: { lines: anim.lines } },
-      );
+      expect(spyEmit).toHaveBeenCalledWith('ui:test-uuid-002:render:clear', {
+        state: { lines: anim.lines },
+      });
     });
   });
 });

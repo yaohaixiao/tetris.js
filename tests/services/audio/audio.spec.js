@@ -121,15 +121,24 @@ describe('Audio', () => {
     test('注册 bgm 事件监听', () => {
       audio.subscribe();
 
-      expect(audio.on).toHaveBeenCalledWith('audio:resume:bgm', audio._onPlayBGM);
+      expect(audio.on).toHaveBeenCalledWith(
+        'audio:resume:bgm',
+        audio._onPlayBGM,
+      );
       expect(audio.on).toHaveBeenCalledWith('audio:stop:bgm', audio._onStopBGM);
-      expect(audio.on).toHaveBeenCalledWith('audio:toggle:bgm', audio._onToggleBGM);
+      expect(audio.on).toHaveBeenCalledWith(
+        'audio:toggle:bgm',
+        audio._onToggleBGM,
+      );
     });
 
     test('注册 sound 事件监听', () => {
       audio.subscribe();
 
-      expect(audio.on).toHaveBeenCalledWith('audio:resume:sound', audio._onPlaySound);
+      expect(audio.on).toHaveBeenCalledWith(
+        'audio:resume:sound',
+        audio._onPlaySound,
+      );
     });
 
     test('总共注册 4 个事件', () => {
@@ -145,15 +154,27 @@ describe('Audio', () => {
     test('解绑 bgm 事件', () => {
       audio.unsubscribe();
 
-      expect(audio.off).toHaveBeenCalledWith('audio:resume:bgm', audio._onPlayBGM);
-      expect(audio.off).toHaveBeenCalledWith('audio:stop:bgm', audio._onStopBGM);
-      expect(audio.off).toHaveBeenCalledWith('audio:toggle:bgm', audio._onToggleBGM);
+      expect(audio.off).toHaveBeenCalledWith(
+        'audio:resume:bgm',
+        audio._onPlayBGM,
+      );
+      expect(audio.off).toHaveBeenCalledWith(
+        'audio:stop:bgm',
+        audio._onStopBGM,
+      );
+      expect(audio.off).toHaveBeenCalledWith(
+        'audio:toggle:bgm',
+        audio._onToggleBGM,
+      );
     });
 
     test('解绑 sound 事件', () => {
       audio.unsubscribe();
 
-      expect(audio.off).toHaveBeenCalledWith('audio:resume:sound', audio._onPlaySound);
+      expect(audio.off).toHaveBeenCalledWith(
+        'audio:resume:sound',
+        audio._onPlaySound,
+      );
     });
 
     test('总共解绑 4 个事件', () => {

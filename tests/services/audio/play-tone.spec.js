@@ -95,7 +95,10 @@ describe('playTone', () => {
     test('在指定时间设置频率值', () => {
       playTone(createAudio(), 880, 200);
 
-      expect(mockOscillator.frequency.setValueAtTime).toHaveBeenCalledWith(880, 100);
+      expect(mockOscillator.frequency.setValueAtTime).toHaveBeenCalledWith(
+        880,
+        100,
+      );
     });
   });
 
@@ -104,7 +107,9 @@ describe('playTone', () => {
       playTone(createAudio(), 440, 200);
 
       expect(mockOscillator.connect).toHaveBeenCalledWith(mockGainNode);
-      expect(mockGainNode.connect).toHaveBeenCalledWith(mockAudioContext.destination);
+      expect(mockGainNode.connect).toHaveBeenCalledWith(
+        mockAudioContext.destination,
+      );
     });
   });
 
@@ -158,7 +163,10 @@ describe('playTone', () => {
       const t1 = t0 + 0.003;
 
       expect(mockGainNode.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, t0);
-      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.15, t1);
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.15,
+        t1,
+      );
     });
 
     test('sustainRatio 默认 0.9', () => {
@@ -179,7 +187,9 @@ describe('playTone', () => {
 
       const t3 = 100.3;
 
-      expect(mockGainNode.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.0001, t3);
+      expect(
+        mockGainNode.gain.exponentialRampToValueAtTime,
+      ).toHaveBeenCalledWith(0.0001, t3);
     });
   });
 
@@ -192,7 +202,10 @@ describe('playTone', () => {
 
       const t1 = 100.01;
 
-      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.2, t1);
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.2,
+        t1,
+      );
     });
 
     test('自定义 sustainRatio', () => {
@@ -215,13 +228,19 @@ describe('playTone', () => {
       });
 
       // t3 = 100.3
-      expect(mockGainNode.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.0001, 100.3);
+      expect(
+        mockGainNode.gain.exponentialRampToValueAtTime,
+      ).toHaveBeenCalledWith(0.0001, 100.3);
     });
 
     test('完整自定义 articulation', () => {
       playTone(createAudio(), 440, 300, {
         volume: 0.25,
-        articulation: { attackTime: 0.005, releaseTime: 0.04, sustainRatio: 0.6 },
+        articulation: {
+          attackTime: 0.005,
+          releaseTime: 0.04,
+          sustainRatio: 0.6,
+        },
       });
 
       const t0 = 100;
@@ -230,9 +249,17 @@ describe('playTone', () => {
       const t3 = 100.3;
 
       expect(mockGainNode.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, t0);
-      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.25, t1);
-      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.25 * 0.6, t2);
-      expect(mockGainNode.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.0001, t3);
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.25,
+        t1,
+      );
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.25 * 0.6,
+        t2,
+      );
+      expect(
+        mockGainNode.gain.exponentialRampToValueAtTime,
+      ).toHaveBeenCalledWith(0.0001, t3);
     });
   });
 

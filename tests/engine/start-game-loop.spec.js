@@ -83,7 +83,9 @@ describe('startGameLoop', () => {
       expect(Engine.Game.UI.tickHud).toHaveBeenCalled();
       expect(Engine.Game.UI.render).toHaveBeenCalled();
       expect(Engine.Game.Animations.render).toHaveBeenCalled();
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalledWith(startGameLoop);
+      expect(globalThis.requestAnimationFrame).toHaveBeenCalledWith(
+        startGameLoop,
+      );
     });
   });
 
@@ -165,7 +167,8 @@ describe('startGameLoop', () => {
 
       startGameLoop(5500);
 
-      const flushOrder = Engine.Game.CommandQueue.flush.mock.invocationCallOrder[0];
+      const flushOrder =
+        Engine.Game.CommandQueue.flush.mock.invocationCallOrder[0];
       const tickOrder = Engine.Game.tick.mock.invocationCallOrder[0];
 
       expect(flushOrder).toBeLessThan(tickOrder);
@@ -175,7 +178,8 @@ describe('startGameLoop', () => {
       startGameLoop(5000);
 
       const uiOrder = Engine.Game.UI.render.mock.invocationCallOrder[0];
-      const animOrder = Engine.Game.Animations.render.mock.invocationCallOrder[0];
+      const animOrder =
+        Engine.Game.Animations.render.mock.invocationCallOrder[0];
 
       expect(uiOrder).toBeLessThan(animOrder);
     });

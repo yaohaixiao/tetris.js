@@ -225,8 +225,8 @@ describe('LevelUpAnimation', () => {
       const spyStop = jest.spyOn(animation, 'stop');
 
       // delay 需要两次 tick
-      scheduler.tick(0);     // 记录 startTime
-      scheduler.tick(3000);  // 3000ms >= 3000ms → 执行
+      scheduler.tick(0); // 记录 startTime
+      scheduler.tick(3000); // 3000ms >= 3000ms → 执行
 
       expect(spyStop).toHaveBeenCalled();
     });
@@ -266,13 +266,10 @@ describe('LevelUpAnimation', () => {
 
       animation.render();
 
-      expect(spyEmit).toHaveBeenCalledWith(
-        'ui:test-uuid-003:render:level:up',
-        {
-          level: 5,
-          fireworks: animation.fireworks,
-        },
-      );
+      expect(spyEmit).toHaveBeenCalledWith('ui:test-uuid-003:render:level:up', {
+        level: 5,
+        fireworks: animation.fireworks,
+      });
     });
   });
 });

@@ -81,8 +81,8 @@ describe('Scheduler', () => {
 
       scheduler.delay(fn, 100);
 
-      scheduler.tick(0);    // 记录 startTime=0
-      scheduler.tick(100);  // 执行并移除
+      scheduler.tick(0); // 记录 startTime=0
+      scheduler.tick(100); // 执行并移除
 
       expect(scheduler.size()).toBe(0);
     });
@@ -163,8 +163,8 @@ describe('Scheduler', () => {
 
       scheduler.interval(fn, 25);
 
-      scheduler.tick(100);  // startTime=100, nextTime=125
-      scheduler.tick(125);  // gameTime=125 >= nextTime=125 → 执行
+      scheduler.tick(100); // startTime=100, nextTime=125
+      scheduler.tick(125); // gameTime=125 >= nextTime=125 → 执行
 
       expect(fn).toHaveBeenCalledTimes(1);
     });
@@ -174,8 +174,8 @@ describe('Scheduler', () => {
 
       scheduler.interval(fn, 25);
 
-      scheduler.tick(100);  // startTime=100, nextTime=125
-      scheduler.tick(110);  // gameTime=110 < nextTime=125 → 不执行
+      scheduler.tick(100); // startTime=100, nextTime=125
+      scheduler.tick(110); // gameTime=110 < nextTime=125 → 不执行
 
       expect(fn).not.toHaveBeenCalled();
     });
@@ -185,10 +185,10 @@ describe('Scheduler', () => {
 
       scheduler.interval(fn, 25);
 
-      scheduler.tick(100);  // startTime=100, nextTime=125
-      scheduler.tick(125);  // fn 执行, nextTime=150
-      scheduler.tick(150);  // fn 执行, nextTime=175
-      scheduler.tick(175);  // fn 执行, nextTime=200
+      scheduler.tick(100); // startTime=100, nextTime=125
+      scheduler.tick(125); // fn 执行, nextTime=150
+      scheduler.tick(150); // fn 执行, nextTime=175
+      scheduler.tick(175); // fn 执行, nextTime=200
 
       expect(fn).toHaveBeenCalledTimes(3);
     });
@@ -308,7 +308,7 @@ describe('Scheduler', () => {
       // 所有 delay 默认为 0, t=0
       // 3 个 delay 任务，首次 tick 记录 startTime，第二次 tick 执行
       scheduler.tick(0);
-      scheduler.tick(0);  // gameTime-startTime=0 >= delay(0) → 执行
+      scheduler.tick(0); // gameTime-startTime=0 >= delay(0) → 执行
 
       expect(results).toEqual(['a', 'b', 'c']);
     });
@@ -381,10 +381,7 @@ describe('Scheduler', () => {
     });
 
     test('任务执行完自动清理', () => {
-      scheduler.sequence([
-        { fn: jest.fn() },
-        { fn: jest.fn() },
-      ]);
+      scheduler.sequence([{ fn: jest.fn() }, { fn: jest.fn() }]);
 
       scheduler.tick(0);
       scheduler.tick(0);
@@ -457,8 +454,8 @@ describe('Scheduler', () => {
       const fn = jest.fn();
 
       scheduler.delay(fn, 0);
-      scheduler.tick();      // 首次：记录 startTime
-      scheduler.tick();      // 第二次：执行
+      scheduler.tick(); // 首次：记录 startTime
+      scheduler.tick(); // 第二次：执行
 
       expect(fn).toHaveBeenCalledTimes(1);
     });

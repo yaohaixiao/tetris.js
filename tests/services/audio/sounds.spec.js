@@ -155,15 +155,10 @@ describe('Sounds', () => {
       // perfect: shift=4 → chord[0] = 587 + 48 = 635
       // speed = 260 * 2.0 = 520
       // volume = 0.32 * 1.5 = 0.48
-      expect(playTone).toHaveBeenCalledWith(
-        sounds,
-        635,
-        520,
-        {
-          volume: 0.48,
-          startTime: 100.16,
-        },
-      );
+      expect(playTone).toHaveBeenCalledWith(sounds, 635, 520, {
+        volume: 0.48,
+        startTime: 100.16,
+      });
     });
 
     test('4行消除使用 tetris 动机', () => {
@@ -178,15 +173,10 @@ describe('Sounds', () => {
       // tetris: shift=2 → chord[0] = 440 + 24 = 464
       // speed = 260 * 1.5 = 390
       // volume = 0.32 * 1.2 = 0.384
-      expect(playTone).toHaveBeenCalledWith(
-        sounds,
-        464,
-        390,
-        {
-          volume: 0.384,
-          startTime: 100.16,
-        },
-      );
+      expect(playTone).toHaveBeenCalledWith(sounds, 464, 390, {
+        volume: 0.384,
+        startTime: 100.16,
+      });
     });
 
     test('1行消除使用 combo 动机（默认）', () => {
@@ -201,15 +191,10 @@ describe('Sounds', () => {
       // combo: shift=0 → chord[0] = 587
       // speed = 260 * 1.0 = 260
       // volume = 0.32 * 1.0 = 0.32
-      expect(playTone).toHaveBeenCalledWith(
-        sounds,
-        587,
-        260,
-        {
-          volume: 0.32,
-          startTime: 100.16,
-        },
-      );
+      expect(playTone).toHaveBeenCalledWith(sounds, 587, 260, {
+        volume: 0.32,
+        startTime: 100.16,
+      });
     });
 
     test('全清优先级高于 tetris（lines=4, isPerfectClear=true）', () => {
@@ -224,15 +209,10 @@ describe('Sounds', () => {
       // perfect: shift=4 → chord[0] = 440 + 48 = 488（非 tetris 的 464）
       // speed = 260 * 2.0 = 520
       // volume = 0.32 * 1.5 = 0.48
-      expect(playTone).toHaveBeenCalledWith(
-        sounds,
-        488,
-        520,
-        {
-          volume: 0.48,
-          startTime: 100.16,
-        },
-      );
+      expect(playTone).toHaveBeenCalledWith(sounds, 488, 520, {
+        volume: 0.48,
+        startTime: 100.16,
+      });
     });
 
     test('lines 超出 frequencies 长度时取最后一个和弦', () => {
@@ -245,15 +225,10 @@ describe('Sounds', () => {
 
       // index = min(5, 4) = 4 → baseChord = [440, 880, 1174]
       // combo: shift=0 → chord[0] = 440
-      expect(playTone).toHaveBeenCalledWith(
-        sounds,
-        440,
-        260,
-        {
-          volume: 0.32,
-          startTime: 100.16,
-        },
-      );
+      expect(playTone).toHaveBeenCalledWith(sounds, 440, 260, {
+        volume: 0.32,
+        startTime: 100.16,
+      });
     });
   });
 

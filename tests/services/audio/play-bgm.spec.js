@@ -5,16 +5,86 @@ jest.mock('@/lib/services/audio/loop-play-bgm', () => jest.fn());
 
 // Mock Musics — 10首曲目，匹配 MUSIC_LIST
 jest.mock('@/lib/services/audio/constants/musics', () => ({
-  TetrisTheme:    { melody: 'melody-0',  duration: 110, volume: 0.05, wave: 'square',  gate: 1,   articulation: {} },
-  SpringFestival: { melody: 'melody-1',  duration: 120, volume: 0.06, wave: 'sine',    gate: 1,   articulation: {} },
-  FirstDivision:  { melody: 'melody-2',  duration: 110, volume: 0.05, wave: 'square',  gate: 1,   articulation: {} },
-  GongXiFaCai:    { melody: 'melody-3',  duration: 100, volume: 0.07, wave: 'triangle',gate: 0.9, articulation: { attackTime: 0.005 } },
-  Loginska:       { melody: 'melody-4',  duration: 110, volume: 0.05, wave: 'square',  gate: 1,   articulation: {} },
-  BeyondTheWall:  { melody: 'melody-5',  duration: 130, volume: 0.04, wave: 'sawtooth',gate: 0.8, articulation: {} },
-  Technotris:     { melody: 'melody-6',  duration: 90,  volume: 0.08, wave: 'square',  gate: 0.7, articulation: {} },
-  GoldenSnakeDance:{ melody: 'melody-7', duration: 110, volume: 0.05, wave: 'sine',    gate: 1,   articulation: {} },
-  Korobeiniki:    { melody: 'melody-8',  duration: 100, volume: 0.07, wave: 'triangle',gate: 0.9, articulation: { attackTime: 0.005 } },
-  JourneyToWest:  { melody: 'melody-9',  duration: 110, volume: 0.06, wave: 'square',  gate: 1,   articulation: {} },
+  TetrisTheme: {
+    melody: 'melody-0',
+    duration: 110,
+    volume: 0.05,
+    wave: 'square',
+    gate: 1,
+    articulation: {},
+  },
+  SpringFestival: {
+    melody: 'melody-1',
+    duration: 120,
+    volume: 0.06,
+    wave: 'sine',
+    gate: 1,
+    articulation: {},
+  },
+  FirstDivision: {
+    melody: 'melody-2',
+    duration: 110,
+    volume: 0.05,
+    wave: 'square',
+    gate: 1,
+    articulation: {},
+  },
+  GongXiFaCai: {
+    melody: 'melody-3',
+    duration: 100,
+    volume: 0.07,
+    wave: 'triangle',
+    gate: 0.9,
+    articulation: { attackTime: 0.005 },
+  },
+  Loginska: {
+    melody: 'melody-4',
+    duration: 110,
+    volume: 0.05,
+    wave: 'square',
+    gate: 1,
+    articulation: {},
+  },
+  BeyondTheWall: {
+    melody: 'melody-5',
+    duration: 130,
+    volume: 0.04,
+    wave: 'sawtooth',
+    gate: 0.8,
+    articulation: {},
+  },
+  Technotris: {
+    melody: 'melody-6',
+    duration: 90,
+    volume: 0.08,
+    wave: 'square',
+    gate: 0.7,
+    articulation: {},
+  },
+  GoldenSnakeDance: {
+    melody: 'melody-7',
+    duration: 110,
+    volume: 0.05,
+    wave: 'sine',
+    gate: 1,
+    articulation: {},
+  },
+  Korobeiniki: {
+    melody: 'melody-8',
+    duration: 100,
+    volume: 0.07,
+    wave: 'triangle',
+    gate: 0.9,
+    articulation: { attackTime: 0.005 },
+  },
+  JourneyToWest: {
+    melody: 'melody-9',
+    duration: 110,
+    volume: 0.06,
+    wave: 'square',
+    gate: 1,
+    articulation: {},
+  },
 }));
 
 describe('playBGM', () => {
@@ -118,17 +188,13 @@ describe('playBGM', () => {
     test('传递正确的曲目参数', () => {
       playBGM(audio, 28); // GongXiFaCai: index 3
 
-      expect(loopPlayBGM).toHaveBeenCalledWith(
-        audio,
-        'melody-3',
-        {
-          duration: 100,
-          volume: 0.07,
-          wave: 'triangle',
-          gate: 0.9,
-          articulation: { attackTime: 0.005 },
-        },
-      );
+      expect(loopPlayBGM).toHaveBeenCalledWith(audio, 'melody-3', {
+        duration: 100,
+        volume: 0.07,
+        wave: 'triangle',
+        gate: 0.9,
+        articulation: { attackTime: 0.005 },
+      });
     });
   });
 });

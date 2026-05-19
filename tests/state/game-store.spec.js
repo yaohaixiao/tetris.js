@@ -37,6 +37,7 @@ describe('GameStore', () => {
       difficulty: 'easy',
       mode: 'main-menu',
       gamepadConnected: false,
+      controller: 'human',
     };
 
     store = new GameStore({
@@ -141,6 +142,23 @@ describe('GameStore', () => {
       store.resetState();
 
       expect(store.defaults.score).toBe(originalDefaultsScore);
+    });
+
+    it('resetState 后所有字段应该恢复初始值', () => {
+      store.setMode('playing');
+      store.setLevel(10);
+      store.setHighScore(5000);
+      store.setState({ score: 3000 });
+      store.setController('ai'); // 新增：先改为 ai
+
+      store.resetState();
+
+      const state = store.getState();
+      expect(state.mode).toBe('main-menu');
+      expect(state.level).toBe(1);
+      expect(state.highScore).toBe(0);
+      expect(state.score).toBe(0);
+      expect(state.controller).toBe('human'); // 新增：验证重置为 human
     });
   });
 
@@ -423,6 +441,35 @@ describe('GameStore', () => {
       expect(state.level).toBe(1);
       expect(state.highScore).toBe(0);
       expect(state.score).toBe(0);
+    });
+  });
+
+  // ==================== Controller ====================
+  describe('控制者身份', () => {
+    it('初始控制者应该为 human', () => {
+      expect(store.getController()).toBe('human');
+    });
+
+    it('应该获取和设置控制者身份', () => {
+      store.setController('ai');
+      expect(store.getController()).toBe('ai');
+
+      store.setController('human');
+      expect(store.getController()).toBe('human');
+    });
+
+    it('resetState 应该重置控制者为 human', () => {
+      store.setController('ai');
+      store.resetState();
+
+      expect(store.getController()).toBe('human');
+    });
+
+    it('getState 返回的 state 应该包含 controller 字段', () => {
+      store.setController('ai');
+
+      const state = store.getState();
+      expect(state.controller).toBe('ai');
     });
   });
 });

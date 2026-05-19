@@ -92,11 +92,7 @@ describe('ReplayController', () => {
 
     test('连续调用依次推进 pieceIndex', () => {
       replay.playing = true;
-      replay.pieceSequence = [
-        { type: 'I' },
-        { type: 'O' },
-        { type: 'T' },
-      ];
+      replay.pieceSequence = [{ type: 'I' }, { type: 'O' }, { type: 'T' }];
 
       replay.getNextPiece();
       const result = replay.getNextPiece();
@@ -278,16 +274,13 @@ describe('ReplayController', () => {
           replay.update({ speed: 500, timestamp: 1500 });
 
           expect(spyEmit).toHaveBeenCalledTimes(2);
-          expect(spyEmit).toHaveBeenNthCalledWith(
-            1,
-            'dispatch:command',
-            { type: 'move', payload: { x: -1 } },
-          );
-          expect(spyEmit).toHaveBeenNthCalledWith(
-            2,
-            'dispatch:command',
-            { type: 'rotate' },
-          );
+          expect(spyEmit).toHaveBeenNthCalledWith(1, 'dispatch:command', {
+            type: 'move',
+            payload: { x: -1 },
+          });
+          expect(spyEmit).toHaveBeenNthCalledWith(2, 'dispatch:command', {
+            type: 'rotate',
+          });
           expect(replay.cursor).toBe(2);
         });
 
@@ -447,10 +440,9 @@ describe('ReplayController', () => {
 
       replay.stopPlay();
 
-      expect(spyEmit).toHaveBeenCalledWith(
-        'game:test-uuid-123:update:mode',
-        { mode: 'game-over' },
-      );
+      expect(spyEmit).toHaveBeenCalledWith('game:test-uuid-123:update:mode', {
+        mode: 'game-over',
+      });
     });
   });
 
@@ -512,9 +504,7 @@ describe('ReplayController', () => {
 
       replay._onAddRecord({ ms: 100, cmd: { type: 'move' } });
 
-      expect(replay.data).toEqual([
-        { ms: 100, cmd: { type: 'move' } },
-      ]);
+      expect(replay.data).toEqual([{ ms: 100, cmd: { type: 'move' } }]);
     });
 
     test('recording 为 false 时忽略', () => {
@@ -531,7 +521,14 @@ describe('ReplayController', () => {
   describe('_onAddPiece', () => {
     test('recording 为 true 时深拷贝推入 pieceSequence', () => {
       replay.recording = true;
-      const piece = { type: 'I', rotation: 0, cells: [[1, 0], [1, 1]] };
+      const piece = {
+        type: 'I',
+        rotation: 0,
+        cells: [
+          [1, 0],
+          [1, 1],
+        ],
+      };
 
       replay._onAddPiece(piece);
 
@@ -574,14 +571,12 @@ describe('ReplayController', () => {
 
       replay._onGameOver();
 
-      expect(spyEmit).toHaveBeenCalledWith(
-        'ui:test-uuid-123:update:mode',
-        { mode: 'game-over' },
-      );
-      expect(spyEmit).toHaveBeenCalledWith(
-        'game:test-uuid-123:update:mode',
-        { mode: 'game-over' },
-      );
+      expect(spyEmit).toHaveBeenCalledWith('ui:test-uuid-123:update:mode', {
+        mode: 'game-over',
+      });
+      expect(spyEmit).toHaveBeenCalledWith('game:test-uuid-123:update:mode', {
+        mode: 'game-over',
+      });
     });
   });
 
@@ -611,10 +606,9 @@ describe('ReplayController', () => {
       replay._onClearLines({ isLevelUp: true, level: 5 });
 
       expect(spyEmit).toHaveBeenCalledWith('audio:stop:bgm');
-      expect(spyEmit).toHaveBeenCalledWith(
-        'audio:resume:sound',
-        { sound: 'LEVEL_UP' },
-      );
+      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+        sound: 'LEVEL_UP',
+      });
       expect(spyEmit).toHaveBeenCalledWith(
         'game:test-uuid-123:start:level:up',
         { level: 5 },
