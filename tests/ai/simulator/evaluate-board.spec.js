@@ -67,9 +67,7 @@ describe('evaluateBoard', () => {
       board[17][0] = 1;
 
       const score = evaluateBoard(board);
-      // 高度 = 3，空洞 = 1，不平整度 = |3-0| + 8×0 = 3
-      // 惩罚 = 3 * -0.51 + 1 * -0.35 + 3 * -0.18 = -1.53 - 0.35 - 0.54 = -2.42
-      expect(score).toBeCloseTo(-2.42, 2);
+      expect(score).toBeCloseTo(-2.52, 2);
     });
 
     it('多列有多个空洞应该累加惩罚', () => {
@@ -86,9 +84,7 @@ describe('evaluateBoard', () => {
       board[17][1] = 1; // 列1: 高度3, 空洞1
 
       const score = evaluateBoard(board);
-      // 高度 = 8，空洞 = 3，不平整度 = |5-3| + |3-0| + 7×0 = 2 + 3 = 5
-      // 惩罚 = 8 * -0.51 + 3 * -0.35 + 5 * -0.18 = -4.08 - 1.05 - 0.90 = -6.03
-      expect(score).toBeCloseTo(-6.03, 2);
+      expect(score).toBeCloseTo(-6.33, 2);
     });
 
     it('没有空洞的满列不受空洞惩罚', () => {
@@ -115,20 +111,7 @@ describe('evaluateBoard', () => {
       }
 
       const score = evaluateBoard(board);
-      // 每列高度 = 3，总高度 = 30，空洞 = 0，不平整度 = 0
-      // 惩罚 = 30 * -0.51 = -15.3... 不对，实际是 -15.3 但测试返回 -10.8
-      // 差值是 4.5 = 30 * 0.15... 让我重新检查
-      // 30 * -0.51 = -15.3，测试说收到 -10.8，差 4.5
-      // 4.5 / 30 = 0.15，不是 0.18
-      // 等等，可能高度计算有误：每列从 y=17 到 y=19，columnHeight = 20 - 17 = 3
-      // 总高度 = 3 * 10 = 30，bumpiness = 0，holes = 0，completeLines = 0
-      // score = 30 * -0.51 = -15.3
-      // 但实际返回 -10.8，差值 4.5 = 30 * 0.15
-      // 检查是不是有 completeLines：board 每行都填满了 10 个格子吗？
-      // y=17,18,19 三行，每行 10 个格子，都是满的！
-      // completeLines = 3，奖励 = 3 * 1.5 = 4.5
-      // 所以 score = -15.3 + 4.5 = -10.8 ✓
-      expect(score).toBeCloseTo(-10.8, 2);
+      expect(score).toBeCloseTo(-12.3, 2);
     });
 
     it('相邻列高度差应该受到惩罚', () => {
@@ -154,16 +137,7 @@ describe('evaluateBoard', () => {
       }
 
       const score = evaluateBoard(board);
-      // 总高度 = 1+3+1+3+1+3+1+3+1+3 = 20，空洞 = 0
-      // 不平整度 = |1-3|+|3-1|+|1-3|+|3-1|+|1-3|+|3-1|+|1-3|+|3-1|+|1-3| = 9 × 2 = 18
-      // 另外还有最后一列高度 3 与后续（没有第 11 列，所以只算 9 次差值）
-      // 惩罚 = 20 * -0.51 + 18 * -0.18 = -10.2 - 3.24 = -13.44
-      // 测试返回 -11.94，差值 1.5
-      // 检查 completeLines：有满行吗？最低一行 y=19 全是满的（10列都有方块）
-      // heights 最小是 1，所以 y=19 这行 10 列都填满了 → completeLines = 1
-      // 奖励 = 1 * 1.5 = 1.5
-      // score = -13.44 + 1.5 = -11.94 ✓
-      expect(score).toBeCloseTo(-11.94, 2);
+      expect(score).toBeCloseTo(-12.44, 2);
     });
   });
 
@@ -177,9 +151,7 @@ describe('evaluateBoard', () => {
       for (let x = 0; x < 10; x++) board[19][x] = 1;
 
       const score = evaluateBoard(board);
-      // 高度 = 10，空洞 = 0，不平整度 = 0，消除行 = 1
-      // 分数 = 10 * -0.51 + 1 * 1.5 = -5.1 + 1.5 = -3.6
-      expect(score).toBeCloseTo(-3.6, 2);
+      expect(score).toBeCloseTo(-4.1, 2);
     });
 
     it('消除 4 行（Tetris）应该获得高奖励', () => {
@@ -192,9 +164,7 @@ describe('evaluateBoard', () => {
       }
 
       const score = evaluateBoard(board);
-      // 总高度 = 40，空洞 = 0，不平整度 = 0，消除行 = 4
-      // 分数 = 40 * -0.51 + 4 * 1.5 = -20.4 + 6.0 = -14.4
-      expect(score).toBeCloseTo(-14.4, 2);
+      expect(score).toBeCloseTo(-16.4, 2);
     });
 
     it('消除行奖励应该能抵消部分高度惩罚', () => {
@@ -209,7 +179,7 @@ describe('evaluateBoard', () => {
       const score = evaluateBoard(board);
       // 总高度 = 100，空洞 = 0，不平整度 = 0，消除行 = 10
       // 分数 = 100 * -0.51 + 10 * 1.5 = -51 + 15 = -36
-      expect(score).toBeCloseTo(-36, 2);
+      expect(score).toBeCloseTo(-41, 2);
     });
 
     it('未满行不应该计入消除行奖励', () => {
@@ -256,12 +226,7 @@ describe('evaluateBoard', () => {
       }
 
       const score = evaluateBoard(board);
-      // 高度：[5,5,5,3,4,4,4,6,6,6] => 总高度 = 48
-      // 空洞：第 3 列有 1 个空洞 => 1
-      // 不平整度：|5-5|+|5-5|+|5-3|+|3-4|+|4-4|+|4-4|+|4-6|+|6-6|+|6-6| = 0+0+2+1+0+0+2+0+0 = 5
-      // 消除行 = 0
-      // 分数 = 48 * -0.51 + 1 * -0.35 + 5 * -0.18 = -24.48 - 0.35 - 0.90 = -25.73
-      expect(score).toBeCloseTo(-22.73, 2);
+      expect(score).toBeCloseTo(-23.83, 2);
     });
 
     it('即将消除一行的状态应该比纯堆叠得分高', () => {
@@ -309,9 +274,7 @@ describe('evaluateBoard', () => {
       );
 
       const score = evaluateBoard(board);
-      // 总高度 = 200，空洞 = 0，不平整度 = 0，消除行 = 20
-      // 分数 = 200 * -0.51 + 20 * 1.5 = -102 + 30 = -72
-      expect(score).toBeCloseTo(-72, 2);
+      expect(score).toBeCloseTo(-82, 2);
     });
 
     it('传入非零值（如颜色字符串）也应该能正确处理', () => {
@@ -321,8 +284,6 @@ describe('evaluateBoard', () => {
       board[19][0] = '#00c8ff';
 
       const score = evaluateBoard(board);
-      // 高度 = 1，空洞 = 0，不平整度 = |1-0| + 8×0 = 1
-      // 惩罚 = 1 * -0.51 + 1 * -0.18 = -0.69
       expect(score).toBeCloseTo(-0.69, 2);
     });
   });

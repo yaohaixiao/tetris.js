@@ -4,6 +4,7 @@ describe('ReplayController', () => {
   let replay;
   let mockGame;
   let mockStore;
+  let spyEmit;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -20,6 +21,8 @@ describe('ReplayController', () => {
       Game: mockGame,
       Store: mockStore,
     });
+
+    spyEmit = jest.spyOn(replay, 'emit');
   });
 
   // ==================== 初始化 ====================
@@ -435,14 +438,28 @@ describe('ReplayController', () => {
       expect(replay.playing).toBe(false);
     });
 
-    test('stopPlay 发射 game-over 事件', () => {
-      const spyEmit = jest.spyOn(replay, 'emit');
+    it('stopPlay 应该仅将 playing 设置为 false', () => {
+      replay.playing = true;
 
       replay.stopPlay();
+
+      expect(replay.playing).toBe(false);
+      // 不应该发射任何事件
+      expect(spyEmit).not.toHaveBeenCalled();
+    });
+
+    it('回放完毕后 update 应该发射 game-over 事件', () => {
+      replay.playing = true;
+      replay.data = [{ ms: 100, cmd: { action: 'DROP' } }];
+      replay.cursor = 1; // cursor >= data.length，模拟回放完毕
+      mockStore.getMode.mockReturnValue('replay');
+
+      replay.update({ speed: 1000, timestamp: 0 });
 
       expect(spyEmit).toHaveBeenCalledWith('game:test-uuid-123:update:mode', {
         mode: 'game-over',
       });
+      expect(replay.playing).toBe(false);
     });
   });
 

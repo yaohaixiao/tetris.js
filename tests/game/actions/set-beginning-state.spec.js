@@ -17,6 +17,7 @@ describe('setBeginningState', () => {
     };
 
     mockContext = {
+      id: 'test-uuid',
       Store: mockStore,
       emit: jest.fn(),
     };
@@ -24,12 +25,15 @@ describe('setBeginningState', () => {
 
   // ==================== 基本功能 ====================
   describe('基本功能', () => {
-    it('应该发送 ui:update:mode 事件', () => {
+    it('应该发送 ui:test-uuid:update:mode 事件', () => {
       setBeginningState(mockContext, 'playing');
 
-      expect(mockContext.emit).toHaveBeenCalledWith('ui:update:mode', {
-        mode: 'playing',
-      });
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'ui:test-uuid:update:mode',
+        {
+          mode: 'playing',
+        },
+      );
     });
 
     it('应该更新 Store 状态', () => {
@@ -50,9 +54,12 @@ describe('setBeginningState', () => {
     it('应该传递 mode 参数', () => {
       setBeginningState(mockContext, 'game-over');
 
-      expect(mockContext.emit).toHaveBeenCalledWith('ui:update:mode', {
-        mode: 'game-over',
-      });
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'ui:test-uuid:update:mode',
+        {
+          mode: 'game-over',
+        },
+      );
       expect(mockStore.setState).toHaveBeenCalledWith(
         expect.objectContaining({ mode: 'game-over' }),
       );
