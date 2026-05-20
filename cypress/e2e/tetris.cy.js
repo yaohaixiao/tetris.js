@@ -382,5 +382,53 @@ describe('Tetris E2E', () => {
 
       cy.get('#game-board').should('be.visible');
     });
+
+    it('回放中按 Enter 返回主菜单，重新开始游戏后 controller 重置为 HUMAN，方块可正常操作', () => {
+      playAndTriggerReplay();
+
+      // 等待进入 replay 模式
+      cy.get('#game-board[data-mode="replay"]', { timeout: 30000 }).should(
+        'exist',
+      );
+
+      // 回放过程中按 Enter 回到主菜单
+      cy.get('body').type('{enter}');
+      cy.get('#game-board[data-mode="main-menu"]').should('exist');
+
+      // controller 应显示 HUMAN
+      cy.get('#controller').should('contain', 'HUMAN');
+
+      // 选择等级 1
+      cy.get('body').type('1');
+      cy.get('#level').should('contain', '01');
+
+      // 进入难度选择
+      cy.get('body').type('{enter}');
+      cy.get('#game-board[data-mode="difficulty"]').should('exist');
+
+      // 选择 Easy 难度
+      cy.get('body').type('e');
+
+      // 确认开始
+      cy.get('body').type('{enter}');
+
+      // 等待倒计时结束（约 4.5 秒）
+      cy.wait(4500);
+
+      // 游戏正常进行
+      cy.get('#game-board').should('be.visible');
+
+      // controller 应该仍然是 HUMAN（不是 AI）
+      cy.get('#controller').should('contain', 'HUMAN');
+
+      // 方块能正常操作
+      cy.get('body').type('{leftarrow}');
+      cy.get('body').type('{leftarrow}');
+      cy.get('body').type('{rightarrow}');
+      cy.get('body').type('{uparrow}');
+      cy.get('body').type(' ');
+
+      cy.get('#game-board').should('be.visible');
+    });
   });
 });
