@@ -5624,9 +5624,9 @@ var tetris = (() => {
       /** 评估权重（轻惩罚） */
       weights: {
         holes: -0.45,
-        height: -0.35,
-        bumpiness: -0.18,
-        completeLines: 1
+        height: -0.25,
+        bumpiness: -0.12,
+        completeLines: 2
       },
       /** 决策延迟（毫秒） */
       delay: 580
@@ -5641,15 +5641,15 @@ var tetris = (() => {
      */
     NORMAL: {
       /** 前瞻深度：多看一步 */
-      lookahead: 2,
+      lookahead: 1,
       /** 随机噪声：10% 概率随机选择 */
       noise: 0.1,
       /** 评估权重（中等惩罚） */
       weights: {
         holes: -0.75,
-        height: -0.6,
+        height: -0.35,
         bumpiness: -0.18,
-        completeLines: 1.5
+        completeLines: 6
       },
       /** 决策延迟（毫秒） */
       delay: 480
@@ -5664,18 +5664,16 @@ var tetris = (() => {
      */
     HARD: {
       /** 前瞻深度：多看两步 */
-      lookahead: 3,
+      lookahead: 2,
+      beam: 5,
       /** 随机噪声：不犯错 */
       noise: 0,
       /** 评估权重（重惩罚） */
       weights: {
-        holes: -1.2,
-        // 空洞惩罚（更重）
-        height: -1,
-        // 高度惩罚
+        holes: -0.9,
+        height: -0.55,
         bumpiness: -0.2,
-        // 不平整度惩罚
-        completeLines: 2
+        completeLines: 9
       },
       /** 决策延迟（毫秒） */
       delay: 280
@@ -5691,15 +5689,16 @@ var tetris = (() => {
       lookahead: 3,
       /** 随机噪声：不犯错 */
       noise: 0,
+      beam: 3,
       /** 评估权重（重惩罚，与 HARD 相同） */
       weights: {
-        holes: -1.2,
-        height: -1.4,
+        holes: -1,
+        height: -0.65,
         bumpiness: -0.2,
-        completeLines: 2.2
+        completeLines: 10
       },
       /** 决策延迟（毫秒）：极快 */
-      delay: 120
+      delay: 150
     }
   };
   var ai_difficulty_default = AIDifficulty;
@@ -5872,9 +5871,9 @@ var tetris = (() => {
     const heights = [];
     const w = {
       height: -0.51,
-      holes: -0.45,
+      holes: -0.35,
       bumpiness: -0.18,
-      completeLines: 1,
+      completeLines: 1.5,
       // 自定义权重覆盖默认值
       ...weights
     };
@@ -6018,7 +6017,7 @@ var tetris = (() => {
       // simulateDrop 返回的最终 Y 坐标
     );
     const clearedBoard = clear_full_lines_default(board);
-    const nextPiece = random_shape_default();
+    const nextPiece = snapshot.next || random_shape_default();
     const newPiece = {
       shape: nextPiece.shape,
       position: {
@@ -6043,9 +6042,18 @@ var tetris = (() => {
   var advance_snapshot_default = advanceSnapshot;
 
   // lib/ai/planner/self-play.js
-  var selfPlay = (snapshot, weights, depth = 1) => {
+  var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
     const moves = generate_moves_default(snapshot);
     if (moves.length === 0) return null;
+    if (depth > 1 && moves.length > beam) {
+      const scored = moves.map((move2) => ({
+        move: move2,
+        score: evaluate_board_default(move2.board, weights)
+      }));
+      scored.sort((a, b) => b.score - a.score);
+      moves.length = 0;
+      moves.push(...scored.slice(0, beam).map((s) => s.move));
+    }
     let best = null;
     let bestScore = -Infinity;
     for (const move2 of moves) {
@@ -6054,7 +6062,7 @@ var tetris = (() => {
         score = evaluate_board_default(move2.board, weights);
       } else {
         const nextSnapshot = advance_snapshot_default(snapshot, move2);
-        const nextBest = selfPlay(nextSnapshot, depth - 1);
+        const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam);
         score = nextBest ? evaluate_board_default(nextBest.board, weights) : evaluate_board_default(move2.board, weights);
       }
       if (score > bestScore) {
@@ -6147,7 +6155,8 @@ var tetris = (() => {
           }
         });
       }
-      this.aiSchedulerId = this.Scheduler.delay(this.loop, this.Game.getSpeed());
+      const difficulty = this.getDifficultyConfig();
+      this.aiSchedulerId = this.Scheduler.delay(this.loop, difficulty.delay);
     };
     /**
      * ## AI 决策
@@ -6172,8 +6181,8 @@ var tetris = (() => {
      */
     think(state) {
       const difficulty = this.getDifficultyConfig();
-      const { lookahead, weights } = difficulty;
-      return self_play_default(create_snapshot_default(state), weights, lookahead);
+      const { lookahead, weights, beam } = difficulty;
+      return self_play_default(create_snapshot_default(state), weights, lookahead, beam);
     }
     getDifficultyConfig() {
       const difficulty = this.Game.Store.getDifficulty();
