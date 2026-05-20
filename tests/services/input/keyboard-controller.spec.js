@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-import GAME from '@/lib/game/constants/game.js'
+import GAME from '@/lib/game/constants/game.js';
 import KeyboardController from '@/lib/services/input/keyboard-controller.js';
 
 describe('KeyboardController', () => {

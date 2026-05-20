@@ -1,4 +1,4 @@
-import cloneBoard from '@/lib/ai/clone-board.js';
+import cloneBoard from '@/lib/ai/utils/clone-board.js';
 
 describe('cloneBoard', () => {
   it('应该深拷贝棋盘', () => {

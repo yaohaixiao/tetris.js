@@ -168,8 +168,7 @@ describe('getClockAngles', () => {
       const angles = getClockAngles(new Date('2024-01-01 12:30:45'));
 
       // 时针：12h + 30min + 45s → (0 + 30/60 + 45/3600) / 12 * 2π
-      const expectedHAng =
-        (0 + 30 / 60 + 45 / 3600) * ((2 * Math.PI) / 12);
+      const expectedHAng = (0 + 30 / 60 + 45 / 3600) * ((2 * Math.PI) / 12);
       // 分针：30min + 45s → (30 + 45/60) / 60 * 2π
       const expectedMAng = (30 + 45 / 60) * ((2 * Math.PI) / 60);
       // 秒针：45s → 45/60 * 2π
@@ -184,8 +183,7 @@ describe('getClockAngles', () => {
       const angles = getClockAngles(new Date('2024-01-01 15:15:15'));
 
       // 时针：15%12=3h + 15min + 15s → (3 + 15/60 + 15/3600) / 12 * 2π
-      const expectedHAng =
-        (3 + 15 / 60 + 15 / 3600) * ((2 * Math.PI) / 12);
+      const expectedHAng = (3 + 15 / 60 + 15 / 3600) * ((2 * Math.PI) / 12);
       // 分针：15min + 15s → (15 + 15/60) / 60 * 2π
       const expectedMAng = (15 + 15 / 60) * ((2 * Math.PI) / 60);
       // 秒针：15s → 15/60 * 2π
@@ -200,8 +198,7 @@ describe('getClockAngles', () => {
       const angles = getClockAngles(new Date('2024-01-01 23:59:59'));
 
       // 时针：23%12=11h + 59min + 59s
-      const expectedHAng =
-        (11 + 59 / 60 + 59 / 3600) * ((2 * Math.PI) / 12);
+      const expectedHAng = (11 + 59 / 60 + 59 / 3600) * ((2 * Math.PI) / 12);
       // 分针：59min + 59s
       const expectedMAng = (59 + 59 / 60) * ((2 * Math.PI) / 60);
       // 秒针：59s

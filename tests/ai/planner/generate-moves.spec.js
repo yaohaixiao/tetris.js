@@ -1,18 +1,18 @@
-import generateMoves from '@/lib/ai/generate-moves.js';
+import generateMoves from '@/lib/ai/planner/generate-moves.js';
 
 // Mock 依赖
-jest.mock('@/lib/ai/rotate-matrix.js', () => ({
+jest.mock('@/lib/ai/simulator/rotate-matrix.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
-jest.mock('@/lib/ai/simulate-drop.js', () => ({
+jest.mock('@/lib/ai/simulator/simulate-drop.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
-import rotateMatrix from '@/lib/ai/rotate-matrix.js';
-import simulateDrop from '@/lib/ai/simulate-drop.js';
+import rotateMatrix from '@/lib/ai/simulator/rotate-matrix.js';
+import simulateDrop from '@/lib/ai/simulator/simulate-drop.js';
 
 describe('generateMoves', () => {
   const T_SHAPE = [

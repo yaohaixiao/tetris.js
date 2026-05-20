@@ -1,18 +1,18 @@
-import simulateDrop from '@/lib/ai/simulate-drop.js';
+import simulateDrop from '@/lib/ai/simulator/simulate-drop.js';
 
 // Mock 依赖
-jest.mock('@/lib/ai/clone-board.js', () => ({
+jest.mock('@/lib/ai/utils/clone-board.js', () => ({
   __esModule: true,
   default: jest.fn((board) => board.map((row) => [...row])),
 }));
 
-jest.mock('@/lib/ai/collision.js', () => ({
+jest.mock('@/lib/ai/utils/collision.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
-import cloneBoard from '@/lib/ai/clone-board.js';
-import collision from '@/lib/ai/collision.js';
+import cloneBoard from '@/lib/ai/utils/clone-board.js';
+import collision from '@/lib/ai/utils/collision.js';
 
 describe('simulateDrop', () => {
   const ROWS = 20;

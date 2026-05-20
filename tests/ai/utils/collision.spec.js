@@ -1,4 +1,4 @@
-import collision from '@/lib/ai/collision.js';
+import collision from '@/lib/ai/utils/collision.js';
 
 describe('collision', () => {
   // 创建一个标准的 20x10 空棋盘

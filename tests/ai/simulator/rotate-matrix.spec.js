@@ -1,4 +1,4 @@
-import rotateMatrix from '@/lib/ai/rotate-matrix.js';
+import rotateMatrix from '@/lib/ai/simulator/rotate-matrix.js';
 
 describe('rotateMatrix', () => {
   // ==================== 标准方块旋转 ====================

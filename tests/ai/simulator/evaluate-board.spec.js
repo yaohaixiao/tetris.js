@@ -1,4 +1,4 @@
-import evaluateBoard from '@/lib/ai/evaluate-board.js';
+import evaluateBoard from '@/lib/ai/simulator/evaluate-board.js';
 
 describe('evaluateBoard', () => {
   // ==================== 空棋盘 ====================
