@@ -781,9 +781,9 @@ describe('GamepadController', () => {
       gamepad._refreshGamepadState();
     });
 
-    it('AI 控制时 BACK 键（SWITCH_CONTROLLER）应该可以发送事件', () => {
-      // BACK 键 index = 8
-      mockPad.buttons[8] = { value: 1, pressed: true };
+    it('AI 控制时 RB 键（SWITCH_CONTROLLER）应该可以发送事件', () => {
+      // RB 键 index = 5
+      mockPad.buttons[5] = { value: 1, pressed: true };
       gamepad.emit.mockClear();
 
       gamepad._collectCommands(Date.now());
