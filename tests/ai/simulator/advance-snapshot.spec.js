@@ -1,6 +1,5 @@
 import advanceSnapshot from '@/lib/ai/simulator/advance-snapshot.js';
 
-// Mock 依赖
 jest.mock('@/lib/game/utils/random-shape.js', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -33,9 +32,7 @@ describe('advanceSnapshot', () => {
 
   const createSnapshot = () => ({
     controller: 'ai',
-    board: Array.from({ length: 20 }, () =>
-      Array.from({ length: 10 }, () => 0),
-    ),
+    board: Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0)),
     level: 1,
     score: 0,
     lines: 0,
@@ -55,9 +52,7 @@ describe('advanceSnapshot', () => {
   });
 
   const createMove = () => ({
-    board: Array.from({ length: 20 }, () =>
-      Array.from({ length: 10 }, () => 0),
-    ),
+    board: Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0)),
     actions: ['DROP'],
     y: 18,
   });
@@ -65,14 +60,11 @@ describe('advanceSnapshot', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // 默认 mock 行为
-    simulatePlacement.mockImplementation((board) =>
-      board.map((row) => [...row]),
-    );
+    simulatePlacement.mockImplementation((board) => board.map((row) => [...row]));
     clearFullLines.mockImplementation((board) => board.map((row) => [...row]));
     randomShape.mockReturnValue({
-      shape: O_SHAPE,
-      color: '#ffa500',
+      shape: [[1]],
+      color: '#fff',
     });
   });
 
@@ -81,7 +73,6 @@ describe('advanceSnapshot', () => {
     it('应该返回一个新的快照对象', () => {
       const snapshot = createSnapshot();
       const move = createMove();
-
       const result = advanceSnapshot(snapshot, move);
 
       expect(result).toBeDefined();
@@ -91,7 +82,6 @@ describe('advanceSnapshot', () => {
     it('应该保留原始快照中的非棋盘字段', () => {
       const snapshot = createSnapshot();
       const move = createMove();
-
       const result = advanceSnapshot(snapshot, move);
 
       expect(result.controller).toBe(snapshot.controller);
@@ -118,20 +108,19 @@ describe('advanceSnapshot', () => {
     it('应该调用 clearFullLines 清除满行', () => {
       const snapshot = createSnapshot();
       const move = createMove();
-
       advanceSnapshot(snapshot, move);
 
       expect(clearFullLines).toHaveBeenCalled();
     });
 
-    it('应该调用 randomShape 生成新方块', () => {
+    it('应该调用 randomShape 生成下一个预览方块（仅 1 次）', () => {
       const snapshot = createSnapshot();
       const move = createMove();
 
       advanceSnapshot(snapshot, move);
 
-      // 调用 2 次：一次 cur，一次 next
-      expect(randomShape).toHaveBeenCalledTimes(2);
+      // 改用 snapshot.next 后，只有 next 字段需要 randomShape
+      expect(randomShape).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -149,7 +138,7 @@ describe('advanceSnapshot', () => {
       expect(result.board).toBe(clearedBoard);
     });
 
-    it('piece 应该包含新方块的 shape', () => {
+    it('piece 应该包含 snapshot.next 方块的 shape', () => {
       const snapshot = createSnapshot();
       const move = createMove();
 
@@ -159,7 +148,7 @@ describe('advanceSnapshot', () => {
       expect(result.piece.shape).toEqual(O_SHAPE);
     });
 
-    it('piece.position.x 应该居中计算', () => {
+    it('piece.position.x 应该根据 next 方块居中计算', () => {
       const snapshot = createSnapshot();
       const move = createMove();
 
@@ -169,7 +158,7 @@ describe('advanceSnapshot', () => {
       expect(result.piece.position.x).toBe(4);
     });
 
-    it('piece.position.y 应该为 0（从顶部开始）', () => {
+    it('piece.position.y 应该为 0', () => {
       const snapshot = createSnapshot();
       const move = createMove();
 
@@ -178,27 +167,22 @@ describe('advanceSnapshot', () => {
       expect(result.piece.position.y).toBe(0);
     });
 
-    it('cur 应该等于新生成的方块', () => {
+    it('cur 应该等于 snapshot.next', () => {
       const snapshot = createSnapshot();
       const move = createMove();
-      const newShape = {
-        shape: O_SHAPE,
-        color: '#ffa500',
-      };
-      randomShape.mockReturnValueOnce(newShape);
-      randomShape.mockReturnValueOnce({ shape: [[1]], color: '#fff' });
 
       const result = advanceSnapshot(snapshot, move);
 
-      expect(result.cur).toBe(newShape);
+      // cur 现在是 snapshot.next，不是 randomShape 的返回值
+      expect(result.cur.shape).toEqual(snapshot.next.shape);
+      expect(result.cur.color).toBe(snapshot.next.color);
     });
 
-    it('next 应该是第二次调用 randomShape 的结果', () => {
+    it('next 应该是 randomShape 的返回值', () => {
       const snapshot = createSnapshot();
       const move = createMove();
-      const nextShape = { shape: [[1, 1, 1, 1]], color: '#00c8ff' };
-      randomShape.mockReturnValueOnce({ shape: O_SHAPE, color: '#ffa500' });
-      randomShape.mockReturnValueOnce(nextShape);
+      const nextShape = { shape: [[1]], color: '#fff' };
+      randomShape.mockReturnValue(nextShape);
 
       const result = advanceSnapshot(snapshot, move);
 
@@ -239,30 +223,19 @@ describe('advanceSnapshot', () => {
     });
   });
 
-  // ==================== 不同方块宽度居中 ====================
-  describe('新方块居中计算', () => {
-    it('I 型方块（宽 4）应该居中正确', () => {
+  // ==================== snapshot.next 为 null 时的降级处理 ====================
+  describe('snapshot.next 为 null', () => {
+    it('应该降级使用 randomShape 作为当前方块', () => {
       const snapshot = createSnapshot();
+      snapshot.next = null;
       const move = createMove();
-      const IShape = { shape: [[1, 1, 1, 1]], color: '#00c8ff' };
-      randomShape.mockReturnValue(IShape);
+      const fallbackShape = { shape: [[1]], color: '#fff' };
+      randomShape.mockReturnValue(fallbackShape);
 
       const result = advanceSnapshot(snapshot, move);
 
-      // 宽度 4，居中 x = floor(10/2) - floor(4/2) = 5 - 2 = 3
-      expect(result.piece.position.x).toBe(3);
-    });
-
-    it('单格方块（宽 1）应该居中正确', () => {
-      const snapshot = createSnapshot();
-      const move = createMove();
-      const singleShape = { shape: [[1]], color: '#fff' };
-      randomShape.mockReturnValue(singleShape);
-
-      const result = advanceSnapshot(snapshot, move);
-
-      // 宽度 1，居中 x = floor(10/2) - floor(1/2) = 5 - 0 = 5
-      expect(result.piece.position.x).toBe(5);
+      // cur 应该降级使用 randomShape
+      expect(result.cur).toBe(fallbackShape);
     });
   });
 
@@ -296,17 +269,6 @@ describe('advanceSnapshot', () => {
         snapshot.piece.position.x,
         19,
       );
-    });
-
-    it('快照的 next 为 null 时应该正常工作', () => {
-      const snapshot = createSnapshot();
-      snapshot.next = null;
-      const move = createMove();
-
-      const result = advanceSnapshot(snapshot, move);
-
-      expect(result).toBeDefined();
-      expect(result.next).toBeDefined();
     });
   });
 });

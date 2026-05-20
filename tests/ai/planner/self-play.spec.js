@@ -1,339 +1,266 @@
+import selfPlay from '@/lib/ai/planner/self-play.js';
+
+jest.mock('@/lib/ai/planner/generate-moves.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock('@/lib/ai/simulator/evaluate-board.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock('@/lib/ai/simulator/advance-snapshot.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+import generateMoves from '@/lib/ai/planner/generate-moves.js';
 import evaluateBoard from '@/lib/ai/simulator/evaluate-board.js';
+import advanceSnapshot from '@/lib/ai/simulator/advance-snapshot.js';
 
-describe('evaluateBoard', () => {
-  // ==================== 空棋盘 ====================
-  describe('空棋盘', () => {
-    it('应该返回 0（没有任何惩罚或奖励）', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
+describe('selfPlay', () => {
+  const createSnapshot = () => ({
+    controller: 'ai',
+    board: Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0)),
+    level: 1,
+    score: 0,
+    lines: 0,
+    cur: { shape: [[0, 1, 0], [1, 1, 1]], color: '#00c8ff' },
+    next: { shape: [[1, 1], [1, 1]], color: '#ffa500' },
+    piece: { shape: [[0, 1, 0], [1, 1, 1]], position: { x: 3, y: 0 } },
+    mode: 'playing',
+  });
 
-      expect(evaluateBoard(board)).toBe(0);
+  const createMove = (overrides = {}) => ({
+    board: Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0)),
+    actions: ['DROP'],
+    y: 18,
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // ==================== depth = 1（基础模式） ====================
+  describe('depth = 1（基础模式）', () => {
+    it('应该返回评分最高的移动', () => {
+      const snapshot = createSnapshot();
+      const move1 = createMove({ actions: ['DROP'] });
+      const move2 = createMove({ actions: ['MOVE_LEFT', 'DROP'] });
+      const move3 = createMove({ actions: ['MOVE_RIGHT', 'DROP'] });
+
+      generateMoves.mockReturnValue([move1, move2, move3]);
+      evaluateBoard
+        .mockReturnValueOnce(-5)
+        .mockReturnValueOnce(-1)
+        .mockReturnValueOnce(-3);
+
+      const best = selfPlay(snapshot, undefined, 1);
+
+      expect(best).toBe(move2);
+    });
+
+    it('所有 move 评分相同时应该返回第一个', () => {
+      const snapshot = createSnapshot();
+      const move1 = createMove();
+      const move2 = createMove();
+
+      generateMoves.mockReturnValue([move1, move2]);
+      evaluateBoard.mockReturnValue(0);
+
+      const best = selfPlay(snapshot, undefined, 1);
+
+      expect(best).toBe(move1);
+    });
+
+    it('只有一个候选时应该返回该候选', () => {
+      const snapshot = createSnapshot();
+      const onlyMove = createMove();
+
+      generateMoves.mockReturnValue([onlyMove]);
+      evaluateBoard.mockReturnValue(-2.5);
+
+      const best = selfPlay(snapshot, undefined, 1);
+
+      expect(best).toBe(onlyMove);
+    });
+
+    it('没有候选移动时应该返回 null', () => {
+      const snapshot = createSnapshot();
+      generateMoves.mockReturnValue([]);
+
+      const best = selfPlay(snapshot, undefined, 1);
+
+      expect(best).toBeNull();
+    });
+
+    it('不应该调用 advanceSnapshot', () => {
+      const snapshot = createSnapshot();
+      generateMoves.mockReturnValue([createMove()]);
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot, undefined, 1);
+
+      expect(advanceSnapshot).not.toHaveBeenCalled();
+    });
+
+    it('应该为每个候选调用一次 evaluateBoard', () => {
+      const snapshot = createSnapshot();
+      generateMoves.mockReturnValue([createMove(), createMove(), createMove()]);
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot, undefined, 1);
+
+      expect(evaluateBoard).toHaveBeenCalledTimes(3);
+    });
+
+    it('应该将 weights 传给 evaluateBoard', () => {
+      const snapshot = createSnapshot();
+      const weights = { holes: -0.75, height: -0.51, bumpiness: -0.18, completeLines: 1.5 };
+      generateMoves.mockReturnValue([createMove()]);
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot, weights, 1);
+
+      expect(evaluateBoard).toHaveBeenCalledWith(expect.any(Array), weights);
     });
   });
 
-  // ==================== aggregateHeight（总高度） ====================
-  describe('总高度惩罚', () => {
-    it('单列有方块时应该返回负分', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 15; y < 20; y++) {
-        board[y][0] = 1;
-      }
+  // ==================== depth = 2（前瞻模式） ====================
+  describe('depth = 2（前瞻模式）', () => {
+    it('应该调用 advanceSnapshot 推进快照', () => {
+      const snapshot = createSnapshot();
+      const move = createMove();
+      generateMoves.mockReturnValue([move]);
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-3.45, 2);
+      const nextSnapshot = { ...snapshot, board: [] };
+      advanceSnapshot.mockReturnValue(nextSnapshot);
+      generateMoves
+        .mockReturnValueOnce([move])
+        .mockReturnValueOnce([createMove()]);
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot, undefined, 2);
+
+      expect(advanceSnapshot).toHaveBeenCalledWith(snapshot, move);
     });
 
-    it('多列高度应该累加惩罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 17; y < 20; y++) board[y][0] = 1;
-      for (let y = 15; y < 20; y++) board[y][1] = 1;
+    it('应该递归调用 selfPlay', () => {
+      const snapshot = createSnapshot();
+      const move = createMove();
+      generateMoves.mockReturnValue([move]);
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-5.34, 2);
+      const nextSnapshot = { ...snapshot, board: [] };
+      advanceSnapshot.mockReturnValue(nextSnapshot);
+      generateMoves
+        .mockReturnValueOnce([move])
+        .mockReturnValueOnce([createMove()]);
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot, undefined, 2);
+
+      expect(generateMoves).toHaveBeenCalledTimes(2);
     });
 
-    it('最高列（满列）应该受到最大惩罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 0; y < 20; y++) board[y][5] = 1;
+    it('递归返回 null 时应该退回到直接评估', () => {
+      const snapshot = createSnapshot();
+      const move = createMove();
+      generateMoves
+        .mockReturnValueOnce([move])
+        .mockReturnValueOnce([]);
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-17.4, 2);
-    });
-  });
+      advanceSnapshot.mockReturnValue({ ...snapshot });
+      evaluateBoard.mockReturnValue(-5);
 
-  // ==================== holes（空洞数） ====================
-  describe('空洞惩罚', () => {
-    it('单列有一个空洞应该受到惩罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      board[19][0] = 1;
-      board[18][0] = 0;
-      board[17][0] = 1;
+      const best = selfPlay(snapshot, undefined, 2);
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-2.52, 2);
+      expect(best).toBe(move);
+      expect(evaluateBoard).toHaveBeenCalledWith(move.board, undefined);
     });
 
-    it('多列有多个空洞应该累加惩罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      board[19][0] = 1;
-      board[18][0] = 0;
-      board[17][0] = 1;
-      board[16][0] = 0;
-      board[15][0] = 1;
-      board[19][1] = 1;
-      board[18][1] = 0;
-      board[17][1] = 1;
+    it('递归时应传递 weights', () => {
+      const snapshot = createSnapshot();
+      const weights = { holes: -0.9, height: -0.55, bumpiness: -0.2, completeLines: 6.0 };
+      const move = createMove();
+      generateMoves.mockReturnValue([move]);
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-6.33, 2);
-    });
+      advanceSnapshot.mockReturnValue({ ...snapshot });
+      generateMoves
+        .mockReturnValueOnce([move])
+        .mockReturnValueOnce([createMove()]);
+      evaluateBoard.mockReturnValue(0);
 
-    it('没有空洞的满列不受空洞惩罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 17; y < 20; y++) board[y][0] = 1;
+      selfPlay(snapshot, weights, 2);
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-2.07, 2);
+      // 验证 evaluateBoard 收到了 weights
+      expect(evaluateBoard).toHaveBeenCalledWith(expect.any(Array), weights);
     });
   });
 
-  // ==================== bumpiness（不平整度） ====================
-  describe('不平整度惩罚', () => {
-    it('完全平整的表面不应该受 bumpiness 惩罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 10; x++) {
-        for (let y = 17; y < 20; y++) board[y][x] = 1;
-      }
+  // ==================== depth = 3（深度前瞻） ====================
+  describe('depth = 3（深度前瞻）', () => {
+    it('应该递归 3 层', () => {
+      const snapshot = createSnapshot();
+      const move = createMove();
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-12.3, 2);
-    });
+      generateMoves
+        .mockReturnValueOnce([move])
+        .mockReturnValueOnce([move])
+        .mockReturnValueOnce([move]);
 
-    it('相邻列高度差应该受到惩罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 15; y < 20; y++) board[y][0] = 1;
-      board[19][1] = 1;
+      advanceSnapshot.mockReturnValue({ ...snapshot });
+      evaluateBoard.mockReturnValue(0);
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-3.96, 2);
-    });
+      selfPlay(snapshot, undefined, 3);
 
-    it('锯齿状表面应该受较大惩罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      const heights = [1, 3, 1, 3, 1, 3, 1, 3, 1, 3];
-      for (let x = 0; x < 10; x++) {
-        for (let y = 20 - heights[x]; y < 20; y++) board[y][x] = 1;
-      }
-
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-12.44, 2);
+      expect(generateMoves).toHaveBeenCalledTimes(3);
+      expect(advanceSnapshot).toHaveBeenCalledTimes(2);
+      expect(evaluateBoard).toHaveBeenCalledTimes(3);  // 改这里
     });
   });
 
-  // ==================== completeLines（消除行奖励） ====================
-  describe('消除行奖励', () => {
-    it('消除 1 行应该获得奖励', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 10; x++) board[19][x] = 1;
+  // ==================== 默认深度 ====================
+  describe('默认深度', () => {
+    it('不传 depth 时应该默认为 1', () => {
+      const snapshot = createSnapshot();
+      generateMoves.mockReturnValue([createMove()]);
+      evaluateBoard.mockReturnValue(0);
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-4.1, 2);
-    });
+      selfPlay(snapshot);
 
-    it('消除 4 行（Tetris）应该获得高奖励', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 16; y < 20; y++) {
-        for (let x = 0; x < 10; x++) board[y][x] = 1;
-      }
-
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-16.4, 2);
-    });
-
-    it('消除行奖励应该能抵消部分高度惩罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 10; y < 20; y++) {
-        for (let x = 0; x < 10; x++) board[y][x] = 1;
-      }
-
-      const score = evaluateBoard(board);
-      // 总高度 = 100，空洞 = 0，不平整度 = 0，消除行 = 10
-      // 分数 = 100 * -0.51 + 10 * 1.5 = -51 + 15 = -36
-      expect(score).toBeCloseTo(-41, 2);
-    });
-
-    it('未满行不应该计入消除行奖励', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 9; x++) board[19][x] = 1;
-
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-4.77, 2);
+      expect(advanceSnapshot).not.toHaveBeenCalled();
     });
   });
 
-  // ==================== 综合场景 ====================
-  describe('综合场景', () => {
-    it('典型的中等堆叠状态', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 3; x++) {
-        for (let y = 15; y < 20; y++) board[y][x] = 1;
-      }
-      board[19][3] = 1;
-      board[17][3] = 1;
-      for (let x = 4; x < 7; x++) {
-        for (let y = 16; y < 20; y++) board[y][x] = 1;
-      }
-      for (let x = 7; x < 10; x++) {
-        for (let y = 14; y < 20; y++) board[y][x] = 1;
-      }
+  // ==================== 不可变性 ====================
+  describe('不可变性', () => {
+    it('不应该修改传入的快照对象', () => {
+      const snapshot = createSnapshot();
+      const snapshotCopy = JSON.stringify(snapshot);
+      generateMoves.mockReturnValue([createMove()]);
+      evaluateBoard.mockReturnValue(-1);
 
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-23.83, 2);
-    });
+      selfPlay(snapshot, undefined, 1);
 
-    it('即将消除一行的状态应该比纯堆叠得分高', () => {
-      const boardA = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 9; x++) boardA[19][x] = 1;
-
-      const boardB = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 10; x++) boardB[19][x] = 1;
-
-      const scoreA = evaluateBoard(boardA);
-      const scoreB = evaluateBoard(boardB);
-
-      expect(scoreB).toBeGreaterThan(scoreA);
+      expect(JSON.stringify(snapshot)).toBe(snapshotCopy);
     });
   });
 
-  // ==================== 边界情况 ====================
-  describe('边界情况', () => {
-    it('应该处理高度为 1 的棋盘', () => {
-      const board = Array.from({ length: 1 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
+  // ==================== 返回值结构 ====================
+  describe('返回值结构', () => {
+    it('返回的最佳移动应包含 board、actions、y 属性', () => {
+      const snapshot = createSnapshot();
+      const move = createMove();
+      generateMoves.mockReturnValue([move]);
+      evaluateBoard.mockReturnValue(-1);
 
-      expect(evaluateBoard(board)).toBe(0);
-    });
+      const best = selfPlay(snapshot, undefined, 1);
 
-    it('应该处理宽度为 1 的棋盘', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 1 }, () => 0),
-      );
-
-      expect(evaluateBoard(board)).toBe(0);
-    });
-
-    it('全满棋盘', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 1),
-      );
-
-      const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-82, 2);
-    });
-
-    it('传入非零值（如颜色字符串）也应该能正确处理', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      board[19][0] = '#00c8ff';
-
-      const score = evaluateBoard(board);
-      // 高度 = 1，空洞 = 0，不平整度 = |1-0| + 8×0 = 1
-      // 惩罚 = 1 * -0.51 + 1 * -0.18 = -0.69
-      expect(score).toBeCloseTo(-0.69, 2);
-    });
-  });
-
-  // ==================== 自定义权重 ====================
-  describe('自定义权重', () => {
-    it('应该支持传入自定义权重', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      board[19][0] = 1;
-      board[18][0] = 0;
-      board[17][0] = 1;
-
-      const weights = {
-        holes: -0.75,
-        height: -0.51,
-        bumpiness: -0.18,
-        completeLines: 1.5,
-      };
-
-      const score = evaluateBoard(board, weights);
-      // 高度 = 3，空洞 = 1，不平整度 = 3
-      // 惩罚 = 3 * -0.51 + 1 * -0.75 + 3 * -0.18 = -1.53 - 0.75 - 0.54 = -2.82
-      expect(score).toBeCloseTo(-2.82, 2);
-    });
-
-    it('应该支持部分自定义权重（其余用默认值）', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      board[19][0] = 1;
-      board[18][0] = 0;
-      board[17][0] = 1;
-
-      // 只传 holes，其他用默认值
-      const weights = { holes: -0.99 };
-
-      const score = evaluateBoard(board, weights);
-      // 高度 = 3，空洞 = 1，不平整度 = 3
-      // 惩罚 = 3 * -0.51 + 1 * -0.99 + 3 * -0.18 = -1.53 - 0.99 - 0.54 = -3.06
-      expect(score).toBeCloseTo(-3.06, 2);
-    });
-
-    it('NORMAL 难度权重', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 10; x++) board[19][x] = 1;
-
-      const weights = {
-        holes: -0.75,
-        height: -0.51,
-        bumpiness: -0.18,
-        completeLines: 1.5,
-      };
-
-      const score = evaluateBoard(board, weights);
-      // 高度 = 10，空洞 = 0，不平整度 = 0，消除行 = 1
-      // 分数 = 10 * -0.51 + 1 * 1.5 = -5.1 + 1.5 = -3.6
-      expect(score).toBeCloseTo(-3.6, 2);
-    });
-
-    it('HARD 难度权重', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 10; x++) board[19][x] = 1;
-
-      const weights = {
-        holes: -1.2,
-        height: -1.0,
-        bumpiness: -0.2,
-        completeLines: 2.0,
-      };
-
-      const score = evaluateBoard(board, weights);
-      // 高度 = 10，空洞 = 0，不平整度 = 0，消除行 = 1
-      // 分数 = 10 * -1.0 + 1 * 2.0 = -10 + 2 = -8
-      expect(score).toBeCloseTo(-8, 2);
+      expect(best).toHaveProperty('board');
+      expect(best).toHaveProperty('actions');
+      expect(best).toHaveProperty('y');
     });
   });
 });

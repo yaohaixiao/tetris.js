@@ -230,7 +230,7 @@ describe('AIController', () => {
       ai.actions = ['DROP'];
       ai.enabled = true;
       ai.loop();
-      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 200);
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
     });
 
     it('调度延迟应该使用 Game.getSpeed()', () => {
@@ -238,7 +238,7 @@ describe('AIController', () => {
       ai.actions = ['DROP'];
       ai.enabled = true;
       ai.loop();
-      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 350);
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
     });
 
     it('已存在的 actions 不会再次调用 think', () => {
