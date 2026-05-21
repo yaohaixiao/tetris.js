@@ -168,7 +168,7 @@ describe('evaluateBoard', () => {
       }
 
       const score = Number(evaluateBoard(board).toFixed(2));
-      expect(score).toBeCloseTo(3.60, 2);
+      expect(score).toBeCloseTo(3.6, 2);
     });
 
     it('消除行奖励应该能抵消部分高度惩罚', () => {

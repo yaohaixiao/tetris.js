@@ -7,6 +7,10 @@ import Command from '@/lib/core/command/command.js';
 describe('CommandQueue', () => {
   let commandQueue;
 
+  const cmd = new Command('MOVE');
+  console.log('=================');
+  console.log('cmd.payload:', cmd.payload);
+
   beforeEach(() => {
     EventBus.clear();
     commandQueue = new CommandQueue({

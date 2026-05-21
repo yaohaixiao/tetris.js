@@ -59,7 +59,7 @@ describe('reset', () => {
     });
 
     it('应该播放场景切换音效', () => {
-      expect(mockGame.emit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(mockGame.emit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'SWITCH_SCENE',
       });
     });

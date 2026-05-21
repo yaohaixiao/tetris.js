@@ -48,7 +48,7 @@ describe('resume', () => {
     it('应播放 RESUME 音效', () => {
       resume(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'RESUME',
       });
     });
@@ -141,7 +141,7 @@ describe('resume', () => {
       expect(events).toEqual([
         'ui:test-uuid-001:update:mode',
         'game:test-uuid-001:stop:paused',
-        'audio:resume:sound',
+        'audio:play:sound',
         'audio:resume:bgm',
       ]);
     });

@@ -1,4 +1,5 @@
 import AIController from '@/lib/ai/ai-controller.js';
+import EventBus from '@/lib/core/event-bus/index.js';
 
 // Mock 依赖
 jest.mock('@/lib/ai/planner/self-play.js', () => ({
@@ -14,10 +15,13 @@ describe('AIController', () => {
   let mockStore;
   let mockScheduler;
   let mockAnimations;
+  let emitSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
+
+    emitSpy = jest.spyOn(EventBus, 'emit');
 
     mockStore = {
       getState: jest.fn().mockReturnValue({
@@ -59,7 +63,6 @@ describe('AIController', () => {
 
     const mockOn = jest.fn();
     const mockOff = jest.fn();
-    const mockEmit = jest.fn();
 
     selfPlay.mockReturnValue(null);
 
@@ -72,11 +75,11 @@ describe('AIController', () => {
     ai.Animations = mockAnimations;
     ai.on = mockOn;
     ai.off = mockOff;
-    ai.emit = mockEmit;
   });
 
   afterEach(() => {
     jest.useRealTimers();
+    emitSpy.mockRestore();
   });
 
   // ==================== 构造函数 ====================
@@ -189,7 +192,7 @@ describe('AIController', () => {
       ai.enabled = true;
       ai.loop();
       // 第一个 action 已被 shift 执行
-      expect(mockGame.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
         device: 'ai',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -210,7 +213,7 @@ describe('AIController', () => {
       ai.enabled = true;
 
       ai.loop();
-      expect(mockGame.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
         device: 'ai',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -218,7 +221,7 @@ describe('AIController', () => {
       expect(ai.actions).toEqual(['ROTATE', 'DROP']);
 
       ai.loop();
-      expect(mockGame.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
         device: 'ai',
         action: 'ROTATE',
         payload: { Game: mockGame },
@@ -345,7 +348,7 @@ describe('AIController', () => {
       jest.spyOn(ai, 'think').mockReturnValue({ board: [], actions: [] });
       ai.enabled = true;
       ai.loop();
-      expect(mockGame.emit).not.toHaveBeenCalled();
+      expect(emitSpy).not.toHaveBeenCalled();
     });
 
     it('多次 stop 调用不应该报错', () => {

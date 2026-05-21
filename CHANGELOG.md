@@ -1,17 +1,15 @@
 ## [1.2.1](https://github.com/yaohaixiao/tetris.js/compare/1.2.0...1.2.1) (2026-05-21)
 
-
 ### Bug Fixes
 
-* 修复 gamepad 手柄控制模块，依赖注入 Store 初始化未注入导致的控制失效问题； ([5df5e42](https://github.com/yaohaixiao/tetris.js/commit/5df5e4205ef5cbc57c945b23d1d5a460d1244acb))
-* 修复游戏手柄切换 HUMAN/AI 的问题，更换为 RB 键； ([13d3876](https://github.com/yaohaixiao/tetris.js/commit/13d387641db114caa568ffba3e93446cb779058a))
-* gamepad 控制时，difficulty BACK 键定义 BACK 指令，playing 状态未恢复 QUIT 指令，导致无法强行结束游戏的问题； ([d0eaec1](https://github.com/yaohaixiao/tetris.js/commit/d0eaec1b837f79c2ea4af119a847081eec130136))
-
+- 修复 gamepad 手柄控制模块，依赖注入 Store 初始化未注入导致的控制失效问题； ([5df5e42](https://github.com/yaohaixiao/tetris.js/commit/5df5e4205ef5cbc57c945b23d1d5a460d1244acb))
+- 修复游戏手柄切换 HUMAN/AI 的问题，更换为 RB 键； ([13d3876](https://github.com/yaohaixiao/tetris.js/commit/13d387641db114caa568ffba3e93446cb779058a))
+- gamepad 控制时，difficulty
+  BACK 键定义 BACK 指令，playing 状态未恢复 QUIT 指令，导致无法强行结束游戏的问题； ([d0eaec1](https://github.com/yaohaixiao/tetris.js/commit/d0eaec1b837f79c2ea4af119a847081eec130136))
 
 ### Features
 
-* 调整 evaluateBoard() 方法做功能抉择时消除行 completeLines 的权重，并调整 AIDifficulty 的权重值配置； ([0910e38](https://github.com/yaohaixiao/tetris.js/commit/0910e38504b7a36246ffc3ba0319eb05230bdb7e))
-
+- 调整 evaluateBoard() 方法做功能抉择时消除行 completeLines 的权重，并调整 AIDifficulty 的权重值配置； ([0910e38](https://github.com/yaohaixiao/tetris.js/commit/0910e38504b7a36246ffc3ba0319eb05230bdb7e))
 
 # [1.2.0](https://github.com/yaohaixiao/tetris.js/compare/1.1.0...1.2.0) (2026-05-20)
 

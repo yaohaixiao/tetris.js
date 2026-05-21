@@ -38,10 +38,7 @@ describe('start', () => {
     it('应该发送倒计时事件，传递 { game }', () => {
       start(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith(
-        'game:test-game-uuid:start:countdown',
-        { game: mockContext },
-      );
+      expect(mockContext.emit).toHaveBeenCalledWith('game:test-game-uuid:start:countdown');
     });
   });
 
@@ -87,32 +84,20 @@ describe('start', () => {
 
       start(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith(
-        'game:custom-game-id:start:countdown',
-        { game: mockContext },
-      );
+      expect(mockContext.emit).toHaveBeenCalledWith('game:custom-game-id:start:countdown');
     });
 
-    it('应该将 game 本身作为参数传递', () => {
+    it('应该不传递额外的 payload', () => {
       start(mockContext);
-
-      const emitCall = mockContext.emit.mock.calls[0];
-
-      expect(emitCall[1]).toEqual({ game: mockContext });
-      expect(emitCall[1].game).toBe(mockContext);
+      expect(mockContext.emit.mock.calls[0].length).toBe(1);
     });
   });
 
   // ==================== 执行顺序 ====================
   describe('执行顺序', () => {
-    it('应该先设置基准行数再发送事件', () => {
+    it('应该不传递额外的 payload', () => {
       start(mockContext);
-
-      const setBaseLinesOrder =
-        mockStore.setBaseLines.mock.invocationCallOrder[0];
-      const emitOrder = mockContext.emit.mock.invocationCallOrder[0];
-
-      expect(setBaseLinesOrder).toBeLessThan(emitOrder);
+      expect(mockContext.emit.mock.calls[0].length).toBe(1);
     });
   });
 

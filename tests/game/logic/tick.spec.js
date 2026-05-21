@@ -195,7 +195,7 @@ describe('tick', () => {
     it('应该播放 FALL 音效', () => {
       tick(mockContext, false);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'FALL',
       });
     });
@@ -245,7 +245,7 @@ describe('tick', () => {
 
       const fallSoundIndex = mockContext.emit.mock.calls.findIndex(
         ([event, payload]) =>
-          event === 'audio:resume:sound' && payload.sound === 'FALL',
+          event === 'audio:play:sound' && payload.sound === 'FALL',
       );
 
       expect(lockOrder).toBeLessThan(

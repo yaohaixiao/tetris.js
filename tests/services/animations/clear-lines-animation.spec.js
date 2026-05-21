@@ -1,17 +1,7 @@
 import ClearLinesAnimation from '@/lib/services/animations/clear-lines-animation';
-import Scheduler from '@/lib/engine/scheduler';
-
-jest.mock('@/lib/engine', () => ({
-  __esModule: true,
-  default: {
-    Scheduler: {
-      sequence: jest.fn(),
-    },
-  },
-}));
 
 jest.mock('@/lib/game/actions/apply-clear-lines', () =>
-  jest.fn(() => ({
+    jest.fn(() => ({
     level: 5,
     levelUp: true,
     stateHandler: jest.fn(),
@@ -21,6 +11,7 @@ jest.mock('@/lib/game/actions/apply-clear-lines', () =>
 describe('ClearLinesAnimation', () => {
   let mockGame;
   let lines;
+  let mockScheduler
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,28 +21,35 @@ describe('ClearLinesAnimation', () => {
     };
 
     lines = [18, 17];
+
+    mockScheduler = {
+      sequence: jest.fn(),
+      interval: jest.fn(),
+      cancel: jest.fn(),
+      delay: jest.fn(),
+    };
   });
 
   // ==================== 初始化 ====================
 
   describe('初始化', () => {
     test('layer 为 200', () => {
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
       expect(anim.layer).toBe(200);
     });
 
     test('blocking 为 true', () => {
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
       expect(anim.blocking).toBe(true);
     });
 
     test('name 为 clear-lines', () => {
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
       expect(anim.name).toBe('clear-lines');
     });
 
     test('lines 根据传入的 y 数组初始化', () => {
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       expect(anim.lines).toHaveLength(2);
       expect(anim.lines[0]).toEqual({ y: 18, alpha: 1, timer: 0 });
@@ -63,10 +61,10 @@ describe('ClearLinesAnimation', () => {
 
       const anim = new ClearLinesAnimation({
         Game: mockGame,
-        lines: [5, 10, 15],
+        lines: [5, 10, 15], Scheduler:mockScheduler
       });
 
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(spyEmit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'CLEAR',
         lines: 2,
       });
@@ -79,7 +77,7 @@ describe('ClearLinesAnimation', () => {
 
   describe('update', () => {
     test('偶数 phase 时 alpha=1，奇数 phase 时 alpha=0', () => {
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       // 第一次 update：timer=0, phase=0, alpha=1, timer→0.06
       anim.update(0.06);
@@ -107,13 +105,13 @@ describe('ClearLinesAnimation', () => {
     });
 
     test('所有行 timer < 0.72 时返回 true', () => {
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       expect(anim.update(0.5)).toBe(true);
     });
 
     test('所有行 timer >= 0.72 时返回 false 并调用 stop', () => {
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       anim.lines.forEach((line) => {
         line.timer = 0.72;
@@ -128,7 +126,7 @@ describe('ClearLinesAnimation', () => {
     test('部分行未完成时返回 true', () => {
       const anim = new ClearLinesAnimation({
         Game: mockGame,
-        lines: [5, 10],
+        lines: [5, 10], Scheduler:mockScheduler
       });
 
       anim.lines[0].timer = 0.72;
@@ -141,24 +139,22 @@ describe('ClearLinesAnimation', () => {
   // ==================== stop ====================
 
   describe('stop', () => {
-    test('调用 Engine.Scheduler.sequence', () => {
-      const Engine = require('@/lib/engine').default;
-
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+    test('调用 mockScheduler.sequence', () => {
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       anim.stop();
 
-      expect(Engine.Scheduler.sequence).toHaveBeenCalled();
+      expect(mockScheduler.sequence).toHaveBeenCalled();
     });
 
     test('sequence 包含 4 个任务', () => {
       const Engine = require('@/lib/engine').default;
 
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       anim.stop();
 
-      const queue = Engine.Scheduler.sequence.mock.calls[0][0];
+      const queue = mockScheduler.sequence.mock.calls[0][0];
 
       expect(queue).toHaveLength(4);
       queue.forEach((item) => {
@@ -171,11 +167,11 @@ describe('ClearLinesAnimation', () => {
       const Engine = require('@/lib/engine').default;
       const spyEmit = jest.spyOn(ClearLinesAnimation.prototype, 'emit');
 
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       anim.stop();
 
-      const queue = Engine.Scheduler.sequence.mock.calls[0][0];
+      const queue = mockScheduler.sequence.mock.calls[0][0];
       queue[0].fn();
 
       expect(spyEmit).toHaveBeenCalledWith(
@@ -190,11 +186,11 @@ describe('ClearLinesAnimation', () => {
       const Engine = require('@/lib/engine').default;
       const spyEmit = jest.spyOn(ClearLinesAnimation.prototype, 'emit');
 
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       anim.stop();
 
-      const queue = Engine.Scheduler.sequence.mock.calls[0][0];
+      const queue = mockScheduler.sequence.mock.calls[0][0];
       queue[1].fn();
 
       expect(spyEmit).toHaveBeenCalledWith(
@@ -209,11 +205,11 @@ describe('ClearLinesAnimation', () => {
       const Engine = require('@/lib/engine').default;
       const spyEmit = jest.spyOn(ClearLinesAnimation.prototype, 'emit');
 
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       anim.stop();
 
-      const queue = Engine.Scheduler.sequence.mock.calls[0][0];
+      const queue = mockScheduler.sequence.mock.calls[0][0];
       queue[2].fn();
 
       expect(spyEmit).toHaveBeenCalledWith(
@@ -227,11 +223,11 @@ describe('ClearLinesAnimation', () => {
       const Engine = require('@/lib/engine').default;
       const spyEmit = jest.spyOn(ClearLinesAnimation.prototype, 'emit');
 
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
 
       anim.stop();
 
-      const queue = Engine.Scheduler.sequence.mock.calls[0][0];
+      const queue = mockScheduler.sequence.mock.calls[0][0];
       queue[3].fn();
 
       expect(spyEmit).toHaveBeenCalledWith('game:test-uuid-002:update:hud');
@@ -244,12 +240,12 @@ describe('ClearLinesAnimation', () => {
 
   describe('render', () => {
     test('发射 render:clear 事件', () => {
-      const anim = new ClearLinesAnimation({ Game: mockGame, lines });
+      const anim = new ClearLinesAnimation({ Game: mockGame, lines, Scheduler:mockScheduler });
       const spyEmit = jest.spyOn(anim, 'emit');
 
       anim.render();
 
-      expect(spyEmit).toHaveBeenCalledWith('ui:test-uuid-002:render:clear', {
+      expect(spyEmit).toHaveBeenCalledWith('ui:test-uuid-002:render:clear:lines', {
         state: { lines: anim.lines },
       });
     });

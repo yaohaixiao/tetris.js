@@ -58,7 +58,7 @@ describe('CountdownAnimation', () => {
         Game: mockGame,
       });
 
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(spyEmit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'COUNTDOWN',
       });
 
@@ -108,7 +108,7 @@ describe('CountdownAnimation', () => {
       scheduler.tick(1000);
 
       expect(animation.state.number).toBe(1);
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(spyEmit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'COUNTDOWN',
       });
     });

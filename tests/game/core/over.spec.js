@@ -37,7 +37,7 @@ describe('over', () => {
     it('应该播放游戏结束音效', () => {
       over(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'GAME_OVER',
       });
     });
@@ -97,12 +97,12 @@ describe('over', () => {
         'replay:test-game-uuid:stop:record',
       );
       const stopBgmIndex = calls.indexOf('audio:stop:bgm');
-      const gameOverSoundIndex = calls.indexOf('audio:resume:sound');
+      const gameOverSoundIndex = calls.indexOf('audio:play:sound');
       const gameOverIndex = calls.indexOf('replay:test-game-uuid:game:over');
 
       // 1. stop:record
       // 2. audio:stop:bgm
-      // 3. audio:resume:sound
+      // 3. audio:play:sound
       // 4. game:over
       expect(stopRecordIndex).toBeLessThan(stopBgmIndex);
       expect(stopBgmIndex).toBeLessThan(gameOverSoundIndex);

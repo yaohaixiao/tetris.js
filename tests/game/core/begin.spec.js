@@ -134,7 +134,7 @@ describe('begin', () => {
     it('应该播放游戏开始音效', () => {
       begin(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'GAME_STARTED',
       });
     });
@@ -192,7 +192,7 @@ describe('begin', () => {
       const recordIndex = callNames.indexOf(
         'replay:test-game-uuid:start:record',
       );
-      const soundIndex = callNames.indexOf('audio:resume:sound');
+      const soundIndex = callNames.indexOf('audio:play:sound');
 
       expect(recordIndex).toBeLessThan(soundIndex);
       expect(mockStore.resetBoard).toHaveBeenCalled();

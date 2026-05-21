@@ -136,7 +136,7 @@ describe('Audio', () => {
       audio.subscribe();
 
       expect(audio.on).toHaveBeenCalledWith(
-        'audio:resume:sound',
+        'audio:play:sound',
         audio._onPlaySound,
       );
     });
@@ -172,7 +172,7 @@ describe('Audio', () => {
       audio.unsubscribe();
 
       expect(audio.off).toHaveBeenCalledWith(
-        'audio:resume:sound',
+        'audio:play:sound',
         audio._onPlaySound,
       );
     });

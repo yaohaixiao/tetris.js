@@ -70,7 +70,7 @@ describe('PausedAnimation', () => {
       animation.timer = 0.9;
       animation.update(0.2); // timer = 1.1 → >= 1
 
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(spyEmit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'SECOND_TICK',
       });
       // timer 重置为 0
@@ -83,7 +83,7 @@ describe('PausedAnimation', () => {
       animation.timer = 0.8;
       animation.update(0.5); // timer = 1.3
 
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(spyEmit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'SECOND_TICK',
       });
       expect(animation.timer).toBe(0);
@@ -101,7 +101,7 @@ describe('PausedAnimation', () => {
       // 1 秒后触发
       scheduler.tick(1000);
 
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(spyEmit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'SECOND_TICK',
       });
     });

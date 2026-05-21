@@ -578,7 +578,7 @@ describe('ReplayController', () => {
       replay._onGameOver();
 
       expect(spyEmit).toHaveBeenCalledWith(
-        'game:test-uuid-123:replay:prepare:board',
+        'game:test-uuid-123:replay:prepare',
         { nextPiece: { curr: { type: 'I' }, next: { type: 'O' } } },
       );
     });
@@ -597,13 +597,13 @@ describe('ReplayController', () => {
     });
   });
 
-  // ==================== _onClearLines ====================
+  // ==================== _onStopClearLines ====================
 
-  describe('_onClearLines', () => {
+  describe('_onStopClearLines', () => {
     test('非升级时忽略', () => {
       const spyEmit = jest.spyOn(replay, 'emit');
 
-      replay._onClearLines({ isLevelUp: false, level: 5 });
+      replay._onStopClearLines({ isLevelUp: false, level: 5 });
 
       expect(spyEmit).not.toHaveBeenCalled();
     });
@@ -612,7 +612,7 @@ describe('ReplayController', () => {
       replay.playing = true;
       const spyEmit = jest.spyOn(replay, 'emit');
 
-      replay._onClearLines({ isLevelUp: true, level: 5 });
+      replay._onStopClearLines({ isLevelUp: true, level: 5 });
 
       expect(spyEmit).not.toHaveBeenCalled();
     });
@@ -620,10 +620,10 @@ describe('ReplayController', () => {
     test('正常游戏升级时触发音效和特效', () => {
       const spyEmit = jest.spyOn(replay, 'emit');
 
-      replay._onClearLines({ isLevelUp: true, level: 5 });
+      replay._onStopClearLines({ isLevelUp: true, level: 5 });
 
       expect(spyEmit).toHaveBeenCalledWith('audio:stop:bgm');
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(spyEmit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'LEVEL_UP',
       });
       expect(spyEmit).toHaveBeenCalledWith(

@@ -47,7 +47,7 @@ describe('pause', () => {
     it('应该播放暂停音效', () => {
       pause(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(mockContext.emit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'PAUSED',
       });
     });
