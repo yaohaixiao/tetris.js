@@ -5247,7 +5247,8 @@ var tetris = (() => {
           GAMEPAD_ACTION_MAP.B = "DROP";
           GAMEPAD_ACTION_MAP.X = "RESTART";
           GAMEPAD_ACTION_MAP.Y = "TOGGLE_PAUSE";
-          GAMEPAD_ACTION_MAP.BACK = "SWITCH_CONTROLLER";
+          GAMEPAD_ACTION_MAP.BACK = "QUIT";
+          GAMEPAD_ACTION_MAP.RB = "SWITCH_CONTROLLER";
           break;
         }
       }
@@ -5624,7 +5625,7 @@ var tetris = (() => {
       /** 评估权重（轻惩罚） */
       weights: {
         holes: -0.45,
-        height: -0.25,
+        height: -0.35,
         bumpiness: -0.12,
         completeLines: 2
       },
@@ -5641,15 +5642,15 @@ var tetris = (() => {
      */
     NORMAL: {
       /** 前瞻深度：多看一步 */
-      lookahead: 1,
+      lookahead: 2,
       /** 随机噪声：10% 概率随机选择 */
       noise: 0.1,
       /** 评估权重（中等惩罚） */
       weights: {
         holes: -0.75,
-        height: -0.35,
+        height: -0.45,
         bumpiness: -0.18,
-        completeLines: 6
+        completeLines: 3
       },
       /** 决策延迟（毫秒） */
       delay: 480
@@ -5664,16 +5665,16 @@ var tetris = (() => {
      */
     HARD: {
       /** 前瞻深度：多看两步 */
-      lookahead: 2,
+      lookahead: 3,
       beam: 5,
       /** 随机噪声：不犯错 */
       noise: 0,
       /** 评估权重（重惩罚） */
       weights: {
         holes: -0.9,
-        height: -0.55,
+        height: -0.75,
         bumpiness: -0.2,
-        completeLines: 9
+        completeLines: 5
       },
       /** 决策延迟（毫秒） */
       delay: 280
@@ -5693,9 +5694,9 @@ var tetris = (() => {
       /** 评估权重（重惩罚，与 HARD 相同） */
       weights: {
         holes: -1,
-        height: -0.65,
+        height: -0.95,
         bumpiness: -0.2,
-        completeLines: 10
+        completeLines: 6
       },
       /** 决策延迟（毫秒）：极快 */
       delay: 150
@@ -5892,7 +5893,7 @@ var tetris = (() => {
         completeLines += 1;
       }
     }
-    return aggregateHeight * w.height + holes * w.holes + bumpiness * w.bumpiness + completeLines * w.completeLines;
+    return aggregateHeight * w.height + holes * w.holes + bumpiness * w.bumpiness + Math.pow(completeLines, 2) * w.completeLines;
   };
   var evaluate_board_default = evaluateBoard;
 
@@ -6126,7 +6127,7 @@ var tetris = (() => {
      * 2. 检查游戏状态（必须为 playing 且无动画阻塞）
      * 3. 如果没有待执行动作，调用 `think()` 生成新的动作计划
      * 4. 从队列中取出一个动作，通过 `dispatch:input` 发送给 Game
-     * 5. 调度下一次循环
+     * 5. 根据当前难度配置的 delay 调度下一次循环
      *
      * @returns {void}
      */
@@ -6139,6 +6140,7 @@ var tetris = (() => {
         this.aiSchedulerId = this.Scheduler.delay(this.loop, 100);
         return;
       }
+      const difficulty = this.getDifficultyConfig();
       if (this.actions.length === 0) {
         const best = this.think(state);
         if (best) {
@@ -6155,7 +6157,6 @@ var tetris = (() => {
           }
         });
       }
-      const difficulty = this.getDifficultyConfig();
       this.aiSchedulerId = this.Scheduler.delay(this.loop, difficulty.delay);
     };
     /**
@@ -6163,34 +6164,49 @@ var tetris = (() => {
      *
      * 分析当前游戏状态，计算最佳动作序列。
      *
-     * ### 决策流程
+     * ### 决策算法选择
      *
-     * 1. 将棋盘从颜色字符串格式转换为数字格式（0 为空，1 为占用）
-     * 2. 构建 AI 需要的 piece 对象（shape + position）
-     * 3. 调用 `generateMoves` 生成所有可能的移动
-     * 4. 用 `evaluateBoard` 为每个结果评分
-     * 5. 返回评分最高的移动
+     * | 难度   | 算法                          | 说明                            |
+     * | ------ | ----------------------------- | ------------------------------- |
+     * | EASY   | selfPlay (lookahead=1)        | 只看当前方块，轻度启发式评估    |
+     * | NORMAL | selfPlay (lookahead=1)        | 同上，但权重更严格              |
+     * | HARD   | selfPlay (lookahead=2 + beam) | 前瞻搜索 + 束搜索剪枝           |
+     * | EXPERT | MCTS (iterations=300)         | 蒙特卡洛树搜索，随机模拟 300 次 |
      *
-     * @param {object} state - 游戏状态对象
-     * @param {string[][]} state.board - 棋盘二维数组（颜色字符串）
-     * @param {object} state.curr - 当前方块对象
-     * @param {number[][]} state.curr.shape - 方块形状矩阵
-     * @param {number} state.cx - 当前方块 X 坐标
-     * @param {number} state.cy - 当前方块 Y 坐标
-     * @returns {object | null} 最佳移动对象（{ board, actions }），无法决策时返回 null
+     * ### 流程
+     *
+     * 1. 根据当前难度等级读取配置（lookahead、weights、beam 等）
+     * 2. 从真实游戏状态创建快照（深拷贝，隔离 AI 模拟）
+     * 3. 调用对应的决策算法
+     * 4. 返回最佳移动对象（{ board, actions, y }）
+     *
+     * @param {object} state - 游戏状态对象（Store.getState() 的返回值）
+     * @param {string[][]} state.board - 棋盘二维数组（颜色字符串格式）
+     * @param {object} state.curr - 当前活动方块对象（含 shape、color）
+     * @param {number} state.cx - 当前方块的 X 坐标（列索引）
+     * @param {number} state.cy - 当前方块的 Y 坐标（行索引）
+     * @returns {object | null} 最佳移动对象 `{ board, actions, y }`，无法决策时返回 null
      */
     think(state) {
       const difficulty = this.getDifficultyConfig();
       const { lookahead, weights, beam } = difficulty;
-      return self_play_default(create_snapshot_default(state), weights, lookahead, beam);
+      const snapshot = create_snapshot_default(state);
+      return self_play_default(snapshot, weights, lookahead, beam);
     }
+    /**
+     * ## 获取当前难度的完整配置
+     *
+     * 从 Store 读取当前选择的难度等级（easy/normal/hard/expert）， 映射到对应的 `AIDifficulty` 配置对象。
+     *
+     * @returns {object} 难度配置对象，包含 lookahead、noise、weights、delay、beam 等字段
+     */
     getDifficultyConfig() {
       const difficulty = this.Game.Store.getDifficulty();
       const map = {
         easy: ai_difficulty_default.EASY,
         normal: ai_difficulty_default.NORMAL,
         hard: ai_difficulty_default.HARD,
-        expert: ai_difficulty_default.HARD
+        expert: ai_difficulty_default.EXPERT
       };
       return map[difficulty] || ai_difficulty_default.NORMAL;
     }
@@ -7436,7 +7452,7 @@ var tetris = (() => {
       this.CommandQueue = new command_queue_default({ Game: this });
       this.UI = new ui_default({ Game: this, Store, Elements });
       this.Keyboard = new keyboard_controller_default({ Game: this, Store });
-      this.Gamepad = new gamepad_controller_default({ Game: this });
+      this.Gamepad = new gamepad_controller_default({ Game: this, Store });
       this.AI = new ai_controller_default({
         Game: this,
         Store,

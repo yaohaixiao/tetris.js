@@ -1,18 +1,15 @@
 # [1.2.0](https://github.com/yaohaixiao/tetris.js/compare/1.1.0...1.2.0) (2026-05-20)
 
-
 ### Bug Fixes
 
-* 修复 replay 播放完毕，stopPlay() 重置 game-over 状态导致的无法开始的问题； ([a77b3af](https://github.com/yaohaixiao/tetris.js/commit/a77b3afcc5435e172f042644db7f749a03199f14))
-* 修复更新 UI 状态消息错误的问题（忘记使用 scope 消息） ([1fa5e75](https://github.com/yaohaixiao/tetris.js/commit/1fa5e75d3fe46e81bd68622bceab8c327a8c367c))
-* 修复在添加 AI 控制后 reset 未处理更新 controller 信息和停止 AI 控制的问题，同时修复了在 Replay 过程中按 enter 开始游戏，方块无法 tick 自动下落的问题； ([c2d49f1](https://github.com/yaohaixiao/tetris.js/commit/c2d49f14932267017b1c20e1be7c998de03fe246))
-
+- 修复 replay 播放完毕，stopPlay() 重置 game-over 状态导致的无法开始的问题； ([a77b3af](https://github.com/yaohaixiao/tetris.js/commit/a77b3afcc5435e172f042644db7f749a03199f14))
+- 修复更新 UI 状态消息错误的问题（忘记使用 scope 消息） ([1fa5e75](https://github.com/yaohaixiao/tetris.js/commit/1fa5e75d3fe46e81bd68622bceab8c327a8c367c))
+- 修复在添加 AI 控制后 reset 未处理更新 controller 信息和停止 AI 控制的问题，同时修复了在 Replay 过程中按 enter 开始游戏，方块无法 tick 自动下落的问题； ([c2d49f1](https://github.com/yaohaixiao/tetris.js/commit/c2d49f14932267017b1c20e1be7c998de03fe246))
 
 ### Features
 
-* 优化 AI 控制逻辑，添加更具 difficulty 难度等级调整 AI 控制的决策权重； ([916cfca](https://github.com/yaohaixiao/tetris.js/commit/916cfca449ed554e3494a2aec611152cd696abcb))
-* 优化 AIController 的 think() 方法 ([18e015a](https://github.com/yaohaixiao/tetris.js/commit/18e015a0a4222f016f513a2334eb9172a803acfe))
-
+- 优化 AI 控制逻辑，添加更具 difficulty 难度等级调整 AI 控制的决策权重； ([916cfca](https://github.com/yaohaixiao/tetris.js/commit/916cfca449ed554e3494a2aec611152cd696abcb))
+- 优化 AIController 的 think() 方法 ([18e015a](https://github.com/yaohaixiao/tetris.js/commit/18e015a0a4222f016f513a2334eb9172a803acfe))
 
 # [1.1.0](https://github.com/yaohaixiao/tetris.js/compare/1.0.0...1.1.0) (2026-05-19)
 
