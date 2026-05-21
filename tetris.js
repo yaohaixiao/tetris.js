@@ -663,8 +663,6 @@ var tetris = (() => {
      * ## 构造函数
      *
      * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {AudioContext} options.Context - Web Audio API 上下文
-     * @param {object} options.Scheduler - 任务调度器
      */
     constructor(options) {
       super(options);
@@ -787,10 +785,11 @@ var tetris = (() => {
       const baseChord = frequencies[index];
       const chord = baseChord.map((freq) => freq + cfg.shift * 12);
       const queue = [];
+      const { Context, Scheduler: Scheduler2 } = this;
       for (const [i, freq] of chord.entries()) {
         queue.push({
           fn: () => {
-            const now = this.Context.currentTime;
+            const now = Context.currentTime;
             play_tone_default(this, freq, speeds[i] * cfg.speed, {
               volume: volumes[i] * cfg.volume,
               startTime: now + timeouts[i] / 1e3
@@ -798,7 +797,7 @@ var tetris = (() => {
           }
         });
       }
-      this.Scheduler.sequence(queue);
+      Scheduler2.sequence(queue);
     };
     /**
      * ## 升级庆祝音效
@@ -808,8 +807,9 @@ var tetris = (() => {
      * @returns {void}
      */
     LEVEL_UP = () => {
-      const now = this.Context.currentTime;
-      this.Scheduler.sequence([
+      const { Context, Scheduler: Scheduler2 } = this;
+      const now = Context.currentTime;
+      Scheduler2.sequence([
         { fn: () => play_tone_default(this, 523, 220) },
         { fn: () => play_tone_default(this, 587, 220, { startTime: now + 0.26 }) },
         { fn: () => play_tone_default(this, 659, 240, { startTime: now + 0.52 }) },
@@ -857,8 +857,9 @@ var tetris = (() => {
      * @returns {void}
      */
     GAME_OVER = () => {
-      const now = this.Context.currentTime;
-      this.Scheduler.sequence([
+      const { Context, Scheduler: Scheduler2 } = this;
+      const now = Context.currentTime;
+      Scheduler2.sequence([
         { fn: () => play_tone_default(this, 330, 200) },
         { fn: () => play_tone_default(this, 294, 300, { startTime: now + 0.21 }) },
         { fn: () => play_tone_default(this, 262, 500, { startTime: now + 0.52 }) }
@@ -2424,11 +2425,11 @@ var tetris = (() => {
     STOP_CLEAR_LINES: `replay:${uuid}:stop:clear:lines`
   });
   var UIEvents = (uuid) => ({
-    /* ---------- 更新游戏控制者 ---------- */
-    UPDATE_CONTROLLER: `ui:${uuid}:update:controller`,
-    /* ---------- DOM 绘制 ---------- */
+    /* ---------- HUD 绘制 ---------- */
     UPDATE_MODE: `ui:${uuid}:update:mode`,
+    UPDATE_CONTROLLER: `ui:${uuid}:update:controller`,
     UPDATE_HUD: `ui:${uuid}:update:hud`,
+    /* ---------- 画布绘制 ---------- */
     RESIZE: `ui:${uuid}:resize`,
     /* ---------- 动画特效 ---------- */
     RENDER_NEXT_PIECE: `ui:${uuid}:render:next:piece`,
@@ -2571,6 +2572,362 @@ var tetris = (() => {
     };
   };
   var audio_default = Audio;
+
+  // lib/events/router/game-router.js
+  var GameRouter = class extends core_default {
+    constructor(options) {
+      super(options);
+    }
+    /**
+     * ## 订阅所有游戏事件
+     *
+     * 绑定核心流程、方块操作、动画特效、输入设备等所有事件。 同时触发各子模块的 subscribe。
+     *
+     * @returns {void}
+     */
+    subscribe() {
+      const { AI, Animations, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
+      const events = GameEvents(Game2.id);
+      this.on(events.UPDATE_STATE, this._onUpdateState);
+      this.on(events.UPDATE_MODE, this._onUpdateMode);
+      this.on(events.UPDATE_LEVEL, this._onUpdateLevel);
+      this.on(events.UPDATE_GAMEPAD_CONNECTED, this._onUpdateGamepadConnected);
+      this.on(events.SWITCH_CONTROLLER, this._onSwitchController);
+      this.on(events.UPDATE_HUD, this._onUpdateHud);
+      this.on(events.SAVE_HIGH_SCORE, this._onSaveHighScore);
+      this.on(events.SELECT_LEVEL, this._onSelectLevel);
+      this.on(events.SWITCH_TO_DIFFICULTY, this._onSwitchToDifficulty);
+      this.on(events.SELECT_DIFFICULTY, this._onSelectDifficulty);
+      this.on(events.SWITCH_TO_MAIN_MENU, this._onSwitchToMainMenu);
+      this.on(events.BEGIN, this._onGameBegin);
+      this.on(events.START, this._onGameStart);
+      this.on(events.TOGGLE_PAUSED, this._onTogglePaused);
+      this.on(events.RESTART, this._onGameRestart);
+      this.on(events.RESET, this._onGameReset);
+      this.on(events.OVER, this._onGameOver);
+      this.on(events.BLOCK_MOVE, this._onBlockMove);
+      this.on(events.BLOCK_ROTATE, this._onBlockRotate);
+      this.on(events.BLOCK_DROP, this._onBlockDrop);
+      this.on(events.BLOCK_TICK, this._onBlockTick);
+      this.on(events.BLOCK_SPAWN, this._onBlockSpawn);
+      this.on(events.START_COUNTDOWN, this._onStartCountdown);
+      this.on(events.START_PAUSED, this._onStartPaused);
+      this.on(events.STOP_PAUSED, this._onStopPaused);
+      this.on(events.START_CLEAR_LINES, this._onStartClearLines);
+      this.on(events.START_LEVEL_UP, this._onStartLevelUp);
+      this.on(events.TOGGLE_BGM, this._onToggleBGM);
+      this.on(events.REPLAY_PREPARE, this._onReplayPrepare);
+      AI.subscribe();
+      Animations.subscribe();
+      CommandQueue2.subscribe();
+      Replay.subscribe();
+      UI2.subscribe();
+    }
+    /**
+     * ## 取消订阅所有游戏事件
+     *
+     * @returns {void}
+     */
+    unsubscribe() {
+      const { AI, Animations, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
+      const events = GameEvents(Game2.id);
+      this.off(events.UPDATE_STATE, this._onUpdateState);
+      this.off(events.UPDATE_MODE, this._onUpdateMode);
+      this.off(events.UPDATE_LEVEL, this._onUpdateLevel);
+      this.off(events.UPDATE_GAMEPAD_CONNECTED, this._onUpdateGamepadConnected);
+      this.off(events.SWITCH_CONTROLLER, this._onSwitchController);
+      this.off(events.UPDATE_HUD, this._onUpdateHud);
+      this.off(events.SAVE_HIGH_SCORE, this._onSaveHighScore);
+      this.off(events.SELECT_LEVEL, this._onSelectLevel);
+      this.off(events.SWITCH_TO_DIFFICULTY, this._onSwitchToDifficulty);
+      this.off(events.SELECT_DIFFICULTY, this._onSelectDifficulty);
+      this.off(events.SWITCH_TO_MAIN_MENU, this._onSwitchToMainMenu);
+      this.off(events.BEGIN, this._onGameBegin);
+      this.off(events.START, this._onGameStart);
+      this.off(events.TOGGLE_PAUSED, this._onTogglePaused);
+      this.off(events.RESTART, this._onGameRestart);
+      this.off(events.RESET, this._onGameReset);
+      this.off(events.OVER, this._onGameOver);
+      this.off(events.BLOCK_MOVE, this._onBlockMove);
+      this.off(events.BLOCK_ROTATE, this._onBlockRotate);
+      this.off(events.BLOCK_DROP, this._onBlockDrop);
+      this.off(events.BLOCK_TICK, this._onBlockTick);
+      this.off(events.BLOCK_SPAWN, this._onBlockSpawn);
+      this.off(events.START_COUNTDOWN, this._onStartCountdown);
+      this.off(events.START_PAUSED, this._onStartPaused);
+      this.off(events.STOP_PAUSED, this._onStopPaused);
+      this.off(events.START_CLEAR_LINES, this._onStartClearLines);
+      this.off(events.START_LEVEL_UP, this._onStartLevelUp);
+      this.off(events.TOGGLE_BGM, this._onToggleBGM);
+      this.off(events.REPLAY_PREPARE, this._onReplayPrepare);
+      AI.unsubscribe();
+      Animations.unsubscribe();
+      CommandQueue2.unsubscribe();
+      Replay.unsubscribe();
+      UI2.unsubscribe();
+    }
+    // ==================== 事件处理器（私有） ====================
+    /**
+     * ## 切换控制者（human ↔ ai）
+     *
+     * @private
+     * @returns {void}
+     */
+    _onSwitchController = () => {
+      const { Store, Game: Game2 } = this;
+      const uuid = Game2.id;
+      const controller = Store.getController() === "human" ? "ai" : "human";
+      const AE = AIEvents(uuid);
+      const UE = UIEvents(uuid);
+      Store.setController(controller);
+      if (controller === "ai") {
+        this.emit(AE.START);
+      } else {
+        this.emit(AE.STOP);
+      }
+      this.emit(UE.UPDATE_CONTROLLER, { controller });
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onUpdateState = (options) => {
+      const { Store } = this;
+      const { stateHandler } = options;
+      Store.setState(stateHandler);
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onUpdateMode = (options) => {
+      const { Store, Game: Game2 } = this;
+      const { mode } = options;
+      const events = UIEvents(Game2.id);
+      this.emit(events.UPDATE_MODE, { mode });
+      Store.setMode(mode);
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onUpdateLevel = (options) => {
+      const { Store } = this;
+      const { level } = options;
+      Store.setLevel(level);
+    };
+    /** @private */
+    _onUpdateHud = () => {
+      const { Store, Game: Game2 } = this;
+      const events = UIEvents(Game2.id);
+      this.emit(events.UPDATE_HUD, { state: Store.getState() });
+    };
+    /** @private */
+    _onSaveHighScore = () => {
+      const { Store, Game: Game2 } = this;
+      Game2.saveHighScore(Store.getScore());
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onSelectLevel = (options) => {
+      const { Store, Game: Game2 } = this;
+      const { level } = options;
+      const events = UIEvents(Game2.id);
+      Game2.selectLevel(level);
+      this.emit(events.UPDATE_HUD, { state: Store.getState() });
+    };
+    /** @private */
+    _onSwitchToDifficulty = () => {
+      const { Game: Game2 } = this;
+      const events = UIEvents(Game2.id);
+      this.emit(events.UPDATE_MODE, { mode: "difficulty" });
+      Game2.switchToDifficulty();
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onSelectDifficulty = (options) => {
+      const { Game: Game2 } = this;
+      const { difficulty } = options;
+      Game2.selectDifficulty(difficulty);
+    };
+    /** @private */
+    _onSwitchToMainMenu = () => {
+      const { Game: Game2 } = this;
+      Game2.switchToMainMenu();
+    };
+    /** @private */
+    _onGameBegin = () => {
+      const { Game: Game2 } = this;
+      Game2.begin();
+    };
+    /**
+     * ## 游戏开始事件处理
+     *
+     * 进入倒计时阶段。如果当前是 AI 控制，发送 `ai:start` 事件。
+     *
+     * @private
+     * @returns {void}
+     */
+    _onGameStart = () => {
+      const { Store, Game: Game2 } = this;
+      const events = AIEvents(Game2.id);
+      Game2.start();
+      if (Store.getController() === "ai") {
+        this.emit(events.START);
+      }
+    };
+    /**
+     * ## 暂停/继续切换事件处理
+     *
+     * 根据切换后的模式自动管理 AI 的启停。
+     *
+     * @private
+     * @returns {void}
+     */
+    _onTogglePaused = () => {
+      const { Store, Game: Game2 } = this;
+      const events = AIEvents(Game2.id);
+      Game2.togglePause();
+      if (Store.getController() === "ai") {
+        const { mode } = Store.getState();
+        if (mode === "paused") {
+          this.emit(events.STOP);
+        } else if (mode === "playing") {
+          this.emit(events.START);
+        }
+      }
+    };
+    /** @private */
+    _onGameReset = () => {
+      const { Game: Game2 } = this;
+      Game2.reset();
+    };
+    /** @private */
+    _onGameRestart = () => {
+      const { Game: Game2 } = this;
+      Game2.restart();
+    };
+    /** @private */
+    _onGameOver = () => {
+      const { Game: Game2 } = this;
+      Game2.over();
+    };
+    /** @private */
+    _onBlockSpawn = () => {
+      const { Game: Game2 } = this;
+      Game2.spawn();
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onBlockMove = (options) => {
+      const { Game: Game2 } = this;
+      const { ox, oy } = options;
+      Game2.move(ox, oy);
+    };
+    /** @private */
+    _onBlockRotate = () => {
+      const { Game: Game2 } = this;
+      Game2.rotate();
+    };
+    /** @private */
+    _onBlockDrop = () => {
+      const { Game: Game2 } = this;
+      Game2.drop();
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onBlockTick = (options) => {
+      const { Game: Game2 } = this;
+      const { isBlocked } = options;
+      Game2.tick(isBlocked);
+    };
+    /** @private */
+    _onToggleBGM = () => {
+      const { Store } = this;
+      const events = AudioEvents();
+      this.emit(events.TOGGLE_BGM, {
+        level: Store.getLevel()
+      });
+    };
+    /**
+     * ## 回放准备棋盘事件处理
+     *
+     * 重置棋盘为初始状态，设置回放模式，开始回放。
+     *
+     * @private
+     * @returns {void}
+     */
+    _onReplayPrepare = () => {
+      const { Store, Game: Game2 } = this;
+      const uuid = Game2.id;
+      const UE = UIEvents(uuid);
+      const RE = ReplayEvents(uuid);
+      const GE = GameEvents(uuid);
+      Store.resetBoard();
+      Store.setState({
+        board: Store.getBeginningBoard(),
+        score: 0,
+        lines: 0,
+        level: 1
+      });
+      this.emit(UE.UPDATE_MODE, { mode: "replay" });
+      Store.setMode("replay");
+      this.emit(UE.UPDATE_HUD, { state: Store.getState() });
+      this.emit(RE.START_PLAY);
+      this.emit(GE.BLOCK_SPAWN);
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onUpdateGamepadConnected = (options) => {
+      const { Store } = this;
+      const { connected } = options;
+      Store.setGamepadConnected(connected);
+    };
+    /** @private */
+    _onStartCountdown = () => {
+      const { Game: Game2 } = this;
+      Game2.startCountdown();
+    };
+    /** @private */
+    _onStartPaused = () => {
+      const { Game: Game2 } = this;
+      Game2.startPaused();
+    };
+    /** @private */
+    _onStopPaused = () => {
+      const { Game: Game2 } = this;
+      Game2.stopPaused();
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onStartClearLines = (options) => {
+      const { Game: Game2 } = this;
+      const { linesToClear } = options;
+      Game2.startClearLines(linesToClear);
+    };
+    /**
+     * @private
+     * @param {object} options - 参数对象
+     */
+    _onStartLevelUp = (options) => {
+      const { Game: Game2 } = this;
+      const { level } = options;
+      Game2.startLevelUp(level);
+    };
+  };
+  var game_router_default = GameRouter;
 
   // lib/state/game-state.js
   var GameState = {
@@ -3272,6 +3629,141 @@ var tetris = (() => {
     };
   };
   var animation_system_default = AnimationSystem;
+
+  // lib/events/router/ui-router.js
+  var UIRouter = class extends core_default {
+    constructor(options) {
+      super(options);
+    }
+    /**
+     * ## 订阅 UI 事件
+     *
+     * 绑定所有 UI 相关的渲染事件。
+     *
+     * @returns {void}
+     */
+    subscribe() {
+      const { Game: Game2 } = this;
+      const events = UIEvents(Game2.id);
+      this.on(events.UPDATE_MODE, this._onUpdateMode);
+      this.on(events.UPDATE_HUD, this._onUpdateHud);
+      this.on(events.UPDATE_CONTROLLER, this._onUpdateController);
+      this.on(events.RESIZE, this._onResize);
+      this.on(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
+      this.on(events.RENDER_COUNTDOWN, this._onRenderCountdown);
+      this.on(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
+      this.on(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
+    }
+    /**
+     * ## 取消订阅 UI 事件
+     *
+     * @returns {void}
+     */
+    unsubscribe() {
+      const { Game: Game2 } = this;
+      const events = UIEvents(Game2.id);
+      this.off(events.UPDATE_MODE, this._onUpdateMode);
+      this.off(events.UPDATE_HUD, this._onUpdateHud);
+      this.off(events.UPDATE_CONTROLLER, this._onUpdateController);
+      this.off(events.RESIZE, this._onResize);
+      this.off(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
+      this.off(events.RENDER_COUNTDOWN, this._onRenderCountdown);
+      this.off(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
+      this.off(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
+    }
+    /**
+     * ## 处理模式更新事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {string} payload.mode - 游戏模式
+     * @returns {void}
+     */
+    _onUpdateMode = ({ mode }) => {
+      const { UI: UI2 } = this;
+      UI2.updateMode(mode);
+    };
+    /**
+     * ## 处理控制者更新事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {string} payload.controller - 控制者身份
+     * @returns {void}
+     */
+    _onUpdateController = ({ controller }) => {
+      const { UI: UI2 } = this;
+      UI2.updateController(controller);
+    };
+    /**
+     * ## 处理 HUD 更新事件
+     *
+     * @private
+     * @returns {void}
+     */
+    _onUpdateHud = () => {
+      const { UI: UI2 } = this;
+      UI2.updateHud();
+    };
+    /**
+     * ## 处理画布自适应事件
+     *
+     * @private
+     * @returns {void}
+     */
+    _onResize = () => {
+      const { UI: UI2 } = this;
+      UI2.resize();
+    };
+    /**
+     * ## 处理渲染预览方块事件
+     *
+     * @private
+     * @returns {void}
+     */
+    _onRenderNextPiece = () => {
+      const { UI: UI2 } = this;
+      UI2.renderNextPiece();
+    };
+    /**
+     * ## 处理渲染倒计时事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {object} payload.state - 倒计时状态
+     * @returns {void}
+     */
+    _onRenderCountdown = ({ state }) => {
+      const { UI: UI2 } = this;
+      UI2.renderCountdown(state);
+    };
+    /**
+     * ## 处理渲染消行闪烁事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {object} payload.state - 消行动画状态
+     * @returns {void}
+     */
+    _onRenderClearLines = ({ state }) => {
+      const { UI: UI2 } = this;
+      UI2.renderClearLines(state);
+    };
+    /**
+     * ## 处理渲染升级烟花事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {number} payload.level - 新等级
+     * @param {object[]} payload.fireworks - 烟花粒子数组
+     * @returns {void}
+     */
+    _onRenderLevelUp = ({ level, fireworks }) => {
+      const { UI: UI2 } = this;
+      UI2.renderLevelUp(level, fireworks);
+    };
+  };
+  var ui_router_default = UIRouter;
 
   // lib/services/ui/core/canvas.js
   var Canvas = class {
@@ -4869,6 +5361,11 @@ var tetris = (() => {
       const { Hud, Main } = Elements;
       this.Hud = create_hud_default(hud_elements_default(Hud));
       this.Canvas = new canvas_default(Main);
+      const { Game: Game2 } = this;
+      this.Router = new ui_router_default({
+        UI: this,
+        Game: Game2
+      });
     }
     /**
      * ## 更新游戏模式标识
@@ -4882,21 +5379,6 @@ var tetris = (() => {
       this.Canvas.gameBoard.dataset.mode = mode;
     }
     /**
-     * ## 更新 HUD 显示
-     *
-     * 从 Store 读取最新状态并更新 HUD 数字显示。
-     *
-     * @returns {void}
-     */
-    updateHud() {
-      const state = this.Store.getState();
-      const { mode, score, lines, level, highScore, needReset = false } = state;
-      if (mode === "main-menu" || needReset) {
-        this.Hud.reset();
-      }
-      this.Hud.update({ score, lines, level, highScore });
-    }
-    /**
      * ## 更新控制者标识
      *
      * @param {string} controller - 当前控制者（human / ai）
@@ -4904,6 +5386,22 @@ var tetris = (() => {
      */
     updateController(controller) {
       this.Hud.updateController(controller);
+    }
+    /**
+     * ## 更新 HUD 显示
+     *
+     * 从 Store 读取最新状态并更新 HUD 数字显示。
+     *
+     * @returns {void}
+     */
+    updateHud() {
+      const { Store } = this;
+      const state = Store.getState();
+      const { mode, score, lines, level, highScore, needReset = false } = state;
+      if (mode === "main-menu" || needReset) {
+        this.Hud.reset();
+      }
+      this.Hud.update({ score, lines, level, highScore });
     }
     /**
      * ## 更新 HUD 动画
@@ -4924,8 +5422,8 @@ var tetris = (() => {
      * @returns {void}
      */
     lazyRender() {
-      const state = this.Store.getState();
-      lazy_render_scene_default(this.Canvas, state);
+      const { Store } = this;
+      lazy_render_scene_default(this.Canvas, Store.getState());
     }
     /**
      * ## 渲染游戏场景
@@ -4935,8 +5433,8 @@ var tetris = (() => {
      * @returns {void}
      */
     render() {
-      const state = this.Store.getState();
-      render_scene_default(this.Canvas, state);
+      const { Store } = this;
+      render_scene_default(this.Canvas, Store.getState());
     }
     /**
      * ## 画布自适应
@@ -4948,6 +5446,39 @@ var tetris = (() => {
     resize() {
       resize_default(this.Canvas);
     }
+    /** ## 处理渲染下一个方块 */
+    renderNextPiece() {
+      const { Canvas: Canvas2, Store } = this;
+      render_next_piece_default(Canvas2, Store.getState());
+    }
+    /**
+     * ## 处理渲染倒计时事件
+     *
+     * @param {object} state - 游戏状态信息
+     * @returns {void}
+     */
+    renderCountdown(state) {
+      render_countdown_default(this.Canvas, state);
+    }
+    /**
+     * ## 处理渲染消行闪烁事件
+     *
+     * @param {object} state - 游戏状态信息
+     * @returns {void}
+     */
+    renderClearLines(state) {
+      render_clear_lines_default(this.Canvas, state);
+    }
+    /**
+     * ## 处理渲染升级烟花事件
+     *
+     * @param {number} level - 新等级
+     * @param {object[]} fireworks - 烟花粒子数组
+     * @returns {void}
+     */
+    renderLevelUp(level, fireworks) {
+      render_level_up_default(this.Canvas, level, fireworks);
+    }
     /**
      * ## 订阅 UI 事件
      *
@@ -4956,16 +5487,7 @@ var tetris = (() => {
      * @returns {void}
      */
     subscribe() {
-      const uuid = this.Game.id;
-      const events = UIEvents(uuid);
-      this.on(events.UPDATE_CONTROLLER, this._onUpdateController);
-      this.on(events.UPDATE_MODE, this._onUpdateMode);
-      this.on(events.UPDATE_HUD, this._onUpdateHud);
-      this.on(events.RESIZE, this._onResize);
-      this.on(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
-      this.on(events.RENDER_COUNTDOWN, this._onRenderCountdown);
-      this.on(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
-      this.on(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
+      this.Router.subscribe();
     }
     /**
      * ## 取消订阅 UI 事件
@@ -4973,100 +5495,8 @@ var tetris = (() => {
      * @returns {void}
      */
     unsubscribe() {
-      const uuid = this.Game.id;
-      const events = UIEvents(uuid);
-      this.off(events.UPDATE_CONTROLLER, this._onUpdateController);
-      this.off(events.UPDATE_MODE, this._onUpdateMode);
-      this.off(events.UPDATE_HUD, this._onUpdateHud);
-      this.off(events.RESIZE, this._onResize);
-      this.off(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
-      this.off(events.RENDER_COUNTDOWN, this._onRenderCountdown);
-      this.off(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
-      this.off(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
+      this.Router.unsubscribe();
     }
-    /**
-     * ## 处理控制者更新事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {string} payload.controller - 控制者身份
-     * @returns {void}
-     */
-    _onUpdateController = ({ controller }) => {
-      this.updateController(controller);
-    };
-    /**
-     * ## 处理模式更新事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {string} payload.mode - 游戏模式
-     * @returns {void}
-     */
-    _onUpdateMode = ({ mode }) => {
-      this.updateMode(mode);
-    };
-    /**
-     * ## 处理 HUD 更新事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onUpdateHud = () => {
-      this.updateHud(this.Store.getState());
-    };
-    /**
-     * ## 处理画布自适应事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onResize = () => {
-      this.resize();
-    };
-    /**
-     * ## 处理渲染预览方块事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onRenderNextPiece = () => {
-      render_next_piece_default(this.Canvas, this.Store.getState());
-    };
-    /**
-     * ## 处理渲染倒计时事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {object} payload.state - 倒计时状态
-     * @returns {void}
-     */
-    _onRenderCountdown = ({ state }) => {
-      render_countdown_default(this.Canvas, state);
-    };
-    /**
-     * ## 处理渲染消行闪烁事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {object} payload.state - 消行动画状态
-     * @returns {void}
-     */
-    _onRenderClearLines = ({ state }) => {
-      render_clear_lines_default(this.Canvas, state);
-    };
-    /**
-     * ## 处理渲染升级烟花事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {number} payload.level - 新等级
-     * @param {object[]} payload.fireworks - 烟花粒子数组
-     * @returns {void}
-     */
-    _onRenderLevelUp = ({ level, fireworks }) => {
-      render_level_up_default(this.Canvas, level, fireworks);
-    };
   };
   var ui_default = UI;
 
@@ -6433,6 +6863,132 @@ var tetris = (() => {
   };
   var ai_controller_default = AIController;
 
+  // lib/events/router/replay-router.js
+  var ReplayRouter = class extends core_default {
+    constructor(options) {
+      super(options);
+    }
+    /**
+     * ## 绑定所有事件监听
+     *
+     * 在游戏初始化时调用一次。
+     */
+    subscribe() {
+      const { Game: Game2 } = this;
+      const events = ReplayEvents(Game2.id);
+      this.on(events.START_RECORD, this._onStartRecord);
+      this.on(events.STOP_RECORD, this._onStopRecord);
+      this.on(events.ADD_RECORD, this._onAddRecord);
+      this.on(events.ADD_PIECE, this._onAddPiece);
+      this.on(events.START_PLAY, this._onStartPlay);
+      this.on(events.RESET, this._onReset);
+      this.on(events.GAME_OVER, this._onGameOver);
+      this.on(events.STOP_CLEAR_LINES, this._onStopClearLines);
+    }
+    unsubscribe() {
+      const { Game: Game2 } = this;
+      const events = ReplayEvents(Game2.id);
+      this.off(events.START_RECORD, this._onStartRecord);
+      this.off(events.STOP_RECORD, this._onStopRecord);
+      this.off(events.ADD_RECORD, this._onAddRecord);
+      this.off(events.ADD_PIECE, this._onAddPiece);
+      this.off(events.START_PLAY, this._onStartPlay);
+      this.off(events.RESET, this._onReset);
+      this.off(events.GAME_OVER, this._onGameOver);
+      this.off(events.STOP_CLEAR_LINES, this._onStopClearLines);
+    }
+    /** @private */
+    _onStartRecord = () => {
+      const { Replay } = this;
+      Replay.startRecord();
+    };
+    /** @private */
+    _onStopRecord = () => {
+      const { Replay } = this;
+      Replay.stopRecord();
+    };
+    /**
+     * ## 录制一条 command
+     *
+     * 只在 recording 状态下写入。
+     *
+     * @private
+     * @param {object} record - { ms, cmd }
+     */
+    _onAddRecord = (record) => {
+      const { Replay } = this;
+      Replay.addRecord(record);
+    };
+    /**
+     * ## 录制一个方块。
+     *
+     * 只在 recording 状态下写入，使用深拷贝避免引用污染。
+     *
+     * @private
+     * @param {object} piece - 方块数据
+     */
+    _onAddPiece = (piece) => {
+      const { Replay } = this;
+      Replay.addPiece(piece);
+    };
+    /** @private */
+    _onStartPlay = () => {
+      const { Replay } = this;
+      Replay.startPlay();
+    };
+    /** @private */
+    _onReset = () => {
+      const { Replay } = this;
+      Replay.reset();
+    };
+    /**
+     * ## 游戏结束时的处理。
+     *
+     * - 有回放数据：准备棋盘进入回放
+     * - 无回放数据：直接进入 game-over 状态
+     *
+     * @private
+     */
+    _onGameOver = () => {
+      const { Replay, Game: Game2 } = this;
+      const uuid = Game2.id;
+      const AE = AIEvents(uuid);
+      const GE = GameEvents(uuid);
+      const UE = UIEvents(uuid);
+      if (Replay.hasData) {
+        this.emit(AE.STOP);
+        this.emit(GE.REPLAY_PREPARE, {
+          nextPiece: Replay.getNextPiece()
+        });
+      } else {
+        this.emit(UE.UPDATE_MODE, { mode: "game-over" });
+        this.emit(GE.UPDATE_MODE, { mode: "game-over" });
+      }
+    };
+    /**
+     * ## 消行时的处理
+     *
+     * 回放中不触发升级提示音/动画；录制或正常游戏中升级时触发。
+     *
+     * @private
+     * @param {object} param - 参数对象
+     * @param {boolean} param.isLevelUp - 是否升级
+     * @param {number} param.level - 当前等级
+     */
+    _onStopClearLines = ({ isLevelUp, level }) => {
+      const { Game: Game2, Replay } = this;
+      if (!isLevelUp || Replay.playing) {
+        return;
+      }
+      const AE = AudioEvents();
+      const GE = GameEvents(Game2.id);
+      this.emit(AE.STOP_BGM);
+      this.emit(AE.PLAY_SOUND, { sound: "LEVEL_UP" });
+      this.emit(GE.START_LEVEL_UP, { level });
+    };
+  };
+  var replay_router_default = ReplayRouter;
+
   // lib/runtime/replay-controller.js
   var ReplayController = class extends core_default {
     /**
@@ -6451,6 +7007,9 @@ var tetris = (() => {
      */
     constructor(options) {
       super(options);
+      this.initialize();
+    }
+    initialize() {
       this.recording = false;
       this.playing = false;
       this.data = [];
@@ -6460,6 +7019,11 @@ var tetris = (() => {
       this.playElapsed = 0;
       this.startTime = 0;
       this.timestamp = 0;
+      const { Game: Game2 } = this;
+      this.Router = new replay_router_default({
+        Replay: this,
+        Game: Game2
+      });
     }
     getNextPiece() {
       if (!this.playing) {
@@ -6508,17 +7072,16 @@ var tetris = (() => {
      * @param {number} ctx.timestamp - 当前 requestAnimationFrame 时间戳
      */
     update({ speed, timestamp }) {
-      const { Store, Game: Game2 } = this;
+      const { Store, Game: Game2, data } = this;
       const mode = Store.getMode();
       this.timestamp = timestamp;
       if (!this.playing || mode !== "replay") {
         return;
       }
-      const { data } = this;
-      const GE = GameEvents(Game2.id);
+      const events = GameEvents(Game2.id);
       if (data.length > 0 && this.cursor >= data.length) {
         this.stopPlay();
-        this.emit(GE.UPDATE_MODE, { mode: "game-over" });
+        this.emit(events.UPDATE_MODE, { mode: "game-over" });
         return;
       }
       const next = data[this.cursor];
@@ -6577,6 +7140,18 @@ var tetris = (() => {
     stopPlay() {
       this.playing = false;
     }
+    addRecord(record) {
+      if (!this.recording) {
+        return;
+      }
+      this.data.push(record);
+    }
+    addPiece(piece) {
+      if (!this.recording) {
+        return;
+      }
+      this.pieceSequence.push(structuredClone(piece));
+    }
     /**
      * ## 清除所有数据，重置标志位。
      *
@@ -6607,28 +7182,10 @@ var tetris = (() => {
      * 在游戏初始化时调用一次。
      */
     subscribe() {
-      const uuid = this.Game.id;
-      const events = ReplayEvents(uuid);
-      this.on(events.START_RECORD, this._onStartRecord);
-      this.on(events.STOP_RECORD, this._onStopRecord);
-      this.on(events.ADD_RECORD, this._onAddRecord);
-      this.on(events.ADD_PIECE, this._onAddPiece);
-      this.on(events.START_PLAY, this._onStartPlay);
-      this.on(events.RESET, this._onReset);
-      this.on(events.GAME_OVER, this._onGameOver);
-      this.on(events.STOP_CLEAR_LINES, this._onStopClearLines);
+      this.Router.subscribe();
     }
     unsubscribe() {
-      const uuid = this.Game.id;
-      const events = ReplayEvents(uuid);
-      this.off(events.START_RECORD, this._onStartRecord);
-      this.off(events.STOP_RECORD, this._onStopRecord);
-      this.off(events.ADD_RECORD, this._onAddRecord);
-      this.off(events.ADD_PIECE, this._onAddPiece);
-      this.off(events.START_PLAY, this._onStartPlay);
-      this.off(events.RESET, this._onReset);
-      this.off(events.GAME_OVER, this._onGameOver);
-      this.off(events.STOP_CLEAR_LINES, this._onStopClearLines);
+      this.Router.unsubscribe();
     }
     /**
      * ## 销毁实例
@@ -6639,96 +7196,6 @@ var tetris = (() => {
       this.reset();
       this.unsubscribe();
     }
-    /** @private */
-    _onStartRecord = () => {
-      this.startRecord();
-    };
-    /** @private */
-    _onStopRecord = () => {
-      this.stopRecord();
-    };
-    /**
-     * ## 录制一条 command
-     *
-     * 只在 recording 状态下写入。
-     *
-     * @private
-     * @param {object} record - { ms, cmd }
-     */
-    _onAddRecord = (record) => {
-      if (!this.recording) {
-        return;
-      }
-      this.data.push(record);
-    };
-    /**
-     * ## 录制一个方块。
-     *
-     * 只在 recording 状态下写入，使用深拷贝避免引用污染。
-     *
-     * @private
-     * @param {object} piece - 方块数据
-     */
-    _onAddPiece = (piece) => {
-      if (!this.recording) {
-        return;
-      }
-      this.pieceSequence.push(structuredClone(piece));
-    };
-    /** @private */
-    _onStartPlay = () => {
-      this.startPlay();
-    };
-    /** @private */
-    _onReset = () => {
-      this.reset();
-    };
-    /**
-     * ## 游戏结束时的处理。
-     *
-     * - 有回放数据：准备棋盘进入回放
-     * - 无回放数据：直接进入 game-over 状态
-     *
-     * @private
-     */
-    _onGameOver = () => {
-      const { Game: Game2 } = this;
-      const uuid = Game2.id;
-      const AE = AIEvents(uuid);
-      const GE = GameEvents(uuid);
-      const UE = UIEvents(uuid);
-      if (this.hasData) {
-        this.emit(AE.STOP);
-        this.emit(GE.REPLAY_PREPARE, {
-          nextPiece: this.getNextPiece()
-        });
-      } else {
-        this.emit(UE.UPDATE_MODE, { mode: "game-over" });
-        this.emit(GE.UPDATE_MODE, { mode: "game-over" });
-      }
-    };
-    /**
-     * ## 消行时的处理
-     *
-     * 回放中不触发升级提示音/动画；录制或正常游戏中升级时触发。
-     *
-     * @private
-     * @param {object} param - 参数对象
-     * @param {boolean} param.isLevelUp - 是否升级
-     * @param {number} param.level - 当前等级
-     */
-    _onStopClearLines = ({ isLevelUp, level }) => {
-      if (!isLevelUp || this.playing) {
-        return;
-      }
-      const { Game: Game2 } = this;
-      const uuid = Game2.id;
-      const AE = AudioEvents();
-      const GE = GameEvents(uuid);
-      this.emit(AE.STOP_BGM);
-      this.emit(AE.PLAY_SOUND, { sound: "LEVEL_UP" });
-      this.emit(GE.START_LEVEL_UP, { level });
-    };
   };
   var replay_controller_default = ReplayController;
 
@@ -7662,6 +8129,7 @@ var tetris = (() => {
     constructor(options) {
       super(options);
       this.initialize();
+      this.addEventListeners();
     }
     /**
      * ## 初始化所有子系统
@@ -7680,20 +8148,29 @@ var tetris = (() => {
       this.effect = null;
       this.Store = Store;
       this.Animations = new animation_system_default({ Game: this });
-      this.CommandQueue = new command_queue_default({ Game: this });
-      this.UI = new ui_default({ Game: this, Store, Elements });
-      this.Keyboard = new keyboard_controller_default({ Game: this, Store });
-      this.Gamepad = new gamepad_controller_default({ Game: this, Store });
       this.AI = new ai_controller_default({
         Game: this,
         Store,
         Scheduler: Scheduler2,
         Animations: this.Animations
       });
+      this.CommandQueue = new command_queue_default({ Game: this });
+      this.UI = new ui_default({ Game: this, Store, Elements });
+      this.Keyboard = new keyboard_controller_default({ Game: this, Store });
+      this.Gamepad = new gamepad_controller_default({ Game: this, Store });
       this.Replay = new replay_controller_default({
         Game: this,
         Store,
         Scheduler: Scheduler2
+      });
+      this.Router = new game_router_default({
+        AI: this.AI,
+        Animations: this.Animations,
+        CommandQueue: this.CommandQueue,
+        Game: this,
+        Replay: this.Replay,
+        Store,
+        UI: this.UI
       });
     }
     /**
@@ -7790,6 +8267,10 @@ var tetris = (() => {
     /** @returns {void} */
     over() {
       over_default(this);
+    }
+    /** @returns {void} */
+    spawn() {
+      spawn_default(this);
     }
     // ==================== 方块操作代理方法 ====================
     /**
@@ -7893,6 +8374,14 @@ var tetris = (() => {
       );
     }
     // ==================== 事件订阅 / 取消订阅 ====================
+    addEventListeners() {
+      this.Keyboard.addEventListeners();
+      this.Gamepad.addEventListeners();
+    }
+    removeEventListeners() {
+      this.Keyboard.removeEventListeners();
+      this.Gamepad.removeEventListeners();
+    }
     /**
      * ## 订阅所有游戏事件
      *
@@ -7901,44 +8390,7 @@ var tetris = (() => {
      * @returns {void}
      */
     subscribe() {
-      const uuid = this.id;
-      const events = GameEvents(uuid);
-      this.on(events.UPDATE_STATE, this._onUpdateState);
-      this.on(events.UPDATE_MODE, this._onUpdateMode);
-      this.on(events.UPDATE_LEVEL, this._onUpdateLevel);
-      this.on(events.UPDATE_GAMEPAD_CONNECTED, this._onUpdateGamepadConnected);
-      this.on(events.SWITCH_CONTROLLER, this._onSwitchController);
-      this.on(events.UPDATE_HUD, this._onUpdateHud);
-      this.on(events.SAVE_HIGH_SCORE, this._onSaveHighScore);
-      this.on(events.SELECT_LEVEL, this._onSelectLevel);
-      this.on(events.SWITCH_TO_DIFFICULTY, this._onSwitchToDifficulty);
-      this.on(events.SELECT_DIFFICULTY, this._onSelectDifficulty);
-      this.on(events.SWITCH_TO_MAIN_MENU, this._onSwitchToMainMenu);
-      this.on(events.BEGIN, this._onGameBegin);
-      this.on(events.START, this._onGameStart);
-      this.on(events.TOGGLE_PAUSED, this._onTogglePaused);
-      this.on(events.RESTART, this._onGameRestart);
-      this.on(events.RESET, this._onGameReset);
-      this.on(events.OVER, this._onGameOver);
-      this.on(events.BLOCK_MOVE, this._onBlockMove);
-      this.on(events.BLOCK_ROTATE, this._onBlockRotate);
-      this.on(events.BLOCK_DROP, this._onBlockDrop);
-      this.on(events.BLOCK_TICK, this._onBlockTick);
-      this.on(events.BLOCK_SPAWN, this._onBlockSpawn);
-      this.on(events.START_COUNTDOWN, this._onStartCountdown);
-      this.on(events.START_PAUSED, this._onStartPaused);
-      this.on(events.STOP_PAUSED, this._onStopPaused);
-      this.on(events.START_CLEAR_LINES, this._onStartClearLines);
-      this.on(events.START_LEVEL_UP, this._onStartLevelUp);
-      this.on(events.TOGGLE_BGM, this._onToggleBGM);
-      this.on(events.REPLAY_PREPARE, this._onReplayPrepare);
-      this.Keyboard.addEventListeners();
-      this.Gamepad.addEventListeners();
-      this.UI.subscribe();
-      this.Replay.subscribe();
-      this.Animations.subscribe();
-      this.CommandQueue.subscribe();
-      this.AI.subscribe();
+      this.Router.subscribe();
     }
     /**
      * ## 取消订阅所有游戏事件
@@ -7946,280 +8398,8 @@ var tetris = (() => {
      * @returns {void}
      */
     unsubscribe() {
-      const uuid = this.id;
-      const events = GameEvents(uuid);
-      this.off(events.UPDATE_STATE, this._onUpdateState);
-      this.off(events.UPDATE_MODE, this._onUpdateMode);
-      this.off(events.UPDATE_LEVEL, this._onUpdateLevel);
-      this.off(events.UPDATE_GAMEPAD_CONNECTED, this._onUpdateGamepadConnected);
-      this.off(events.SWITCH_CONTROLLER, this._onSwitchController);
-      this.off(events.UPDATE_HUD, this._onUpdateHud);
-      this.off(events.SAVE_HIGH_SCORE, this._onSaveHighScore);
-      this.off(events.SELECT_LEVEL, this._onSelectLevel);
-      this.off(events.SWITCH_TO_DIFFICULTY, this._onSwitchToDifficulty);
-      this.off(events.SELECT_DIFFICULTY, this._onSelectDifficulty);
-      this.off(events.SWITCH_TO_MAIN_MENU, this._onSwitchToMainMenu);
-      this.off(events.BEGIN, this._onGameBegin);
-      this.off(events.START, this._onGameStart);
-      this.off(events.TOGGLE_PAUSED, this._onTogglePaused);
-      this.off(events.RESTART, this._onGameRestart);
-      this.off(events.RESET, this._onGameReset);
-      this.off(events.OVER, this._onGameOver);
-      this.off(events.BLOCK_MOVE, this._onBlockMove);
-      this.off(events.BLOCK_ROTATE, this._onBlockRotate);
-      this.off(events.BLOCK_DROP, this._onBlockDrop);
-      this.off(events.BLOCK_TICK, this._onBlockTick);
-      this.off(events.BLOCK_SPAWN, this._onBlockSpawn);
-      this.off(events.START_COUNTDOWN, this._onStartCountdown);
-      this.off(events.START_PAUSED, this._onStartPaused);
-      this.off(events.STOP_PAUSED, this._onStopPaused);
-      this.off(events.START_CLEAR_LINES, this._onStartClearLines);
-      this.off(events.START_LEVEL_UP, this._onStartLevelUp);
-      this.off(events.TOGGLE_PAUSED, this._onToggleBGM);
-      this.off(events.REPLAY_PREPARE, this._onReplayPrepare);
-      this.Keyboard.removeEventListeners();
-      this.Gamepad.removeEventListeners();
-      this.UI.unsubscribe();
-      this.Replay.unsubscribe();
-      this.Animations.unsubscribe();
-      this.CommandQueue.unsubscribe();
-      this.AI.unsubscribe();
+      this.Router.unsubscribe();
     }
-    // ==================== 事件处理器（私有） ====================
-    /**
-     * ## 切换控制者（human ↔ ai）
-     *
-     * @private
-     * @returns {void}
-     */
-    _onSwitchController = () => {
-      const { Store } = this;
-      const uuid = this.id;
-      const controller = Store.getController() === "human" ? "ai" : "human";
-      const AE = AIEvents(uuid);
-      const UE = UIEvents(uuid);
-      Store.setController(controller);
-      if (controller === "ai") {
-        this.emit(AE.START);
-      } else {
-        this.emit(AE.STOP);
-      }
-      this.emit(UE.UPDATE_CONTROLLER, { controller });
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onUpdateState = (options) => {
-      const { stateHandler } = options;
-      this.Store.setState(stateHandler);
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onUpdateMode = (options) => {
-      const { mode } = options;
-      const events = UIEvents(this.id);
-      this.emit(events.UPDATE_MODE, { mode });
-      this.Store.setMode(mode);
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onUpdateLevel = (options) => {
-      const { level } = options;
-      this.Store.setLevel(level);
-    };
-    /** @private */
-    _onUpdateHud = () => {
-      const events = UIEvents(this.id);
-      this.emit(events.UPDATE_HUD, { state: this.Store.getState() });
-    };
-    /** @private */
-    _onSaveHighScore = () => {
-      this.saveHighScore(this.Store.getScore());
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onSelectLevel = (options) => {
-      const { level } = options;
-      const events = UIEvents(this.id);
-      this.selectLevel(level);
-      this.emit(events.UPDATE_HUD, { state: this.Store.getState() });
-    };
-    /** @private */
-    _onSwitchToDifficulty = () => {
-      const events = UIEvents(this.id);
-      this.emit(events.UPDATE_MODE, { mode: "difficulty" });
-      this.switchToDifficulty();
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onSelectDifficulty = (options) => {
-      const { difficulty } = options;
-      this.selectDifficulty(difficulty);
-    };
-    /** @private */
-    _onSwitchToMainMenu = () => {
-      this.switchToMainMenu();
-    };
-    /** @private */
-    _onGameBegin = () => {
-      this.begin();
-    };
-    /**
-     * ## 游戏开始事件处理
-     *
-     * 进入倒计时阶段。如果当前是 AI 控制，发送 `ai:start` 事件。
-     *
-     * @private
-     * @returns {void}
-     */
-    _onGameStart = () => {
-      const events = AIEvents(this.id);
-      this.start();
-      if (this.Store.getController() === "ai") {
-        this.emit(events.START);
-      }
-    };
-    /**
-     * ## 暂停/继续切换事件处理
-     *
-     * 根据切换后的模式自动管理 AI 的启停。
-     *
-     * @private
-     * @returns {void}
-     */
-    _onTogglePaused = () => {
-      const uuid = this.id;
-      const events = AIEvents(uuid);
-      this.togglePause();
-      if (this.Store.getController() === "ai") {
-        const { mode } = this.Store.getState();
-        if (mode === "paused") {
-          this.emit(events.STOP);
-        } else if (mode === "playing") {
-          this.emit(events.START);
-        }
-      }
-    };
-    /** @private */
-    _onGameReset = () => {
-      this.reset();
-    };
-    /** @private */
-    _onGameRestart = () => {
-      this.restart();
-    };
-    /** @private */
-    _onGameOver = () => {
-      this.over();
-    };
-    /** @private */
-    _onBlockSpawn = () => {
-      spawn_default(this);
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onBlockMove = (options) => {
-      const { ox, oy } = options;
-      this.move(ox, oy);
-    };
-    /** @private */
-    _onBlockRotate = () => {
-      this.rotate();
-    };
-    /** @private */
-    _onBlockDrop = () => {
-      this.drop();
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onBlockTick = (options) => {
-      const { isBlocked } = options;
-      this.tick(isBlocked);
-    };
-    /** @private */
-    _onToggleBGM = () => {
-      const { Store, Level } = this;
-      const events = AudioEvents();
-      this.emit(events.TOGGLE_BGM, {
-        level: Store.getLevel(),
-        maxLevel: Level.max
-      });
-    };
-    /**
-     * ## 回放准备棋盘事件处理
-     *
-     * 重置棋盘为初始状态，设置回放模式，开始回放。
-     *
-     * @private
-     * @returns {void}
-     */
-    _onReplayPrepare = () => {
-      const { id, Store } = this;
-      const UE = UIEvents(id);
-      const RE = ReplayEvents(id);
-      const GE = GameEvents(id);
-      Store.resetBoard();
-      Store.setState({
-        board: Store.getBeginningBoard(),
-        score: 0,
-        lines: 0,
-        level: 1
-      });
-      this.emit(UE.UPDATE_MODE, { mode: "replay" });
-      Store.setMode("replay");
-      this.emit(UE.UPDATE_HUD, { state: Store.getState() });
-      this.emit(RE.START_PLAY);
-      this.emit(GE.BLOCK_SPAWN);
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onUpdateGamepadConnected = (options) => {
-      const { connected } = options;
-      this.Store.setGamepadConnected(connected);
-    };
-    /** @private */
-    _onStartCountdown = () => {
-      this.startCountdown();
-    };
-    /** @private */
-    _onStartPaused = () => {
-      this.startPaused();
-    };
-    /** @private */
-    _onStopPaused = () => {
-      this.stopPaused();
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onStartClearLines = (options) => {
-      const { linesToClear } = options;
-      this.startClearLines(linesToClear);
-    };
-    /**
-     * @private
-     * @param {object} options - 参数对象
-     */
-    _onStartLevelUp = (options) => {
-      const { level } = options;
-      this.startLevelUp(level);
-    };
   };
   var game_default2 = Game;
 
@@ -8305,10 +8485,9 @@ var tetris = (() => {
      * ## 初始化方法
      *
      * @param {string} action - 命令类型（如 MOVE_LEFT、ROTATE、DROP 等）
-     * @param {object} [payload={}] - 命令携带的额外参数（如 Game 实例引用等）。默认值为 `{}`. Default.
-     *   Default is `{}`
+     * @param {object} [payload] - 命令携带的额外参数（如 Game 实例引用等）。
      */
-    initialize(action = "", payload = {}) {
+    initialize(action, payload = {}) {
       this.action = action;
       this.payload = payload;
     }
