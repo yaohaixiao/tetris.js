@@ -38,7 +38,9 @@ describe('start', () => {
     it('应该发送倒计时事件，传递 { game }', () => {
       start(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('game:test-game-uuid:start:countdown');
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'game:test-game-uuid:start:countdown',
+      );
     });
   });
 
@@ -84,7 +86,9 @@ describe('start', () => {
 
       start(mockContext);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('game:custom-game-id:start:countdown');
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'game:custom-game-id:start:countdown',
+      );
     });
 
     it('应该不传递额外的 payload', () => {

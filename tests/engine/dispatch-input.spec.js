@@ -266,18 +266,9 @@ describe('dispatchInput', () => {
 
       const context = { isBlocked: false, ms: 1000 };
 
-      dispatchInput(
-        { action: 'MOVE', payload: { Game: game } },
-        context,
-      );
-      dispatchInput(
-        { action: 'ROTATE', payload: { Game: game } },
-        context,
-      );
-      dispatchInput(
-        { action: 'DROP', payload: { Game: game } },
-        context,
-      );
+      dispatchInput({ action: 'MOVE', payload: { Game: game } }, context);
+      dispatchInput({ action: 'ROTATE', payload: { Game: game } }, context);
+      dispatchInput({ action: 'DROP', payload: { Game: game } }, context);
 
       expect(game.emit).toHaveBeenCalledTimes(6); // 每次调用发两个事件
     });
