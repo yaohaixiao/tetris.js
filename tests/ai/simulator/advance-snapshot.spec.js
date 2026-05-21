@@ -32,7 +32,9 @@ describe('advanceSnapshot', () => {
 
   const createSnapshot = () => ({
     controller: 'ai',
-    board: Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0)),
+    board: Array.from({ length: 20 }, () =>
+      Array.from({ length: 10 }, () => 0),
+    ),
     level: 1,
     score: 0,
     lines: 0,
@@ -52,7 +54,9 @@ describe('advanceSnapshot', () => {
   });
 
   const createMove = () => ({
-    board: Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0)),
+    board: Array.from({ length: 20 }, () =>
+      Array.from({ length: 10 }, () => 0),
+    ),
     actions: ['DROP'],
     y: 18,
   });
@@ -60,7 +64,9 @@ describe('advanceSnapshot', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    simulatePlacement.mockImplementation((board) => board.map((row) => [...row]));
+    simulatePlacement.mockImplementation((board) =>
+      board.map((row) => [...row]),
+    );
     clearFullLines.mockImplementation((board) => board.map((row) => [...row]));
     randomShape.mockReturnValue({
       shape: [[1]],

@@ -22,18 +22,40 @@ import advanceSnapshot from '@/lib/ai/simulator/advance-snapshot.js';
 describe('selfPlay', () => {
   const createSnapshot = () => ({
     controller: 'ai',
-    board: Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0)),
+    board: Array.from({ length: 20 }, () =>
+      Array.from({ length: 10 }, () => 0),
+    ),
     level: 1,
     score: 0,
     lines: 0,
-    cur: { shape: [[0, 1, 0], [1, 1, 1]], color: '#00c8ff' },
-    next: { shape: [[1, 1], [1, 1]], color: '#ffa500' },
-    piece: { shape: [[0, 1, 0], [1, 1, 1]], position: { x: 3, y: 0 } },
+    cur: {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1],
+      ],
+      color: '#00c8ff',
+    },
+    next: {
+      shape: [
+        [1, 1],
+        [1, 1],
+      ],
+      color: '#ffa500',
+    },
+    piece: {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1],
+      ],
+      position: { x: 3, y: 0 },
+    },
     mode: 'playing',
   });
 
   const createMove = (overrides = {}) => ({
-    board: Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0)),
+    board: Array.from({ length: 20 }, () =>
+      Array.from({ length: 10 }, () => 0),
+    ),
     actions: ['DROP'],
     y: 18,
     ...overrides,
@@ -118,7 +140,12 @@ describe('selfPlay', () => {
 
     it('应该将 weights 传给 evaluateBoard', () => {
       const snapshot = createSnapshot();
-      const weights = { holes: -0.75, height: -0.51, bumpiness: -0.18, completeLines: 1.5 };
+      const weights = {
+        holes: -0.75,
+        height: -0.51,
+        bumpiness: -0.18,
+        completeLines: 1.5,
+      };
       generateMoves.mockReturnValue([createMove()]);
       evaluateBoard.mockReturnValue(0);
 
@@ -167,9 +194,7 @@ describe('selfPlay', () => {
     it('递归返回 null 时应该退回到直接评估', () => {
       const snapshot = createSnapshot();
       const move = createMove();
-      generateMoves
-        .mockReturnValueOnce([move])
-        .mockReturnValueOnce([]);
+      generateMoves.mockReturnValueOnce([move]).mockReturnValueOnce([]);
 
       advanceSnapshot.mockReturnValue({ ...snapshot });
       evaluateBoard.mockReturnValue(-5);
@@ -182,7 +207,12 @@ describe('selfPlay', () => {
 
     it('递归时应传递 weights', () => {
       const snapshot = createSnapshot();
-      const weights = { holes: -0.9, height: -0.55, bumpiness: -0.2, completeLines: 6.0 };
+      const weights = {
+        holes: -0.9,
+        height: -0.55,
+        bumpiness: -0.2,
+        completeLines: 6.0,
+      };
       const move = createMove();
       generateMoves.mockReturnValue([move]);
 
@@ -217,7 +247,7 @@ describe('selfPlay', () => {
 
       expect(generateMoves).toHaveBeenCalledTimes(3);
       expect(advanceSnapshot).toHaveBeenCalledTimes(2);
-      expect(evaluateBoard).toHaveBeenCalledTimes(3);  // 改这里
+      expect(evaluateBoard).toHaveBeenCalledTimes(3); // 改这里
     });
   });
 

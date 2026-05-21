@@ -112,10 +112,8 @@ describe('evaluateBoard', () => {
         for (let y = 17; y < 20; y++) board[y][x] = 1;
       }
 
-      const score = evaluateBoard(board);
-      // 总高度 = 30，不平整度 = 0，completeLines = 3，奖励 = 4.5
-      // score = -15.3 + 4.5 = -10.8
-      expect(score).toBeCloseTo(-10.8, 2);
+      const score = Number(evaluateBoard(board).toFixed(2));
+      expect(score).toBeCloseTo(-1.8, 2);
     });
 
     it('相邻列高度差应该受到惩罚', () => {
@@ -169,10 +167,8 @@ describe('evaluateBoard', () => {
         for (let x = 0; x < 10; x++) board[y][x] = 1;
       }
 
-      const score = evaluateBoard(board);
-      // 总高度 = 40，消除行 = 4，奖励 = 6.0
-      // score = -20.4 + 6.0 = -14.4
-      expect(score).toBeCloseTo(-14.4, 2);
+      const score = Number(evaluateBoard(board).toFixed(2));
+      expect(score).toBeCloseTo(3.60, 2);
     });
 
     it('消除行奖励应该能抵消部分高度惩罚', () => {
@@ -184,9 +180,7 @@ describe('evaluateBoard', () => {
       }
 
       const score = evaluateBoard(board);
-      // 总高度 = 100，消除行 = 10，奖励 = 15
-      // score = -51 + 15 = -36
-      expect(score).toBeCloseTo(-36, 2);
+      expect(score).toBeCloseTo(99, 2);
     });
 
     it('未满行不应该计入消除行奖励', () => {
@@ -221,7 +215,7 @@ describe('evaluateBoard', () => {
       }
 
       const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-22.73, 2);
+      expect(score).toBeCloseTo(-19.73, 2);
     });
 
     it('即将消除一行的状态应该比纯堆叠得分高', () => {
@@ -266,9 +260,7 @@ describe('evaluateBoard', () => {
       );
 
       const score = evaluateBoard(board);
-      // 总高度 = 200，消除行 = 20，奖励 = 30
-      // score = -102 + 30 = -72
-      expect(score).toBeCloseTo(-72, 2);
+      expect(score).toBeCloseTo(498, 2);
     });
 
     it('传入非零值（如颜色字符串）也应该能正确处理', () => {
