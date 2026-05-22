@@ -1,13 +1,6 @@
 import LevelUpAnimation from '@/lib/services/animations/level-up-animation';
 import Scheduler from '@/lib/engine/scheduler';
 
-jest.mock('@/lib/services/ui/constants/firework-colors', () => [
-  '#FF0000',
-  '#00FF00',
-  '#0000FF',
-  '#FFFF00',
-]);
-
 describe('LevelUpAnimation', () => {
   let scheduler;
   let mockGame;
@@ -20,10 +13,12 @@ describe('LevelUpAnimation', () => {
     scheduler = new Scheduler();
 
     mockUI = {
-      Canvas: {
-        gameBoard: {
-          width: 400,
-          height: 600,
+      Renderer: {
+        Canvas: {
+          gameBoard: {
+            width: 800,
+            height: 600,
+          },
         },
       },
     };
@@ -94,7 +89,7 @@ describe('LevelUpAnimation', () => {
       const particles = animation.createFireworks();
 
       particles.forEach((p) => {
-        expect(p.x).toBe(200); // width/2 = 400/2
+        expect(p.x).toBe(400); // width/2 = 800/2
         expect(p.y).toBe(240); // height/2 - 60 = 300 - 60
       });
     });
@@ -103,7 +98,7 @@ describe('LevelUpAnimation', () => {
       const particles = animation.createFireworks();
       const p = particles[0];
 
-      expect(p).toHaveProperty('x', 200);
+      expect(p).toHaveProperty('x', 400);
       expect(p).toHaveProperty('y', 240);
       expect(p).toHaveProperty('vx');
       expect(p).toHaveProperty('vy');
