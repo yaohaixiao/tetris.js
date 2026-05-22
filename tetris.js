@@ -58,7 +58,7 @@ var tetris = (() => {
   };
   var colors_default = COLORS;
 
-  // lib/services/ui/constants/images/scenes-background.js
+  // lib/services/ui/constants/scenes-background.js
   var { RGBA_WHITE: RGBA_WHITE2 } = colors_default;
   var ScenesBackground = {
     /** 主菜单 / 倒计时：彩色 "TETRIS" 字样 */
@@ -2586,7 +2586,7 @@ var tetris = (() => {
      * @returns {void}
      */
     subscribe() {
-      const { AI, Animations, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
+      const { Animations, AI, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
       const events = GameEvents(Game2.id);
       this.on(events.UPDATE_STATE, this._onUpdateState);
       this.on(events.UPDATE_MODE, this._onUpdateMode);
@@ -2629,7 +2629,7 @@ var tetris = (() => {
      * @returns {void}
      */
     unsubscribe() {
-      const { AI, Animations, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
+      const { Animations, AI, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
       const events = GameEvents(Game2.id);
       this.off(events.UPDATE_STATE, this._onUpdateState);
       this.off(events.UPDATE_MODE, this._onUpdateMode);
@@ -3630,141 +3630,6 @@ var tetris = (() => {
   };
   var animation_system_default = AnimationSystem;
 
-  // lib/events/router/ui-router.js
-  var UIRouter = class extends core_default {
-    constructor(options) {
-      super(options);
-    }
-    /**
-     * ## 订阅 UI 事件
-     *
-     * 绑定所有 UI 相关的渲染事件。
-     *
-     * @returns {void}
-     */
-    subscribe() {
-      const { Game: Game2 } = this;
-      const events = UIEvents(Game2.id);
-      this.on(events.UPDATE_MODE, this._onUpdateMode);
-      this.on(events.UPDATE_HUD, this._onUpdateHud);
-      this.on(events.UPDATE_CONTROLLER, this._onUpdateController);
-      this.on(events.RESIZE, this._onResize);
-      this.on(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
-      this.on(events.RENDER_COUNTDOWN, this._onRenderCountdown);
-      this.on(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
-      this.on(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
-    }
-    /**
-     * ## 取消订阅 UI 事件
-     *
-     * @returns {void}
-     */
-    unsubscribe() {
-      const { Game: Game2 } = this;
-      const events = UIEvents(Game2.id);
-      this.off(events.UPDATE_MODE, this._onUpdateMode);
-      this.off(events.UPDATE_HUD, this._onUpdateHud);
-      this.off(events.UPDATE_CONTROLLER, this._onUpdateController);
-      this.off(events.RESIZE, this._onResize);
-      this.off(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
-      this.off(events.RENDER_COUNTDOWN, this._onRenderCountdown);
-      this.off(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
-      this.off(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
-    }
-    /**
-     * ## 处理模式更新事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {string} payload.mode - 游戏模式
-     * @returns {void}
-     */
-    _onUpdateMode = ({ mode }) => {
-      const { UI: UI2 } = this;
-      UI2.updateMode(mode);
-    };
-    /**
-     * ## 处理控制者更新事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {string} payload.controller - 控制者身份
-     * @returns {void}
-     */
-    _onUpdateController = ({ controller }) => {
-      const { UI: UI2 } = this;
-      UI2.updateController(controller);
-    };
-    /**
-     * ## 处理 HUD 更新事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onUpdateHud = () => {
-      const { UI: UI2 } = this;
-      UI2.updateHud();
-    };
-    /**
-     * ## 处理画布自适应事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onResize = () => {
-      const { UI: UI2 } = this;
-      UI2.resize();
-    };
-    /**
-     * ## 处理渲染预览方块事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onRenderNextPiece = () => {
-      const { UI: UI2 } = this;
-      UI2.renderNextPiece();
-    };
-    /**
-     * ## 处理渲染倒计时事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {object} payload.state - 倒计时状态
-     * @returns {void}
-     */
-    _onRenderCountdown = ({ state }) => {
-      const { UI: UI2 } = this;
-      UI2.renderCountdown(state);
-    };
-    /**
-     * ## 处理渲染消行闪烁事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {object} payload.state - 消行动画状态
-     * @returns {void}
-     */
-    _onRenderClearLines = ({ state }) => {
-      const { UI: UI2 } = this;
-      UI2.renderClearLines(state);
-    };
-    /**
-     * ## 处理渲染升级烟花事件
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {number} payload.level - 新等级
-     * @param {object[]} payload.fireworks - 烟花粒子数组
-     * @returns {void}
-     */
-    _onRenderLevelUp = ({ level, fireworks }) => {
-      const { UI: UI2 } = this;
-      UI2.renderLevelUp(level, fireworks);
-    };
-  };
-  var ui_router_default = UIRouter;
-
   // lib/services/ui/core/canvas.js
   var Canvas = class {
     /**
@@ -3795,6 +3660,19 @@ var tetris = (() => {
   };
   var canvas_default = Canvas;
 
+  // lib/utils/pad-start.js
+  var padStart = (n, len) => {
+    const num = Number(n);
+    if (!Number.isFinite(num)) {
+      return "";
+    }
+    const targetLen = Math.max(0, Math.floor(len));
+    const sign = num < 0 ? "-" : "";
+    const absStr = Math.abs(num).toString();
+    return sign + absStr.padStart(targetLen, "0");
+  };
+  var pad_start_default = padStart;
+
   // lib/services/ui/hud/hud-elements.js
   var HudElements = (options) => {
     const { controller, score, lines, level, highScore } = options;
@@ -3812,6 +3690,113 @@ var tetris = (() => {
     };
   };
   var hud_elements_default = HudElements;
+
+  // lib/services/ui/hud/hud-manager.js
+  var setText = (el, value, pad = 0) => el.textContent = pad ? pad_start_default(value, pad) : String(value);
+  var animationScore = (tracker, element, padding) => {
+    if (tracker.visual === tracker.target) {
+      return;
+    }
+    const diff = tracker.target - tracker.visual;
+    const step = Math.ceil(Math.abs(diff) * 0.1);
+    if (diff > 0) {
+      tracker.visual += step;
+      if (tracker.visual > tracker.target) {
+        tracker.visual = tracker.target;
+      }
+    } else {
+      tracker.visual -= step;
+      if (tracker.visual < tracker.target) {
+        tracker.visual = tracker.target;
+      }
+    }
+    setText(element, tracker.visual, padding);
+  };
+  var HudManager = class {
+    /**
+     * ## 创建 HUD 实例
+     *
+     * @param {object} options - HUD 各 DOM 元素的配置信息
+     * @param {string} options.score - 分数显示元素名称
+     * @param {string} options.highScore - 最高分显示元素名称
+     * @param {string} options.lines - 消除行数显示元素名称
+     * @param {string} options.level - 等级显示元素名称
+     * @param {string} options.controller - 控制者标识显示元素名称
+     */
+    constructor(options) {
+      this.elements = hud_elements_default(options);
+      this.scoreTracker = { visual: 0, target: 0 };
+      this.highScoreTracker = { visual: 0, target: 0 };
+      this.prev = { lines: -1, level: -1 };
+    }
+    /**
+     * ## 更新 HUD 目标值
+     *
+     * 分数和最高分只更新 target（由 `tick()` 驱动动画）， 行数和等级立即更新 DOM。
+     *
+     * @param {object} state - 游戏状态
+     * @param {number} state.score - 当前分数
+     * @param {number} state.highScore - 最高分
+     * @param {number} state.lines - 消除行数
+     * @param {number} state.level - 当前等级
+     * @returns {void}
+     */
+    update(state) {
+      const { elements, scoreTracker, highScoreTracker, prev } = this;
+      scoreTracker.target = Number(state.score) || 0;
+      highScoreTracker.target = Number(state.highScore) || 0;
+      if (state.lines !== prev.lines) {
+        setText(elements.lines, state.lines, 2);
+        prev.lines = state.lines;
+      }
+      if (state.level !== prev.level) {
+        setText(elements.level, state.level, 2);
+        prev.level = state.level;
+      }
+    }
+    /**
+     * ## 更新控制者标识
+     *
+     * @param {string} controller - 控制者身份（'human' 或 'ai'），会转为大写显示
+     * @returns {void}
+     */
+    updateController(controller) {
+      setText(this.elements.controller, controller.toUpperCase());
+    }
+    /**
+     * ## 每帧驱动动画
+     *
+     * 在游戏主循环中调用，更新分数和最高分的平滑动画。
+     *
+     * @returns {void}
+     */
+    tick() {
+      const { elements, scoreTracker, highScoreTracker } = this;
+      animationScore(scoreTracker, elements.score, 5);
+      animationScore(highScoreTracker, elements.highScore, 5);
+    }
+    /**
+     * ## 重置 HUD 为初始状态
+     *
+     * 清空所有追踪器和 DOM 显示，通常在返回主菜单或游戏重置时调用。
+     *
+     * @returns {void}
+     */
+    reset() {
+      const { elements, scoreTracker, highScoreTracker, prev } = this;
+      scoreTracker.visual = 0;
+      scoreTracker.target = 0;
+      highScoreTracker.visual = 0;
+      highScoreTracker.target = 0;
+      prev.lines = -1;
+      prev.level = -1;
+      setText(elements.score, 0, 5);
+      setText(elements.highScore, 0, 5);
+      setText(elements.lines, 0, 2);
+      setText(elements.level, 1, 2);
+    }
+  };
+  var hud_manager_default = HudManager;
 
   // lib/services/ui/board/clear-board.js
   function clearBoard(canvas) {
@@ -3875,14 +3860,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-tetris-text.js
   var renderTetrisText = (canvas) => {
-    const { GREEN: GREEN6 } = colors_default;
+    const { GREEN: GREEN5 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "TETRIS.JS",
       x: width / 2,
       y: height * 0.1,
-      color: GREEN6,
+      color: GREEN5,
       size: 1.1
     });
   };
@@ -3890,14 +3875,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-level-text.js
   var renderLevelText = (canvas) => {
-    const { GREEN: GREEN6 } = colors_default;
+    const { GREEN: GREEN5 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "LEVEL",
       x: width / 2,
       y: height * 0.35,
-      color: GREEN6,
+      color: GREEN5,
       size: 1,
       center: true
     });
@@ -3906,14 +3891,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-level-number.js
   var renderLevelNumber = (canvas, level, y) => {
-    const { GREEN: GREEN6 } = colors_default;
+    const { GREEN: GREEN5 } = colors_default;
     const { gameBoard } = canvas;
     const { width } = gameBoard;
     render_text_default(canvas, {
       text: String(level),
       x: width / 2,
       y,
-      color: GREEN6,
+      color: GREEN5,
       size: 3,
       center: true
     });
@@ -3938,14 +3923,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-enter-continue-text.js
   var renderEnterContinueText = (canvas) => {
-    const { TEAL: TEAL6, BLACK: BLACK2 } = colors_default;
+    const { TEAL: TEAL5, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "ENTER CONTINUE",
       x: width / 2,
       y: height * 0.74,
-      color: TEAL6,
+      color: TEAL5,
       strokeColor: BLACK2,
       size: 1,
       center: true,
@@ -4084,14 +4069,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-difficulty-text.js
   var renderDifficultText = (canvas) => {
-    const { GREEN: GREEN6 } = colors_default;
+    const { GREEN: GREEN5 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "DIFFICULTY",
       x: width / 2,
       y: height * 0.35,
-      color: GREEN6,
+      color: GREEN5,
       size: 1,
       center: true
     });
@@ -4100,14 +4085,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-difficult-words.js
   var renderDifficultyWords = (canvas, difficulty, y) => {
-    const { GREEN: GREEN6 } = colors_default;
+    const { GREEN: GREEN5 } = colors_default;
     const { gameBoard } = canvas;
     const { width } = gameBoard;
     render_text_default(canvas, {
       text: difficulty.toUpperCase(),
       x: width / 2,
       y,
-      color: GREEN6,
+      color: GREEN5,
       size: 2.2,
       center: true
     });
@@ -4136,14 +4121,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-enter-start-text.js
   var renderEnterStartText = (canvas) => {
-    const { TEAL: TEAL6, BLACK: BLACK2 } = colors_default;
+    const { TEAL: TEAL5, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "ENTER START",
       x: width / 2,
       y: height * 0.74,
-      color: TEAL6,
+      color: TEAL5,
       strokeColor: BLACK2,
       size: 1.15,
       center: true,
@@ -4175,14 +4160,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-paused-text.js
   var renderPausedText = (canvas) => {
-    const { YELLOW: YELLOW6, BLACK: BLACK2 } = colors_default;
+    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "PAUSED",
       x: width / 2,
       y: height / 1.4,
-      color: YELLOW6,
+      color: YELLOW5,
       strokeColor: BLACK2,
       size: 1.6,
       center: true,
@@ -4245,19 +4230,6 @@ var tetris = (() => {
     Red: { stroke: RED3, face: RGBA_RED2, secondHand: WHITE2 }
   };
   var clock_themes_default = ClockThemes;
-
-  // lib/utils/pad-start.js
-  var padStart = (n, len) => {
-    const num = Number(n);
-    if (!Number.isFinite(num)) {
-      return "";
-    }
-    const targetLen = Math.max(0, Math.floor(len));
-    const sign = num < 0 ? "-" : "";
-    const absStr = Math.abs(num).toString();
-    return sign + absStr.padStart(targetLen, "0");
-  };
-  var pad_start_default = padStart;
 
   // lib/utils/format-time.js
   var formatTime = (date, format = "yyyy-MM-dd HH:mm:ss") => {
@@ -4354,7 +4326,7 @@ var tetris = (() => {
   };
   var get_clock_angles_default = getClockAngles;
 
-  // lib/services/ui/constants/images/chinese-hour-animals.js
+  // lib/services/ui/constants/chinese-hour-animals.js
   var { RGBA_WHITE: RGBA_WHITE4 } = colors_default;
   var ChineseHourAnimals = {
     /** 子时 (23:00-01:00)：鼠 */
@@ -4557,7 +4529,7 @@ var tetris = (() => {
   };
   var render_analog_clock_default = renderAnalogClock;
 
-  // lib/services/ui/core/render-block.js
+  // lib/services/ui/board/render-block.js
   var renderBlock = (canvas, x, y, color) => {
     const { gameBoardContext: ctx, blockSize } = canvas;
     const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
@@ -4572,7 +4544,7 @@ var tetris = (() => {
   };
   var render_block_default = renderBlock;
 
-  // lib/services/ui/constants/images/chinese-hour-characters.js
+  // lib/services/ui/constants/chinese-hour-characters.js
   var { RGBA_TEAL: RGBA_TEAL3 } = colors_default;
   var ChineseHourCharacters = {
     /** 子时 (23:00-01:00) */
@@ -4860,15 +4832,15 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-game-text.js
   var renderGameText = (canvas) => {
-    const { RED: RED6, YELLOW: YELLOW6 } = colors_default;
+    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "GAME",
       x: width / 2,
       y: height / 1.8,
-      color: RED6,
-      strokeColor: YELLOW6,
+      color: RED5,
+      strokeColor: YELLOW5,
       size: 2.3,
       center: true,
       stroke: true
@@ -4878,15 +4850,15 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-over-text.js
   var renderOverText = (canvas) => {
-    const { RED: RED6, YELLOW: YELLOW6 } = colors_default;
+    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "OVER",
       x: width / 2,
       y: height / 1.6,
-      color: RED6,
-      strokeColor: YELLOW6,
+      color: RED5,
+      strokeColor: YELLOW5,
       size: 2.3,
       center: true,
       stroke: true
@@ -5070,6 +5042,23 @@ var tetris = (() => {
   };
   var lazy_render_scene_default = lazyRenderScene;
 
+  // lib/services/ui/core/resize.js
+  var resize = (canvas) => {
+    const { gameBoard, nextPiece, rows, cols } = canvas;
+    const h = globalThis.innerHeight * 0.9;
+    canvas.blockSize = Math.floor(h / rows);
+    gameBoard.width = canvas.blockSize * cols;
+    gameBoard.height = canvas.blockSize * rows;
+    canvas.fontSize = Math.floor(gameBoard.height * 0.032);
+    const nextSize = Math.min(
+      globalThis.innerWidth * 0.1,
+      globalThis.innerHeight * 0.18
+    );
+    nextPiece.width = nextSize;
+    nextPiece.height = nextSize;
+  };
+  var resize_default = resize;
+
   // lib/services/ui/board/render-clear-lines.js
   var renderClearLines = (canvas, state) => {
     const { gameBoardContext: ctx, cols } = canvas;
@@ -5086,7 +5075,7 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-countdown-text.js
   var renderCountdownText = (canvas, count, scale = 1) => {
-    const { YELLOW: YELLOW6, BLACK: BLACK2 } = colors_default;
+    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
     const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
     const { gameBoard, gameBoardContext: ctx, fontSize } = canvas;
     const { width, height } = gameBoard;
@@ -5096,7 +5085,7 @@ var tetris = (() => {
     ctx.translate(width / 2, height / 2);
     ctx.scale(scale, scale);
     ctx.font = `${fontSize * 3.25}px ${FONT_FAMILY2}`;
-    ctx.fillStyle = YELLOW6;
+    ctx.fillStyle = YELLOW5;
     ctx.strokeStyle = BLACK2;
     ctx.lineWidth = 6;
     const text = String(count);
@@ -5108,14 +5097,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-get-ready-text.js
   var renderGetReadyText = (canvas) => {
-    const { GREEN: GREEN6, BLACK: BLACK2 } = colors_default;
+    const { GREEN: GREEN5, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "GET READY!",
       x: width / 2,
       y: height / 1.46,
-      color: GREEN6,
+      color: GREEN5,
       stroke: true,
       strokeColor: BLACK2,
       // 固定字号
@@ -5171,14 +5160,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-level-up-text.js
   var renderLevelUpText = (canvas) => {
-    const { GREEN: GREEN6 } = colors_default;
+    const { GREEN: GREEN5 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "LEVEL UP",
       x: width / 2,
       y: height / 2.5,
-      color: GREEN6,
+      color: GREEN5,
       size: 1.2,
       center: true
     });
@@ -5187,14 +5176,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-congrats-text.js
   var renderCongratsText = (canvas) => {
-    const { YELLOW: YELLOW6, BLACK: BLACK2 } = colors_default;
+    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "CONGRATS!",
       x: width / 2,
       y: height / 1.6,
-      color: YELLOW6,
+      color: YELLOW5,
       // 黄色填充
       stroke: true,
       // 启用描边
@@ -5223,149 +5212,17 @@ var tetris = (() => {
   }
   var render_level_up_default = renderLevelUp;
 
-  // lib/services/ui/core/resize.js
-  var resize = (canvas) => {
-    const { gameBoard, nextPiece, rows, cols } = canvas;
-    const h = globalThis.innerHeight * 0.9;
-    canvas.blockSize = Math.floor(h / rows);
-    gameBoard.width = canvas.blockSize * cols;
-    gameBoard.height = canvas.blockSize * rows;
-    canvas.fontSize = Math.floor(gameBoard.height * 0.032);
-    const nextSize = Math.min(
-      globalThis.innerWidth * 0.1,
-      globalThis.innerHeight * 0.18
-    );
-    nextPiece.width = nextSize;
-    nextPiece.height = nextSize;
-  };
-  var resize_default = resize;
-
-  // lib/services/ui/hud/create-hud.js
-  var setText = (el, value, pad = 0) => el.textContent = pad ? pad_start_default(value, pad) : String(value);
-  var animationScore = (tracker, element, padding) => {
-    if (tracker.visual === tracker.target) {
-      return;
-    }
-    const diff = tracker.target - tracker.visual;
-    const step = Math.ceil(Math.abs(diff) * 0.1);
-    if (diff > 0) {
-      tracker.visual += step;
-      if (tracker.visual > tracker.target) {
-        tracker.visual = tracker.target;
-      }
-    } else {
-      tracker.visual -= step;
-      if (tracker.visual < tracker.target) {
-        tracker.visual = tracker.target;
-      }
-    }
-    setText(element, tracker.visual, padding);
-  };
-  var createHud = (HudElements2) => {
-    const scoreTracker = { visual: 0, target: 0 };
-    const highScoreTracker = { visual: 0, target: 0 };
-    const prev = { lines: -1, level: -1 };
-    return {
-      /**
-       * ## 更新 HUD 目标值
-       *
-       * 分数和最高分只更新 target（由 tick 驱动动画）， 行数和等级立即更新 DOM。
-       *
-       * @param {object} state - 游戏状态
-       * @param {number} state.score - 当前分数
-       * @param {number} state.highScore - 最高分
-       * @param {number} state.lines - 消除行数
-       * @param {number} state.level - 当前等级
-       * @returns {void}
-       */
-      update: (state) => {
-        scoreTracker.target = Number(state.score) || 0;
-        highScoreTracker.target = Number(state.highScore) || 0;
-        if (state.lines !== prev.lines) {
-          setText(HudElements2.lines, state.lines, 2);
-          prev.lines = state.lines;
-        }
-        if (state.level !== prev.level) {
-          setText(HudElements2.level, state.level, 2);
-          prev.level = state.level;
-        }
-      },
-      /**
-       * ## 更新控制者标识
-       *
-       * @param {string} controller - 控制者身份（'human' 或 'ai'），会转为大写显示
-       * @returns {void}
-       */
-      updateController(controller) {
-        setText(HudElements2.controller, controller.toUpperCase());
-      },
-      /**
-       * ## 每帧驱动动画
-       *
-       * 在游戏主循环中调用，更新分数和最高分的平滑动画。
-       *
-       * @returns {void}
-       */
-      tick: () => {
-        animationScore(scoreTracker, HudElements2.score, 5);
-        animationScore(highScoreTracker, HudElements2.highScore, 5);
-      },
-      /**
-       * ## 重置 HUD 为初始状态
-       *
-       * 清空所有追踪器和 DOM 显示，通常在返回主菜单或游戏重置时调用。
-       *
-       * @returns {void}
-       */
-      reset: () => {
-        scoreTracker.visual = 0;
-        scoreTracker.target = 0;
-        highScoreTracker.visual = 0;
-        highScoreTracker.target = 0;
-        prev.lines = -1;
-        prev.level = -1;
-        setText(HudElements2.score, 0, 5);
-        setText(HudElements2.highScore, 0, 5);
-        setText(HudElements2.lines, 0, 2);
-        setText(HudElements2.level, 1, 2);
-      }
-    };
-  };
-  var create_hud_default = createHud;
-
-  // lib/services/ui/index.js
-  var UI = class extends core_default {
-    /**
-     * ## 构造函数
-     *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Store - 游戏状态存储
-     * @param {object} options.Elements - UI 元素配置
-     */
+  // lib/services/ui/core/canvas-renderer.js
+  var CanvasRenderer = class extends core_default {
     constructor(options) {
       super(options);
       this.initialize(options);
     }
-    /**
-     * ## 初始化 UI
-     *
-     * 创建 Canvas 和 HUD 实例。
-     *
-     * @param {object} options - 配置对象
-     * @param {object} options.Elements - UI 元素配置（含 Hud 和 Main）
-     * @returns {void}
-     */
     initialize(options) {
       const { Elements } = options;
       const { Hud, Main } = Elements;
-      this.Hud = create_hud_default(hud_elements_default(Hud));
+      this.Hud = new hud_manager_default(Hud);
       this.Canvas = new canvas_default(Main);
-      const { Game: Game2 } = this;
-      this.Router = new ui_router_default({
-        UI: this,
-        Game: Game2
-      });
     }
     /**
      * ## 更新游戏模式标识
@@ -5478,6 +5335,277 @@ var tetris = (() => {
      */
     renderLevelUp(level, fireworks) {
       render_level_up_default(this.Canvas, level, fireworks);
+    }
+  };
+  var canvas_renderer_default = CanvasRenderer;
+
+  // lib/events/router/ui-router.js
+  var UIRouter = class extends core_default {
+    constructor(options) {
+      super(options);
+    }
+    /**
+     * ## 订阅 UI 事件
+     *
+     * 绑定所有 UI 相关的渲染事件。
+     *
+     * @returns {void}
+     */
+    subscribe() {
+      const { Game: Game2 } = this;
+      const events = UIEvents(Game2.id);
+      this.on(events.UPDATE_MODE, this._onUpdateMode);
+      this.on(events.UPDATE_HUD, this._onUpdateHud);
+      this.on(events.UPDATE_CONTROLLER, this._onUpdateController);
+      this.on(events.RESIZE, this._onResize);
+      this.on(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
+      this.on(events.RENDER_COUNTDOWN, this._onRenderCountdown);
+      this.on(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
+      this.on(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
+    }
+    /**
+     * ## 取消订阅 UI 事件
+     *
+     * @returns {void}
+     */
+    unsubscribe() {
+      const { Game: Game2 } = this;
+      const events = UIEvents(Game2.id);
+      this.off(events.UPDATE_MODE, this._onUpdateMode);
+      this.off(events.UPDATE_HUD, this._onUpdateHud);
+      this.off(events.UPDATE_CONTROLLER, this._onUpdateController);
+      this.off(events.RESIZE, this._onResize);
+      this.off(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
+      this.off(events.RENDER_COUNTDOWN, this._onRenderCountdown);
+      this.off(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
+      this.off(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
+    }
+    /**
+     * ## 处理模式更新事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {string} payload.mode - 游戏模式
+     * @returns {void}
+     */
+    _onUpdateMode = ({ mode }) => {
+      const { UI: UI2 } = this;
+      UI2.updateMode(mode);
+    };
+    /**
+     * ## 处理控制者更新事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {string} payload.controller - 控制者身份
+     * @returns {void}
+     */
+    _onUpdateController = ({ controller }) => {
+      const { UI: UI2 } = this;
+      UI2.updateController(controller);
+    };
+    /**
+     * ## 处理 HUD 更新事件
+     *
+     * @private
+     * @returns {void}
+     */
+    _onUpdateHud = () => {
+      const { UI: UI2 } = this;
+      UI2.updateHud();
+    };
+    /**
+     * ## 处理画布自适应事件
+     *
+     * @private
+     * @returns {void}
+     */
+    _onResize = () => {
+      const { UI: UI2 } = this;
+      UI2.resize();
+    };
+    /**
+     * ## 处理渲染预览方块事件
+     *
+     * @private
+     * @returns {void}
+     */
+    _onRenderNextPiece = () => {
+      const { UI: UI2 } = this;
+      UI2.renderNextPiece();
+    };
+    /**
+     * ## 处理渲染倒计时事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {object} payload.state - 倒计时状态
+     * @returns {void}
+     */
+    _onRenderCountdown = ({ state }) => {
+      const { UI: UI2 } = this;
+      UI2.renderCountdown(state);
+    };
+    /**
+     * ## 处理渲染消行闪烁事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {object} payload.state - 消行动画状态
+     * @returns {void}
+     */
+    _onRenderClearLines = ({ state }) => {
+      const { UI: UI2 } = this;
+      UI2.renderClearLines(state);
+    };
+    /**
+     * ## 处理渲染升级烟花事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {number} payload.level - 新等级
+     * @param {object[]} payload.fireworks - 烟花粒子数组
+     * @returns {void}
+     */
+    _onRenderLevelUp = ({ level, fireworks }) => {
+      const { UI: UI2 } = this;
+      UI2.renderLevelUp(level, fireworks);
+    };
+  };
+  var ui_router_default = UIRouter;
+
+  // lib/services/ui/index.js
+  var UI = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * @param {object} options - 配置（依赖的执行上下文）对象
+     * @param {object} options.Game - 游戏主实例
+     * @param {object} options.Store - 游戏状态存储
+     * @param {object} options.Elements - UI 元素配置
+     */
+    constructor(options) {
+      super(options);
+      this.initialize(options);
+    }
+    /**
+     * ## 初始化 UI
+     *
+     * 创建 Canvas 和 HUD 实例。
+     *
+     * @param {object} options - 配置对象
+     * @returns {void}
+     */
+    initialize(options) {
+      const { Game: Game2 } = this;
+      this.Renderer = new canvas_renderer_default(options);
+      this.Router = new ui_router_default({
+        UI: this,
+        Game: Game2
+      });
+    }
+    /**
+     * ## 更新游戏模式标识
+     *
+     * 修改棋盘 Canvas 的 `data-mode` 属性，用于 CSS 样式切换。
+     *
+     * @param {string} mode - 游戏模式
+     * @returns {void}
+     */
+    updateMode(mode) {
+      this.Renderer.updateMode(mode);
+    }
+    /**
+     * ## 更新控制者标识
+     *
+     * @param {string} controller - 当前控制者（human / ai）
+     * @returns {void}
+     */
+    updateController(controller) {
+      this.Renderer.updateController(controller);
+    }
+    /**
+     * ## 更新 HUD 显示
+     *
+     * 从 Store 读取最新状态并更新 HUD 数字显示。
+     *
+     * @returns {void}
+     */
+    updateHud() {
+      this.Renderer.updateHud();
+    }
+    /**
+     * ## 更新 HUD 动画
+     *
+     * 每帧调用，驱动 HUD 数字的平滑过渡动画。
+     *
+     * @param {number} delta - 距离上一帧的时间差（秒）
+     * @returns {void}
+     */
+    tickHud(delta) {
+      this.Renderer.tickHud(delta);
+    }
+    /**
+     * ## 延迟渲染场景
+     *
+     * 等待字体等资源加载完成后渲染主菜单场景。
+     *
+     * @returns {void}
+     */
+    lazyRender() {
+      this.Renderer.lazyRender();
+    }
+    /**
+     * ## 渲染游戏场景
+     *
+     * 每帧调用，绘制棋盘和当前方块。
+     *
+     * @returns {void}
+     */
+    render() {
+      this.Renderer.render();
+    }
+    /**
+     * ## 画布自适应
+     *
+     * 根据窗口尺寸调整棋盘大小。
+     *
+     * @returns {void}
+     */
+    resize() {
+      this.Renderer.resize();
+    }
+    /** ## 处理渲染下一个方块 */
+    renderNextPiece() {
+      this.Renderer.renderNextPiece();
+    }
+    /**
+     * ## 处理渲染倒计时事件
+     *
+     * @param {object} state - 游戏状态信息
+     * @returns {void}
+     */
+    renderCountdown(state) {
+      this.Renderer.renderCountdown(state);
+    }
+    /**
+     * ## 处理渲染消行闪烁事件
+     *
+     * @param {object} state - 游戏状态信息
+     * @returns {void}
+     */
+    renderClearLines(state) {
+      this.Renderer.renderClearLines(state);
+    }
+    /**
+     * ## 处理渲染升级烟花事件
+     *
+     * @param {number} level - 新等级
+     * @param {object[]} fireworks - 烟花粒子数组
+     * @returns {void}
+     */
+    renderLevelUp(level, fireworks) {
+      this.Renderer.renderLevelUp(level, fireworks);
     }
     /**
      * ## 订阅 UI 事件
@@ -6213,12 +6341,21 @@ var tetris = (() => {
   // lib/ai/core/ai-difficulty.js
   var AIDifficulty = {
     /**
-     * ## 简单难度
+     * ## 简单难度（EASY）
      *
      * - 只看当前方块（lookahead=1），不做深层推演
      * - 25% 概率随机选择非最优解，模拟人类失误
      * - 评估权重较轻，允许堆高和留空洞
-     * - 决策延迟 680ms，给玩家充足的操作时间
+     * - 决策延迟 580ms，给玩家充足的操作时间
+     *
+     * ### 权重设计
+     *
+     * | 指标          | 权重  | 说明                                     |
+     * | ------------- | ----- | ---------------------------------------- |
+     * | holes         | -0.45 | 轻度惩罚空洞，偶尔漏填无妨               |
+     * | height        | -0.35 | 允许堆高，不主动压高度                   |
+     * | bumpiness     | -0.12 | 轻微惩罚不平整                           |
+     * | completeLines | 2     | 消 1 行奖 2 分，4 行奖 32 分，不刻意追求 |
      */
     EASY: {
       /** 前瞻深度：只看当前方块 */
@@ -6236,12 +6373,21 @@ var tetris = (() => {
       delay: 580
     },
     /**
-     * ## 普通难度
+     * ## 普通难度（NORMAL）
      *
      * - 多看一步（lookahead=2），有一定前瞻能力
      * - 10% 概率随机选择，偶尔失误
      * - 评估权重适中，开始重视空洞
      * - 决策延迟 480ms，中等响应速度
+     *
+     * ### 权重设计
+     *
+     * | 指标          | 权重  | 说明                                   |
+     * | ------------- | ----- | -------------------------------------- |
+     * | holes         | -0.75 | 明显惩罚空洞，减少留洞                 |
+     * | height        | -0.45 | 适度控制高度                           |
+     * | bumpiness     | -0.18 | 惩罚不平整，保持表面平整               |
+     * | completeLines | 3     | 消 1 行奖 3 分，4 行奖 48 分，鼓励消行 |
      */
     NORMAL: {
       /** 前瞻深度：多看一步 */
@@ -6259,49 +6405,77 @@ var tetris = (() => {
       delay: 480
     },
     /**
-     * ## 困难难度
+     * ## 困难难度（HARD）
      *
      * - 多看两步（lookahead=3），深度推演
+     * - Beam Search 剪枝宽度 5，平衡性能与智能
      * - 0% 噪声，始终选择最优解，不犯错
-     * - 评估权重严格，强力惩罚空洞
-     * - 决策延迟 380ms，较快响应
+     * - 评估权重严格，强力惩罚空洞和高度
+     * - 决策延迟 280ms，较快响应
+     *
+     * ### 权重设计
+     *
+     * | 指标          | 权重  | 说明                                          |
+     * | ------------- | ----- | --------------------------------------------- |
+     * | holes         | -0.9  | 重罚空洞，几乎不留洞                          |
+     * | height        | -0.95 | **强力压高度**，AI 极度恐高                   |
+     * | bumpiness     | -0.2  | 保持表面平整                                  |
+     * | completeLines | 6     | 消 1 行奖 6 分，4 行奖 96 分，高度追求 Tetris |
+     *
+     * 高度惩罚 -0.95 配合消行奖励 6（平方后 4 行 = 96 分）， AI 会为了凑满行而主动压低堆叠，同时追求一次性消除多行。
      */
     HARD: {
       /** 前瞻深度：多看两步 */
       lookahead: 3,
+      /** Beam Search 剪枝宽度 */
       beam: 5,
       /** 随机噪声：不犯错 */
       noise: 0,
       /** 评估权重（重惩罚） */
       weights: {
         holes: -0.9,
-        height: -0.75,
+        height: -0.95,
         bumpiness: -0.2,
-        completeLines: 5
+        completeLines: 6
       },
       /** 决策延迟（毫秒） */
       delay: 280
     },
     /**
-     * ## 专家难度
+     * ## 专家难度（EXPERT）
      *
      * - 和困难难度相同的推理能力（lookahead=3, noise=0）
-     * - 唯一的区别是决策延迟仅为 120ms， 接近游戏的最低下落速度，给玩家极短的反应窗口
+     * - Beam Search 剪枝宽度 3，保证流畅性
+     * - 评估权重最严格，对高度和空洞零容忍
+     * - 决策延迟仅为 150ms，给玩家极短的反应窗口
+     * - 接近游戏的最低下落速度（120ms），但保留 30ms 呼吸感
+     *
+     * ### 权重设计
+     *
+     * | 指标          | 权重  | 说明                                           |
+     * | ------------- | ----- | ---------------------------------------------- |
+     * | holes         | -1.0  | 最重空洞惩罚，绝不留洞                         |
+     * | height        | -1.25 | **极限压高度**，AI 视堆高为最大威胁            |
+     * | bumpiness     | -0.2  | 保持表面平整                                   |
+     * | completeLines | 7     | 消 1 行奖 7 分，4 行奖 112 分，极限追求 Tetris |
+     *
+     * 高度惩罚 -1.25 是四个难度中的最大值， 配合消行奖励 7（平方后 4 行 = 112 分）， AI 在极度恐高的同时会疯狂追求一次性多行消除。
      */
     EXPERT: {
       /** 前瞻深度：多看两步 */
       lookahead: 3,
       /** 随机噪声：不犯错 */
       noise: 0,
+      /** Beam Search 剪枝宽度 */
       beam: 3,
-      /** 评估权重（重惩罚，与 HARD 相同） */
+      /** 评估权重（最重惩罚） */
       weights: {
         holes: -1,
-        height: -0.95,
+        height: -1.25,
         bumpiness: -0.2,
-        completeLines: 6
+        completeLines: 7
       },
-      /** 决策延迟（毫秒）：极快 */
+      /** 决策延迟（毫秒）：极快，保留 30ms 呼吸感 */
       delay: 150
     }
   };
@@ -6992,9 +7166,9 @@ var tetris = (() => {
   // lib/runtime/replay-controller.js
   var ReplayController = class extends core_default {
     /**
-     * ## 是否有录制的回放数据。
+     * ## 是否有录制的回放数据
      *
-     * @returns {boolean} - 有回放数据，返回 true，否则返回 false
+     * @returns {boolean} 有回放数据返回 true，否则返回 false
      */
     get hasData() {
       return this.data.length > 0;
@@ -7002,13 +7176,22 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * @class
      * @param {object} options - 配置（依赖的执行上下文）对象
+     * @param {object} options.Game - 游戏主实例
+     * @param {object} options.Store - 游戏状态存储
+     * @param {object} options.Scheduler - 任务调度器
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
+    /**
+     * ## 初始化所有内部状态
+     *
+     * 重置录制/回放相关的所有标志和数据， 并创建 ReplayRouter 实例处理事件路由。
+     *
+     * @returns {void}
+     */
     initialize() {
       this.recording = false;
       this.playing = false;
@@ -7025,6 +7208,13 @@ var tetris = (() => {
         Game: Game2
       });
     }
+    /**
+     * ## 获取下一个方块
+     *
+     * 在回放模式下，从录制的方块序列中按顺序读取。 确保回放时的方块顺序与录制时完全一致。
+     *
+     * @returns {{ curr: object | null; next: object | null }} 当前方块和下一个预览方块
+     */
     getNextPiece() {
       if (!this.playing) {
         return { curr: null, next: null };
@@ -7037,13 +7227,15 @@ var tetris = (() => {
       return { curr: piece, next };
     }
     /**
-     * ## 同步回放逻辑时钟。
+     * ## 同步回放逻辑时钟
      *
-     * 计算当前 wall-clock 时间与 startTime 的差值作为回放进度。 如果检测到时间跳跃过大（标签页切后台），限制单次跳跃上限。
+     * 计算当前 wall-clock 时间与 startTime 的差值作为回放进度。 如果检测到时间跳跃过大（标签页切后台），限制单次跳跃上限为 1 秒，
+     * 防止切回后瞬间执行大量 command 导致爆帧。
      *
      * @param {object} ctx - 执行上下文对象
      * @param {number} ctx.timestamp - 当前 requestAnimationFrame 时间戳
      * @param {boolean} ctx.isBlocked - 是否处于暂停/阻塞状态
+     * @returns {void}
      */
     syncPlayElapsed({ timestamp, isBlocked }) {
       if (!this.playing || isBlocked) return;
@@ -7063,13 +7255,15 @@ var tetris = (() => {
      * 执行流程：
      *
      * 1. 更新当前 timestamp
-     * 2. 检查回放是否结束
-     * 3. 如有需要，快进跳过长时间等待（标签页切回后）
-     * 4. 将所有逻辑时间已到的 command 逐条注入 EventBus
+     * 2. 检查是否处于回放状态
+     * 3. 检查回放是否完毕（所有 command 已执行）
+     * 4. 如有需要，快进跳过长时间等待（标签页切回后）
+     * 5. 将所有逻辑时间已到的 command 逐条注入 EventBus
      *
      * @param {object} ctx - 执行上下文对象
-     * @param {number} ctx.speed - 获取当前下落间隔（ms），用于快进阈值计算
+     * @param {number} ctx.speed - 当前下落间隔（毫秒），用于快进阈值计算
      * @param {number} ctx.timestamp - 当前 requestAnimationFrame 时间戳
+     * @returns {void}
      */
     update({ speed, timestamp }) {
       const { Store, Game: Game2, data } = this;
@@ -7103,11 +7297,9 @@ var tetris = (() => {
     /**
      * ## 开始录制
      *
-     * 行为：
+     * 开启 recording 标志，清空旧数据和方块序列， 将 startTime 设置为当前 timestamp。
      *
-     * - 开启 recording 标志
-     * - 清空旧数据和方块序列
-     * - 将 startTime 设置为当前 timestamp
+     * @returns {void}
      */
     startRecord() {
       this.recording = true;
@@ -7117,18 +7309,20 @@ var tetris = (() => {
       this.playElapsed = 0;
       this.startTime = this.timestamp;
     }
-    /** ## 停止录制 */
+    /**
+     * ## 停止录制
+     *
+     * @returns {void}
+     */
     stopRecord() {
       this.recording = false;
     }
     /**
      * ## 开始回放
      *
-     * 行为：
+     * 开启 playing 标志，重置 cursor 和 pieceIndex， 将 startTime 设置为当前 timestamp。
      *
-     * - 开启 playing 标志
-     * - 重置 cursor 和 pieceIndex
-     * - 将 startTime 设置为当前 timestamp
+     * @returns {void}
      */
     startPlay() {
       this.playing = true;
@@ -7136,16 +7330,36 @@ var tetris = (() => {
       this.pieceIndex = 0;
       this.startTime = this.timestamp;
     }
-    /** ## 停止回放 */
+    /**
+     * ## 停止回放
+     *
+     * @returns {void}
+     */
     stopPlay() {
       this.playing = false;
     }
+    /**
+     * ## 添加一条录制记录
+     *
+     * 只在 recording 状态下写入数据。
+     *
+     * @param {object} record - 录制数据 `{ ms, cmd }`
+     * @returns {void}
+     */
     addRecord(record) {
       if (!this.recording) {
         return;
       }
       this.data.push(record);
     }
+    /**
+     * ## 添加一个方块到序列
+     *
+     * 只在 recording 状态下写入，使用深拷贝避免引用污染。
+     *
+     * @param {object} piece - 方块数据
+     * @returns {void}
+     */
     addPiece(piece) {
       if (!this.recording) {
         return;
@@ -7153,9 +7367,11 @@ var tetris = (() => {
       this.pieceSequence.push(structuredClone(piece));
     }
     /**
-     * ## 清除所有数据，重置标志位。
+     * ## 清除所有数据，重置标志位
      *
      * 注意：不清除事件绑定，仅重置录制/回放相关状态。
+     *
+     * @returns {void}
      */
     clear() {
       this.recording = false;
@@ -7167,9 +7383,11 @@ var tetris = (() => {
       this.startTime = 0;
     }
     /**
-     * ## 停止录制/回放并清除所有数据。
+     * ## 停止录制/回放并清除所有数据
      *
-     * 等同于 stopRecord() + stopPlay() + clear()。
+     * 等同于 `stopRecord()` + `stopPlay()` + `clear()`。 通过 `replay:<id>:reset` 事件触发。
+     *
+     * @returns {void}
      */
     reset() {
       this.stopRecord();
@@ -7179,11 +7397,20 @@ var tetris = (() => {
     /**
      * ## 绑定所有事件监听
      *
-     * 在游戏初始化时调用一次。
+     * 委托给 ReplayRouter 处理。
+     *
+     * @returns {void}
      */
     subscribe() {
       this.Router.subscribe();
     }
+    /**
+     * ## 取消绑定所有事件监听
+     *
+     * 委托给 ReplayRouter 处理。
+     *
+     * @returns {void}
+     */
     unsubscribe() {
       this.Router.unsubscribe();
     }
@@ -7191,6 +7418,8 @@ var tetris = (() => {
      * ## 销毁实例
      *
      * 停止所有录制/回放、清除数据、解绑所有事件。 主要用于 AI 对战切换对手或完全卸载 replay 模块。
+     *
+     * @returns {void}
      */
     destroy() {
       this.reset();
@@ -7562,11 +7791,6 @@ var tetris = (() => {
   };
   var clear_lines_animation_default = ClearLinesAnimation;
 
-  // lib/services/ui/constants/firework-colors.js
-  var { TEAL: TEAL5, YELLOW: YELLOW5, PURPLE: PURPLE4, ORANGE: ORANGE5, GREEN: GREEN5, RED: RED5 } = colors_default;
-  var FIREWORK_COLORS = [TEAL5, YELLOW5, PURPLE4, ORANGE5, GREEN5, RED5];
-  var firework_colors_default = FIREWORK_COLORS;
-
   // lib/services/animations/level-up-animation.js
   var LevelUpAnimation = class extends core_default {
     /**
@@ -7619,7 +7843,16 @@ var tetris = (() => {
      */
     createFireworks() {
       const { UI: UI2 } = this;
-      const { width, height } = UI2.Canvas.gameBoard;
+      const { width, height } = UI2.Renderer.Canvas.gameBoard;
+      const FIREWORK_COLORS = [
+        colors_default.TEAL,
+        colors_default.YELLOW,
+        colors_default.PURPLE,
+        colors_default.ORANGE,
+        colors_default.GREEN,
+        colors_default.RED,
+        colors_default.PINK
+      ];
       const particles = [];
       for (let i = 0; i < 40; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -7636,7 +7869,7 @@ var tetris = (() => {
           /** ## 粒子半径（3-7 像素随机） */
           radius: 3 + Math.random() * 4,
           /** ## 随机颜色 */
-          color: firework_colors_default[Math.floor(Math.random() * firework_colors_default.length)],
+          color: FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)],
           /** ## 初始透明度（完全不透明） */
           alpha: 1
         });
@@ -8129,7 +8362,6 @@ var tetris = (() => {
     constructor(options) {
       super(options);
       this.initialize();
-      this.addEventListeners();
     }
     /**
      * ## 初始化所有子系统
@@ -8164,8 +8396,8 @@ var tetris = (() => {
         Scheduler: Scheduler2
       });
       this.Router = new game_router_default({
-        AI: this.AI,
         Animations: this.Animations,
+        AI: this.AI,
         CommandQueue: this.CommandQueue,
         Game: this,
         Replay: this.Replay,
@@ -8466,6 +8698,8 @@ var tetris = (() => {
     /**
      * ## 创建一个命令实例
      *
+     * 通过父类 `Base` 的构造函数注入 payload 中的依赖， 然后调用 `initialize()` 设置命令的核心属性。
+     *
      * @example
      *   // AI 发送左移命令
      *   const cmd = new Command('MOVE_LEFT', { Game: gameInstance });
@@ -8482,10 +8716,11 @@ var tetris = (() => {
       this.initialize(action, payload);
     }
     /**
-     * ## 初始化方法
+     * ## 初始化命令的核心属性
      *
      * @param {string} action - 命令类型（如 MOVE_LEFT、ROTATE、DROP 等）
-     * @param {object} [payload] - 命令携带的额外参数（如 Game 实例引用等）。
+     * @param {object} [payload={}] - 命令携带的额外参数（如 Game 实例引用等）. Default is `{}`
+     * @returns {void}
      */
     initialize(action, payload = {}) {
       this.action = action;
@@ -9205,6 +9440,7 @@ var tetris = (() => {
       UI2.updateController(Store.getController());
       UI2.lazyRender();
       Engine.subscribe();
+      Game2.addEventListeners();
       Engine.start();
     },
     /**
