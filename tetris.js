@@ -4,23 +4,23 @@ var tetris = (() => {
     // 请始终保持 min > max
     Level: {
       min: 11,
-      max: 99
+      max: 99,
     },
     Elements: {
       Main: {
         cols: 10,
         rows: 20,
-        board: "game-board",
-        next: "next-piece"
+        board: 'game-board',
+        next: 'next-piece',
       },
       Hud: {
-        controller: "controller",
-        score: "score",
-        lines: "lines",
-        level: "level",
-        highScore: "high-score"
-      }
-    }
+        controller: 'controller',
+        score: 'score',
+        lines: 'lines',
+        level: 'level',
+        highScore: 'high-score',
+      },
+    },
   };
   var configuration_default = Configuration;
 
@@ -92,11 +92,11 @@ var tetris = (() => {
      */
     _processTask(task, gameTime) {
       switch (task.type) {
-        case "delay": {
+        case 'delay': {
           this._processDelayTask(task, gameTime);
           break;
         }
-        case "interval": {
+        case 'interval': {
           this._processIntervalTask(task, gameTime);
           break;
         }
@@ -182,10 +182,10 @@ var tetris = (() => {
       const id = this.nextId++;
       this.tasks.set(id, {
         id,
-        type: "delay",
+        type: 'delay',
         delay,
         fn,
-        cancelled: false
+        cancelled: false,
       });
       return id;
     }
@@ -206,10 +206,10 @@ var tetris = (() => {
       const id = this.nextId++;
       this.tasks.set(id, {
         id,
-        type: "interval",
+        type: 'interval',
         interval,
         fn,
-        cancelled: false
+        cancelled: false,
       });
       return id;
     }
@@ -283,18 +283,19 @@ var tetris = (() => {
 
   // lib/utils/is-function.js
   var isFunction = (val) => {
-    if (val == null || typeof val !== "function" && typeof val !== "object") {
+    if (val == null || (typeof val !== 'function' && typeof val !== 'object')) {
       return false;
     }
     return (
       // 处理某些特殊环境下 typeof 误判为 object 的函数（极少数情况）
-      typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]"
+      typeof val === 'function' ||
+      Object.prototype.toString.call(val) === '[object Function]'
     );
   };
   var is_function_default = isFunction;
 
   // lib/utils/is-string.js
-  var isString = (str) => typeof str === "string";
+  var isString = (str) => typeof str === 'string';
   var is_string_default = isString;
 
   // lib/core/event-bus/index.js
@@ -399,7 +400,7 @@ var tetris = (() => {
      */
     clear() {
       this.events.clear();
-    }
+    },
   };
   var event_bus_default = EventBus;
 
@@ -485,7 +486,8 @@ var tetris = (() => {
     /**
      * ## 清空所有事件（EventBus 代理）
      *
-     * 移除全局 EventBus 中的所有事件订阅。 注意：这是全局操作，会影响所有继承 Base 的实例。 通常用于游戏重启或单元测试 teardown。
+     * 移除全局 EventBus 中的所有事件订阅。 注意：这是全局操作，会影响所有继承 Base 的实例。 通常用于游戏重启或单元测试
+     * teardown。
      *
      * @returns {void}
      */
@@ -501,20 +503,20 @@ var tetris = (() => {
     combo: {
       shift: 0,
       speed: 1,
-      volume: 1
+      volume: 1,
     },
     /** ## 俄罗斯方块（4 行）：音调提高，加速，音量增大 */
     tetris: {
       shift: 2,
       speed: 1.2,
-      volume: 1.1
+      volume: 1.1,
     },
     /** ## 全清（Perfect Clear）：音调大幅提高，稍慢，音量最大 */
     perfect: {
       shift: 5,
       speed: 0.9,
-      volume: 1.3
-    }
+      volume: 1.3,
+    },
   };
   var motifs_default = MOTIFS;
 
@@ -528,13 +530,13 @@ var tetris = (() => {
       // 音量峰值
       volume = 0.15,
       // 默认方波
-      wave = "square",
+      wave = 'square',
       // 默认连奏，音符唱满时值
       gate = 1,
       // 运音包络
       articulation = {},
       // 默认立即开始
-      startTime = Context.currentTime
+      startTime = Context.currentTime,
     } = options;
     const osc = Context.createOscillator();
     const gain = Context.createGain();
@@ -547,7 +549,7 @@ var tetris = (() => {
       // 起音时间，3ms 快速起音
       releaseTime = 0.02,
       // 释音时间，20ms 平滑收尾
-      sustainRatio = 0.9
+      sustainRatio = 0.9,
       // 延音比，保持 90% 峰值音量进入衰减段
     } = articulation;
     const t0 = startTime;
@@ -562,7 +564,7 @@ var tetris = (() => {
     gain.connect(Context.destination);
     osc.start(t0);
     osc.stop(t3 + 0.05);
-    osc.addEventListener("ended", () => {
+    osc.addEventListener('ended', () => {
       osc.disconnect();
       gain.disconnect();
     });
@@ -572,12 +574,12 @@ var tetris = (() => {
   // lib/services/audio/sounds.js
   var getMotif = (lines, isPerfectClear = false) => {
     if (isPerfectClear) {
-      return "perfect";
+      return 'perfect';
     }
     if (lines === 4) {
-      return "tetris";
+      return 'tetris';
     }
-    return "combo";
+    return 'combo';
   };
   var Sounds = class extends core_default {
     /**
@@ -596,7 +598,7 @@ var tetris = (() => {
      * @returns {void}
      */
     LEVEL_CHANGED = () => {
-      play_tone_default(this, 520, 80, { volume: 0.2, wave: "triangle" });
+      play_tone_default(this, 520, 80, { volume: 0.2, wave: 'triangle' });
     };
     /**
      * ## 主菜单/难度选择场景切换音效
@@ -606,7 +608,7 @@ var tetris = (() => {
      * @returns {void}
      */
     SWITCH_SCENE = () => {
-      play_tone_default(this, 620, 80, { volume: 0.2, wave: "triangle" });
+      play_tone_default(this, 620, 80, { volume: 0.2, wave: 'triangle' });
     };
     /**
      * ## 难度选择音效
@@ -616,7 +618,7 @@ var tetris = (() => {
      * @returns {void}
      */
     DIFFICULTY_CHANGED = () => {
-      play_tone_default(this, 880, 80, { volume: 0.2, wave: "triangle" });
+      play_tone_default(this, 880, 80, { volume: 0.2, wave: 'triangle' });
     };
     /**
      * ## 等级开始音效
@@ -626,7 +628,7 @@ var tetris = (() => {
      * @returns {void}
      */
     GAME_STARTED = () => {
-      play_tone_default(this, 1319, 160, { volume: 0.22, wave: "triangle" });
+      play_tone_default(this, 1319, 160, { volume: 0.22, wave: 'triangle' });
     };
     /**
      * ## 开始倒计时音效
@@ -636,7 +638,7 @@ var tetris = (() => {
      * @returns {void}
      */
     COUNTDOWN = () => {
-      play_tone_default(this, 784, 180, { volume: 0.4, wave: "sine" });
+      play_tone_default(this, 784, 180, { volume: 0.4, wave: 'sine' });
     };
     /**
      * ## 方块移动音效
@@ -695,7 +697,7 @@ var tetris = (() => {
         [587, 698, 880],
         [698, 880, 1174],
         [587, 880, 1174],
-        [440, 880, 1174]
+        [440, 880, 1174],
       ];
       const speeds = [260, 300, 380];
       const volumes = [0.32, 0.3, 0.25];
@@ -713,9 +715,9 @@ var tetris = (() => {
             const now = Context.currentTime;
             play_tone_default(this, freq, speeds[i] * cfg.speed, {
               volume: volumes[i] * cfg.volume,
-              startTime: now + timeouts[i] / 1e3
+              startTime: now + timeouts[i] / 1e3,
             });
-          }
+          },
         });
       }
       Scheduler2.sequence(queue);
@@ -732,16 +734,35 @@ var tetris = (() => {
       const now = Context.currentTime;
       Scheduler2.sequence([
         { fn: () => play_tone_default(this, 523, 220) },
-        { fn: () => play_tone_default(this, 587, 220, { startTime: now + 0.26 }) },
-        { fn: () => play_tone_default(this, 659, 240, { startTime: now + 0.52 }) },
+        {
+          fn: () =>
+            play_tone_default(this, 587, 220, { startTime: now + 0.26 }),
+        },
+        {
+          fn: () =>
+            play_tone_default(this, 659, 240, { startTime: now + 0.52 }),
+        },
         {
           delay: 260,
-          fn: () => play_tone_default(this, 784, 260, { startTime: now + 0.78 })
+          fn: () =>
+            play_tone_default(this, 784, 260, { startTime: now + 0.78 }),
         },
-        { fn: () => play_tone_default(this, 880, 280, { startTime: now + 1.06 }) },
-        { fn: () => play_tone_default(this, 1047, 320, { startTime: now + 1.36 }) },
-        { fn: () => play_tone_default(this, 1175, 360, { startTime: now + 1.7 }) },
-        { fn: () => play_tone_default(this, 1319, 480, { startTime: now + 2.08 }) }
+        {
+          fn: () =>
+            play_tone_default(this, 880, 280, { startTime: now + 1.06 }),
+        },
+        {
+          fn: () =>
+            play_tone_default(this, 1047, 320, { startTime: now + 1.36 }),
+        },
+        {
+          fn: () =>
+            play_tone_default(this, 1175, 360, { startTime: now + 1.7 }),
+        },
+        {
+          fn: () =>
+            play_tone_default(this, 1319, 480, { startTime: now + 2.08 }),
+        },
       ]);
     };
     /**
@@ -760,7 +781,7 @@ var tetris = (() => {
      * @returns {void}
      */
     SECOND_TICK = () => {
-      play_tone_default(this, 880, 50, { volume: 0.085, wave: "triangle" });
+      play_tone_default(this, 880, 50, { volume: 0.085, wave: 'triangle' });
     };
     /**
      * ## 恢复游戏音效
@@ -782,8 +803,14 @@ var tetris = (() => {
       const now = Context.currentTime;
       Scheduler2.sequence([
         { fn: () => play_tone_default(this, 330, 200) },
-        { fn: () => play_tone_default(this, 294, 300, { startTime: now + 0.21 }) },
-        { fn: () => play_tone_default(this, 262, 500, { startTime: now + 0.52 }) }
+        {
+          fn: () =>
+            play_tone_default(this, 294, 300, { startTime: now + 0.21 }),
+        },
+        {
+          fn: () =>
+            play_tone_default(this, 262, 500, { startTime: now + 0.52 }),
+        },
       ]);
     };
     /**
@@ -800,7 +827,7 @@ var tetris = (() => {
   // lib/services/audio/constants/bgm/tetris-theme.js
   var TetrisTheme = {
     /** ## 音乐名称 */
-    name: "TetrisTheme",
+    name: 'TetrisTheme',
     /**
      * ## 旋律数据
      *
@@ -951,23 +978,23 @@ var tetris = (() => {
       { freq: 440, dur: 0.6 },
       { freq: 440, dur: 1.2 },
       { freq: 440, dur: 0.4 },
-      { freq: 440, dur: 0.4 }
+      { freq: 440, dur: 0.4 },
     ],
     /** ## 每个音符的基准时长（ms） */
     duration: 220,
     /** ## 音量（0-1） */
     volume: 0.08,
     /** ## 波形类型：方波（经典 8-bit 音色） */
-    wave: "square",
+    wave: 'square',
     /** ## 连奏/断奏比例（0.6，明显断奏颗粒感） */
-    gate: 0.6
+    gate: 0.6,
   };
   var tetris_theme_default = TetrisTheme;
 
   // lib/services/audio/constants/bgm/spring-festival.js
   var SpringFestival = {
     /** ## 音乐名称 */
-    name: "Spring Festival",
+    name: 'Spring Festival',
     /**
      * ## 旋律数据
      *
@@ -1049,7 +1076,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.4 },
       { freq: 587, dur: 0.4 },
       { freq: 523, dur: 0.8 },
-      { freq: 0, dur: 1 }
+      { freq: 0, dur: 1 },
       // 段落呼吸
     ],
     /** ## 每个音符的基准时长（ms），较快节奏 */
@@ -1057,7 +1084,7 @@ var tetris = (() => {
     /** ## 音量（0-1） */
     volume: 0.08,
     /** ## 波形类型：方波（模拟唢呐/秧歌的热闹感） */
-    wave: "square",
+    wave: 'square',
     /** ## 连奏/断奏比例（0.7，轻断奏，颗粒分明） */
     gate: 0.7,
     /** ## 运音包络 */
@@ -1067,15 +1094,15 @@ var tetris = (() => {
       /** ## 释音时间（20ms） */
       releaseTime: 0.02,
       /** ## 延音比（0.5，较低，音符跳跃） */
-      sustainRatio: 0.5
-    }
+      sustainRatio: 0.5,
+    },
   };
   var spring_festival_default = SpringFestival;
 
   // lib/services/audio/constants/bgm/first-division.js
   var FirstDivision = {
     /** ## 音乐名称 */
-    name: "FirstDivision",
+    name: 'FirstDivision',
     /**
      * ## 旋律数据
      *
@@ -1159,21 +1186,21 @@ var tetris = (() => {
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 1.2 },
       { freq: 523, dur: 0.8 },
-      { freq: 494, dur: 1.6 }
+      { freq: 494, dur: 1.6 },
     ],
     /** ## 每个音符的基准时长（ms） */
     duration: 180,
     /** ## 音量（0-1） */
     volume: 0.08,
     /** ## 波形类型：方波（经典 8-bit 音色） */
-    wave: "square"
+    wave: 'square',
   };
   var first_division_default = FirstDivision;
 
   // lib/services/audio/constants/bgm/gong-xi-fa-cai.js
   var GongXiFaCai = {
     /** ## 音乐名称 */
-    name: "Gong Xi Fa Cai",
+    name: 'Gong Xi Fa Cai',
     /**
      * ## 旋律数据
      *
@@ -1306,7 +1333,7 @@ var tetris = (() => {
       { freq: 880, dur: 0.5 },
       { freq: 784, dur: 0.5 },
       { freq: 659, dur: 2 },
-      { freq: 0, dur: 1.5 }
+      { freq: 0, dur: 1.5 },
       // 段落呼吸
     ],
     /** ## 每个音符的基准时长（ms） */
@@ -1314,7 +1341,7 @@ var tetris = (() => {
     /** ## 音量（0-1） */
     volume: 0.08,
     /** ## 波形类型：方波 */
-    wave: "square",
+    wave: 'square',
     /** ## 连奏/断奏比例（0.8，较连奏） */
     gate: 0.8,
     /** ## 运音包络 */
@@ -1324,15 +1351,15 @@ var tetris = (() => {
       /** ## 释音时间（20ms，平滑收尾） */
       releaseTime: 0.02,
       /** ## 延音比（0.6，中高延音） */
-      sustainRatio: 0.6
-    }
+      sustainRatio: 0.6,
+    },
   };
   var gong_xi_fa_cai_default = GongXiFaCai;
 
   // lib/services/audio/constants/bgm/loginska.js
   var Loginska = {
     /** ## 音乐名称 */
-    name: "Loginska",
+    name: 'Loginska',
     /**
      * ## 旋律数据
      *
@@ -1404,21 +1431,21 @@ var tetris = (() => {
       { freq: 440, dur: 0.6 },
       { freq: 440, dur: 1.2 },
       { freq: 440, dur: 0.4 },
-      { freq: 440, dur: 0.4 }
+      { freq: 440, dur: 0.4 },
     ],
     /** ## 每个音符的基准时长（ms） */
     duration: 180,
     /** ## 音量（0-1），略低于其他曲目 */
     volume: 0.07,
     /** ## 波形类型：方波（经典 8-bit 音色） */
-    wave: "square"
+    wave: 'square',
   };
   var loginska_default = Loginska;
 
   // lib/services/audio/constants/bgm/beyond-the-wall.js
   var BeyondTheWall = {
     /** ## 音乐名称 */
-    name: "BeyondTheWall",
+    name: 'BeyondTheWall',
     /**
      * ## 分段 Gate 配置（可选）
      *
@@ -1438,9 +1465,9 @@ var tetris = (() => {
         // 推进段：最连奏
         dnb: 0.88,
         // DnB：较断奏
-        outro: 0.91
+        outro: 0.91,
         // 回落：较连奏
-      }
+      },
     },
     /**
      * ## 旋律数据
@@ -1568,21 +1595,21 @@ var tetris = (() => {
       { freq: 0, dur: 0.15 },
       { freq: 330, dur: 0.6 },
       { freq: 392, dur: 0.6 },
-      { freq: 440, dur: 1.8 }
+      { freq: 440, dur: 1.8 },
     ],
     /** ## 每个音符的基准时长（ms） */
     duration: 130,
     /** ## 音量（0-1） */
     volume: 0.09,
     /** ## 波形类型：三角波（音色柔和） */
-    wave: "triangle"
+    wave: 'triangle',
   };
   var beyond_the_wall_default = BeyondTheWall;
 
   // lib/services/audio/constants/bgm/technotris.js
   var Technotris = {
     /** ## 音乐名称 */
-    name: "Technotris",
+    name: 'Technotris',
     /**
      * ## 旋律数据
      *
@@ -1701,21 +1728,21 @@ var tetris = (() => {
       { freq: 587, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 494, dur: 0.8 },
-      { freq: 440, dur: 1.6 }
+      { freq: 440, dur: 1.6 },
     ],
     /** ## 每个音符的基准时长（ms） */
     duration: 180,
     /** ## 音量（0-1） */
     volume: 0.09,
     /** ## 波形类型：方波（电子音色） */
-    wave: "square"
+    wave: 'square',
   };
   var technotris_default = Technotris;
 
   // lib/services/audio/constants/bgm/golden-snake-dance.js
   var GoldenSnakeDance = {
     /** ## 音乐名称 */
-    name: "Golden Snake Dance",
+    name: 'Golden Snake Dance',
     /**
      * ## 旋律数据
      *
@@ -1838,7 +1865,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.6 },
       { freq: 587, dur: 0.3 },
       { freq: 523, dur: 1.5 },
-      { freq: 0, dur: 1 }
+      { freq: 0, dur: 1 },
       // 段落呼吸
     ],
     /** ## 每个音符的基准时长（ms），较快节奏 */
@@ -1846,7 +1873,7 @@ var tetris = (() => {
     /** ## 音量（0-1） */
     volume: 0.08,
     /** ## 波形类型：方波（模拟唢呐/弹拨乐） */
-    wave: "square",
+    wave: 'square',
     /**
      * ## 连奏/断奏比例
      *
@@ -1864,15 +1891,15 @@ var tetris = (() => {
       /** ## 释音时间（15ms，快速收尾） */
       releaseTime: 0.015,
       /** ## 延音比（0.4，低延音使音符跳跃） */
-      sustainRatio: 0.4
-    }
+      sustainRatio: 0.4,
+    },
   };
   var golden_snake_dance_default = GoldenSnakeDance;
 
   // lib/services/audio/constants/bgm/korobeiniki.js
   var Korobeiniki = {
     /** ## 音乐名称 */
-    name: "Korobeiniki",
+    name: 'Korobeiniki',
     /**
      * ## 旋律数据
      *
@@ -1993,21 +2020,21 @@ var tetris = (() => {
       // ===== 结尾（循环点）=====
       { freq: 523, dur: 1.2 },
       { freq: 494, dur: 0.8 },
-      { freq: 440, dur: 1.6 }
+      { freq: 440, dur: 1.6 },
     ],
     /** ## 每个音符的基准时长（ms） */
     duration: 140,
     /** ## 音量（0-1） */
     volume: 0.08,
     /** ## 波形类型：方波（经典 8-bit 音色） */
-    wave: "square"
+    wave: 'square',
   };
   var korobeiniki_default = Korobeiniki;
 
   // lib/services/audio/constants/bgm/journey-to-west.js
   var JourneyToWest = {
     /** ## 音乐名称 */
-    name: "JourneyToWest",
+    name: 'JourneyToWest',
     /**
      * ## 旋律数据
      *
@@ -2088,14 +2115,14 @@ var tetris = (() => {
       { freq: 440, dur: 1.8 },
       { freq: 440, dur: 3.6 },
       { freq: 440, dur: 1.8 },
-      { freq: 440, dur: 5.4 }
+      { freq: 440, dur: 5.4 },
     ],
     /** ## 每个音符的基准时长（ms），较慢节奏 */
     duration: 110,
     /** ## 音量（0-1），比其他曲目更响亮 */
     volume: 0.12,
     /** ## 波形类型：方波（经典 8-bit 音色） */
-    wave: "square"
+    wave: 'square',
   };
   var journey_to_west_default = JourneyToWest;
 
@@ -2160,7 +2187,7 @@ var tetris = (() => {
      *
      * @type {Music}
      */
-    JourneyToWest: journey_to_west_default
+    JourneyToWest: journey_to_west_default,
   };
   var musics_default = Musics;
 
@@ -2171,15 +2198,15 @@ var tetris = (() => {
     const {
       duration = 110,
       volume = 0.05,
-      wave = "square",
+      wave = 'square',
       gate = 1,
-      articulation = {}
+      articulation = {},
     } = options;
     if (duration <= 0 || !melody?.length) {
       return;
     }
     const { Scheduler: Scheduler2, Context } = audio;
-    if (Context.state === "suspended") {
+    if (Context.state === 'suspended') {
       Context.resume();
     }
     let currentNoteIndex = 0;
@@ -2192,7 +2219,7 @@ var tetris = (() => {
           wave,
           gate,
           articulation,
-          startTime: time
+          startTime: time,
         });
       }
     };
@@ -2222,7 +2249,7 @@ var tetris = (() => {
     Technotris: Technotris2,
     GoldenSnakeDance: GoldenSnakeDance2,
     Korobeiniki: Korobeiniki2,
-    JourneyToWest: JourneyToWest2
+    JourneyToWest: JourneyToWest2,
   } = musics_default;
   var MUSIC_LIST = [
     TetrisTheme2,
@@ -2234,7 +2261,7 @@ var tetris = (() => {
     Technotris2,
     GoldenSnakeDance2,
     Korobeiniki2,
-    JourneyToWest2
+    JourneyToWest2,
   ];
   var getMusicByLevel = (audio, level) => {
     const { length } = MUSIC_LIST;
@@ -2251,7 +2278,7 @@ var tetris = (() => {
       volume,
       wave,
       gate,
-      articulation
+      articulation,
     });
   };
   var play_bgm_default = playBGM;
@@ -2275,23 +2302,23 @@ var tetris = (() => {
 
   // lib/events/event-catalog.js
   var AnimationsEvents = (uuid) => ({
-    CLEAR: `animations:${uuid}:clear`
+    CLEAR: `animations:${uuid}:clear`,
   });
   var AudioEvents = () => ({
     /* ---------- 背景音乐 ---------- */
-    RESUME_BGM: "audio:resume:bgm",
-    STOP_BGM: "audio:stop:bgm",
-    TOGGLE_BGM: "audio:toggle:bgm",
+    RESUME_BGM: 'audio:resume:bgm',
+    STOP_BGM: 'audio:stop:bgm',
+    TOGGLE_BGM: 'audio:toggle:bgm',
     /* ---------- 游戏音效 ---------- */
-    PLAY_SOUND: "audio:play:sound"
+    PLAY_SOUND: 'audio:play:sound',
   });
   var AIEvents = (uuid) => ({
     START: `ai:${uuid}:start`,
-    STOP: `ai:${uuid}:stop`
+    STOP: `ai:${uuid}:stop`,
   });
   var CommandEvents = (uuid) => ({
     CLEAR: `command:queue:${uuid}:clear`,
-    ENQUEUE: `command:queue:${uuid}:enqueue`
+    ENQUEUE: `command:queue:${uuid}:enqueue`,
   });
   var GameEvents = (uuid) => ({
     /* ---------- 状态更新 ---------- */
@@ -2330,7 +2357,7 @@ var tetris = (() => {
     /* ---------- 背景音乐 ---------- */
     TOGGLE_BGM: `game:${uuid}:toggle:bgm`,
     /* ---------- 回放准备 ---------- */
-    REPLAY_PREPARE: `game:${uuid}:replay:prepare`
+    REPLAY_PREPARE: `game:${uuid}:replay:prepare`,
   });
   var ReplayEvents = (uuid) => ({
     /* ---------- 记录操作 ---------- */
@@ -2343,7 +2370,7 @@ var tetris = (() => {
     RESET: `replay:${uuid}:reset`,
     /* ---------- 流程控制 ---------- */
     GAME_OVER: `replay:${uuid}:game:over`,
-    STOP_CLEAR_LINES: `replay:${uuid}:stop:clear:lines`
+    STOP_CLEAR_LINES: `replay:${uuid}:stop:clear:lines`,
   });
   var UIEvents = (uuid) => ({
     /* ---------- HUD 绘制 ---------- */
@@ -2356,7 +2383,7 @@ var tetris = (() => {
     RENDER_NEXT_PIECE: `ui:${uuid}:render:next:piece`,
     RENDER_COUNTDOWN: `ui:${uuid}:render:countdown`,
     RENDER_CLEAR_LINES: `ui:${uuid}:render:clear:lines`,
-    RENDER_LEVEL_UP: `ui:${uuid}:render:level:up`
+    RENDER_LEVEL_UP: `ui:${uuid}:render:level:up`,
   });
 
   // lib/services/audio/index.js
@@ -2384,7 +2411,7 @@ var tetris = (() => {
       this.Context = Context;
       this.Sounds = new sounds_default({
         ...options,
-        Context
+        Context,
       });
       this.bgmSchedulerId = 0;
     }
@@ -2471,7 +2498,7 @@ var tetris = (() => {
      * @returns {void}
      */
     _onToggleBGM = ({ level }) => {
-      this.emit("audio:resume:sound", { sound: "BGM_TOGGLED" });
+      this.emit('audio:resume:sound', { sound: 'BGM_TOGGLED' });
       this.toggleBGM(level);
     };
     /**
@@ -2514,7 +2541,14 @@ var tetris = (() => {
      * @returns {void}
      */
     subscribe() {
-      const { Animations, AI, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
+      const {
+        Animations,
+        AI,
+        CommandQueue: CommandQueue2,
+        Game: Game2,
+        Replay,
+        UI: UI2,
+      } = this;
       const events = GameEvents(Game2.id);
       this.on(events.UPDATE_STATE, this._onUpdateState);
       this.on(events.UPDATE_MODE, this._onUpdateMode);
@@ -2559,7 +2593,14 @@ var tetris = (() => {
      * @returns {void}
      */
     unsubscribe() {
-      const { Animations, AI, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
+      const {
+        Animations,
+        AI,
+        CommandQueue: CommandQueue2,
+        Game: Game2,
+        Replay,
+        UI: UI2,
+      } = this;
       const events = GameEvents(Game2.id);
       this.off(events.UPDATE_STATE, this._onUpdateState);
       this.off(events.UPDATE_MODE, this._onUpdateMode);
@@ -2608,11 +2649,11 @@ var tetris = (() => {
     _onSwitchController = () => {
       const { Store, Game: Game2 } = this;
       const uuid = Game2.id;
-      const controller = Store.getController() === "human" ? "ai" : "human";
+      const controller = Store.getController() === 'human' ? 'ai' : 'human';
       const AE = AIEvents(uuid);
       const UE = UIEvents(uuid);
       Store.setController(controller);
-      if (controller === "ai") {
+      if (controller === 'ai') {
         this.emit(AE.START);
       } else {
         this.emit(AE.STOP);
@@ -2705,7 +2746,7 @@ var tetris = (() => {
     _onSwitchToDifficulty = () => {
       const { Game: Game2 } = this;
       const events = UIEvents(Game2.id);
-      this.emit(events.UPDATE_MODE, { mode: "difficulty" });
+      this.emit(events.UPDATE_MODE, { mode: 'difficulty' });
       Game2.switchToDifficulty();
     };
     /**
@@ -2753,7 +2794,7 @@ var tetris = (() => {
       const { Store, Game: Game2 } = this;
       const events = AIEvents(Game2.id);
       Game2.start();
-      if (Store.getController() === "ai") {
+      if (Store.getController() === 'ai') {
         this.emit(events.START);
       }
     };
@@ -2769,11 +2810,11 @@ var tetris = (() => {
       const { Store, Game: Game2 } = this;
       const events = AIEvents(Game2.id);
       Game2.togglePause();
-      if (Store.getController() === "ai") {
+      if (Store.getController() === 'ai') {
         const { mode } = Store.getState();
-        if (mode === "paused") {
+        if (mode === 'paused') {
           this.emit(events.STOP);
-        } else if (mode === "playing") {
+        } else if (mode === 'playing') {
           this.emit(events.START);
         }
       }
@@ -2875,7 +2916,7 @@ var tetris = (() => {
       const { Store } = this;
       const events = AudioEvents();
       this.emit(events.TOGGLE_BGM, {
-        level: Store.getLevel()
+        level: Store.getLevel(),
       });
     };
     /**
@@ -2897,10 +2938,10 @@ var tetris = (() => {
         board: Store.getBeginningBoard(),
         score: 0,
         lines: 0,
-        level: 1
+        level: 1,
       });
-      this.emit(UE.UPDATE_MODE, { mode: "replay" });
-      Store.setMode("replay");
+      this.emit(UE.UPDATE_MODE, { mode: 'replay' });
+      Store.setMode('replay');
       this.emit(UE.UPDATE_HUD, { state: Store.getState() });
       this.emit(RE.START_PLAY);
       this.emit(GE.BLOCK_SPAWN);
@@ -2980,7 +3021,7 @@ var tetris = (() => {
   // lib/state/game-state.js
   var GameState = {
     /** ## 当前控制者身份：human / ai */
-    controller: "human",
+    controller: 'human',
     /** ## 游戏初始化时的棋盘数据（用于回放） */
     beginningBoard: [],
     /** ## 游戏棋盘（20×10），存储颜色值字符串 */
@@ -3006,7 +3047,7 @@ var tetris = (() => {
     /** ## 当前待消除行号 */
     clearLines: [],
     /** ## 游戏难度 */
-    difficulty: "easy",
+    difficulty: 'easy',
     /**
      * ## 游戏模式
      *
@@ -3015,40 +3056,40 @@ var tetris = (() => {
      * - `paused`：游戏暂停
      * - `game-over`：游戏结束
      */
-    mode: "main-menu",
+    mode: 'main-menu',
     /** ## 手柄连接状态 */
-    gamepadConnected: false
+    gamepadConnected: false,
   };
   var game_state_default = GameState;
 
   // lib/constants/colors.js
-  var TEAL = "#00c8ff";
-  var RGBA_TEAL = "rgba(0, 200, 255, 0.3)";
-  var YELLOW = "#f1fa04";
-  var RGBA_YELLOW = "rgba(255, 255, 0, 0.3)";
-  var PURPLE = "#d31ac1";
-  var RGBA_PURPLE = "rgba(211, 26, 193, 0.3)";
-  var BLUE = "#5050ff";
-  var RGBA_BLUE = "rgba(80, 80, 255, 0.3)";
-  var ORANGE = "#ffa500";
-  var RGBA_ORANGE = "rgba(255, 127, 0, 0.3)";
-  var GREEN = "#0afa04";
-  var DARK_GREEN = "#5c9d31";
-  var RGBA_GREEN = "rgba(0, 255, 0, 0.3)";
-  var RED = "#ff3b30";
-  var RGBA_RED = "rgba(255, 59, 48, 0.3)";
-  var CORAL = "#e64a19";
-  var RGBA_CORAL = "rgba(230, 74, 25, 0.3)";
-  var BLACK = "#444";
-  var RGBA_BLACK = "rgba(0, 0, 0, 0.3)";
-  var WHITE = "#fff";
-  var RGBA_WHITE = "rgba(255, 255, 255, 0.3)";
-  var PINK = "#ff4fa3";
-  var RGBA_PINK = "rgba(255, 79, 163, 0.3)";
-  var VIOLET = "#7b34eb";
-  var RGBA_VIOLET = "rgba(123, 52, 235, 0.3)";
-  var CYAN = "#0cc0df";
-  var RGBA_CYAN = "rgba(12, 192, 223, 0.3)";
+  var TEAL = '#00c8ff';
+  var RGBA_TEAL = 'rgba(0, 200, 255, 0.3)';
+  var YELLOW = '#f1fa04';
+  var RGBA_YELLOW = 'rgba(255, 255, 0, 0.3)';
+  var PURPLE = '#d31ac1';
+  var RGBA_PURPLE = 'rgba(211, 26, 193, 0.3)';
+  var BLUE = '#5050ff';
+  var RGBA_BLUE = 'rgba(80, 80, 255, 0.3)';
+  var ORANGE = '#ffa500';
+  var RGBA_ORANGE = 'rgba(255, 127, 0, 0.3)';
+  var GREEN = '#0afa04';
+  var DARK_GREEN = '#5c9d31';
+  var RGBA_GREEN = 'rgba(0, 255, 0, 0.3)';
+  var RED = '#ff3b30';
+  var RGBA_RED = 'rgba(255, 59, 48, 0.3)';
+  var CORAL = '#e64a19';
+  var RGBA_CORAL = 'rgba(230, 74, 25, 0.3)';
+  var BLACK = '#444';
+  var RGBA_BLACK = 'rgba(0, 0, 0, 0.3)';
+  var WHITE = '#fff';
+  var RGBA_WHITE = 'rgba(255, 255, 255, 0.3)';
+  var PINK = '#ff4fa3';
+  var RGBA_PINK = 'rgba(255, 79, 163, 0.3)';
+  var VIOLET = '#7b34eb';
+  var RGBA_VIOLET = 'rgba(123, 52, 235, 0.3)';
+  var CYAN = '#0cc0df';
+  var RGBA_CYAN = 'rgba(12, 192, 223, 0.3)';
   var COLORS = {
     TEAL,
     RGBA_TEAL,
@@ -3076,18 +3117,34 @@ var tetris = (() => {
     VIOLET,
     RGBA_VIOLET,
     CYAN,
-    RGBA_CYAN
+    RGBA_CYAN,
   };
   var colors_default = COLORS;
 
   // lib/state/utils/generate-garbage-rows.js
-  var { RED: RED2, GREEN: GREEN2, BLUE: BLUE2, YELLOW: YELLOW2, PURPLE: PURPLE2, TEAL: TEAL2, ORANGE: ORANGE2 } = colors_default;
-  var DEFAULT_COLOR_MAP = [RED2, GREEN2, BLUE2, YELLOW2, PURPLE2, TEAL2, ORANGE2];
+  var {
+    RED: RED2,
+    GREEN: GREEN2,
+    BLUE: BLUE2,
+    YELLOW: YELLOW2,
+    PURPLE: PURPLE2,
+    TEAL: TEAL2,
+    ORANGE: ORANGE2,
+  } = colors_default;
+  var DEFAULT_COLOR_MAP = [
+    RED2,
+    GREEN2,
+    BLUE2,
+    YELLOW2,
+    PURPLE2,
+    TEAL2,
+    ORANGE2,
+  ];
   var generateGarbageRows = (rows, cols, colorMap) => {
     const colors = colorMap || DEFAULT_COLOR_MAP;
     const garbage = [];
     for (let i = 0; i < rows; i += 1) {
-      const row = Array.from({ length: cols }).fill("");
+      const row = Array.from({ length: cols }).fill('');
       for (let col = 0; col < cols; col += 1) {
         row[col] = colors[Math.floor(Math.random() * colors.length)];
       }
@@ -3098,7 +3155,7 @@ var tetris = (() => {
         holePositions.add(Math.floor(Math.random() * cols));
       }
       for (const pos of holePositions) {
-        row[pos] = "";
+        row[pos] = '';
       }
       garbage.push(row);
     }
@@ -3168,7 +3225,7 @@ var tetris = (() => {
     setState(patch) {
       this.state = {
         ...this.state,
-        ...is_function_default(patch) ? patch(this.state) : patch
+        ...(is_function_default(patch) ? patch(this.state) : patch),
       };
     }
     /**
@@ -3198,9 +3255,8 @@ var tetris = (() => {
      */
     resetBoard() {
       const { cols, rows } = this.options;
-      this.state.board = Array.from(
-        { length: rows },
-        () => Array.from({ length: cols }).fill(0)
+      this.state.board = Array.from({ length: rows }, () =>
+        Array.from({ length: cols }).fill(0),
       );
     }
     /**
@@ -3222,7 +3278,7 @@ var tetris = (() => {
         easy: 0,
         normal: 3,
         hard: 6,
-        expert: 9
+        expert: 9,
       };
       const { board, difficulty } = this.state;
       const cols = board[0].length;
@@ -3294,11 +3350,11 @@ var tetris = (() => {
     /**
      * ## 设置游戏难度等级
      *
-     * @param {string} [difficulty='easy'] - 难度等级（easy / normal / hard / expert）.
-     *   Default is `'easy'`
+     * @param {string} [difficulty='easy'] - 难度等级（easy / normal / hard /
+     *   expert）. Default is `'easy'`
      * @returns {void}
      */
-    setDifficulty(difficulty = "easy") {
+    setDifficulty(difficulty = 'easy') {
       this.state.difficulty = difficulty;
     }
     /**
@@ -3526,347 +3582,103 @@ var tetris = (() => {
 
   // lib/runtime/animation-system.js
   var AnimationSystem = class extends core_default {
-    /**
-     * ## 当前活跃的动画队列
-     *
-     * 存储所有正在运行的动画对象。 该队列会在 `update()` 过程中动态变化（移除已结束的动画）。
-     *
-     * @private
-     * @type {object[]}
-     */
     #queue = [];
-    /**
-     * ## 等待注册的动画队列
-     *
-     * 新注册的动画先加入此队列，在下次 `update()` 时合并到 `#queue`。
-     * 这种延迟注册机制避免在遍历活跃队列时直接修改数组，防止迭代器失效问题。
-     *
-     * @private
-     * @type {object[]}
-     */
     #pending = [];
-    /**
-     * ## 按 layer 排序后的缓存数组
-     *
-     * 用于渲染阶段，避免每帧都重新进行排序操作。 只在队列发生变化（`#dirty = true`）时才重新计算。
-     *
-     * @private
-     * @type {object[]}
-     */
     #sorted = [];
-    /**
-     * ## 排序缓存是否需要重新计算
-     *
-     * 当队列发生变化时（添加动画、移除动画）设为 `true`， 下次 `render()` 时会触发重新排序。 这是一种典型的懒加载（Lazy
-     * Loading）优化策略。
-     *
-     * @private
-     * @type {boolean}
-     */
     #dirty = false;
-    /**
-     * ## 当前动画总数（调试用）
-     *
-     * 返回系统中所有动画的数量，包括：
-     *
-     * - 活跃队列（`#queue`）中的动画
-     * - 待注册队列（`#pending`）中的动画
-     *
-     * 主要用于调试和监控目的。
-     *
-     * @type {number}
-     */
     get size() {
       return this.#queue.length + this.#pending.length;
     }
-    /**
-     * ## 构造函数
-     *
-     * 初始化动画管理系统实例。 注意：构造函数不会自动订阅事件，需要手动调用 `subscribe()`。
-     *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例，用于事件通信
-     */
     constructor(options) {
       super(options);
     }
-    /**
-     * ## 注册动画
-     *
-     * 将动画对象注册到系统中。新动画不会立即生效， 而是在下次 `update()` 时合并到活跃队列，避免遍历中修改数组。
-     *
-     * ### 动画对象验证
-     *
-     * 系统会严格验证动画对象是否包含必需的方法（`update` 和 `render`）， 如果验证失败会抛出错误，确保系统稳定性。
-     *
-     * ### 默认值设置
-     *
-     * - `layer`：默认为 0（最底层）
-     * - `blocking`：默认为 false（非阻塞动画）
-     * - `name`：默认为 'anonymous'（匿名动画）
-     *
-     * @example
-     *   // 注册一个简单的移动动画
-     *   animSystem.register({
-     *     name: 'move-right',
-     *     layer: 5,
-     *     blocking: false,
-     *     x: 0,
-     *     targetX: 100,
-     *     speed: 50,
-     *     update(delta) {
-     *       this.x += this.speed * delta;
-     *       return this.x < this.targetX;
-     *     },
-     *     render() {
-     *       drawSprite(this.x, 0);
-     *     },
-     *   });
-     *
-     * @param {object} animation - 动画对象，必须包含 `update()` 和 `render()` 方法
-     * @returns {void}
-     * @throws {Error} 如果动画对象无效则抛出错误
-     */
     register(animation) {
-      if (!animation || typeof animation.update !== "function" || typeof animation.render !== "function") {
-        throw new Error(
-          "Invalid animation: must implement update() and render()"
-        );
+      if (!animation || typeof animation.render !== 'function') {
+        throw new Error('Invalid animation: must implement render()');
       }
       animation.layer ??= 0;
       animation.blocking ??= false;
-      animation.name ??= "anonymous";
+      animation.name ??= 'anonymous';
       this.#pending.push(animation);
       this.#dirty = true;
     }
-    /**
-     * ## 更新所有动画
-     *
-     * 在游戏逻辑循环中调用。执行流程：
-     *
-     * 1. 合并待注册动画到活跃队列
-     * 2. 遍历所有动画并调用 `update(delta)`
-     * 3. 自动移除返回 `false` 的已结束动画
-     * 4. 处理 `update()` 过程中新注册的动画（增量合并）
-     *
-     * ### 安全更新机制
-     *
-     * 使用 while 循环和游标方式遍历，支持在更新过程中安全地移除动画。 当动画返回 `false` 时立即从队列中移除，并保持游标位置不变。
-     *
-     * ### 增量注册支持
-     *
-     * 如果在某个动画的 `update()` 方法中注册了新动画，系统会立即合并这些新动画， 确保它们在同一帧内也能被更新（如果注册时已遍历到的位置之后）。
-     *
-     * @example
-     *   // 在游戏循环中调用
-     *   let lastTime = performance.now();
-     *   function animate(currentTime) {
-     *     const delta = (currentTime - lastTime) / 1000;
-     *     animSystem.update(delta);
-     *     lastTime = currentTime;
-     *     requestAnimationFrame(animate);
-     *   }
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒），用于基于时间的动画计算
-     * @returns {void}
-     */
-    update(delta) {
+    flush() {
       this.#mergePending();
-      let processedCount = 0;
-      while (processedCount < this.#queue.length) {
-        const anim = this.#queue[processedCount];
-        const alive = anim.update(delta);
-        if (alive) {
-          processedCount++;
-        } else {
-          this.#queue.splice(processedCount, 1);
-          this.#dirty = true;
-        }
-        if (this.#pending.length > 0) {
-          this.#mergePending();
-        }
-      }
+      this.#removeFinished();
     }
-    /**
-     * ## 渲染所有动画
-     *
-     * 在渲染循环中调用。采用懒排序策略： 只在队列发生变化（`#dirty = true`）时才重新排序。
-     *
-     * ### 渲染顺序
-     *
-     * `layer` 值越小越先渲染（底层），越大越后渲染（顶层）。 例如：背景动画 layer=0，UI 特效 layer=100。
-     *
-     * 这种分层渲染机制确保正确的视觉叠加效果：
-     *
-     * - 底层动画（如背景云彩）先绘制
-     * - 中层动画（如游戏特效）后绘制
-     * - 顶层动画（如 UI 提示）最后绘制
-     *
-     * ### 性能优化
-     *
-     * 排序操作的时间复杂度为 O(n log n)，通过懒排序策略， 只有在队列实际发生变化时才重新排序，避免每帧都进行不必要的排序。
-     *
-     * @example
-     *   // 在游戏循环中调用
-     *   function render() {
-     *     ctx.clearRect(0, 0, width, height);
-     *     // 绘制游戏基础内容...
-     *     animSystem.render(); // 绘制所有动画层
-     *   }
-     *
-     * @returns {void}
-     */
     render() {
       if (this.#dirty) {
-        this.#sorted = this.#queue.slice().toSorted((a, b) => a.layer - b.layer);
+        this.#sorted = this.#queue
+          .slice()
+          .toSorted((a, b) => a.layer - b.layer);
         this.#dirty = false;
       }
       for (const animation of this.#sorted) {
         animation.render();
       }
     }
-    /**
-     * ## 检查是否存在阻塞性动画
-     *
-     * 阻塞动画会暂停用户输入或游戏逻辑（如消行特效、倒计时、过场动画等）。 此方法用于判断是否应该阻塞用户交互或游戏进程。
-     *
-     * ### 使用场景
-     *
-     * - **输入阻塞**：存在阻塞动画时，忽略用户输入，防止操作冲突
-     * - **游戏逻辑阻塞**：等待特效播放完成后再继续游戏逻辑
-     * - **流程控制**：按动画名称精确控制哪些动画会阻塞特定功能
-     *
-     * @example
-     *   // 检查是否有任何阻塞动画
-     *   if (animSystem.hasBlocking()) {
-     *     return; // 有阻塞动画，暂停处理输入
-     *   }
-     *
-     *   // 只检查消行和倒计时动画
-     *   if (animSystem.hasBlocking(['clear-lines', 'countdown'])) {
-     *     return; // 特效播放中，等待完成
-     *   }
-     *
-     * @param {string[]} [names=[]] - 可选，指定要检查的动画名称列表。 为空时检查所有阻塞动画。默认值为 `[]`.
-     *   Default is `[]`
-     * @returns {boolean} 存在匹配的阻塞动画则返回 `true`，否则返回 `false`
-     */
     hasBlocking(names = []) {
       const hasNames = names.length > 0;
       for (const animation of this.#queue) {
-        if (!animation.blocking) {
-          continue;
-        }
+        if (animation._finished) continue;
+        if (!animation.blocking) continue;
         if (!hasNames || names.includes(animation.name)) {
           return true;
         }
       }
       return false;
     }
-    /**
-     * ## 清空所有动画
-     *
-     * 移除系统中的所有动画，重置内部状态。 通常在游戏重置、场景切换或紧急清理时使用。
-     *
-     * ### 清空范围
-     *
-     * - 清空活跃队列（`#queue`）
-     * - 清空待注册队列（`#pending`）
-     * - 清空排序缓存（`#sorted`）
-     * - 重置 dirty 标记
-     *
-     * @example
-     *   // 游戏重置时清空所有动画
-     *   function resetGame() {
-     *     animSystem.clear();
-     *     // 其他重置逻辑...
-     *   }
-     *
-     * @returns {void}
-     */
     clear() {
+      for (const anim of this.#queue) {
+        if (typeof anim.dispose === 'function') {
+          anim.dispose();
+        }
+      }
+      for (const anim of this.#pending) {
+        if (typeof anim.dispose === 'function') {
+          anim.dispose();
+        }
+      }
       this.#queue.length = 0;
       this.#pending.length = 0;
       this.#sorted.length = 0;
       this.#dirty = false;
     }
-    /**
-     * ## 合并待注册动画到活跃队列
-     *
-     * 将 `#pending` 中的动画全部移入 `#queue`，并标记排序缓存失效。 这是一个批量操作，一次性转移所有等待注册的动画。
-     *
-     * ### 设计原因
-     *
-     * 使用延迟队列而非直接注册的原因：
-     *
-     * 1. **遍历安全**：避免在遍历 `#queue` 时直接修改数组
-     * 2. **批量操作**：减少多次转移的开销
-     * 3. **性能优化**：只在必要时（update 开始时）进行一次合并
-     *
-     * @private
-     * @returns {void}
-     */
+    subscribe() {
+      const { Game: Game2 } = this;
+      const events = AnimationsEvents(Game2.id);
+      this.on(events.CLEAR, this._onClear);
+    }
+    unsubscribe() {
+      const { Game: Game2 } = this;
+      const events = AnimationsEvents(Game2.id);
+      this.off(events.CLEAR, this._onClear);
+    }
+    _onClear = () => {
+      this.clear();
+    };
     #mergePending() {
       if (this.#pending.length === 0) return;
       this.#queue.push(...this.#pending);
       this.#pending.length = 0;
       this.#dirty = true;
     }
-    /**
-     * ## 订阅动画系统事件
-     *
-     * 监听 `animations:<id>:clear` 事件，用于外部触发清空操作。
-     *
-     * ### 事件说明
-     *
-     * - 事件名称：`animations:{gameId}:clear`
-     * - 触发时机：外部需要清空所有动画时（如游戏重置）
-     * - 响应动作：调用 `clear()` 方法清空所有动画
-     *
-     * @example
-     *   // 初始化时订阅事件
-     *   animSystem.subscribe();
-     *
-     *   // 外部触发清空
-     *   eventBus.emit('animations:game1:clear');
-     *
-     * @returns {void}
-     */
-    subscribe() {
-      const { Game: Game2 } = this;
-      const events = AnimationsEvents(Game2.id);
-      this.on(events.CLEAR, this._onClear);
+    #removeFinished() {
+      let removed = false;
+      for (let i = this.#queue.length - 1; i >= 0; i--) {
+        const anim = this.#queue[i];
+        if (anim._finished) {
+          if (typeof anim.dispose === 'function') {
+            anim.dispose();
+          }
+          this.#queue.splice(i, 1);
+          removed = true;
+        }
+      }
+      if (removed) {
+        this.#dirty = true;
+      }
     }
-    /**
-     * ## 取消订阅动画系统事件
-     *
-     * 移除对 `animations:<id>:clear` 事件的监听。 在组件销毁或不需要响应清空事件时调用，避免内存泄漏。
-     *
-     * @example
-     *   // 销毁前取消订阅
-     *   function destroy() {
-     *     animSystem.unsubscribe();
-     *     animSystem.clear();
-     *   }
-     *
-     * @returns {void}
-     */
-    unsubscribe() {
-      const { Game: Game2 } = this;
-      const events = AnimationsEvents(Game2.id);
-      this.off(events.CLEAR, this._onClear);
-    }
-    /**
-     * ## 处理清空事件
-     *
-     * 当接收到 `animations:<id>:clear` 事件时的回调函数。 执行清空所有动画的操作。
-     *
-     * @private
-     * @returns {void}
-     */
-    _onClear = () => {
-      this.clear();
-    };
   };
   var animation_system_default = AnimationSystem;
 
@@ -3891,9 +3703,9 @@ var tetris = (() => {
       this.rows = rows;
       this.cols = cols;
       this.gameBoard = document.querySelector(`#${board}`);
-      this.gameBoardContext = this.gameBoard.getContext("2d");
+      this.gameBoardContext = this.gameBoard.getContext('2d');
       this.nextPiece = document.querySelector(`#${next}`);
-      this.nextPieceContext = this.nextPiece.getContext("2d");
+      this.nextPieceContext = this.nextPiece.getContext('2d');
       this.fontSize = 0;
       this.blockSize = 0;
     }
@@ -3904,12 +3716,12 @@ var tetris = (() => {
   var padStart = (n, len) => {
     const num = Number(n);
     if (!Number.isFinite(num)) {
-      return "";
+      return '';
     }
     const targetLen = Math.max(0, Math.floor(len));
-    const sign = num < 0 ? "-" : "";
+    const sign = num < 0 ? '-' : '';
     const absStr = Math.abs(num).toString();
-    return sign + absStr.padStart(targetLen, "0");
+    return sign + absStr.padStart(targetLen, '0');
   };
   var pad_start_default = padStart;
 
@@ -3926,13 +3738,14 @@ var tetris = (() => {
       /** @type {HTMLElement | null} 等级显示元素 */
       level: document.querySelector(`#${level}`),
       /** @type {HTMLElement | null} 最高分显示元素 */
-      highScore: document.querySelector(`#${highScore}`)
+      highScore: document.querySelector(`#${highScore}`),
     };
   };
   var hud_elements_default = HudElements;
 
   // lib/services/ui/hud/hud-manager.js
-  var setText = (el, value, pad = 0) => el.textContent = pad ? pad_start_default(value, pad) : String(value);
+  var setText = (el, value, pad = 0) =>
+    (el.textContent = pad ? pad_start_default(value, pad) : String(value));
   var animationScore = (tracker, element, padding) => {
     if (tracker.visual === tracker.target) {
       return;
@@ -4050,16 +3863,16 @@ var tetris = (() => {
   var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
   var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
   var AI_ALLOWED_ACTIONS = [
-    "SWITCH_CONTROLLER",
-    "TOGGLE_MUSIC",
-    "TOGGLE_PAUSED",
-    "RESTART",
-    "QUIT"
+    'SWITCH_CONTROLLER',
+    'TOGGLE_MUSIC',
+    'TOGGLE_PAUSED',
+    'RESTART',
+    'QUIT',
   ];
   var GAME = {
     CLEAR_LINE_SCORES,
     FONT_FAMILY,
-    AI_ALLOWED_ACTIONS
+    AI_ALLOWED_ACTIONS,
   };
   var game_default = GAME;
 
@@ -4073,15 +3886,15 @@ var tetris = (() => {
       strokeColor,
       size = 1,
       center = true,
-      baseline = "",
+      baseline = '',
       stroke = false,
-      lineWidth = 2
+      lineWidth = 2,
     } = options;
     const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
     const { gameBoardContext: ctx, fontSize } = canvas;
     ctx.save();
     if (center) {
-      ctx.textAlign = "center";
+      ctx.textAlign = 'center';
     }
     if (baseline) {
       ctx.textBaseline = baseline;
@@ -4104,11 +3917,11 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "TETRIS.JS",
+      text: 'TETRIS.JS',
       x: width / 2,
       y: height * 0.1,
       color: GREEN5,
-      size: 1.1
+      size: 1.1,
     });
   };
   var render_tetris_text_default = renderTetrisText;
@@ -4119,12 +3932,12 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "LEVEL",
+      text: 'LEVEL',
       x: width / 2,
       y: height * 0.35,
       color: GREEN5,
       size: 1,
-      center: true
+      center: true,
     });
   };
   var render_level_text_default = renderLevelText;
@@ -4140,7 +3953,7 @@ var tetris = (() => {
       y,
       color: GREEN5,
       size: 3,
-      center: true
+      center: true,
     });
   };
   var render_level_number_default = renderLevelNumber;
@@ -4151,12 +3964,12 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "1-9 or T KEY",
+      text: '1-9 or T KEY',
       x: width / 2,
       y: height * 0.58,
       color: WHITE3,
       size: 1,
-      center: true
+      center: true,
     });
   };
   var render_level_shortcut_default = renderLevelShortcut;
@@ -4167,14 +3980,14 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "ENTER CONTINUE",
+      text: 'ENTER CONTINUE',
       x: width / 2,
       y: height * 0.74,
       color: TEAL5,
       strokeColor: BLACK2,
       size: 1,
       center: true,
-      stroke: true
+      stroke: true,
     });
   };
   var render_enter_continue_text_default = renderEnterContinueText;
@@ -4207,13 +4020,14 @@ var tetris = (() => {
     /** 暂停场景：咖啡杯图标 */
     coffee: `<svg fill="${RGBA_WHITE2}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="800" height="800" viewBox="0 0 32 32"><path d="M24.6 25h.9c2.5 0 4.5-2 4.5-4.5 0-2.3-1.8-4.2-4-4.4V15c0-.6-.4-1-1-1H7c-.6 0-1 .4-1 1v5c0 3.3 1.6 6.2 4 8H5c-.6 0-1 .4-1 1s.4 1 1 1h22c.6 0 1-.4 1-1s-.4-1-1-1h-5c1.1-.8 2-1.8 2.6-3m3.4-4.5c0 1.4-1.1 2.5-2.5 2.5.3-.9.5-2 .5-3v-1.9c1.1.2 2 1.2 2 2.4M24 16v2.4c-1.1.5-4.1 1.4-7.6-.3s-6.6-.8-8.4.1V16zM8 20.5c1-.7 4-2.3 7.5-.6 1.8.9 3.5 1.1 5 1.1 1.4 0 2.6-.3 3.5-.5-.1 1-.3 2-.7 2.8-.1.1-.2.3-.2.4-1.4 2.5-4 4.2-7 4.2-4.3.1-7.8-3.2-8.1-7.4m3-9.5h3c.3 0 .5.2.5.5v.5c0 .6.4 1 1 1s1-.4 1-1v-.5c0-1.4-1.1-2.5-2.5-2.5h-3c-.3 0-.5-.2-.5-.5s.2-.5.5-.5h9.5c1.7 0 3-1.3 3-3s-1.3-3-3-3h-10c-.6 0-1 .4-1 1s.4 1 1 1h10c.6 0 1 .4 1 1s-.4 1-1 1H11C9.6 6 8.5 7.1 8.5 8.5S9.6 11 11 11"/></svg>`,
     /** 游戏结束场景：笑脸表情 */
-    happy: `<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="800" height="800" viewBox="0 0 512.003 512.003"><circle cx="256.001" cy="256.001" r="256.001" style="fill:#fddf6d"/><path d="M310.859 474.208c-141.385 0-256-114.615-256-256 0-75.537 32.722-143.422 84.757-190.281C56.738 70.303 0 156.525 0 256c0 141.385 114.615 256 256 256 65.849 0 125.883-24.87 171.243-65.718-34.918 17.853-74.473 27.926-116.384 27.926" style="fill:#fcc56b"/><path d="M245.899 187.172c-5.752 0-10.414-4.663-10.414-10.414 0-13.433-10.928-24.362-24.362-24.362s-24.362 10.93-24.362 24.362c0 5.752-4.663 10.414-10.414 10.414-5.752 0-10.414-4.663-10.414-10.414 0-24.918 20.273-45.19 45.19-45.19s45.19 20.272 45.19 45.19c.001 5.751-4.662 10.414-10.414 10.414M421.798 187.172c-5.752 0-10.414-4.663-10.414-10.414 0-13.433-10.928-24.362-24.362-24.362s-24.362 10.93-24.362 24.362c0 5.752-4.663 10.414-10.414 10.414s-10.414-4.663-10.414-10.414c0-24.918 20.273-45.19 45.19-45.19s45.19 20.272 45.19 45.19c.001 5.751-4.662 10.414-10.414 10.414" style="fill:#7f184c"/><path d="M293.248 443.08c-74.004 0-133.995-59.991-133.995-133.995h267.991c-.001 74.003-59.993 133.995-133.996 133.995" style="fill:#fff"/><path d="M172.426 367.092a134 134 0 0 0 12.472 20.829h216.699a134 134 0 0 0 12.472-20.829z" style="fill:#e6e6e6"/><path d="M145.987 240.152c-19.011 0-34.423 15.412-34.423 34.423h68.848c-.002-19.011-15.414-34.423-34.425-34.423M446.251 240.152c-19.011 0-34.423 15.412-34.423 34.423h68.848c0-19.011-15.412-34.423-34.425-34.423" style="fill:#f9a880"/><ellipse cx="292.913" cy="73.351" rx="29.854" ry="53.46" style="fill:#fceb88" transform="rotate(-74.199 292.913 73.351)"/></svg>`
+    happy: `<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="800" height="800" viewBox="0 0 512.003 512.003"><circle cx="256.001" cy="256.001" r="256.001" style="fill:#fddf6d"/><path d="M310.859 474.208c-141.385 0-256-114.615-256-256 0-75.537 32.722-143.422 84.757-190.281C56.738 70.303 0 156.525 0 256c0 141.385 114.615 256 256 256 65.849 0 125.883-24.87 171.243-65.718-34.918 17.853-74.473 27.926-116.384 27.926" style="fill:#fcc56b"/><path d="M245.899 187.172c-5.752 0-10.414-4.663-10.414-10.414 0-13.433-10.928-24.362-24.362-24.362s-24.362 10.93-24.362 24.362c0 5.752-4.663 10.414-10.414 10.414-5.752 0-10.414-4.663-10.414-10.414 0-24.918 20.273-45.19 45.19-45.19s45.19 20.272 45.19 45.19c.001 5.751-4.662 10.414-10.414 10.414M421.798 187.172c-5.752 0-10.414-4.663-10.414-10.414 0-13.433-10.928-24.362-24.362-24.362s-24.362 10.93-24.362 24.362c0 5.752-4.663 10.414-10.414 10.414s-10.414-4.663-10.414-10.414c0-24.918 20.273-45.19 45.19-45.19s45.19 20.272 45.19 45.19c.001 5.751-4.662 10.414-10.414 10.414" style="fill:#7f184c"/><path d="M293.248 443.08c-74.004 0-133.995-59.991-133.995-133.995h267.991c-.001 74.003-59.993 133.995-133.996 133.995" style="fill:#fff"/><path d="M172.426 367.092a134 134 0 0 0 12.472 20.829h216.699a134 134 0 0 0 12.472-20.829z" style="fill:#e6e6e6"/><path d="M145.987 240.152c-19.011 0-34.423 15.412-34.423 34.423h68.848c-.002-19.011-15.414-34.423-34.425-34.423M446.251 240.152c-19.011 0-34.423 15.412-34.423 34.423h68.848c0-19.011-15.412-34.423-34.425-34.423" style="fill:#f9a880"/><ellipse cx="292.913" cy="73.351" rx="29.854" ry="53.46" style="fill:#fceb88" transform="rotate(-74.199 292.913 73.351)"/></svg>`,
   };
   var scenes_background_default = ScenesBackground;
 
   // lib/services/ui/image/image-manager.js
   var ImagesCache = /* @__PURE__ */ new Map();
-  var toDataURI = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  var toDataURI = (svg) =>
+    `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   var getImage = (svg) => {
     const cached = ImagesCache.get(svg);
     if (cached) {
@@ -4252,7 +4066,7 @@ var tetris = (() => {
   var renderSceneBackground = (canvas, scene) => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
-    const hours = (/* @__PURE__ */ new Date()).getHours();
+    const hours = /* @__PURE__ */ new Date().getHours();
     let icon;
     let img;
     let size;
@@ -4260,8 +4074,8 @@ var tetris = (() => {
     let y;
     switch (scene) {
       /** 主菜单 / 倒计时场景：使用 Tetris 图标 */
-      case "main-menu":
-      case "countdown": {
+      case 'main-menu':
+      case 'countdown': {
         img = getImage(scenes_background_default.tetris);
         size = width;
         x = width / 2 - size / 2;
@@ -4269,15 +4083,15 @@ var tetris = (() => {
         break;
       }
       /** 游戏进行中场景：根据时间切换主题背景 */
-      case "playing": {
+      case 'playing': {
         if (hours >= 0 && hours <= 8) {
-          icon = "pagoda";
+          icon = 'pagoda';
           size = width * 1.4;
         } else if (hours > 8 && hours <= 14) {
-          icon = "temple";
+          icon = 'temple';
           size = width * 1.1;
         } else {
-          icon = "tower";
+          icon = 'tower';
           size = width * 1.6;
         }
         img = getImage(scenes_background_default[icon]);
@@ -4286,7 +4100,7 @@ var tetris = (() => {
         break;
       }
       /** 暂停场景：使用咖啡杯图标 */
-      case "paused": {
+      case 'paused': {
         img = getImage(scenes_background_default.coffee);
         size = width * 0.76;
         x = width / 2 - size / 2;
@@ -4294,7 +4108,7 @@ var tetris = (() => {
         break;
       }
       /** 游戏结束场景：使用笑脸图标 */
-      case "game-over": {
+      case 'game-over': {
         img = getImage(scenes_background_default.happy);
         size = Math.floor(width * 0.42);
         x = width / 2 - size / 2;
@@ -4312,7 +4126,7 @@ var tetris = (() => {
     const { height } = gameBoard;
     clear_board_default(canvas);
     render_overlay_default(canvas);
-    render_scene_background_default(canvas, "main-menu");
+    render_scene_background_default(canvas, 'main-menu');
     render_tetris_text_default(canvas);
     render_level_text_default(canvas);
     render_level_number_default(canvas, level, height * 0.5);
@@ -4333,12 +4147,12 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "DIFFICULTY",
+      text: 'DIFFICULTY',
       x: width / 2,
       y: height * 0.35,
       color: GREEN5,
       size: 1,
-      center: true
+      center: true,
     });
   };
   var render_difficulty_text_default = renderDifficultText;
@@ -4354,7 +4168,7 @@ var tetris = (() => {
       y,
       color: GREEN5,
       size: 2.2,
-      center: true
+      center: true,
     });
   };
   var render_difficult_words_default = renderDifficultyWords;
@@ -4364,9 +4178,9 @@ var tetris = (() => {
     const { WHITE: WHITE3 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
-    let text = "E/N/H/X KEY";
+    let text = 'E/N/H/X KEY';
     if (state.gamepadConnected) {
-      text = "A/B/Y/X KEY";
+      text = 'A/B/Y/X KEY';
     }
     render_text_default(canvas, {
       text,
@@ -4374,7 +4188,7 @@ var tetris = (() => {
       y: height * 0.58,
       color: WHITE3,
       size: 1,
-      center: true
+      center: true,
     });
   };
   var render_difficulty_shortcut_default = renderDifficultyShortcut;
@@ -4385,14 +4199,14 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "ENTER START",
+      text: 'ENTER START',
       x: width / 2,
       y: height * 0.74,
       color: TEAL5,
       strokeColor: BLACK2,
       size: 1.15,
       center: true,
-      stroke: true
+      stroke: true,
     });
   };
   var render_enter_start_text_default = renderEnterStartText;
@@ -4403,7 +4217,7 @@ var tetris = (() => {
     const { height } = gameBoard;
     clear_board_default(canvas);
     render_overlay_default(canvas);
-    render_scene_background_default(canvas, "main-menu");
+    render_scene_background_default(canvas, 'main-menu');
     render_tetris_text_default(canvas);
     render_difficulty_text_default(canvas);
     render_difficult_words_default(canvas, state.difficulty, height * 0.5);
@@ -4424,14 +4238,14 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "PAUSED",
+      text: 'PAUSED',
       x: width / 2,
       y: height / 1.4,
       color: YELLOW5,
       strokeColor: BLACK2,
       size: 1.6,
       center: true,
-      stroke: true
+      stroke: true,
     });
   };
   var render_paused_text_default = renderPausedText;
@@ -4461,7 +4275,7 @@ var tetris = (() => {
     VIOLET: VIOLET2,
     RGBA_VIOLET: RGBA_VIOLET2,
     CYAN: CYAN2,
-    RGBA_CYAN: RGBA_CYAN2
+    RGBA_CYAN: RGBA_CYAN2,
   } = colors_default;
   var ClockThemes = {
     /** 戌时 (19-20) */
@@ -4487,20 +4301,20 @@ var tetris = (() => {
     /** 丑时 (1-2) */
     White: { stroke: WHITE2, face: RGBA_WHITE3, secondHand: RED3 },
     /** 子时 (23, 0) */
-    Red: { stroke: RED3, face: RGBA_RED2, secondHand: WHITE2 }
+    Red: { stroke: RED3, face: RGBA_RED2, secondHand: WHITE2 },
   };
   var clock_themes_default = ClockThemes;
 
   // lib/utils/format-time.js
-  var formatTime = (date, format = "yyyy-MM-dd HH:mm:ss") => {
+  var formatTime = (date, format = 'yyyy-MM-dd HH:mm:ss') => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    const toSymbol = () => hours >= 12 ? "PM" : "AM";
-    const hasSymbol = format.includes("a");
+    const toSymbol = () => (hours >= 12 ? 'PM' : 'AM');
+    const hasSymbol = format.includes('a');
     const hour12 = hours % 12 || 12;
     const symbols = {
       yyyy: year,
@@ -4510,11 +4324,11 @@ var tetris = (() => {
       hh: pad_start_default(hour12, 2),
       mm: pad_start_default(minutes, 2),
       ss: pad_start_default(seconds, 2),
-      a: hasSymbol ? toSymbol() : ""
+      a: hasSymbol ? toSymbol() : '',
     };
     let time = format;
     for (const key of Object.keys(symbols)) {
-      time = time.replaceAll(new RegExp(key, "g"), symbols[key]);
+      time = time.replaceAll(new RegExp(key, 'g'), symbols[key]);
     }
     return time;
   };
@@ -4523,49 +4337,52 @@ var tetris = (() => {
   // lib/services/ui/effects/clock/utils/get-chinese-hour-dial-theme.js
   var getChineseHourDialTheme = (hour) => {
     const map = [
-      "Red",
-      "White",
-      "White",
-      "Orange",
-      "Orange",
-      "Cyan",
-      "Cyan",
-      "Blue",
-      "Blue",
-      "Coral",
-      "Coral",
-      "Purple",
-      "Purple",
-      "Green",
-      "Green",
-      "Yellow",
-      "Yellow",
-      "Pink",
-      "Pink",
-      "Teal",
-      "Teal",
-      "Violet",
-      "Violet",
-      "Red"
+      'Red',
+      'White',
+      'White',
+      'Orange',
+      'Orange',
+      'Cyan',
+      'Cyan',
+      'Blue',
+      'Blue',
+      'Coral',
+      'Coral',
+      'Purple',
+      'Purple',
+      'Green',
+      'Green',
+      'Yellow',
+      'Yellow',
+      'Pink',
+      'Pink',
+      'Teal',
+      'Teal',
+      'Violet',
+      'Violet',
+      'Red',
     ];
     return map[hour];
   };
   var get_chinese_hour_dial_theme_default = getChineseHourDialTheme;
 
   // lib/services/ui/effects/render-digital-clock.js
-  var renderDigitalClock = (canvas, time, format = "HH:mm:ss") => {
+  var renderDigitalClock = (canvas, time, format = 'HH:mm:ss') => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     const targetTime = time || /* @__PURE__ */ new Date();
     const text = format_time_default(targetTime, format);
-    const theme = clock_themes_default[get_chinese_hour_dial_theme_default(targetTime.getHours())];
+    const theme =
+      clock_themes_default[
+        get_chinese_hour_dial_theme_default(targetTime.getHours())
+      ];
     render_text_default(canvas, {
       text,
       x: width / 2,
       y: height / 4.15,
       color: theme?.secondHand || colors_default.GREEN,
       size: 0.94,
-      center: true
+      center: true,
     });
   };
   var render_digital_clock_default = renderDigitalClock;
@@ -4575,13 +4392,13 @@ var tetris = (() => {
     const h = time.getHours();
     const m = time.getMinutes();
     const s = time.getSeconds();
-    const hAng = (h % 12 + m / 60 + s / 3600) * (2 * Math.PI / 12);
-    const mAng = (m + s / 60) * (2 * Math.PI / 60);
-    const sAng = s * (2 * Math.PI / 60);
+    const hAng = ((h % 12) + m / 60 + s / 3600) * ((2 * Math.PI) / 12);
+    const mAng = (m + s / 60) * ((2 * Math.PI) / 60);
+    const sAng = s * ((2 * Math.PI) / 60);
     return {
       hAng,
       mAng,
-      sAng
+      sAng,
     };
   };
   var get_clock_angles_default = getClockAngles;
@@ -4612,60 +4429,60 @@ var tetris = (() => {
     /** 戌时 (19:00-21:00)：狗 */
     dog: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M326.063 282.947c0 34.25-13.231 44.464-29.642 44.464s-29.642-10.214-29.642-44.464c0-34.223 13.231-44.463 29.642-44.463s29.642 10.24 29.642 44.463m-56.59 147.349v311.646L190.276 916.21h59.204l73.89-162.574V377.263H296.42c-119.404 0-172.733-53.383-185.506-107.79h35.625c51.092 0 68.58-15.764 120.535-62.544 12.773-11.507 28.08-25.277 47.024-41.742l18.35-15.952-69.658-99.14-44.086 30.99 41.768 59.472c-11.183 9.863-20.884 18.594-29.48 26.328-50.257 45.272-54.757 48.694-84.453 48.694H53.895v26.947c0 88.711 66.91 178.15 215.579 187.77M486.185 268.88c2.29 71.734 28.7 136.327 75.049 182.919 57.479 57.829 141.204 87.147 248.859 87.147 18.593 0 36.19-1.158 52.628-3.449 3.746 111.266 33.63 170.334 51.496 196.015l-38.507 84.723c-93.535-74.186-186.934-115.604-498.446-115.604v53.894c34.277 0 65.698.512 94.64 1.51l-97.308 214.07H433.8l96.013-211.241c66.183 4.338 117.006 11.83 157.912 22.016L626.23 916.21h59.176l54.165-119.135c47.616 18.405 79.737 42.092 113.125 69.74l-46.943 103.29h59.204l113.07-248.779-13.823-13.204c-.485-.458-45.65-47.59-47.94-185.263C985.17 498.553 1024 447.81 1024 377.263c0-95.205-66.506-161.684-161.684-161.684v53.895c65.482 0 107.79 42.307 107.79 107.79 0 89.087-87.014 107.789-160.014 107.789-92.753 0-163.625-23.984-210.648-71.276-30.316-30.505-45.891-65.833-53.356-98.735 11.21 6.952 22.933 13.339 35.275 19.186l23.04-48.72C512.296 241.852 455.41 156.86 385.159 41.525l-46.026 28.052c49.448 81.246 92.968 148.507 147.051 199.303"/></svg>`,
     /** 亥时 (21:00-23:00)：猪 */
-    pig: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M808.421 700.632v53.894c-196.446 0-323.368 84.642-323.368 215.58h-53.895c0-163.706 148.076-269.474 377.263-269.474m-323.368 107.79v-53.896c-158.343 0-245.599 0-319.65-49.367l-6.79-4.527h-77.77c-21.694 0-26.625-14.821-26.948-26.948v-82.62C138.05 579.88 215.579 516.15 215.579 404.21V215.579h-53.895v161.684h-26.947C67.773 377.263 0 414.29 0 485.053h53.895c0-42.631 52.87-53.895 80.842-53.895h24.63c-12.234 73.755-74.213 107.79-132.42 107.79H0v134.736c0 32.499 21.53 80.842 80.842 80.842h61.683c32.687 20.507 67.126 33.146 105.957 41.014a232.9 232.9 0 0 0-32.903 120.67h53.895c0-41.93 14.012-80.303 39.424-112.505 49.987 4.447 107.062 4.716 176.155 4.716M412.106 466l-88.738 88.738V431.158h-53.894V684.84L450.21 504.104zm-88.738-304.317h-53.894v190.033a770 770 0 0 1 53.894-49.098zm323.369-53.895c-72.623 0-146.81 23.337-215.58 58.638v-58.638h-53.894v154.14c81.57-56.536 178.068-100.245 269.474-100.245 148.588 0 269.474 120.886 269.474 269.474v235.655L809.58 862.316h61.359l99.166-181.76V431.158c0-178.31-145.057-323.369-323.368-323.369"/></svg>`
+    pig: `<svg fill="${RGBA_WHITE4}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M808.421 700.632v53.894c-196.446 0-323.368 84.642-323.368 215.58h-53.895c0-163.706 148.076-269.474 377.263-269.474m-323.368 107.79v-53.896c-158.343 0-245.599 0-319.65-49.367l-6.79-4.527h-77.77c-21.694 0-26.625-14.821-26.948-26.948v-82.62C138.05 579.88 215.579 516.15 215.579 404.21V215.579h-53.895v161.684h-26.947C67.773 377.263 0 414.29 0 485.053h53.895c0-42.631 52.87-53.895 80.842-53.895h24.63c-12.234 73.755-74.213 107.79-132.42 107.79H0v134.736c0 32.499 21.53 80.842 80.842 80.842h61.683c32.687 20.507 67.126 33.146 105.957 41.014a232.9 232.9 0 0 0-32.903 120.67h53.895c0-41.93 14.012-80.303 39.424-112.505 49.987 4.447 107.062 4.716 176.155 4.716M412.106 466l-88.738 88.738V431.158h-53.894V684.84L450.21 504.104zm-88.738-304.317h-53.894v190.033a770 770 0 0 1 53.894-49.098zm323.369-53.895c-72.623 0-146.81 23.337-215.58 58.638v-58.638h-53.894v154.14c81.57-56.536 178.068-100.245 269.474-100.245 148.588 0 269.474 120.886 269.474 269.474v235.655L809.58 862.316h61.359l99.166-181.76V431.158c0-178.31-145.057-323.369-323.368-323.369"/></svg>`,
   };
   var chinese_hour_animals_default = ChineseHourAnimals;
 
   // lib/services/ui/image/utils/get-chinese-hour-animal.js
   var getChineseHourAnimal = (hour) => {
     const map = [
-      "rat",
+      'rat',
       // 0  子时（鼠）
-      "ox",
+      'ox',
       // 1  丑时（牛）
-      "ox",
+      'ox',
       // 2  丑时（牛）
-      "tiger",
+      'tiger',
       // 3  寅时（虎）
-      "tiger",
+      'tiger',
       // 4  寅时（虎）
-      "rabbit",
+      'rabbit',
       // 5  卯时（兔）
-      "rabbit",
+      'rabbit',
       // 6  卯时（兔）
-      "dragon",
+      'dragon',
       // 7  辰时（龙）
-      "dragon",
+      'dragon',
       // 8  辰时（龙）
-      "snake",
+      'snake',
       // 9  巳时（蛇）
-      "snake",
+      'snake',
       // 10 巳时（蛇）
-      "horse",
+      'horse',
       // 11 午时（马）
-      "horse",
+      'horse',
       // 12 午时（马）
-      "goat",
+      'goat',
       // 13 未时（羊）
-      "goat",
+      'goat',
       // 14 未时（羊）
-      "monkey",
+      'monkey',
       // 15 申时（猴）
-      "monkey",
+      'monkey',
       // 16 申时（猴）
-      "rooster",
+      'rooster',
       // 17 酉时（鸡）
-      "rooster",
+      'rooster',
       // 18 酉时（鸡）
-      "dog",
+      'dog',
       // 19 戌时（狗）
-      "dog",
+      'dog',
       // 20 戌时（狗）
-      "pig",
+      'pig',
       // 21 亥时（猪）
-      "pig",
+      'pig',
       // 22 亥时（猪）
-      "rat"
+      'rat',
       // 23 子时（鼠，回归）
     ];
     return map[hour];
@@ -4710,7 +4527,7 @@ var tetris = (() => {
     const dotDistance = radius - Math.floor(radius * 0.25);
     for (let i = 0; i < 12; i++) {
       ctx.save();
-      ctx.rotate(i * Math.PI / 6);
+      ctx.rotate((i * Math.PI) / 6);
       ctx.beginPath();
       ctx.arc(0, -dotDistance, dotRadius, 0, Math.PI * 2);
       ctx.fillStyle = theme.stroke;
@@ -4776,10 +4593,11 @@ var tetris = (() => {
     const displayTime = time || /* @__PURE__ */ new Date();
     const hours = displayTime.getHours();
     const angles = get_clock_angles_default(displayTime);
-    const theme = clock_themes_default[get_chinese_hour_dial_theme_default(hours)];
+    const theme =
+      clock_themes_default[get_chinese_hour_dial_theme_default(hours)];
     ctx.save();
     ctx.translate(centerX, centerY);
-    ctx.lineCap = "round";
+    ctx.lineCap = 'round';
     render_clock_dial_default(canvas, radius, theme);
     render_chinese_hour_animal_default(canvas);
     render_clock_ticks_default(canvas, radius, theme);
@@ -4830,60 +4648,60 @@ var tetris = (() => {
     /** 戌时 (19:00-21:00) */
     xu: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="M970.105 512c0 224.984-163.166 412.187-377.263 450.533v-54.46C777.135 870.507 916.211 707.206 916.211 512c0-222.882-181.33-404.21-404.211-404.21S107.79 289.117 107.79 512 289.117 916.21 512 916.21c9.081 0 18-.754 26.947-1.374v53.895c-8.973.539-17.866 1.374-26.947 1.374-252.605 0-458.105-205.5-458.105-458.105S259.395 53.895 512 53.895 970.105 259.395 970.105 512M594.513 662.393c33.684 44.544 75.21 74.698 124.74 90.813l11.425 3.719 10.402-6.01c40.124-23.174 67.341-128.35 67.341-158.073h-53.895c0 22.07-19.132 80.87-33.71 103.505-34.817-14.606-64.54-39.262-89.25-74.132 48.316-55.27 92.079-117.33 120.535-179.9l-49.044-22.286C679.289 472.279 643.315 524.746 603 572.685c-24.01-50.93-41.148-115.927-51.658-195.395h149.289v-53.895h-155.19a1848 1848 0 0 1-6.495-161.71h-53.894c0 58.206 2.155 112.073 6.494 161.683H323.368v26.948c0 216.549-13.177 263.545-100.702 359.047l39.747 36.432c63.327-69.093 92.807-118.272 105.715-206.848h116.925v-53.894h-111.32a1742 1742 0 0 0 3.45-107.79H497.34c12.611 98.25 35.031 177.476 67.395 238.188-61.979 65.536-128.054 117.976-173.299 142.282l25.52 47.481c47.589-25.573 114.095-77.446 177.556-142.82m125.17-411.971-80.842-80.842-38.103 38.103 80.842 80.842z"/></svg>`,
     /** 亥时 (21:00-23:00) */
-    hai: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m309.976 804.756-27.136-46.592c103.073-60.012 183.026-132.473 241.475-219.244h-174l-13.473-50.283c58.88-33.981 99.436-117.572 118.703-165.296H242.526v-53.894h538.948v53.894h-268.18c-12.396 34.089-42.47 106.604-90.436 161.685h134.01a680.6 680.6 0 0 0 46.349-107.709l51.092 17.058c-58.422 175.265-171.035 309.49-344.333 410.381m192.35-2.937-34.52-41.364c88.415-73.728 154.517-158.774 202.106-259.908l48.801 22.96a797.4 797.4 0 0 1-82.35 137.781c32.74 15.01 83.455 44.868 137.646 101.592l-38.939 37.268c-57.236-59.877-109.325-85.558-133.766-95.178a851 851 0 0 1-98.978 96.849m48.613-536.872-80.842-53.895 29.884-44.84 80.843 53.894zM512 53.895c-252.605 0-458.105 205.5-458.105 458.105S259.395 970.105 512 970.105c9.081 0 17.974-.835 26.947-1.374v-53.895c-8.946.62-17.866 1.375-26.947 1.375-222.882 0-404.21-181.33-404.21-404.211S289.117 107.79 512 107.79 916.21 289.117 916.21 512c0 195.207-139.075 358.508-323.368 396.045v54.461c214.097-38.346 377.263-225.55 377.263-450.533 0-252.578-205.5-458.078-458.105-458.078"/></svg>`
+    hai: `<svg fill="${RGBA_TEAL3}" xmlns="http://www.w3.org/2000/svg" width="800" height="800" class="icon" viewBox="0 0 1024 1024"><path d="m309.976 804.756-27.136-46.592c103.073-60.012 183.026-132.473 241.475-219.244h-174l-13.473-50.283c58.88-33.981 99.436-117.572 118.703-165.296H242.526v-53.894h538.948v53.894h-268.18c-12.396 34.089-42.47 106.604-90.436 161.685h134.01a680.6 680.6 0 0 0 46.349-107.709l51.092 17.058c-58.422 175.265-171.035 309.49-344.333 410.381m192.35-2.937-34.52-41.364c88.415-73.728 154.517-158.774 202.106-259.908l48.801 22.96a797.4 797.4 0 0 1-82.35 137.781c32.74 15.01 83.455 44.868 137.646 101.592l-38.939 37.268c-57.236-59.877-109.325-85.558-133.766-95.178a851 851 0 0 1-98.978 96.849m48.613-536.872-80.842-53.895 29.884-44.84 80.843 53.894zM512 53.895c-252.605 0-458.105 205.5-458.105 458.105S259.395 970.105 512 970.105c9.081 0 17.974-.835 26.947-1.374v-53.895c-8.946.62-17.866 1.375-26.947 1.375-222.882 0-404.21-181.33-404.21-404.211S289.117 107.79 512 107.79 916.21 289.117 916.21 512c0 195.207-139.075 358.508-323.368 396.045v54.461c214.097-38.346 377.263-225.55 377.263-450.533 0-252.578-205.5-458.078-458.105-458.078"/></svg>`,
   };
   var chinese_hour_characters_default = ChineseHourCharacters;
 
   // lib/services/ui/image/utils/get-chinese-hour-character.js
   var getChineseHourCharacter = (hour) => {
     const map = [
-      "zi",
+      'zi',
       // 0  子时
-      "chou",
+      'chou',
       // 1  丑时
-      "chou",
+      'chou',
       // 2  丑时
-      "yin",
+      'yin',
       // 3  寅时
-      "yin",
+      'yin',
       // 4  寅时
-      "mao",
+      'mao',
       // 5  卯时
-      "mao",
+      'mao',
       // 6  卯时
-      "chen",
+      'chen',
       // 7  辰时
-      "chen",
+      'chen',
       // 8  辰时
-      "si",
+      'si',
       // 9  巳时
-      "si",
+      'si',
       // 10 巳时
-      "wu",
+      'wu',
       // 11 午时
-      "wu",
+      'wu',
       // 12 午时
-      "wei",
+      'wei',
       // 13 未时
-      "wei",
+      'wei',
       // 14 未时
-      "shen",
+      'shen',
       // 15 申时
-      "shen",
+      'shen',
       // 16 申时
-      "you",
+      'you',
       // 17 酉时
-      "you",
+      'you',
       // 18 酉时
-      "xu",
+      'xu',
       // 19 戌时
-      "xu",
+      'xu',
       // 20 戌时
-      "hai",
+      'hai',
       // 21 亥时
-      "hai",
+      'hai',
       // 22 亥时
-      "zi"
+      'zi',
       // 23 子时（回归）
     ];
     return map[hour];
@@ -4902,7 +4720,7 @@ var tetris = (() => {
     night_0_3: (width, height) => ({
       size: Math.floor(width * 0.48),
       x: width - Math.floor(width * 0.48) * 0.7,
-      y: height / 2 - Math.floor(width * 0.48) * 1.4
+      y: height / 2 - Math.floor(width * 0.48) * 1.4,
     }),
     /**
      * ## 清晨 4-7 点：右侧偏中
@@ -4916,7 +4734,7 @@ var tetris = (() => {
       return {
         size,
         x: width - size * 1.1,
-        y: height / 2 - size * 1.7
+        y: height / 2 - size * 1.7,
       };
     },
     /**
@@ -4931,7 +4749,7 @@ var tetris = (() => {
       return {
         size,
         x: width - size * 1.2,
-        y: height / 2 - size * 1.75
+        y: height / 2 - size * 1.75,
       };
     },
     /**
@@ -4945,7 +4763,7 @@ var tetris = (() => {
       return {
         size,
         x: width / 2 - size / 2,
-        y: -size * 0.1
+        y: -size * 0.1,
       };
     },
     /**
@@ -4960,7 +4778,7 @@ var tetris = (() => {
       return {
         size,
         x: size * 0.2,
-        y: height / 2 - size * 1.75
+        y: height / 2 - size * 1.75,
       };
     },
     /**
@@ -4975,7 +4793,7 @@ var tetris = (() => {
       return {
         size,
         x: size * 0.1,
-        y: height / 2 - size * 1.7
+        y: height / 2 - size * 1.7,
       };
     },
     /**
@@ -4990,35 +4808,35 @@ var tetris = (() => {
       return {
         size,
         x: -size * 0.3,
-        y: height / 2 - size * 1.4
+        y: height / 2 - size * 1.4,
       };
-    }
+    },
   };
   var getStrategyKey = (hour) => {
     if (hour <= 3) {
-      return "night_0_3";
+      return 'night_0_3';
     }
     if (hour <= 7) {
-      return "morning_4_7";
+      return 'morning_4_7';
     }
     if (hour <= 11) {
-      return "morning_8_11";
+      return 'morning_8_11';
     }
     if (hour <= 14) {
-      return "noon_12_14";
+      return 'noon_12_14';
     }
     if (hour <= 16) {
-      return "afternoon_14_16";
+      return 'afternoon_14_16';
     }
     if (hour <= 19) {
-      return "evening_17_19";
+      return 'evening_17_19';
     }
-    return "night_20_23";
+    return 'night_20_23';
   };
   var renderChineseHourCharacter = (canvas) => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
-    const hour = (/* @__PURE__ */ new Date()).getHours();
+    const hour = /* @__PURE__ */ new Date().getHours();
     const character = get_chinese_hour_character_default(hour);
     const img = getImage(chinese_hour_characters_default[character]);
     const key = getStrategyKey(hour);
@@ -5033,7 +4851,7 @@ var tetris = (() => {
     const { rows, cols } = canvas;
     clear_board_default(canvas);
     render_chinese_hour_character_default(canvas);
-    render_scene_background_default(canvas, "playing");
+    render_scene_background_default(canvas, 'playing');
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         if (board[y][x]) {
@@ -5076,7 +4894,7 @@ var tetris = (() => {
     clear_board_default(canvas);
     render_active_only_default(canvas, state);
     render_overlay_default(canvas);
-    render_scene_background_default(canvas, "paused");
+    render_scene_background_default(canvas, 'paused');
     render_tetris_text_default(canvas);
     render_digital_clock_default(canvas);
     render_analog_clock_default(canvas);
@@ -5096,14 +4914,14 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "GAME",
+      text: 'GAME',
       x: width / 2,
       y: height / 1.8,
       color: RED5,
       strokeColor: YELLOW5,
       size: 2.3,
       center: true,
-      stroke: true
+      stroke: true,
     });
   };
   var render_game_text_default = renderGameText;
@@ -5114,14 +4932,14 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "OVER",
+      text: 'OVER',
       x: width / 2,
       y: height / 1.6,
       color: RED5,
       strokeColor: YELLOW5,
       size: 2.3,
       center: true,
-      stroke: true
+      stroke: true,
     });
   };
   var render_over_text_default = renderOverText;
@@ -5131,7 +4949,7 @@ var tetris = (() => {
     clear_board_default(canvas);
     render_active_only_default(canvas, state);
     render_overlay_default(canvas);
-    render_scene_background_default(canvas, "game-over");
+    render_scene_background_default(canvas, 'game-over');
     render_tetris_text_default(canvas);
     render_game_text_default(canvas);
     render_over_text_default(canvas);
@@ -5204,7 +5022,7 @@ var tetris = (() => {
     clear_board_default(canvas);
     render_playing_default(canvas, state);
     render_overlay_default(canvas);
-    render_scene_background_default(canvas, "game-over");
+    render_scene_background_default(canvas, 'game-over');
     render_tetris_text_default(canvas);
     render_game_text_default(canvas);
     render_over_text_default(canvas);
@@ -5226,7 +5044,7 @@ var tetris = (() => {
      * @param {object} canvas - 游戏 canvas 信息对象
      * @param {object} state 游戏状态
      */
-    "main-menu": (canvas, state) => {
+    'main-menu': (canvas, state) => {
       main_menu_scene_default(canvas, state);
     },
     /**
@@ -5262,7 +5080,7 @@ var tetris = (() => {
      * @param {object} canvas - 游戏 canvas 信息对象
      * @param {object} state 游戏状态
      */
-    "game-over": (canvas, state) => {
+    'game-over': (canvas, state) => {
       game_over_scene_default(canvas, state);
     },
     /**
@@ -5273,7 +5091,7 @@ var tetris = (() => {
      */
     replay: (canvas, state) => {
       replay_scene_default(canvas, state);
-    }
+    },
   };
   var scenes_default = Scenes;
 
@@ -5312,7 +5130,7 @@ var tetris = (() => {
     canvas.fontSize = Math.floor(gameBoard.height * 0.032);
     const nextSize = Math.min(
       globalThis.innerWidth * 0.1,
-      globalThis.innerHeight * 0.18
+      globalThis.innerHeight * 0.18,
     );
     nextPiece.width = nextSize;
     nextPiece.height = nextSize;
@@ -5340,8 +5158,8 @@ var tetris = (() => {
     const { gameBoard, gameBoardContext: ctx, fontSize } = canvas;
     const { width, height } = gameBoard;
     ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.translate(width / 2, height / 2);
     ctx.scale(scale, scale);
     ctx.font = `${fontSize * 3.25}px ${FONT_FAMILY2}`;
@@ -5361,7 +5179,7 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "GET READY!",
+      text: 'GET READY!',
       x: width / 2,
       y: height / 1.46,
       color: GREEN5,
@@ -5371,7 +5189,7 @@ var tetris = (() => {
       size: 1.1,
       center: true,
       // 对齐方式与你原逻辑一致
-      baseline: "top"
+      baseline: 'top',
     });
   };
   var render_get_ready_text_default = renderGetReadyText;
@@ -5394,7 +5212,7 @@ var tetris = (() => {
     clear_board_default(canvas);
     render_overlay_default(canvas);
     render_tetris_text_default(canvas);
-    render_scene_background_default(canvas, "countdown");
+    render_scene_background_default(canvas, 'countdown');
     render_gamepad_default(canvas);
     render_get_ready_text_default(canvas);
     render_countdown_text_default(canvas, number, scale);
@@ -5424,12 +5242,12 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "LEVEL UP",
+      text: 'LEVEL UP',
       x: width / 2,
       y: height / 2.5,
       color: GREEN5,
       size: 1.2,
-      center: true
+      center: true,
     });
   };
   var render_level_up_text_default = renderLevelUpText;
@@ -5440,7 +5258,7 @@ var tetris = (() => {
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
-      text: "CONGRATS!",
+      text: 'CONGRATS!',
       x: width / 2,
       y: height / 1.6,
       color: YELLOW5,
@@ -5453,7 +5271,7 @@ var tetris = (() => {
       // 描边宽度 3px
       size: 1.3,
       // 字体大小系数
-      center: true
+      center: true,
       // 水平居中
     });
   };
@@ -5535,7 +5353,7 @@ var tetris = (() => {
       const { Store } = this;
       const state = Store.getState();
       const { mode, score, lines, level, highScore, needReset = false } = state;
-      if (mode === "main-menu" || needReset) {
+      if (mode === 'main-menu' || needReset) {
         this.Hud.reset();
       }
       this.Hud.update({ score, lines, level, highScore });
@@ -5880,7 +5698,7 @@ var tetris = (() => {
       this.Renderer = new canvas_renderer_default(options);
       this.Router = new ui_router_default({
         UI: this,
-        Game: Game2
+        Game: Game2,
       });
     }
     // ==================== 状态更新方法 ====================
@@ -6034,61 +5852,61 @@ var tetris = (() => {
   // lib/services/input/keyboard-controller.js
   var KEYBOARDS_ACTION_MAP = {
     // ========== 方块操作 ==========
-    arrowleft: "MOVE_LEFT",
+    arrowleft: 'MOVE_LEFT',
     // 向左移动方块
-    arrowright: "MOVE_RIGHT",
+    arrowright: 'MOVE_RIGHT',
     // 向右移动方块
-    arrowdown: "MOVE_DOWN",
+    arrowdown: 'MOVE_DOWN',
     // 向下加速移动
-    arrowup: "ROTATE",
+    arrowup: 'ROTATE',
     // 旋转方块
-    " ": "DROP",
+    ' ': 'DROP',
     // 空格键：方块直接落底
     // ========== 游戏控制 ==========
-    s: "SWITCH_CONTROLLER",
+    s: 'SWITCH_CONTROLLER',
     // 切换控制器（玩家/AI）
-    m: "TOGGLE_MUSIC",
+    m: 'TOGGLE_MUSIC',
     // 切换音乐开关
-    p: "TOGGLE_PAUSED",
+    p: 'TOGGLE_PAUSED',
     // 暂停/继续游戏
-    r: "RESTART",
+    r: 'RESTART',
     // 重新开始游戏
-    q: "QUIT",
+    q: 'QUIT',
     // 退出游戏
     // ========== 关卡选择 ==========
-    1: "LEVEL_ONE",
+    1: 'LEVEL_ONE',
     // 第1关
-    2: "LEVEL_TWO",
+    2: 'LEVEL_TWO',
     // 第2关
-    3: "LEVEL_THREE",
+    3: 'LEVEL_THREE',
     // 第3关
-    4: "LEVEL_FOUR",
+    4: 'LEVEL_FOUR',
     // 第4关
-    5: "LEVEL_FIVE",
+    5: 'LEVEL_FIVE',
     // 第5关
-    6: "LEVEL_SIX",
+    6: 'LEVEL_SIX',
     // 第6关
-    7: "LEVEL_SEVEN",
+    7: 'LEVEL_SEVEN',
     // 第7关
-    8: "LEVEL_EIGHT",
+    8: 'LEVEL_EIGHT',
     // 第8关
-    9: "LEVEL_NINE",
+    9: 'LEVEL_NINE',
     // 第9关
-    t: "LEVEL_TEN",
+    t: 'LEVEL_TEN',
     // T键：第10关
     // ========== 难度选择 ==========
-    e: "EASY",
+    e: 'EASY',
     // 简单难度
-    n: "NORMAL",
+    n: 'NORMAL',
     // 普通难度
-    h: "HARD",
+    h: 'HARD',
     // 困难难度
-    x: "EXPERT",
+    x: 'EXPERT',
     // 专家难度
     // ========== 界面导航 ==========
-    b: "BACK",
+    b: 'BACK',
     // 返回上一级
-    enter: "CONFIRM"
+    enter: 'CONFIRM',
     // 确认操作
   };
   var resolveKeyboardAction = (key) => {
@@ -6129,8 +5947,8 @@ var tetris = (() => {
      * @returns {KeyboardController} - 返回 KeyboardController 对象，可链式调用
      */
     addEventListeners() {
-      globalThis.addEventListener("resize", this._onResize);
-      document.addEventListener("keydown", this._onKeydown);
+      globalThis.addEventListener('resize', this._onResize);
+      document.addEventListener('keydown', this._onKeydown);
       return this;
     }
     /**
@@ -6144,8 +5962,8 @@ var tetris = (() => {
      * @returns {KeyboardController} - 返回 KeyboardController 对象，可链式调用
      */
     removeEventListeners() {
-      globalThis.removeEventListener("resize", this._onResize);
-      document.removeEventListener("keydown", this._onKeydown);
+      globalThis.removeEventListener('resize', this._onResize);
+      document.removeEventListener('keydown', this._onKeydown);
       return this;
     }
     /**
@@ -6168,10 +5986,13 @@ var tetris = (() => {
       const action = resolveKeyboardAction(key);
       const mode = Store.getMode();
       const controller = Store.getController();
-      return !action || // 场景1：无效按键
-      mode === "replay" && key !== "enter" || // 场景2：回放模式限制
-      controller === "ai" && // 场景3：AI 控制限制
-      mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action);
+      return (
+        !action || // 场景1：无效按键
+        (mode === 'replay' && key !== 'enter') || // 场景2：回放模式限制
+        (controller === 'ai' && // 场景3：AI 控制限制
+          mode === 'playing' &&
+          !game_default.AI_ALLOWED_ACTIONS.includes(action))
+      );
     }
     /**
      * ## resize 事件的功能函数
@@ -6212,15 +6033,15 @@ var tetris = (() => {
       if (this._isBlocked(key)) {
         return this;
       }
-      this.emit("dispatch:input", {
-        device: "keyboard",
+      this.emit('dispatch:input', {
+        device: 'keyboard',
         // 输入设备类型
         action,
         // 游戏动作指令
         payload: {
-          Game: Game2
+          Game: Game2,
           // 传递游戏实例，供后续处理使用
-        }
+        },
       });
       return this;
     };
@@ -6230,48 +6051,48 @@ var tetris = (() => {
   // lib/services/input/gamepad-controller.js
   var GAMEPAD_ACTION_MAP = {
     // 基础控制按键
-    A: "TOGGLE_MUSIC",
+    A: 'TOGGLE_MUSIC',
     // 切换音乐（游戏中）
-    B: "DROP",
+    B: 'DROP',
     // 方块直接落底
-    X: "RESTART",
+    X: 'RESTART',
     // 重新开始游戏
-    Y: "TOGGLE_PAUSE",
+    Y: 'TOGGLE_PAUSE',
     // 暂停/继续游戏
-    START: "CONFIRM",
+    START: 'CONFIRM',
     // 确认操作
-    BACK: "QUIT",
+    BACK: 'QUIT',
     // 退出游戏
     // 方向键（DPad）
-    DPAD_LEFT: "MOVE_LEFT",
+    DPAD_LEFT: 'MOVE_LEFT',
     // 向左移动
-    DPAD_RIGHT: "MOVE_RIGHT",
+    DPAD_RIGHT: 'MOVE_RIGHT',
     // 向右移动
-    DPAD_DOWN: "MOVE_DOWN",
+    DPAD_DOWN: 'MOVE_DOWN',
     // 向下加速
-    DPAD_UP: "ROTATE"
+    DPAD_UP: 'ROTATE',
     // 旋转方块
   };
   var LEVELS = [
-    "ONE",
+    'ONE',
     // 第 1 关
-    "TWO",
+    'TWO',
     // 第 2 关
-    "THREE",
+    'THREE',
     // 第 3 关
-    "FOUR",
+    'FOUR',
     // 第 4 关
-    "FIX",
+    'FIX',
     // 第 5 关（注意这里是 FIX 不是 FIVE，可能是拼写约定）
-    "SIX",
+    'SIX',
     // 第 6 关
-    "SEVEN",
+    'SEVEN',
     // 第 7 关
-    "EIGHT",
+    'EIGHT',
     // 第 8 关
-    "NINE",
+    'NINE',
     // 第 9 关
-    "TEN"
+    'TEN',
     // 第 10 关
   ];
   var STANDARD_BTN_MAP = {
@@ -6301,7 +6122,7 @@ var tetris = (() => {
     // 方向键下
     DPAD_LEFT: 14,
     // 方向键左
-    DPAD_RIGHT: 15
+    DPAD_RIGHT: 15,
     // 方向键右
   };
   var BETOP_20BC_1263_BTN_MAP = {
@@ -6323,7 +6144,7 @@ var tetris = (() => {
     // 右扳机
     BACK: 8,
     // 返回键
-    START: 9
+    START: 9,
     // 开始键
   };
   var GamepadController = class extends core_default {
@@ -6352,12 +6173,12 @@ var tetris = (() => {
         up: false,
         down: false,
         left: false,
-        right: false
+        right: false,
       };
       this.AXIS_MAP = {
         LEFT_STICK_X: 0,
         // 左摇杆 X 轴
-        LEFT_STICK_Y: 1
+        LEFT_STICK_Y: 1,
         // 左摇杆 Y 轴
       };
     }
@@ -6392,8 +6213,8 @@ var tetris = (() => {
       if (this._eventsBound) {
         return this;
       }
-      globalThis.addEventListener("gamepadconnected", this._onConnect);
-      globalThis.addEventListener("gamepaddisconnected", this._onDisconnect);
+      globalThis.addEventListener('gamepadconnected', this._onConnect);
+      globalThis.addEventListener('gamepaddisconnected', this._onDisconnect);
       this._eventsBound = true;
       return this;
     }
@@ -6405,8 +6226,8 @@ var tetris = (() => {
      * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
      */
     removeEventListeners() {
-      globalThis.removeEventListener("gamepadconnected", this._onConnect);
-      globalThis.removeEventListener("gamepaddisconnected", this._onDisconnect);
+      globalThis.removeEventListener('gamepadconnected', this._onConnect);
+      globalThis.removeEventListener('gamepaddisconnected', this._onDisconnect);
       this._eventsBound = false;
       return this;
     }
@@ -6428,11 +6249,13 @@ var tetris = (() => {
         return this;
       }
       this.activeGamepadIndex = pad.index;
-      this.curBtnMap = this._isBetop(pad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+      this.curBtnMap = this._isBetop(pad.id)
+        ? BETOP_20BC_1263_BTN_MAP
+        : STANDARD_BTN_MAP;
       const { Game: Game2 } = this;
       const events = GameEvents(Game2.id);
       this.emit(events.UPDATE_GAMEPAD_CONNECTED, {
-        connected: true
+        connected: true,
       });
       return this;
     };
@@ -6457,7 +6280,7 @@ var tetris = (() => {
       const { Game: Game2 } = this;
       const events = GameEvents(Game2.id);
       this.emit(events.UPDATE_GAMEPAD_CONNECTED, {
-        connected: false
+        connected: false,
       });
       return this;
     };
@@ -6470,7 +6293,7 @@ var tetris = (() => {
      * @returns {boolean} - 是北通手柄返回 true，否则返回 false
      */
     _isBetop(id) {
-      return id.includes("20bc") && id.includes("1263");
+      return id.includes('20bc') && id.includes('1263');
     }
     /**
      * ## 刷新 Gamepad 状态
@@ -6487,10 +6310,13 @@ var tetris = (() => {
         const firstPad = Array.from(pads).find(Boolean);
         if (firstPad) {
           this.activeGamepadIndex = firstPad.index;
-          this.curBtnMap = this._isBetop(firstPad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+          this.curBtnMap = this._isBetop(firstPad.id)
+            ? BETOP_20BC_1263_BTN_MAP
+            : STANDARD_BTN_MAP;
         }
       }
-      this.activeGamepad = this.activeGamepadIndex === null ? null : pads[this.activeGamepadIndex];
+      this.activeGamepad =
+        this.activeGamepadIndex === null ? null : pads[this.activeGamepadIndex];
       return this;
     }
     /**
@@ -6504,21 +6330,21 @@ var tetris = (() => {
      */
     _updateActionMap(mode) {
       switch (mode) {
-        case "difficulty": {
-          GAMEPAD_ACTION_MAP.A = "EASY";
-          GAMEPAD_ACTION_MAP.B = "NORMAL";
-          GAMEPAD_ACTION_MAP.Y = "HARD";
-          GAMEPAD_ACTION_MAP.X = "EXPERT";
-          GAMEPAD_ACTION_MAP.BACK = "BACK";
+        case 'difficulty': {
+          GAMEPAD_ACTION_MAP.A = 'EASY';
+          GAMEPAD_ACTION_MAP.B = 'NORMAL';
+          GAMEPAD_ACTION_MAP.Y = 'HARD';
+          GAMEPAD_ACTION_MAP.X = 'EXPERT';
+          GAMEPAD_ACTION_MAP.BACK = 'BACK';
           break;
         }
-        case "playing": {
-          GAMEPAD_ACTION_MAP.A = "TOGGLE_MUSIC";
-          GAMEPAD_ACTION_MAP.B = "DROP";
-          GAMEPAD_ACTION_MAP.X = "RESTART";
-          GAMEPAD_ACTION_MAP.Y = "TOGGLE_PAUSE";
-          GAMEPAD_ACTION_MAP.BACK = "QUIT";
-          GAMEPAD_ACTION_MAP.RB = "SWITCH_CONTROLLER";
+        case 'playing': {
+          GAMEPAD_ACTION_MAP.A = 'TOGGLE_MUSIC';
+          GAMEPAD_ACTION_MAP.B = 'DROP';
+          GAMEPAD_ACTION_MAP.X = 'RESTART';
+          GAMEPAD_ACTION_MAP.Y = 'TOGGLE_PAUSE';
+          GAMEPAD_ACTION_MAP.BACK = 'QUIT';
+          GAMEPAD_ACTION_MAP.RB = 'SWITCH_CONTROLLER';
           break;
         }
       }
@@ -6539,17 +6365,17 @@ var tetris = (() => {
      * @returns {string} - 解析后的按键执行动作名称，空字符串表示不触发动作
      */
     _resolveAction(action, btnName, isDPad, mode, level, now) {
-      if (!isDPad || mode !== "main-menu") {
+      if (!isDPad || mode !== 'main-menu') {
         return action;
       }
       if (now - this.lastDpadTime < this.DPAD_COOLDOWN) {
-        return "";
+        return '';
       }
       this.lastDpadTime = now;
-      if (btnName === "DPAD_UP") {
+      if (btnName === 'DPAD_UP') {
         return this._getMoveUpAction(mode, level);
       }
-      if (btnName === "DPAD_DOWN") {
+      if (btnName === 'DPAD_DOWN') {
         return this._getMoveDownAction(mode, level);
       }
       return action;
@@ -6571,8 +6397,14 @@ var tetris = (() => {
       const { Game: Game2, Store } = this;
       const controller = Store.getController();
       for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
-        const isBlocked = !action || (mode === "replay" || mode === "game-over") && btnName !== "START" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action);
-        const isDPad = btnName.startsWith("DPAD_");
+        const isBlocked =
+          !action ||
+          ((mode === 'replay' || mode === 'game-over') &&
+            btnName !== 'START') ||
+          (controller === 'ai' &&
+            mode === 'playing' &&
+            !game_default.AI_ALLOWED_ACTIONS.includes(action));
+        const isDPad = btnName.startsWith('DPAD_');
         if (!this._isPressed(btnName)) {
           continue;
         }
@@ -6588,15 +6420,15 @@ var tetris = (() => {
           isDPad,
           mode,
           level,
-          now
+          now,
         );
         if (!finalAction) {
           continue;
         }
         this.emit(`dispatch:input`, {
-          device: "gamepad",
+          device: 'gamepad',
           action: finalAction,
-          payload: { Game: Game2 }
+          payload: { Game: Game2 },
         });
       }
       return this;
@@ -6620,7 +6452,7 @@ var tetris = (() => {
       }
       this._updateActionMap(mode);
       this._handleStandardButtons(pad, mode, level, now);
-      if (mode === "replay" || mode === "game-over") {
+      if (mode === 'replay' || mode === 'game-over') {
         return this;
       }
       const x = this._getAxis(this.AXIS_MAP.LEFT_STICK_X);
@@ -6647,9 +6479,9 @@ var tetris = (() => {
       const { Game: Game2 } = this;
       this.axisStates[action] = true;
       this.emit(`dispatch:input`, {
-        device: "gamepad",
+        device: 'gamepad',
         action,
-        payload: { Game: Game2 }
+        payload: { Game: Game2 },
       });
       return this;
     }
@@ -6674,9 +6506,9 @@ var tetris = (() => {
      */
     _handleStickUp(y) {
       if (y < -this.DPAD_THRESHOLD) {
-        this._startAxisAction("ROTATE");
+        this._startAxisAction('ROTATE');
       } else {
-        this._stopAxisAction("ROTATE");
+        this._stopAxisAction('ROTATE');
       }
       return this;
     }
@@ -6689,9 +6521,9 @@ var tetris = (() => {
      */
     _handleStickDown(y) {
       if (y > this.DPAD_THRESHOLD) {
-        this._startAxisAction("MOVE_DOWN");
+        this._startAxisAction('MOVE_DOWN');
       } else {
-        this._stopAxisAction("MOVE_DOWN");
+        this._stopAxisAction('MOVE_DOWN');
       }
       return this;
     }
@@ -6704,9 +6536,9 @@ var tetris = (() => {
      */
     _handleStickLeft(x) {
       if (x < -this.DPAD_THRESHOLD) {
-        this._startAxisAction("MOVE_LEFT");
+        this._startAxisAction('MOVE_LEFT');
       } else {
-        this._stopAxisAction("MOVE_LEFT");
+        this._stopAxisAction('MOVE_LEFT');
       }
       return this;
     }
@@ -6719,9 +6551,9 @@ var tetris = (() => {
      */
     _handleStickRight(x) {
       if (x > this.DPAD_THRESHOLD) {
-        this._startAxisAction("MOVE_RIGHT");
+        this._startAxisAction('MOVE_RIGHT');
       } else {
-        this._stopAxisAction("MOVE_RIGHT");
+        this._stopAxisAction('MOVE_RIGHT');
       }
       return this;
     }
@@ -6755,7 +6587,7 @@ var tetris = (() => {
       const { Game: Game2 } = this;
       const events = GameEvents(Game2.id);
       let action;
-      if (mode === "main-menu") {
+      if (mode === 'main-menu') {
         let newLevel = Number(level) + 1;
         if (newLevel >= 10) {
           newLevel = 10;
@@ -6763,7 +6595,7 @@ var tetris = (() => {
         this.emit(events.UPDATE_LEVEL, { level: newLevel });
         action = `LEVEL_${LEVELS[newLevel - 1]}`;
       } else {
-        action = "ROTATE";
+        action = 'ROTATE';
       }
       return action;
     }
@@ -6781,7 +6613,7 @@ var tetris = (() => {
       let action;
       const { Game: Game2 } = this;
       const events = GameEvents(Game2.id);
-      if (mode === "main-menu") {
+      if (mode === 'main-menu') {
         let newLevel = Number(level) - 1;
         if (newLevel <= 1) {
           newLevel = 1;
@@ -6789,7 +6621,7 @@ var tetris = (() => {
         this.emit(events.UPDATE_LEVEL, { level: newLevel });
         action = `LEVEL_${LEVELS[newLevel - 1]}`;
       } else {
-        action = "MOVE_DOWN";
+        action = 'MOVE_DOWN';
       }
       return action;
     }
@@ -6808,9 +6640,9 @@ var tetris = (() => {
       if (!st.up) {
         st.up = true;
         this.emit(`dispatch:input`, {
-          device: "gamepad",
+          device: 'gamepad',
           action,
-          payload: { Game: Game2 }
+          payload: { Game: Game2 },
         });
       }
       st.down = st.left = st.right = false;
@@ -6831,9 +6663,9 @@ var tetris = (() => {
       if (!st.down) {
         st.down = true;
         this.emit(`dispatch:input`, {
-          device: "gamepad",
+          device: 'gamepad',
           action,
-          payload: { Game: Game2 }
+          payload: { Game: Game2 },
         });
       }
       st.up = st.left = st.right = false;
@@ -6851,9 +6683,9 @@ var tetris = (() => {
       if (!st.left) {
         st.left = true;
         this.emit(`dispatch:input`, {
-          device: "gamepad",
-          action: "MOVE_LEFT",
-          payload: { Game: Game2 }
+          device: 'gamepad',
+          action: 'MOVE_LEFT',
+          payload: { Game: Game2 },
         });
       }
       st.up = st.down = st.right = false;
@@ -6871,9 +6703,9 @@ var tetris = (() => {
       if (!st.right) {
         st.right = true;
         this.emit(`dispatch:input`, {
-          device: "gamepad",
-          action: "MOVE_RIGHT",
-          payload: { Game: Game2 }
+          device: 'gamepad',
+          action: 'MOVE_RIGHT',
+          payload: { Game: Game2 },
         });
       }
       st.up = st.down = st.left = false;
@@ -6893,30 +6725,33 @@ var tetris = (() => {
       const v = val.toFixed(5);
       const st = this.dpadAxisState;
       const now = Date.now();
-      if (mode === "main-menu" && now - this.lastDpadTime < this.DPAD_COOLDOWN) {
+      if (
+        mode === 'main-menu' &&
+        now - this.lastDpadTime < this.DPAD_COOLDOWN
+      ) {
         return this;
       }
       switch (v) {
         // 上方向
-        case "-1.00000": {
+        case '-1.00000': {
           this._handleBetopDpadUp(mode, level, st);
           this.lastDpadTime = now;
           break;
         }
         // 下方向
-        case "0.14286": {
+        case '0.14286': {
           this._handleBetopDpadDown(mode, level, st);
           this.lastDpadTime = now;
           break;
         }
         // 左方向
-        case "0.71429": {
+        case '0.71429': {
           this._handleBetopDpadLeft(st);
           this.lastDpadTime = now;
           break;
         }
         // 右方向
-        case "-0.42857": {
+        case '-0.42857': {
           this._handleBetopDpadRight(st);
           this.lastDpadTime = now;
           break;
@@ -7003,10 +6838,10 @@ var tetris = (() => {
         holes: -0.45,
         height: -0.35,
         bumpiness: -0.12,
-        completeLines: 2
+        completeLines: 2,
       },
       /** 决策延迟（毫秒） */
-      delay: 580
+      delay: 580,
     },
     /**
      * ## 普通难度（NORMAL）
@@ -7035,10 +6870,10 @@ var tetris = (() => {
         holes: -0.75,
         height: -0.45,
         bumpiness: -0.18,
-        completeLines: 3
+        completeLines: 3,
       },
       /** 决策延迟（毫秒） */
-      delay: 480
+      delay: 480,
     },
     /**
      * ## 困难难度（HARD）
@@ -7072,10 +6907,10 @@ var tetris = (() => {
         holes: -0.9,
         height: -0.95,
         bumpiness: -0.2,
-        completeLines: 6
+        completeLines: 6,
       },
       /** 决策延迟（毫秒） */
-      delay: 280
+      delay: 280,
     },
     /**
      * ## 专家难度（EXPERT）
@@ -7095,7 +6930,8 @@ var tetris = (() => {
      * | bumpiness     | -0.2  | 保持表面平整                                   |
      * | completeLines | 7     | 消 1 行奖 7 分，4 行奖 112 分，极限追求 Tetris |
      *
-     * 高度惩罚 -1.25 是四个难度中的最大值， 配合消行奖励 7（平方后 4 行 = 112 分）， AI 在极度恐高的同时会疯狂追求一次性多行消除。
+     * 高度惩罚 -1.25 是四个难度中的最大值， 配合消行奖励 7（平方后 4 行 = 112 分）， AI
+     * 在极度恐高的同时会疯狂追求一次性多行消除。
      */
     EXPERT: {
       /** 前瞻深度：多看两步 */
@@ -7109,47 +6945,47 @@ var tetris = (() => {
         holes: -1,
         height: -1.25,
         bumpiness: -0.2,
-        completeLines: 8
+        completeLines: 8,
       },
       /** 决策延迟（毫秒）：极快，保留 30ms 呼吸感 */
-      delay: 150
-    }
+      delay: 150,
+    },
   };
   var ai_difficulty_default = AIDifficulty;
 
   // lib/ai/snapshot/create-snapshot.js
-  var createSnapshot = (state) => structuredClone({
-    // 控制者身份
-    controller: state.controller,
-    // 棋盘状态
-    board: state.board,
-    // 游戏进度
-    level: state.level,
-    score: state.score,
-    lines: state.lines,
-    // 原始方块对象（保留完整信息，方便后续扩展）
-    cur: state.curr,
-    next: state.next,
-    // AI 决策专用的方块信息：从 state.curr 和 state.cx/cy 中提取并结构化
-    piece: {
-      shape: state.curr.shape,
-      position: {
-        x: state.cx,
-        y: state.cy
-      }
-    },
-    // 游戏模式
-    mode: state.mode
-  });
+  var createSnapshot = (state) =>
+    structuredClone({
+      // 控制者身份
+      controller: state.controller,
+      // 棋盘状态
+      board: state.board,
+      // 游戏进度
+      level: state.level,
+      score: state.score,
+      lines: state.lines,
+      // 原始方块对象（保留完整信息，方便后续扩展）
+      cur: state.curr,
+      next: state.next,
+      // AI 决策专用的方块信息：从 state.curr 和 state.cx/cy 中提取并结构化
+      piece: {
+        shape: state.curr.shape,
+        position: {
+          x: state.cx,
+          y: state.cy,
+        },
+      },
+      // 游戏模式
+      mode: state.mode,
+    });
   var create_snapshot_default = createSnapshot;
 
   // lib/ai/simulator/rotate-matrix.js
   var rotateMatrix = (matrix) => {
     const rows = matrix.length;
     const cols = matrix[0].length;
-    const next = Array.from(
-      { length: cols },
-      () => Array.from({ length: rows }).fill(0)
+    const next = Array.from({ length: cols }, () =>
+      Array.from({ length: rows }).fill(0),
     );
     for (let y = 0; y < rows; y += 1) {
       for (let x = 0; x < cols; x += 1) {
@@ -7211,7 +7047,7 @@ var tetris = (() => {
     const nextBoard = simulate_placement_default(board, shape, startX, y);
     return {
       board: nextBoard,
-      y
+      y,
     };
   };
   var simulate_drop_default = simulateDrop;
@@ -7229,12 +7065,12 @@ var tetris = (() => {
   };
   var addRotateActions = (actions, count) => {
     for (let i = 0; i < count; i++) {
-      actions.push("ROTATE");
+      actions.push('ROTATE');
     }
   };
   var addMoveActions = (actions, delta) => {
     if (delta === 0) return;
-    const moveDirection = delta > 0 ? "MOVE_RIGHT" : "MOVE_LEFT";
+    const moveDirection = delta > 0 ? 'MOVE_RIGHT' : 'MOVE_LEFT';
     const moveCount = Math.abs(delta);
     for (let i = 0; i < moveCount; i++) {
       actions.push(moveDirection);
@@ -7244,7 +7080,7 @@ var tetris = (() => {
     const actions = [];
     addRotateActions(actions, rotationCount);
     addMoveActions(actions, targetX - originalX);
-    actions.push("DROP");
+    actions.push('DROP');
     return actions;
   };
   var createCandidate = ({
@@ -7252,17 +7088,17 @@ var tetris = (() => {
     currentShape,
     targetX,
     originalPiece,
-    rotationCount
+    rotationCount,
   }) => {
     const result = simulate_drop_default(board, currentShape, targetX);
     const actions = buildActionSequence({
       rotationCount,
       targetX,
-      originalX: originalPiece.position.x
+      originalX: originalPiece.position.x,
     });
     return {
       board: result.board,
-      actions
+      actions,
     };
   };
   var generateMoves = (snapshot) => {
@@ -7277,7 +7113,7 @@ var tetris = (() => {
           currentShape,
           targetX,
           originalPiece: piece,
-          rotationCount: rotation
+          rotationCount: rotation,
         });
         moves.push(candidate);
       }
@@ -7324,7 +7160,7 @@ var tetris = (() => {
       bumpiness: -0.18,
       completeLines: 1.5,
       // 自定义权重覆盖默认值
-      ...weights
+      ...weights,
     };
     for (let x = 0; x < board[0].length; x++) {
       heights.push(get_column_height_default(board, x));
@@ -7341,12 +7177,26 @@ var tetris = (() => {
         completeLines += 1;
       }
     }
-    return aggregateHeight * w.height + holes * w.holes + bumpiness * w.bumpiness + Math.pow(completeLines, 2) * w.completeLines;
+    return (
+      aggregateHeight * w.height +
+      holes * w.holes +
+      bumpiness * w.bumpiness +
+      Math.pow(completeLines, 2) * w.completeLines
+    );
   };
   var evaluate_board_default = evaluateBoard;
 
   // lib/game/constants/shapes.js
-  var { PINK: PINK3, BLUE: BLUE4, TEAL: TEAL4, YELLOW: YELLOW4, VIOLET: VIOLET3, ORANGE: ORANGE4, GREEN: GREEN4, RED: RED4 } = colors_default;
+  var {
+    PINK: PINK3,
+    BLUE: BLUE4,
+    TEAL: TEAL4,
+    YELLOW: YELLOW4,
+    VIOLET: VIOLET3,
+    ORANGE: ORANGE4,
+    GREEN: GREEN4,
+    RED: RED4,
+  } = colors_default;
   var SHAPES = [
     /**
      * ## I 型方块（标准长条）
@@ -7368,9 +7218,9 @@ var tetris = (() => {
     {
       shape: [
         [1, 1],
-        [1, 1]
+        [1, 1],
       ],
-      color: ORANGE4
+      color: ORANGE4,
     },
     /**
      * ## T 型方块
@@ -7380,9 +7230,9 @@ var tetris = (() => {
     {
       shape: [
         [0, 1, 0],
-        [1, 1, 1]
+        [1, 1, 1],
       ],
-      color: YELLOW4
+      color: YELLOW4,
     },
     /**
      * ## L 型方块
@@ -7392,9 +7242,9 @@ var tetris = (() => {
     {
       shape: [
         [1, 0, 0],
-        [1, 1, 1]
+        [1, 1, 1],
       ],
-      color: BLUE4
+      color: BLUE4,
     },
     /**
      * ## J 型方块（反 L 型）
@@ -7404,9 +7254,9 @@ var tetris = (() => {
     {
       shape: [
         [0, 0, 1],
-        [1, 1, 1]
+        [1, 1, 1],
       ],
-      color: PINK3
+      color: PINK3,
     },
     /**
      * ## S 型方块（右斜）
@@ -7416,9 +7266,9 @@ var tetris = (() => {
     {
       shape: [
         [0, 1, 1],
-        [1, 1, 0]
+        [1, 1, 0],
       ],
-      color: RED4
+      color: RED4,
     },
     /**
      * ## Z 型方块（左斜）
@@ -7428,10 +7278,10 @@ var tetris = (() => {
     {
       shape: [
         [1, 1, 0],
-        [0, 1, 1]
+        [0, 1, 1],
       ],
-      color: VIOLET3
-    }
+      color: VIOLET3,
+    },
   ];
   var shapes_default = SHAPES;
 
@@ -7441,7 +7291,7 @@ var tetris = (() => {
     const piece = shapes_default[index];
     return {
       ...piece,
-      shape: piece.shape.map((row) => [...row])
+      shape: piece.shape.map((row) => [...row]),
     };
   };
   var random_shape_default = randomShape;
@@ -7462,7 +7312,7 @@ var tetris = (() => {
       snapshot.board,
       snapshot.piece.shape,
       snapshot.piece.position.x,
-      move2.y
+      move2.y,
       // simulateDrop 返回的最终 Y 坐标
     );
     const clearedBoard = clear_full_lines_default(board);
@@ -7471,9 +7321,9 @@ var tetris = (() => {
       shape: nextPiece.shape,
       position: {
         x: Math.floor(10 / 2) - Math.floor(nextPiece.shape[0].length / 2),
-        y: 0
+        y: 0,
         // 从顶部开始
-      }
+      },
     };
     return {
       ...snapshot,
@@ -7484,7 +7334,7 @@ var tetris = (() => {
       // 新活动方块
       cur: nextPiece,
       // 新活动方块的原始对象
-      next: random_shape_default()
+      next: random_shape_default(),
       // 再随机生成下一个预览方块
     };
   };
@@ -7497,7 +7347,7 @@ var tetris = (() => {
     if (depth > 1 && moves.length > beam) {
       const scored = moves.map((move2) => ({
         move: move2,
-        score: evaluate_board_default(move2.board, weights)
+        score: evaluate_board_default(move2.board, weights),
       }));
       scored.sort((a, b) => b.score - a.score);
       moves.length = 0;
@@ -7512,7 +7362,9 @@ var tetris = (() => {
       } else {
         const nextSnapshot = advance_snapshot_default(snapshot, move2);
         const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam);
-        score = nextBest ? evaluate_board_default(nextBest.board, weights) : evaluate_board_default(move2.board, weights);
+        score = nextBest
+          ? evaluate_board_default(nextBest.board, weights)
+          : evaluate_board_default(move2.board, weights);
       }
       if (score > bestScore) {
         bestScore = score;
@@ -7586,7 +7438,7 @@ var tetris = (() => {
       }
       const { Game: Game2, Animations, Scheduler: Scheduler2 } = this;
       const state = Game2.Store.getState();
-      if (state.mode !== "playing" || Animations.hasBlocking()) {
+      if (state.mode !== 'playing' || Animations.hasBlocking()) {
         this.aiSchedulerId = Scheduler2.delay(this.loop, 100);
         return;
       }
@@ -7599,12 +7451,12 @@ var tetris = (() => {
       }
       const action = this.actions.shift();
       if (action) {
-        this.emit("dispatch:input", {
-          device: "ai",
+        this.emit('dispatch:input', {
+          device: 'ai',
           action,
           payload: {
-            Game: Game2
-          }
+            Game: Game2,
+          },
         });
       }
       this.aiSchedulerId = Scheduler2.delay(this.loop, difficulty.delay);
@@ -7657,7 +7509,7 @@ var tetris = (() => {
         easy: ai_difficulty_default.EASY,
         normal: ai_difficulty_default.NORMAL,
         hard: ai_difficulty_default.HARD,
-        expert: ai_difficulty_default.EXPERT
+        expert: ai_difficulty_default.EXPERT,
       };
       return map[difficulty] || ai_difficulty_default.NORMAL;
     }
@@ -7782,7 +7634,8 @@ var tetris = (() => {
     /**
      * ## 停止录制
      *
-     * 当接收到 `STOP_RECORD` 事件时触发。 调用 ReplayController 的 `stopRecord()` 方法停止录制游戏过程。
+     * 当接收到 `STOP_RECORD` 事件时触发。 调用 ReplayController 的 `stopRecord()`
+     * 方法停止录制游戏过程。
      *
      * @private
      * @returns {void}
@@ -7873,11 +7726,11 @@ var tetris = (() => {
       if (Replay.hasData) {
         this.emit(AE.STOP);
         this.emit(GE.REPLAY_PREPARE, {
-          nextPiece: Replay.getNextPiece()
+          nextPiece: Replay.getNextPiece(),
         });
       } else {
-        this.emit(UE.UPDATE_MODE, { mode: "game-over" });
-        this.emit(GE.UPDATE_MODE, { mode: "game-over" });
+        this.emit(UE.UPDATE_MODE, { mode: 'game-over' });
+        this.emit(GE.UPDATE_MODE, { mode: 'game-over' });
       }
     };
     /**
@@ -7912,7 +7765,7 @@ var tetris = (() => {
       const AE = AudioEvents();
       const GE = GameEvents(Game2.id);
       this.emit(AE.STOP_BGM);
-      this.emit(AE.PLAY_SOUND, { sound: "LEVEL_UP" });
+      this.emit(AE.PLAY_SOUND, { sound: 'LEVEL_UP' });
       this.emit(GE.START_LEVEL_UP, { level });
     };
   };
@@ -7960,7 +7813,7 @@ var tetris = (() => {
       const { Game: Game2 } = this;
       this.Router = new replay_router_default({
         Replay: this,
-        Game: Game2
+        Game: Game2,
       });
     }
     /**
@@ -7984,8 +7837,8 @@ var tetris = (() => {
     /**
      * ## 同步回放逻辑时钟
      *
-     * 计算当前 wall-clock 时间与 startTime 的差值作为回放进度。 如果检测到时间跳跃过大（标签页切后台），限制单次跳跃上限为 1 秒，
-     * 防止切回后瞬间执行大量 command 导致爆帧。
+     * 计算当前 wall-clock 时间与 startTime 的差值作为回放进度。 如果检测到时间跳跃过大（标签页切后台），限制单次跳跃上限为 1
+     * 秒， 防止切回后瞬间执行大量 command 导致爆帧。
      *
      * @param {object} ctx - 执行上下文对象
      * @param {number} ctx.timestamp - 当前 requestAnimationFrame 时间戳
@@ -8024,13 +7877,13 @@ var tetris = (() => {
       const { Store, Game: Game2, data } = this;
       const mode = Store.getMode();
       this.timestamp = timestamp;
-      if (!this.playing || mode !== "replay") {
+      if (!this.playing || mode !== 'replay') {
         return;
       }
       const events = GameEvents(Game2.id);
       if (data.length > 0 && this.cursor >= data.length) {
         this.stopPlay();
-        this.emit(events.UPDATE_MODE, { mode: "game-over" });
+        this.emit(events.UPDATE_MODE, { mode: 'game-over' });
         return;
       }
       const next = data[this.cursor];
@@ -8043,7 +7896,11 @@ var tetris = (() => {
           this.startTime = timestamp - this.playElapsed;
         }
       }
-      while (this.playing && this.cursor < data.length && data[this.cursor].ms <= this.playElapsed) {
+      while (
+        this.playing &&
+        this.cursor < data.length &&
+        data[this.cursor].ms <= this.playElapsed
+      ) {
         const { cmd } = data[this.cursor];
         this.emit(`dispatch:command`, cmd);
         this.cursor++;
@@ -8140,7 +7997,8 @@ var tetris = (() => {
     /**
      * ## 停止录制/回放并清除所有数据
      *
-     * 等同于 `stopRecord()` + `stopPlay()` + `clear()`。 通过 `replay:<id>:reset` 事件触发。
+     * 等同于 `stopRecord()` + `stopPlay()` + `clear()`。 通过 `replay:<id>:reset`
+     * 事件触发。
      *
      * @returns {void}
      */
@@ -8185,187 +8043,86 @@ var tetris = (() => {
 
   // lib/services/animations/countdown-animation.js
   var CountdownAnimation = class extends core_default {
-    /**
-     * ## 构造函数
-     *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Scheduler - 任务调度器
-     */
     constructor(options) {
       super(options);
       this.initialize();
-      this._countdown();
     }
-    /**
-     * ## 初始化动画状态
-     *
-     * @returns {void}
-     */
     initialize() {
       this.layer = 100;
       this.blocking = true;
-      this.name = "countdown";
+      this.name = 'countdown';
+      this._finished = false;
       this.state = {
         show: true,
         number: 3,
         scale: 4,
-        count: 0,
-        acc: 0
       };
-      this._intervalId = 0;
-    }
-    /**
-     * ## 启动倒计时
-     *
-     * 播放倒计时音效，每秒切换数字。
-     *
-     * @private
-     * @returns {void}
-     */
-    _countdown() {
       const { Scheduler: Scheduler2 } = this;
       const events = AudioEvents();
-      this.emit(events.PLAY_SOUND, { sound: "COUNTDOWN" });
-      this._intervalId = Scheduler2.interval(() => {
+      this.emit(events.PLAY_SOUND, { sound: 'COUNTDOWN' });
+      this._scaleId = Scheduler2.interval(() => {
+        this.state.scale = Math.max(1, this.state.scale - 0.016 * 40);
+      }, 16);
+      this._countdownId = Scheduler2.interval(() => {
         this.state.number -= 1;
         this.state.scale = 4;
         if (this.state.number >= 1) {
-          this.emit(events.PLAY_SOUND, { sound: "COUNTDOWN" });
+          this.emit(events.PLAY_SOUND, { sound: 'COUNTDOWN' });
         }
         if (this.state.number <= 0) {
-          this.stop();
+          this._finished = true;
         }
       }, 1e3);
     }
-    /**
-     * ## 更新动画状态
-     *
-     * 每帧推进缩放动画（scale 从 4 平滑缩小到 1）。
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {boolean} - 数值大于 0，返回 false，否则返回 true
-     */
-    update(delta) {
-      this.state.scale = Math.max(1, this.state.scale - delta * 40);
-      return this.state.number > 0;
-    }
-    /**
-     * ## 倒计时结束处理
-     *
-     * 取消计时器，触发游戏正式开始。
-     *
-     * @returns {void}
-     */
-    stop() {
-      const { Game: Game2, Scheduler: Scheduler2 } = this;
+    dispose() {
+      const { Scheduler: Scheduler2 } = this;
+      if (this._scaleId != null) Scheduler2.cancel(this._scaleId);
+      if (this._countdownId != null) Scheduler2.cancel(this._countdownId);
+      const { Game: Game2 } = this;
       const events = GameEvents(Game2.id);
-      Scheduler2.cancel(this._intervalId);
       this.emit(events.BEGIN);
     }
-    /**
-     * ## 渲染动画
-     *
-     * 将当前状态传递给 UI 层绘制倒计时数字。
-     *
-     * @returns {void}
-     */
     render() {
-      const { state, Game: Game2 } = this;
-      const events = UIEvents(Game2.id);
-      this.emit(events.RENDER_COUNTDOWN, { state });
+      const events = UIEvents(this.Game.id);
+      this.emit(events.RENDER_COUNTDOWN, { state: this.state });
     }
   };
   var countdown_animation_default = CountdownAnimation;
 
   // lib/services/animations/paused-animation.js
   var PausedAnimation = class extends core_default {
-    /**
-     * ## 构造函数
-     *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Scheduler - 任务调度器
-     */
     constructor(options) {
       super(options);
       this.layer = 500;
       this.blocking = true;
-      this.name = "paused";
-      this.timer = 0;
+      this.name = 'paused';
+      this._finished = false;
       this.active = true;
-      this._tickId = 0;
-      this._tick();
+      this._startTick();
     }
-    /**
-     * ## 启动滴答定时器
-     *
-     * 每秒播放一次滴答音效。
-     *
-     * @private
-     * @returns {void}
-     */
-    _tick() {
-      if (!this.active) {
-        return;
-      }
+    _startTick() {
       const { Scheduler: Scheduler2 } = this;
       const events = AudioEvents();
       this._tickId = Scheduler2.interval(() => {
-        this.emit(events.PLAY_SOUND, { sound: "SECOND_TICK" });
+        this.emit(events.PLAY_SOUND, { sound: 'SECOND_TICK' });
       }, 1e3);
     }
-    /**
-     * ## 更新暂停动画状态
-     *
-     * 累加计时器，每秒触发一次滴答音效。
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {boolean} 始终返回 `true`，表示动画不会自动结束
-     */
-    update(delta) {
-      if (!this.active) {
-        return false;
-      }
-      const events = AudioEvents();
-      this.timer += delta;
-      if (this.timer >= 1) {
-        this.emit(events.PLAY_SOUND, { sound: "SECOND_TICK" });
-        this.timer = 0;
-      }
-      return true;
-    }
-    /**
-     * ## 恢复暂停动画
-     *
-     * 将活跃状态设为 `true`，使动画重新生效。
-     *
-     * @returns {void}
-     */
     resume() {
+      if (this.active) return;
       this.active = true;
+      this._startTick();
     }
-    /**
-     * ## 暂停结束处理
-     *
-     * 将活跃状态设为 `false`，取消滴答定时器。
-     *
-     * @returns {void}
-     */
     stop() {
-      const { Scheduler: Scheduler2 } = this;
       this.active = false;
-      Scheduler2.cancel(this._tickId);
+      this._finished = true;
     }
-    /**
-     * ## 渲染暂停动画
-     *
-     * 标记活跃状态为 `true`，实际的渲染由 UI 层监听事件完成。
-     *
-     * @returns {void}
-     */
-    render() {
-      this.active = true;
+    dispose() {
+      const { Scheduler: Scheduler2 } = this;
+      if (this._tickId != null) {
+        Scheduler2.cancel(this._tickId);
+      }
     }
+    render() {}
   };
   var paused_animation_default = PausedAnimation;
 
@@ -8411,7 +8168,7 @@ var tetris = (() => {
         // 根据消除行数加分
         level: Math.min(Math.max(prev.level, newLevel), max),
         // 更新等级（限制在有效范围内）
-        board
+        board,
         // 更新棋盘
       }),
       /** ## 是否触发了升级 */
@@ -8419,183 +8176,117 @@ var tetris = (() => {
       /** ## 计算后的新等级 */
       level: isMaxOut ? max : newLevel,
       /** ## 是否达到最大等级 */
-      isMaxOut
+      isMaxOut,
     };
   };
   var apply_clear_lines_default = applyClearLines;
 
   // lib/services/animations/clear-lines-animation.js
   var ClearLinesAnimation = class extends core_default {
-    /**
-     * ## 构造函数
-     *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {number[]} options.lines - 待消除的行号数组
-     */
     constructor(options) {
       super(options);
       this.initialize(options);
     }
-    /**
-     * ## 初始化动画
-     *
-     * 设置动画属性并为每行创建独立的动画状态数据。
-     *
-     * @param {object} options - 配置对象
-     * @param {number[]} options.lines - 待消除的行号数组
-     * @returns {void}
-     */
     initialize(options) {
       const { lines } = options;
       this.layer = 200;
       this.blocking = true;
-      this.name = "clear-lines";
-      this.lines = lines.map((y) => ({
-        y,
-        alpha: 1,
-        timer: 0
-      }));
+      this.name = 'clear-lines';
+      this._finished = false;
+      this._schedulerIds = [];
+      this.lines = lines.map((y) => ({ y, alpha: 1 }));
+      const { Scheduler: Scheduler2 } = this;
+      const toggle = () => {
+        for (const line of this.lines) {
+          line.alpha = line.alpha === 1 ? 0 : 1;
+        }
+      };
+      const ids = Scheduler2.sequence([
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+      ]);
+      this._schedulerIds.push(...ids);
+      const endId = Scheduler2.delay(() => {
+        this._finished = true;
+      }, 720);
+      this._schedulerIds.push(endId);
       const AE = AudioEvents();
       this.emit(AE.PLAY_SOUND, {
-        sound: "CLEAR",
-        lines: lines.length - 1
+        sound: 'CLEAR',
+        lines: lines.length - 1,
       });
     }
-    /**
-     * ## 更新动画状态
-     *
-     * 每帧调用，推进每行的计时器并根据 phase 计算闪烁透明度。
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {boolean} - 执行完成，返回 true，否则返回 false
-     */
-    update(delta) {
-      let done = true;
-      for (const line of this.lines) {
-        const phase = Math.floor(line.timer / 0.12);
-        line.alpha = phase % 2 === 0 ? 1 : 0;
-        line.timer += delta;
-        if (line.timer < 0.72) {
-          done = false;
-        }
+    dispose() {
+      const { Scheduler: Scheduler2 } = this;
+      for (const id of this._schedulerIds) {
+        Scheduler2.cancel(id);
       }
-      if (done) {
-        this.stop();
-        return false;
-      }
-      return true;
-    }
-    /**
-     * ## 动画结束后的收尾逻辑
-     *
-     * 通过 Scheduler 序列依次执行：
-     *
-     * 1. 触发升级逻辑（回放时不触发）
-     * 2. 更新游戏状态（消行、加分、升级）
-     * 3. 保存最高分
-     * 4. 刷新 HUD 显示
-     *
-     * @returns {void}
-     */
-    stop() {
-      const { Game: Game2, Scheduler: Scheduler2 } = this;
+      const { Game: Game2 } = this;
       const uuid = Game2.id;
       const result = apply_clear_lines_default(Game2);
       const { level, levelUp } = result;
-      const isLevelUp = levelUp;
       const GE = GameEvents(uuid);
       const RE = ReplayEvents(uuid);
       Scheduler2.sequence([
         {
           fn: () => {
-            this.emit(RE.STOP_CLEAR_LINES, { isLevelUp, level });
-          }
+            this.emit(RE.STOP_CLEAR_LINES, { isLevelUp: levelUp, level });
+          },
         },
         {
           fn: () => {
             this.emit(GE.UPDATE_STATE, {
-              stateHandler: result.stateHandler
+              stateHandler: result.stateHandler,
             });
-          }
+          },
         },
         {
           fn: () => {
             this.emit(GE.SAVE_HIGH_SCORE);
-          }
+          },
         },
         {
           fn: () => {
             this.emit(GE.UPDATE_HUD);
-          }
-        }
+          },
+        },
       ]);
     }
-    /**
-     * ## 渲染动画
-     *
-     * 在渲染阶段调用，将当前闪烁状态传递给 UI 层进行绘制。 不修改 state，仅负责视觉表现。
-     *
-     * @returns {void}
-     */
     render() {
-      const { lines, Game: Game2 } = this;
-      const events = UIEvents(Game2.id);
-      this.emit(events.RENDER_CLEAR_LINES, { state: { lines } });
+      const events = UIEvents(this.Game.id);
+      this.emit(events.RENDER_CLEAR_LINES, { state: { lines: this.lines } });
     }
   };
   var clear_lines_animation_default = ClearLinesAnimation;
 
   // lib/services/animations/level-up-animation.js
   var LevelUpAnimation = class extends core_default {
-    /**
-     * ## 构造函数
-     *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.UI - UI 渲染模块
-     * @param {object} options.Scheduler - 任务调度器
-     * @param {number} options.level - 升级后的新等级
-     */
     constructor(options) {
       super(options);
       this.initialize(options);
     }
-    /**
-     * ## 初始化动画
-     *
-     * 设置动画属性，创建初始烟花粒子，启动定时生成器。
-     *
-     * @param {object} options - 配置对象
-     * @param {number} options.level - 升级后的新等级
-     * @returns {void}
-     */
     initialize(options) {
       const { level } = options;
       this.layer = 100;
       this.blocking = true;
-      this.name = "level-up";
-      this.duration = 3;
-      this.spawnTimer = 0;
-      this.timer = 0;
+      this.name = 'level-up';
       this.level = level;
+      this._finished = false;
       this.fireworks = this.createFireworks();
-      this.active = true;
       const { Scheduler: Scheduler2 } = this;
       this._spawnId = Scheduler2.interval(() => {
         this.fireworks.push(...this.createFireworks());
       }, 600);
+      this._updateId = Scheduler2.interval(() => {
+        this.updateFireworks(0.016);
+      }, 16);
       this._endId = Scheduler2.delay(() => {
-        this.stop();
+        this._finished = true;
       }, 3e3);
     }
-    /**
-     * ## 创建一组烟花粒子
-     *
-     * 在画布中心上方生成 40 个随机方向和速度的粒子。
-     *
-     * @returns {object[]} 烟花粒子对象数组
-     */
     createFireworks() {
       const { UI: UI2 } = this;
       const { width, height } = UI2.Renderer.Canvas.gameBoard;
@@ -8606,47 +8297,25 @@ var tetris = (() => {
         colors_default.ORANGE,
         colors_default.GREEN,
         colors_default.RED,
-        colors_default.PINK
+        colors_default.PINK,
       ];
       const particles = [];
       for (let i = 0; i < 40; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 5 + Math.random() * 15;
         particles.push({
-          /** ## 初始 X 坐标：画布水平中心 */
           x: width / 2,
-          /** ## 初始 Y 坐标：画布中心上方 60 像素 */
           y: height / 2 - 60,
-          /** ## X 轴速度分量 */
           vx: Math.cos(angle) * speed,
-          /** ## Y 轴速度分量 */
           vy: Math.sin(angle) * speed,
-          /** ## 粒子半径（3-7 像素随机） */
           radius: 3 + Math.random() * 4,
-          /** ## 随机颜色 */
-          color: FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)],
-          /** ## 初始透明度（完全不透明） */
-          alpha: 1
+          color:
+            FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)],
+          alpha: 1,
         });
       }
       return particles;
     }
-    /**
-     * ## 更新所有烟花粒子的物理状态
-     *
-     * 每帧更新粒子的速度、位置、透明度和半径。
-     *
-     * ### 物理模拟
-     *
-     * - **空气阻力**：速度每帧衰减 2%（×0.98）
-     * - **重力**：Y 轴速度增加（gravity × delta）
-     * - **位置更新**：根据速度更新坐标
-     * - **淡出**：透明度逐渐降低
-     * - **膨胀**：半径逐渐增大
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {void}
-     */
     updateFireworks(delta) {
       const gravity = 0.01;
       for (const p of this.fireworks) {
@@ -8660,44 +8329,20 @@ var tetris = (() => {
       }
       this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
     }
-    /**
-     * ## 更新动画状态
-     *
-     * 每帧调用，更新所有粒子的物理状态。
-     *
-     * @param {number} delta - 距离上一帧的时间差（秒）
-     * @returns {boolean} - 返回当前是否激活
-     */
-    update(delta) {
-      this.updateFireworks(delta);
-      return this.active;
-    }
-    /**
-     * ## 升级动画结束处理
-     *
-     * 取消定时器，恢复背景音乐播放。
-     *
-     * @returns {void}
-     */
-    stop() {
-      const { level, Scheduler: Scheduler2 } = this;
+    dispose() {
+      const { Scheduler: Scheduler2 } = this;
+      if (this._spawnId != null) Scheduler2.cancel(this._spawnId);
+      if (this._updateId != null) Scheduler2.cancel(this._updateId);
+      if (this._endId != null) Scheduler2.cancel(this._endId);
       const events = AudioEvents();
-      this.active = false;
-      Scheduler2.cancel(this._spawnId);
-      Scheduler2.cancel(this._endId);
-      this.emit(events.RESUME_BGM, { level });
+      this.emit(events.RESUME_BGM, { level: this.level });
     }
-    /**
-     * ## 渲染升级动画
-     *
-     * 将等级和粒子数据传递给 UI 层绘制 "LEVEL UP" 文字和烟花效果。
-     *
-     * @returns {void}
-     */
     render() {
-      const { level, fireworks, Game: Game2 } = this;
-      const events = UIEvents(Game2.id);
-      this.emit(events.RENDER_LEVEL_UP, { level, fireworks });
+      const events = UIEvents(this.Game.id);
+      this.emit(events.RENDER_LEVEL_UP, {
+        level: this.level,
+        fireworks: this.fireworks,
+      });
     }
   };
   var level_up_animation_default = LevelUpAnimation;
@@ -8710,15 +8355,17 @@ var tetris = (() => {
     }
     const state = Store.getState();
     const { next } = state;
-    const curr = next ? {
-      ...next,
-      // 深拷贝形状矩阵，避免旋转时污染预览方块
-      shape: next.shape.map((row) => [...row])
-    } : random_shape_default();
+    const curr = next
+      ? {
+          ...next,
+          // 深拷贝形状矩阵，避免旋转时污染预览方块
+          shape: next.shape.map((row) => [...row]),
+        }
+      : random_shape_default();
     return {
       curr,
       // 随机生成新的预览方块
-      next: random_shape_default()
+      next: random_shape_default(),
     };
   };
   var get_next_piece_default = getNextPiece;
@@ -8754,14 +8401,14 @@ var tetris = (() => {
   var over = (runtime) => {
     const { id, Store } = runtime;
     const mode = Store.getMode();
-    if (mode === "game-over" || mode === "replay") {
+    if (mode === 'game-over' || mode === 'replay') {
       return;
     }
     const AE = AudioEvents();
     const RE = ReplayEvents(id);
     runtime.emit(RE.STOP_RECORD);
     runtime.emit(AE.STOP_BGM);
-    runtime.emit(AE.PLAY_SOUND, { sound: "GAME_OVER" });
+    runtime.emit(AE.PLAY_SOUND, { sound: 'GAME_OVER' });
     runtime.emit(RE.GAME_OVER);
   };
   var over_default = over;
@@ -8782,7 +8429,7 @@ var tetris = (() => {
       // 水平居中：屏幕中间 - 方块宽度的一半
       cx: Math.floor(cols / 2) - Math.floor(curr.shape[0].length / 2),
       // 垂直位置从顶部开始（第 0 行）
-      cy: 0
+      cy: 0,
     });
     const state = Store.getState();
     if (collision_default2(runtime, 0, 0)) {
@@ -8809,10 +8456,10 @@ var tetris = (() => {
       // 消除行数归零
       level,
       // 设置初始等级
-      next: null
+      next: null,
       // 清空预览方块
     });
-    if (mode === "playing") {
+    if (mode === 'playing') {
       Store.setBeginningBoard(Store.generateBoard());
     }
   };
@@ -8823,16 +8470,16 @@ var tetris = (() => {
     const { Store, id, Scheduler: Scheduler2 } = runtime;
     const AE = AudioEvents();
     const RE = ReplayEvents(id);
-    const $level = document.querySelector("#level");
+    const $level = document.querySelector('#level');
     const level = Store.getLevel();
     if ($level) {
       $level.textContent = pad_start_default(Store.getLevel(), 2);
     }
     runtime.emit(RE.START_RECORD);
     Store.resetBoard();
-    set_beginning_state_default(runtime, "playing", level);
+    set_beginning_state_default(runtime, 'playing', level);
     spawn_default(runtime);
-    runtime.emit(AE.PLAY_SOUND, { sound: "GAME_STARTED" });
+    runtime.emit(AE.PLAY_SOUND, { sound: 'GAME_STARTED' });
     Scheduler2.delay(() => {
       runtime.emit(AE.RESUME_BGM, { level });
     }, 250);
@@ -8857,13 +8504,13 @@ var tetris = (() => {
     const AE = AudioEvents();
     const GE = GameEvents(id);
     const UE = UIEvents(id);
-    if (mode !== "playing") {
+    if (mode !== 'playing') {
       return;
     }
-    runtime.emit(UE.UPDATE_MODE, { mode: "paused" });
-    Store.setMode("paused");
+    runtime.emit(UE.UPDATE_MODE, { mode: 'paused' });
+    Store.setMode('paused');
     runtime.emit(AE.STOP_BGM);
-    runtime.emit(AE.PLAY_SOUND, { sound: "PAUSED" });
+    runtime.emit(AE.PLAY_SOUND, { sound: 'PAUSED' });
     runtime.emit(GE.START_PAUSED);
   };
   var pause_default = pause;
@@ -8872,17 +8519,17 @@ var tetris = (() => {
   var resume = (runtime) => {
     const { id, Store } = runtime;
     const mode = Store.getMode();
-    if (mode !== "paused") {
+    if (mode !== 'paused') {
       return;
     }
     const level = Store.getLevel();
     const AE = AudioEvents();
     const GE = GameEvents(id);
     const UE = UIEvents(id);
-    runtime.emit(UE.UPDATE_MODE, { mode: "playing" });
-    Store.setMode("playing");
+    runtime.emit(UE.UPDATE_MODE, { mode: 'playing' });
+    Store.setMode('playing');
     runtime.emit(GE.STOP_PAUSED);
-    runtime.emit(AE.PLAY_SOUND, { sound: "RESUME" });
+    runtime.emit(AE.PLAY_SOUND, { sound: 'RESUME' });
     runtime.emit(AE.RESUME_BGM, { level });
   };
   var resume_default = resume;
@@ -8890,10 +8537,10 @@ var tetris = (() => {
   // lib/game/core/toggle-pause.js
   var togglePause = (runtime) => {
     const mode = runtime.Store.getMode();
-    if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
+    if (mode === 'main-menu' || mode === 'replay' || mode === 'game-over') {
       return;
     }
-    if (mode === "playing") {
+    if (mode === 'playing') {
       pause_default(runtime);
     } else {
       resume_default(runtime);
@@ -8902,7 +8549,7 @@ var tetris = (() => {
   var toggle_pause_default = togglePause;
 
   // lib/game/core/reset.js
-  var reset = (runtime, mode = "main-menu") => {
+  var reset = (runtime, mode = 'main-menu') => {
     const { id, Store } = runtime;
     const AUE = AudioEvents();
     const AIE = AIEvents(id);
@@ -8915,17 +8562,17 @@ var tetris = (() => {
     runtime.emit(ANE.CLEAR);
     runtime.emit(CE.CLEAR);
     Store.resetBoard();
-    if (mode === "main-menu") {
-      Store.setDifficulty("easy");
+    if (mode === 'main-menu') {
+      Store.setDifficulty('easy');
       level = 1;
-      runtime.emit(AUE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
+      runtime.emit(AUE.PLAY_SOUND, { sound: 'SWITCH_SCENE' });
     }
     set_beginning_state_default(runtime, mode, level);
     runtime.emit(UE.UPDATE_HUD, { state: Store.getState() });
     runtime.emit(UE.UPDATE_MODE, { mode });
     runtime.emit(AIE.STOP);
-    Store.setController("human");
-    runtime.emit(UE.UPDATE_CONTROLLER, { controller: "human" });
+    Store.setController('human');
+    runtime.emit(UE.UPDATE_CONTROLLER, { controller: 'human' });
     runtime.emit(RE.RESET);
   };
   var reset_default = reset;
@@ -8934,11 +8581,11 @@ var tetris = (() => {
   var restart = (runtime) => {
     const { Store } = runtime;
     const mode = Store.getMode();
-    if (mode !== "playing") {
+    if (mode !== 'playing') {
       return;
     }
     const level = Store.getLevel();
-    reset_default(runtime, "playing");
+    reset_default(runtime, 'playing');
     spawn_default(runtime);
     const events = AudioEvents();
     runtime.emit(events.RESUME_BGM, { level });
@@ -8956,9 +8603,9 @@ var tetris = (() => {
       cy += oy;
       Store.setState({
         cx,
-        cy
+        cy,
       });
-      runtime.emit(events.PLAY_SOUND, { sound: "MOVE" });
+      runtime.emit(events.PLAY_SOUND, { sound: 'MOVE' });
       return true;
     }
     return false;
@@ -8975,20 +8622,20 @@ var tetris = (() => {
     }
     const currentShape = structuredClone(curr);
     const prev = curr.shape;
-    currentShape.shape = prev[0].map(
-      (_, i) => prev.map((r) => r[i]).toReversed()
+    currentShape.shape = prev[0].map((_, i) =>
+      prev.map((r) => r[i]).toReversed(),
     );
     Store.setState({
-      curr: currentShape
+      curr: currentShape,
     });
     const events = AudioEvents();
     if (collision_default2(runtime, 0, 0)) {
       currentShape.shape = prev;
       Store.setState({
-        curr: currentShape
+        curr: currentShape,
       });
     } else {
-      runtime.emit(events.PLAY_SOUND, { sound: "ROTATE" });
+      runtime.emit(events.PLAY_SOUND, { sound: 'ROTATE' });
     }
   };
   var rotate_default = rotate;
@@ -9005,7 +8652,7 @@ var tetris = (() => {
         if (s[y][x]) {
           board[state.cy + y][state.cx + x] = curr.color;
           Store.setState({
-            board
+            board,
           });
         }
       }
@@ -9045,22 +8692,22 @@ var tetris = (() => {
   // lib/game/logic/tick.js
   var tick = (runtime, isBlocked) => {
     const mode = runtime.Store.getMode();
-    if (mode !== "playing" && mode !== "replay" || isBlocked) {
+    if ((mode !== 'playing' && mode !== 'replay') || isBlocked) {
       return;
     }
-    if (mode === "playing") {
-      runtime.emit("dispatch:input", {
-        device: "replay",
-        action: "AUTO_TICK",
+    if (mode === 'playing') {
+      runtime.emit('dispatch:input', {
+        device: 'replay',
+        action: 'AUTO_TICK',
         payload: {
-          Game: runtime
-        }
+          Game: runtime,
+        },
       });
     }
     const events = AudioEvents();
     if (!move_default(runtime, 0, 1)) {
       lock_default(runtime);
-      runtime.emit(events.PLAY_SOUND, { sound: "FALL" });
+      runtime.emit(events.PLAY_SOUND, { sound: 'FALL' });
       clear_lines_default(runtime);
       spawn_default(runtime);
     }
@@ -9076,10 +8723,10 @@ var tetris = (() => {
     }
     const events = AudioEvents();
     lock_default(runtime);
-    runtime.emit(events.PLAY_SOUND, { sound: "FALL" });
+    runtime.emit(events.PLAY_SOUND, { sound: 'FALL' });
     clear_lines_default(runtime);
     spawn_default(runtime);
-    runtime.emit(events.PLAY_SOUND, { sound: "DROP" });
+    runtime.emit(events.PLAY_SOUND, { sound: 'DROP' });
   };
   var drop_default = drop;
 
@@ -9107,8 +8754,8 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收依赖配置，调用 `initialize()` 创建所有子系统。 构造函数本身不进行复杂初始化，所有子系统的创建都在 `initialize()`
-     * 中完成。
+     * 接收依赖配置，调用 `initialize()` 创建所有子系统。 构造函数本身不进行复杂初始化，所有子系统的创建都在
+     * `initialize()` 中完成。
      *
      * @param {object} options - 配置（依赖的执行上下文）对象
      * @param {object} options.Elements - UI 元素配置，包含 Canvas 等 DOM 元素引用
@@ -9143,7 +8790,7 @@ var tetris = (() => {
       const { Elements, Scheduler: Scheduler2 } = this;
       const Store = new game_store_default({
         ...Elements.Main,
-        GameState: game_state_default
+        GameState: game_state_default,
       });
       this.id = crypto.randomUUID();
       this.effect = null;
@@ -9153,7 +8800,7 @@ var tetris = (() => {
         Game: this,
         Store,
         Scheduler: Scheduler2,
-        Animations: this.Animations
+        Animations: this.Animations,
       });
       this.CommandQueue = new command_queue_default({ Game: this });
       this.UI = new ui_default({ Game: this, Store, Elements });
@@ -9162,7 +8809,7 @@ var tetris = (() => {
       this.Replay = new replay_controller_default({
         Game: this,
         Store,
-        Scheduler: Scheduler2
+        Scheduler: Scheduler2,
       });
       this.Router = new game_router_default({
         Animations: this.Animations,
@@ -9171,7 +8818,7 @@ var tetris = (() => {
         Game: this,
         Replay: this.Replay,
         Store,
-        UI: this.UI
+        UI: this.UI,
       });
     }
     /**
@@ -9185,7 +8832,7 @@ var tetris = (() => {
     selectLevel(level) {
       const events = AudioEvents();
       this.Store.setLevel(level);
-      this.emit(events.PLAY_SOUND, { sound: "LEVEL_CHANGED" });
+      this.emit(events.PLAY_SOUND, { sound: 'LEVEL_CHANGED' });
     }
     /**
      * ## 切换到难度选择界面
@@ -9196,8 +8843,8 @@ var tetris = (() => {
      */
     switchToDifficulty() {
       const events = AudioEvents();
-      this.Store.setMode("difficulty");
-      this.emit(events.PLAY_SOUND, { sound: "SWITCH_SCENE" });
+      this.Store.setMode('difficulty');
+      this.emit(events.PLAY_SOUND, { sound: 'SWITCH_SCENE' });
     }
     /**
      * ## 选择难度
@@ -9216,7 +8863,7 @@ var tetris = (() => {
     selectDifficulty(difficulty) {
       const events = AudioEvents();
       this.Store.setDifficulty(difficulty);
-      this.emit(events.PLAY_SOUND, { sound: "DIFFICULTY_CHANGED" });
+      this.emit(events.PLAY_SOUND, { sound: 'DIFFICULTY_CHANGED' });
     }
     /**
      * ## 切换到主菜单
@@ -9228,9 +8875,9 @@ var tetris = (() => {
     switchToMainMenu() {
       const AE = AudioEvents();
       const UE = UIEvents(this.id);
-      this.emit(UE.UPDATE_MODE, { mode: "main-menu" });
-      this.Store.setMode("main-menu");
-      this.emit(AE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
+      this.emit(UE.UPDATE_MODE, { mode: 'main-menu' });
+      this.Store.setMode('main-menu');
+      this.emit(AE.PLAY_SOUND, { sound: 'SWITCH_SCENE' });
     }
     /**
      * ## 加载最高分
@@ -9240,7 +8887,8 @@ var tetris = (() => {
      * @returns {void}
      */
     loadHighScore() {
-      const highScore = Number.parseInt(get_storage_default("tetris-high-score"), 10) || 0;
+      const highScore =
+        Number.parseInt(get_storage_default('tetris-high-score'), 10) || 0;
       this.Store.setHighScore(highScore);
     }
     /**
@@ -9255,7 +8903,7 @@ var tetris = (() => {
       const { Store } = this;
       if (score > Store.getHighScore()) {
         Store.setHighScore(score);
-        set_storage_default("tetris-high-score", score.toString());
+        set_storage_default('tetris-high-score', score.toString());
       }
     }
     /*
@@ -9421,7 +9069,9 @@ var tetris = (() => {
      */
     startCountdown() {
       const { Scheduler: Scheduler2 } = this;
-      this.Animations.register(new countdown_animation_default({ Scheduler: Scheduler2, Game: this }));
+      this.Animations.register(
+        new countdown_animation_default({ Scheduler: Scheduler2, Game: this }),
+      );
     }
     /**
      * ## 开始暂停动画
@@ -9461,7 +9111,11 @@ var tetris = (() => {
     startClearLines(linesToClear) {
       const { Scheduler: Scheduler2 } = this;
       this.Animations.register(
-        new clear_lines_animation_default({ Game: this, lines: linesToClear, Scheduler: Scheduler2 })
+        new clear_lines_animation_default({
+          Game: this,
+          lines: linesToClear,
+          Scheduler: Scheduler2,
+        }),
       );
     }
     /**
@@ -9479,8 +9133,8 @@ var tetris = (() => {
           Game: this,
           UI: this.UI,
           level,
-          Scheduler: Scheduler2
-        })
+          Scheduler: Scheduler2,
+        }),
       );
     }
     // ==================== 事件订阅 / 取消订阅 ====================
@@ -9538,7 +9192,13 @@ var tetris = (() => {
       engine_default.fixedAccumulator = timestamp;
     }
     const { Game: Game2, Scheduler: Scheduler2 } = engine_default;
-    const { UI: UI2, Replay, Gamepad, Animations, CommandQueue: CommandQueue2 } = Game2;
+    const {
+      UI: UI2,
+      Replay,
+      Gamepad,
+      Animations,
+      CommandQueue: CommandQueue2,
+    } = Game2;
     const isBlocked = Animations.hasBlocking();
     const stepDelta = timestamp - engine_default.fixedAccumulator;
     const prev = engine_default.lastTickTime ?? timestamp;
@@ -9550,19 +9210,22 @@ var tetris = (() => {
     Scheduler2.tick(timestamp);
     Replay.syncPlayElapsed({
       timestamp: engine_default.lastTickTime,
-      isBlocked
+      isBlocked,
     });
     Replay.update({
       speed: Game2.getSpeed(),
-      timestamp: engine_default.lastTickTime
+      timestamp: engine_default.lastTickTime,
     });
     Gamepad.update(timestamp);
     CommandQueue2.flush();
-    if ((!engine_default.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
+    if (
+      (!engine_default.fixedAccumulator || stepDelta > Game2.getSpeed()) &&
+      !Replay.playing
+    ) {
       Game2.tick(isBlocked);
       engine_default.fixedAccumulator = timestamp;
     }
-    Animations.update(delta);
+    Animations.flush();
     UI2.tickHud();
     UI2.render();
     Animations.render();
@@ -9643,9 +9306,9 @@ var tetris = (() => {
      */
     execute() {
       const { action, payload } = this;
-      this.emit("dispatch:command", {
+      this.emit('dispatch:command', {
         action,
-        payload
+        payload,
       });
     }
   };
@@ -9666,7 +9329,7 @@ var tetris = (() => {
     Game2.emit(CE.ENQUEUE, { cmd });
     Game2.emit(RE.ADD_RECORD, {
       ms,
-      cmd
+      cmd,
     });
   };
   var dispatch_input_default = dispatchInput;
@@ -9815,7 +9478,7 @@ var tetris = (() => {
       }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SWITCH_TO_DIFFICULTY);
-    }
+    },
   };
   var main_menu_actions_default = MAIN_MENU_ACTIONS;
 
@@ -9833,7 +9496,7 @@ var tetris = (() => {
       }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_DIFFICULTY, {
-        difficulty: "easy"
+        difficulty: 'easy',
       });
     },
     /**
@@ -9847,7 +9510,7 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.SELECT_DIFFICULTY, { difficulty: "normal" });
+      Game2.emit(events.SELECT_DIFFICULTY, { difficulty: 'normal' });
     },
     /**
      * ## 选择难度 hard
@@ -9860,7 +9523,7 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.SELECT_DIFFICULTY, { difficulty: "hard" });
+      Game2.emit(events.SELECT_DIFFICULTY, { difficulty: 'hard' });
     },
     /**
      * ## 选择难度 expert
@@ -9873,7 +9536,7 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.SELECT_DIFFICULTY, { difficulty: "expert" });
+      Game2.emit(events.SELECT_DIFFICULTY, { difficulty: 'expert' });
     },
     /**
      * ## 返回游戏等级选择
@@ -9900,7 +9563,7 @@ var tetris = (() => {
       }
       const events = GameEvents(Game2.id);
       Game2.emit(events.START);
-    }
+    },
   };
   var difficulty_actions_default = DIFFICULT_ACTIONS;
 
@@ -9919,7 +9582,7 @@ var tetris = (() => {
       const events = GameEvents(Game2.id);
       Game2.emit(events.BLOCK_MOVE, {
         ox: -1,
-        oy: 0
+        oy: 0,
       });
     },
     /**
@@ -9935,7 +9598,7 @@ var tetris = (() => {
       const events = GameEvents(Game2.id);
       Game2.emit(events.BLOCK_MOVE, {
         ox: 1,
-        oy: 0
+        oy: 0,
       });
     },
     /**
@@ -9951,7 +9614,7 @@ var tetris = (() => {
       const events = GameEvents(Game2.id);
       Game2.emit(events.BLOCK_MOVE, {
         ox: 0,
-        oy: 1
+        oy: 1,
       });
     },
     /**
@@ -10046,7 +9709,7 @@ var tetris = (() => {
       }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SWITCH_CONTROLLER);
-    }
+    },
   };
   var game_playing_actions_default = GAME_PLAYING_ACTIONS;
 
@@ -10066,7 +9729,7 @@ var tetris = (() => {
       }
       const events = GameEvents(Game2.id);
       Game2.emit(events.TOGGLE_PAUSED);
-    }
+    },
   };
   var paused_actions_default = PAUSED_ACTIONS;
 
@@ -10089,7 +9752,7 @@ var tetris = (() => {
       }
       const events = GameEvents(Game2.id);
       Game2.emit(events.RESET);
-    }
+    },
   };
   var game_over_actions_default = GAME_OVER_ACTIONS;
 
@@ -10108,7 +9771,7 @@ var tetris = (() => {
       const events = GameEvents(Game2.id);
       Game2.emit(events.BLOCK_MOVE, {
         ox: -1,
-        oy: 0
+        oy: 0,
       });
     },
     /**
@@ -10124,7 +9787,7 @@ var tetris = (() => {
       const events = GameEvents(Game2.id);
       Game2.emit(events.BLOCK_MOVE, {
         ox: 1,
-        oy: 0
+        oy: 0,
       });
     },
     /**
@@ -10140,7 +9803,7 @@ var tetris = (() => {
       const events = GameEvents(Game2.id);
       Game2.emit(events.BLOCK_MOVE, {
         ox: 0,
-        oy: 1
+        oy: 1,
       });
     },
     /**
@@ -10199,18 +9862,18 @@ var tetris = (() => {
       }
       const events = GameEvents(Game2.id);
       Game2.emit(events.RESET);
-    }
+    },
   };
   var replay_actions_default = REPLAY_ACTIONS;
 
   // lib/engine/dispatch-command.js
   var ACTIONS_MAP = {
-    "main-menu": main_menu_actions_default,
+    'main-menu': main_menu_actions_default,
     difficulty: difficulty_actions_default,
     playing: game_playing_actions_default,
     paused: paused_actions_default,
     replay: replay_actions_default,
-    "game-over": game_over_actions_default
+    'game-over': game_over_actions_default,
   };
   var dispatchCommand = (cmd, { mode }) => {
     const { action, payload } = cmd;
@@ -10301,7 +9964,7 @@ var tetris = (() => {
       const normalizedOptions = {
         ...options,
         Scheduler: Engine.Scheduler,
-        isAIPlayer: true
+        isAIPlayer: true,
       };
       Engine.Audio = new audio_default(normalizedOptions);
       Engine.Game = new game_default2(normalizedOptions);
@@ -10329,8 +9992,8 @@ var tetris = (() => {
       const { Store, UI: UI2 } = Game2;
       Store.resetBoard();
       Game2.loadHighScore();
-      Game2.setBeginningState("main-menu");
-      UI2.updateMode("main-menu");
+      Game2.setBeginningState('main-menu');
+      UI2.updateMode('main-menu');
       UI2.resize();
       UI2.updateHud();
       UI2.updateController(Store.getController());
@@ -10366,9 +10029,9 @@ var tetris = (() => {
       Game2.on(`dispatch:command`, (cmd) => {
         const mode = Store.getMode();
         const isBlocked = Animations.hasBlocking([
-          "clear-lines",
-          "countdown",
-          "level-up"
+          'clear-lines',
+          'countdown',
+          'level-up',
         ]);
         const { payload } = cmd;
         payload.isBlocked = isBlocked;
@@ -10376,9 +10039,9 @@ var tetris = (() => {
       });
       Game2.on(`dispatch:input`, (input) => {
         const isBlocked = Animations.hasBlocking([
-          "clear-lines",
-          "countdown",
-          "level-up"
+          'clear-lines',
+          'countdown',
+          'level-up',
         ]);
         const ms = Engine.lastTickTime - Replay.startTime;
         dispatch_input_default(input, { isBlocked, ms });
@@ -10413,7 +10076,7 @@ var tetris = (() => {
      */
     restart: () => {
       restart_game_loop_default();
-    }
+    },
   };
   var engine_default = Engine;
 

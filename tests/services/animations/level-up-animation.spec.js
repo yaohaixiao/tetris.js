@@ -1,270 +1,570 @@
-import LevelUpAnimation from '@/lib/services/animations/level-up-animation';
-import Scheduler from '@/lib/engine/scheduler';
+import LevelUpAnimation from '@/lib/services/animations/level-up-animation.js';
 
-describe('LevelUpAnimation', () => {
-  let scheduler;
-  let mockGame;
-  let mockUI;
-  let animation;
+// ============================================================
+// Mocks
+// ============================================================
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+// Mock Base
+jest.mock('@/lib/core', () => {
+  function MockBase(options) {
+    this.Game = options?.Game;
+    this.Scheduler = options?.Scheduler;
+    this.UI = options?.UI;
+    this._events = {};
+  }
 
-    scheduler = new Scheduler();
+  MockBase.prototype.on = function (event, fn) {
+    (this._events[event] ??= []).push(fn);
+  };
 
-    mockUI = {
-      Renderer: {
-        Canvas: {
-          gameBoard: {
-            width: 800,
-            height: 600,
-          },
+  MockBase.prototype.off = function (event, fn) {
+    if (!this._events[event]) return;
+    this._events[event] = this._events[event].filter((f) => f !== fn);
+  };
+
+  MockBase.prototype.emit = function (event, ...args) {
+    if (!this._events[event]) return;
+    for (const fn of this._events[event]) {
+      fn(...args);
+    }
+  };
+
+  return { __esModule: true, default: MockBase };
+});
+
+// Mock COLORS
+jest.mock('@/lib/constants/colors.js', () => ({
+  TEAL: '#00FFFF',
+  YELLOW: '#FFFF00',
+  PURPLE: '#800080',
+  ORANGE: '#FFA500',
+  GREEN: '#00FF00',
+  RED: '#FF0000',
+  PINK: '#FFC0CB',
+}));
+
+// Mock event-catalog
+jest.mock('@/lib/events/event-catalog.js', () => ({
+  AudioEvents: () => ({
+    PLAY_SOUND: 'audio:playSound',
+    RESUME_BGM: 'audio:resumeBgm',
+  }),
+  UIEvents: (id) => ({
+    RENDER_LEVEL_UP: `ui:${id}:renderLevelUp`,
+  }),
+}));
+
+// ============================================================
+// 辅助函数
+// ============================================================
+
+function createMockScheduler() {
+  const tasks = new Map();
+  let nextId = 1;
+
+  const scheduler = {
+    tasks,
+    interval: jest.fn((fn, interval) => {
+      const id = nextId++;
+      tasks.set(id, { fn, interval, cancelled: false });
+      return id;
+    }),
+    delay: jest.fn((fn, delay) => {
+      const id = nextId++;
+      tasks.set(id, { fn, delay, cancelled: false });
+      return id;
+    }),
+    sequence: jest.fn((list) => {
+      return list.map((item) => scheduler.delay(item.fn, item.delay));
+    }),
+    cancel: jest.fn((id) => {
+      const task = tasks.get(id);
+      if (task) task.cancelled = true;
+    }),
+    tick: jest.fn(),
+    clear: jest.fn(),
+    size: () => tasks.size,
+  };
+
+  return scheduler;
+}
+
+function createMockUI() {
+  return {
+    Renderer: {
+      Canvas: {
+        gameBoard: {
+          width: 800,
+          height: 600,
         },
       },
-    };
+    },
+  };
+}
 
-    mockGame = {
-      id: 'test-uuid-003',
-    };
+function createAnimation(overrides = {}) {
+  const Scheduler = overrides.Scheduler || createMockScheduler();
+  const Game = overrides.Game || { id: 'test' };
+  const UI = overrides.UI || createMockUI();
+  const level = overrides.level ?? 5;
 
-    animation = new LevelUpAnimation({
-      Scheduler: scheduler,
-      Game: mockGame,
-      UI: mockUI,
-      level: 5,
-    });
+  const anim = new LevelUpAnimation({ Game, Scheduler, UI, level });
+  return { anim, Scheduler, Game, UI, level };
+}
+
+// ============================================================
+// 构造函数 & initialize
+// ============================================================
+describe('LevelUpAnimation - 构造函数 & initialize', () => {
+  it('应该设置正确的默认属性', () => {
+    const { anim } = createAnimation();
+
+    expect(anim.layer).toBe(100);
+    expect(anim.blocking).toBe(true);
+    expect(anim.name).toBe('level-up');
+    expect(anim._finished).toBe(false);
+    expect(anim.level).toBe(5);
   });
 
-  // ==================== 初始化 ====================
+  it('应该创建初始烟花粒子', () => {
+    const { anim } = createAnimation();
 
-  describe('初始化', () => {
-    test('layer 为 100', () => {
-      expect(animation.layer).toBe(100);
-    });
-
-    test('blocking 为 true', () => {
-      expect(animation.blocking).toBe(true);
-    });
-
-    test('name 为 level-up', () => {
-      expect(animation.name).toBe('level-up');
-    });
-
-    test('duration 为 3 秒', () => {
-      expect(animation.duration).toBe(3);
-    });
-
-    test('level 为传入的值', () => {
-      expect(animation.level).toBe(5);
-    });
-
-    test('active 初始为 true', () => {
-      expect(animation.active).toBe(true);
-    });
-
-    test('timer 和 spawnTimer 初始为 0', () => {
-      expect(animation.timer).toBe(0);
-      expect(animation.spawnTimer).toBe(0);
-    });
-
-    test('注册 spawn interval（600ms）和 end delay（3000ms）', () => {
-      expect(scheduler.size()).toBeGreaterThanOrEqual(2);
-    });
-
-    test('初始创建了一组 fireworks', () => {
-      expect(animation.fireworks.length).toBe(40);
-    });
+    expect(anim.fireworks).toBeDefined();
+    expect(Array.isArray(anim.fireworks)).toBe(true);
+    expect(anim.fireworks.length).toBe(40);
   });
 
-  // ==================== createFireworks ====================
+  it('应该注册烟花生成定时器（每 600ms）', () => {
+    const Scheduler = createMockScheduler();
+    createAnimation({ Scheduler });
 
-  describe('createFireworks', () => {
-    test('创建 40 个粒子', () => {
-      const particles = animation.createFireworks();
+    expect(Scheduler.interval).toHaveBeenCalledWith(
+      expect.any(Function),
+      600,
+    );
+  });
 
-      expect(particles).toHaveLength(40);
-    });
+  it('应该注册粒子物理更新定时器（每 16ms）', () => {
+    const Scheduler = createMockScheduler();
+    createAnimation({ Scheduler });
 
-    test('粒子在画布中心上方', () => {
-      const particles = animation.createFireworks();
+    expect(Scheduler.interval).toHaveBeenCalledWith(
+      expect.any(Function),
+      16,
+    );
+  });
 
-      particles.forEach((p) => {
-        expect(p.x).toBe(400); // width/2 = 800/2
-        expect(p.y).toBe(240); // height/2 - 60 = 300 - 60
-      });
-    });
+  it('应该注册动画结束定时器（3000ms 后）', () => {
+    const Scheduler = createMockScheduler();
+    createAnimation({ Scheduler });
 
-    test('每个粒子有必需的属性', () => {
-      const particles = animation.createFireworks();
-      const p = particles[0];
+    expect(Scheduler.delay).toHaveBeenCalledWith(
+      expect.any(Function),
+      3000,
+    );
+  });
 
-      expect(p).toHaveProperty('x', 400);
-      expect(p).toHaveProperty('y', 240);
+  it('应该注册三个 Scheduler 任务', () => {
+    const Scheduler = createMockScheduler();
+    createAnimation({ Scheduler });
+
+    // 两次 interval + 一次 delay
+    expect(Scheduler.interval).toHaveBeenCalledTimes(2);
+    expect(Scheduler.delay).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ============================================================
+// createFireworks
+// ============================================================
+describe('LevelUpAnimation - createFireworks', () => {
+  it('应该生成 40 个粒子', () => {
+    const { anim } = createAnimation();
+    const particles = anim.createFireworks();
+
+    expect(particles).toHaveLength(40);
+  });
+
+  it('每个粒子应该包含必要的属性', () => {
+    const { anim } = createAnimation();
+    const particles = anim.createFireworks();
+
+    for (const p of particles) {
+      expect(p).toHaveProperty('x');
+      expect(p).toHaveProperty('y');
       expect(p).toHaveProperty('vx');
       expect(p).toHaveProperty('vy');
       expect(p).toHaveProperty('radius');
       expect(p).toHaveProperty('color');
-      expect(p).toHaveProperty('alpha', 1);
-    });
+      expect(p).toHaveProperty('alpha');
+    }
+  });
 
-    test('粒子速度为 5 到 20', () => {
-      const particles = animation.createFireworks();
+  it('粒子初始位置应该在画布中心上方', () => {
+    const { anim, UI } = createAnimation();
+    const particles = anim.createFireworks();
+    const { width, height } = UI.Renderer.Canvas.gameBoard;
 
-      particles.forEach((p) => {
-        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        expect(speed).toBeGreaterThanOrEqual(4.9); // 浮点精度
-        expect(speed).toBeLessThanOrEqual(20.1);
-      });
+    for (const p of particles) {
+      expect(p.x).toBe(width / 2);
+      expect(p.y).toBe(height / 2 - 60);
+    }
+  });
+
+  it('粒子初始 alpha 应该为 1（完全不透明）', () => {
+    const { anim } = createAnimation();
+    const particles = anim.createFireworks();
+
+    for (const p of particles) {
+      expect(p.alpha).toBe(1);
+    }
+  });
+
+  it('粒子半径应该在 3 到 7 之间', () => {
+    const { anim } = createAnimation();
+    const particles = anim.createFireworks();
+
+    for (const p of particles) {
+      expect(p.radius).toBeGreaterThanOrEqual(3);
+      expect(p.radius).toBeLessThanOrEqual(7);
+    }
+  });
+
+  it('粒子颜色应该来自预定义的颜色列表', () => {
+    const { anim } = createAnimation();
+    const particles = anim.createFireworks();
+    const validColors = [
+      '#00FFFF', '#FFFF00', '#800080', '#FFA500',
+      '#00FF00', '#FF0000', '#FFC0CB',
+    ];
+
+    for (const p of particles) {
+      expect(validColors).toContain(p.color);
+    }
+  });
+
+  it('每次调用应该生成不同的粒子（随机性）', () => {
+    const { anim } = createAnimation();
+    const particles1 = anim.createFireworks();
+    const particles2 = anim.createFireworks();
+
+    // 由于随机性，两次生成的粒子不会完全相同
+    const allSame = particles1.every(
+      (p, i) => p.vx === particles2[i].vx && p.vy === particles2[i].vy,
+    );
+    expect(allSame).toBe(false);
+  });
+});
+
+// ============================================================
+// 烟花生成定时器
+// ============================================================
+describe('LevelUpAnimation - 烟花生成定时器', () => {
+  it('每次触发应该新增 40 个粒子', () => {
+    const Scheduler = createMockScheduler();
+    const { anim } = createAnimation({ Scheduler });
+
+    const initialCount = anim.fireworks.length;
+    expect(initialCount).toBe(40);
+
+    // 获取烟花生成回调
+    const spawnCall = Scheduler.interval.mock.calls.find(
+      (call) => call[1] === 600,
+    );
+    const spawnFn = spawnCall[0];
+
+    spawnFn();
+
+    expect(anim.fireworks.length).toBe(80); // 40 + 40
+  });
+
+  it('多次触发应该累加粒子', () => {
+    const Scheduler = createMockScheduler();
+    const { anim } = createAnimation({ Scheduler });
+
+    const spawnCall = Scheduler.interval.mock.calls.find(
+      (call) => call[1] === 600,
+    );
+    const spawnFn = spawnCall[0];
+
+    spawnFn();
+    spawnFn();
+    spawnFn();
+
+    expect(anim.fireworks.length).toBe(160); // 40 + 40*3
+  });
+});
+
+// ============================================================
+// updateFireworks
+// ============================================================
+describe('LevelUpAnimation - updateFireworks', () => {
+  it('应该更新所有粒子的物理状态', () => {
+    const { anim } = createAnimation();
+
+    const before = anim.fireworks[0].x;
+    anim.updateFireworks(0.016);
+    const after = anim.fireworks[0].x;
+
+    // 粒子位置应该发生变化
+    expect(after).not.toBe(before);
+  });
+
+  it('透明度应该逐渐降低', () => {
+    const { anim } = createAnimation();
+
+    expect(anim.fireworks[0].alpha).toBe(1);
+
+    anim.updateFireworks(0.016);
+
+    expect(anim.fireworks[0].alpha).toBeLessThan(1);
+  });
+
+  it('半径应该逐渐增大', () => {
+    const { anim } = createAnimation();
+
+    const before = anim.fireworks[0].radius;
+    anim.updateFireworks(0.016);
+    const after = anim.fireworks[0].radius;
+
+    expect(after).toBeGreaterThan(before);
+  });
+
+  it('应该过滤掉透明度 <= 0 的粒子', () => {
+    const { anim } = createAnimation();
+
+    // 将所有粒子透明度设为接近 0
+    for (const p of anim.fireworks) {
+      p.alpha = 0.0001;
+    }
+
+    const initialCount = anim.fireworks.length;
+    anim.updateFireworks(0.016);
+
+    // 透明度降至 0 以下的粒子应该被移除
+    expect(anim.fireworks.length).toBeLessThan(initialCount);
+  });
+
+  it('固定步长 delta = 0.016 时的衰减计算', () => {
+    const { anim } = createAnimation();
+    const p = anim.fireworks[0];
+
+    // 手动计算预期值
+    const expectedVx = p.vx * 0.98;
+    const expectedVy = p.vy * 0.98 + 0.01 * 0.016;
+    const expectedX = p.x + expectedVx * 0.016 * 0.008;
+    const expectedY = p.y + expectedVy * 0.016 * 0.008;
+    const expectedAlpha = p.alpha - 0.016 * 0.024;
+    const expectedRadius = p.radius + 0.016 * 10;
+
+    anim.updateFireworks(0.016);
+
+    expect(p.vx).toBeCloseTo(expectedVx, 10);
+    expect(p.vy).toBeCloseTo(expectedVy, 10);
+    expect(p.x).toBeCloseTo(expectedX, 10);
+    expect(p.y).toBeCloseTo(expectedY, 10);
+    expect(p.alpha).toBeCloseTo(expectedAlpha, 10);
+    expect(p.radius).toBeCloseTo(expectedRadius, 10);
+  });
+});
+
+// ============================================================
+// 粒子物理更新定时器
+// ============================================================
+describe('LevelUpAnimation - 粒子物理更新定时器', () => {
+  it('应该以 delta = 0.016 调用 updateFireworks', () => {
+    const Scheduler = createMockScheduler();
+    const { anim } = createAnimation({ Scheduler });
+
+    // 获取物理更新回调
+    const updateCall = Scheduler.interval.mock.calls.find(
+      (call) => call[1] === 16,
+    );
+    const updateFn = updateCall[0];
+
+    const before = anim.fireworks[0].x;
+    updateFn();
+    const after = anim.fireworks[0].x;
+
+    expect(after).not.toBe(before);
+  });
+});
+
+// ============================================================
+// 结束定时器
+// ============================================================
+describe('LevelUpAnimation - 结束定时器', () => {
+  it('3000ms 后应该设置 _finished 为 true', () => {
+    const Scheduler = createMockScheduler();
+    const { anim } = createAnimation({ Scheduler });
+
+    const endFn = Scheduler.delay.mock.calls[0][0];
+
+    expect(anim._finished).toBe(false);
+
+    endFn();
+    expect(anim._finished).toBe(true);
+  });
+});
+
+// ============================================================
+// render
+// ============================================================
+describe('LevelUpAnimation - render', () => {
+  it('应该发送 RENDER_LEVEL_UP 事件并传递等级和粒子数据', () => {
+    const { anim } = createAnimation();
+    const handler = jest.fn();
+    anim.on('ui:test:renderLevelUp', handler);
+
+    anim.render();
+
+    expect(handler).toHaveBeenCalledWith({
+      level: 5,
+      fireworks: anim.fireworks,
     });
   });
 
-  // ==================== updateFireworks ====================
+  it('粒子变化后 render 应该反映最新状态', () => {
+    const { anim } = createAnimation();
 
-  describe('updateFireworks', () => {
-    test('粒子位置更新', () => {
-      const initialX = animation.fireworks[0].x;
-      const initialY = animation.fireworks[0].y;
+    anim.updateFireworks(0.016);
 
-      animation.updateFireworks(0.016);
+    const handler = jest.fn();
+    anim.on('ui:test:renderLevelUp', handler);
 
-      // 位置应有变化
-      expect(animation.fireworks[0].x).not.toBe(initialX);
-      expect(animation.fireworks[0].y).not.toBe(initialY);
-    });
+    anim.render();
 
-    test('粒子速度衰减（乘以 0.98）', () => {
-      const p = animation.fireworks[0];
-      const initialVx = p.vx;
-      const initialVy = p.vy;
+    const callArg = handler.mock.calls[0][0];
+    expect(callArg.level).toBe(5);
+    expect(callArg.fireworks).toBe(anim.fireworks);
+  });
+});
 
-      animation.updateFireworks(0.016);
+// ============================================================
+// dispose
+// ============================================================
+describe('LevelUpAnimation - dispose', () => {
+  it('应该取消烟花生成定时器', () => {
+    const Scheduler = createMockScheduler();
+    Scheduler.interval.mockReturnValueOnce(1).mockReturnValueOnce(2);
+    Scheduler.delay.mockReturnValue(3);
 
-      // 速度衰减后小于原速度
-      expect(p.vx).not.toBe(initialVx);
-      expect(p.vy).not.toBe(initialVy);
-    });
+    const { anim } = createAnimation({ Scheduler });
 
-    test('粒子透明度衰减', () => {
-      const initialAlpha = animation.fireworks[0].alpha;
+    expect(anim._spawnId).toBe(1);
 
-      animation.updateFireworks(1);
+    anim.dispose();
 
-      expect(animation.fireworks[0].alpha).toBeLessThan(initialAlpha);
-    });
-
-    test('过滤掉 alpha <= 0 的粒子', () => {
-      animation.fireworks[0].alpha = -0.1;
-
-      animation.updateFireworks(0.016);
-
-      // 第一个粒子被过滤
-      expect(animation.fireworks.length).toBeLessThan(40);
-    });
-
-    test('粒子半径增大', () => {
-      const initialRadius = animation.fireworks[0].radius;
-
-      animation.updateFireworks(0.016);
-
-      expect(animation.fireworks[0].radius).toBeGreaterThan(initialRadius);
-    });
+    expect(Scheduler.cancel).toHaveBeenCalledWith(1);
   });
 
-  // ==================== update ====================
+  it('应该取消粒子物理更新定时器', () => {
+    const Scheduler = createMockScheduler();
+    Scheduler.interval.mockReturnValueOnce(1).mockReturnValueOnce(2);
+    Scheduler.delay.mockReturnValue(3);
 
-  describe('update', () => {
-    test('active 为 true 时返回 true', () => {
-      expect(animation.update(0.016)).toBe(true);
-    });
+    const { anim } = createAnimation({ Scheduler });
 
-    test('active 为 false 时返回 false', () => {
-      animation.active = false;
+    expect(anim._updateId).toBe(2);
 
-      expect(animation.update(0.016)).toBe(false);
-    });
+    anim.dispose();
 
-    test('调用 updateFireworks', () => {
-      const spyUpdateFireworks = jest.spyOn(animation, 'updateFireworks');
-
-      animation.update(0.016);
-
-      expect(spyUpdateFireworks).toHaveBeenCalledWith(0.016);
-    });
+    expect(Scheduler.cancel).toHaveBeenCalledWith(2);
   });
 
-  // ==================== Scheduler 任务 ====================
+  it('应该取消动画结束定时器', () => {
+    const Scheduler = createMockScheduler();
+    Scheduler.interval.mockReturnValueOnce(1).mockReturnValueOnce(2);
+    Scheduler.delay.mockReturnValue(3);
 
-  describe('spawn interval（每 600ms 生成烟花）', () => {
-    test('600ms 后生成新一组烟花', () => {
-      const beforeCount = animation.fireworks.length;
+    const { anim } = createAnimation({ Scheduler });
 
-      scheduler.tick(0);
-      scheduler.tick(600);
+    expect(anim._endId).toBe(3);
 
-      expect(animation.fireworks.length).toBe(beforeCount + 40);
-    });
+    anim.dispose();
 
-    test('多次触发持续生成', () => {
-      scheduler.tick(0);
-
-      scheduler.tick(600);
-      expect(animation.fireworks.length).toBe(80);
-
-      scheduler.tick(1200);
-      expect(animation.fireworks.length).toBe(120);
-    });
+    expect(Scheduler.cancel).toHaveBeenCalledWith(3);
   });
 
-  describe('end delay（3 秒后结束）', () => {
-    test('3 秒后调用 stop', () => {
-      const spyStop = jest.spyOn(animation, 'stop');
+  it('应该取消全部三个定时器', () => {
+    const Scheduler = createMockScheduler();
+    const { anim } = createAnimation({ Scheduler });
 
-      // delay 需要两次 tick
-      scheduler.tick(0); // 记录 startTime
-      scheduler.tick(3000); // 3000ms >= 3000ms → 执行
+    anim.dispose();
 
-      expect(spyStop).toHaveBeenCalled();
-    });
+    expect(Scheduler.cancel).toHaveBeenCalledTimes(3);
   });
 
-  // ==================== stop ====================
+  it('应该触发 RESUME_BGM 事件', () => {
+    const { anim } = createAnimation({ level: 8 });
+    const handler = jest.fn();
+    anim.on('audio:resumeBgm', handler);
 
-  describe('stop', () => {
-    test('设置 active 为 false', () => {
-      animation.stop();
+    anim.dispose();
 
-      expect(animation.active).toBe(false);
-    });
-
-    test('取消 spawn interval 和 end delay', () => {
-      const spyCancel = jest.spyOn(scheduler, 'cancel');
-
-      animation.stop();
-
-      expect(spyCancel).toHaveBeenCalledTimes(2);
-    });
-
-    test('发射 audio:resume:bgm 事件', () => {
-      const spyEmit = jest.spyOn(animation, 'emit');
-
-      animation.stop();
-
-      expect(spyEmit).toHaveBeenCalledWith('audio:resume:bgm', { level: 5 });
-    });
+    expect(handler).toHaveBeenCalledWith({ level: 8 });
   });
 
-  // ==================== render ====================
+  it('定时器 ID 为 null 时不应报错', () => {
+    const { anim } = createAnimation();
 
-  describe('render', () => {
-    test('发射 render:level:up 事件', () => {
-      const spyEmit = jest.spyOn(animation, 'emit');
+    anim._spawnId = null;
+    anim._updateId = null;
+    anim._endId = null;
 
-      animation.render();
+    expect(() => anim.dispose()).not.toThrow();
+  });
 
-      expect(spyEmit).toHaveBeenCalledWith('ui:test-uuid-003:render:level:up', {
-        level: 5,
-        fireworks: animation.fireworks,
-      });
-    });
+  it('定时器 ID 为 undefined 时不应报错', () => {
+    const { anim } = createAnimation();
+
+    anim._spawnId = undefined;
+    anim._updateId = undefined;
+    anim._endId = undefined;
+
+    expect(() => anim.dispose()).not.toThrow();
+  });
+});
+
+// ============================================================
+// 完整生命周期集成测试
+// ============================================================
+describe('LevelUpAnimation - 完整生命周期', () => {
+  it('initialize → 生成烟花 → 更新物理 → 结束 → dispose → 恢复音乐', () => {
+    const Scheduler = createMockScheduler();
+    const { anim } = createAnimation({ Scheduler, level: 3 });
+
+    // 1. 初始状态
+    expect(anim._finished).toBe(false);
+    expect(anim.fireworks.length).toBe(40);
+    expect(anim.level).toBe(3);
+
+    // 2. 模拟烟花生成
+    const spawnCall = Scheduler.interval.mock.calls.find(
+      (call) => call[1] === 600,
+    );
+    spawnCall[0]();
+    expect(anim.fireworks.length).toBe(80);
+
+    // 3. 模拟粒子物理更新
+    const updateCall = Scheduler.interval.mock.calls.find(
+      (call) => call[1] === 16,
+    );
+    const beforeAlpha = anim.fireworks[0].alpha;
+    updateCall[0]();
+    expect(anim.fireworks[0].alpha).toBeLessThan(beforeAlpha);
+
+    // 4. 模拟 3 秒结束
+    const endFn = Scheduler.delay.mock.calls[0][0];
+    endFn();
+    expect(anim._finished).toBe(true);
+
+    // 5. dispose 清理
+    const bgmHandler = jest.fn();
+    anim.on('audio:resumeBgm', bgmHandler);
+    anim.dispose();
+
+    expect(Scheduler.cancel).toHaveBeenCalledTimes(3);
+    expect(bgmHandler).toHaveBeenCalledWith({ level: 3 });
   });
 });

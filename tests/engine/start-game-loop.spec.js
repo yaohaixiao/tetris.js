@@ -1,193 +1,234 @@
-import Engine from '@/lib/engine';
-import startGameLoop from '@/lib/engine/start-game-loop';
+import startGameLoop from '@/lib/engine/start-game-loop.js';
 
 jest.mock('@/lib/engine', () => ({
   __esModule: true,
   default: {
-    lastTickTime: 0,
-    fixedAccumulator: 0,
+    lastTickTime: null,
+    fixedAccumulator: null,
     rafId: null,
-    Scheduler: { tick: jest.fn() },
-    Game: {
-      UI: {
-        tickHud: jest.fn(),
-        render: jest.fn(),
-      },
-      Replay: {
-        syncPlayElapsed: jest.fn(),
-        update: jest.fn(),
-        playing: false,
-        startTime: 0,
-      },
-      Gamepad: {
-        update: jest.fn(),
-      },
-      Animations: {
-        hasBlocking: jest.fn().mockReturnValue(false),
-        update: jest.fn(),
-        render: jest.fn(),
-      },
-      CommandQueue: {
-        flush: jest.fn(),
-      },
-      tick: jest.fn(),
-      getSpeed: jest.fn().mockReturnValue(1000),
-      Store: {
-        getMode: jest.fn().mockReturnValue('playing'),
-      },
-    },
+    Game: null,
+    Scheduler: null,
   },
 }));
 
-jest.mock('@/lib/configuration.js', () => ({}));
+global.requestAnimationFrame = jest.fn(() => 1);
+
+const Engine = require('@/lib/engine').default;
+
+function resetEngine() {
+  Engine.lastTickTime = null;
+  Engine.fixedAccumulator = null;
+  Engine.rafId = null;
+  Engine.Game = null;
+  Engine.Scheduler = null;
+}
+
+function mockGame(getSpeed = 500) {
+  return {
+    getSpeed: jest.fn(() => getSpeed),
+    tick: jest.fn(),
+    UI: { tickHud: jest.fn(), render: jest.fn() },
+    Replay: { playing: false, syncPlayElapsed: jest.fn(), update: jest.fn() },
+    Gamepad: { update: jest.fn() },
+    Animations: { hasBlocking: jest.fn(() => false), flush: jest.fn(), render: jest.fn() },
+    CommandQueue: { flush: jest.fn() },
+  };
+}
+
+function setup(overrides = {}) {
+  resetEngine();
+  const Game = mockGame(overrides.getSpeed);
+  Object.assign(Game.Replay, overrides.Replay);
+  Object.assign(Game.Animations, overrides.Animations);
+
+  Engine.Game = Game;
+  Engine.Scheduler = { tick: jest.fn(), delay: jest.fn(), interval: jest.fn(), sequence: jest.fn(), cancel: jest.fn(), clear: jest.fn() };
+
+  return { Game, Scheduler: Engine.Scheduler };
+}
 
 describe('startGameLoop', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    Engine.lastTickTime = 0;
-    Engine.fixedAccumulator = 0;
-    Engine.rafId = null;
-    Engine.Game.Replay.playing = false;
-    Engine.Game.Animations.hasBlocking.mockReturnValue(false);
-    Engine.Game.getSpeed.mockReturnValue(1000);
-
-    globalThis.requestAnimationFrame = jest.fn(() => 123);
+  // 步骤1：死亡螺旋
+  it('步骤1：delta > 1000ms 时流程不中断', () => {
+    const { Scheduler } = setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(2000);
+    expect(Scheduler.tick).toHaveBeenCalled();
   });
 
-  describe('初始化时间戳', () => {
-    it('首次调用应初始化 timestamp 和 accumulator', () => {
-      startGameLoop(5000);
-
-      expect(Engine.lastTickTime).toBe(5000);
-      expect(Engine.fixedAccumulator).toBe(5000);
-    });
+  // 步骤2：Scheduler
+  it('步骤2：Scheduler.tick 以 timestamp 调用', () => {
+    const { Scheduler } = setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(Scheduler.tick).toHaveBeenCalledWith(100);
   });
 
-  describe('基础调用链', () => {
-    it('应调用 Scheduler.tick', () => {
-      startGameLoop(10000);
-
-      expect(Engine.Scheduler.tick).toHaveBeenCalledWith(10000);
-    });
-
-    it('应调用所有子系统', () => {
-      startGameLoop(10000);
-
-      expect(Engine.Scheduler.tick).toHaveBeenCalled();
-      expect(Engine.Game.Replay.syncPlayElapsed).toHaveBeenCalled();
-      expect(Engine.Game.Replay.update).toHaveBeenCalled();
-      expect(Engine.Game.Gamepad.update).toHaveBeenCalled();
-      expect(Engine.Game.CommandQueue.flush).toHaveBeenCalled();
-      expect(Engine.Game.Animations.update).toHaveBeenCalled();
-      expect(Engine.Game.UI.tickHud).toHaveBeenCalled();
-      expect(Engine.Game.UI.render).toHaveBeenCalled();
-      expect(Engine.Game.Animations.render).toHaveBeenCalled();
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalledWith(
-        startGameLoop,
-      );
+  // 步骤3：Replay.syncPlayElapsed
+  it('步骤3：调用 Replay.syncPlayElapsed', () => {
+    const { Game } = setup();
+    Engine.lastTickTime = 50;
+    startGameLoop(100);
+    expect(Game.Replay.syncPlayElapsed).toHaveBeenCalledWith({
+      timestamp: 100,
+      isBlocked: false,
     });
   });
 
-  describe('delta 计算', () => {
-    it('正常帧 delta 约为 16ms', () => {
-      Engine.lastTickTime = 5000;
-      startGameLoop(5016);
-
-      expect(Engine.Game.Animations.update).toHaveBeenCalledWith(0.016);
+  it('步骤3：阻塞时 isBlocked 为 true', () => {
+    const { Game } = setup({
+      Animations: { hasBlocking: jest.fn(() => true) },
     });
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(Game.Replay.syncPlayElapsed).toHaveBeenCalledWith(
+      expect.objectContaining({ isBlocked: true }),
+    );
+  });
 
-    it('超大时间差应限制 delta 为 1000', () => {
-      Engine.lastTickTime = 1000;
-      startGameLoop(2002000);
-
-      expect(Engine.Game.Animations.update).toHaveBeenCalledWith(1000);
+  // 步骤4：Replay.update
+  it('步骤4：调用 Replay.update', () => {
+    const { Game } = setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(Game.Replay.update).toHaveBeenCalledWith({
+      speed: 500,
+      timestamp: 100,
     });
   });
 
-  describe('Game.tick 条件', () => {
-    it('步长足够时应执行 tick', () => {
-      Engine.lastTickTime = 5000;
-      Engine.fixedAccumulator = 5000;
-      Engine.Game.getSpeed.mockReturnValue(200);
-
-      startGameLoop(5500);
-
-      expect(Engine.Game.tick).toHaveBeenCalledWith(false);
-    });
-
-    it('步长不够时不执行 tick', () => {
-      Engine.lastTickTime = 5000;
-      Engine.fixedAccumulator = 5000;
-      Engine.Game.getSpeed.mockReturnValue(2000);
-
-      startGameLoop(5500);
-
-      expect(Engine.Game.tick).not.toHaveBeenCalled();
-    });
-
-    it('tick 传递 isBlocked', () => {
-      Engine.lastTickTime = 5000;
-      Engine.fixedAccumulator = 5000;
-      Engine.Game.Animations.hasBlocking.mockReturnValue(true);
-      Engine.Game.getSpeed.mockReturnValue(200);
-
-      startGameLoop(5500);
-
-      expect(Engine.Game.tick).toHaveBeenCalledWith(true);
-    });
-
-    it('Replay.playing=true 时不执行 tick', () => {
-      Engine.lastTickTime = 5000;
-      Engine.fixedAccumulator = 5000;
-      Engine.Game.Replay.playing = true;
-      Engine.Game.getSpeed.mockReturnValue(200);
-
-      startGameLoop(5500);
-
-      expect(Engine.Game.tick).not.toHaveBeenCalled();
-    });
-
-    it('tick 后更新 accumulator', () => {
-      Engine.lastTickTime = 5000;
-      Engine.fixedAccumulator = 5000;
-      Engine.Game.getSpeed.mockReturnValue(200);
-
-      startGameLoop(5500);
-
-      expect(Engine.fixedAccumulator).toBe(5500);
-    });
+  // 步骤5：Gamepad
+  it('步骤5：调用 Gamepad.update', () => {
+    const { Game } = setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(Game.Gamepad.update).toHaveBeenCalledWith(100);
   });
 
-  describe('调用顺序', () => {
-    it('应先 flush 再 tick（步长足够时）', () => {
-      Engine.lastTickTime = 5000;
-      Engine.fixedAccumulator = 5000;
-      Engine.Game.getSpeed.mockReturnValue(200);
-
-      startGameLoop(5500);
-
-      const flushOrder =
-        Engine.Game.CommandQueue.flush.mock.invocationCallOrder[0];
-      const tickOrder = Engine.Game.tick.mock.invocationCallOrder[0];
-
-      expect(flushOrder).toBeLessThan(tickOrder);
-    });
-
-    it('应先 UI.render 再 Animations.render', () => {
-      startGameLoop(5000);
-
-      const uiOrder = Engine.Game.UI.render.mock.invocationCallOrder[0];
-      const animOrder =
-        Engine.Game.Animations.render.mock.invocationCallOrder[0];
-
-      expect(uiOrder).toBeLessThan(animOrder);
-    });
+  // 步骤6：CommandQueue
+  it('步骤6：调用 CommandQueue.flush', () => {
+    const { Game } = setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(Game.CommandQueue.flush).toHaveBeenCalled();
   });
 
-  describe('边界情况', () => {
-    it('不应崩溃', () => {
-      expect(() => startGameLoop(5000)).not.toThrow();
+  // 步骤7：Game.tick
+  it('步骤7：首次执行 fixedAccumulator 为 null 时调用 Game.tick', () => {
+    const { Game } = setup();
+    Engine.lastTickTime = 1;
+    Engine.fixedAccumulator = null;
+    startGameLoop(100);
+    expect(Game.tick).toHaveBeenCalledWith(false);
+    expect(Engine.fixedAccumulator).toBe(100);
+  });
+
+  it('步骤7：stepDelta > getSpeed 时调用 Game.tick', () => {
+    const { Game } = setup({ getSpeed: 500 });
+    Engine.lastTickTime = 1;
+    Engine.fixedAccumulator = 1;
+    startGameLoop(600);
+    expect(Game.tick).toHaveBeenCalled();
+  });
+
+  it('步骤7：stepDelta <= getSpeed 时不调用 Game.tick', () => {
+    const { Game } = setup({ getSpeed: 500 });
+    Engine.lastTickTime = 1;
+    Engine.fixedAccumulator = 1;
+    startGameLoop(100);
+    expect(Game.tick).not.toHaveBeenCalled();
+  });
+
+  it('步骤7：Replay.playing 时不调用 Game.tick', () => {
+    const { Game } = setup({ Replay: { playing: true } });
+    Engine.lastTickTime = 1;
+    Engine.fixedAccumulator = null;
+    startGameLoop(600);
+    expect(Game.tick).not.toHaveBeenCalled();
+  });
+
+  it('步骤7：阻塞时传递 isBlocked = true', () => {
+    const { Game } = setup({
+      Animations: { hasBlocking: jest.fn(() => true) },
     });
+    Engine.lastTickTime = 1;
+    Engine.fixedAccumulator = null;
+    startGameLoop(600);
+    expect(Game.tick).toHaveBeenCalledWith(true);
+  });
+
+  // 步骤8：Animations.flush
+  it('步骤8：调用 Animations.flush', () => {
+    const { Game } = setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(Game.Animations.flush).toHaveBeenCalled();
+  });
+
+  // 步骤9：HUD
+  it('步骤9：调用 UI.tickHud', () => {
+    const { Game } = setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(Game.UI.tickHud).toHaveBeenCalled();
+  });
+
+  // 步骤10：UI.render
+  it('步骤10：调用 UI.render', () => {
+    const { Game } = setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(Game.UI.render).toHaveBeenCalled();
+  });
+
+  // 步骤11：Animations.render
+  it('步骤11：调用 Animations.render', () => {
+    const { Game } = setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(Game.Animations.render).toHaveBeenCalled();
+  });
+
+  // 步骤12：requestAnimationFrame
+  it('步骤12：调用 requestAnimationFrame', () => {
+    setup();
+    Engine.lastTickTime = 1;
+    startGameLoop(100);
+    expect(requestAnimationFrame).toHaveBeenCalledWith(startGameLoop);
+    expect(Engine.rafId).toBe(1);
+  });
+
+  // 执行顺序
+  it('应该按正确顺序调用各模块', () => {
+    const callOrder = [];
+    const { Game, Scheduler } = setup();
+
+    Scheduler.tick.mockImplementation(() => callOrder.push('scheduler'));
+    Game.Replay.syncPlayElapsed.mockImplementation(() => callOrder.push('syncElapsed'));
+    Game.Replay.update.mockImplementation(() => callOrder.push('replay'));
+    Game.Gamepad.update.mockImplementation(() => callOrder.push('gamepad'));
+    Game.CommandQueue.flush.mockImplementation(() => callOrder.push('commandQueue'));
+    Game.tick.mockImplementation(() => callOrder.push('game'));
+    Game.Animations.flush.mockImplementation(() => callOrder.push('animFlush'));
+    Game.UI.tickHud.mockImplementation(() => callOrder.push('hud'));
+    Game.UI.render.mockImplementation(() => callOrder.push('uiRender'));
+    Game.Animations.render.mockImplementation(() => callOrder.push('animRender'));
+
+    Engine.lastTickTime = 1;
+    Engine.fixedAccumulator = null;
+    startGameLoop(600);
+
+    expect(callOrder).toEqual([
+      'scheduler',
+      'syncElapsed',
+      'replay',
+      'gamepad',
+      'commandQueue',
+      'game',
+      'animFlush',
+      'hud',
+      'uiRender',
+      'animRender',
+    ]);
   });
 });
