@@ -1,5 +1,3 @@
-/** @jest-environment jsdom */
-
 import EventBus from '@/lib/core/event-bus/index.js';
 import CommandQueue from '@/lib/core/command/command-queue.js';
 import Command from '@/lib/core/command/command.js';
@@ -8,8 +6,6 @@ describe('CommandQueue', () => {
   let commandQueue;
 
   const cmd = new Command('MOVE');
-  console.log('=================');
-  console.log('cmd.payload:', cmd.payload);
 
   beforeEach(() => {
     EventBus.clear();
