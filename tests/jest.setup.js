@@ -1,8 +1,8 @@
 // Mock structuredClone
-global.structuredClone = (val) => JSON.parse(JSON.stringify(val));
+globalThis.structuredClone = (val) => JSON.parse(JSON.stringify(val));
 
 // Mock Web Audio API
-global.AudioContext = class AudioContext {
+globalThis.AudioContext = class AudioContext {
   currentTime = 100;
   destination = {};
   createOscillator() {
