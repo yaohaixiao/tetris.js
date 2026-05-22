@@ -1,3 +1,12 @@
+# [1.3.0](https://github.com/yaohaixiao/tetris.js/compare/1.2.1...1.3.0) (2026-05-22)
+
+
+### Features
+
+* 优化 AI 决策配置，HARD 和 EXPERT 都更加“智能”； ([6e96b20](https://github.com/yaohaixiao/tetris.js/commit/6e96b209ef484c5208b051acc399f2d2a392e79a))
+* 优化动画管理，使用 Scheduler 统一接管，统一时间线； ([1c543f7](https://github.com/yaohaixiao/tetris.js/commit/1c543f76403887340db95bac4bfd1a04392cb765))
+
+
 ## [1.2.1](https://github.com/yaohaixiao/tetris.js/compare/1.2.0...1.2.1) (2026-05-21)
 
 ### Bug Fixes
