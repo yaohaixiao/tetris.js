@@ -23,8 +23,11 @@
   },
   "keywords": [
     "javascript",
+    "canvas",
     "tetris",
     "game",
+    "ai",
+    "gamepad",
     "tetris.js"
   ],
   "author": "乘风巨浪",
