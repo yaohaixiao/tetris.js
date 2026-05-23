@@ -1,3 +1,20 @@
+# [1.4.0](https://github.com/yaohaixiao/tetris.js/compare/1.3.0...1.4.0) (2026-05-23)
+
+
+### Bug Fixes
+
+* 修复初始化没有更新 HUD 的问题； ([e4c1e5e](https://github.com/yaohaixiao/tetris.js/commit/e4c1e5e5cadebfb44829f66d9d45e1ab99486c72))
+
+
+### Features
+
+* 添加背景音乐，现在是 256 关，没 16 级更换一次背景音乐； ([7678967](https://github.com/yaohaixiao/tetris.js/commit/7678967c4564c2ed78d6ccb8c8db747f0816f1dd))
+* 游戏升级速度变化，算法变为最大等级（256级），到60%的管卡，速度极限到120ms间隔； ([7867951](https://github.com/yaohaixiao/tetris.js/commit/7867951a1c123ab916af658994e68f779bf6d502))
+* 致敬 FC 俄罗斯方案，游戏规则向 FC 版本靠近，最大关卡 256 关； ([ae51afc](https://github.com/yaohaixiao/tetris.js/commit/ae51afc414b4f6c24c0a0311ef1dc3f85b37d22e))
+* 致敬 FC 俄罗斯方块，更具等级不同，修改方块配色方案； ([ee68b57](https://github.com/yaohaixiao/tetris.js/commit/ee68b57963bbd465bdaffd642fbd1cf950999f81))
+* 致敬 FC 俄罗斯方块，消除分数调整，按 FC 规则，分数：CLEAR_LINE_SCORES[cleared] * currentLevel；每升级1次，升级消除行 +5 行，90行封顶； ([33dbc10](https://github.com/yaohaixiao/tetris.js/commit/33dbc10ee2acc75091aa3d7a50d4e17dbe16794b))
+
+
 # [1.3.0](https://github.com/yaohaixiao/tetris.js/compare/1.2.1...1.3.0) (2026-05-22)
 
 ### Features
