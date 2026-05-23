@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/yaohaixiao/tetris.js/compare/1.4.0...1.5.0) (2026-05-23)
+
+
+### Bug Fixes
+
+* 修复 apply-clear-lines.js 调整得分和等级计算后的计算不准问题； ([a8c980e](https://github.com/yaohaixiao/tetris.js/commit/a8c980e3a1fd7902958b925e673fb1fbad27e610))
+
+
+### Features
+
+* 添加消除行时显示等分动画； ([45b693a](https://github.com/yaohaixiao/tetris.js/commit/45b693adc4d5690aa2b74fde84b4c64d7bf7debd))
+
+
 # [1.4.0](https://github.com/yaohaixiao/tetris.js/compare/1.3.0...1.4.0) (2026-05-23)
 
 
