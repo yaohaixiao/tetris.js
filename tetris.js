@@ -5956,7 +5956,7 @@ var tetris = (() => {
     const y = rowY * blockSize + blockSize / 2;
     ctx.globalAlpha = alpha;
     ctx.fillStyle = WHITE3;
-    ctx.font = `${fontSize * 0.85}px ${FONT_FAMILY2}`;
+    ctx.font = `${fontSize * 0.8}px ${FONT_FAMILY2}`;
     ctx.textAlign = "center";
     ctx.fillText(String(score), x, y - offsetY);
     ctx.globalAlpha = 1;
@@ -6497,9 +6497,6 @@ var tetris = (() => {
      * 接收依赖配置，创建 Renderer 和 Router 实例。
      *
      * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例（用于传递给 Router）
-     * @param {object} options.Store - 游戏状态存储（用于传递给 Renderer）
-     * @param {object} options.Elements - UI 元素配置（含 Hud 和 Main）
      */
     constructor(options) {
       super(options);
@@ -9135,67 +9132,75 @@ var tetris = (() => {
   var paused_animation_default = PausedAnimation;
 
   // lib/game/actions/apply-clear-lines.js
+  var createEmptyRow = (cols) => Array.from({ length: cols }).fill(0);
+  var calculateLevel = (totalLines, maxLevel) => {
+    let level = 1;
+    let required = 10;
+    let consumed = 0;
+    while (level < maxLevel && totalLines >= consumed + required) {
+      consumed += required;
+      level++;
+      required = Math.min(required + 2, 60);
+    }
+    return {
+      level,
+      levelUpSteps: required
+    };
+  };
   var applyClearLines = (runtime) => {
-    const { MAX_LEVEL: MAX_LEVEL2 } = game_default;
+    const { MAX_LEVEL: MAX_LEVEL2, CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
     const { Elements, Store } = runtime;
     const state = Store.getState();
-    const { rows, cols } = Elements.Main;
-    const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
-    const lines = state.clearLines || [];
+    const { cols } = Elements.Main;
+    const lines = [...state.clearLines || []].toSorted((a, b) => b - a);
     const cleared = lines.length;
     const board = structuredClone(state.board);
-    for (let y = rows - 1; y >= 0; y--) {
-      const isFullLine = board[y].every(Boolean);
-      if (isFullLine) {
-        board.splice(y, 1);
-        board.unshift(Array.from({ length: cols }).fill(0));
-        y++;
-      }
+    for (const y of lines) {
+      board.splice(y, 1);
+    }
+    for (let i = 0; i < cleared; i++) {
+      board.unshift(createEmptyRow(cols));
     }
     const nextLines = state.lines + cleared;
     const totalLines = state.baseLines + nextLines;
-    const newLevel = Math.floor(totalLines / state.levelUpSteps) + 1;
-    const isMaxOut = newLevel > MAX_LEVEL2;
-    const levelUp = newLevel > state.level && !isMaxOut;
-    if (levelUp) {
-      state.levelUpSteps += 2;
-      state.levelUpSteps = Math.min(60, state.levelUpSteps);
-    }
-    const clearScore = CLEAR_LINE_SCORES2[cleared] * newLevel;
+    const { level: newLevel, levelUpSteps } = calculateLevel(
+      totalLines,
+      MAX_LEVEL2
+    );
+    const levelUp = newLevel > state.level;
+    const baseScore = CLEAR_LINE_SCORES2[cleared] || 0;
+    const clearScore = baseScore * newLevel;
     return {
-      /**
-       * ## 状态更新处理函数
-       *
-       * 接收当前 state，返回消行后的新 state。
-       *
-       * @param {object} prev - 当前状态
-       * @returns {object} 新状态
-       */
+      /** 状态更新函数 */
       stateHandler: (prev) => ({
         ...prev,
-        /** 清空待消除行列表 */
+        /** 清空待消除行 */
         clearLines: [],
-        /** 更新累计消除行数 */
-        lines: nextLines,
-        /** 固定分 × 新等级 */
-        score: prev.score + clearScore,
-        /** 等级不低于当前，不超过 MAX_LEVEL */
-        level: Math.min(Math.max(prev.level, newLevel), MAX_LEVEL2),
-        /** 同步升级步长 */
-        levelUpSteps: state.levelUpSteps,
         /** 更新棋盘 */
         board,
-        /** 消除得分 */
+        /** 更新累计消除行数 */
+        lines: nextLines,
+        /** 更新等级 */
+        level: newLevel,
+        /** 更新升级步长 */
+        levelUpSteps,
+        /** 更新总分 */
+        score: prev.score + clearScore,
+        /** 本次消除得分 */
         clearScore
       }),
-      /** 是否触发了升级 */
+      /** 是否升级 */
       levelUp,
-      /** 计算后的新等级 */
-      level: isMaxOut ? MAX_LEVEL2 : newLevel,
+      /** 当前等级 */
+      level: newLevel,
+      /** 当前升级步长 */
+      levelUpSteps,
       /** 是否达到最大等级 */
-      isMaxOut,
-      /** 消除得分 */
-      clearScore
+      isMaxOut: newLevel >= MAX_LEVEL2,
+      /** 本次消除得分 */
+      clearScore,
+      /** 消除行数 */
+      cleared
     };
   };
   var apply_clear_lines_default = applyClearLines;
@@ -9217,7 +9222,8 @@ var tetris = (() => {
     /**
      * ## 初始化动画
      *
-     * 设置动画属性，为每行创建独立的透明度状态，启动闪烁序列和结束定时器。
+     * 设置动画属性，为每行创建独立的透明度状态， 调用 `applyClearLines` 获取本次消除得分供分数动画使用，
+     * 启动闪烁序列、分数动画和结束定时器，播放消行音效。
      *
      * @param {object} options - 配置对象
      * @param {number[]} options.lines - 待消除的行号数组
@@ -9231,20 +9237,20 @@ var tetris = (() => {
       this._finished = false;
       this._schedulerIds = [];
       this.lines = lines.map((y) => ({ y, alpha: 1 }));
-      const { Scheduler: Scheduler2 } = this;
+      const { Scheduler: Scheduler2, Game: Game2 } = this;
+      const GE = GameEvents(Game2.id);
+      const AE = AudioEvents();
+      const { clearScore } = apply_clear_lines_default(Game2);
       const toggle = () => {
         for (const line of this.lines) {
           line.alpha = line.alpha === 1 ? 0 : 1;
         }
       };
-      const { Game: Game2 } = this;
-      const events = GameEvents(Game2.id);
-      const result = apply_clear_lines_default(Game2);
       const ids = Scheduler2.sequence([
         {
           fn: () => {
-            this.emit(events.START_CLEAR_SCORE, {
-              score: result.clearScore,
+            this.emit(GE.START_CLEAR_SCORE, {
+              score: clearScore,
               lines: this.lines.map((l) => l.y)
             });
           },
@@ -9256,7 +9262,6 @@ var tetris = (() => {
         { fn: toggle, delay: 120 },
         { fn: toggle, delay: 120 }
       ]);
-      const AE = AudioEvents();
       this._schedulerIds.push(...ids);
       const endId = Scheduler2.delay(() => {
         this._finished = true;
@@ -9270,21 +9275,18 @@ var tetris = (() => {
     /**
      * ## 清理资源并执行收尾逻辑
      *
-     * 由 AnimationSystem 在移除动画时自动调用。 取消所有 Scheduler 定时器，然后按顺序执行：
+     * 由 AnimationSystem 在移除动画时自动调用。 取消所有 Scheduler 定时器，重新调用 `applyClearLines`
+     * 获取最终消除结果， 依次执行升级逻辑、更新状态、保存最高分、刷新 HUD。
      *
-     * 1. 触发升级逻辑（回放时不触发）
-     * 2. 更新游戏状态（消行、加分、升级）
-     * 3. 保存最高分
-     * 4. 刷新 HUD 显示
+     * `applyClearLines` 是纯函数，此处再次调用结果与 `initialize` 中一致。
      *
      * @returns {void}
      */
     dispose() {
-      const { Scheduler: Scheduler2 } = this;
+      const { Scheduler: Scheduler2, Game: Game2 } = this;
       for (const id of this._schedulerIds) {
         Scheduler2.cancel(id);
       }
-      const { Game: Game2 } = this;
       const uuid = Game2.id;
       const result = apply_clear_lines_default(Game2);
       const { level, levelUp } = result;
@@ -9324,8 +9326,8 @@ var tetris = (() => {
      */
     render() {
       const { Game: Game2 } = this;
-      const events = UIEvents(Game2.id);
-      this.emit(events.RENDER_CLEAR_LINES, { state: { lines: this.lines } });
+      const UE = UIEvents(Game2.id);
+      this.emit(UE.RENDER_CLEAR_LINES, { state: { lines: this.lines } });
     }
   };
   var clear_lines_animation_default = ClearLinesAnimation;
