@@ -42,9 +42,7 @@ jest.mock('@/lib/events/event-catalog.js', () => ({
 // 辅助函数
 // ============================================================
 
-/**
- * 创建 mock Scheduler
- */
+/** 创建 mock Scheduler */
 function createMockScheduler() {
   const tasks = new Map();
   let nextId = 1;
@@ -76,9 +74,7 @@ function createMockScheduler() {
   return scheduler;
 }
 
-/**
- * 创建 CountdownAnimation 实例
- */
+/** 创建 CountdownAnimation 实例 */
 function createAnimation(overrides = {}) {
   const Scheduler = overrides.Scheduler || createMockScheduler();
   const Game = overrides.Game || { id: 'test' };
@@ -122,20 +118,14 @@ describe('CountdownAnimation - 构造函数 & initialize', () => {
     const Scheduler = createMockScheduler();
     createAnimation({ Scheduler });
 
-    expect(Scheduler.interval).toHaveBeenCalledWith(
-      expect.any(Function),
-      16,
-    );
+    expect(Scheduler.interval).toHaveBeenCalledWith(expect.any(Function), 16);
   });
 
   it('应该注册倒计时定时器（每 1000ms）', () => {
     const Scheduler = createMockScheduler();
     createAnimation({ Scheduler });
 
-    expect(Scheduler.interval).toHaveBeenCalledWith(
-      expect.any(Function),
-      1000,
-    );
+    expect(Scheduler.interval).toHaveBeenCalledWith(expect.any(Function), 1000);
   });
 
   it('应该注册两个定时器', () => {
@@ -160,11 +150,17 @@ describe('CountdownAnimation - 缩放动画', () => {
     );
     const scaleFn = scaleCall[0];
 
-    const anim = new CountdownAnimation({ Game: { id: 'test' }, Scheduler: createMockScheduler() });
+    const anim = new CountdownAnimation({
+      Game: { id: 'test' },
+      Scheduler: createMockScheduler(),
+    });
     anim.state.scale = 4;
 
     // 模拟缩放回调
-    const testAnim = new CountdownAnimation({ Game: { id: 'test' }, Scheduler: createMockScheduler() });
+    const testAnim = new CountdownAnimation({
+      Game: { id: 'test' },
+      Scheduler: createMockScheduler(),
+    });
     testAnim.state.scale = 4;
 
     // 直接测试 Math.max 逻辑

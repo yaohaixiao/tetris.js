@@ -138,30 +138,21 @@ describe('LevelUpAnimation - 构造函数 & initialize', () => {
     const Scheduler = createMockScheduler();
     createAnimation({ Scheduler });
 
-    expect(Scheduler.interval).toHaveBeenCalledWith(
-      expect.any(Function),
-      600,
-    );
+    expect(Scheduler.interval).toHaveBeenCalledWith(expect.any(Function), 600);
   });
 
   it('应该注册粒子物理更新定时器（每 16ms）', () => {
     const Scheduler = createMockScheduler();
     createAnimation({ Scheduler });
 
-    expect(Scheduler.interval).toHaveBeenCalledWith(
-      expect.any(Function),
-      16,
-    );
+    expect(Scheduler.interval).toHaveBeenCalledWith(expect.any(Function), 16);
   });
 
   it('应该注册动画结束定时器（3000ms 后）', () => {
     const Scheduler = createMockScheduler();
     createAnimation({ Scheduler });
 
-    expect(Scheduler.delay).toHaveBeenCalledWith(
-      expect.any(Function),
-      3000,
-    );
+    expect(Scheduler.delay).toHaveBeenCalledWith(expect.any(Function), 3000);
   });
 
   it('应该注册三个 Scheduler 任务', () => {
@@ -234,8 +225,13 @@ describe('LevelUpAnimation - createFireworks', () => {
     const { anim } = createAnimation();
     const particles = anim.createFireworks();
     const validColors = [
-      '#00FFFF', '#FFFF00', '#800080', '#FFA500',
-      '#00FF00', '#FF0000', '#FFC0CB',
+      '#00FFFF',
+      '#FFFF00',
+      '#800080',
+      '#FFA500',
+      '#00FF00',
+      '#FF0000',
+      '#FFC0CB',
     ];
 
     for (const p of particles) {

@@ -40,9 +40,7 @@ jest.mock('@/lib/events/event-catalog.js', () => ({
 // 辅助函数
 // ============================================================
 
-/**
- * 创建 mock Scheduler
- */
+/** 创建 mock Scheduler */
 function createMockScheduler() {
   const tasks = new Map();
   let nextId = 1;
@@ -66,9 +64,7 @@ function createMockScheduler() {
   return scheduler;
 }
 
-/**
- * 创建 PausedAnimation 实例
- */
+/** 创建 PausedAnimation 实例 */
 function createAnimation(overrides = {}) {
   const Scheduler = overrides.Scheduler || createMockScheduler();
   const Game = overrides.Game || { id: 'test' };
@@ -95,10 +91,7 @@ describe('PausedAnimation - 构造函数 & initialize', () => {
     const Scheduler = createMockScheduler();
     createAnimation({ Scheduler });
 
-    expect(Scheduler.interval).toHaveBeenCalledWith(
-      expect.any(Function),
-      1000,
-    );
+    expect(Scheduler.interval).toHaveBeenCalledWith(expect.any(Function), 1000);
   });
 
   it('应该只注册一个定时器', () => {
@@ -191,8 +184,8 @@ describe('PausedAnimation - resume', () => {
   it('resume 后应该更新 _tickId', () => {
     const Scheduler = createMockScheduler();
     Scheduler.interval
-             .mockReturnValueOnce(1)  // 构造时
-             .mockReturnValueOnce(99); // resume 时
+      .mockReturnValueOnce(1) // 构造时
+      .mockReturnValueOnce(99); // resume 时
 
     const { anim } = createAnimation({ Scheduler });
 
@@ -296,9 +289,7 @@ describe('PausedAnimation - render', () => {
 describe('PausedAnimation - 完整生命周期', () => {
   it('构造 → 暂停 → 恢复 → 停止 → dispose', () => {
     const Scheduler = createMockScheduler();
-    Scheduler.interval
-             .mockReturnValueOnce(1)
-             .mockReturnValueOnce(2);
+    Scheduler.interval.mockReturnValueOnce(1).mockReturnValueOnce(2);
 
     const { anim } = createAnimation({ Scheduler });
 
@@ -320,8 +311,8 @@ describe('PausedAnimation - 完整生命周期', () => {
   it('构造 → 暂停 → 恢复 → 再次停止 → dispose', () => {
     const Scheduler = createMockScheduler();
     Scheduler.interval
-             .mockReturnValueOnce(1)  // 构造时
-             .mockReturnValueOnce(2); // resume 时
+      .mockReturnValueOnce(1) // 构造时
+      .mockReturnValueOnce(2); // resume 时
 
     const { anim } = createAnimation({ Scheduler });
 

@@ -30,7 +30,11 @@ function mockGame(getSpeed = 500) {
     UI: { tickHud: jest.fn(), render: jest.fn() },
     Replay: { playing: false, syncPlayElapsed: jest.fn(), update: jest.fn() },
     Gamepad: { update: jest.fn() },
-    Animations: { hasBlocking: jest.fn(() => false), flush: jest.fn(), render: jest.fn() },
+    Animations: {
+      hasBlocking: jest.fn(() => false),
+      flush: jest.fn(),
+      render: jest.fn(),
+    },
     CommandQueue: { flush: jest.fn() },
   };
 }
@@ -42,7 +46,14 @@ function setup(overrides = {}) {
   Object.assign(Game.Animations, overrides.Animations);
 
   Engine.Game = Game;
-  Engine.Scheduler = { tick: jest.fn(), delay: jest.fn(), interval: jest.fn(), sequence: jest.fn(), cancel: jest.fn(), clear: jest.fn() };
+  Engine.Scheduler = {
+    tick: jest.fn(),
+    delay: jest.fn(),
+    interval: jest.fn(),
+    sequence: jest.fn(),
+    cancel: jest.fn(),
+    clear: jest.fn(),
+  };
 
   return { Game, Scheduler: Engine.Scheduler };
 }
@@ -204,15 +215,21 @@ describe('startGameLoop', () => {
     const { Game, Scheduler } = setup();
 
     Scheduler.tick.mockImplementation(() => callOrder.push('scheduler'));
-    Game.Replay.syncPlayElapsed.mockImplementation(() => callOrder.push('syncElapsed'));
+    Game.Replay.syncPlayElapsed.mockImplementation(() =>
+      callOrder.push('syncElapsed'),
+    );
     Game.Replay.update.mockImplementation(() => callOrder.push('replay'));
     Game.Gamepad.update.mockImplementation(() => callOrder.push('gamepad'));
-    Game.CommandQueue.flush.mockImplementation(() => callOrder.push('commandQueue'));
+    Game.CommandQueue.flush.mockImplementation(() =>
+      callOrder.push('commandQueue'),
+    );
     Game.tick.mockImplementation(() => callOrder.push('game'));
     Game.Animations.flush.mockImplementation(() => callOrder.push('animFlush'));
     Game.UI.tickHud.mockImplementation(() => callOrder.push('hud'));
     Game.UI.render.mockImplementation(() => callOrder.push('uiRender'));
-    Game.Animations.render.mockImplementation(() => callOrder.push('animRender'));
+    Game.Animations.render.mockImplementation(() =>
+      callOrder.push('animRender'),
+    );
 
     Engine.lastTickTime = 1;
     Engine.fixedAccumulator = null;

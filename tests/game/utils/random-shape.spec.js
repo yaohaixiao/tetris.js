@@ -1,136 +1,112 @@
 import randomShape from '@/lib/game/utils/random-shape.js';
 
-// Mock SHAPES
-jest.mock('@/lib/game/constants/shapes.js', () => ({
-  __esModule: true,
-  default: [
-    { shape: [[1, 1, 1, 1]], color: '#008080' },
-    { shape: [[1, 1, 1, 1, 1]], color: '#00FF00' },
-    {
-      shape: [
-        [1, 1],
-        [1, 1],
-      ],
-      color: '#FFA500',
-    },
-  ],
-}));
+jest.mock('@/lib/game/constants/shapes.js', () => [
+  { shape: [[1, 1, 1, 1]], colorIndex: 0 },
+  { shape: [[1, 1, 1, 1, 1]], colorIndex: 1 },
+  { shape: [[1, 1], [1, 1]], colorIndex: 2 },
+  { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 3 },
+  { shape: [[1, 0, 0], [1, 1, 1]], colorIndex: 4 },
+  { shape: [[0, 0, 1], [1, 1, 1]], colorIndex: 5 },
+  { shape: [[0, 1, 1], [1, 1, 0]], colorIndex: 6 },
+  { shape: [[1, 1, 0], [0, 1, 1]], colorIndex: 7 },
+]);
+
+jest.mock('@/lib/game/constants/color-palettes.js', () => [
+  ['#P0_0', '#P0_1', '#P0_2', '#P0_3', '#P0_4', '#P0_5', '#P0_6', '#P0_7'],
+  ['#P1_0', '#P1_1', '#P1_2', '#P1_3', '#P1_4', '#P1_5', '#P1_6', '#P1_7'],
+  ['#P2_0', '#P2_1', '#P2_2', '#P2_3', '#P2_4', '#P2_5', '#P2_6', '#P2_7'],
+  ['#P3_0', '#P3_1', '#P3_2', '#P3_3', '#P3_4', '#P3_5', '#P3_6', '#P3_7'],
+  ['#P4_0', '#P4_1', '#P4_2', '#P4_3', '#P4_4', '#P4_5', '#P4_6', '#P4_7'],
+  ['#P5_0', '#P5_1', '#P5_2', '#P5_3', '#P5_4', '#P5_5', '#P5_6', '#P5_7'],
+  ['#P6_0', '#P6_1', '#P6_2', '#P6_3', '#P6_4', '#P6_5', '#P6_6', '#P6_7'],
+  ['#P7_0', '#P7_1', '#P7_2', '#P7_3', '#P7_4', '#P7_5', '#P7_6', '#P7_7'],
+]);
 
 describe('randomShape', () => {
-  // ==================== 基本功能 ====================
-  describe('基本功能', () => {
-    it('应该返回包含 shape 和 color 的对象', () => {
-      const result = randomShape();
+  beforeEach(() => {
+    jest.spyOn(Math, 'random').mockReturnValue(0);
+  });
 
-      expect(result).toHaveProperty('shape');
-      expect(result).toHaveProperty('color');
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  // ==================== 返回值结构 ====================
+  describe('返回值结构', () => {
+    it('应返回包含 shape 和 color 的对象', () => {
+      const piece = randomShape(1);
+      expect(piece).toHaveProperty('shape');
+      expect(piece).toHaveProperty('color');
     });
 
-    it('color 应该是有效值', () => {
-      const validColors = ['#008080', '#00FF00', '#FFA500'];
-
-      for (let i = 0; i < 20; i++) {
-        const result = randomShape();
-        expect(validColors).toContain(result.color);
-      }
-    });
-
-    it('shape 应该是二维数组', () => {
-      const result = randomShape();
-
-      expect(Array.isArray(result.shape)).toBe(true);
-      result.shape.forEach((row) => {
-        expect(Array.isArray(row)).toBe(true);
-      });
+    it('不应包含 colorIndex', () => {
+      const piece = randomShape(1);
+      expect(piece).not.toHaveProperty('colorIndex');
     });
   });
 
-  // ==================== 深拷贝验证 ====================
-  describe('深拷贝验证', () => {
-    it('返回的 shape 应该是原始数据的副本而非引用', () => {
-      // 多次调用，确保每次返回的 shape 引用不同
-      const result1 = randomShape();
-      const result2 = randomShape();
-
-      // 即使随机到同一个方块，shape 也应该是不同的引用
-      if (result1.color === result2.color) {
-        // 不能直接比较引用，因为可能不是同一个
-      }
-
-      // 修改返回的 shape 不应该影响后续调用
-      const result = randomShape();
-      result.shape[0][0] = 999;
-
-      const anotherResult = randomShape();
-      // 后续调用的 shape 不应该包含 999
-      const flatValues = anotherResult.shape.flat();
-      expect(flatValues).not.toContain(999);
-    });
-
-    it('每次返回的 shape 应该是新数组', () => {
-      const result1 = randomShape();
-      const result2 = randomShape();
-
-      // 内部行数组应该是不同的引用
-      if (
-        result1.shape.length === result2.shape.length &&
-        result1.shape[0].length === result2.shape[0].length
-      ) {
-        expect(result1.shape).not.toBe(result2.shape);
-        expect(result1.shape[0]).not.toBe(result2.shape[0]);
-      }
+  // ==================== shape 深拷贝 ====================
+  describe('shape 深拷贝', () => {
+    it('shape 不是原引用', () => {
+      const piece = randomShape(1);
+      const piece2 = randomShape(1);
+      expect(piece.shape).not.toBe(piece2.shape);
     });
   });
 
-  // ==================== 随机性 ====================
-  describe('随机性', () => {
-    it('多次调用应该产生不同的方块', () => {
-      const colors = new Set();
-
-      for (let i = 0; i < 50; i++) {
-        colors.add(randomShape().color);
-      }
-
-      // 50 次调用几乎肯定会包含多种颜色
-      expect(colors.size).toBeGreaterThan(1);
-    });
-
-    it('应该均匀分布在所有方块类型中', () => {
-      const counts = {};
-
-      for (let i = 0; i < 300; i++) {
-        const result = randomShape();
-        const key = JSON.stringify(result.shape);
-        counts[key] = (counts[key] || 0) + 1;
-      }
-
-      // 每个方块类型至少应该出现几次
-      Object.values(counts).forEach((count) => {
-        expect(count).toBeGreaterThan(0);
-      });
+  // ==================== 默认 level ====================
+  describe('默认 level', () => {
+    it('不传 level 时默认 1，使用第 1 套配色', () => {
+      const piece = randomShape();
+      expect(piece.color).toBe('#P0_0');
     });
   });
 
-  // ==================== 边界情况 ====================
-  describe('边界情况', () => {
-    it('Math.random 返回 0 时应该选择第一个方块', () => {
-      jest.spyOn(Math, 'random').mockReturnValue(0);
-
-      const result = randomShape();
-
-      expect(result.color).toBe('#008080');
-
-      jest.restoreAllMocks();
+  // ==================== 等级配色 ====================
+  describe('等级配色', () => {
+    it('level 1 → palette 0', () => {
+      expect(randomShape(1).color).toBe('#P0_0');
     });
 
-    it('Math.random 返回接近 1 时应该选择最后一个方块', () => {
-      jest.spyOn(Math, 'random').mockReturnValue(0.9999);
+    it('level 32 → palette 0（区间末尾）', () => {
+      expect(randomShape(32).color).toBe('#P0_0');
+    });
 
-      const result = randomShape();
+    it('level 33 → palette 1', () => {
+      expect(randomShape(33).color).toBe('#P1_0');
+    });
 
-      expect(result.color).toBe('#FFA500');
+    it('level 64 → palette 1', () => {
+      expect(randomShape(64).color).toBe('#P1_0');
+    });
 
-      jest.restoreAllMocks();
+    it('level 65 → palette 2', () => {
+      expect(randomShape(65).color).toBe('#P2_0');
+    });
+
+    it('level 225 → palette 7', () => {
+      expect(randomShape(225).color).toBe('#P7_0');
+    });
+
+    it('level 256 → palette 7', () => {
+      expect(randomShape(256).color).toBe('#P7_0');
+    });
+
+    it('level 999 → palette 7（不越界）', () => {
+      expect(randomShape(999).color).toBe('#P7_0');
+    });
+  });
+
+  // ==================== colorIndex 映射 ====================
+  describe('colorIndex 映射', () => {
+    it('colorIndex=3 → palette[3]', () => {
+      Math.random.mockReturnValue(0.4); // SHAPES[3]
+      expect(randomShape(1).color).toBe('#P0_3');
+    });
+
+    it('colorIndex=7 → palette[7]', () => {
+      Math.random.mockReturnValue(0.9); // SHAPES[7]
+      expect(randomShape(1).color).toBe('#P0_7');
     });
   });
 });

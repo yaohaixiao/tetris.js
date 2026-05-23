@@ -36,9 +36,7 @@ jest.mock('@/lib/events/event-catalog.js', () => ({
 // 辅助函数
 // ============================================================
 
-/**
- * 创建有效的动画对象
- */
+/** 创建有效的动画对象 */
 function createAnim(overrides = {}) {
   return {
     render: jest.fn(),
@@ -51,9 +49,7 @@ function createAnim(overrides = {}) {
   };
 }
 
-/**
- * 创建 AnimationSystem 实例
- */
+/** 创建 AnimationSystem 实例 */
 function createSystem() {
   return new AnimationSystem({ Game: { id: 'test' } });
 }

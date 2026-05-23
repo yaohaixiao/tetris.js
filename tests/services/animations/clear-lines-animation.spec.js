@@ -152,21 +152,18 @@ describe('ClearLinesAnimation - 构造函数 & initialize', () => {
     const Scheduler = createMockScheduler();
     createAnimation({ Scheduler });
 
-    expect(Scheduler.delay).toHaveBeenCalledWith(
-      expect.any(Function),
-      720,
-    );
+    expect(Scheduler.delay).toHaveBeenCalledWith(expect.any(Function), 720);
   });
 
   it('应该将所有 Scheduler 任务 ID 记录到 _schedulerIds', () => {
     const Scheduler = createMockScheduler();
     Scheduler.delay
-             .mockReturnValueOnce(1)
-             .mockReturnValueOnce(2)
-             .mockReturnValueOnce(3)
-             .mockReturnValueOnce(4)
-             .mockReturnValueOnce(5)
-             .mockReturnValueOnce(6);
+      .mockReturnValueOnce(1)
+      .mockReturnValueOnce(2)
+      .mockReturnValueOnce(3)
+      .mockReturnValueOnce(4)
+      .mockReturnValueOnce(5)
+      .mockReturnValueOnce(6);
 
     const { anim } = createAnimation({ Scheduler });
 
@@ -301,12 +298,12 @@ describe('ClearLinesAnimation - dispose', () => {
   it('应该取消所有 Scheduler 任务', () => {
     const Scheduler = createMockScheduler();
     Scheduler.delay
-             .mockReturnValueOnce(1)
-             .mockReturnValueOnce(2)
-             .mockReturnValueOnce(3)
-             .mockReturnValueOnce(4)
-             .mockReturnValueOnce(5)
-             .mockReturnValueOnce(6);
+      .mockReturnValueOnce(1)
+      .mockReturnValueOnce(2)
+      .mockReturnValueOnce(3)
+      .mockReturnValueOnce(4)
+      .mockReturnValueOnce(5)
+      .mockReturnValueOnce(6);
 
     const { anim } = createAnimation({ Scheduler });
 
@@ -318,7 +315,9 @@ describe('ClearLinesAnimation - dispose', () => {
   });
 
   it('应该调用 applyClearLines 并传入 Game', () => {
-    const { default: applyClearLines } = require('@/lib/game/actions/apply-clear-lines.js');
+    const {
+      default: applyClearLines,
+    } = require('@/lib/game/actions/apply-clear-lines.js');
     const Game = { id: 'test' };
     const { anim } = createAnimation({ Game });
 
@@ -445,7 +444,9 @@ describe('ClearLinesAnimation - 完整生命周期', () => {
     expect(anim._finished).toBe(true);
 
     // 4. dispose 调用 applyClearLines
-    const { default: applyClearLines } = require('@/lib/game/actions/apply-clear-lines.js');
+    const {
+      default: applyClearLines,
+    } = require('@/lib/game/actions/apply-clear-lines.js');
     applyClearLines.mockClear();
     anim.dispose();
     expect(applyClearLines).toHaveBeenCalledTimes(1);
