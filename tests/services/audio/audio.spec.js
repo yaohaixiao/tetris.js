@@ -227,31 +227,31 @@ describe('Audio', () => {
 
   describe('_onPlaySound', () => {
     test('从 Sounds 中查找对应 handler 并调用', () => {
-      audio._onPlaySound({ sound: 'CLEAR', lines: 4 });
+      audio._onPlaySound({ sound: 'CLEAR', lines: 4, level: 1 });
 
-      expect(mockSounds.CLEAR).toHaveBeenCalledWith(4);
+      expect(mockSounds.CLEAR).toHaveBeenCalledWith(4, 1);
     });
 
     test('handler 不是函数时忽略', () => {
       isFunction.mockReturnValue(false);
 
-      audio._onPlaySound({ sound: 'CLEAR', lines: 4 });
+      audio._onPlaySound({ sound: 'CLEAR', lines: 4, level: 1 });
 
       expect(mockSounds.CLEAR).not.toHaveBeenCalled();
     });
 
-    test('lines 参数传递给 handler', () => {
-      audio._onPlaySound({ sound: 'CLEAR', lines: 2 });
+    test('lines 和 level 参数传递给 handler', () => {
+      audio._onPlaySound({ sound: 'CLEAR', lines: 2, level: 50 });
 
-      expect(mockSounds.CLEAR).toHaveBeenCalledWith(2);
+      expect(mockSounds.CLEAR).toHaveBeenCalledWith(2, 50);
     });
 
     test('不同 sound 路由到不同 handler', () => {
-      audio._onPlaySound({ sound: 'LEVEL_UP' });
-      audio._onPlaySound({ sound: 'GAME_OVER' });
+      audio._onPlaySound({ sound: 'LEVEL_UP', level: 5 });
+      audio._onPlaySound({ sound: 'GAME_OVER', level: 1 });
 
-      expect(mockSounds.LEVEL_UP).toHaveBeenCalled();
-      expect(mockSounds.GAME_OVER).toHaveBeenCalled();
+      expect(mockSounds.LEVEL_UP).toHaveBeenCalledWith(undefined, 5);
+      expect(mockSounds.GAME_OVER).toHaveBeenCalledWith(undefined, 1);
     });
   });
 });

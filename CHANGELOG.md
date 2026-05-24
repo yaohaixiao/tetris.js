@@ -1,17 +1,15 @@
 # [1.6.0](https://github.com/yaohaixiao/tetris.js/compare/1.5.0...1.6.0) (2026-05-24)
 
-
 ### Bug Fixes
 
-* 修复 create-snapshot.js 模块中 state.curr 为 null 时的逻辑漏洞； ([69f50ef](https://github.com/yaohaixiao/tetris.js/commit/69f50efbd71a8833489e0370935a43d2000ee162))
-
+- 修复 create-snapshot.js 模块中 state.curr 为 null 时的逻辑漏洞； ([69f50ef](https://github.com/yaohaixiao/tetris.js/commit/69f50efbd71a8833489e0370935a43d2000ee162))
 
 ### Features
 
-* 调整 clear-score-animation.js 的动画效果，使文本移动位移更明显；并使用 renderText() 方法重构 render-clear-score.js; ([b3393af](https://github.com/yaohaixiao/tetris.js/commit/b3393af87def1e7bb64c3559e9eb7495eb11bacd))
-* 添加方块落地闪亮特效； ([9213894](https://github.com/yaohaixiao/tetris.js/commit/9213894eb214dac9c3b82ce9e52b9e9ef3f87ad4))
-* 优化 render-text.js，增加对 alpha 参数的支持； ([3f29997](https://github.com/yaohaixiao/tetris.js/commit/3f2999781752048e6cddb50902e71341913a7eb1))
-
+- 调整 clear-score-animation.js 的动画效果，使文本移动位移更明显；并使用 renderText() 方法重构 render-clear-score.js;
+  ([b3393af](https://github.com/yaohaixiao/tetris.js/commit/b3393af87def1e7bb64c3559e9eb7495eb11bacd))
+- 添加方块落地闪亮特效； ([9213894](https://github.com/yaohaixiao/tetris.js/commit/9213894eb214dac9c3b82ce9e52b9e9ef3f87ad4))
+- 优化 render-text.js，增加对 alpha 参数的支持； ([3f29997](https://github.com/yaohaixiao/tetris.js/commit/3f2999781752048e6cddb50902e71341913a7eb1))
 
 # [1.5.0](https://github.com/yaohaixiao/tetris.js/compare/1.4.0...1.5.0) (2026-05-23)
 
@@ -22,7 +20,6 @@
 ### Features
 
 - 添加消除行时显示等分动画； ([45b693a](https://github.com/yaohaixiao/tetris.js/commit/45b693adc4d5690aa2b74fde84b4c64d7bf7debd))
-
 
 # [1.4.0](https://github.com/yaohaixiao/tetris.js/compare/1.3.0...1.4.0) (2026-05-23)
 

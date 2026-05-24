@@ -27,26 +27,31 @@ jest.mock('@/lib/events/event-catalog.js', () => ({
   }),
 }));
 
+const createStore = () => ({
+  getState: jest.fn(() => ({
+    lines: 0,
+    level: 5,
+    score: 0,
+    baseLines: 0,
+    board: [],
+  })),
+  getLevel: jest.fn(() => 5),
+});
+
 const createAnimation = (options = {}) => {
   const scheduler = options.Scheduler || new Scheduler();
+  const store = createStore();
   const anim = new ClearLinesAnimation({
     Game: {
       id: 'test-uuid',
-      Store: {
-        getState: jest.fn(() => ({
-          lines: 0,
-          level: 5,
-          score: 0,
-          baseLines: 0,
-          board: [],
-        })),
-      },
+      Store: store,
       Elements: { Main: { rows: 20, cols: 10 } },
     },
+    Store: store,
     Scheduler: scheduler,
-    lines: [3],
+    lines: options.lines || [3],
   });
-  return { anim, scheduler };
+  return { anim, scheduler, store };
 };
 
 describe('ClearLinesAnimation', () => {
@@ -77,6 +82,30 @@ describe('ClearLinesAnimation', () => {
       const { anim } = createAnimation();
       expect(anim._schedulerIds).toHaveLength(7);
     });
+
+    it('应该播放消行音效，传入 lines 和 level', () => {
+      const emitSpy = jest.fn();
+      const scheduler = new Scheduler();
+      const store = createStore();
+
+      const anim = new ClearLinesAnimation({
+        Game: {
+          id: 'test-uuid',
+          Store: store,
+          Elements: { Main: { rows: 20, cols: 10 } },
+        },
+        Store: store,
+        Scheduler: scheduler,
+        lines: [18, 19],
+        emit: emitSpy,
+      });
+
+      expect(emitSpy).toHaveBeenCalledWith('audio:play:sound', {
+        sound: 'CLEAR',
+        lines: 1,
+        level: 5,
+      });
+    });
   });
 
   describe('闪烁（toggle 从 sequence[1] 开始）', () => {
@@ -87,16 +116,11 @@ describe('ClearLinesAnimation', () => {
       const arg = spy.mock.calls[0][0];
 
       expect(anim.lines[0].alpha).toBe(1);
-      arg[1].fn();
-      expect(anim.lines[0].alpha).toBe(0);
-      arg[2].fn();
-      expect(anim.lines[0].alpha).toBe(1);
-      arg[3].fn();
-      expect(anim.lines[0].alpha).toBe(0);
-      arg[4].fn();
-      expect(anim.lines[0].alpha).toBe(1);
-      arg[5].fn();
-      expect(anim.lines[0].alpha).toBe(0);
+      arg[1].fn(); expect(anim.lines[0].alpha).toBe(0);
+      arg[2].fn(); expect(anim.lines[0].alpha).toBe(1);
+      arg[3].fn(); expect(anim.lines[0].alpha).toBe(0);
+      arg[4].fn(); expect(anim.lines[0].alpha).toBe(1);
+      arg[5].fn(); expect(anim.lines[0].alpha).toBe(0);
     });
   });
 

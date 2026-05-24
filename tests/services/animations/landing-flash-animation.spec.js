@@ -13,7 +13,10 @@ const createAnimation = (options = {}) => {
     Game: { id: 'test-uuid' },
     Scheduler: scheduler,
     piece: options.piece || {
-      shape: [[1, 1], [1, 1]],
+      shape: [
+        [1, 1],
+        [1, 1],
+      ],
       cx: 4,
       cy: 18,
     },
@@ -45,7 +48,14 @@ describe('LandingFlashAnimation', () => {
 
     it('收集落地格子坐标（2×2 方块）', () => {
       const { anim } = createAnimation({
-        piece: { shape: [[1, 1], [1, 1]], cx: 4, cy: 18 },
+        piece: {
+          shape: [
+            [1, 1],
+            [1, 1],
+          ],
+          cx: 4,
+          cy: 18,
+        },
       });
       expect(anim.state.cells).toEqual([
         { x: 4, y: 18 },
@@ -57,7 +67,14 @@ describe('LandingFlashAnimation', () => {
 
     it('只收集实心格子（shape 中为 0 的跳过）', () => {
       const { anim } = createAnimation({
-        piece: { shape: [[0, 1, 0], [1, 1, 1]], cx: 3, cy: 5 },
+        piece: {
+          shape: [
+            [0, 1, 0],
+            [1, 1, 1],
+          ],
+          cx: 3,
+          cy: 5,
+        },
       });
       expect(anim.state.cells).toEqual([
         { x: 4, y: 5 },
@@ -108,10 +125,9 @@ describe('LandingFlashAnimation', () => {
 
       anim.render();
 
-      expect(spy).toHaveBeenCalledWith(
-        'ui:test-uuid:render:landing:flash',
-        { state: { cells: [{ x: 5, y: 10 }] } },
-      );
+      expect(spy).toHaveBeenCalledWith('ui:test-uuid:render:landing:flash', {
+        state: { cells: [{ x: 5, y: 10 }] },
+      });
     });
   });
 });

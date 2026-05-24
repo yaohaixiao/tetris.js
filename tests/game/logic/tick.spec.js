@@ -229,15 +229,17 @@ describe('tick', () => {
     it('应该先 lock 再 clearLines', () => {
       tick(mockContext, false);
 
-      expect(lock.mock.invocationCallOrder[0])
-        .toBeLessThan(clearLines.mock.invocationCallOrder[0]);
+      expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
+        clearLines.mock.invocationCallOrder[0],
+      );
     });
 
     it('应该先 clearLines 再 spawn', () => {
       tick(mockContext, false);
 
-      expect(clearLines.mock.invocationCallOrder[0])
-        .toBeLessThan(spawn.mock.invocationCallOrder[0]);
+      expect(clearLines.mock.invocationCallOrder[0]).toBeLessThan(
+        spawn.mock.invocationCallOrder[0],
+      );
     });
   });
 
