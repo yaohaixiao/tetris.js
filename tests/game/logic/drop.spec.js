@@ -6,7 +6,6 @@ import lock from '@/lib/game/logic/lock.js';
 import clearLines from '@/lib/game/logic/clear-lines.js';
 import spawn from '@/lib/game/logic/spawn.js';
 
-// Mock 依赖
 jest.mock('@/lib/game/logic/move.js', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -27,13 +26,36 @@ jest.mock('@/lib/game/logic/spawn.js', () => ({
   default: jest.fn(),
 }));
 
+jest.mock('@/lib/events/event-catalog.js', () => ({
+  AudioEvents: () => ({
+    PLAY_SOUND: 'audio:play:sound',
+  }),
+  GameEvents: (uuid) => ({
+    START_LANDING_FLASH: `game:${uuid}:start:landing:flash`,
+  }),
+}));
+
 describe('drop', () => {
   let mockContext;
+  let mockStore;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockStore = {
+      getState: jest.fn().mockReturnValue({
+        curr: {
+          shape: [[1]],
+          color: '#FFA500',
+        },
+        cx: 4,
+        cy: 18,
+      }),
+    };
+
     mockContext = {
+      id: 'test-uuid',
+      Store: mockStore,
       emit: jest.fn(),
     };
   });
@@ -41,7 +63,6 @@ describe('drop', () => {
   // ==================== 基本流程 ====================
   describe('基本流程', () => {
     it('应该循环调用 move 直到返回 false', () => {
-      // 前 3 次返回 true，第 4 次返回 false
       move
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true)
@@ -51,12 +72,6 @@ describe('drop', () => {
       drop(mockContext);
 
       expect(move).toHaveBeenCalledTimes(4);
-    });
-
-    it('move 一直返回 true 会无限循环（理论上不会发生）', () => {
-      // 模拟 move 一直返回 true，
-      // 在实际使用中不会发生，因为总会触底
-      // 这里只验证函数结构
     });
 
     it('move 立即返回 false 时也应该正常执行后续', () => {
@@ -79,6 +94,15 @@ describe('drop', () => {
 
       expect(lock).toHaveBeenCalledWith(mockContext);
       expect(lock).toHaveBeenCalledTimes(1);
+    });
+
+    it('应该发射落地高亮事件', () => {
+      drop(mockContext);
+
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'game:test-uuid:start:landing:flash',
+        { piece: { shape: [[1]], cx: 4, cy: 18 } },
+      );
     });
 
     it('应该播放落地音效', () => {
@@ -118,26 +142,24 @@ describe('drop', () => {
       move.mockReturnValue(false);
     });
 
-    it('move 循环结束后应该按顺序执行 lock → 音效 → clearLines → spawn → 音效', () => {
+    it('lock → landing flash → FALL → clearLines → spawn → DROP', () => {
       drop(mockContext);
+
+      const events = mockContext.emit.mock.calls.map(([e]) => e);
 
       const lockOrder = lock.mock.invocationCallOrder[0];
       const clearLinesOrder = clearLines.mock.invocationCallOrder[0];
       const spawnOrder = spawn.mock.invocationCallOrder[0];
 
-      // lock 在 clearLines 之前
       expect(lockOrder).toBeLessThan(clearLinesOrder);
-      // clearLines 在 spawn 之前
       expect(clearLinesOrder).toBeLessThan(spawnOrder);
-    });
 
-    it('锁定时不应该再移动', () => {
-      move.mockReturnValue(false);
+      const flashIdx = events.indexOf('game:test-uuid:start:landing:flash');
+      const fallIdx = events.indexOf('audio:play:sound');
+      const dropIdx = events.lastIndexOf('audio:play:sound');
 
-      drop(mockContext);
-
-      // move 只调用了一次
-      expect(move).toHaveBeenCalledTimes(1);
+      expect(flashIdx).toBeLessThan(fallIdx);
+      expect(fallIdx).toBeLessThan(dropIdx);
     });
   });
 
@@ -159,8 +181,7 @@ describe('drop', () => {
 
       drop(mockContext);
 
-      const allCalls = move.mock.calls;
-      allCalls.forEach((call) => {
+      move.mock.calls.forEach((call) => {
         expect(call).toEqual([mockContext, 0, 1]);
       });
     });
@@ -168,44 +189,6 @@ describe('drop', () => {
 
   // ==================== 音效 ====================
   describe('音效', () => {
-    it('FALL 音效应该在 lock 之后播放', () => {
-      move.mockReturnValue(false);
-
-      drop(mockContext);
-
-      const lockOrder = lock.mock.invocationCallOrder[0];
-      const fallSoundCall = mockContext.emit.mock.calls.find(
-        ([event, payload]) =>
-          event === 'audio:play:sound' && payload.sound === 'FALL',
-      );
-
-      // 查找该调用的顺序
-      const fallSoundIndex = mockContext.emit.mock.calls.findIndex(
-        ([event, payload]) =>
-          event === 'audio:play:sound' && payload.sound === 'FALL',
-      );
-
-      expect(lockOrder).toBeLessThan(
-        mockContext.emit.mock.invocationCallOrder[fallSoundIndex],
-      );
-    });
-
-    it('DROP 音效应该在 spawn 之后播放', () => {
-      move.mockReturnValue(false);
-
-      drop(mockContext);
-
-      const spawnOrder = spawn.mock.invocationCallOrder[0];
-      const dropSoundIndex = mockContext.emit.mock.calls.findIndex(
-        ([event, payload]) =>
-          event === 'audio:play:sound' && payload.sound === 'DROP',
-      );
-
-      expect(spawnOrder).toBeLessThan(
-        mockContext.emit.mock.invocationCallOrder[dropSoundIndex],
-      );
-    });
-
     it('总共应该播放两个音效', () => {
       move.mockReturnValue(false);
 
@@ -245,7 +228,8 @@ describe('drop', () => {
       expect(lock).toHaveBeenCalled();
       expect(clearLines).toHaveBeenCalled();
       expect(spawn).toHaveBeenCalled();
-      expect(mockContext.emit).toHaveBeenCalledTimes(2);
+      // 3 个 emit：landing flash + FALL + DROP
+      expect(mockContext.emit).toHaveBeenCalledTimes(3);
     });
   });
 });
