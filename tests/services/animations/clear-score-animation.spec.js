@@ -125,10 +125,9 @@ describe('ClearScoreAnimation', () => {
 
       anim.render();
 
-      expect(emitSpy).toHaveBeenCalledWith(
-        'ui:test-uuid:render:clear:score',
-        { state: { score: 800, y: 19, alpha: 1, offsetY: 0 } },
-      );
+      expect(emitSpy).toHaveBeenCalledWith('ui:test-uuid:render:clear:score', {
+        state: { score: 800, y: 19, alpha: 1, offsetY: 0 },
+      });
     });
 
     it('alpha 变化后 render 反映最新状态', () => {
@@ -139,10 +138,9 @@ describe('ClearScoreAnimation', () => {
 
       anim.render();
 
-      expect(emitSpy).toHaveBeenCalledWith(
-        'ui:test-uuid:render:clear:score',
-        { state: { score: 800, y: 19, alpha: 0.5, offsetY: 2 } },
-      );
+      expect(emitSpy).toHaveBeenCalledWith('ui:test-uuid:render:clear:score', {
+        state: { score: 800, y: 19, alpha: 0.5, offsetY: 2 },
+      });
     });
   });
 });
