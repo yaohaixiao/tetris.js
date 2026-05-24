@@ -3,12 +3,48 @@ import randomShape from '@/lib/game/utils/random-shape.js';
 jest.mock('@/lib/game/constants/shapes.js', () => [
   { shape: [[1, 1, 1, 1]], colorIndex: 0 },
   { shape: [[1, 1, 1, 1, 1]], colorIndex: 1 },
-  { shape: [[1, 1], [1, 1]], colorIndex: 2 },
-  { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 3 },
-  { shape: [[1, 0, 0], [1, 1, 1]], colorIndex: 4 },
-  { shape: [[0, 0, 1], [1, 1, 1]], colorIndex: 5 },
-  { shape: [[0, 1, 1], [1, 1, 0]], colorIndex: 6 },
-  { shape: [[1, 1, 0], [0, 1, 1]], colorIndex: 7 },
+  {
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+    colorIndex: 2,
+  },
+  {
+    shape: [
+      [0, 1, 0],
+      [1, 1, 1],
+    ],
+    colorIndex: 3,
+  },
+  {
+    shape: [
+      [1, 0, 0],
+      [1, 1, 1],
+    ],
+    colorIndex: 4,
+  },
+  {
+    shape: [
+      [0, 0, 1],
+      [1, 1, 1],
+    ],
+    colorIndex: 5,
+  },
+  {
+    shape: [
+      [0, 1, 1],
+      [1, 1, 0],
+    ],
+    colorIndex: 6,
+  },
+  {
+    shape: [
+      [1, 1, 0],
+      [0, 1, 1],
+    ],
+    colorIndex: 7,
+  },
 ]);
 
 jest.mock('@/lib/game/constants/color-palettes.js', () => [

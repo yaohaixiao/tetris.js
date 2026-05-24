@@ -208,9 +208,9 @@ describe('begin', () => {
 
       const events = mockContext.emit.mock.calls.map(([e]) => e);
 
-      const recordIdx  = events.indexOf('replay:test-game-uuid:start:record');
-      const hudIdx     = events.indexOf('ui:test-game-uuid:update:hud');
-      const soundIdx   = events.indexOf('audio:play:sound');
+      const recordIdx = events.indexOf('replay:test-game-uuid:start:record');
+      const hudIdx = events.indexOf('ui:test-game-uuid:update:hud');
+      const soundIdx = events.indexOf('audio:play:sound');
 
       expect(recordIdx).toBeLessThan(hudIdx);
       expect(hudIdx).toBeLessThan(soundIdx);

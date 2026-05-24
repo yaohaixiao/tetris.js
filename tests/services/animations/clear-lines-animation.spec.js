@@ -1,15 +1,15 @@
-// tests/services/animations/clear-lines-animation.spec.js
-
 import ClearLinesAnimation from '@/lib/services/animations/clear-lines-animation';
 import Scheduler from '@/lib/engine/scheduler';
 
-jest.mock('@/lib/game/actions/apply-clear-lines', () => jest.fn(() => ({
-  level: 6,
-  levelUp: true,
-  clearScore: 800,
-  cleared: 1,
-  stateHandler: jest.fn(),
-})));
+jest.mock('@/lib/game/actions/apply-clear-lines', () =>
+  jest.fn(() => ({
+    level: 6,
+    levelUp: true,
+    clearScore: 800,
+    cleared: 1,
+    stateHandler: jest.fn(),
+  })),
+);
 
 jest.mock('@/lib/events/event-catalog.js', () => ({
   AudioEvents: () => ({ PLAY_SOUND: 'audio:play:sound' }),
@@ -32,7 +32,15 @@ const createAnimation = (options = {}) => {
   const anim = new ClearLinesAnimation({
     Game: {
       id: 'test-uuid',
-      Store: { getState: jest.fn(() => ({ lines: 0, level: 5, score: 0, baseLines: 0, board: [] })) },
+      Store: {
+        getState: jest.fn(() => ({
+          lines: 0,
+          level: 5,
+          score: 0,
+          baseLines: 0,
+          board: [],
+        })),
+      },
       Elements: { Main: { rows: 20, cols: 10 } },
     },
     Scheduler: scheduler,
@@ -79,11 +87,16 @@ describe('ClearLinesAnimation', () => {
       const arg = spy.mock.calls[0][0];
 
       expect(anim.lines[0].alpha).toBe(1);
-      arg[1].fn(); expect(anim.lines[0].alpha).toBe(0);
-      arg[2].fn(); expect(anim.lines[0].alpha).toBe(1);
-      arg[3].fn(); expect(anim.lines[0].alpha).toBe(0);
-      arg[4].fn(); expect(anim.lines[0].alpha).toBe(1);
-      arg[5].fn(); expect(anim.lines[0].alpha).toBe(0);
+      arg[1].fn();
+      expect(anim.lines[0].alpha).toBe(0);
+      arg[2].fn();
+      expect(anim.lines[0].alpha).toBe(1);
+      arg[3].fn();
+      expect(anim.lines[0].alpha).toBe(0);
+      arg[4].fn();
+      expect(anim.lines[0].alpha).toBe(1);
+      arg[5].fn();
+      expect(anim.lines[0].alpha).toBe(0);
     });
   });
 
@@ -97,10 +110,10 @@ describe('ClearLinesAnimation', () => {
 
       arg[0].fn();
 
-      expect(emitSpy).toHaveBeenCalledWith(
-        'game:test-uuid:start:clear:score',
-        { score: 800, lines: [3] },
-      );
+      expect(emitSpy).toHaveBeenCalledWith('game:test-uuid:start:clear:score', {
+        score: 800,
+        lines: [3],
+      });
     });
   });
 
@@ -123,10 +136,9 @@ describe('ClearLinesAnimation', () => {
 
       anim.render();
 
-      expect(emitSpy).toHaveBeenCalledWith(
-        'ui:test-uuid:render:clear:lines',
-        { state: { lines: [{ y: 3, alpha: 1 }] } },
-      );
+      expect(emitSpy).toHaveBeenCalledWith('ui:test-uuid:render:clear:lines', {
+        state: { lines: [{ y: 3, alpha: 1 }] },
+      });
     });
   });
 
