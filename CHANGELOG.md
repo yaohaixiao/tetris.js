@@ -1,3 +1,12 @@
+# [1.7.0](https://github.com/yaohaixiao/tetris.js/compare/1.6.0...1.7.0) (2026-05-25)
+
+
+### Features
+
+* 添加根据等级，播放不同的消除音效，也是 16 级，更换1次； ([86e2da5](https://github.com/yaohaixiao/tetris.js/commit/86e2da556317d4425e23fbc552f18fc820df1794))
+* 添加在移动设备访问时，显示 GAME BOY 模拟按键，对游戏进行操作的能力； ([bb538b9](https://github.com/yaohaixiao/tetris.js/commit/bb538b98d8d0d42e09bcb6bcdbff8060dd2a80fb))
+
+
 # [1.6.0](https://github.com/yaohaixiao/tetris.js/compare/1.5.0...1.6.0) (2026-05-24)
 
 ### Bug Fixes
