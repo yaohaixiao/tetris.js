@@ -1,0 +1,203 @@
+@import './variable.less';
+
+/* ====== 整体布局 ====== */
+.tetris-controls {
+  display: none;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6vw;
+  box-sizing: border-box;
+}
+
+/* ====== START / SELECT ====== */
+.tetris-system-controls {
+  display: flex;
+  flex-direction: row;
+  width: 44vw;
+  gap: 4vw;
+}
+
+.tetris-system-btn {
+  width: 20vw;
+  font-size: 10px;
+  text-align: center;
+  border-radius: 5px;
+  padding: 6px 0;
+  user-select: none;
+  cursor: pointer;
+  transition: 0.1s;
+  color: @white;
+  background: @black;
+}
+
+/* ====== 主控制按钮区域 ====== */
+.tetris-main-controls {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  padding-top: 3vh;
+  flex: 1;
+}
+
+/* ====== D-PAD ====== */
+.tetris-dpad {
+  display: flex;
+  margin-left: 0;
+  flex-direction: column;
+  align-items: center;
+  // 和 tetris-buttons 一样的宽度
+  width: 33.5vw;
+}
+
+.tetris-dpad-mid {
+  display: flex;
+  align-items: center;
+}
+
+.tetris-dpad-up,
+.tetris-dpad-down,
+.tetris-dpad-left,
+.tetris-dpad-right,
+.tetris-dpad-center {
+  // 和 action-btn 一样用 vw，单个键占 36% 的 32vw ≈ 11.5vw
+  width: 11.5vw;
+  height: 11.5vw;
+  line-height: 11.5vw;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  user-select: none;
+  cursor: pointer;
+  transition: 0.1s;
+  background: @black;
+}
+
+/* 组合成十字 */
+.tetris-dpad-up {
+  border-radius: 6px 6px 0 0;
+}
+
+.tetris-dpad-down {
+  border-radius: 0 0 6px 6px;
+}
+
+.tetris-dpad-left {
+  border-radius: 6px 0 0 6px;
+}
+
+.tetris-dpad-right {
+  border-radius: 0 6px 6px 0;
+}
+
+.tetris-dpad-center {
+  position: relative;
+}
+
+.tetris-dpad-center:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: inset 0 0 3px @rgba_black;
+}
+
+.tetris-system-btn:active,
+.tetris-dpad-up:active,
+.tetris-dpad-down:active,
+.tetris-dpad-left:active,
+.tetris-dpad-right:active {
+  background-color: @rgba_black;
+}
+
+/* ====== A / B / X / Y 按钮 ====== */
+.tetris-buttons {
+  position: relative;
+  z-index: 1;
+  margin-left: auto;
+  width: 33.5vw;
+  height: 33.5vw;
+  gap: 20px;
+  aspect-ratio: 1;
+}
+
+.tetris-action-btn {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // 按钮大小为容器的 36%
+  width: 36%;
+  height: 36%;
+  border-radius: 50%;
+  font-weight: bold;
+  // 字体随按钮大小缩放
+  font-size: clamp(18px, 4vw, 14px);
+  user-select: none;
+  cursor: pointer;
+  transition: 0.2s;
+  color: @white;
+  box-shadow: 0 4px 0 @rgba_black;
+}
+
+.tetris-action-btn:active {
+  box-shadow: 0 1px 0 @rgba_black;
+}
+
+.tetris-btn-a {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: @red;
+}
+
+.tetris-btn-a:active {
+  transform: translateX(-50%) translateY(3px);
+}
+
+.tetris-btn-b {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  background: @teal;
+}
+
+.tetris-btn-b:active {
+  transform: translateY(-50%) translateY(3px);
+}
+
+.tetris-btn-x {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  background: @red;
+}
+
+.tetris-btn-x:active {
+   transform: translateY(-50%) translateY(3px);
+ }
+
+.tetris-btn-y {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: @teal;
+}
+
+.tetris-btn-y:active {
+   transform: translateX(-50%) translateY(3px);
+ }
+
+.tetris-btn-a:active,
+.tetris-btn-x:active {
+  color: @teal;
+}
+
+.tetris-btn-b:active,
+.tetris-btn-y:active {
+  color: @red;
+}

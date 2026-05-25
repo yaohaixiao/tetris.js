@@ -1,0 +1,124 @@
+import resize from '@/lib/services/ui/core/resize';
+
+describe('resize', () => {
+  let canvas;
+
+  beforeEach(() => {
+    canvas = {
+      gameBoard: { width: 0, height: 0 },
+      nextPiece: { width: 0, height: 0 },
+      rows: 20,
+      cols: 10,
+      blockSize: 0,
+      fontSize: 0,
+    };
+
+    globalThis.innerWidth = 1024;
+    globalThis.innerHeight = 768;
+  });
+
+  describe('桌面端（>= 480px）', () => {
+    beforeEach(() => {
+      globalThis.innerWidth = 1024;
+      globalThis.innerHeight = 768;
+    });
+
+    it('blockSize = floor(innerHeight * 0.9 / rows)', () => {
+      resize(canvas);
+
+      // h = 768 * 0.9 = 691.2, floor(691.2 / 20) = 34
+      expect(canvas.blockSize).toBe(34);
+    });
+
+    it('gameBoard 宽高正确', () => {
+      resize(canvas);
+
+      expect(canvas.gameBoard.width).toBe(34 * 10); // 340
+      expect(canvas.gameBoard.height).toBe(34 * 20); // 680
+    });
+
+    it('fontSize = blockSize * rows * 0.032', () => {
+      resize(canvas);
+
+      // 34 * 20 * 0.032 = 21.76 -> floor = 21
+      expect(canvas.fontSize).toBe(21);
+    });
+
+    it('nextPiece 取 innerWidth*0.2 和 innerHeight*0.36 的较小值', () => {
+      resize(canvas);
+
+      // 1024*0.2 = 204.8, 768*0.36 = 276.48 -> min = 204.8
+      expect(canvas.nextPiece.width).toBe(204.8);
+      expect(canvas.nextPiece.height).toBe(204.8);
+    });
+
+    it('当 innerHeight*0.36 更小时取它', () => {
+      globalThis.innerWidth = 1920;
+      globalThis.innerHeight = 500;
+
+      resize(canvas);
+
+      // 1920*0.2 = 384, 500*0.36 = 180 -> min = 180
+      expect(canvas.nextPiece.width).toBe(180);
+      expect(canvas.nextPiece.height).toBe(180);
+    });
+  });
+
+  describe('移动端（< 480px）', () => {
+    beforeEach(() => {
+      globalThis.innerWidth = 375;
+      globalThis.innerHeight = 667;
+    });
+
+    it('blockSize 受 width 和 maxH 双重限制', () => {
+      resize(canvas);
+
+      // width = 375 * 0.64 = 240, floor(240/10) = 24
+      // maxH = 667 * 0.68 = 453.56, floor(453.56/20) = 22
+      // min(24, 22) = 22
+      expect(canvas.blockSize).toBe(22);
+    });
+
+    it('gameBoard 宽高正确', () => {
+      resize(canvas);
+
+      expect(canvas.gameBoard.width).toBe(22 * 10); // 220
+      expect(canvas.gameBoard.height).toBe(22 * 20); // 440
+    });
+
+    it('nextSize = blockSize * 5', () => {
+      resize(canvas);
+
+      expect(canvas.nextPiece.width).toBe(110);
+      expect(canvas.nextPiece.height).toBe(110);
+    });
+
+    it('当 height 限制更严时用 height', () => {
+      globalThis.innerWidth = 479;
+      globalThis.innerHeight = 320;
+
+      resize(canvas);
+
+      // width = 479 * 0.64 = 306.56, floor(306.56/10) = 30
+      // maxH = 320 * 0.68 = 217.6, floor(217.6/20) = 10
+      // min(30, 10) = 10
+      expect(canvas.blockSize).toBe(10);
+    });
+  });
+
+  describe('边界情况', () => {
+    it('cols 和 rows 为自定义值', () => {
+      canvas.cols = 8;
+      canvas.rows = 16;
+      globalThis.innerWidth = 800;
+      globalThis.innerHeight = 600;
+
+      resize(canvas);
+
+      // h = 600*0.9 = 540, floor(540/16) = 33
+      expect(canvas.blockSize).toBe(33);
+      expect(canvas.gameBoard.width).toBe(33 * 8); // 264
+      expect(canvas.gameBoard.height).toBe(33 * 16); // 528
+    });
+  });
+});

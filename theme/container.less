@@ -1,8 +1,20 @@
+@import './variable.less';
+
 /* ====== 容器样式 ====== */
-.container {
+.tetris-container {
   display: flex;
-  gap: 0;
-  border: 3px solid #fff;
+  flex-direction: column;
   align-items: stretch;
+  justify-content: center;
+}
+
+.tetris-screen {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  flex: 1;
+  border: 3px solid @white;
+  box-sizing: border-box;
+  align-items: flex-start;
   justify-content: center;
 }

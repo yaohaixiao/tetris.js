@@ -116,11 +116,16 @@ describe('ClearLinesAnimation', () => {
       const arg = spy.mock.calls[0][0];
 
       expect(anim.lines[0].alpha).toBe(1);
-      arg[1].fn(); expect(anim.lines[0].alpha).toBe(0);
-      arg[2].fn(); expect(anim.lines[0].alpha).toBe(1);
-      arg[3].fn(); expect(anim.lines[0].alpha).toBe(0);
-      arg[4].fn(); expect(anim.lines[0].alpha).toBe(1);
-      arg[5].fn(); expect(anim.lines[0].alpha).toBe(0);
+      arg[1].fn();
+      expect(anim.lines[0].alpha).toBe(0);
+      arg[2].fn();
+      expect(anim.lines[0].alpha).toBe(1);
+      arg[3].fn();
+      expect(anim.lines[0].alpha).toBe(0);
+      arg[4].fn();
+      expect(anim.lines[0].alpha).toBe(1);
+      arg[5].fn();
+      expect(anim.lines[0].alpha).toBe(0);
     });
   });
 

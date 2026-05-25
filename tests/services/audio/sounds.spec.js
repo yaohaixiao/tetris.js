@@ -5,8 +5,8 @@ import Scheduler from '@/lib/engine/scheduler';
 jest.mock('@/lib/services/audio/play-tone', () => jest.fn());
 
 jest.mock('@/lib/services/audio/constants/motifs', () => ({
-  combo:   { shift: 0, speed: 1.0, volume: 1.0 },
-  tetris:  { shift: 2, speed: 1.5, volume: 1.2 },
+  combo: { shift: 0, speed: 1.0, volume: 1.0 },
+  tetris: { shift: 2, speed: 1.5, volume: 1.2 },
   perfect: { shift: 4, speed: 2.0, volume: 1.5 },
 }));
 

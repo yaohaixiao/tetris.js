@@ -1,6 +1,11 @@
+@import './variable';
+
 /* ====== 游戏界面：主体画布区域样式 ====== */
-.main {
-  flex: 3;
+.tetris-screen-main {
+  position:relative;
+  z-index:1;
+  border-right: 3px solid @gray;
   image-rendering: pixelated;
   align-self: center;
+  overflow: hidden;
 }

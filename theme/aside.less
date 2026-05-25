@@ -1,12 +1,12 @@
-@import './variable.less';
-
 /* ====== 游戏界面：侧边栏样式 ====== */
-.aside {
-  flex: 2;
+.tetris-screen-aside {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: .5vh;
-  border-left: 3px solid @gray;
   justify-content: space-between;
   align-items: center;
+  align-self: stretch;
+  padding: 1vh 0;
+  overflow: hidden;
 }

@@ -1,0 +1,139 @@
+@import './variable.less';
+@import './utils.less';
+
+// ========================================
+// Breakpoints
+// ========================================
+
+// 小屏手机
+@screen-xs: 320px;
+
+// 普通手机
+@screen-sm: 375px;
+
+// 大屏手机
+@screen-md: 480px;
+
+// ========================================
+// Media Query Mixins
+// ========================================
+
+// >= 320
+.xs(@rules) {
+  @media screen and (max-width: @screen-xs) {
+    @rules();
+  }
+}
+
+// >= 375
+.sm(@rules) {
+  @media screen and (max-width: @screen-sm) {
+    @rules();
+  }
+}
+
+// >= 480
+.md(@rules) {
+  @media screen and (max-width: @screen-md) {
+    @rules();
+  }
+}
+
+.tetris-container {
+  .xs({
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+  });
+
+  .sm({
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+  });
+
+  .md({
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+  });
+}
+
+.tetris-screen {
+  .xs({
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  });
+
+  .sm({
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  });
+
+  .md({
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  });
+}
+
+.tetris-main {
+  .xs({
+    flex: 4;
+  });
+
+  .sm({
+    flex: 4;
+  });
+
+  .md({
+    flex: 4;
+  });
+}
+
+.tetris-panel {
+  &.shutcuts{
+    .xs({
+      display: none;
+    });
+
+    .sm({
+      display: none;
+    });
+
+    .md({
+      display: none;
+    });
+  }
+}
+
+.tetris-controls{
+  .xs({
+    display: flex;
+    flex-direction: column;
+    flex:1;
+    border:3px solid @white;
+    border-top: none;
+  });
+
+  .sm({
+    display: flex;
+    flex-direction: column;
+    flex:1;
+    border:3px solid @white;
+    border-top: none;
+  });
+
+  .md({
+    display: flex;
+    flex-direction: column;
+    flex:1;
+    border:3px solid @white;
+    border-top: none;
+  });
+}

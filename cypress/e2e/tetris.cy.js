@@ -7,30 +7,30 @@ describe('Tetris E2E', () => {
 
   // ========== 页面加载 ==========
   it('页面加载显示所有元素', () => {
-    cy.get('#game-board').should('be.visible');
-    cy.get('#next-piece').should('be.visible');
-    cy.get('#score').should('be.visible');
-    cy.get('#lines').should('be.visible');
-    cy.get('#level').should('be.visible');
-    cy.get('#high-score').should('be.visible');
-    cy.get('#controller').should('be.visible');
+    cy.get('#tetris-game-board').should('be.visible');
+    cy.get('#tetris-next-piece').should('be.visible');
+    cy.get('#tetris-score').should('be.visible');
+    cy.get('#tetris-lines').should('be.visible');
+    cy.get('#tetris-level').should('be.visible');
+    cy.get('#tetris-high-score').should('be.visible');
+    cy.get('#tetris-controller').should('be.visible');
   });
 
   // ========== 主菜单：等级选择 ==========
   describe('主菜单 - 等级选择', () => {
     it('按 1 键选择等级 1', () => {
       cy.get('body').type('1');
-      cy.get('#level').should('contain', '01');
+      cy.get('#tetris-level').should('contain', '01');
     });
 
     it('按 5 键选择等级 5', () => {
       cy.get('body').type('5');
-      cy.get('#level').should('contain', '05');
+      cy.get('#tetris-level').should('contain', '05');
     });
 
     it('按 T 键选择等级 10', () => {
       cy.get('body').type('t');
-      cy.get('#level').should('contain', '10');
+      cy.get('#tetris-level').should('contain', '10');
     });
   });
 
@@ -39,7 +39,7 @@ describe('Tetris E2E', () => {
     it('Enter 进入难度选择界面', () => {
       cy.get('body').type('1');
       cy.get('body').type('{enter}');
-      cy.get('#game-board[data-mode="difficulty"]').should('exist');
+      cy.get('#tetris-game-board[data-mode="difficulty"]').should('exist');
     });
 
     it('按 E 选择 Easy 并确认开始', () => {
@@ -47,7 +47,7 @@ describe('Tetris E2E', () => {
       cy.get('body').type('{enter}');
       cy.get('body').type('e');
       cy.get('body').type('{enter}');
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
     it('按 N 选择 Normal 并确认开始', () => {
@@ -55,7 +55,7 @@ describe('Tetris E2E', () => {
       cy.get('body').type('{enter}');
       cy.get('body').type('n');
       cy.get('body').type('{enter}');
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
     it('按 H 选择 Hard 并确认开始', () => {
@@ -63,7 +63,7 @@ describe('Tetris E2E', () => {
       cy.get('body').type('{enter}');
       cy.get('body').type('h');
       cy.get('body').type('{enter}');
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
     it('按 X 选择 Expert 并确认开始', () => {
@@ -71,7 +71,7 @@ describe('Tetris E2E', () => {
       cy.get('body').type('{enter}');
       cy.get('body').type('x');
       cy.get('body').type('{enter}');
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
     it('难度选择界面按 B 返回等级选择', () => {
@@ -79,7 +79,7 @@ describe('Tetris E2E', () => {
       cy.get('body').type('{enter}');
       cy.get('body').type('b');
       cy.get('body').type('3');
-      cy.get('#level').should('contain', '03');
+      cy.get('#tetris-level').should('contain', '03');
     });
   });
 
@@ -95,12 +95,11 @@ describe('Tetris E2E', () => {
 
     it('完整开始流程：选等级 → 难度 → 开始 → 倒计时', () => {
       startGame();
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
     it('方向键移动方块', () => {
       startGame();
-
       cy.get('body').type('{leftarrow}');
       cy.get('body').type('{leftarrow}');
       cy.get('body').type('{rightarrow}');
@@ -110,32 +109,26 @@ describe('Tetris E2E', () => {
 
     it('P 暂停 / 恢复', () => {
       startGame();
-
       cy.get('body').type('p');
       cy.wait(500);
       cy.get('body').type('p');
       cy.wait(500);
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
     it('M 切换背景音乐', () => {
       startGame();
-
       cy.get('body').type('m');
       cy.wait(300);
       cy.get('body').type('m');
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
     it('R 重新开始', () => {
       startGame();
-
       cy.get('body').type('r');
       cy.wait(2000);
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
   });
 
@@ -151,135 +144,95 @@ describe('Tetris E2E', () => {
 
     it('初始状态 controller 显示 HUMAN', () => {
       startGame();
-      cy.get('#controller').should('contain', 'HUMAN');
+      cy.get('#tetris-controller').should('contain', 'HUMAN');
     });
 
-    it('按 S 键切换为 AI 模式，controller 显示 AI', () => {
+    it('按 S 键切换为 AI 模式', () => {
       startGame();
-
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'AI');
+      cy.get('#tetris-controller').should('contain', 'AI');
     });
 
     it('AI 模式下按 S 键切换回 HUMAN', () => {
       startGame();
-
-      // 切换为 AI
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'AI');
-
-      // 切换回 HUMAN
+      cy.get('#tetris-controller').should('contain', 'AI');
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'HUMAN');
+      cy.get('#tetris-controller').should('contain', 'HUMAN');
     });
 
-    it('AI 模式下 S 键可以切换回 HUMAN', () => {
+    it('AI 模式下 M 键可以正常使用', () => {
       startGame();
-
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'AI');
-
-      cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'HUMAN');
-    });
-
-    it('AI 模式下 M 键（TOGGLE_MUSIC）可以正常使用', () => {
-      startGame();
-
-      cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'AI');
-
+      cy.get('#tetris-controller').should('contain', 'AI');
       cy.get('body').type('m');
       cy.wait(300);
       cy.get('body').type('m');
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
-    it('AI 模式下 P 键（TOGGLE_PAUSED）可以正常使用', () => {
+    it('AI 模式下 P 键可以正常使用', () => {
       startGame();
-
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'AI');
-
+      cy.get('#tetris-controller').should('contain', 'AI');
       cy.get('body').type('p');
       cy.wait(500);
       cy.get('body').type('p');
       cy.wait(500);
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
-    it('AI 模式下 R 键（RESTART）可以正常使用', () => {
+    it('AI 模式下 R 键可以正常使用', () => {
       startGame();
-
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'AI');
-
+      cy.get('#tetris-controller').should('contain', 'AI');
       cy.get('body').type('r');
       cy.wait(2000);
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
-    it('AI 模式下 Q 键（QUIT）可以正常使用', () => {
+    it('AI 模式下 Q 键可以正常使用', () => {
       startGame();
-
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'AI');
-
+      cy.get('#tetris-controller').should('contain', 'AI');
       cy.get('body').type('q');
       cy.wait(500);
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
-    it('AI 模式下方向键和空格键不影响游戏（AI 仍在运行）', () => {
+    it('AI 模式下方向键和空格键不影响游戏', () => {
       startGame();
-
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'AI');
-
-      // 这些按键在 AI 模式下被屏蔽，但不应报错
+      cy.get('#tetris-controller').should('contain', 'AI');
       cy.get('body').type('{leftarrow}');
       cy.get('body').type('{rightarrow}');
       cy.get('body').type('{uparrow}');
       cy.get('body').type('{downarrow}');
       cy.get('body').type(' ');
-
-      cy.get('#game-board').should('be.visible');
-      cy.get('#controller').should('contain', 'AI');
+      cy.get('#tetris-game-board').should('be.visible');
+      cy.get('#tetris-controller').should('contain', 'AI');
     });
 
     it('AI 模式下切换到 HUMAN 后可正常操作方块', () => {
       startGame();
-
-      // 切换为 AI
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'AI');
-
-      // 切换回 HUMAN
+      cy.get('#tetris-controller').should('contain', 'AI');
       cy.get('body').type('s');
-      cy.get('#controller').should('contain', 'HUMAN');
-
-      // 人类可以正常操作
+      cy.get('#tetris-controller').should('contain', 'HUMAN');
       cy.get('body').type('{leftarrow}');
       cy.get('body').type('{rightarrow}');
       cy.get('body').type('{uparrow}');
       cy.get('body').type(' ');
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
     it('多次 S 键切换不报错', () => {
       startGame();
-
       cy.get('body').type('s');
       cy.get('body').type('s');
       cy.get('body').type('s');
       cy.get('body').type('s');
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
   });
 
@@ -292,7 +245,6 @@ describe('Tetris E2E', () => {
       cy.get('body').type('{enter}');
       cy.wait(4500);
 
-      // 做些操作产生记录
       cy.get('body').type('{leftarrow}');
       cy.get('body').type('{uparrow}');
       cy.get('body').type('{rightarrow}');
@@ -303,25 +255,21 @@ describe('Tetris E2E', () => {
       cy.get('body').type('{uparrow}');
       cy.get('body').type(' ');
 
-      // 按 Q 强制结束，触发 replay
       cy.get('body').type('q');
       cy.wait(500);
     };
 
     it('按 Q 强制结束后自动进入回放，HUD 归零', () => {
       playAndTriggerReplay();
-
-      cy.get('#game-board[data-mode="replay"]').should('exist');
-      cy.get('#score').should('contain', '00000');
-      cy.get('#lines').should('contain', '00');
-      cy.get('#level').should('contain', '01');
+      cy.get('#tetris-game-board[data-mode="replay"]').should('exist');
+      cy.get('#tetris-score').should('contain', '00000');
+      cy.get('#tetris-lines').should('contain', '00');
+      cy.get('#tetris-level').should('contain', '01');
     });
 
-    it('回放期间键盘只有 Enter 有效，其他键不报错', () => {
+    it('回放期间键盘只有 Enter 有效', () => {
       playAndTriggerReplay();
-
-      cy.get('#game-board[data-mode="replay"]').should('exist');
-
+      cy.get('#tetris-game-board[data-mode="replay"]').should('exist');
       cy.get('body').type('{leftarrow}');
       cy.get('body').type('{rightarrow}');
       cy.get('body').type('{uparrow}');
@@ -330,105 +278,267 @@ describe('Tetris E2E', () => {
       cy.get('body').type('m');
       cy.get('body').type('s');
       cy.get('body').type('{enter}');
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
-    it('回放结束后进入 game-over，画布可见', () => {
+    it('回放结束后进入 game-over', () => {
       playAndTriggerReplay();
-
-      cy.get('#game-board[data-mode="game-over"]', { timeout: 30000 }).should(
-        'exist',
-      );
-      cy.get('#game-board').should('be.visible');
-      cy.get('#score').should('be.visible');
+      cy.get('#tetris-game-board[data-mode="game-over"]', {
+        timeout: 30000,
+      }).should('exist');
+      cy.get('#tetris-game-board').should('be.visible');
+      cy.get('#tetris-score').should('be.visible');
     });
 
     it('回放结束后 high-score 已显示', () => {
       playAndTriggerReplay();
-
-      cy.get('#game-board[data-mode="game-over"]', { timeout: 30000 }).should(
-        'exist',
-      );
-      cy.get('#high-score').should('be.visible');
+      cy.get('#tetris-game-board[data-mode="game-over"]', {
+        timeout: 30000,
+      }).should('exist');
+      cy.get('#tetris-high-score').should('be.visible');
     });
 
-    it('game-over 后按 Enter 回到主菜单，分数清零', () => {
+    it('game-over 后按 Enter 回到主菜单', () => {
       playAndTriggerReplay();
-
-      cy.get('#game-board[data-mode="game-over"]', { timeout: 30000 }).should(
-        'exist',
-      );
-
+      cy.get('#tetris-game-board[data-mode="game-over"]', {
+        timeout: 30000,
+      }).should('exist');
       cy.get('body').type('{enter}');
-      cy.get('#game-board[data-mode="main-menu"]').should('exist');
-      cy.get('#score').should('contain', '00000');
+      cy.get('#tetris-game-board[data-mode="main-menu"]').should('exist');
+      cy.get('#tetris-score').should('contain', '00000');
     });
 
     it('回放结束后可重新开始游戏', () => {
       playAndTriggerReplay();
-
-      cy.get('#game-board[data-mode="game-over"]', { timeout: 30000 }).should(
-        'exist',
-      );
+      cy.get('#tetris-game-board[data-mode="game-over"]', {
+        timeout: 30000,
+      }).should('exist');
       cy.get('body').type('{enter}');
-      cy.get('#game-board[data-mode="main-menu"]').should('exist');
-
+      cy.get('#tetris-game-board[data-mode="main-menu"]').should('exist');
       cy.get('body').type('1');
       cy.get('body').type('{enter}');
       cy.get('body').type('e');
       cy.get('body').type('{enter}');
       cy.wait(4500);
-
-      cy.get('#game-board').should('be.visible');
+      cy.get('#tetris-game-board').should('be.visible');
     });
 
-    it('回放中按 Enter 返回主菜单，重新开始游戏后 controller 重置为 HUMAN，方块可正常操作', () => {
+    it('回放中按 Enter 返回主菜单，重新开始后 controller 为 HUMAN', () => {
       playAndTriggerReplay();
-
-      // 等待进入 replay 模式
-      cy.get('#game-board[data-mode="replay"]', { timeout: 30000 }).should(
-        'exist',
-      );
-
-      // 回放过程中按 Enter 回到主菜单
+      cy.get('#tetris-game-board[data-mode="replay"]', {
+        timeout: 30000,
+      }).should('exist');
       cy.get('body').type('{enter}');
-      cy.get('#game-board[data-mode="main-menu"]').should('exist');
-
-      // controller 应显示 HUMAN
-      cy.get('#controller').should('contain', 'HUMAN');
-
-      // 选择等级 1
+      cy.get('#tetris-game-board[data-mode="main-menu"]').should('exist');
+      cy.get('#tetris-controller').should('contain', 'HUMAN');
       cy.get('body').type('1');
-      cy.get('#level').should('contain', '01');
-
-      // 进入难度选择
+      cy.get('#tetris-level').should('contain', '01');
       cy.get('body').type('{enter}');
-      cy.get('#game-board[data-mode="difficulty"]').should('exist');
-
-      // 选择 Easy 难度
+      cy.get('#tetris-game-board[data-mode="difficulty"]').should('exist');
       cy.get('body').type('e');
-
-      // 确认开始
       cy.get('body').type('{enter}');
-
-      // 等待倒计时结束（约 4.5 秒）
       cy.wait(4500);
-
-      // 游戏正常进行
-      cy.get('#game-board').should('be.visible');
-
-      // controller 应该仍然是 HUMAN（不是 AI）
-      cy.get('#controller').should('contain', 'HUMAN');
-
-      // 方块能正常操作
+      cy.get('#tetris-game-board').should('be.visible');
+      cy.get('#tetris-controller').should('contain', 'HUMAN');
       cy.get('body').type('{leftarrow}');
       cy.get('body').type('{leftarrow}');
       cy.get('body').type('{rightarrow}');
       cy.get('body').type('{uparrow}');
       cy.get('body').type(' ');
+      cy.get('#tetris-game-board').should('be.visible');
+    });
+  });
 
-      cy.get('#game-board').should('be.visible');
+  // ========== TouchController 触摸控制 ==========
+  describe('TouchController 触摸控制', () => {
+    beforeEach(() => {
+      cy.viewport(375, 667);
+      cy.visit('/tetris.html');
+    });
+
+    // ==================== main-menu 模式 ====================
+    describe('主菜单 - 等级选择（触摸）', () => {
+      it('DPAD UP 切换等级', () => {
+        cy.get('#tetris-level').should('contain', '01');
+
+        cy.get('#tetris-dpad-up').click();
+        cy.get('#tetris-level').should('contain', '02');
+
+        cy.get('#tetris-dpad-up').click();
+        cy.get('#tetris-dpad-up').click();
+        cy.get('#tetris-level').should('contain', '04');
+      });
+
+      it('DPAD DOWN 切换等级', () => {
+        cy.get('#tetris-dpad-up').click();
+        cy.get('#tetris-dpad-up').click();
+        cy.get('#tetris-dpad-up').click();
+        cy.get('#tetris-level').should('contain', '04');
+
+        cy.get('#tetris-dpad-down').click();
+        cy.get('#tetris-level').should('contain', '03');
+      });
+
+      it('DPAD UP 最高到 10', () => {
+        for (let i = 0; i < 12; i++) {
+          cy.get('#tetris-dpad-up').click();
+        }
+        cy.get('#tetris-level').should('contain', '10');
+      });
+
+      it('DPAD DOWN 最低到 1', () => {
+        for (let i = 0; i < 12; i++) {
+          cy.get('#tetris-dpad-down').click();
+        }
+        cy.get('#tetris-level').should('contain', '01');
+      });
+
+      it('START 进入难度选择', () => {
+        cy.get('#tetris-btn-start').click();
+        cy.get('#tetris-game-board[data-mode="difficulty"]').should('exist');
+      });
+    });
+
+    // ==================== difficulty 模式 ====================
+    describe('难度选择（触摸）', () => {
+      beforeEach(() => {
+        cy.get('#tetris-btn-start').click();
+        cy.get('#tetris-game-board[data-mode="difficulty"]').should('exist');
+      });
+
+      it('A 按钮选择 Easy', () => {
+        cy.get('#tetris-btn-a').click();
+        cy.get('#tetris-btn-start').click();
+        cy.wait(4500);
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('B 按钮选择 Normal', () => {
+        cy.get('#tetris-btn-b').click();
+        cy.get('#tetris-btn-start').click();
+        cy.wait(4500);
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('Y 按钮选择 Hard', () => {
+        cy.get('#tetris-btn-y').click();
+        cy.get('#tetris-btn-start').click();
+        cy.wait(4500);
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('X 按钮选择 Expert', () => {
+        cy.get('#tetris-btn-x').click();
+        cy.get('#tetris-btn-start').click();
+        cy.wait(4500);
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('BACK 返回主菜单', () => {
+        cy.get('#tetris-btn-back').click();
+        cy.get('#tetris-game-board[data-mode="main-menu"]').should('exist');
+      });
+    });
+
+    // ==================== playing 模式 ====================
+    describe('游戏中操作（触摸）', () => {
+      const startGame = () => {
+        cy.get('#tetris-btn-start').click();
+        cy.get('#tetris-btn-b').click();
+        cy.get('#tetris-btn-start').click();
+        cy.wait(4500);
+      };
+
+      it('DPAD LEFT 左移', () => {
+        startGame();
+        cy.get('#tetris-dpad-left').click();
+        cy.get('#tetris-dpad-left').click();
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('DPAD RIGHT 右移', () => {
+        startGame();
+        cy.get('#tetris-dpad-right').click();
+        cy.get('#tetris-dpad-right').click();
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('DPAD UP 旋转', () => {
+        startGame();
+        cy.get('#tetris-dpad-up').click();
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('DPAD DOWN 软降', () => {
+        startGame();
+        cy.get('#tetris-dpad-down').click();
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('B 按钮硬降', () => {
+        startGame();
+        cy.get('#tetris-btn-b').click();
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('A 按钮切换音乐', () => {
+        startGame();
+        cy.get('#tetris-btn-a').click();
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('Y 按钮暂停/继续', () => {
+        startGame();
+        cy.get('#tetris-btn-y').click();
+        cy.wait(500);
+        cy.get('#tetris-btn-y').click();
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('X 按钮重新开始', () => {
+        startGame();
+        cy.get('#tetris-btn-x').click();
+        cy.wait(2000);
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('BACK 按钮退出', () => {
+        startGame();
+        cy.get('#tetris-btn-back').click();
+        cy.wait(500);
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+    });
+
+    // ==================== 回放模式（触摸） ====================
+    describe('回放模式（触摸）', () => {
+      const playAndQuit = () => {
+        cy.get('#tetris-btn-start').click();
+        cy.get('#tetris-btn-b').click();
+        cy.get('#tetris-btn-start').click();
+        cy.wait(4500);
+        cy.get('#tetris-btn-b').click();
+        cy.get('#tetris-btn-back').click();
+        cy.wait(500);
+      };
+
+      it('回放中按 BACK 不报错', () => {
+        playAndQuit();
+        cy.get('#tetris-game-board[data-mode="replay"]', {
+          timeout: 30000,
+        }).should('exist');
+        cy.get('#tetris-btn-back').click();
+        cy.get('#tetris-game-board').should('be.visible');
+      });
+
+      it('回放中按 START 返回主菜单', () => {
+        playAndQuit();
+        cy.get('#tetris-game-board[data-mode="replay"]', {
+          timeout: 30000,
+        }).should('exist');
+        cy.get('#tetris-btn-start').click();
+        cy.get('#tetris-game-board[data-mode="main-menu"]').should('exist');
+      });
     });
   });
 });
