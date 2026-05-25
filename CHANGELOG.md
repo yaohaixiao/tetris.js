@@ -1,3 +1,10 @@
+## [1.7.2](https://github.com/yaohaixiao/tetris.js/compare/1.7.1...1.7.2) (2026-05-25)
+
+
+### Bug Fixes
+
+* 修复 crypto.randomUUID() 在非 HTTPS 站点导致的报错问题； ([e5245db](https://github.com/yaohaixiao/tetris.js/commit/e5245db73a3b20ea741f37c9f29dba67c1422b0c))
+
 ## [1.7.1](https://github.com/yaohaixiao/tetris.js/compare/1.7.0...1.7.1) (2026-05-25)
 
 
