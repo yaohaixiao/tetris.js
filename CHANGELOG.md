@@ -1,3 +1,11 @@
+## [1.7.1](https://github.com/yaohaixiao/tetris.js/compare/1.7.0...1.7.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* 修复调整 resize.js 设置 next piece 预览区域显示问题； ([fc3ab51](https://github.com/yaohaixiao/tetris.js/commit/fc3ab51420dc821ebab4a5627cd2d2ef59192528))
+
+
 # [1.7.0](https://github.com/yaohaixiao/tetris.js/compare/1.6.0...1.7.0) (2026-05-25)
 
 
