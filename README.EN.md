@@ -54,10 +54,12 @@ The game fully implements the core mechanics of classic Tetris, including piece 
 
 ### Technical Highlights
 
-- Developed with pure vanilla JavaScript and zero third-party dependencies;
-- Centralized state management with pure function state updates, completely separating game logic from rendering;
-- Independent scheduler drives all animations and sound effects, unaffected by browser frame rate;
-- Comprehensive testing suite: Unit tests with Jest, End-to-End tests with Cypress;
+- **Vanilla JavaScript**: Developed with pure vanilla JavaScript and zero third-party dependencies;
+- **Modular Design**: Based on the ES Module (ESM) specification, each module (audio, rendering, logic) is highly decoupled, making maintenance and replacement easy;
+- **Layered Architecture**: Adopts a Layered Architecture with component-based design;
+- **Centralized State Management**: GameStore-based centralized state management uses pure functions for data updates, completely separating game logic from rendering. Combined with the Command Pattern, it natively supports replay and AI training;
+- **Independent Scheduler**: Uses a dedicated scheduler to drive all animations and sound effects, unaffected by browser frame rate;
+- **Comprehensive Testing Suite**: Unit tests with Jest, End-to-End tests with Cypress;
 
 ## Architecture
 
