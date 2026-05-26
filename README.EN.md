@@ -37,9 +37,9 @@ tetris.js is a pure front-end Tetris game built with vanilla JavaScript and zero
 - **Animation Effects**: Countdown, line-clear flash, floating score text, landing highlight, level-up celebration, pause timer animation
 
 ### System Features
-- **Playback Replay**: Review your entire gameplay after game over
+- **Playback Replay**: Review your entire gameplay after game over (Demo: https://www.bilibili.com/video/BV1oRVA6uEXG/?vd_source=8d9b68dd3ed316bb9b3a13e3f3f778eb)
 - **AI Control**: Multi-step lookahead AI makes decisions based on board evaluation with adjustable difficulty.
-  Demo: https://www.bilibili.com/video/BV1GPG86KEcy/?vd_source=8d9b68dd3ed316bb9b3a13e3f3f778eb
+  (Demo: https://www.bilibili.com/video/BV1GPG86KEcy/?vd_source=8d9b68dd3ed316bb9b3a13e3f3f778eb)
 - **Local Storage**: Persistent storage for highest score
 - **Responsive Layout**: Fully adaptive for desktop, tablet and mobile devices
 
