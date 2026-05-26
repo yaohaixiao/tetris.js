@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import CONSTANTS from './utils/constants.js';
+import CONSTANTS from './constants.js';
 import HTML_TEMPLATE from './utils/html-template.js';
 import formatHtml from './utils/format-html.js';
 import minifyHtml from './utils/minify-html.js';

@@ -2,7 +2,7 @@
 **/node_modules
 
 # production
-/dist
+/dist/**
 /docs
 /.vscode
 /report
@@ -26,7 +26,3 @@ screenshot
 .firebase
 
 .husky
-
-tetris.css
-tetris.html
-tetris.js

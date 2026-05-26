@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import esbuild from 'esbuild';
 
-import CONSTANTS from './utils/constants.js';
+import CONSTANTS from './constants.js';
 import isFileExists from './utils/is-file-exists.js';
 import removeFile from './utils/remove-file.js';
 

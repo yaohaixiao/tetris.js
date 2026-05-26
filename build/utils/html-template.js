@@ -13,7 +13,7 @@ const HtmlTemplate = `
   <link rel="preload" href="img/bg.jpg" as="image">
   <link rel="prefetch" href="font/latin.woff2" type="font/woff2" as="font">
   <title>俄罗斯方块</title>
-  <link href="./tetris.css" rel="stylesheet">
+  <link href="./css/tetris.css" rel="stylesheet">
 </head>
 <body>
   <div class="tetris-container">
@@ -74,7 +74,7 @@ const HtmlTemplate = `
       </section>
     </footer>
   </div>
-  <script src="./tetris.js"></script>
+  <script src="./js/tetris.js"></script>
 </body>
 </html>
 `;
