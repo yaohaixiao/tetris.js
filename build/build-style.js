@@ -1,14 +1,19 @@
 import chalk from 'chalk';
 import less from 'less';
 
-import CONSTANTS from './utils/constants.js';
+import CONSTANTS from './constants.js';
 import isFileExists from './utils/is-file-exists.js';
 import readFile from './utils/read-file.js';
 import removeFile from './utils/remove-file.js';
 import writeFile from './utils/write-file.js';
 
 const buildStyle = (args) => {
-  const { LESS_FILE_PATH, STYLE_FILE_PATH, STYLE_MAP_PATH } = CONSTANTS;
+  const {
+    LESS_FILE_PATH,
+    STYLE_FILE_PATH,
+    MINIFY_STYLE_FILE_PATH,
+    STYLE_MAP_PATH,
+  } = CONSTANTS;
   const compress = args.action === 'minify';
   // 读取 less 文件
   const code = readFile(LESS_FILE_PATH, 'utf8');
@@ -31,22 +36,19 @@ const buildStyle = (args) => {
       },
     })
     .then(({ css, map }) => {
-      writeFile(STYLE_FILE_PATH, css);
+      const filePath = compress ? MINIFY_STYLE_FILE_PATH : STYLE_FILE_PATH;
+
+      writeFile(filePath, css);
 
       // 处理 .map 文件
       if (compress) {
         // 创建 .map 文件
         writeFile(STYLE_MAP_PATH, map);
-      } else {
-        if (isFileExists(STYLE_MAP_PATH)) {
-          // 删除 .map 文件
-          removeFile(STYLE_MAP_PATH);
-        }
       }
 
       console.log(
         chalk.greenBright('成功：'),
-        chalk.blueBright(STYLE_FILE_PATH),
+        chalk.blueBright(filePath),
         chalk.green('发布成功！'),
       );
 

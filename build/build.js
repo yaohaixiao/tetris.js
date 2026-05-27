@@ -1,6 +1,8 @@
 import buildHTML from './build-html.js';
 import buildStyle from './build-style.js';
 import buildScript from './build-script.js';
+import copyFile from './utils/copy-file.js';
+import copyDir from './utils/copy-dir.js';
 
 import getProcessArguments from './utils/get-process-arguments.js';
 
@@ -18,6 +20,12 @@ const build = async () => {
     })
     .then(() => {
       return buildScript(args);
+    })
+    .then(() => {
+      return copyFile('./assets/img/bg.jpg', './dist/img/bg.jpg');
+    })
+    .then(() => {
+      return copyDir('./assets/font', './dist/font');
     });
 };
 

@@ -1,13 +1,14 @@
 import chalk from 'chalk';
 
-import CONSTANTS from './utils/constants.js';
-import HTML_TEMPLATE from './utils/html-template.js';
+import CONSTANTS from './constants.js';
+import getHtmlTemplate from './utils/get-html-template.js';
 import formatHtml from './utils/format-html.js';
 import minifyHtml from './utils/minify-html.js';
 import writeFile from './utils/write-file.js';
 
 const buildHtml = (args) => {
   const { HTML_FILE_PATH } = CONSTANTS;
+  const HTML_TEMPLATE = getHtmlTemplate(args);
 
   let action;
 

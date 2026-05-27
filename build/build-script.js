@@ -1,21 +1,27 @@
 import chalk from 'chalk';
 import esbuild from 'esbuild';
 
-import CONSTANTS from './utils/constants.js';
+import CONSTANTS from './constants.js';
 import isFileExists from './utils/is-file-exists.js';
 import removeFile from './utils/remove-file.js';
 
 // 执行打包
 const buildScript = (args) => {
-  const { BASE_PATH, SCRIPT_FILE_PATH, SCRIPT_MAP_PATH } = CONSTANTS;
+  const {
+    BASE_PATH,
+    SCRIPT_FILE_PATH,
+    MINIFY_SCRIPT_FILE_PATH,
+    SCRIPT_MAP_PATH,
+  } = CONSTANTS;
   const minify = args.action === 'minify';
+  const outfile = minify ? MINIFY_SCRIPT_FILE_PATH : SCRIPT_FILE_PATH;
 
   return esbuild
     .build({
       // 入口文件（你的 ES6 主模块）
-      entryPoints: [`${BASE_PATH}/lib/tetris.js`],
+      entryPoints: [ `${BASE_PATH}/lib/tetris.js` ],
       // 输出文件（浏览器直接用）
-      outfile: SCRIPT_FILE_PATH,
+      outfile,
       // 打包模式：浏览器环境
       platform: 'browser',
       // 输出格式：iife（浏览器立即执行函数，完美兼容所有浏览器）
@@ -29,13 +35,9 @@ const buildScript = (args) => {
       globalName: 'tetris',
     })
     .then(() => {
-      if (!minify && isFileExists(SCRIPT_MAP_PATH)) {
-        removeFile(SCRIPT_MAP_PATH);
-      }
-
       console.log(
         chalk.greenBright('成功：'),
-        chalk.blueBright(SCRIPT_FILE_PATH),
+        chalk.blueBright(outfile),
         chalk.green('发布成功！'),
       );
 

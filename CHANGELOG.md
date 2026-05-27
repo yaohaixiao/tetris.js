@@ -1,26 +1,23 @@
 ## [1.7.2](https://github.com/yaohaixiao/tetris.js/compare/1.7.1...1.7.2) (2026-05-25)
 
-
 ### Bug Fixes
 
-* 修复 crypto.randomUUID() 在非 HTTPS 站点导致的报错问题； ([e5245db](https://github.com/yaohaixiao/tetris.js/commit/e5245db73a3b20ea741f37c9f29dba67c1422b0c))
+- 修复 crypto.randomUUID() 在非 HTTPS 站点导致的报错问题； ([e5245db](https://github.com/yaohaixiao/tetris.js/commit/e5245db73a3b20ea741f37c9f29dba67c1422b0c))
 
 ## [1.7.1](https://github.com/yaohaixiao/tetris.js/compare/1.7.0...1.7.1) (2026-05-25)
 
-
 ### Bug Fixes
 
-* 修复调整 resize.js 设置 next piece 预览区域显示问题； ([fc3ab51](https://github.com/yaohaixiao/tetris.js/commit/fc3ab51420dc821ebab4a5627cd2d2ef59192528))
-
+- 修复调整 resize.js 设置 next
+  piece 预览区域显示问题； ([fc3ab51](https://github.com/yaohaixiao/tetris.js/commit/fc3ab51420dc821ebab4a5627cd2d2ef59192528))
 
 # [1.7.0](https://github.com/yaohaixiao/tetris.js/compare/1.6.0...1.7.0) (2026-05-25)
 
-
 ### Features
 
-* 添加根据等级，播放不同的消除音效，也是 16 级，更换1次； ([86e2da5](https://github.com/yaohaixiao/tetris.js/commit/86e2da556317d4425e23fbc552f18fc820df1794))
-* 添加在移动设备访问时，显示 GAME BOY 模拟按键，对游戏进行操作的能力； ([bb538b9](https://github.com/yaohaixiao/tetris.js/commit/bb538b98d8d0d42e09bcb6bcdbff8060dd2a80fb))
-
+- 添加根据等级，播放不同的消除音效，也是 16 级，更换1次； ([86e2da5](https://github.com/yaohaixiao/tetris.js/commit/86e2da556317d4425e23fbc552f18fc820df1794))
+- 添加在移动设备访问时，显示 GAME
+  BOY 模拟按键，对游戏进行操作的能力； ([bb538b9](https://github.com/yaohaixiao/tetris.js/commit/bb538b98d8d0d42e09bcb6bcdbff8060dd2a80fb))
 
 # [1.6.0](https://github.com/yaohaixiao/tetris.js/compare/1.5.0...1.6.0) (2026-05-24)
 
