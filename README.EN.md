@@ -13,6 +13,8 @@ tetris.js is a zero-dependency native JavaScript Tetris game built on Canvas, su
 
 ## Features
 
+![Tetris game-Features](assets/img/features-poster.png)
+
 The game fully implements the core features of classic Tetris, including piece generation, movement, rotation, descent, collision detection, line clearing, leveling up, score tracking, etc., complemented by rich interface rendering, animations, and interactive feedback.
 
 ### Game Controls

@@ -7,11 +7,13 @@
 
 简体中文 | [English](./README.EN.md)
 
-![俄罗斯方块游戏截图](assets/img/screen-shot.png)
+![俄罗斯方块游戏-游戏截图](assets/img/screen-shot.png)
 
 tetris.js 是一款零依赖的原生 JavaScript 俄罗斯方块游戏，基于 Canvas 实现，支持多端输入与 AI 控制。项目采用固定帧流程驱动架构，结合 Scheduler、Command Queue 与 Replay 系统，实现清晰的游戏更新管线，是一个轻量级前端游戏引擎设计与架构实践示例。
 
 ## 功能特性
+
+![俄罗斯方块游戏-功能特性](assets/img/features-poster.png)
 
 游戏完整实现了经典俄罗斯方块的核心功能，包含方块生成、移动、旋转、下落、碰撞检测、消行、升级、分数统计等能力，同时搭配丰富的界面渲染、动画特效与交互反馈。
 
