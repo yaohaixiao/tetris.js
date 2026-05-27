@@ -47,6 +47,7 @@ describe('begin', () => {
     jest.clearAllMocks();
 
     scheduler = new Scheduler();
+    scheduler.now = 0;
 
     mockStore = {
       getLevel: jest.fn().mockReturnValue(5),

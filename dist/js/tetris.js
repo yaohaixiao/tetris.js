@@ -36,197 +36,74 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 初始化空的任务映射表和 ID 计数器。
+     * 初始化空任务队列、ID 计数器和顺序计数器。
      */
     constructor() {
-      this.tasks = /* @__PURE__ */ new Map();
+      this.tasks = [];
       this.nextId = 1;
+      this.order = 0;
+      this.now = performance.now();
       this.dirty = false;
+      this.maxCatchUp = 5;
     }
-    /**
-     * ## 驱动调度器
-     *
-     * 由外部 Game Loop 每帧调用，传入当前游戏时间。 遍历所有任务，执行到期的任务，并清理已取消的任务。
-     *
-     * ### 执行逻辑
-     *
-     * 1. 如果任务表为空，直接返回
-     * 2. 遍历所有任务：
-     *
-     *    - 已取消的任务：标记 dirty，跳过
-     *    - Delay 任务：首次设置 startTime，到期后执行并删除
-     *    - Interval 任务：首次设置 startTime 和 nextTime，到期后执行并更新 nextTime
-     * 3. 如果 dirty 为 true，批量删除已取消的任务
-     *
-     * @param {number} [gameTime=performance.now()] - 当前游戏时间戳（毫秒）。默认值为
-     *   `performance.now()`. Default is `performance.now()`
-     * @returns {void}
-     */
-    tick(gameTime = performance.now()) {
-      if (this.tasks.size === 0) {
-        return;
-      }
-      this._executeDueTasks(gameTime);
-      this._cleanupCancelledTasks();
-    }
-    /**
-     * ## 执行到期任务
-     *
-     * 遍历所有任务，初始化并执行到期的任务。
-     *
-     * @private
-     * @param {number} gameTime - 当前游戏时间戳
-     * @returns {void}
-     */
-    _executeDueTasks(gameTime) {
-      for (const task of this.tasks.values()) {
-        if (task.cancelled) {
-          this.dirty = true;
-          continue;
-        }
-        this._processTask(task, gameTime);
-      }
-    }
-    /**
-     * ## 处理单个任务
-     *
-     * 根据任务类型进行初始化、判断和执行。
-     *
-     * @private
-     * @param {object} task - 任务对象
-     * @param {number} gameTime - 当前游戏时间戳
-     * @returns {void}
-     */
-    _processTask(task, gameTime) {
-      switch (task.type) {
-        case "delay": {
-          this._processDelayTask(task, gameTime);
-          break;
-        }
-        case "interval": {
-          this._processIntervalTask(task, gameTime);
-          break;
-        }
-        default: {
-          break;
-        }
-      }
-    }
-    /**
-     * ## 处理延迟任务
-     *
-     * 首次设置 startTime，到期后执行并删除。
-     *
-     * @private
-     * @param {object} task - 延迟任务对象
-     * @param {number} gameTime - 当前游戏时间戳
-     * @returns {void}
-     */
-    _processDelayTask(task, gameTime) {
-      if (task.startTime === void 0) {
-        task.startTime = gameTime;
-      }
-      if (gameTime - task.startTime < task.delay) {
-        return;
-      }
-      task.fn();
-      this.tasks.delete(task.id);
-    }
-    /**
-     * ## 处理周期任务
-     *
-     * 首次设置 startTime 和 nextTime，到期后执行并更新 nextTime。
-     *
-     * @private
-     * @param {object} task - 周期任务对象
-     * @param {number} gameTime - 当前游戏时间戳
-     * @returns {void}
-     */
-    _processIntervalTask(task, gameTime) {
-      if (task.startTime === void 0) {
-        task.startTime = gameTime;
-        task.nextTime = gameTime + task.interval;
-      }
-      if (gameTime < task.nextTime) {
-        return;
-      }
-      task.fn();
-      task.nextTime = gameTime + task.interval;
-    }
-    /**
-     * ## 批量清理已取消的任务
-     *
-     * 延迟清理机制：有脏标记时才执行清理。
-     *
-     * @private
-     * @returns {void}
-     */
-    _cleanupCancelledTasks() {
-      if (!this.dirty) {
-        return;
-      }
-      for (const [id, task] of this.tasks) {
-        if (task.cancelled) {
-          this.tasks.delete(id);
-        }
-      }
-      this.dirty = false;
-    }
+    /* ================== 公共 API ================== */
     /**
      * ## 创建延迟任务
      *
-     * 替代 `setTimeout`，在指定延迟后执行一次回调函数。
+     * 替代 `setTimeout`，在当前逻辑时间 + 指定延迟后执行一次回调。
      *
      * @example
-     *   // 100ms 后执行
      *   const id = scheduler.delay(() => console.log('done'), 100);
      *
-     * @param {Function} fn - 要执行的回调函数
-     * @param {number} delay - 延迟时间（毫秒）。默认值为 `0`
-     * @returns {number} 任务 ID，可用于后续取消
+     * @param {Function} fn - 回调函数
+     * @param {number} [delay=0] - 延迟时间（毫秒）。默认值为 `0`. Default is `0`
+     * @returns {number} 任务 ID，可用于 `cancel()`
      */
     delay(fn, delay = 0) {
       const id = this.nextId++;
-      this.tasks.set(id, {
+      this._insertTask({
         id,
         type: "delay",
-        delay,
         fn,
-        cancelled: false
+        time: this.now + delay,
+        cancelled: false,
+        order: this.order++
       });
       return id;
     }
     /**
      * ## 创建周期任务
      *
-     * 替代 `setInterval`，按指定间隔周期性执行回调函数。
+     * 替代 `setInterval`，按指定间隔周期性执行回调。
      *
      * @example
-     *   // 每 200ms 执行一次
      *   const id = scheduler.interval(() => console.log('tick'), 200);
      *
-     * @param {Function} fn - 要执行的回调函数
-     * @param {number} interval - 执行间隔（毫秒）。默认值为 `1000`
-     * @returns {number} 任务 ID，可用于后续取消
+     * @param {Function} fn - 回调函数
+     * @param {number} [interval=1000] - 执行间隔（毫秒）。默认值为 `1000`. Default is `1000`
+     * @returns {number} 任务 ID，可用于 `cancel()`
      */
     interval(fn, interval = 1e3) {
       const id = this.nextId++;
-      this.tasks.set(id, {
+      this._insertTask({
         id,
         type: "interval",
-        interval,
         fn,
-        cancelled: false
+        interval,
+        time: this.now + interval,
+        nextTime: this.now + interval,
+        cancelled: false,
+        order: this.order++
       });
       return id;
     }
     /**
      * ## 创建任务序列
      *
-     * 按时间偏移顺序执行多个任务。 每个任务可以指定相对于序列起始时间的延迟。
+     * 按时间偏移顺序执行多个任务。每个任务可指定相对于序列起始时间的延迟。 内部使用 `delay()` 实现，直接绑定绝对时间，不依赖 `tick`
+     * 初始化。
      *
      * @example
-     *   // 立即播放音符 1，260ms 后播放音符 2，520ms 后播放音符 3
      *   scheduler.sequence([
      *     { fn: () => playNote('C4') },
      *     { fn: () => playNote('E4'), delay: 260 },
@@ -234,15 +111,16 @@ var tetris = (() => {
      *   ]);
      *
      * @param {{ fn: Function; delay?: number }[]} list - 任务列表
-     * @param {Function} list[].fn - 要执行的回调函数
-     * @param {number} [list[].delay=0] - 该任务相对于上一个任务的延迟（毫秒）. Default is `0`
+     * @param {Function} list[].fn - 回调函数
+     * @param {number} [list[].delay=0] - 该任务相对于上一个任务的延迟（毫秒）。默认值为 `0`. Default is
+     *   `0`
      * @returns {number[]} 所有任务的 ID 数组
      */
     sequence(list) {
       const ids = [];
       let t = 0;
       for (const item of list) {
-        const { delay = 0, fn } = item;
+        const { fn, delay = 0 } = item;
         t += delay;
         ids.push(this.delay(fn, t));
       }
@@ -257,10 +135,8 @@ var tetris = (() => {
      * @returns {void}
      */
     cancel(id) {
-      const task = this.tasks.get(id);
-      if (!task) {
-        return;
-      }
+      const task = this.tasks.find((t) => t.id === id);
+      if (!task) return;
       task.cancelled = true;
       this.dirty = true;
     }
@@ -272,18 +148,129 @@ var tetris = (() => {
      * @returns {void}
      */
     clear() {
-      this.tasks.clear();
+      this.tasks.length = 0;
       this.dirty = false;
+    }
+    /**
+     * ## 驱动调度器
+     *
+     * 由外部 Game Loop 每帧调用，传入当前游戏时间。 遍历到期任务并执行，最后清理已取消的任务。
+     *
+     * @param {number} [gameTime=performance.now()] - 当前游戏时间戳（毫秒）。默认值为
+     *   `performance.now()`. Default is `performance.now()`
+     * @returns {void}
+     */
+    tick(gameTime = performance.now()) {
+      this.now = gameTime;
+      if (this.tasks.length === 0) return;
+      this._executeDueTasks(gameTime);
+      this._cleanup();
     }
     /**
      * ## 获取任务数量
      *
      * Debug 辅助方法，用于测试和调试。
      *
-     * @returns {number} 当前任务表中的任务数量
+     * @returns {number} 当前任务队列中的任务数量
      */
     size() {
-      return this.tasks.size;
+      return this.tasks.length;
+    }
+    /* ================== 核心引擎（私有） ================== */
+    /**
+     * ## 插入任务并保持队列有序
+     *
+     * 使用插入排序将任务按 `time + order` 升序排列。 同一时间点的任务按 `order` 保证执行顺序稳定。
+     *
+     * @private
+     * @param {object} task - 任务对象
+     * @returns {void}
+     */
+    _insertTask(task) {
+      const { tasks } = this;
+      let i = tasks.length;
+      while (i > 0) {
+        const prev = tasks[i - 1];
+        if (prev.time < task.time || prev.time === task.time && prev.order <= task.order) {
+          break;
+        }
+        tasks[i] = tasks[i - 1];
+        i--;
+      }
+      tasks[i] = task;
+    }
+    /**
+     * ## 执行所有到期任务
+     *
+     * 从队头依次取出 `time <= gameTime` 的任务，按类型分发处理。
+     *
+     * @private
+     * @param {number} gameTime - 当前游戏时间戳
+     * @returns {void}
+     */
+    _executeDueTasks(gameTime) {
+      let catchUpTaskCount = 0;
+      while (this.tasks.length > 0 && this.tasks[0].time <= gameTime) {
+        const task = this.tasks.shift();
+        if (task.cancelled) continue;
+        if (task.type === "delay") {
+          this._runDelayTask(task);
+        } else if (task.type === "interval") {
+          this._runIntervalTask(task, gameTime);
+        }
+        if (++catchUpTaskCount > this.maxCatchUp * 10) break;
+      }
+    }
+    /**
+     * ## 执行 Delay 任务
+     *
+     * 一次性任务，执行后即结束。
+     *
+     * @private
+     * @param {object} task - 延迟任务对象
+     * @returns {void}
+     */
+    _runDelayTask(task) {
+      task.fn(task);
+    }
+    /**
+     * ## 执行 Interval 任务
+     *
+     * 周期任务，执行后更新 `nextTime` 并重新插入队列。 包含补帧保护：长时间暂停后最多补 `maxCatchUp` 次， 超过后重置
+     * `nextTime` 为当前时间，防止瞬间爆帧。
+     *
+     * @private
+     * @param {object} task - 周期任务对象
+     * @param {number} gameTime - 当前游戏时间戳
+     * @returns {void}
+     */
+    _runIntervalTask(task, gameTime) {
+      let catchUp = 0;
+      while (task.nextTime <= gameTime && !task.cancelled && catchUp < this.maxCatchUp) {
+        catchUp++;
+        task.fn(task);
+        task.nextTime += task.interval;
+      }
+      if (catchUp >= this.maxCatchUp) {
+        task.nextTime = gameTime + task.interval;
+      }
+      if (!task.cancelled) {
+        task.time = task.nextTime;
+        this._insertTask(task);
+      }
+    }
+    /**
+     * ## 批量清理已取消的任务
+     *
+     * 延迟清理机制：有脏标记时才执行清理。 过滤掉所有 `cancelled === true` 的任务。
+     *
+     * @private
+     * @returns {void}
+     */
+    _cleanup() {
+      if (!this.dirty) return;
+      this.tasks = this.tasks.filter((t) => !t.cancelled);
+      this.dirty = false;
     }
   };
   var scheduler_default = Scheduler;
