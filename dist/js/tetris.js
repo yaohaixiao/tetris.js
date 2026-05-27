@@ -5365,7 +5365,7 @@ var tetris = (() => {
   } = colors_default;
   var ClockThemes = {
     /** 戌时 (19-20) */
-    Teal: { stroke: TEAL3, face: RGBA_TEAL2, secondHand: VIOLET2 },
+    Teal: { stroke: TEAL3, face: RGBA_TEAL2, secondHand: GREEN3 },
     /** 亥时 (21-22) */
     Violet: { stroke: VIOLET2, face: RGBA_VIOLET2, secondHand: TEAL3 },
     /** 申时 (15-16) */
@@ -11874,9 +11874,7 @@ var tetris = (() => {
       Gamepad.update(timestamp);
       CommandQueue2.flush();
       if ((!Engine.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
-        console.log("before tick, isBlocked:", isBlocked);
         Game2.tick(isBlocked);
-        console.log("after tick");
         Engine.fixedAccumulator = timestamp;
       }
       Animations.flush();
