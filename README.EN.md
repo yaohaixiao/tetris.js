@@ -364,6 +364,8 @@ switching as stages progress. Tracks change every 16 stages.
 | 225-240 | FinalPush        | Ultimate Challenge  |
 | 241-256 | JourneyToWest    | Epic Finale         |
 
+**PS**: Have fun playing! If you like it, please consider starring the project to support it!
+
 ## License
 
 - tetris.js Project: Open-sourced under the

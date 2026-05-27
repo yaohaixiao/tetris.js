@@ -289,6 +289,8 @@ BOY 按键；
 | 225-240 关 | FinalPush        | 终极挑战曲风 |
 | 241-256 关 | JourneyToWest    | 史诗压轴曲风 |
 
+**PS**：祝玩得开心，喜欢记得 STAR 支持！
+
 ## 开源许可
 
 - tetris.js 项目：基于
