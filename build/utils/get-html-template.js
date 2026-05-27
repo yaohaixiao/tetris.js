@@ -8,8 +8,8 @@ const {
 
 const getHtmlTemplate = (args) => {
   const minify = args.action === 'minify';
-  const stylePath = minify ? './css/tetris.min.css' : './css/tetris.css';
-  const scriptPath = minify ? './js/tetris.min.js' : './js/tetris.js';
+  const stylePath = minify ? 'css/tetris.min.css' : 'css/tetris.css';
+  const scriptPath = minify ? 'js/tetris.min.js' : 'js/tetris.js';
 
   return `
     <!DOCTYPE html>
@@ -19,11 +19,11 @@ const getHtmlTemplate = (args) => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="preload" href="${stylePath}" as="style">
       <link rel="preload" href="${scriptPath}" as="script">
-      <link rel="preload" href="./img/bg.jpg" as="image">
-      <link rel="preload" href="./favicon.ico" as="image">
-      <link rel="prefetch" href="./font/latin.woff2" type="font/woff2" as="font">
+      <link rel="preload" href="img/bg.jpg" as="image">
+      <link rel="preload" href="favicon.ico" as="image">
+      <link rel="prefetch" href="font/latin.woff2" type="font/woff2" as="font">
       <title>俄罗斯方块</title>
-      <link rel="icon" href="./favicon.ico" type="image/x-icon">
+      <link rel="icon" href="favicon.ico" type="image/x-icon">
       <link href="${stylePath}" rel="stylesheet">
     </head>
     <body>
