@@ -20,7 +20,6 @@ const getHtmlTemplate = (args) => {
       <link rel="preload" href="${stylePath}" as="style">
       <link rel="preload" href="${scriptPath}" as="script">
       <link rel="preload" href="img/bg.jpg" as="image">
-      <link rel="preload" href="favicon.ico" as="image">
       <link rel="prefetch" href="font/latin.woff2" type="font/woff2" as="font">
       <title>俄罗斯方块</title>
       <link rel="icon" href="favicon.ico" type="image/x-icon">
