@@ -1,3 +1,16 @@
+## [1.7.3](https://github.com/yaohaixiao/tetris.js/compare/1.7.2...1.7.3) (2026-05-27)
+
+
+### Bug Fixes
+
+* 调整暂停时钟秒针颜色，修复0-1点秒针和电子时间显示不清新得问题； ([2c96e9c](https://github.com/yaohaixiao/tetris.js/commit/2c96e9c456d4f7dab03d939f715c55df30949b8c))
+
+
+### Features
+
+* Scheduler 升级 ([9216220](https://github.com/yaohaixiao/tetris.js/commit/9216220b1fd982648ce1c4c79796bee4ca2702e8))
+
+
 ## [1.7.2](https://github.com/yaohaixiao/tetris.js/compare/1.7.1...1.7.2) (2026-05-25)
 
 ### Bug Fixes
