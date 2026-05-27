@@ -333,14 +333,18 @@ describe('Scheduler', () => {
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-
     it('大量任务都能正确执行', () => {
       const fns = Array.from({ length: 100 }, () => jest.fn());
       fns.forEach((fn) => scheduler.delay(fn, 50));
 
       // 调试：检查排序
       const firstTask = scheduler.tasks[0];
-      console.log('first task time:', firstTask?.time, 'order:', firstTask?.order);
+      console.log(
+        'first task time:',
+        firstTask?.time,
+        'order:',
+        firstTask?.order,
+      );
 
       scheduler.tick(100);
 

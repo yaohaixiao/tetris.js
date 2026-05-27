@@ -1,10 +1,6 @@
 import Configuration from '../../lib/configuration.js';
 
-const {
-  Main,
-  Hud,
-  Controls
-} = Configuration.Elements;
+const { Main, Hud, Controls } = Configuration.Elements;
 
 const getHtmlTemplate = (args) => {
   const minify = args.action === 'minify';
@@ -87,7 +83,7 @@ const getHtmlTemplate = (args) => {
       <script src="${scriptPath}"></script>
     </body>
     </html>
-    `
+    `;
 };
 
 export default getHtmlTemplate;

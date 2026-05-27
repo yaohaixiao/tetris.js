@@ -36,12 +36,12 @@ describe('stopBGM', () => {
     const fn = jest.fn();
 
     scheduler.clear();
-    scheduler.now = 0;  // 重置时间
+    scheduler.now = 0; // 重置时间
 
     const id = scheduler.interval(fn, 25);
     audio.bgmSchedulerId = id;
 
-    scheduler.tick(25);  // 首次 tick 即触发
+    scheduler.tick(25); // 首次 tick 即触发
     expect(fn).toHaveBeenCalledTimes(1);
 
     stopBGM(audio);

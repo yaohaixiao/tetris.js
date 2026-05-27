@@ -170,7 +170,9 @@ describe('Engine', () => {
 
     it('启动 game loop', () => {
       Engine.launch();
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalledWith(Engine.tick);
+      expect(globalThis.requestAnimationFrame).toHaveBeenCalledWith(
+        Engine.tick,
+      );
     });
   });
 
@@ -302,23 +304,41 @@ describe('Engine', () => {
     it('调用 requestAnimationFrame', () => {
       Engine.lastTickTime = 1;
       Engine.tick(100);
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalledWith(Engine.tick);
+      expect(globalThis.requestAnimationFrame).toHaveBeenCalledWith(
+        Engine.tick,
+      );
       expect(Engine.rafId).toBe(123);
     });
 
     it('应该按正确顺序调用各模块', () => {
       const callOrder = [];
 
-      Engine.Scheduler.tick.mockImplementation(() => callOrder.push('scheduler'));
-      Engine.Game.Replay.syncPlayElapsed.mockImplementation(() => callOrder.push('syncElapsed'));
-      Engine.Game.Replay.update.mockImplementation(() => callOrder.push('replay'));
-      Engine.Game.Gamepad.update.mockImplementation(() => callOrder.push('gamepad'));
-      Engine.Game.CommandQueue.flush.mockImplementation(() => callOrder.push('commandQueue'));
+      Engine.Scheduler.tick.mockImplementation(() =>
+        callOrder.push('scheduler'),
+      );
+      Engine.Game.Replay.syncPlayElapsed.mockImplementation(() =>
+        callOrder.push('syncElapsed'),
+      );
+      Engine.Game.Replay.update.mockImplementation(() =>
+        callOrder.push('replay'),
+      );
+      Engine.Game.Gamepad.update.mockImplementation(() =>
+        callOrder.push('gamepad'),
+      );
+      Engine.Game.CommandQueue.flush.mockImplementation(() =>
+        callOrder.push('commandQueue'),
+      );
       Engine.Game.tick.mockImplementation(() => callOrder.push('game'));
-      Engine.Game.Animations.flush.mockImplementation(() => callOrder.push('animFlush'));
+      Engine.Game.Animations.flush.mockImplementation(() =>
+        callOrder.push('animFlush'),
+      );
       Engine.Game.UI.tickHud.mockImplementation(() => callOrder.push('hud'));
-      Engine.Game.UI.render.mockImplementation(() => callOrder.push('uiRender'));
-      Engine.Game.Animations.render.mockImplementation(() => callOrder.push('animRender'));
+      Engine.Game.UI.render.mockImplementation(() =>
+        callOrder.push('uiRender'),
+      );
+      Engine.Game.Animations.render.mockImplementation(() =>
+        callOrder.push('animRender'),
+      );
 
       Engine.lastTickTime = 1;
       Engine.fixedAccumulator = 0;
@@ -343,7 +363,9 @@ describe('Engine', () => {
   describe('start / stop / restart', () => {
     it('start 调用 requestAnimationFrame', () => {
       Engine.start();
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalledWith(Engine.tick);
+      expect(globalThis.requestAnimationFrame).toHaveBeenCalledWith(
+        Engine.tick,
+      );
     });
 
     it('stop 取消 RAF 并重置状态', () => {
@@ -375,8 +397,14 @@ describe('Engine', () => {
     it('订阅 dispatch:command 和 dispatch:input', () => {
       Engine.Game = new (require('@/lib/game'))();
       Engine._subscribe();
-      expect(Engine.Game.on).toHaveBeenCalledWith('dispatch:command', expect.any(Function));
-      expect(Engine.Game.on).toHaveBeenCalledWith('dispatch:input', expect.any(Function));
+      expect(Engine.Game.on).toHaveBeenCalledWith(
+        'dispatch:command',
+        expect.any(Function),
+      );
+      expect(Engine.Game.on).toHaveBeenCalledWith(
+        'dispatch:input',
+        expect.any(Function),
+      );
     });
   });
 });

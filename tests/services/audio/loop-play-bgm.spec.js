@@ -185,7 +185,9 @@ describe('loopPlayBGM', () => {
     });
 
     test('自定义 articulation', () => {
-      loopPlayBGM(audio, melody, { articulation: { attackTime: 0.01, sustainRatio: 0.5 } });
+      loopPlayBGM(audio, melody, {
+        articulation: { attackTime: 0.01, sustainRatio: 0.5 },
+      });
       scheduler.tick(125);
       expect(playTone).toHaveBeenCalledWith(
         audio,
