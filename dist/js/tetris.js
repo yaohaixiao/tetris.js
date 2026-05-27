@@ -209,7 +209,6 @@ var tetris = (() => {
      * @returns {void}
      */
     _executeDueTasks(gameTime) {
-      let catchUpTaskCount = 0;
       while (this.tasks.length > 0 && this.tasks[0].time <= gameTime) {
         const task = this.tasks.shift();
         if (task.cancelled) continue;
@@ -218,7 +217,6 @@ var tetris = (() => {
         } else if (task.type === "interval") {
           this._runIntervalTask(task, gameTime);
         }
-        if (++catchUpTaskCount > this.maxCatchUp * 10) break;
       }
     }
     /**
@@ -11064,64 +11062,6 @@ var tetris = (() => {
   };
   var game_default2 = Game;
 
-  // lib/engine/start-game-loop.js
-  var startGameLoop = (timestamp) => {
-    if (!engine_default.lastTickTime) {
-      engine_default.lastTickTime = timestamp;
-      engine_default.fixedAccumulator = timestamp;
-    }
-    const { Game: Game2, Scheduler: Scheduler2 } = engine_default;
-    const { UI: UI2, Replay, Gamepad, Animations, CommandQueue: CommandQueue2 } = Game2;
-    const isBlocked = Animations.hasBlocking();
-    const stepDelta = timestamp - engine_default.fixedAccumulator;
-    const prev = engine_default.lastTickTime ?? timestamp;
-    let delta = (timestamp - prev) / 1e3;
-    if (delta > 1e3) {
-      delta = 1e3;
-    }
-    engine_default.lastTickTime = timestamp;
-    Scheduler2.tick(timestamp);
-    Replay.syncPlayElapsed({
-      timestamp: engine_default.lastTickTime,
-      isBlocked
-    });
-    Replay.update({
-      speed: Game2.getSpeed(),
-      timestamp: engine_default.lastTickTime
-    });
-    Gamepad.update(timestamp);
-    CommandQueue2.flush();
-    if ((!engine_default.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
-      Game2.tick(isBlocked);
-      engine_default.fixedAccumulator = timestamp;
-    }
-    Animations.flush();
-    UI2.tickHud();
-    UI2.render();
-    Animations.render();
-    engine_default.rafId = requestAnimationFrame(startGameLoop);
-  };
-  var start_game_loop_default = startGameLoop;
-
-  // lib/engine/restart-game-loop.js
-  var restartGameLoop = () => {
-    engine_default.stop();
-    engine_default.rafId = requestAnimationFrame(start_game_loop_default);
-  };
-  var restart_game_loop_default = restartGameLoop;
-
-  // lib/engine/stop-game-loop.js
-  var stopGameLoop = () => {
-    if (!engine_default.rafId) {
-      return;
-    }
-    cancelAnimationFrame(engine_default.rafId);
-    engine_default.rafId = 0;
-    engine_default.lastTickTime = 0;
-    engine_default.fixedAccumulator = 0;
-  };
-  var stop_game_loop_default = stopGameLoop;
-
   // lib/core/command/command.js
   var Command = class extends core_default {
     /**
@@ -11873,6 +11813,79 @@ var tetris = (() => {
       Engine.start();
     },
     /**
+     * # 带速度控制的游戏主循环（Game Loop）
+     *
+     * 使用 `requestAnimationFrame` 驱动的核心渲染循环， 控制游戏的下落节奏、输入处理、渲染和动画更新。
+     *
+     * ## 帧循环流程
+     *
+     * 每一帧按以下顺序执行：
+     *
+     * | 步骤 | 操作                     | 说明                                         |
+     * | ---- | ------------------------ | -------------------------------------------- |
+     * | 1    | 防止死亡螺旋             | 限制 delta 上限为 1000ms，防止切后台回来卡死 |
+     * | 2    | Scheduler.tick()         | 驱动调度器，执行到期的定时任务               |
+     * | 3    | Replay.syncPlayElapsed() | 同步回放逻辑时钟                             |
+     * | 4    | Replay.update()          | 更新回放系统，注入待重放的命令               |
+     * | 5    | Gamepad.update()         | 更新手柄输入状态                             |
+     * | 6    | CommandQueue.flush()     | 执行命令队列中的所有待执行命令               |
+     * | 7    | Game.tick()              | 执行游戏逻辑（下落/碰撞/消行）               |
+     * | 8    | Animations.update()      | 更新动画状态                                 |
+     * | 9    | UI.tickHud()             | 更新 HUD 动画                                |
+     * | 10   | UI.render()              | 渲染游戏界面                                 |
+     * | 11   | Animations.render()      | 叠加渲染动画特效                             |
+     * | 12   | requestAnimationFrame()  | 请求下一帧                                   |
+     *
+     * ## 固定时间步长
+     *
+     * 游戏逻辑（下落）不是每帧都执行，而是根据当前等级的速度 （`Game.getSpeed()`）来控制执行频率：
+     *
+     * - 低等级时速度慢，下落间隔大（约 1000ms）
+     * - 高等级时速度快，下落间隔小（最低 120ms）
+     *
+     * 这确保了游戏难度与等级挂钩，同时避免了帧率波动对游戏速度的影响。
+     *
+     * ## 回放特殊处理
+     *
+     * 当 `Replay.playing` 为 true 时，跳过游戏逻辑 tick， 因为回放系统会通过注入 command 来驱动游戏状态。
+     *
+     * @param {number} timestamp - RequestAnimationFrame 传入的当前时间戳（毫秒）
+     * @returns {void}
+     */
+    tick: (timestamp) => {
+      if (!Engine.lastTickTime) {
+        Engine.lastTickTime = timestamp;
+        Engine.fixedAccumulator = timestamp;
+      }
+      const { Game: Game2, Scheduler: Scheduler2 } = Engine;
+      const { UI: UI2, Replay, Gamepad, Animations, CommandQueue: CommandQueue2 } = Game2;
+      const isBlocked = Animations.hasBlocking();
+      const stepDelta = timestamp - Engine.fixedAccumulator;
+      Engine.lastTickTime = timestamp;
+      Scheduler2.tick(timestamp);
+      Replay.syncPlayElapsed({
+        timestamp: Engine.lastTickTime,
+        isBlocked
+      });
+      Replay.update({
+        speed: Game2.getSpeed(),
+        timestamp: Engine.lastTickTime
+      });
+      Gamepad.update(timestamp);
+      CommandQueue2.flush();
+      if ((!Engine.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
+        console.log("before tick, isBlocked:", isBlocked);
+        Game2.tick(isBlocked);
+        console.log("after tick");
+        Engine.fixedAccumulator = timestamp;
+      }
+      Animations.flush();
+      UI2.tickHud();
+      UI2.render();
+      Animations.render();
+      Engine.rafId = requestAnimationFrame(Engine.tick);
+    },
+    /**
      * ## 订阅各模块事件
      *
      * 依次订阅 Engine 自身、Audio 音频系统、Game 游戏主控的事件。 在 launch 时调用一次。
@@ -11925,7 +11938,7 @@ var tetris = (() => {
      * @returns {void}
      */
     start: () => {
-      Engine.rafId = requestAnimationFrame(start_game_loop_default);
+      Engine.rafId = requestAnimationFrame(Engine.tick);
     },
     /**
      * ## 停止游戏循环
@@ -11935,7 +11948,14 @@ var tetris = (() => {
      * @returns {void}
      */
     stop: () => {
-      stop_game_loop_default();
+      if (!Engine.rafId) {
+        return;
+      }
+      cancelAnimationFrame(Engine.rafId);
+      Engine.rafId = 0;
+      Engine.lastTickTime = 0;
+      Engine.now = 0;
+      Engine.fixedAccumulator = 0;
     },
     /**
      * ## 重启游戏循环
@@ -11945,7 +11965,8 @@ var tetris = (() => {
      * @returns {void}
      */
     restart: () => {
-      restart_game_loop_default();
+      Engine.stop();
+      Engine.start();
     }
   };
   var engine_default = Engine;
