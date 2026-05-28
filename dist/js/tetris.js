@@ -10764,6 +10764,10 @@ var tetris = (() => {
       cx += ox;
       cy += oy;
       Store.setState({ cx, cy });
+      const { curr } = Store.getState();
+      if (curr._lockTimer) {
+        curr._lockTimer = 0;
+      }
       runtime.emit(AE.PLAY_SOUND, { sound: "MOVE" });
       return true;
     }
@@ -10890,6 +10894,10 @@ var tetris = (() => {
   };
   var get_kick_data_default = getKickData;
 
+  // lib/game/utils/compute-new-rotation.js
+  var computeNewRotation = (current, direction) => ((current ?? 0) + direction + 4) % 4;
+  var compute_new_rotation_default = computeNewRotation;
+
   // lib/game/utils/rotate-counter-clockwise.js
   var rotateCounterClockwise = (matrix) => {
     const rows = matrix.length;
@@ -10918,49 +10926,79 @@ var tetris = (() => {
   };
   var rotate_clockwise_default = rotateClockwise;
 
+  // lib/game/utils/compute-rotated-shape.js
+  var computeRotatedShape = (shape, direction) => direction === 1 ? rotate_clockwise_default(shape) : rotate_counter_clockwise_default(shape);
+  var compute_rotated_shape_default = computeRotatedShape;
+
+  // lib/game/utils/apply-rotation.js
+  var applyRotation = (Store, curr, rotated, newRotation, cx, cy) => {
+    const updates = {
+      curr: { ...curr, shape: rotated, rotation: newRotation }
+    };
+    if (cx !== void 0) {
+      updates.cx = cx;
+    }
+    if (cy !== void 0) {
+      updates.cy = cy;
+    }
+    Store.setState(updates);
+    const { curr: updatedCurr } = Store.getState();
+    if (updatedCurr._lockTimer) {
+      updatedCurr._lockTimer = 0;
+    }
+  };
+  var apply_rotation_default = applyRotation;
+
+  // lib/game/utils/try-kick-rotation.js
+  var tryKickRotation = (runtime, curr, rotated, newRotation, tests) => {
+    const { cx, cy } = runtime.Store.getState();
+    for (const [ox, oy] of tests) {
+      const offsetX = ox;
+      const offsetY = -oy;
+      if (!collision_default2(runtime, offsetX, offsetY, rotated)) {
+        apply_rotation_default(
+          runtime.Store,
+          curr,
+          rotated,
+          newRotation,
+          cx + offsetX,
+          cy + offsetY
+        );
+        return true;
+      }
+    }
+    return false;
+  };
+  var try_kick_rotation_default = tryKickRotation;
+
+  // lib/game/utils/try-normal-rotation.js
+  var tryNormalRotation = (runtime, curr, rotated, newRotation) => {
+    if (!collision_default2(runtime, 0, 0, rotated)) {
+      apply_rotation_default(runtime.Store, curr, rotated, newRotation);
+      return true;
+    }
+    return false;
+  };
+  var try_normal_rotation_default = tryNormalRotation;
+
   // lib/game/logic/rotate.js
   var rotate = (runtime, direction = 1) => {
     const { Store } = runtime;
-    const state = Store.getState();
-    const { curr } = state;
-    if (curr?.type === "O") {
-      return;
-    }
-    const rotated = direction === 1 ? rotate_clockwise_default(curr.shape) : rotate_counter_clockwise_default(curr.shape);
+    const { curr } = Store.getState();
+    if (curr?.type === "O") return;
+    const rotated = compute_rotated_shape_default(curr.shape, direction);
+    const newRotation = compute_new_rotation_default(curr.rotation, direction);
     const kickData = get_kick_data_default(curr.type);
-    const curRotation = (curr.rotation ?? 0) % 4;
-    const newRotation = (curRotation + direction + 4) % 4;
-    if (kickData && Array.isArray(kickData)) {
-      const tests = kickData[curRotation];
-      if (tests && Array.isArray(tests) && tests.length > 0) {
-        for (const [ox, oy] of tests) {
-          const offsetX = ox;
-          const offsetY = -oy;
-          if (!collision_default2(runtime, offsetX, offsetY, rotated)) {
-            Store.setState({
-              curr: {
-                ...curr,
-                shape: rotated,
-                rotation: newRotation
-              },
-              cx: state.cx + offsetX,
-              cy: state.cy + offsetY
-            });
-            runtime.emit(AudioEvents().PLAY_SOUND, { sound: "ROTATE" });
-            return;
-          }
-        }
+    const AE = AudioEvents();
+    if (kickData?.length) {
+      const tests = kickData[(curr.rotation ?? 0) % 4];
+      if (tests?.length && try_kick_rotation_default(runtime, curr, rotated, newRotation, tests)) {
+        runtime.emit(AE.PLAY_SOUND, { sound: "ROTATE" });
+        return;
       }
     }
-    if (!collision_default2(runtime, 0, 0, rotated)) {
-      Store.setState({
-        curr: {
-          ...curr,
-          shape: rotated,
-          rotation: newRotation
-        }
-      });
-      runtime.emit(AudioEvents().PLAY_SOUND, { sound: "ROTATE" });
+    if (try_normal_rotation_default(runtime, curr, rotated, newRotation)) {
+      runtime.emit(AE.PLAY_SOUND, { sound: "ROTATE" });
     }
   };
   var rotate_default = rotate;
@@ -11013,6 +11051,7 @@ var tetris = (() => {
   var clear_lines_default = clearLines;
 
   // lib/game/logic/tick.js
+  var LOCK_DELAY = 300;
   var tick = (runtime, isBlocked) => {
     const mode = runtime.Store.getMode();
     if (mode !== "playing" && mode !== "replay" || isBlocked) {
@@ -11022,15 +11061,24 @@ var tetris = (() => {
       runtime.emit("dispatch:input", {
         device: "replay",
         action: "AUTO_TICK",
-        payload: {
-          Game: runtime
-        }
+        payload: { Game: runtime }
       });
     }
     const AE = AudioEvents();
     const GE = GameEvents(runtime.id);
     const { curr, cx, cy } = runtime.Store.getState();
-    if (!move_default(runtime, 0, 1)) {
+    if (move_default(runtime, 0, 1)) {
+      if (curr._lockTimer) {
+        curr._lockTimer = 0;
+      }
+      return;
+    }
+    if (!curr._lockTimer) {
+      curr._lockTimer = 0;
+    }
+    curr._lockTimer += runtime.getSpeed();
+    if (curr._lockTimer >= LOCK_DELAY) {
+      curr._lockTimer = 0;
       lock_default(runtime);
       runtime.emit(GE.START_LANDING_FLASH, {
         piece: { shape: curr.shape, cx, cy }

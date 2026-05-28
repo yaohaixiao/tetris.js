@@ -53,6 +53,7 @@ describe('tick', () => {
       id: 'test-uuid',
       Store: mockStore,
       emit: jest.fn(),
+      getSpeed: jest.fn(() => 1000),
     };
   });
 

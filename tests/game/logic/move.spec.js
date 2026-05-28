@@ -1,7 +1,8 @@
+// tests/game/logic/move.spec.js
+
 import move from '@/lib/game/logic/move.js';
 import collision from '@/lib/game/logic/collision.js';
 
-// Mock 依赖
 jest.mock('@/lib/game/logic/collision.js', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -18,6 +19,7 @@ describe('move', () => {
     mockState = {
       cx: 4,
       cy: 5,
+      curr: { shape: [[1]], color: '#ffa500' },
     };
 
     mockStore = {
@@ -91,6 +93,22 @@ describe('move', () => {
 
       expect(collision).toHaveBeenCalledWith(mockContext, -1, 0);
     });
+
+    it('移动成功时重置 _lockTimer', () => {
+      mockState.curr._lockTimer = 200;
+      collision.mockReturnValue(false);
+
+      move(mockContext, 0, 1);
+
+      expect(mockState.curr._lockTimer).toBe(0);
+    });
+
+    it('_lockTimer 不存在时不报错', () => {
+      delete mockState.curr._lockTimer;
+      collision.mockReturnValue(false);
+
+      expect(() => move(mockContext, 0, 1)).not.toThrow();
+    });
   });
 
   // ==================== 移动失败 ====================
@@ -126,6 +144,15 @@ describe('move', () => {
 
       expect(collision).toHaveBeenCalledWith(mockContext, 1, 1);
     });
+
+    it('碰撞时不应该重置 _lockTimer', () => {
+      mockState.curr._lockTimer = 200;
+      collision.mockReturnValue(true);
+
+      move(mockContext, 0, 1);
+
+      expect(mockState.curr._lockTimer).toBe(200);
+    });
   });
 
   // ==================== 参数传递 ====================
@@ -135,10 +162,7 @@ describe('move', () => {
 
       move(mockContext, -2, 0);
 
-      expect(mockStore.setState).toHaveBeenCalledWith({
-        cx: 2,
-        cy: 5,
-      });
+      expect(mockStore.setState).toHaveBeenCalledWith({ cx: 2, cy: 5 });
       expect(collision).toHaveBeenCalledWith(mockContext, -2, 0);
     });
 
@@ -147,10 +171,7 @@ describe('move', () => {
 
       move(mockContext, 0, -1);
 
-      expect(mockStore.setState).toHaveBeenCalledWith({
-        cx: 4,
-        cy: 4,
-      });
+      expect(mockStore.setState).toHaveBeenCalledWith({ cx: 4, cy: 4 });
       expect(collision).toHaveBeenCalledWith(mockContext, 0, -1);
     });
 
@@ -159,10 +180,7 @@ describe('move', () => {
 
       move(mockContext, 0, 0);
 
-      expect(mockStore.setState).toHaveBeenCalledWith({
-        cx: 4,
-        cy: 5,
-      });
+      expect(mockStore.setState).toHaveBeenCalledWith({ cx: 4, cy: 5 });
     });
   });
 
@@ -194,7 +212,6 @@ describe('move', () => {
 
       move(mockContext, 1, 1);
 
-      // 因为没有 setState，所以 cx/cy 不变
       expect(mockState.cx).toBe(originalCx);
       expect(mockState.cy).toBe(originalCy);
     });
@@ -202,14 +219,12 @@ describe('move', () => {
     it('多次移动应该正确累加', () => {
       collision.mockReturnValue(false);
 
-      // 第一次右移
       move(mockContext, 1, 0);
       expect(mockStore.setState).toHaveBeenLastCalledWith({ cx: 5, cy: 5 });
 
       mockState.cx = 5;
       mockState.cy = 5;
 
-      // 第二次下移
       move(mockContext, 0, 1);
       expect(mockStore.setState).toHaveBeenLastCalledWith({ cx: 5, cy: 6 });
     });
