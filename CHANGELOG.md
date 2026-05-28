@@ -1,3 +1,16 @@
+# [1.9.0](https://github.com/yaohaixiao/tetris.js/compare/1.8.0...1.9.0) (2026-05-28)
+
+
+### Bug Fixes
+
+* 修复 1×4、1×5、2×3 等非正方形矩阵旋转错误， 修复负数 rotation 溢出问题 (curRotation + direction + 4) % 4 ([2f67571](https://github.com/yaohaixiao/tetris.js/commit/2f675710aa3b8a5961aff4d788a36422068a099c))
+
+
+### Features
+
+* 添加 Lock Delay 机制 ([d163a6f](https://github.com/yaohaixiao/tetris.js/commit/d163a6f63fee50de14da69725af47313aa621c89))
+* 添加 SRS KICK 墙踢数据 ([d9a0795](https://github.com/yaohaixiao/tetris.js/commit/d9a0795febcce38f30506f0494126ded43d493d8))
+* KeyboardController 添加 DAS/ARR 支持 ([4f4e5de](https://github.com/yaohaixiao/tetris.js/commit/4f4e5de18b1af24074f96d91302aa20ea238f9ec))
 # [1.8.0](https://github.com/yaohaixiao/tetris.js/compare/1.7.3...1.8.0) (2026-05-28)
 
 
