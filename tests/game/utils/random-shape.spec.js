@@ -1,14 +1,16 @@
 import randomShape from '@/lib/game/utils/random-shape.js';
 
 jest.mock('@/lib/game/constants/shapes.js', () => [
-  { shape: [[1, 1, 1, 1]], colorIndex: 0 },
-  { shape: [[1, 1, 1, 1, 1]], colorIndex: 1 },
+  { shape: [[1, 1, 1, 1]], colorIndex: 0, type: 'I', rotation: 0 },
+  { shape: [[1, 1, 1, 1, 1]], colorIndex: 1, type: 'I5', rotation: 0 },
   {
     shape: [
       [1, 1],
       [1, 1],
     ],
     colorIndex: 2,
+    type: 'O',
+    rotation: 0,
   },
   {
     shape: [
@@ -16,6 +18,8 @@ jest.mock('@/lib/game/constants/shapes.js', () => [
       [1, 1, 1],
     ],
     colorIndex: 3,
+    type: 'T',
+    rotation: 0,
   },
   {
     shape: [
@@ -23,6 +27,8 @@ jest.mock('@/lib/game/constants/shapes.js', () => [
       [1, 1, 1],
     ],
     colorIndex: 4,
+    type: 'L',
+    rotation: 0,
   },
   {
     shape: [
@@ -30,6 +36,8 @@ jest.mock('@/lib/game/constants/shapes.js', () => [
       [1, 1, 1],
     ],
     colorIndex: 5,
+    type: 'J',
+    rotation: 0,
   },
   {
     shape: [
@@ -37,6 +45,8 @@ jest.mock('@/lib/game/constants/shapes.js', () => [
       [1, 1, 0],
     ],
     colorIndex: 6,
+    type: 'S',
+    rotation: 0,
   },
   {
     shape: [
@@ -44,6 +54,8 @@ jest.mock('@/lib/game/constants/shapes.js', () => [
       [0, 1, 1],
     ],
     colorIndex: 7,
+    type: 'Z',
+    rotation: 0,
   },
 ]);
 
@@ -69,15 +81,38 @@ describe('randomShape', () => {
 
   // ==================== 返回值结构 ====================
   describe('返回值结构', () => {
-    it('应返回包含 shape 和 color 的对象', () => {
+    it('应返回包含 shape、color、type、rotation、colorIndex 的对象', () => {
       const piece = randomShape(1);
       expect(piece).toHaveProperty('shape');
       expect(piece).toHaveProperty('color');
+      expect(piece).toHaveProperty('type');
+      expect(piece).toHaveProperty('rotation');
+      expect(piece).toHaveProperty('colorIndex');
     });
 
-    it('不应包含 colorIndex', () => {
+    it('shape 应为数组', () => {
       const piece = randomShape(1);
-      expect(piece).not.toHaveProperty('colorIndex');
+      expect(Array.isArray(piece.shape)).toBe(true);
+    });
+
+    it('color 应为字符串', () => {
+      const piece = randomShape(1);
+      expect(typeof piece.color).toBe('string');
+    });
+
+    it('type 应为字符串', () => {
+      const piece = randomShape(1);
+      expect(typeof piece.type).toBe('string');
+    });
+
+    it('rotation 应为数字', () => {
+      const piece = randomShape(1);
+      expect(typeof piece.rotation).toBe('number');
+    });
+
+    it('colorIndex 应为数字', () => {
+      const piece = randomShape(1);
+      expect(typeof piece.colorIndex).toBe('number');
     });
   });
 
@@ -87,6 +122,16 @@ describe('randomShape', () => {
       const piece = randomShape(1);
       const piece2 = randomShape(1);
       expect(piece.shape).not.toBe(piece2.shape);
+    });
+
+    it('修改返回的 shape 不应影响原始数据', () => {
+      const piece = randomShape(1);
+      const originalShape = piece.shape.map(row => [...row]);
+      piece.shape[0][0] = 999;
+      expect(piece.shape[0][0]).toBe(999);
+      // 重新生成应该不受影响
+      const newPiece = randomShape(1);
+      expect(newPiece.shape[0][0]).not.toBe(999);
     });
   });
 
@@ -133,16 +178,72 @@ describe('randomShape', () => {
     });
   });
 
-  // ==================== colorIndex 映射 ====================
-  describe('colorIndex 映射', () => {
-    it('colorIndex=3 → palette[3]', () => {
-      Math.random.mockReturnValue(0.4); // SHAPES[3]
-      expect(randomShape(1).color).toBe('#P0_3');
+  // ==================== 类型和颜色索引映射 ====================
+  describe('类型和颜色索引映射', () => {
+    it('应正确返回 type 和 colorIndex', () => {
+      Math.random.mockReturnValue(0);     // SHAPES[0] - I 型
+      const piece = randomShape(1);
+      expect(piece.type).toBe('I');
+      expect(piece.colorIndex).toBe(0);
     });
 
-    it('colorIndex=7 → palette[7]', () => {
-      Math.random.mockReturnValue(0.9); // SHAPES[7]
-      expect(randomShape(1).color).toBe('#P0_7');
+    it('colorIndex=3 → type=T, palette[3]', () => {
+      Math.random.mockReturnValue(0.4);   // SHAPES[3] - T 型
+      const piece = randomShape(1);
+      expect(piece.type).toBe('T');
+      expect(piece.colorIndex).toBe(3);
+      expect(piece.color).toBe('#P0_3');
+    });
+
+    it('colorIndex=7 → type=Z, palette[7]', () => {
+      Math.random.mockReturnValue(0.9);   // SHAPES[7] - Z 型
+      const piece = randomShape(1);
+      expect(piece.type).toBe('Z');
+      expect(piece.colorIndex).toBe(7);
+      expect(piece.color).toBe('#P0_7');
+    });
+
+    it('I5 类型应正确返回', () => {
+      Math.random.mockReturnValue(0.15);  // SHAPES[1] - I5 型
+      const piece = randomShape(1);
+      expect(piece.type).toBe('I5');
+      expect(piece.colorIndex).toBe(1);
+    });
+
+    it('O 类型应正确返回', () => {
+      Math.random.mockReturnValue(0.25);  // SHAPES[2] - O 型
+      const piece = randomShape(1);
+      expect(piece.type).toBe('O');
+      expect(piece.colorIndex).toBe(2);
+    });
+  });
+
+  // ==================== rotation 初始值 ====================
+  describe('rotation 初始值', () => {
+    it('所有方块的初始 rotation 应为 0', () => {
+      for (let i = 0; i < 10; i++) {
+        Math.random.mockReturnValue(Math.random());
+        const piece = randomShape(1);
+        expect(piece.rotation).toBe(0);
+      }
+    });
+  });
+
+  // ==================== 随机性测试 ====================
+  describe('随机性', () => {
+    it('Math.random 被正确调用', () => {
+      randomShape(1);
+      expect(Math.random).toHaveBeenCalled();
+    });
+
+    it('不同随机值应返回不同方块', () => {
+      Math.random.mockReturnValueOnce(0.1);  // I5
+      Math.random.mockReturnValueOnce(0.5);  // L
+
+      const piece1 = randomShape(1);
+      const piece2 = randomShape(1);
+
+      expect(piece1.type).not.toBe(piece2.type);
     });
   });
 });

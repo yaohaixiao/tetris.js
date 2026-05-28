@@ -5763,13 +5763,13 @@ var tetris = (() => {
     grad.addColorStop(1, dark);
     ctx.fillStyle = grad;
     ctx.fillRect(px, py, w, h);
-    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
     ctx.beginPath();
     ctx.moveTo(px, py);
     ctx.lineTo(px + w * 0.3, py + h * 0.5);
     ctx.lineTo(px, py + h);
     ctx.fill();
-    ctx.fillStyle = "rgba(0,0,0,0.06)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.06)";
     ctx.beginPath();
     ctx.moveTo(px + w, py);
     ctx.lineTo(px + w * 0.7, py + h * 0.5);
@@ -8581,13 +8581,13 @@ var tetris = (() => {
      *
      * 形状：1 行 4 列 colorIndex: 0（TEAL 系）
      */
-    { shape: [[1, 1, 1, 1]], colorIndex: 0 },
+    { shape: [[1, 1, 1, 1]], colorIndex: 0, type: "I", rotation: 0 },
     /**
      * ## I 型方块（加长版）
      *
      * 形状：1 行 5 列 colorIndex: 1（GREEN 系）
      */
-    { shape: [[1, 1, 1, 1, 1]], colorIndex: 1 },
+    { shape: [[1, 1, 1, 1, 1]], colorIndex: 1, type: "I5", rotation: 0 },
     /**
      * ## O 型方块（正方形）
      *
@@ -8598,7 +8598,9 @@ var tetris = (() => {
         [1, 1],
         [1, 1]
       ],
-      colorIndex: 2
+      colorIndex: 2,
+      type: "O",
+      rotation: 0
     },
     /**
      * ## T 型方块
@@ -8610,7 +8612,9 @@ var tetris = (() => {
         [0, 1, 0],
         [1, 1, 1]
       ],
-      colorIndex: 3
+      colorIndex: 3,
+      type: "T",
+      rotation: 0
     },
     /**
      * ## L 型方块
@@ -8622,7 +8626,9 @@ var tetris = (() => {
         [1, 0, 0],
         [1, 1, 1]
       ],
-      colorIndex: 4
+      colorIndex: 4,
+      type: "L",
+      rotation: 0
     },
     /**
      * ## J 型方块（反 L 型）
@@ -8634,7 +8640,9 @@ var tetris = (() => {
         [0, 0, 1],
         [1, 1, 1]
       ],
-      colorIndex: 5
+      colorIndex: 5,
+      type: "J",
+      rotation: 0
     },
     /**
      * ## S 型方块（右斜）
@@ -8646,7 +8654,9 @@ var tetris = (() => {
         [0, 1, 1],
         [1, 1, 0]
       ],
-      colorIndex: 6
+      colorIndex: 6,
+      type: "S",
+      rotation: 0
     },
     /**
      * ## Z 型方块（左斜）
@@ -8658,7 +8668,9 @@ var tetris = (() => {
         [1, 1, 0],
         [0, 1, 1]
       ],
-      colorIndex: 7
+      colorIndex: 7,
+      type: "Z",
+      rotation: 0
     }
   ];
   var shapes_default = SHAPES;
@@ -8816,7 +8828,10 @@ var tetris = (() => {
     const palette = color_palettes_default[paletteIndex];
     return {
       shape: piece.shape.map((row) => [...row]),
-      color: palette[piece.colorIndex]
+      color: palette[piece.colorIndex],
+      type: piece.type,
+      rotation: piece.rotation ?? 0,
+      colorIndex: piece.colorIndex
     };
   };
   var random_shape_default = randomShape;
@@ -10468,7 +10483,7 @@ var tetris = (() => {
   var get_next_piece_default = getNextPiece;
 
   // lib/game/logic/collision.js
-  var collision2 = (runtime, ox, oy) => {
+  var collision2 = (runtime, ox, oy, shapeOverride) => {
     const { Elements, Store } = runtime;
     const { rows, cols } = Elements.Main;
     const state = Store.getState();
@@ -10476,7 +10491,7 @@ var tetris = (() => {
     if (!curr) {
       return false;
     }
-    const s = curr.shape;
+    const s = shapeOverride || curr.shape;
     for (let y = 0; y < s.length; y++) {
       for (let x = 0; x < s[y].length; x++) {
         if (s[y][x]) {
@@ -10704,26 +10719,187 @@ var tetris = (() => {
   };
   var move_default = move;
 
+  // lib/game/constants/srs-kick-data.js
+  var KICK_I = [
+    // 0→R
+    [
+      [0, 0],
+      [-2, 0],
+      [1, 0],
+      [-2, -1],
+      [1, 2]
+    ],
+    // R→2
+    [
+      [0, 0],
+      [-1, 0],
+      [2, 0],
+      [-1, 2],
+      [2, -1]
+    ],
+    // 2→L
+    [
+      [0, 0],
+      [2, 0],
+      [-1, 0],
+      [2, 1],
+      [-1, -2]
+    ],
+    // L→0
+    [
+      [0, 0],
+      [1, 0],
+      [-2, 0],
+      [1, -2],
+      [-2, 1]
+    ]
+  ];
+  var KICK_I5 = [
+    // 0→R (索引 0)
+    [
+      [0, 0],
+      [-2, 0],
+      [1, 0],
+      [-2, -1],
+      [1, 2]
+    ],
+    // R→2 (索引 1)
+    [
+      [0, 0],
+      [-1, 0],
+      [2, 0],
+      [-1, 2],
+      [2, -1]
+    ],
+    // 2→L (索引 2)
+    [
+      [0, 0],
+      [2, 0],
+      [-1, 0],
+      [2, 1],
+      [-1, -2]
+    ],
+    // L→0 (索引 3)
+    [
+      [0, 0],
+      [1, 0],
+      [-2, 0],
+      [1, -2],
+      [-2, 1]
+    ]
+  ];
+  var KICK_JLSZT = [
+    // 0→R
+    [
+      [0, 0],
+      [-1, 0],
+      [-1, 1],
+      [0, -2],
+      [-1, -2]
+    ],
+    // R→2
+    [
+      [0, 0],
+      [1, 0],
+      [1, -1],
+      [0, 2],
+      [1, 2]
+    ],
+    // 2→L
+    [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, -2],
+      [1, -2]
+    ],
+    // L→0
+    [
+      [0, 0],
+      [-1, 0],
+      [-1, -1],
+      [0, 2],
+      [-1, 2]
+    ]
+  ];
+  var getKickData = (type) => {
+    if (type === "I") {
+      return KICK_I;
+    }
+    if (type === "I5") {
+      return KICK_I5;
+    }
+    if (type === "O") {
+      return null;
+    }
+    return KICK_JLSZT;
+  };
+
   // lib/game/logic/rotate.js
-  var rotate = (runtime) => {
+  var rotateClockwise = (matrix) => {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const rotated = Array.from({ length: cols }).fill(0).map(() => Array.from({ length: rows }).fill(0));
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        rotated[j][rows - 1 - i] = matrix[i][j];
+      }
+    }
+    return rotated;
+  };
+  var rotateCounterClockwise = (matrix) => {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const rotated = Array.from({ length: cols }).fill(0).map(() => Array.from({ length: rows }).fill(0));
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        rotated[cols - 1 - j][i] = matrix[i][j];
+      }
+    }
+    return rotated;
+  };
+  var rotate = (runtime, direction = 1) => {
     const { Store } = runtime;
     const state = Store.getState();
     const { curr } = state;
-    if (!curr) {
+    if (curr?.type === "O") {
       return;
     }
-    const currentShape = structuredClone(curr);
-    const prev = curr.shape;
-    currentShape.shape = prev[0].map(
-      (_, i) => prev.map((r) => r[i]).toReversed()
-    );
-    Store.setState({ curr: currentShape });
-    const AE = AudioEvents();
-    if (collision_default2(runtime, 0, 0)) {
-      currentShape.shape = prev;
-      Store.setState({ curr: currentShape });
-    } else {
-      runtime.emit(AE.PLAY_SOUND, { sound: "ROTATE" });
+    const rotated = direction === 1 ? rotateClockwise(curr.shape) : rotateCounterClockwise(curr.shape);
+    const kickData = getKickData(curr.type);
+    const curRotation = (curr.rotation ?? 0) % 4;
+    const newRotation = (curRotation + direction + 4) % 4;
+    if (kickData && Array.isArray(kickData)) {
+      const tests = kickData[curRotation];
+      if (tests && Array.isArray(tests) && tests.length > 0) {
+        for (const [ox, oy] of tests) {
+          const offsetX = ox;
+          const offsetY = -oy;
+          if (!collision_default2(runtime, offsetX, offsetY, rotated)) {
+            Store.setState({
+              curr: {
+                ...curr,
+                shape: rotated,
+                rotation: newRotation
+              },
+              cx: state.cx + offsetX,
+              cy: state.cy + offsetY
+            });
+            runtime.emit(AudioEvents().PLAY_SOUND, { sound: "ROTATE" });
+            return;
+          }
+        }
+      }
+    }
+    if (!collision_default2(runtime, 0, 0, rotated)) {
+      Store.setState({
+        curr: {
+          ...curr,
+          shape: rotated,
+          rotation: newRotation
+        }
+      });
+      runtime.emit(AudioEvents().PLAY_SOUND, { sound: "ROTATE" });
     }
   };
   var rotate_default = rotate;
