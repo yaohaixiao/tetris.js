@@ -166,7 +166,7 @@ describe('ClearLinesAnimation', () => {
       anim.render();
 
       expect(emitSpy).toHaveBeenCalledWith('ui:test-uuid:render:clear:lines', {
-        state: { lines: [{ y: 3, alpha: 1 }] },
+        state: { lines: [{ y: 3, alpha: 1, color: '#fff' }] },
       });
     });
   });

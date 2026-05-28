@@ -1,6 +1,26 @@
 var tetris = (() => {
   // lib/configuration.js
   var Configuration = {
+    Block: {
+      /*
+       * 样式：
+       *
+       * - classic（默认）
+       * - gradient
+       * - pixel
+       * - shaded
+       */
+      style: "shaded",
+      /*
+       * 图案：
+       *
+       * - square（默认）
+       * - jay
+       * - ell
+       * - tee
+       */
+      pattern: "square"
+    },
     Elements: {
       Main: {
         cols: 10,
@@ -4792,16 +4812,14 @@ var tetris = (() => {
      * 通过 DOM ID 获取 Canvas 元素并初始化渲染上下文。
      *
      * @param {object} options - 配置选项
-     * @param {string} options.board - 主棋盘 Canvas 的 DOM ID
-     * @param {string} options.next - 预览方块 Canvas 的 DOM ID
-     * @param {number} options.cols - 棋盘列数
-     * @param {number} options.rows - 棋盘行数
      */
     constructor(options) {
       this.initialize(options);
     }
     initialize(options) {
-      const { board, next, cols, rows } = options;
+      const { board, next, cols, rows, style, pattern } = options;
+      this.style = style;
+      this.pattern = pattern;
       this.rows = rows;
       this.cols = cols;
       this.gameBoard = document.querySelector(`#${board}`);
@@ -5371,21 +5389,21 @@ var tetris = (() => {
     /** 亥时 (21-22) */
     Violet: { stroke: VIOLET2, face: RGBA_VIOLET2, secondHand: TEAL3 },
     /** 申时 (15-16) */
-    Yellow: { stroke: YELLOW3, face: RGBA_YELLOW2, secondHand: PINK2 },
+    Yellow: { stroke: YELLOW3, face: RGBA_YELLOW2, secondHand: GREEN3 },
     /** 酉时 (17-18) */
     Pink: { stroke: PINK2, face: RGBA_PINK2, secondHand: YELLOW3 },
     /** 午时 (11-12) */
-    Purple: { stroke: PURPLE3, face: RGBA_PURPLE2, secondHand: GREEN3 },
+    Purple: { stroke: PURPLE3, face: RGBA_PURPLE2, secondHand: TEAL3 },
     /** 未时 (13-14) */
-    Green: { stroke: GREEN3, face: RGBA_GREEN2, secondHand: CYAN2 },
+    Green: { stroke: GREEN3, face: RGBA_GREEN2, secondHand: TEAL3 },
     /** 辰时 (7-8) */
-    Blue: { stroke: BLUE3, face: RGBA_BLUE2, secondHand: CORAL2 },
+    Blue: { stroke: BLUE3, face: RGBA_BLUE2, secondHand: YELLOW3 },
     /** 巳时 (9-10) */
-    Coral: { stroke: CORAL2, face: RGBA_CORAL2, secondHand: BLUE3 },
+    Coral: { stroke: CORAL2, face: RGBA_CORAL2, secondHand: WHITE2 },
     /** 寅时 (3-4) */
-    Orange: { stroke: ORANGE3, face: RGBA_ORANGE2, secondHand: CYAN2 },
+    Orange: { stroke: ORANGE3, face: RGBA_ORANGE2, secondHand: RED3 },
     /** 卯时 (5-6) */
-    Cyan: { stroke: CYAN2, face: RGBA_CYAN2, secondHand: ORANGE3 },
+    Cyan: { stroke: CYAN2, face: RGBA_CYAN2, secondHand: GREEN3 },
     /** 丑时 (1-2) */
     White: { stroke: WHITE2, face: RGBA_WHITE3, secondHand: RED3 },
     /** 子时 (23, 0) */
@@ -5691,18 +5709,189 @@ var tetris = (() => {
   };
   var render_analog_clock_default = renderAnalogClock;
 
-  // lib/services/ui/board/render-block.js
-  var renderBlock = (canvas, x, y, color) => {
+  // lib/services/ui/block/render-classic-block.js
+  var renderClassicBlock = (canvas, x, y, color) => {
     const { gameBoardContext: ctx, blockSize } = canvas;
-    const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
+    const { BLACK: BLACK2 } = colors_default;
     const gap = 1;
-    const size = blockSize - gap * 2;
+    const size = blockSize - gap;
     const px = x * blockSize + gap;
     const py = y * blockSize + gap;
     ctx.fillStyle = color;
     ctx.fillRect(px, py, size, size);
-    ctx.strokeStyle = RGBA_BLACK2;
+    ctx.strokeStyle = BLACK2;
     ctx.strokeRect(px, py, size, size);
+  };
+  var render_classic_block_default = renderClassicBlock;
+
+  // lib/services/ui/block/utils/lighten.js
+  var lighten = (hex, factor) => {
+    const r = Number.parseInt(hex.slice(1, 3), 16);
+    const g = Number.parseInt(hex.slice(3, 5), 16);
+    const b = Number.parseInt(hex.slice(5, 7), 16);
+    const lr = Math.min(255, Math.floor(r + (255 - r) * factor));
+    const lg = Math.min(255, Math.floor(g + (255 - g) * factor));
+    const lb = Math.min(255, Math.floor(b + (255 - b) * factor));
+    return `#${lr.toString(16).padStart(2, "0")}${lg.toString(16).padStart(2, "0")}${lb.toString(16).padStart(2, "0")}`;
+  };
+  var lighten_default = lighten;
+
+  // lib/services/ui/block/utils/darken.js
+  var darken = (hex, factor) => {
+    const r = Number.parseInt(hex.slice(1, 3), 16);
+    const g = Number.parseInt(hex.slice(3, 5), 16);
+    const b = Number.parseInt(hex.slice(5, 7), 16);
+    const dr = Math.floor(r * (1 - factor));
+    const dg = Math.floor(g * (1 - factor));
+    const db = Math.floor(b * (1 - factor));
+    return `#${dr.toString(16).padStart(2, "0")}${dg.toString(16).padStart(2, "0")}${db.toString(16).padStart(2, "0")}`;
+  };
+  var darken_default = darken;
+
+  // lib/services/ui/block/render-gradient-block.js
+  var renderGradientBlock = (canvas, x, y, color) => {
+    const { gameBoardContext: ctx, blockSize } = canvas;
+    const px = x * blockSize;
+    const py = y * blockSize;
+    const w = blockSize;
+    const h = blockSize;
+    const light = lighten_default(color, 0.15);
+    const dark = darken_default(color, 0.25);
+    const grad = ctx.createLinearGradient(px, py, px, py + h);
+    grad.addColorStop(0, light);
+    grad.addColorStop(0.5, color);
+    grad.addColorStop(1, dark);
+    ctx.fillStyle = grad;
+    ctx.fillRect(px, py, w, h);
+    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.lineTo(px + w * 0.3, py + h * 0.5);
+    ctx.lineTo(px, py + h);
+    ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,0.06)";
+    ctx.beginPath();
+    ctx.moveTo(px + w, py);
+    ctx.lineTo(px + w * 0.7, py + h * 0.5);
+    ctx.lineTo(px + w, py + h);
+    ctx.fill();
+  };
+  var render_gradient_block_default = renderGradientBlock;
+
+  // lib/services/ui/block/render-pixel-block.js
+  var layer = (options) => {
+    const { ctx, px, py, w, h, u, steps, color } = options;
+    ctx.fillStyle = color;
+    ctx.fillRect(
+      px + u * steps,
+      // X 坐标：缩进 steps 个单元
+      py + u * steps,
+      // Y 坐标：缩进 steps 个单元
+      w - u * steps * 2,
+      // 宽度：两侧各缩进 steps 个单元
+      h - u * steps * 2
+      // 高度：两侧各缩进 steps 个单元
+    );
+  };
+  var drawLayers = (options) => {
+    const { ctx, px, py, w, h, u, color, darkColor } = options;
+    layer({ ctx, px, py, w, h, u, steps: 0, color: darkColor });
+    layer({ ctx, px, py, w, h, u, steps: 1, color });
+    layer({ ctx, px, py, w, h, u, steps: 2, color: darkColor });
+  };
+  var renderPixelBlock = (canvas, x, y, color, pattern = "square") => {
+    const { gameBoardContext: ctx, blockSize } = canvas;
+    const u = blockSize / 8;
+    const px = x * blockSize;
+    const py = y * blockSize;
+    const w = blockSize;
+    const h = blockSize;
+    const darkColor = darken_default(color, 0.4);
+    const lightColor = lighten_default(color, 0.5);
+    switch (pattern) {
+      /** Jay：4 层嵌套，最内层用亮色 */
+      case "jay": {
+        drawLayers({ ctx, px, py, w, h, u, color, darkColor });
+        layer({ ctx, px, py, w, h, u, steps: 3, color: lightColor });
+        break;
+      }
+      /** Ell：2 层嵌套（外暗→主色） */
+      case "ell": {
+        layer({ ctx, px, py, w, h, u, steps: 0, color: darkColor });
+        layer({ ctx, px, py, w, h, u, steps: 1, color });
+        break;
+      }
+      /** Tee：2 层 + 横竖条内部细节 */
+      case "tee": {
+        layer({ ctx, px, py, w, h, u, steps: 0, color: darkColor });
+        layer({ ctx, px, py, w, h, u, steps: 1, color });
+        ctx.fillStyle = lightColor;
+        ctx.fillRect(px + u * 2, py + u * 2, u, h - u * 4);
+        ctx.fillRect(px + u * 2, py + u * 2, w - u * 4, u);
+        ctx.fillStyle = darkColor;
+        ctx.fillRect(px + u * 2, py + u * 5, w - u * 4, u);
+        ctx.fillRect(px + u * 5, py + u * 3, u, h - u * 6);
+        break;
+      }
+      /** Square：3 层嵌套（默认） */
+      default: {
+        drawLayers({ ctx, px, py, w, h, u, color, darkColor });
+      }
+    }
+  };
+  var render_pixel_block_default = renderPixelBlock;
+
+  // lib/services/ui/block/render-shaded-block.js
+  var renderShadedBlock = (canvas, x, y, color) => {
+    const { gameBoardContext: ctx, blockSize } = canvas;
+    const px = x * blockSize;
+    const py = y * blockSize;
+    const w = blockSize;
+    const h = blockSize;
+    const base = color;
+    const light = lighten_default(color, 0.08);
+    const dark = darken_default(color, 0.12);
+    const darker = darken_default(color, 0.22);
+    ctx.fillStyle = darker;
+    ctx.fillRect(px, py + h / 2, w, h / 2);
+    ctx.fillStyle = light;
+    ctx.fillRect(px, py, w, h / 2);
+    ctx.fillStyle = base;
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.lineTo(px + w / 2, py + h / 2);
+    ctx.lineTo(px, py + h);
+    ctx.fill();
+    ctx.fillStyle = dark;
+    ctx.beginPath();
+    ctx.moveTo(px + w, py);
+    ctx.lineTo(px + w / 2, py + h / 2);
+    ctx.lineTo(px + w, py + h);
+    ctx.fill();
+  };
+  var render_shaded_block_default = renderShadedBlock;
+
+  // lib/services/ui/block/render-block.js
+  var renderBlock = (canvas, x, y, color) => {
+    const { style = "classic", pattern = "square" } = canvas;
+    switch (style) {
+      case "gradient": {
+        render_gradient_block_default(canvas, x, y, color);
+        break;
+      }
+      case "shaded": {
+        render_shaded_block_default(canvas, x, y, color);
+        break;
+      }
+      case "pixel": {
+        render_pixel_block_default(canvas, x, y, color, pattern);
+        break;
+      }
+      default: {
+        render_classic_block_default(canvas, x, y, color);
+        break;
+      }
+    }
   };
   var render_block_default = renderBlock;
 
@@ -6058,8 +6247,12 @@ var tetris = (() => {
   // lib/services/ui/next/render-next-piece.js
   var renderNextPiece = (canvas, state) => {
     const { next } = state;
-    const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
-    const { nextPiece, nextPieceContext: ctx } = canvas;
+    const {
+      style = "classic",
+      pattern = "square",
+      nextPiece,
+      nextPieceContext: ctx
+    } = canvas;
     const { width, height } = nextPiece;
     if (!next) {
       return;
@@ -6069,21 +6262,28 @@ var tetris = (() => {
     const ox = Math.floor((width - shape[0].length * blockSize) / 2);
     const oy = Math.floor((height - shape.length * blockSize) / 2);
     clear_next_piece_default(canvas);
+    ctx.save();
+    ctx.translate(ox, oy);
     for (let y = 0; y < shape.length; y++) {
       for (let x = 0; x < shape[y].length; x++) {
         if (!shape[y][x]) {
           continue;
         }
-        const gap = 1;
-        const size = blockSize - gap;
-        const px = ox + x * blockSize + gap;
-        const py = oy + y * blockSize + gap;
-        ctx.fillStyle = next.color;
-        ctx.fillRect(px, py, size, size);
-        ctx.strokeStyle = RGBA_BLACK2;
-        ctx.strokeRect(px, py, size, size);
+        render_block_default(
+          {
+            gameBoardContext: ctx,
+            blockSize,
+            style,
+            pattern,
+            next: "ok"
+          },
+          x,
+          y,
+          next.color
+        );
       }
     }
+    ctx.restore();
   };
   var render_next_piece_default = renderNextPiece;
 
@@ -6231,7 +6431,7 @@ var tetris = (() => {
   };
   var resize_default = resize;
 
-  // lib/services/ui/board/render-clear-lines.js
+  // lib/services/ui/effects/render-clear-lines.js
   var renderClearLines = (canvas, state) => {
     const { gameBoardContext: ctx, cols } = canvas;
     for (const line of state.lines) {
@@ -6441,16 +6641,16 @@ var tetris = (() => {
      * 创建 HudManager 和 Canvas 实例。
      *
      * @param {object} options - 配置对象
-     * @param {object} options.Elements - UI 元素配置
-     * @param {object} options.Elements.Hud - HUD DOM 元素配置
-     * @param {object} options.Elements.Main - 主画布配置（board、next、cols、rows）
      * @returns {void}
      */
     initialize(options) {
-      const { Elements } = options;
+      const { Elements, Block } = options;
       const { Hud, Main } = Elements;
       this.Hud = new hud_manager_default(Hud);
-      this.Canvas = new canvas_default(Main);
+      this.Canvas = new canvas_default({
+        ...Main,
+        ...Block
+      });
     }
     // ==================== 状态更新方法 ====================
     /**
@@ -9851,10 +10051,14 @@ var tetris = (() => {
       this.name = "clear-lines";
       this._finished = false;
       this._schedulerIds = [];
-      this.lines = lines.map((y) => ({ y, alpha: 1 }));
       const { Scheduler: Scheduler2, Game: Game2, Store } = this;
       const GE = GameEvents(Game2.id);
       const AE = AudioEvents();
+      this.lines = lines.map((y) => ({
+        y,
+        alpha: 1,
+        color: Store.getState().next?.color || colors_default.WHITE
+      }));
       const { clearScore } = apply_clear_lines_default(Game2);
       const toggle = () => {
         for (const line of this.lines) {
@@ -10677,7 +10881,7 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize() {
-      const { Elements, Scheduler: Scheduler2 } = this;
+      const { Elements, Block, Scheduler: Scheduler2 } = this;
       const { Controls } = Elements;
       const Store = new game_store_default({
         ...Elements.Main,
@@ -10694,7 +10898,7 @@ var tetris = (() => {
         Scheduler: Scheduler2,
         Animations: this.Animations
       });
-      this.UI = new ui_default({ Game: this, Store, Elements });
+      this.UI = new ui_default({ Game: this, Store, Elements, Block });
       this.Keyboard = new keyboard_controller_default({ Game: this, Store });
       this.Gamepad = new gamepad_controller_default({ Game: this, Store });
       this.Touch = new touch_controller_default({ Game: this, Store, Controls });
