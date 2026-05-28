@@ -62,6 +62,7 @@ jest.mock('@/lib/game', () => {
     Keyboard: {
       addEventListeners: jest.fn(),
       removeEventListeners: jest.fn(),
+      update: jest.fn(),  // 新增
     },
     UI: {
       updateMode: jest.fn(),
@@ -325,6 +326,9 @@ describe('Engine', () => {
       Engine.Game.Gamepad.update.mockImplementation(() =>
         callOrder.push('gamepad'),
       );
+      Engine.Game.Keyboard.update.mockImplementation(() =>
+        callOrder.push('keyboard'),
+      );
       Engine.Game.CommandQueue.flush.mockImplementation(() =>
         callOrder.push('commandQueue'),
       );
@@ -349,6 +353,7 @@ describe('Engine', () => {
         'syncElapsed',
         'replay',
         'gamepad',
+        'keyboard',
         'commandQueue',
         'game',
         'animFlush',

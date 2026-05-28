@@ -7261,6 +7261,12 @@ var tetris = (() => {
   var ui_default = UI;
 
   // lib/services/input/keyboard-controller.js
+  var DAS_CONFIG = {
+    DAS: 10,
+    // 延迟 10 帧（≈167ms）后开始自动移动
+    ARR: 2
+    // 之后每 2 帧（≈33ms）移动一次
+  };
   var KEYBOARDS_ACTION_MAP = {
     // ========== 方块操作 ==========
     arrowleft: "MOVE_LEFT",
@@ -7340,6 +7346,47 @@ var tetris = (() => {
      */
     constructor(options) {
       super(options);
+      this.initialize();
+    }
+    /**
+     * ## 初始化 DAS/ARR 状态
+     *
+     * @returns {void}
+     */
+    initialize() {
+      this.dasState = {
+        dasTimer: -1,
+        arrTimer: 0,
+        direction: 0,
+        active: false
+      };
+    }
+    /**
+     * ## 每帧更新 DAS/ARR（由 Engine.tick 驱动）
+     *
+     * - DAS 阶段：等待 DAS_CONFIG.DAS 帧后开始
+     * - ARR 阶段：每 DAS_CONFIG.ARR 帧自动移动一次
+     *
+     * @returns {void}
+     */
+    update() {
+      const { dasState, Game: Game2 } = this;
+      if (!dasState.active || dasState.direction === 0) return;
+      if (Game2.Store.getMode() !== "playing") return;
+      if (dasState.dasTimer < DAS_CONFIG.DAS) {
+        dasState.dasTimer++;
+        return;
+      }
+      if (dasState.arrTimer >= DAS_CONFIG.ARR) {
+        dasState.arrTimer = 0;
+        this.emit("dispatch:input", {
+          device: "keyboard",
+          action: dasState.direction === -1 ? "MOVE_LEFT" : "MOVE_RIGHT",
+          payload: { Game: Game2 }
+        });
+      } else {
+        dasState.arrTimer++;
+      }
     }
     /**
      * ## 绑定游戏中键盘操作相关的事件
@@ -7347,68 +7394,59 @@ var tetris = (() => {
      * 注册全局事件监听器：
      *
      * - `resize`：监听窗口大小变化，用于调整游戏画布尺寸
-     * - `keydown`：监听键盘按键，处理游戏操作输入
-     *
-     * 使用箭头函数绑定方法，确保 `this` 指向当前实例。
-     *
-     * @example
-     *   const keyboard = new KeyboardController(options);
-     *   keyboard.addEventListeners(); // 开始监听键盘输入
+     * - `keydown`：监听键盘按下，处理游戏操作输入
+     * - `keyup`：监听键盘松开，用于停止 DAS/ARR
      *
      * @returns {KeyboardController} - 返回 KeyboardController 对象，可链式调用
      */
     addEventListeners() {
       globalThis.addEventListener("resize", this._onResize);
       document.addEventListener("keydown", this._onKeydown);
+      document.addEventListener("keyup", this._onKeyup);
       return this;
     }
     /**
      * ## 解除游戏中键盘操作相关的事件绑定
      *
-     * 移除之前注册的所有事件监听器。 在组件销毁或不需要键盘控制时调用，避免内存泄漏。
-     *
-     * @example
-     *   keyboard.removeEventListeners(); // 停止监听键盘输入
+     * 移除之前注册的所有事件监听器。
      *
      * @returns {KeyboardController} - 返回 KeyboardController 对象，可链式调用
      */
     removeEventListeners() {
       globalThis.removeEventListener("resize", this._onResize);
       document.removeEventListener("keydown", this._onKeydown);
+      document.removeEventListener("keyup", this._onKeyup);
       return this;
     }
     /**
      * ## 判断按键是否被屏蔽
      *
-     * 根据当前游戏状态决定是否应该响应该按键。 这是输入系统的核心安全机制，防止在不适当时刻执行无效操作。
+     * 根据当前游戏状态决定是否应该响应该按键。
      *
-     * 屏蔽场景详解：
+     * 屏蔽场景：
      *
-     * 1. **无效映射**：按键不在映射表中，无法转换为游戏动作
-     * 2. **回放限制**：回放模式下只允许按确认键（Enter），防止干扰回放过程
-     * 3. **AI 限制**：AI 控制时，玩家只能按 S 键切换控制器，其他操作由 AI 负责
+     * 1. 按键不在映射表中
+     * 2. 回放模式下只允许按 Enter 键
+     * 3. AI 控制时，只允许 AI_ALLOWED_ACTIONS 中的操作
      *
      * @private
      * @param {string} key - 按键名称（已小写化）
-     * @returns {boolean} - 按键被屏蔽返回 true，否则返回 false
+     * @returns {boolean} 按键被屏蔽返回 true，否则返回 false
      */
     _isBlocked(key) {
       const { Store } = this;
       const action = resolveKeyboardAction(key);
       const mode = Store.getMode();
       const controller = Store.getController();
-      return !action || // 场景1：无效按键
-      mode === "replay" && key !== "enter" || // 场景2：回放模式限制
-      controller === "ai" && // 场景3：AI 控制限制
-      mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action);
+      return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action);
     }
     /**
-     * ## resize 事件的功能函数
+     * ## resize 事件处理
      *
-     * 当浏览器窗口大小改变时触发。 通过 EventBus 发送 RESIZE 事件，通知游戏画布重新计算尺寸和布局。
+     * 当浏览器窗口大小改变时触发。
      *
      * @private
-     * @returns {KeyboardController} - 返回 KeyboardController 对象，可链式调用
+     * @returns {KeyboardController} - 返回 KeyboardController，支持链式方法调用
      */
     _onResize = () => {
       const { Game: Game2 } = this;
@@ -7417,40 +7455,54 @@ var tetris = (() => {
       return this;
     };
     /**
-     * ## keydown 事件的功能函数
+     * ## keydown 事件处理
      *
-     * 当用户按下键盘按键时触发。 执行流程：
-     *
-     * 1. 获取并规范化按键名称
-     * 2. 将按键映射为游戏动作指令
-     * 3. 检查按键是否应该被屏蔽
-     * 4. 通过 EventBus 派发输入事件
+     * 当用户按下键盘按键时触发。 左右方向键会启动 DAS/ARR 自动重复移动。
      *
      * @private
-     * @param {Event} e - 键盘事件对象
-     * @param {string} e.key - 按下的键名（如 'ArrowLeft'、' '、'a'）
-     * @returns {KeyboardController} - 返回 KeyboardController 对象，可链式调用
+     * @param {object} e - 键盘事件对象
+     * @returns {KeyboardController} - 返回 KeyboardController，支持链式方法调用
      */
     _onKeydown = (e) => {
       const { Game: Game2 } = this;
       const key = e.key?.toLowerCase();
-      if (!key) {
-        return this;
-      }
+      if (!key) return this;
       const action = resolveKeyboardAction(key);
-      if (this._isBlocked(key)) {
-        return this;
+      if (this._isBlocked(key)) return this;
+      if (key === "arrowleft") {
+        this.dasState.direction = -1;
+        this.dasState.dasTimer = 0;
+        this.dasState.arrTimer = 0;
+        this.dasState.active = true;
+      } else if (key === "arrowright") {
+        this.dasState.direction = 1;
+        this.dasState.dasTimer = 0;
+        this.dasState.arrTimer = 0;
+        this.dasState.active = true;
       }
       this.emit("dispatch:input", {
         device: "keyboard",
-        // 输入设备类型
         action,
-        // 游戏动作指令
-        payload: {
-          Game: Game2
-          // 传递游戏实例，供后续处理使用
-        }
+        payload: { Game: Game2 }
       });
+      return this;
+    };
+    /**
+     * ## keyup 事件处理
+     *
+     * 当用户松开键盘按键时触发。 松开左右方向键会停止 DAS/ARR。
+     *
+     * @private
+     * @param {object} e - 键盘事件对象
+     * @returns {KeyboardController} - 返回 KeyboardController，支持链式方法调用
+     */
+    _onKeyup = (e) => {
+      const key = e.key?.toLowerCase();
+      if (key === "arrowleft" && this.dasState.direction === -1 || key === "arrowright" && this.dasState.direction === 1) {
+        this.dasState.direction = 0;
+        this.dasState.dasTimer = -1;
+        this.dasState.active = false;
+      }
       return this;
     };
   };
@@ -10822,6 +10874,8 @@ var tetris = (() => {
       [-1, 2]
     ]
   ];
+
+  // lib/game/utils/get-kick-data.js
   var getKickData = (type) => {
     if (type === "I") {
       return KICK_I;
@@ -10834,19 +10888,9 @@ var tetris = (() => {
     }
     return KICK_JLSZT;
   };
+  var get_kick_data_default = getKickData;
 
-  // lib/game/logic/rotate.js
-  var rotateClockwise = (matrix) => {
-    const rows = matrix.length;
-    const cols = matrix[0].length;
-    const rotated = Array.from({ length: cols }).fill(0).map(() => Array.from({ length: rows }).fill(0));
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        rotated[j][rows - 1 - i] = matrix[i][j];
-      }
-    }
-    return rotated;
-  };
+  // lib/game/utils/rotate-counter-clockwise.js
   var rotateCounterClockwise = (matrix) => {
     const rows = matrix.length;
     const cols = matrix[0].length;
@@ -10858,6 +10902,23 @@ var tetris = (() => {
     }
     return rotated;
   };
+  var rotate_counter_clockwise_default = rotateCounterClockwise;
+
+  // lib/game/utils/rotate-clockwise.js
+  var rotateClockwise = (matrix) => {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const rotated = Array.from({ length: cols }).fill(0).map(() => Array.from({ length: rows }).fill(0));
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        rotated[j][rows - 1 - i] = matrix[i][j];
+      }
+    }
+    return rotated;
+  };
+  var rotate_clockwise_default = rotateClockwise;
+
+  // lib/game/logic/rotate.js
   var rotate = (runtime, direction = 1) => {
     const { Store } = runtime;
     const state = Store.getState();
@@ -10865,8 +10926,8 @@ var tetris = (() => {
     if (curr?.type === "O") {
       return;
     }
-    const rotated = direction === 1 ? rotateClockwise(curr.shape) : rotateCounterClockwise(curr.shape);
-    const kickData = getKickData(curr.type);
+    const rotated = direction === 1 ? rotate_clockwise_default(curr.shape) : rotate_counter_clockwise_default(curr.shape);
+    const kickData = get_kick_data_default(curr.type);
     const curRotation = (curr.rotation ?? 0) % 4;
     const newRotation = (curRotation + direction + 4) % 4;
     if (kickData && Array.isArray(kickData)) {
@@ -12240,7 +12301,7 @@ var tetris = (() => {
         Engine.fixedAccumulator = timestamp;
       }
       const { Game: Game2, Scheduler: Scheduler2 } = Engine;
-      const { UI: UI2, Replay, Gamepad, Animations, CommandQueue: CommandQueue2 } = Game2;
+      const { UI: UI2, Replay, Gamepad, Keyboard, Animations, CommandQueue: CommandQueue2 } = Game2;
       const isBlocked = Animations.hasBlocking();
       const stepDelta = timestamp - Engine.fixedAccumulator;
       Engine.lastTickTime = timestamp;
@@ -12254,6 +12315,7 @@ var tetris = (() => {
         timestamp: Engine.lastTickTime
       });
       Gamepad.update(timestamp);
+      Keyboard.update();
       CommandQueue2.flush();
       if ((!Engine.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
         Game2.tick(isBlocked);
