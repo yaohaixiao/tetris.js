@@ -5,7 +5,7 @@
 
 * 调增绘制预览方块的细节，减少预览方块间的间隙； ([88595f2](https://github.com/yaohaixiao/tetris.js/commit/88595f233893a21ffef6b45aad425e9f8dbe9330))
 * 添加3中方块绘制风格：gradient（渐变风格）、pixel（矩形像素风格）、shaded（立体风格） ([ef56dc5](https://github.com/yaohaixiao/tetris.js/commit/ef56dc5146d9338dcd79581e9780a7138b4a1da4))
-
+* 调整暂停时钟样式；
 
 ## [1.7.3](https://github.com/yaohaixiao/tetris.js/compare/1.7.2...1.7.3) (2026-05-27)
 
