@@ -41,6 +41,7 @@ const getHtmlTemplate = (args) => {
               <p class="tetris-panel-text">SCORE:<br><span id="${Hud.score}">00000</span></p>
               <p class="tetris-panel-text">LINE:<br><span id="${Hud.lines}">00</span></p>
               <p class="tetris-panel-text">LEVEL:<br><span id="${Hud.level}">01</span></p>
+              <p class="tetris-panel-text">COMBO:<br><span id="${Hud.combo}">00</span></p>
               <p class="tetris-panel-text tetris-highlight">HI-SCORE:<br><span id="${Hud.highScore}">00000</span></p>
             </section>
             <section class="tetris-panel hold">

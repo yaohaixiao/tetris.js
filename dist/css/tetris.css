@@ -408,33 +408,33 @@ body {
 @media screen and (max-width: 320px) {
   .tetris-next-piece,
   .tetris-hold-piece {
-    width: 82%;
+    width: 72%;
   }
 }
 @media screen and (max-width: 375px) {
   .tetris-next-piece,
   .tetris-hold-piece {
-    width: 82%;
+    width: 72%;
   }
 }
 @media screen and (max-width: 480px) {
   .tetris-next-piece,
   .tetris-hold-piece {
-    width: 82%;
+    width: 72%;
   }
 }
 @media screen and (max-width: 320px) {
-  .tetris-panel.shutcuts {
+  .tetris-panel.shortcuts {
     display: none;
   }
 }
 @media screen and (max-width: 375px) {
-  .tetris-panel.shutcuts {
+  .tetris-panel.shortcuts {
     display: none;
   }
 }
 @media screen and (max-width: 480px) {
-  .tetris-panel.shutcuts {
+  .tetris-panel.shortcuts {
     display: none;
   }
 }

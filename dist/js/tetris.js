@@ -34,6 +34,7 @@ var tetris = (() => {
         score: "tetris-score",
         lines: "tetris-lines",
         level: "tetris-level",
+        combo: "tetris-combo",
         highScore: "tetris-high-score"
       },
       Controls: {
@@ -3940,6 +3941,8 @@ var tetris = (() => {
     lines: 0,
     /** ## 当前等级 */
     level: 1,
+    combo: 0,
+    comboScore: 0,
     /** ## 历史最高分 */
     highScore: 0,
     /** ## 升级基准行数 */
@@ -4405,26 +4408,25 @@ var tetris = (() => {
      *
      * 返回 UI 渲染所需的核心显示数据。
      *
-     * @returns {{ source: string; lines: number; level: number }} HUD 数据
+     * @returns {object} HUD 数据
      */
     getHub() {
-      const { source, lines, level } = this.state;
-      return { source, lines, level };
+      const { source, lines, level, combo, comboScore } = this.state;
+      return { source, lines, level, combo, comboScore };
     }
     /**
      * ## 设置 HUD 数据
      *
      * @param {object} hud - HUD 数据对象
-     * @param {number} hud.score - 当前得分
-     * @param {number} hud.lines - 当前消除行数
-     * @param {number} hud.level - 当前等级
      * @returns {void}
      */
     setHud(hud) {
-      const { score, lines, level } = hud;
+      const { score, lines, level, combo, comboScore } = hud;
       this.state.score = score;
       this.state.lines = lines;
       this.state.level = level;
+      this.state.combo = combo;
+      this.state.comboScore = comboScore;
     }
     /**
      * ## 获取当前分数
@@ -4873,7 +4875,7 @@ var tetris = (() => {
 
   // lib/services/ui/hud/hud-elements.js
   var HudElements = (options) => {
-    const { controller, score, lines, level, highScore } = options;
+    const { controller, score, lines, level, combo, highScore } = options;
     return {
       /** @type {HTMLElement | null} 分数显示元素 */
       controller: document.querySelector(`#${controller}`),
@@ -4883,6 +4885,8 @@ var tetris = (() => {
       lines: document.querySelector(`#${lines}`),
       /** @type {HTMLElement | null} 等级显示元素 */
       level: document.querySelector(`#${level}`),
+      /** @type {HTMLElement | null} 连续消减显示元素 */
+      combo: document.querySelector(`#${combo}`),
       /** @type {HTMLElement | null} 最高分显示元素 */
       highScore: document.querySelector(`#${highScore}`)
     };
@@ -4919,13 +4923,14 @@ var tetris = (() => {
      * @param {string} options.highScore - 最高分显示元素名称
      * @param {string} options.lines - 消除行数显示元素名称
      * @param {string} options.level - 等级显示元素名称
+     * @param {string} options.combo - Combo显示元素名称
      * @param {string} options.controller - 控制者标识显示元素名称
      */
     constructor(options) {
       this.elements = hud_elements_default(options);
       this.scoreTracker = { visual: 0, target: 0 };
       this.highScoreTracker = { visual: 0, target: 0 };
-      this.prev = { lines: -1, level: -1 };
+      this.prev = { lines: -1, level: -1, combo: -1 };
     }
     /**
      * ## 更新 HUD 目标值
@@ -4937,6 +4942,7 @@ var tetris = (() => {
      * @param {number} state.highScore - 最高分
      * @param {number} state.lines - 消除行数
      * @param {number} state.level - 当前等级
+     * @param {number} state.combo - 连续消减次数
      * @returns {void}
      */
     update(state) {
@@ -4950,6 +4956,10 @@ var tetris = (() => {
       if (state.level !== prev.level) {
         setText(elements.level, state.level, 2);
         prev.level = state.level;
+      }
+      if (state.combo !== prev.combo) {
+        setText(elements.combo, state.combo, 2);
+        prev.combo = state.combo;
       }
     }
     /**
@@ -4988,10 +4998,12 @@ var tetris = (() => {
       highScoreTracker.target = 0;
       prev.lines = -1;
       prev.level = -1;
+      prev.combo = -1;
       setText(elements.score, 0, 5);
       setText(elements.highScore, 0, 5);
       setText(elements.lines, 0, 2);
       setText(elements.level, 1, 2);
+      setText(elements.combo, 0, 2);
     }
   };
   var hud_manager_default = HudManager;
@@ -6525,15 +6537,26 @@ var tetris = (() => {
 
   // lib/services/ui/effects/render-clear-score.js
   var renderClearScore = (canvas, scoreData) => {
-    const { WHITE: WHITE3 } = colors_default;
+    const { WHITE: WHITE3, YELLOW: YELLOW5 } = colors_default;
     const { gameBoard, blockSize } = canvas;
     const { width } = gameBoard;
-    const { score, y: rowY, alpha, offsetY } = scoreData;
+    const { score, y: rowY, alpha, offsetY, combo, comboScore } = scoreData;
     if (alpha <= 0) {
       return;
     }
     const x = width / 2;
     const y = rowY * blockSize + blockSize / 2 - offsetY;
+    if (combo > 1) {
+      render_text_default(canvas, {
+        text: `Combo x${combo} (+${comboScore})`,
+        x,
+        y: y - blockSize * 0.65,
+        color: YELLOW5,
+        size: 0.75,
+        center: true,
+        alpha
+      });
+    }
     render_text_default(canvas, {
       text: String(score),
       x,
@@ -6764,11 +6787,19 @@ var tetris = (() => {
     updateHud() {
       const { Store } = this;
       const state = Store.getState();
-      const { mode, score, lines, level, highScore, needReset = false } = state;
+      const {
+        mode,
+        score,
+        lines,
+        level,
+        highScore,
+        combo = 0,
+        needReset = false
+      } = state;
       if (mode === "main-menu" || needReset) {
         this.Hud.reset();
       }
-      this.Hud.update({ score, lines, level, highScore });
+      this.Hud.update({ score, lines, level, highScore, combo });
     }
     /**
      * ## 更新 HUD 动画
@@ -10197,10 +10228,7 @@ var tetris = (() => {
       level++;
       required = Math.min(required + 2, 60);
     }
-    return {
-      level,
-      levelUpSteps: required
-    };
+    return { level, levelUpSteps: required };
   };
   var applyClearLines = (runtime) => {
     const { MAX_LEVEL: MAX_LEVEL2, CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
@@ -10225,16 +10253,20 @@ var tetris = (() => {
     const levelUp = newLevel > state.level;
     const baseScore = CLEAR_LINE_SCORES2[cleared] || 0;
     const clearScore = baseScore * newLevel;
+    const combo = cleared > 0 ? (state.combo || 0) + 1 : 0;
+    const comboScore = combo > 1 ? (combo - 1) * 50 : 0;
     return {
       /**
-       * 状态更新函数
+       * ## 状态更新处理函数
        *
-       * @param {object} prev - 之前的游戏状态信息
-       * @returns {object} - 返回计算消除行后的游戏状态信息
+       * 接收当前 state，返回消行后的新 state。
+       *
+       * @param {object} prev - 当前状态
+       * @returns {object} 新状态
        */
       stateHandler: (prev) => ({
         ...prev,
-        /** 清空待消除行 */
+        /** 清空待消除行列表 */
         clearLines: [],
         /** 更新棋盘 */
         board,
@@ -10244,23 +10276,35 @@ var tetris = (() => {
         level: newLevel,
         /** 更新升级步长 */
         levelUpSteps,
-        /** 更新总分 */
-        score: prev.score + clearScore,
-        /** 本次消除得分 */
-        clearScore
+        /**
+         * 更新总分
+         *
+         * 总分 = 原分数 + 消行得分 + Combo 额外加分
+         */
+        score: prev.score + clearScore + comboScore,
+        /** 本次消行得分（用于飘字动画） */
+        clearScore,
+        /** 当前连击次数（用于 HUD 显示） */
+        combo,
+        /** 本次连击额外加分（用于飘字动画） */
+        comboScore
       }),
-      /** 是否升级 */
+      /** 是否触发了升级 */
       levelUp,
-      /** 当前等级 */
+      /** 计算后的新等级 */
       level: newLevel,
       /** 当前升级步长 */
       levelUpSteps,
-      /** 是否达到最大等级 */
+      /** 是否达到最大等级（256） */
       isMaxOut: newLevel >= MAX_LEVEL2,
-      /** 本次消除得分 */
+      /** 本次消行得分 */
       clearScore,
       /** 消除行数 */
-      cleared
+      cleared,
+      /** 当前连击次数 */
+      combo,
+      /** 本次连击额外加分 */
+      comboScore
     };
   };
   var apply_clear_lines_default = applyClearLines;
@@ -10301,7 +10345,7 @@ var tetris = (() => {
         alpha: 1,
         color: Store.getState().next?.color || colors_default.WHITE
       }));
-      const { clearScore } = apply_clear_lines_default(Game2);
+      const { clearScore, combo, comboScore } = apply_clear_lines_default(Game2);
       const toggle = () => {
         for (const line of this.lines) {
           line.alpha = line.alpha === 1 ? 0 : 1;
@@ -10312,7 +10356,9 @@ var tetris = (() => {
           fn: () => {
             this.emit(GE.START_CLEAR_SCORE, {
               score: clearScore,
-              lines: this.lines.map((l) => l.y)
+              lines: this.lines.map((l) => l.y),
+              combo,
+              comboScore
             });
           },
           delay: 50
@@ -10414,13 +10460,15 @@ var tetris = (() => {
      */
     initialize() {
       const { scoreData, Scheduler: Scheduler2 } = this;
-      const { score, lines } = scoreData;
+      const { score, lines, combo, comboScore } = scoreData;
       this.layer = 300;
       this.blocking = false;
       this.name = "clear-score";
       this._finished = false;
       this.state = {
         score,
+        combo: combo || 0,
+        comboScore: comboScore || 0,
         y: lines[lines.length - 1],
         alpha: 1,
         offsetY: 0
@@ -10789,6 +10837,10 @@ var tetris = (() => {
       // 消除行数归零
       level,
       // 设置初始等级
+      combo: 0,
+      // 设置 combo 次数
+      comboScore: 0,
+      // 设置 combo 得分
       next: null,
       // 清空预览方块
       hold: null
@@ -11215,6 +11267,10 @@ var tetris = (() => {
     const { id, Store } = runtime;
     const linesToClear = find_full_lines_default(runtime);
     if (linesToClear.length === 0) {
+      const UE = UIEvents(id);
+      const hudState = { combo: 0 };
+      Store.setState(hudState);
+      runtime.emit(UE.UPDATE_HUD, hudState);
       return;
     }
     Store.setClearLines(linesToClear);
