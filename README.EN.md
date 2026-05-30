@@ -5,188 +5,116 @@
 [![npm downloads](https://img.shields.io/npm/dt/@yaohaixiao/tetris.js)](https://npmcharts.com/compare/@yaohaixiao/tetris.js?minimal=true)
 [![MIT License](https://img.shields.io/github/license/yaohaixiao/tetris.js.svg)](https://github.com/yaohaixiao/tetris.js/blob/main/LICENSE)
 
-[简体中文](./README.md) | English
+English | [简体中文](./README.md)
 
-![Tetris game screenshot](assets/img/screen-shot.png)
+![Tetris Game - Screenshot](assets/img/screen-shot.png)
 
-tetris.js is a zero-dependency native JavaScript Tetris game built on Canvas,
-supporting multi-platform input and AI control. The project adopts a fixed-frame
-process-driven architecture, combined with a Scheduler, Command Queue, and
-Replay system to achieve a clear game update pipeline. It serves as a
-lightweight example of front-end game engine design and architectural practices.
+tetris.js is a zero-dependency, vanilla JavaScript Tetris game built on Canvas, supporting multi-platform input and AI control. The project adopts a fixed-frame loop architecture, combining a Scheduler, Command Queue, and Replay system to create a clear game update pipeline — a lightweight example of front-end game engine design and architectural practice.
 
 ## Features
 
-![Tetris game-Features](assets/img/features-poster.png)
+![Tetris Game - Features](assets/img/features-poster.png)
 
-The game fully implements the core features of classic Tetris, including piece
-generation, movement, rotation, descent, collision detection, line clearing,
-leveling up, score tracking, etc., complemented by rich interface rendering,
-animations, and interactive feedback.
+The game fully implements classic Tetris core mechanics, including piece generation, movement, rotation, dropping, collision detection, line clearing, leveling up, and score tracking, complemented by rich UI rendering, animation effects, and interactive feedback.
 
 ### Game Controls
 
-- **Computer Keyboard**: Arrow keys for movement and rotation, Spacebar for hard
-  drop, P to pause, M to toggle background music, R to restart, Q to quit, S to
-  toggle AI mode.
-- **Gamepad**: Fully supported, works with both left analog stick and D-pad.
-- **Mobile Touch**: Replicates GameBoy-style virtual buttons, fully supports
-  touchscreen operation.
+- **Keyboard**: Arrow keys for movement and rotation, Space for hard drop, P to pause, M to toggle background music, R to restart, Q to quit, S to toggle AI mode;
+- **Gamepad**: Fully supported, with left stick and D-pad controls;
+- **Mobile Touch**: GameBoy-style virtual buttons for complete touchscreen control;
 
 <p align="center">
-  <img src="assets/img/game-boy-layout.png" alt="Tetris game screenshot - GAME BOY layout">
+  <img src="assets/img/game-boy-layout.png" alt="Tetris Game Screenshot - GameBoy Layout">
 </p>
 
-### Level & Difficulty
+### Levels & Difficulty
 
-- **Level Selection**: Supports levels 1-10 (Keyboard keys 1-9 / T,
-  gamepad/touch use up/down buttons).
-- **Difficulty Selection**: Easy / Normal / Hard / Expert (Keyboard keys
-  E/N/H/X, gamepad/touch buttons A/B/Y/X).
-- **Total 256 Levels**: Pays homage to classic FC game design; level cycles
-  after reaching 256.
+- **Level Selection**: Supports levels 1-10 (keyboard keys 1-9 / T, gamepad and touch use up/down);
+- **Difficulty Selection**: Easy / Normal / Hard / Expert (keyboard E/N/H/X, gamepad and touch A/B/Y/X);
+- **256 Total Levels**: A tribute to classic FC design — after level 256, levels loop back;
 
 ### Game Rules
 
-- **Fall Speed**: Initial fall interval at level 1 is 1000ms, smoothly
-  accelerates within the first 60% of levels, reaching a terminal speed of
-  100ms.
-- **Scoring Rules**: Score = Base points × Current level (100 points for 1 line,
-  800 points for 4 lines).
-- **Level Up Rules**: Uses dynamic level-up conditions. Initially requires
-  clearing 10 lines to level up; required lines increase gradually, max 60 lines
-  per level.
+- **Drop Speed**: Level 1 starts at 1000ms drop interval, smoothly accelerating to a 100ms limit within the first 60% of levels;
+- **Scoring**: Score = Base Points × Current Level (1 line = 100 pts, 4 lines = 800 pts);
+- **Leveling**: Dynamic level-up thresholds — starts at 10 lines, increases gradually, capping at 60 lines per level;
 
-### Audiovisual Experience
+### Audio-Visual Experience
 
-- **16 BGM Tracks**: Automatically switches tracks every 16 levels, covering
-  classic, electronic, folk, synthwave, and more.
-- **16 Line-Clear SFX**: Chords and instrumentation parameters change with
-  levels, offering progressive auditory feedback.
-- **8 Color Palettes**: Switches every 32 levels, transitioning from classic
-  bright colors to neon, gemstone, and other themed palettes.
-- **Animation Effects**: Includes countdown, line-clear flash, floating scores,
-  landing highlight, level-up celebration, pause timer, and more.
+- **16 Background Music Tracks**: Auto-switching every 16 levels, covering classical, electronic, folk, synthwave and more;
+- **16 Line-Clear Sound Sets**: Chord and timbre parameters evolve with levels for a layered auditory experience;
+- **8 Block Color Palettes**: Rotating every 32 levels, transitioning from classic bright to neon and jewel themes;
+- **Animation Effects**: Countdown, line-clear flashing, floating scores, landing highlights, level-up celebrations, pause ticking, and more;
 
 ### System Capabilities
 
-- **Action Replay**: After a game ends, you can watch a full replay of the
-  entire gameplay session (Video: link).
-- **AI Control**: Features multi-step lookahead, selecting optimal placements
-  via board evaluation algorithms, with adjustable difficulty levels (Video:
-  link).
-- **Local Storage**: Automatically persists the highest score.
-- **Responsive Layout**: Perfectly adapts to desktop, tablet, and mobile
-  screens.
+- **Replay**: Watch full game replays after game over (Video: https://www.bilibili.com/video/BV1oRVA6uEXG/?vd_source=8d9b68dd3ed316bb9b3a13e3f3f778eb);
+- **AI Control**: Multi-step lookahead with board evaluation for optimal placement decisions, with configurable difficulty levels (Video: https://www.bilibili.com/video/BV1GPG86KEcy/?vd_source=8d9b68dd3ed316bb9b3a13e3f3f778eb);
+- **Local Storage**: Persistently saves high scores;
+- **Responsive Layout**: Perfectly adapts to desktop, tablet, and mobile screens;
 
 ### Technical Highlights
 
-- **Native JavaScript**: Developed purely in native JavaScript, zero third-party
-  dependencies.
-- **Modular Design**: Based on ES Module (ESM) specification; modules (audio,
-  rendering, logic) are highly decoupled, easy to maintain and replace.
-- **Layered Architecture**: Adopts layered architecture and component-based
-  design.
-- **Centralized State Management**: Uses GameStore for centralized state
-  management, updating data via pure functions, achieving complete separation of
-  game logic and rendering. Combined with Command Pattern, natively supports
-  recording and AI training.
-- **Independent Scheduler**: A dedicated scheduler drives all animations and
-  sound effects, unaffected by browser frame rate.
-- **Comprehensive Testing**: Uses Jest for unit testing and Cypress for
-  end-to-end testing.
+- **Vanilla JavaScript**: Pure native JavaScript, zero external dependencies;
+- **Modular Design**: ES Module (ESM) based, with highly decoupled modules (audio, rendering, logic) for easy maintenance and replacement;
+- **Layered Architecture**: Adopts a layered architecture with component-based design;
+- **Centralized State Management**: GameStore-based centralized state management with pure function updates, fully separating game logic from rendering. Combined with the Command Pattern, natively supports replay recording and AI training;
+- **Independent Scheduler**: All animations and audio driven by a dedicated Scheduler, unaffected by browser frame rate;
+- **Comprehensive Testing**: Unit tests with Jest, end-to-end tests with Cypress;
 
-## Architecture Description
+## Architecture
 
-This project adopts a layered architecture design, offering clear structure,
-high modularity, and strong maintainability. It serves not only as a reference
-for Tetris development but also as a general architecture for small front-end 2D
-canvas games, adaptable to other game types with minor modifications.
+This project uses a layered architecture with clear structure, high modularity, and strong maintainability. It is not only suitable for Tetris-style game development but also serves as a general architectural reference for small front-end 2D canvas games, easily adaptable to other game types.
 
 ![System Architecture Diagram](assets/img/architecture-poster.png)
 
-## Architecture Advantages
+## Architectural Advantages
 
-- **Clear Modularization**: Clear responsibilities for each layer, low coupling
-  between modules. Base utilities, game rules, services, and core runtime each
-  have their roles, making maintenance and extension very convenient.
-- **Centralized State Management**: All core game states are stored in
-  `GameStore`, updated via pure functions in `stateHandler`, avoiding scattered
-  data. This design natively supports **action replay** and allows for future
-  extensions like time-travel debugging.
-- **Command Pattern Drives Main Loop**: Player actions, AI decisions, and
-  automatic piece descent are all encapsulated as standard command objects,
-  enabling recording, replay, and management of operations, forming the
-  foundation for replay and AI features.
-- **Event Bus for Module Decoupling**: Based on publish-subscribe pattern,
-  events like line clear, level up, game over are broadcast uniformly.
-  Rendering, audio, and animation modules respond independently without
-  depending on each other.
-- **Unified Task Scheduling System**: A dedicated `Scheduler` coordinates all
-  timed tasks, ensuring precise timing for piece descent, animations, sound
-  effects, and AI calculations, unaffected by frame rate fluctuations, ensuring
-  reproducible game logic.
-- **Unified Abstraction for Multiple Input Channels**: Keyboard, gamepad, and
-  touch actions are all mapped to standard game commands. Upper-layer logic
-  doesn't need to know the input device type, reducing integration costs for new
-  devices.
-- **Deterministic Game Logic**: State changes are determined solely by commands
-  and time, with no random side effects or implicit dependencies. Same input
-  always yields the same result, suitable for replay, bug reproduction, and AI
-  simulation.
-- **Plug-in Extension Design**: Audio, animation, AI, replay, etc., are
-  independent pluggable modules, not intruding into core logic, allowing
-  flexible addition of new features and version iterations.
-- **AI Separation from Core Logic**: AI only simulates optimal strategies based
-  on game state snapshots, without modifying runtime data. The architecture is
-  robust, facilitating iteration of different algorithms and difficulty modes.
-- **Separation of Runtime and Presentation**: The core runtime handles rules and
-  state management, while the rendering layer focuses on drawing. Currently
-  using Canvas, it can be extended to WebGL or port the core logic to
-  server-side, mini-program, and other environments.
+- **Clear Module Boundaries**: Each layer has distinct responsibilities with low coupling. Utilities, game rules, services, and runtime core each perform their own roles for easy maintenance and extension.
+- **Centralized State Management**: All core game state is stored in `GameStore`, updated via pure `stateHandler` functions, avoiding scattered data. This design natively supports **replay**, and lays the foundation for advanced features like time-travel debugging.
+- **Command Pattern Main Loop**: Player actions, AI decisions, and automatic piece drops are all encapsulated as standard Command objects, enabling operation recording, replay, and governance — the underlying support for the replay system and AI gameplay.
+- **Event Bus Decoupling**: Modules communicate via publish-subscribe. Events such as line clears, level-ups, and game over are broadcast, with rendering, audio, and animation modules responding independently without inter-dependencies.
+- **Unified Scheduling System**: A dedicated `Scheduler` orchestrates all timed tasks, ensuring precise timing for piece drops, animations, audio, and AI computations, unaffected by frame rate fluctuations, with deterministic game logic.
+- **Unified Multi-Input Abstraction**: Keyboard, gamepad, and touch inputs are all mapped to standard game commands. Upper logic layers are input-device agnostic, reducing integration cost for new devices.
+- **Deterministic Game Logic**: State changes depend only on commands and time, with no random side-effects or implicit dependencies. The same input always produces consistent results, suitable for replay, debugging, and AI simulation.
+- **Pluggable Extension Design**: Audio, animations, AI, and replay are all independent, pluggable modules that do not intrude on core logic, making new features and version iterations more flexible.
+- **AI Isolated from Core Logic**: AI only deduces optimal strategies from game state snapshots without directly modifying runtime data, ensuring architectural robustness and facilitating algorithm and difficulty iteration.
+- **Separation of Runtime and Presentation**: The core runtime layer handles rules and state management, while the rendering layer focuses on drawing. Currently Canvas-based, it can be extended to WebGL rendering, or have core logic ported to server-side, mini-programs, and other multi-platform environments.
 
 ## Development Guide
 
-- Basic game configuration: `lib/configuration.js`.
-- Modify block styles/color palettes:
-  - Color palette config: `lib/game/constants/color-palettes.js`.
-  - Block shapes: `lib/game/constants/shapes.js`.
-- Add BGM/SFX: Add resources and level mappings in audio module.
-  - BGM:
-    - Add BGM: `lib/services/audio/constants/bgm`.
-    - Register BGM: `lib/services/audio/constants/musics.js`.
-  - Game SFX: `lib/services/audio/sounds.js`.
+- Game configuration: `lib/configuration.js`;
+- Modifying block styles/colors:
+  - Color palettes: `lib/game/constants/color-palettes.js`;
+  - Block styles: `lib/game/constants/shapes.js`;
+- Adding background music / sound effects: Append resources and level mappings in the audio module:
+  - BGM: `lib/services/audio/constants/bgm`;
+  - Register BGM: `lib/services/audio/constants/musics.js`;
+  - Sound effects: `lib/services/audio/sounds.js`;
 - Game animation configuration:
-  - Animation management system: `lib/runtime/animation-system.js`.
-  - Add new animations: `lib/services/animations`, refer to existing animation
-    code comments.
-  - Register animations:
-    - Subscribe to animation trigger messages in `lib/game/index.js`.
-    - Execute animation:
-      `this.Animations.register(new CountdownAnimation({ Scheduler, Game: this }))`.
-    - Dependency injection: `{ Scheduler, Game: this }` provides needed
-      dependencies.
+  - Animation management system: `lib/runtime/animation-system.js`;
+  - Adding animations: `lib/services/animations`, refer to existing animation code and comments;
+  - Registering animations:
+    - Subscribe to animation messages: listen for animation triggers in `lib/game/index.js`;
+    - Execute animation: `this.Animations.register(new CountdownAnimation({ Scheduler, Game: this }))`;
+    - Dependency injection: `{ Scheduler, Game: this }` is the dependency configuration — inject as needed;
 - EventBus event management:
-  - Message registration: `lib/events/event-catalog.js`.
-  - Event routing: Add router module in `lib/events/router` (if module
-    subscribes to >6 messages).
-- Custom game rules (speed, scoring, leveling): Modify rule calculation
-  functions:
-  - Speed config: `lib/game/rules/get-speed.js`.
-  - Lines cleared scoring: `lib/game/constants/game.js`.
-  - Scoring/Leveling: `lib/game/actions/apply-clear-lines.js`.
-- Extend for new input devices:
-  - Add adapter in `lib/services/input` layer (inherit Base class, implement
-    dependency injection and message pub/sub).
-  - Register in `lib/game/index.js` (refer to existing Keyboard, Gamepad, and
-    Touch).
-- Input/Command mapping:
-  - Input mapping: `lib/engine/dispatch-input.js`.
-  - Command mapping: `lib/engine/dispatch-command.js`.
-  - Add command set: `lib/game/actions/difficulty-actions.js`.
+  - Event registration: `lib/events/event-catalog.js`;
+  - Event routing: `lib/events/router` (add routing module when module subscriptions exceed 6 events);
+- Customizing game rules (speed, scoring, leveling): Modify rule calculation functions:
+  - Speed: `lib/game/rules/get-speed.js`;
+  - Line clear scores: `lib/game/constants/game.js`;
+  - Scoring / leveling: `lib/game/actions/apply-clear-lines.js`;
+- Adding new input devices:
+  - Add new adapters in `lib/services/input` (extend the `Base` class, implement dependency injection and pub-sub messaging);
+  - Register in `lib/game/index.js` within the game core module (refer to existing Keyboard, Gamepad, and Touch);
+- Input / command mapping:
+  - Input mapping: `lib/engine/dispatch-input.js`;
+  - Command mapping: `lib/engine/dispatch-command.js`;
+  - Adding command sets: `lib/game/actions/difficulty-actions.js`;
 - AI configuration:
-  - Difficulty config: `lib/ai/core/ai-difficulty.js`.
-  - Decision planning config: `lib/ai/planner/self-play.js`.
+  - Difficulty configuration: `lib/ai/core/ai-difficulty.js`;
+  - Decision planning: `lib/ai/planner/self-play.js`;
 
 ## Browser Compatibility
 
@@ -194,53 +122,53 @@ canvas games, adaptable to other game types with minor modifications.
 | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | 128 – 131                                                                                                              | 130 – 132                                                                                                                       | 109 – 131                                                                                                                    | 17.5 – 18.1                                                                                                                  | 113 – 114                                                                                                                 |
 
-**Note**: The project uses standard ES6+, Canvas, Gamepad API, and is not
-compatible with Internet Explorer.
+**Note**: This project uses standard ES6+, Canvas, and Gamepad APIs, and is not compatible with IE browsers.
 
-## Game Controls
+## Key Bindings
 
-tetris.js supports various control methods: keyboard, gamepad, and simulated
-GAME BOY buttons for mobile devices.
+tetris.js supports multiple control methods: keyboard, gamepad, and mobile GameBoy-style virtual buttons.
 
-### Keyboard Controls
+### Keyboard
 
 - Enter: Start game
 - ↑: Rotate piece
-- ← / →: Move piece left/right
+- ← / →: Move left / right
 - ↓: Soft drop
 - Space: Hard drop
 - M: Toggle background music
-- P: Pause/Resume game
-- R: Restart game
-- Q: Force quit game
-- B: Return to level selection from difficulty selection
+- P: Pause / resume
+- R: Restart
+- Q: Quit
+- B: Return to level select from difficulty screen
 - S: Toggle AI / Human control
+- C: Hold piece
 
 #### Level Selection
 
-- 1–9: Select level 1 to 9
+- 1–9: Select levels 1–9
 - T: Select level 10
 
 #### Difficulty Selection
 
-- E: Easy (0 preset lines)
-- N: Normal (3 preset lines)
-- H: Hard (6 preset lines)
-- X: Expert (9 preset lines)
+- E: Easy (0 starting rows)
+- N: Normal (3 starting rows)
+- H: Hard (6 starting rows)
+- X: Expert (9 starting rows)
 
-### Gamepad Controls
+### Gamepad
 
 - START: Start game
 - BACK:
-  - Force quit during game
-  - Return to level selection from difficulty selection
+  - In-game: Force quit
+  - Difficulty screen: Return to level select
 - RB: Toggle AI / Human control
-- Left analog stick / D-pad:
+- RT: Hold piece
+- Left stick / D-pad:
   - ↑: Rotate piece
-  - ← / →: Move piece left/right
+  - ← / →: Move left / right
   - ↓: Soft drop
-- X: Restart game
-- Y: Pause/Resume game
+- X: Restart
+- Y: Pause / resume
 - A: Toggle background music
 - B: Hard drop
 
@@ -262,11 +190,12 @@ GAME BOY buttons for mobile devices.
 - ↓: Soft drop
 - ←: Move left
 - →: Move right
-- BACK: Force quit game
+- BACK: Force quit
+- HOLD: Hold piece
 - A: Toggle background music
 - B: Soft drop
-- X: Pause game
-- Y: Restart game
+- X: Pause
+- Y: Restart
 
 #### Level Selection
 
@@ -279,90 +208,79 @@ GAME BOY buttons for mobile devices.
 - B: Normal
 - Y: Hard
 - X: Expert
-- BACK: Return to level selection
+- BACK: Return to level select
 
 ## Game Rules
 
-### Fall Speed
+### Drop Speed
 
-The piece fall interval is calculated by `getSpeed()`. The game starts at level
-1 (1000 ms/cell). Formula:
+Drop interval is calculated by `getSpeed()`. Starting at level 1 (1000ms/cell), the formula:
 
 `step = ceil(1000 / floor(MAX_LEVEL × 0.6))`
 
-Within the first 60% of the `MAX_LEVEL` (256 levels), the fall speed increases
-linearly until reaching the limit. The remaining 40% of levels maintain the
-terminal speed of 100 ms/cell, allowing players to focus on survival challenges.
+ensures smooth linear acceleration within the first 60% of `MAX_LEVEL` (256), reaching a 100ms/cell limit. The remaining 40% of levels maintain this limit, focusing on survival.
 
-### Scoring Rules
+### Scoring
 
-Final Score = Base points per clear × Current level
+Final Score = Base Points × Current Level
 
-| Lines cleared    | Base points |
-| :--------------- | :---------- |
-| 1 line           | 100         |
-| 2 lines          | 300         |
-| 3 lines          | 500         |
-| 4 lines (Tetris) | 800         |
-| 5 lines          | 1200        |
+| Lines Cleared     | Base Points |
+| :---------------- | :---------- |
+| 1 line            | 100         |
+| 2 lines           | 300         |
+| 3 lines           | 500         |
+| 4 lines (Tetris)  | 800         |
+| 5 lines           | 1200        |
 
-**Example**: Clearing 4 lines at level 1 gives 800 × 1 = 800 points. Clearing 4
-lines at level 50 gives 800 × 50 = 40000 points.
+**Example**: Clearing 4 lines at level 1 = 800 × 1 = 800 pts; at level 50 = 800 × 50 = 40,000 pts.
 
-### Level Up Rules
+### Leveling
 
-The game uses `levelUpSteps` for dynamic level-up conditions. The first level-up
-requires clearing only 10 lines, and each subsequent level requires 2 more lines
-(10 → 12 → 14...), max 60 lines per level.
+The game uses `levelUpSteps` for dynamic leveling. The first level-up requires only 10 lines, with each subsequent level requiring 2 more lines (10 → 12 → 14…), capping at 60 lines per level.
 
-There are 256 levels in total. Upon reaching the maximum level, the level value
-cycles back, paying homage to classic FC game design.
+There are 256 levels in total. After the maximum level, the level value loops back, honoring classic FC game design.
 
-### Color Palette Rules
+### Block Color Rules
 
-The game includes 8 built-in color palettes, automatically switching every 32
-levels to maintain visual variety at higher levels.
+The game includes 8 distinct color palettes that switch every 32 levels, keeping visuals fresh even at high levels.
 
-| Level range | Palette | Style description        |
-| :---------- | :------ | :----------------------- |
-| 1-32        | Classic | Default bright colors    |
-| 33-64       | Warm    | Energetic warm tones     |
-| 65-96       | Cool    | Refreshing cool tones    |
-| 97-128      | Candy   | Sweet candy colors       |
-| 129-160     | Forest  | Natural forest hues      |
-| 161-192     | Sunset  | Warm sunset tones        |
-| 193-224     | Neon    | High-brightness neon     |
-| 225-256     | Gem     | Brilliant gemstone tones |
+| Level Range   | Palette    | Style          |
+| :------------ | :--------- | :------------- |
+| 1-32          | Classic    | Default bright |
+| 33-64         | Warm       | Vibrant warm   |
+| 65-96         | Cool       | Fresh cool     |
+| 97-128        | Candy      | Sweet candy    |
+| 129-160       | Forest     | Natural forest |
+| 161-192       | Sunset     | Warm sunset    |
+| 193-224       | Neon       | Bright neon    |
+| 225-256       | Jewel      | Brilliant jewel|
 
 ### Background Music Rules
 
-The game features 16 different BGM tracks, automatically switching every 16
-levels as the game progresses.
+The game features 16 BGM tracks that auto-switch every 16 levels.
 
-| Level range | Track name       | Style                     |
-| :---------- | :--------------- | :------------------------ |
-| 1-16        | TetrisTheme      | Classic main theme        |
-| 17-32       | SpringFestival   | Festive celebratory style |
-| 33-48       | FirstDivision    | Classic folk style        |
-| 49-64       | GongXiFaCai      | Festive blessing style    |
-| 65-80       | Loginska         | Electronic rhythmic style |
-| 81-96       | BeyondTheWall    | Mysterious ethereal style |
-| 97-112      | Technotris       | Tech electronic style     |
-| 113-128     | GoldenSnakeDance | Oriental charm style      |
-| 129-144     | Korobeiniki      | Classic folk              |
-| 145-160     | Ascension        | Ethereal ascension style  |
-| 161-176     | NeonNights       | Neon synthwave            |
-| 177-192     | FrozenPeaks      | Cold, lofty style         |
-| 193-208     | CyberRush        | Cyber high-speed style    |
-| 209-224     | Starlight        | Starry dreamy style       |
-| 225-240     | FinalPush        | Ultimate challenge style  |
-| 241-256     | JourneyToWest    | Epic finale style         |
+| Level Range   | Track Name       | Style          |
+| :------------ | :--------------- | :------------- |
+| 1-16          | TetrisTheme      | Classic theme  |
+| 17-32         | SpringFestival   | Festive cheer  |
+| 33-48         | FirstDivision    | Classic folk   |
+| 49-64         | GongXiFaCai      | Festive wishes |
+| 65-80         | Loginska         | Electronic     |
+| 81-96         | BeyondTheWall    | Mysterious     |
+| 97-112        | Technotris       | Tech electronic|
+| 113-128       | GoldenSnakeDance | Oriental charm |
+| 129-144       | Korobeiniki      | Classic folk   |
+| 145-160       | Ascension        | Ethereal       |
+| 161-176       | NeonNights       | Synthwave      |
+| 177-192       | FrozenPeaks      | Icy solitude   |
+| 193-208       | CyberRush        | Cyber high-speed|
+| 209-224       | Starlight        | Starry dream   |
+| 225-240       | FinalPush        | Final challenge|
+| 241-256       | JourneyToWest    | Epic finale    |
 
-**PS**: Enjoy the game, and don't forget to STAR if you like it!
+**PS**: Have fun playing! Don't forget to STAR if you like it!
 
-## Open Source License
+## License
 
-- tetris.js project: Open-sourced under the
-  [MIT License](http://opensource.org/licenses/mit-license.html)
-- Press Start 2P font (Google open-source font): Open-sourced under the
-  [OFL License](assets/font/OFL.txt)
+- tetris.js project: Licensed under the [MIT License](http://opensource.org/licenses/mit-license.html)
+- Press Start 2P font (Google Fonts): Licensed under the [OFL License](assets/font/OFL.txt)

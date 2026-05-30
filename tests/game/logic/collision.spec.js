@@ -33,7 +33,7 @@ describe('collision', () => {
     mockContext = {
       Store: mockStore,
       Elements: {
-        Main: {
+        Canvas: {
           rows: 20,
           cols: 10,
         },

@@ -22,11 +22,12 @@ var tetris = (() => {
       pattern: "square"
     },
     Elements: {
-      Main: {
+      Canvas: {
         cols: 10,
         rows: 20,
         board: "tetris-game-board",
-        next: "tetris-next-piece"
+        next: "tetris-next-piece",
+        hold: "tetri-hold-piece"
       },
       Hud: {
         controller: "tetris-controller",
@@ -37,6 +38,7 @@ var tetris = (() => {
       },
       Controls: {
         back: "tetris-btn-back",
+        hold: "tetris-btn-hold",
         start: "tetris-btn-start",
         up: "tetris-dpad-up",
         down: "tetris-dpad-down",
@@ -3181,6 +3183,7 @@ var tetris = (() => {
     BLOCK_DROP: `game:${uuid}:block:drop`,
     BLOCK_TICK: `game:${uuid}:block:tick`,
     BLOCK_SPAWN: `game:${uuid}:block:spawn`,
+    BLOCK_HOLD: `game:${uuid}:block:hold`,
     /* ---------- 动画特效 ---------- */
     START_COUNTDOWN: `game:${uuid}:start:countdown`,
     START_PAUSED: `game:${uuid}:start:paused`,
@@ -3214,8 +3217,11 @@ var tetris = (() => {
     UPDATE_HUD: `ui:${uuid}:update:hud`,
     /* ---------- 画布绘制 ---------- */
     RESIZE: `ui:${uuid}:resize`,
-    /* ---------- 动画特效 ---------- */
     RENDER_NEXT_PIECE: `ui:${uuid}:render:next:piece`,
+    RENDER_HOLD_PIECE: `ui:${uuid}:render:hold:piece`,
+    CLEAR_NEXT_PIECE: `ui:${uuid}:clear:next:piece`,
+    CLEAR_HOLD_PIECE: `ui:${uuid}:clear:hold:piece`,
+    /* ---------- 动画特效 ---------- */
     RENDER_COUNTDOWN: `ui:${uuid}:render:countdown`,
     RENDER_CLEAR_LINES: `ui:${uuid}:render:clear:lines`,
     RENDER_CLEAR_SCORE: `ui:${uuid}:render:clear:score`,
@@ -3404,6 +3410,7 @@ var tetris = (() => {
       this.on(events.BLOCK_DROP, this._onBlockDrop);
       this.on(events.BLOCK_TICK, this._onBlockTick);
       this.on(events.BLOCK_SPAWN, this._onBlockSpawn);
+      this.on(events.BLOCK_HOLD, this._onBlockHold);
       this.on(events.START_COUNTDOWN, this._onStartCountdown);
       this.on(events.START_PAUSED, this._onStartPaused);
       this.on(events.STOP_PAUSED, this._onStopPaused);
@@ -3451,6 +3458,7 @@ var tetris = (() => {
       this.off(events.BLOCK_DROP, this._onBlockDrop);
       this.off(events.BLOCK_TICK, this._onBlockTick);
       this.off(events.BLOCK_SPAWN, this._onBlockSpawn);
+      this.off(events.BLOCK_SPAWN, this._onBlockHold);
       this.off(events.START_COUNTDOWN, this._onStartCountdown);
       this.off(events.START_PAUSED, this._onStartPaused);
       this.off(events.STOP_PAUSED, this._onStopPaused);
@@ -3697,6 +3705,16 @@ var tetris = (() => {
       Game2.spawn();
     };
     /**
+     * ## 缓存方块
+     *
+     * @private
+     * @returns {void}
+     */
+    _onBlockHold = () => {
+      const { Game: Game2 } = this;
+      Game2.hold();
+    };
+    /**
      * ## 移动方块
      *
      * @private
@@ -3779,9 +3797,13 @@ var tetris = (() => {
         board: Store.getBeginningBoard(),
         score: 0,
         lines: 0,
-        level: 1
+        level: 1,
+        next: null,
+        hold: null
       });
       this.emit(UE.UPDATE_MODE, { mode: "replay" });
+      this.emit(UE.CLEAR_NEXT_PIECE);
+      this.emit(UE.CLEAR_HOLD_PIECE);
       Store.setMode("replay");
       this.emit(UE.UPDATE_HUD, { state: Store.getState() });
       this.emit(RE.START_PLAY);
@@ -3910,6 +3932,8 @@ var tetris = (() => {
     cy: 0,
     /** ## 下一个预览方块 */
     next: null,
+    /** ## 缓存的方块 */
+    hold: null,
     /** ## 当前得分 */
     score: 0,
     /** ## 累计消除行数 */
@@ -4804,8 +4828,8 @@ var tetris = (() => {
   };
   var animation_system_default = AnimationSystem;
 
-  // lib/services/ui/core/canvas.js
-  var Canvas = class {
+  // lib/services/ui/core/canvas-manager.js
+  var CanvasManager = class {
     /**
      * ## 构造函数
      *
@@ -4817,7 +4841,7 @@ var tetris = (() => {
       this.initialize(options);
     }
     initialize(options) {
-      const { board, next, cols, rows, style, pattern } = options;
+      const { cols, rows, board, next, hold: hold2, style, pattern } = options;
       this.style = style;
       this.pattern = pattern;
       this.rows = rows;
@@ -4826,11 +4850,13 @@ var tetris = (() => {
       this.gameBoardContext = this.gameBoard.getContext("2d");
       this.nextPiece = document.querySelector(`#${next}`);
       this.nextPieceContext = this.nextPiece.getContext("2d");
+      this.holdPiece = document.querySelector(`#${hold2}`);
+      this.holdPieceContext = this.holdPiece.getContext("2d");
       this.fontSize = 0;
       this.blockSize = 0;
     }
   };
-  var canvas_default = Canvas;
+  var canvas_manager_default = CanvasManager;
 
   // lib/utils/pad-start.js
   var padStart = (n, len) => {
@@ -6287,10 +6313,59 @@ var tetris = (() => {
   };
   var render_next_piece_default = renderNextPiece;
 
+  // lib/services/ui/hold/clear-hold-piece.js
+  var clearHoldPiece = (canvas) => {
+    const { nextPiece, holdPieceContext } = canvas;
+    const { width, height } = nextPiece;
+    holdPieceContext.clearRect(0, 0, width, height);
+  };
+  var clear_hold_piece_default = clearHoldPiece;
+
+  // lib/services/ui/hold/render-hold-piece.js
+  var renderHoldPiece = (canvas, state) => {
+    const { hold: hold2 } = state;
+    const {
+      holdPieceContext: ctx,
+      holdPiece: holdCanvas,
+      style = "classic",
+      pattern = "square"
+    } = canvas;
+    const { width, height } = holdCanvas;
+    if (!hold2) {
+      return;
+    }
+    const { shape } = hold2;
+    const blockSize = Math.ceil(width / 6);
+    const ox = Math.floor((width - shape[0].length * blockSize) / 2);
+    const oy = Math.floor((height - shape.length * blockSize) / 2);
+    clear_hold_piece_default(canvas);
+    ctx.save();
+    ctx.translate(ox, oy);
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (!shape[y][x]) continue;
+        render_block_default(
+          {
+            gameBoardContext: ctx,
+            blockSize,
+            style,
+            pattern
+          },
+          x,
+          y,
+          hold2.color
+        );
+      }
+    }
+    ctx.restore();
+  };
+  var render_hold_piece_default = renderHoldPiece;
+
   // lib/services/ui/scenes/playing-scene/render-playing.js
   var renderPlaying = (canvas, state) => {
     render_active_only_default(canvas, state);
     render_next_piece_default(canvas, state);
+    render_hold_piece_default(canvas, state);
   };
   var render_playing_default = renderPlaying;
 
@@ -6405,21 +6480,22 @@ var tetris = (() => {
 
   // lib/services/ui/core/resize.js
   var resize = (canvas) => {
-    const { gameBoard, nextPiece, rows, cols } = canvas;
+    const { gameBoard, nextPiece, holdPiece, rows, cols } = canvas;
     const { innerWidth, innerHeight } = globalThis;
     let blockSize;
     let nextSize;
+    let holdSize;
     if (innerWidth >= 480) {
       const h = innerHeight * 0.9;
       blockSize = Math.floor(h / rows);
-      nextSize = Math.min(innerWidth * 0.1, innerHeight * 0.18);
+      nextSize = holdSize = Math.min(innerWidth * 0.1, innerHeight * 0.18);
     } else {
       const width = innerWidth * 0.64;
       blockSize = Math.min(
         Math.floor(width / cols),
         Math.floor(innerHeight * 0.68 / rows)
       );
-      nextSize = blockSize * 5;
+      nextSize = holdSize = blockSize * 5;
     }
     const fontSize = Math.floor(blockSize * rows * 0.032);
     canvas.blockSize = blockSize;
@@ -6428,6 +6504,8 @@ var tetris = (() => {
     canvas.fontSize = fontSize;
     nextPiece.width = nextSize;
     nextPiece.height = nextSize;
+    holdPiece.width = holdSize;
+    holdPiece.height = holdSize;
   };
   var resize_default = resize;
 
@@ -6645,10 +6723,10 @@ var tetris = (() => {
      */
     initialize(options) {
       const { Elements, Block } = options;
-      const { Hud, Main } = Elements;
+      const { Hud, Canvas } = Elements;
       this.Hud = new hud_manager_default(Hud);
-      this.Canvas = new canvas_default({
-        ...Main,
+      this.Canvas = new canvas_manager_default({
+        ...Canvas,
         ...Block
       });
     }
@@ -6744,8 +6822,20 @@ var tetris = (() => {
      * @returns {void}
      */
     renderNextPiece() {
-      const { Canvas: Canvas2, Store } = this;
-      render_next_piece_default(Canvas2, Store.getState());
+      const { Canvas, Store } = this;
+      render_next_piece_default(Canvas, Store.getState());
+    }
+    renderHoldPiece() {
+      const { Canvas, Store } = this;
+      render_hold_piece_default(Canvas, Store.getState());
+    }
+    clearNextPiece() {
+      const { Canvas } = this;
+      clear_next_piece_default(Canvas);
+    }
+    clearHoldPiece() {
+      const { Canvas } = this;
+      clear_hold_piece_default(Canvas);
     }
     /**
      * ## 渲染倒计时特效
@@ -6835,8 +6925,8 @@ var tetris = (() => {
      * ### 监听的事件分类
      *
      * 1. **HUD 绘制事件**：模式更新、控制者更新、抬头显示更新
-     * 2. **画布绘制事件**：窗口大小调整、画布重绘
-     * 3. **动画特效事件**：预览方块、倒计时、消行、得分、升级、落地高亮等
+     * 2. **画布绘制事件**：窗口大小调整、预览方块渲染、暂存方块渲染
+     * 3. **动画特效事件**：倒计时、消行、得分、升级、落地高亮等
      *
      * @returns {void}
      */
@@ -6848,6 +6938,9 @@ var tetris = (() => {
       this.on(events.UPDATE_CONTROLLER, this._onUpdateController);
       this.on(events.RESIZE, this._onResize);
       this.on(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
+      this.on(events.RENDER_HOLD_PIECE, this._onRenderHoldPiece);
+      this.on(events.CLEAR_NEXT_PIECE, this._onClearNextPiece);
+      this.on(events.CLEAR_HOLD_PIECE, this._onClearHoldPiece);
       this.on(events.RENDER_COUNTDOWN, this._onRenderCountdown);
       this.on(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
       this.on(events.RENDER_CLEAR_SCORE, this._onRenderClearScore);
@@ -6869,6 +6962,9 @@ var tetris = (() => {
       this.off(events.UPDATE_CONTROLLER, this._onUpdateController);
       this.off(events.RESIZE, this._onResize);
       this.off(events.RENDER_NEXT_PIECE, this._onRenderNextPiece);
+      this.off(events.RENDER_HOLD_PIECE, this._onRenderHoldPiece);
+      this.off(events.CLEAR_NEXT_PIECE, this._onClearNextPiece);
+      this.off(events.CLEAR_HOLD_PIECE, this._onClearHoldPiece);
       this.off(events.RENDER_COUNTDOWN, this._onRenderCountdown);
       this.off(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
       this.off(events.RENDER_CLEAR_SCORE, this._onRenderClearScore);
@@ -6944,6 +7040,7 @@ var tetris = (() => {
      *
      * - 主游戏画布的尺寸
      * - 预览方块的显示区域
+     * - 暂存方块的显示区域
      * - UI 元素的相对位置
      * - 字体大小的缩放
      *
@@ -6959,14 +7056,48 @@ var tetris = (() => {
      *
      * 当预览方块发生变化时触发。 通知 UI 重新渲染下一个方块的预览图像。
      *
-     * 预览方块通常显示在主游戏区域的右侧或上方， 让玩家提前了解下一个方块的形状。
-     *
      * @private
      * @returns {void}
      */
     _onRenderNextPiece = () => {
       const { UI: UI2 } = this;
       UI2.renderNextPiece();
+    };
+    /**
+     * ## 处理渲染暂存方块事件
+     *
+     * 当暂存方块发生变化时（首次暂存或交换）触发。 通知 UI 重新渲染暂存方块的预览图像。
+     *
+     * @private
+     * @returns {void}
+     */
+    _onRenderHoldPiece = () => {
+      const { UI: UI2 } = this;
+      UI2.renderHoldPiece();
+    };
+    /**
+     * ## 处理清空预览方块事件
+     *
+     * 当需要清空下一个方块预览时触发。
+     *
+     * @private
+     * @returns {void}
+     */
+    _onClearNextPiece = () => {
+      const { UI: UI2 } = this;
+      UI2.clearNextPiece();
+    };
+    /**
+     * ## 处理清空暂存方块事件
+     *
+     * 当需要清空暂存方块预览时触发。
+     *
+     * @private
+     * @returns {void}
+     */
+    _onClearHoldPiece = () => {
+      const { UI: UI2 } = this;
+      UI2.clearHoldPiece();
     };
     /**
      * ## 处理渲染倒计时事件
@@ -6985,8 +7116,8 @@ var tetris = (() => {
      * @returns {void}
      */
     _onRenderCountdown = (payload) => {
-      const { UI: UI2 } = this;
       const { state } = payload;
+      const { UI: UI2 } = this;
       UI2.renderCountdown(state);
     };
     /**
@@ -7006,8 +7137,8 @@ var tetris = (() => {
      * @returns {void}
      */
     _onRenderClearLines = (payload) => {
-      const { UI: UI2 } = this;
       const { state } = payload;
+      const { UI: UI2 } = this;
       UI2.renderClearLines(state);
     };
     /**
@@ -7026,8 +7157,8 @@ var tetris = (() => {
      * @returns {void}
      */
     _onRenderClearScore = (payload) => {
-      const { UI: UI2 } = this;
       const { state } = payload;
+      const { UI: UI2 } = this;
       UI2.renderClearScore(state);
     };
     /**
@@ -7048,8 +7179,8 @@ var tetris = (() => {
      * @returns {void}
      */
     _onRenderLevelUp = (payload) => {
-      const { UI: UI2 } = this;
       const { level, fireworks } = payload;
+      const { UI: UI2 } = this;
       UI2.renderLevelUp(level, fireworks);
     };
     /**
@@ -7068,8 +7199,8 @@ var tetris = (() => {
      * @returns {void}
      */
     _onRenderLandingFlash = (payload) => {
-      const { UI: UI2 } = this;
       const { state } = payload;
+      const { UI: UI2 } = this;
       UI2.renderLandingFlash(state);
     };
   };
@@ -7193,6 +7324,15 @@ var tetris = (() => {
     renderNextPiece() {
       this.Renderer.renderNextPiece();
     }
+    renderHoldPiece() {
+      this.Renderer.renderHoldPiece();
+    }
+    clearNextPiece() {
+      this.Renderer.clearNextPiece();
+    }
+    clearHoldPiece() {
+      this.Renderer.clearHoldPiece();
+    }
     /**
      * ## 渲染倒计时特效
      *
@@ -7290,6 +7430,8 @@ var tetris = (() => {
     // 重新开始游戏
     q: "QUIT",
     // 退出游戏
+    // ========== 缓存方块 ==========
+    c: "HOLD",
     // ========== 关卡选择 ==========
     1: "LEVEL_ONE",
     // 第1关
@@ -7523,6 +7665,10 @@ var tetris = (() => {
     // 确认操作
     BACK: "QUIT",
     // 退出游戏
+    RB: "SWITCH_CONTROLLER",
+    // 切换 AI/HUMAN
+    RT: "HOLD",
+    // 缓存方块
     // 方向键（DPad）
     DPAD_LEFT: "MOVE_LEFT",
     // 向左移动
@@ -7799,7 +7945,6 @@ var tetris = (() => {
           GAMEPAD_ACTION_MAP.X = "RESTART";
           GAMEPAD_ACTION_MAP.Y = "TOGGLE_PAUSE";
           GAMEPAD_ACTION_MAP.BACK = "QUIT";
-          GAMEPAD_ACTION_MAP.RB = "SWITCH_CONTROLLER";
           break;
         }
       }
@@ -9162,6 +9307,8 @@ var tetris = (() => {
     Y: "TOGGLE_PAUSED",
     /** Start 键：确认操作 */
     START: "CONFIRM",
+    /** Hold 键：缓存方块 */
+    HOLD: "HOLD",
     /** Back 键：退出游戏 */
     BACK: "QUIT",
     /** 十字键左：向左移动 */
@@ -9235,6 +9382,7 @@ var tetris = (() => {
        * - X：重新开始
        * - Y：暂停/继续
        * - Back：退出游戏
+       * - Hold：缓存方块
        * - DPAD：移动和旋转
        */
       case "playing": {
@@ -9244,6 +9392,7 @@ var tetris = (() => {
           X: "RESTART",
           Y: "TOGGLE_PAUSED",
           BACK: "QUIT",
+          HOLD: "HOLD",
           DPAD_UP: "ROTATE",
           DPAD_DOWN: "MOVE_DOWN",
           DPAD_LEFT: "MOVE_LEFT",
@@ -9280,6 +9429,7 @@ var tetris = (() => {
       const { Controls } = this;
       this.level = 0;
       this.$back = document.querySelector(`#${Controls.back}`);
+      this.$hold = document.querySelector(`#${Controls.hold}`);
       this.$start = document.querySelector(`#${Controls.start}`);
       this.$up = document.querySelector(`#${Controls.up}`);
       this.$down = document.querySelector(`#${Controls.down}`);
@@ -9331,6 +9481,7 @@ var tetris = (() => {
      */
     addEventsListeners() {
       this.$back.addEventListener("click", this._onControlTouch);
+      this.$hold.addEventListener("click", this._onControlTouch);
       this.$start.addEventListener("click", this._onControlTouch);
       this.$up.addEventListener("click", this._onControlTouch);
       this.$down.addEventListener("click", this._onControlTouch);
@@ -9350,6 +9501,7 @@ var tetris = (() => {
      */
     removeEventListeners() {
       this.$back.removeEventListener("click", this._onControlTouch);
+      this.$hold.removeEventListener("click", this._onControlTouch);
       this.$start.removeEventListener("click", this._onControlTouch);
       this.$up.removeEventListener("click", this._onControlTouch);
       this.$down.removeEventListener("click", this._onControlTouch);
@@ -9714,6 +9866,9 @@ var tetris = (() => {
       }
       while (this.playing && this.cursor < data.length && data[this.cursor].ms <= this.playElapsed) {
         const { cmd } = data[this.cursor];
+        if (cmd.action === "HOLD_SYNC") {
+          return;
+        }
         this.emit(`dispatch:command`, cmd);
         this.cursor++;
       }
@@ -10031,7 +10186,7 @@ var tetris = (() => {
     const { MAX_LEVEL: MAX_LEVEL2, CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
     const { Elements, Store } = runtime;
     const state = Store.getState();
-    const { cols } = Elements.Main;
+    const { cols } = Elements.Canvas;
     const lines = [...state.clearLines || []].toSorted((a, b) => b - a);
     const cleared = lines.length;
     const board = structuredClone(state.board);
@@ -10537,7 +10692,7 @@ var tetris = (() => {
   // lib/game/logic/collision.js
   var collision2 = (runtime, ox, oy, shapeOverride) => {
     const { Elements, Store } = runtime;
-    const { rows, cols } = Elements.Main;
+    const { rows, cols } = Elements.Canvas;
     const state = Store.getState();
     const { curr, cx, cy, board } = state;
     if (!curr) {
@@ -10580,7 +10735,7 @@ var tetris = (() => {
   // lib/game/logic/spawn.js
   var spawn = (runtime) => {
     const { id, Elements, Store } = runtime;
-    const { cols } = Elements.Main;
+    const { cols } = Elements.Canvas;
     const { curr, next } = get_next_piece_default(runtime);
     if (!curr) {
       return;
@@ -10605,9 +10760,7 @@ var tetris = (() => {
 
   // lib/game/actions/set-beginning-state.js
   var setBeginningState = (runtime, mode, level = 1) => {
-    const { Store, id } = runtime;
-    const events = UIEvents(id);
-    runtime.emit(events.UPDATE_MODE, { mode });
+    const { Store } = runtime;
     Store.setState({
       mode,
       score: 0,
@@ -10616,8 +10769,10 @@ var tetris = (() => {
       // 消除行数归零
       level,
       // 设置初始等级
-      next: null
+      next: null,
       // 清空预览方块
+      hold: null
+      // 清空缓存方块
     });
     if (mode === "playing") {
       Store.setBeginningBoard(Store.generateBoard());
@@ -10631,11 +10786,7 @@ var tetris = (() => {
     const AE = AudioEvents();
     const RE = ReplayEvents(id);
     const UE = UIEvents(id);
-    const $level = document.querySelector("#level");
     const level = Store.getLevel();
-    if ($level) {
-      $level.textContent = pad_start_default(Store.getLevel(), 2);
-    }
     runtime.emit(RE.START_RECORD);
     Store.resetBoard();
     set_beginning_state_default(runtime, "playing", level);
@@ -10732,6 +10883,8 @@ var tetris = (() => {
     set_beginning_state_default(runtime, mode, level);
     runtime.emit(UE.UPDATE_HUD, { state: Store.getState() });
     runtime.emit(UE.UPDATE_MODE, { mode });
+    runtime.emit(UE.CLEAR_NEXT_PIECE);
+    runtime.emit(UE.CLEAR_HOLD_PIECE);
     runtime.emit(AIE.STOP);
     Store.setController("human");
     runtime.emit(UE.UPDATE_CONTROLLER, { controller: "human" });
@@ -11025,7 +11178,7 @@ var tetris = (() => {
   var findFullLines = (runtime) => {
     const { Elements, Store } = runtime;
     const state = Store.getState();
-    const { rows } = Elements.Main;
+    const { rows } = Elements.Canvas;
     const linesToClear = [];
     for (let y = rows - 1; y >= 0; y--) {
       const isLineFull = state.board[y].every((cell) => !!cell);
@@ -11111,6 +11264,33 @@ var tetris = (() => {
   };
   var drop_default = drop;
 
+  // lib/game/logic/hold.js
+  var hold = (runtime) => {
+    const { Store, Elements, id } = runtime;
+    const state = Store.getState();
+    const { curr, hold: hold2 } = state;
+    const { cols } = Elements.Canvas;
+    if (!curr || curr._held) return;
+    if (hold2) {
+      const newCurr = { ...hold2, _held: true };
+      const newHold = { ...curr, _held: true };
+      Store.setState({
+        curr: newCurr,
+        hold: newHold,
+        cx: Math.floor(cols / 2) - Math.floor(newCurr.shape[0].length / 2),
+        cy: 0
+      });
+    } else {
+      Store.setState({
+        hold: { ...curr, _held: true }
+      });
+      spawn_default(runtime);
+    }
+    const events = UIEvents(id);
+    runtime.emit(events.RENDER_HOLD_PIECE);
+  };
+  var hold_default = hold;
+
   // lib/game/rules/get-speed.js
   var getSpeed = (runtime) => {
     const { MAX_LEVEL: MAX_LEVEL2 } = game_default;
@@ -11169,7 +11349,7 @@ var tetris = (() => {
       const { Elements, Block, Scheduler: Scheduler2 } = this;
       const { Controls } = Elements;
       const Store = new game_store_default({
-        ...Elements.Main,
+        ...Elements.Canvas,
         GameState: game_state_default
       });
       this.id = crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -11338,6 +11518,14 @@ var tetris = (() => {
      */
     spawn() {
       spawn_default(this);
+    }
+    /**
+     * ## 缓存方块
+     *
+     * @returns {void}
+     */
+    hold() {
+      hold_default(this);
     }
     // ==================== 方块操作代理方法 ====================
     /**
@@ -11944,6 +12132,19 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_DROP);
     },
     /**
+     * ## 缓存方块
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     */
+    HOLD: (payload) => {
+      const Game2 = payload?.Game;
+      if (!Game2) {
+        return;
+      }
+      const events = GameEvents(Game2.id);
+      Game2.emit(events.BLOCK_HOLD);
+    },
+    /**
      * ## 暂停 / 继续切换
      *
      * @param {object} payload - 按键事件传递的参数对象
@@ -12131,6 +12332,19 @@ var tetris = (() => {
       }
       const events = GameEvents(Game2.id);
       Game2.emit(events.BLOCK_DROP);
+    },
+    /**
+     * ## 缓存方块
+     *
+     * @param {object} payload - 命令参数
+     */
+    HOLD: (payload) => {
+      const Game2 = payload?.Game;
+      if (!Game2) {
+        return;
+      }
+      const events = GameEvents(Game2.id);
+      Game2.emit(events.BLOCK_HOLD);
     },
     /**
      * ## 自动下落

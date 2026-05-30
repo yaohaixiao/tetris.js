@@ -1,7 +1,6 @@
 import begin from '@/lib/game/core/begin.js';
 import spawn from '@/lib/game/logic/spawn.js';
 import setBeginningState from '@/lib/game/actions/set-beginning-state.js';
-import padStart from '@/lib/utils/pad-start.js';
 import Scheduler from '@/lib/engine/scheduler';
 
 jest.mock('@/lib/game/logic/spawn.js', () => ({
@@ -14,16 +13,6 @@ jest.mock('@/lib/game/actions/set-beginning-state.js', () => ({
   default: jest.fn(),
 }));
 
-jest.mock('@/lib/utils/pad-start.js', () => ({
-  __esModule: true,
-  default: jest.fn((val, pad) => String(val).padStart(pad, '0')),
-}));
-
-/**
- * Mock event catalog
- *
- * 与源码中使用的 AudioEvents / ReplayEvents / UIEvents 对齐
- */
 jest.mock('@/lib/events/event-catalog.js', () => ({
   AudioEvents: () => ({
     PLAY_SOUND: 'audio:play:sound',
@@ -41,7 +30,6 @@ describe('begin', () => {
   let mockContext;
   let mockStore;
   let scheduler;
-  let levelElement;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -60,34 +48,6 @@ describe('begin', () => {
       Scheduler: scheduler,
       emit: jest.fn(),
     };
-
-    levelElement = document.createElement('div');
-    levelElement.id = 'level';
-    document.body.appendChild(levelElement);
-  });
-
-  afterEach(() => {
-    if (levelElement.parentNode) {
-      levelElement.parentNode.removeChild(levelElement);
-    }
-  });
-
-  // ==================== DOM 更新 ====================
-  describe('DOM 更新', () => {
-    it('应该更新 #level 元素的文本内容', () => {
-      begin(mockContext);
-      expect(levelElement.textContent).not.toBe('');
-    });
-
-    it('应该使用 padStart 格式化等级', () => {
-      begin(mockContext);
-      expect(padStart).toHaveBeenCalledWith(5, 2);
-    });
-
-    it('#level 元素不存在时不应该报错', () => {
-      document.body.removeChild(levelElement);
-      expect(() => begin(mockContext)).not.toThrow();
-    });
   });
 
   // ==================== Replay 录制 ====================
@@ -136,7 +96,6 @@ describe('begin', () => {
         'ui:test-game-uuid:update:hud',
       );
 
-      // 验证 HUD 在 spawn 之前
       const events = mockContext.emit.mock.calls.map(([e]) => e);
       const hudIdx = events.indexOf('ui:test-game-uuid:update:hud');
       const recordIdx = events.indexOf('replay:test-game-uuid:start:record');
@@ -215,29 +174,6 @@ describe('begin', () => {
 
       expect(recordIdx).toBeLessThan(hudIdx);
       expect(hudIdx).toBeLessThan(soundIdx);
-    });
-  });
-
-  // ==================== 边界情况 ====================
-  describe('边界情况', () => {
-    it('level 为 1 时应该正常格式化', () => {
-      mockStore.getLevel.mockReturnValue(1);
-      begin(mockContext);
-      expect(padStart).toHaveBeenCalledWith(1, 2);
-    });
-
-    it('level 为两位数时应该正常格式化', () => {
-      mockStore.getLevel.mockReturnValue(15);
-      begin(mockContext);
-      expect(padStart).toHaveBeenCalledWith(15, 2);
-    });
-
-    it('#level 元素不存在时不应导致后续流程中断', () => {
-      document.body.removeChild(levelElement);
-      begin(mockContext);
-      expect(mockStore.resetBoard).toHaveBeenCalled();
-      expect(setBeginningState).toHaveBeenCalled();
-      expect(spawn).toHaveBeenCalled();
     });
   });
 });

@@ -41,7 +41,7 @@ describe('spawn', () => {
       Store: mockStore,
       emit: jest.fn(),
       Elements: {
-        Main: {
+        Canvas: {
           cols: 10,
         },
       },
@@ -272,7 +272,7 @@ describe('spawn', () => {
   // ==================== 边界情况 ====================
   describe('边界情况', () => {
     it('cols 为奇数时应该正确居中', () => {
-      mockContext.Elements.Main.cols = 9;
+      mockContext.Elements.Canvas.cols = 9;
 
       spawn(mockContext);
 

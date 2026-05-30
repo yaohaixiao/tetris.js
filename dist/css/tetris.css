@@ -101,13 +101,13 @@ body {
 }
 /* ====== 游戏界面：侧边栏子面板样式 ====== */
 .tetris-panel {
-  padding: 1vh 1vw;
+  padding: 0 1vw;
   text-align: center;
   width: 100%;
 }
 /* ====== 游戏界面：侧边栏子面板文字段落样式 ====== */
 .tetris-panel-text {
-  font-size: 1.65vh;
+  font-size: 1.6vh;
   line-height: 1.4;
   color: #fff;
   text-shadow: 1px 1px 0 #333;
@@ -124,12 +124,35 @@ body {
 /* ====== 游戏界面：下一个方块预览区域标题样式 ====== */
 .tetris-next-title {
   color: #ff0;
-  font-size: 2.1vh;
+  font-size: 1.6vh;
   text-shadow: 2px 2px 0 #333;
   white-space: nowrap;
 }
 /* ====== 游戏界面：下一个方块预览画布区域样式 ====== */
 .tetris-next-piece {
+  margin: 0 auto;
+  width: 96%;
+  border: none;
+  image-rendering: pixelated;
+  display: block;
+  aspect-ratio: 1;
+}
+/* ====== 游戏界面：下一个方块预览区域样式 ====== */
+.tetris-hold {
+  padding: 2vh 1vh 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* ====== 游戏界面：下一个方块预览区域标题样式 ====== */
+.tetris-hold-title {
+  color: #ff0;
+  font-size: 1.6vh;
+  text-shadow: 2px 2px 0 #333;
+  white-space: nowrap;
+}
+/* ====== 游戏界面：下一个方块预览画布区域样式 ====== */
+.tetris-hold-piece {
   margin: 0 auto;
   width: 96%;
   border: none;
@@ -164,7 +187,7 @@ body {
 .tetris-system-controls {
   display: flex;
   flex-direction: row;
-  width: 44vw;
+  width: 68vw;
   gap: 4vw;
 }
 .tetris-system-btn {
@@ -380,6 +403,24 @@ body {
 @media screen and (max-width: 480px) {
   .tetris-main {
     flex: 4;
+  }
+}
+@media screen and (max-width: 320px) {
+  .tetris-next-piece,
+  .tetris-hold-piece {
+    width: 82%;
+  }
+}
+@media screen and (max-width: 375px) {
+  .tetris-next-piece,
+  .tetris-hold-piece {
+    width: 82%;
+  }
+}
+@media screen and (max-width: 480px) {
+  .tetris-next-piece,
+  .tetris-hold-piece {
+    width: 82%;
   }
 }
 @media screen and (max-width: 320px) {

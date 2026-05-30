@@ -1,5 +1,3 @@
-// tests/game/logic/move.spec.js
-
 import move from '@/lib/game/logic/move.js';
 import collision from '@/lib/game/logic/collision.js';
 

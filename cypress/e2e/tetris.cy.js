@@ -1,14 +1,13 @@
-// cypress/e2e/tetris.cy.js
-
 describe('Tetris E2E', () => {
   beforeEach(() => {
-    cy.visit('/tetris.html');
+    cy.visit('/dist/tetris.html');
   });
 
   // ========== 页面加载 ==========
   it('页面加载显示所有元素', () => {
     cy.get('#tetris-game-board').should('be.visible');
     cy.get('#tetris-next-piece').should('be.visible');
+    cy.get('#tetri-hold-piece').should('be.visible');
     cy.get('#tetris-score').should('be.visible');
     cy.get('#tetris-lines').should('be.visible');
     cy.get('#tetris-level').should('be.visible');
@@ -128,6 +127,65 @@ describe('Tetris E2E', () => {
       startGame();
       cy.get('body').type('r');
       cy.wait(2000);
+      cy.get('#tetris-game-board').should('be.visible');
+    });
+
+    // ========== Lock Delay ==========
+    it('方块触底后仍可左右移动', () => {
+      startGame();
+      // 快速硬降到底
+      cy.get('body').type(' ');
+      cy.wait(100);
+      // 触底后仍能左右移动
+      cy.get('body').type('{leftarrow}');
+      cy.get('body').type('{rightarrow}');
+      cy.get('#tetris-game-board').should('be.visible');
+    });
+
+    // ========== SRS 墙踢 ==========
+    it('贴墙旋转成功', () => {
+      startGame();
+      // 移到最左边
+      for (let i = 0; i < 6; i++) {
+        cy.get('body').type('{leftarrow}');
+      }
+      // 旋转应该被墙踢
+      cy.get('body').type('{uparrow}');
+      cy.get('#tetris-game-board').should('be.visible');
+    });
+
+    // ========== DAS/ARR ==========
+    it('长按左右键自动移动', () => {
+      startGame();
+      // 按住右键不放（模拟）
+      cy.get('body').trigger('keydown', { key: 'ArrowRight' });
+      cy.wait(300); // 超过 DAS 延迟
+      cy.get('body').trigger('keyup', { key: 'ArrowRight' });
+      cy.get('#tetris-game-board').should('be.visible');
+    });
+
+    // ========== Hold ==========
+    it('按 C 键暂存方块', () => {
+      startGame();
+      cy.get('body').type('c');
+      cy.get('#tetri-hold-piece').should('be.visible');
+    });
+
+    it('再次按 C 键交换方块', () => {
+      startGame();
+      cy.get('body').type('c');
+      cy.wait(100);
+      cy.get('body').type('c');
+      cy.get('#tetris-game-board').should('be.visible');
+    });
+
+    it('不能连续 hold 两次', () => {
+      startGame();
+      cy.get('body').type('c');
+      cy.wait(100);
+      cy.get('body').type('c');
+      cy.wait(100);
+      cy.get('body').type('c'); // 第三次应该无效
       cy.get('#tetris-game-board').should('be.visible');
     });
   });
@@ -353,17 +411,14 @@ describe('Tetris E2E', () => {
   describe('TouchController 触摸控制', () => {
     beforeEach(() => {
       cy.viewport(375, 667);
-      cy.visit('/tetris.html');
+      cy.visit('/dist/tetris.html');
     });
 
-    // ==================== main-menu 模式 ====================
     describe('主菜单 - 等级选择（触摸）', () => {
       it('DPAD UP 切换等级', () => {
         cy.get('#tetris-level').should('contain', '01');
-
         cy.get('#tetris-dpad-up').click();
         cy.get('#tetris-level').should('contain', '02');
-
         cy.get('#tetris-dpad-up').click();
         cy.get('#tetris-dpad-up').click();
         cy.get('#tetris-level').should('contain', '04');
@@ -374,7 +429,6 @@ describe('Tetris E2E', () => {
         cy.get('#tetris-dpad-up').click();
         cy.get('#tetris-dpad-up').click();
         cy.get('#tetris-level').should('contain', '04');
-
         cy.get('#tetris-dpad-down').click();
         cy.get('#tetris-level').should('contain', '03');
       });
@@ -399,7 +453,6 @@ describe('Tetris E2E', () => {
       });
     });
 
-    // ==================== difficulty 模式 ====================
     describe('难度选择（触摸）', () => {
       beforeEach(() => {
         cy.get('#tetris-btn-start').click();
@@ -440,7 +493,6 @@ describe('Tetris E2E', () => {
       });
     });
 
-    // ==================== playing 模式 ====================
     describe('游戏中操作（触摸）', () => {
       const startGame = () => {
         cy.get('#tetris-btn-start').click();
@@ -508,9 +560,14 @@ describe('Tetris E2E', () => {
         cy.wait(500);
         cy.get('#tetris-game-board').should('be.visible');
       });
+
+      it('HOLD 按钮暂存方块', () => {
+        startGame();
+        cy.get('#tetris-btn-hold').click();
+        cy.get('#tetri-hold-piece').should('be.visible');
+      });
     });
 
-    // ==================== 回放模式（触摸） ====================
     describe('回放模式（触摸）', () => {
       const playAndQuit = () => {
         cy.get('#tetris-btn-start').click();

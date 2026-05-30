@@ -1,5 +1,3 @@
-// tests/unit/services/audio/toggle-bgm.test.js
-
 import toggleBGM from '@/lib/services/audio/toggle-bgm';
 import playBGM from '@/lib/services/audio/play-bgm';
 import stopBGM from '@/lib/services/audio/stop-bgm';

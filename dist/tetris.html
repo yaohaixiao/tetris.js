@@ -36,15 +36,9 @@
             <p class="tetris-panel-text">LEVEL:<br /><span id="tetris-level">01</span></p>
             <p class="tetris-panel-text tetris-highlight">HI-SCORE:<br /><span id="tetris-high-score">00000</span></p>
           </section>
-          <section class="tetris-panel shutcuts">
-            <p class="tetris-panel-text">↑ ROTATE</p>
-            <p class="tetris-panel-text">← → MOVE</p>
-            <p class="tetris-panel-text">↓ SPEED</p>
-            <p class="tetris-panel-text">SPACE DROP</p>
-            <p class="tetris-panel-text tetris-highlight">M BGM ON/OFF</p>
-            <p class="tetris-panel-text">P PAUSE</p>
-            <p class="tetris-panel-text">Q END</p>
-            <p class="tetris-panel-text">R RESTART</p>
+          <section class="tetris-panel hold">
+            <h3 class="tetris-hold-title">HOLD</h3>
+            <canvas id="tetri-hold-piece" class="tetris-hold-piece"></canvas>
           </section>
         </aside>
       </section>
@@ -52,6 +46,7 @@
         <!-- START / SELECT -->
         <section class="tetris-system-controls">
           <div id="tetris-btn-back" data-key="back" class="tetris-system-btn tetris-btn-back">BACK</div>
+          <div id="tetris-btn-hold" data-key="hold" class="tetris-system-btn tetris-btn-hold">HOLD</div>
           <div id="tetris-btn-start" data-key="start" class="tetris-system-btn tetris-btn-start">START</div>
         </section>
         <section class="tetris-main-controls">
