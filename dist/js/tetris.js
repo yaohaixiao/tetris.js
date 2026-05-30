@@ -9014,10 +9014,30 @@ var tetris = (() => {
   ];
   var color_palettes_default = PALETTES;
 
+  // lib/game/utils/refill-bag.js
+  var isFirstBag = true;
+  var refillBag = () => {
+    let bag2 = [...shapes_default].toSorted(() => Math.random() - 0.5);
+    if (isFirstBag) {
+      while ([3, 6, 7].includes(bag2[0].colorIndex)) {
+        bag2 = [...shapes_default].toSorted(() => Math.random() - 0.5);
+      }
+    }
+    isFirstBag = false;
+    return bag2;
+  };
+  refillBag._reset = () => {
+    isFirstBag = true;
+  };
+  var refill_bag_default = refillBag;
+
   // lib/game/utils/random-shape.js
+  var bag = [];
   var randomShape = (level = 1) => {
-    const index = Math.floor(Math.random() * shapes_default.length);
-    const piece = shapes_default[index];
+    if (bag.length === 0) {
+      bag = refill_bag_default();
+    }
+    const piece = bag.pop();
     const paletteIndex = Math.min(
       Math.floor((level - 1) / 32),
       color_palettes_default.length - 1
