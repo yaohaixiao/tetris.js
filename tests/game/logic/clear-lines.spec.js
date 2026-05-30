@@ -16,6 +16,7 @@ describe('clearLines', () => {
 
     mockStore = {
       setClearLines: jest.fn(),
+      setState: jest.fn(),
     };
 
     mockContext = {
@@ -71,7 +72,7 @@ describe('clearLines', () => {
 
   // ==================== 无满行时 ====================
   describe('无满行时', () => {
-    it('没有满行时不应该设置 Store', () => {
+    it('没有满行时不应该设置满行到 Store', () => {
       findFullLines.mockReturnValue([]);
 
       clearLines(mockContext);
@@ -79,12 +80,23 @@ describe('clearLines', () => {
       expect(mockStore.setClearLines).not.toHaveBeenCalled();
     });
 
-    it('没有满行时不应该发送事件', () => {
+    it('没有满行时应该重置 combo 为 0', () => {
       findFullLines.mockReturnValue([]);
 
       clearLines(mockContext);
 
-      expect(mockContext.emit).not.toHaveBeenCalled();
+      expect(mockStore.setState).toHaveBeenCalledWith({ combo: 0 });
+    });
+
+    it('没有满行时应该发送 UPDATE_HUD 事件', () => {
+      findFullLines.mockReturnValue([]);
+
+      clearLines(mockContext);
+
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'ui:test-game-uuid:update:hud',
+        { combo: 0 },
+      );
     });
 
     it('空数组时应该提前返回不报错', () => {
@@ -146,7 +158,6 @@ describe('clearLines', () => {
     it('findFullLines 返回 null 时不应崩溃', () => {
       findFullLines.mockReturnValue(null);
 
-      // linesToClear.length 会报错
       expect(() => {
         clearLines(mockContext);
       }).toThrow();

@@ -10980,7 +10980,7 @@ var tetris = (() => {
   var restart_default = restart;
 
   // lib/game/logic/move.js
-  var move = (runtime, ox, oy) => {
+  var move = (runtime, ox, oy, isHardDrop = false) => {
     const { Store } = runtime;
     const state = Store.getState();
     const AE = AudioEvents();
@@ -10989,6 +10989,9 @@ var tetris = (() => {
       cx += ox;
       cy += oy;
       Store.setState({ cx, cy });
+      if (oy > 0 && !isHardDrop) {
+        Store.setState({ score: Store.getScore() + 1 });
+      }
       const { curr } = Store.getState();
       if (curr._lockTimer) {
         curr._lockTimer = 0;
@@ -11321,11 +11324,17 @@ var tetris = (() => {
 
   // lib/game/logic/drop.js
   var drop = (runtime) => {
+    const { Store } = runtime;
+    const startY = Store.getState().cy;
     while (true) {
-      if (!move_default(runtime, 0, 1)) {
+      if (!move_default(runtime, 0, 1, true)) {
         break;
       }
     }
+    const state = Store.getState();
+    const endY = state.cy;
+    const cellsDropped = endY - startY;
+    Store.setState({ score: state.score + cellsDropped * 2 });
     const AE = AudioEvents();
     const GE = GameEvents(runtime.id);
     const { curr, cx, cy } = runtime.Store.getState();

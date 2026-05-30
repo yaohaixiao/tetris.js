@@ -46,6 +46,8 @@ describe('ClearScoreAnimation', () => {
         y: 19,
         alpha: 1,
         offsetY: 0,
+        combo: 0,
+        comboScore: 0,
       });
     });
 
@@ -124,7 +126,7 @@ describe('ClearScoreAnimation', () => {
       anim.render();
 
       expect(emitSpy).toHaveBeenCalledWith('ui:test-uuid:render:clear:score', {
-        state: { score: 800, y: 19, alpha: 1, offsetY: 0 },
+        state: { score: 800, y: 19, alpha: 1, offsetY: 0, combo: 0, comboScore: 0 },
       });
     });
 
@@ -137,7 +139,7 @@ describe('ClearScoreAnimation', () => {
       anim.render();
 
       expect(emitSpy).toHaveBeenCalledWith('ui:test-uuid:render:clear:score', {
-        state: { score: 800, y: 19, alpha: 0.5, offsetY: 2 },
+        state: { score: 800, y: 19, alpha: 0.5, offsetY: 2, combo: 0, comboScore: 0 },
       });
     });
   });

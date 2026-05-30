@@ -33,6 +33,8 @@ describe('setBeginningState', () => {
         score: 0,
         lines: 0,
         level: 1,
+        combo: 0,
+        comboScore: 0,
         next: null,
         hold: null,
       });
@@ -134,6 +136,22 @@ describe('setBeginningState', () => {
       );
     });
 
+    it('每次调用都应该重置 combo 为 0', () => {
+      setBeginningState(mockContext, 'playing');
+
+      expect(mockStore.setState).toHaveBeenCalledWith(
+        expect.objectContaining({ combo: 0 }),
+      );
+    });
+
+    it('每次调用都应该重置 comboScore 为 0', () => {
+      setBeginningState(mockContext, 'playing');
+
+      expect(mockStore.setState).toHaveBeenCalledWith(
+        expect.objectContaining({ comboScore: 0 }),
+      );
+    });
+
     it('每次调用都应该重置 next 为 null', () => {
       setBeginningState(mockContext, 'playing');
 
@@ -175,6 +193,8 @@ describe('setBeginningState', () => {
         score: 0,
         lines: 0,
         level: 3,
+        combo: 0,
+        comboScore: 0,
         next: null,
         hold: null,
       });

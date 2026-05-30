@@ -50,7 +50,9 @@ describe('drop', () => {
         },
         cx: 4,
         cy: 18,
+        score: 0,
       }),
+      setState: jest.fn(),
     };
 
     mockContext = {
@@ -80,6 +82,76 @@ describe('drop', () => {
       drop(mockContext);
 
       expect(move).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ==================== 硬降计分 ====================
+  describe('硬降计分', () => {
+    it('应该计算下落格数并加 2 分/格', () => {
+      // 直接用 mockReturnValue 覆盖全部 getState 调用
+      mockStore.getState.mockReturnValue({
+        cx: 4,
+        cy: 20,
+        score: 100,
+        curr: { shape: [[1]], color: '#FFA500' },
+      });
+
+      // 但需要 startY 和 endY 不同，才能测试计分
+      // 所以用 once 单独覆盖第一次
+      mockStore.getState
+               .mockReturnValueOnce({ cy: 18 })  // ① startY = 18
+      // 之后全部走 mockReturnValue：cy = 20，cellsDropped = 2
+      ;
+
+      move
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(false);
+
+      drop(mockContext);
+
+      // cellsDropped = 20 - 18 = 2, +2×2 = +4
+      expect(mockStore.setState).toHaveBeenCalledWith({ score: 104 });
+    });
+
+    it('move 立即返回 false 时不加分', () => {
+      mockStore.getState.mockReturnValue({
+        cx: 4,
+        cy: 18,
+        score: 100,
+        curr: { shape: [[1]], color: '#FFA500' },
+      });
+
+      move.mockReturnValue(false);
+
+      drop(mockContext);
+
+      // cellsDropped = 18 - 18 = 0，不加分
+      expect(mockStore.setState).toHaveBeenCalledWith({ score: 100 });
+    });
+  });
+
+  // ==================== move 调用参数 ====================
+  describe('move 调用参数', () => {
+    it('应该以 (context, 0, 1, true) 参数调用 move，标记为硬降', () => {
+      move.mockReturnValue(false);
+
+      drop(mockContext);
+
+      expect(move).toHaveBeenCalledWith(mockContext, 0, 1, true);
+    });
+
+    it('每次循环都应该传递相同的参数', () => {
+      move
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(false);
+
+      drop(mockContext);
+
+      move.mock.calls.forEach((call) => {
+        expect(call).toEqual([mockContext, 0, 1, true]);
+      });
     });
   });
 
@@ -160,30 +232,6 @@ describe('drop', () => {
 
       expect(flashIdx).toBeLessThan(fallIdx);
       expect(fallIdx).toBeLessThan(dropIdx);
-    });
-  });
-
-  // ==================== move 调用参数 ====================
-  describe('move 调用参数', () => {
-    it('应该以 (context, 0, 1) 参数调用 move', () => {
-      move.mockReturnValue(false);
-
-      drop(mockContext);
-
-      expect(move).toHaveBeenCalledWith(mockContext, 0, 1);
-    });
-
-    it('每次循环都应该传递相同的参数', () => {
-      move
-        .mockReturnValueOnce(true)
-        .mockReturnValueOnce(true)
-        .mockReturnValueOnce(false);
-
-      drop(mockContext);
-
-      move.mock.calls.forEach((call) => {
-        expect(call).toEqual([mockContext, 0, 1]);
-      });
     });
   });
 

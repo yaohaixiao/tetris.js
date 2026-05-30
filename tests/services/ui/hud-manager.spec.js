@@ -19,6 +19,7 @@ jest.mock('@/lib/services/ui/hud/hud-elements.js', () => ({
     highScore: { textContent: '' },
     lines: { textContent: '' },
     level: { textContent: '' },
+    combo: { textContent: '' },         // ✅ 新增
     controller: { textContent: '' },
   })),
 }));
@@ -37,6 +38,7 @@ describe('HudManager', () => {
       highScore: 'highScore',
       lines: 'lines',
       level: 'level',
+      combo: 'combo',                   // ✅ 新增
       controller: 'controller',
     });
 
@@ -56,6 +58,7 @@ describe('HudManager', () => {
         highScore: 'highScore',
         lines: 'lines',
         level: 'level',
+        combo: 'combo',
         controller: 'controller',
       });
     });
@@ -69,67 +72,83 @@ describe('HudManager', () => {
     });
 
     it('应该初始化 prev 缓存', () => {
-      expect(hud.prev).toEqual({ lines: -1, level: -1 });
+      expect(hud.prev).toEqual({ lines: -1, level: -1, combo: -1 });
     });
   });
 
   // ==================== update ====================
   describe('update 方法', () => {
     it('应该更新分数追踪器的目标值', () => {
-      hud.update({ score: 500, lines: 0, level: 1 });
+      hud.update({ score: 500, lines: 0, level: 1, combo: 0 });
 
       expect(hud.scoreTracker.target).toBe(500);
     });
 
     it('应该更新最高分追踪器的目标值', () => {
-      hud.update({ highScore: 9999, lines: 0, level: 1 });
+      hud.update({ highScore: 9999, lines: 0, level: 1, combo: 0 });
 
       expect(hud.highScoreTracker.target).toBe(9999);
     });
 
     it('应该将非数字分数转为 0', () => {
-      hud.update({ score: null, lines: 0, level: 1 });
+      hud.update({ score: null, lines: 0, level: 1, combo: 0 });
 
       expect(hud.scoreTracker.target).toBe(0);
     });
 
     it('应该更新行数的 DOM 显示', () => {
-      hud.update({ score: 0, lines: 5, level: 1 });
+      hud.update({ score: 0, lines: 5, level: 1, combo: 0 });
 
       expect(elements.lines.textContent).toBe('05');
     });
 
     it('行数未变化时不应该更新 DOM', () => {
-      hud.update({ score: 0, lines: 5, level: 1 });
+      hud.update({ score: 0, lines: 5, level: 1, combo: 0 });
       const prevText = elements.lines.textContent;
 
-      hud.update({ score: 100, lines: 5, level: 1 });
+      hud.update({ score: 100, lines: 5, level: 1, combo: 0 });
 
       expect(elements.lines.textContent).toBe(prevText);
     });
 
     it('应该更新等级的 DOM 显示', () => {
-      hud.update({ score: 0, lines: 0, level: 3 });
+      hud.update({ score: 0, lines: 0, level: 3, combo: 0 });
 
       expect(elements.level.textContent).toBe('03');
     });
 
     it('等级未变化时不应该更新 DOM', () => {
-      hud.update({ score: 0, lines: 0, level: 3 });
+      hud.update({ score: 0, lines: 0, level: 3, combo: 0 });
       const prevText = elements.level.textContent;
 
-      hud.update({ score: 100, lines: 0, level: 3 });
+      hud.update({ score: 100, lines: 0, level: 3, combo: 0 });
 
       expect(elements.level.textContent).toBe(prevText);
     });
 
+    it('应该更新 combo 的 DOM 显示', () => {
+      hud.update({ score: 0, lines: 0, level: 1, combo: 3 });
+
+      expect(elements.combo.textContent).toBe('03');
+    });
+
+    it('combo 未变化时不应该更新 DOM', () => {
+      hud.update({ score: 0, lines: 0, level: 1, combo: 3 });
+      const prevText = elements.combo.textContent;
+
+      hud.update({ score: 100, lines: 0, level: 1, combo: 3 });
+
+      expect(elements.combo.textContent).toBe(prevText);
+    });
+
     it('应该同时更新多个字段', () => {
-      hud.update({ score: 1000, highScore: 5000, lines: 10, level: 5 });
+      hud.update({ score: 1000, highScore: 5000, lines: 10, level: 5, combo: 2 });
 
       expect(hud.scoreTracker.target).toBe(1000);
       expect(hud.highScoreTracker.target).toBe(5000);
       expect(elements.lines.textContent).toBe('10');
       expect(elements.level.textContent).toBe('05');
+      expect(elements.combo.textContent).toBe('02');
     });
   });
 
@@ -224,10 +243,11 @@ describe('HudManager', () => {
     it('应该重置 prev 缓存', () => {
       hud.prev.lines = 5;
       hud.prev.level = 3;
+      hud.prev.combo = 2;
 
       hud.reset();
 
-      expect(hud.prev).toEqual({ lines: -1, level: -1 });
+      expect(hud.prev).toEqual({ lines: -1, level: -1, combo: -1 });
     });
 
     it('应该清空分数 DOM 显示', () => {
@@ -261,6 +281,14 @@ describe('HudManager', () => {
 
       expect(elements.level.textContent).toBe('01');
     });
+
+    it('应该清空 combo DOM 显示', () => {
+      elements.combo.textContent = '05';
+
+      hud.reset();
+
+      expect(elements.combo.textContent).toBe('00');
+    });
   });
 
   // ==================== 多实例隔离 ====================
@@ -271,6 +299,7 @@ describe('HudManager', () => {
         highScore: 'hs1',
         lines: 'lines1',
         level: 'level1',
+        combo: 'combo1',
         controller: 'ctrl1',
       });
       const hud2 = new HudManager({
@@ -278,11 +307,12 @@ describe('HudManager', () => {
         highScore: 'hs2',
         lines: 'lines2',
         level: 'level2',
+        combo: 'combo2',
         controller: 'ctrl2',
       });
 
-      hud1.update({ score: 100, highScore: 200, lines: 5, level: 3 });
-      hud2.update({ score: 999, highScore: 888, lines: 10, level: 8 });
+      hud1.update({ score: 100, highScore: 200, lines: 5, level: 3, combo: 1 });
+      hud2.update({ score: 999, highScore: 888, lines: 10, level: 8, combo: 2 });
 
       expect(hud1.scoreTracker.target).toBe(100);
       expect(hud2.scoreTracker.target).toBe(999);
@@ -297,14 +327,16 @@ describe('HudManager', () => {
         highScore: 'h1',
         lines: 'l1',
         level: 'lv1',
-        controller: 'c1',
+        combo: 'c1',
+        controller: 'ctrl1',
       });
       const hud2 = new HudManager({
         score: 's2',
         highScore: 'h2',
         lines: 'l2',
         level: 'lv2',
-        controller: 'c2',
+        combo: 'c2',
+        controller: 'ctrl2',
       });
 
       hud1.scoreTracker.target = 100;
@@ -313,7 +345,6 @@ describe('HudManager', () => {
       hud1.tick();
       hud2.tick();
 
-      // 两个实例的 visual 应该不同（因为追赶的步进相同但目标不同）
       expect(hud1.scoreTracker.visual).not.toBe(hud2.scoreTracker.visual);
     });
   });

@@ -17,11 +17,13 @@ describe('move', () => {
     mockState = {
       cx: 4,
       cy: 5,
+      score: 0,                                  // ✅ 新增
       curr: { shape: [[1]], color: '#ffa500' },
     };
 
     mockStore = {
       getState: jest.fn().mockReturnValue(mockState),
+      getScore: jest.fn().mockReturnValue(mockState.score),  // ✅ 新增
       setState: jest.fn(),
     };
 
@@ -106,6 +108,42 @@ describe('move', () => {
       collision.mockReturnValue(false);
 
       expect(() => move(mockContext, 0, 1)).not.toThrow();
+    });
+  });
+
+  // ==================== 软降计分 ====================  // ✅ 新增
+  describe('软降计分', () => {
+    it('oy > 0 时应该加 1 分', () => {
+      mockState.score = 100;
+      mockStore.getScore.mockReturnValue(100);
+      collision.mockReturnValue(false);
+
+      move(mockContext, 0, 1);
+
+      expect(mockStore.setState).toHaveBeenCalledWith({ score: 101 });
+    });
+
+    it('ox 移动时不应该加分', () => {
+      mockState.score = 100;
+      mockStore.getScore.mockReturnValue(100);
+      collision.mockReturnValue(false);
+
+      move(mockContext, 1, 0);
+
+      // 只调用了 setState({ cx, cy })，没有第二个 setState 加分
+      expect(mockStore.setState).toHaveBeenCalledTimes(1);
+      expect(mockStore.setState).toHaveBeenCalledWith({ cx: 5, cy: 5 });
+    });
+
+    it('硬降时不应该加软降分', () => {
+      mockState.score = 100;
+      mockStore.getScore.mockReturnValue(100);
+      collision.mockReturnValue(false);
+
+      move(mockContext, 0, 1, true);  // isHardDrop = true
+
+      expect(mockStore.setState).toHaveBeenCalledTimes(1);
+      expect(mockStore.setState).toHaveBeenCalledWith({ cx: 4, cy: 6 });
     });
   });
 
@@ -218,13 +256,15 @@ describe('move', () => {
       collision.mockReturnValue(false);
 
       move(mockContext, 1, 0);
-      expect(mockStore.setState).toHaveBeenLastCalledWith({ cx: 5, cy: 5 });
+      expect(mockStore.setState).toHaveBeenCalledWith({ cx: 5, cy: 5 });
 
       mockState.cx = 5;
       mockState.cy = 5;
+      mockStore.setState.mockClear();
 
       move(mockContext, 0, 1);
-      expect(mockStore.setState).toHaveBeenLastCalledWith({ cx: 5, cy: 6 });
+      expect(mockStore.setState).toHaveBeenCalledWith({ cx: 5, cy: 6 });
+      expect(mockStore.setState).toHaveBeenCalledWith({ score: 1 });  // 软降分
     });
   });
 });
