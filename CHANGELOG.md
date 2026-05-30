@@ -1,3 +1,11 @@
+# [1.10.0](https://github.com/yaohaixiao/tetris.js/compare/1.9.0...1.10.0) (2026-05-30)
+
+
+### Features
+
+* 添加 Hold 暂存方块功能 ([d856580](https://github.com/yaohaixiao/tetris.js/commit/d856580ad6f8009fd6de6460a4f0ad65b6a102da))
+
+
 # [1.9.0](https://github.com/yaohaixiao/tetris.js/compare/1.8.0...1.9.0) (2026-05-28)
 
 
