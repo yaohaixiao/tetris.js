@@ -24,7 +24,7 @@ describe('findFullLines', () => {
     mockContext = {
       Store: mockStore,
       Elements: {
-        Main: {
+        Canvas: {
           rows: 20,
         },
       },
@@ -161,7 +161,7 @@ describe('findFullLines', () => {
     });
 
     it('棋盘只有 1 行时应该正常检测', () => {
-      mockContext.Elements.Main.rows = 1;
+      mockContext.Elements.Canvas.rows = 1;
       mockState.board = [Array.from({ length: 10 }, () => '#FF0000')];
 
       const result = findFullLines(mockContext);
@@ -182,7 +182,7 @@ describe('findFullLines', () => {
     });
 
     it('board 行宽度为 0 时 every 返回 true', () => {
-      mockContext.Elements.Main.rows = 1;
+      mockContext.Elements.Canvas.rows = 1;
       mockState.board = [[]];
 
       const result = findFullLines(mockContext);

@@ -1,5 +1,3 @@
-// tests/services/ui/core/resize.spec.js
-
 import resize from '@/lib/services/ui/core/resize';
 
 describe('resize', () => {
@@ -9,6 +7,7 @@ describe('resize', () => {
     canvas = {
       gameBoard: { width: 0, height: 0 },
       nextPiece: { width: 0, height: 0 },
+      holdPiece: { width: 0, height: 0 },
       rows: 20,
       cols: 10,
       blockSize: 0,
@@ -28,7 +27,6 @@ describe('resize', () => {
     it('blockSize = floor(innerHeight * 0.9 / rows)', () => {
       resize(canvas);
 
-      // h = 768 * 0.9 = 691.2, floor(691.2 / 20) = 34
       expect(canvas.blockSize).toBe(34);
     });
 
@@ -42,16 +40,21 @@ describe('resize', () => {
     it('fontSize = floor(blockSize * rows * 0.032)', () => {
       resize(canvas);
 
-      // 34 * 20 * 0.032 = 21.76, floor = 21
       expect(canvas.fontSize).toBe(21);
     });
 
     it('nextPiece = min(innerWidth*0.1, innerHeight*0.18)', () => {
       resize(canvas);
 
-      // 1024*0.1 = 102.4, 768*0.18 = 138.24, min = 102.4
       expect(canvas.nextPiece.width).toBe(102.4);
       expect(canvas.nextPiece.height).toBe(102.4);
+    });
+
+    it('holdPiece 和 nextPiece 尺寸相同', () => {
+      resize(canvas);
+
+      expect(canvas.holdPiece.width).toBe(102.4);
+      expect(canvas.holdPiece.height).toBe(102.4);
     });
 
     it('innerHeight*0.18 更小时取 height', () => {
@@ -60,9 +63,10 @@ describe('resize', () => {
 
       resize(canvas);
 
-      // 1920*0.1 = 192, 500*0.18 = 90, min = 90
       expect(canvas.nextPiece.width).toBe(90);
       expect(canvas.nextPiece.height).toBe(90);
+      expect(canvas.holdPiece.width).toBe(90);
+      expect(canvas.holdPiece.height).toBe(90);
     });
   });
 
@@ -75,9 +79,6 @@ describe('resize', () => {
     it('blockSize 取 width 和 maxH 的较小值', () => {
       resize(canvas);
 
-      // width = 375*0.64 = 240, floor(240/10) = 24
-      // maxH = 667*0.68 = 453.56, floor(453.56/20) = 22
-      // min(24, 22) = 22
       expect(canvas.blockSize).toBe(22);
     });
 
@@ -95,15 +96,19 @@ describe('resize', () => {
       expect(canvas.nextPiece.height).toBe(110);
     });
 
+    it('holdSize = blockSize * 5', () => {
+      resize(canvas);
+
+      expect(canvas.holdPiece.width).toBe(110);
+      expect(canvas.holdPiece.height).toBe(110);
+    });
+
     it('height 限制更严时用 height', () => {
       globalThis.innerWidth = 479;
       globalThis.innerHeight = 320;
 
       resize(canvas);
 
-      // width = 479*0.64 = 306.56, floor(306.56/10) = 30
-      // maxH = 320*0.68 = 217.6, floor(217.6/20) = 10
-      // min(30, 10) = 10
       expect(canvas.blockSize).toBe(10);
     });
   });
@@ -117,7 +122,6 @@ describe('resize', () => {
 
       resize(canvas);
 
-      // h = 600*0.9 = 540, floor(540/16) = 33
       expect(canvas.blockSize).toBe(33);
       expect(canvas.gameBoard.width).toBe(264);
       expect(canvas.gameBoard.height).toBe(528);

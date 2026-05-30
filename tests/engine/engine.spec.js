@@ -1,5 +1,3 @@
-// tests/engine/engine.spec.js
-
 import Engine from '@/lib/engine';
 import Scheduler from '@/lib/engine/scheduler';
 import dispatchInput from '@/lib/engine/dispatch-input';

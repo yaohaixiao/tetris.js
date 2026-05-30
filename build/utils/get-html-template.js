@@ -1,6 +1,6 @@
 import Configuration from '../../lib/configuration.js';
 
-const { Main, Hud, Controls } = Configuration.Elements;
+const { Canvas, Hud, Controls } = Configuration.Elements;
 
 const getHtmlTemplate = (args) => {
   const minify = args.action === 'minify';
@@ -27,12 +27,12 @@ const getHtmlTemplate = (args) => {
       <div class="tetris-container">
         <section class="tetris-screen">
           <main id="tetris-screen-main" class="tetris-screen-main">
-            <canvas id="${Main.board}" data-mode="main-menu"></canvas>
+            <canvas id="${Canvas.board}" data-mode="main-menu"></canvas>
           </main>
           <aside class="tetris-screen-aside">
             <section class="tetris-panel next">
               <h3 class="tetris-next-title">NEXT</h3>
-              <canvas id="${Main.next}" class="tetris-next-piece"></canvas>
+              <canvas id="${Canvas.next}" class="tetris-next-piece"></canvas>
             </section>
             <section class="tetris-panel controller">
               <p class="tetris-panel-text tetris-highlight"><span id="${Hud.controller}">Human</span></p>
@@ -43,15 +43,9 @@ const getHtmlTemplate = (args) => {
               <p class="tetris-panel-text">LEVEL:<br><span id="${Hud.level}">01</span></p>
               <p class="tetris-panel-text tetris-highlight">HI-SCORE:<br><span id="${Hud.highScore}">00000</span></p>
             </section>
-            <section class="tetris-panel shutcuts">
-              <p class="tetris-panel-text">↑ ROTATE</p>
-              <p class="tetris-panel-text">← → MOVE</p>
-              <p class="tetris-panel-text">↓ SPEED</p>
-              <p class="tetris-panel-text">SPACE DROP</p>
-              <p class="tetris-panel-text tetris-highlight">M BGM ON/OFF</p>
-              <p class="tetris-panel-text">P PAUSE</p>
-              <p class="tetris-panel-text">Q END</p>
-              <p class="tetris-panel-text">R RESTART</p>
+            <section class="tetris-panel hold">
+              <h3 class="tetris-hold-title">HOLD</h3>
+              <canvas id="${Canvas.hold}" class="tetris-hold-piece"></canvas>
             </section>
           </aside>
         </section>
@@ -59,6 +53,7 @@ const getHtmlTemplate = (args) => {
           <!-- START / SELECT -->
           <section class="tetris-system-controls">
             <div id="${Controls.back}" data-key="back" class="tetris-system-btn tetris-btn-back">BACK</div>
+            <div id="${Controls.hold}" data-key="hold" class="tetris-system-btn tetris-btn-hold">HOLD</div>
             <div id="${Controls.start}" data-key="start" class="tetris-system-btn tetris-btn-start">START</div>
           </section>
           <section class="tetris-main-controls">

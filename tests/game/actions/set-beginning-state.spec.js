@@ -25,17 +25,6 @@ describe('setBeginningState', () => {
 
   // ==================== 基本功能 ====================
   describe('基本功能', () => {
-    it('应该发送 ui:test-uuid:update:mode 事件', () => {
-      setBeginningState(mockContext, 'playing');
-
-      expect(mockContext.emit).toHaveBeenCalledWith(
-        'ui:test-uuid:update:mode',
-        {
-          mode: 'playing',
-        },
-      );
-    });
-
     it('应该更新 Store 状态', () => {
       setBeginningState(mockContext, 'paused');
 
@@ -45,26 +34,13 @@ describe('setBeginningState', () => {
         lines: 0,
         level: 1,
         next: null,
+        hold: null,
       });
     });
   });
 
   // ==================== 参数传递 ====================
   describe('参数传递', () => {
-    it('应该传递 mode 参数', () => {
-      setBeginningState(mockContext, 'game-over');
-
-      expect(mockContext.emit).toHaveBeenCalledWith(
-        'ui:test-uuid:update:mode',
-        {
-          mode: 'game-over',
-        },
-      );
-      expect(mockStore.setState).toHaveBeenCalledWith(
-        expect.objectContaining({ mode: 'game-over' }),
-      );
-    });
-
     it('不传 level 时应该使用默认值 1', () => {
       setBeginningState(mockContext, 'playing');
 
@@ -165,6 +141,14 @@ describe('setBeginningState', () => {
         expect.objectContaining({ next: null }),
       );
     });
+
+    it('每次调用都应该重置 hold 为 null', () => {
+      setBeginningState(mockContext, 'playing');
+
+      expect(mockStore.setState).toHaveBeenCalledWith(
+        expect.objectContaining({ hold: null }),
+      );
+    });
   });
 
   // ==================== 边界情况 ====================
@@ -192,6 +176,7 @@ describe('setBeginningState', () => {
         lines: 0,
         level: 3,
         next: null,
+        hold: null,
       });
     });
   });

@@ -9,9 +9,9 @@ describe('TouchController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // 创建 DOM 元素
     controls = {
       back: 'tetris-back',
+      hold: 'tetris-hold',
       start: 'tetris-start',
       up: 'tetris-up',
       down: 'tetris-down',
@@ -67,6 +67,7 @@ describe('TouchController', () => {
       expect(controller.$right).toBeInstanceOf(HTMLElement);
       expect(controller.$start).toBeInstanceOf(HTMLElement);
       expect(controller.$back).toBeInstanceOf(HTMLElement);
+      expect(controller.$hold).toBeInstanceOf(HTMLElement);
     });
   });
 
@@ -112,6 +113,16 @@ describe('TouchController', () => {
       expect(spy).toHaveBeenCalledWith('dispatch:input', {
         device: 'touch',
         action: 'TOGGLE_PAUSED',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('HOLD 键发射 HOLD', () => {
+      const spy = jest.spyOn(controller, 'emit');
+      controller.dispatchTouch('HOLD');
+      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+        device: 'touch',
+        action: 'HOLD',
         payload: { Game: mockGame },
       });
     });
@@ -183,7 +194,7 @@ describe('TouchController', () => {
       });
     });
 
-    it('DPAD_UP 增加等级并发射 LEVEL_ONE', () => {
+    it('DPAD_UP 增加等级并发射 LEVEL_TWO', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.level = 0;
       controller.dispatchTouch('DPAD_UP');
@@ -195,7 +206,7 @@ describe('TouchController', () => {
       });
     });
 
-    it('DPAD_DOWN 减少等级并发射对应 LEVEL', () => {
+    it('DPAD_DOWN 减少等级并发射 LEVEL_TWO', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.level = 2;
       controller.dispatchTouch('DPAD_DOWN');
