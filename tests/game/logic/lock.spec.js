@@ -247,12 +247,14 @@ describe('lock', () => {
 
   // ==================== 边界情况 ====================
   describe('边界情况', () => {
-    it('curr 为空时不应崩溃（但 shape 访问会报错）', () => {
+    it('curr 为空时应该安全返回，不调用 setState', () => {
       mockState.curr = null;
 
       expect(() => {
         lock(mockContext);
-      }).toThrow();
+      }).not.toThrow();
+
+      expect(mockStore.setState).not.toHaveBeenCalled();
     });
 
     it('空方块时不应写入任何颜色', () => {
