@@ -9158,24 +9158,6 @@ var tetris = (() => {
   };
   var count_holes_default = countHoles;
 
-  // lib/ai/utils/get-well-bonus.js
-  var getWellBonus = (heights) => {
-    const WELL_THRESHOLD = 3;
-    const WELL_WEIGHT = 0.8;
-    let bonus = 0;
-    for (let x = 1; x < heights.length - 1; x++) {
-      const left = heights[x - 1];
-      const cur = heights[x];
-      const right = heights[x + 1];
-      if (cur < left - WELL_THRESHOLD && cur < right - WELL_THRESHOLD) {
-        const depth = Math.min(left, right) - cur;
-        bonus += depth * WELL_WEIGHT;
-      }
-    }
-    return bonus;
-  };
-  var get_well_bonus_default = getWellBonus;
-
   // lib/ai/simulator/evaluate-board.js
   var evaluateBoard = (board, weights, clearResult) => {
     const heights = [];
@@ -9202,8 +9184,7 @@ var tetris = (() => {
         completeLines += 1;
       }
     }
-    const wellBonus = get_well_bonus_default(heights);
-    const staticScore = aggregateHeight * w.height + maxHeight * -1.2 + holes * w.holes + bumpiness * w.bumpiness + Math.pow(completeLines, 2) * w.completeLines + wellBonus;
+    const staticScore = aggregateHeight * w.height + maxHeight * -1.5 + holes * w.holes + bumpiness * w.bumpiness + Math.pow(completeLines, 2) * w.completeLines;
     let scoreBonus = 0;
     if (clearResult) {
       scoreBonus += clearResult.clearScore * 0.01;
@@ -11546,7 +11527,12 @@ var tetris = (() => {
     for (let y = 0; y < s.length; y++) {
       for (let x = 0; x < s[y].length; x++) {
         if (s[y][x]) {
-          board[state.cy + y][state.cx + x] = curr.color;
+          const boardY = state.cy + y;
+          const boardX = state.cx + x;
+          if (boardY < 0 || boardY >= board.length || boardX < 0 || boardX >= board[0].length) {
+            continue;
+          }
+          board[boardY][boardX] = curr.color;
         }
       }
     }
