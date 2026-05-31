@@ -1,11 +1,11 @@
-import computeRotatedShape from '@/lib/game/utils/compute-rotated-shape';
-import rotateClockwise from '@/lib/game/utils/rotate-clockwise';
-import rotateCounterClockwise from '@/lib/game/utils/rotate-counter-clockwise';
+import computeRotatedShape from '@/lib/game/logic/rotate/compute-rotated-shape.js';
+import rotateClockwise from '@/lib/game/logic/rotate/rotate-clockwise.js';
+import rotateCounterClockwise from '@/lib/game/logic/rotate/rotate-counter-clockwise.js';
 
-jest.mock('@/lib/game/utils/rotate-clockwise', () =>
+jest.mock('@/lib/game/logic/rotate/rotate-clockwise.js', () =>
   jest.fn(() => 'clockwise'),
 );
-jest.mock('@/lib/game/utils/rotate-counter-clockwise', () =>
+jest.mock('@/lib/game/logic/rotate/rotate-counter-clockwise.js', () =>
   jest.fn(() => 'counterclockwise'),
 );
 

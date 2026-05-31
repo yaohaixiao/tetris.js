@@ -3951,6 +3951,7 @@ var tetris = (() => {
     next: null,
     /** ## 缓存的方块 */
     hold: null,
+    tSpin: null,
     /** ## 当前得分 */
     score: 0,
     /** ## 累计消除行数 */
@@ -6512,7 +6513,7 @@ var tetris = (() => {
     const { gameBoardContext: ctx } = canvas;
     const { curr, cx, cy } = ghost;
     const { shape, color } = curr;
-    ctx.globalAlpha = 0.65;
+    ctx.globalAlpha = 0.45;
     for (let y = 0; y < shape.length; y++) {
       for (let x = 0; x < shape[y].length; x++) {
         if (shape[y][x]) {
@@ -6963,7 +6964,6 @@ var tetris = (() => {
      * 方块落地的瞬间在落地格子上显示半透明白色覆盖。 动画由 `LandingFlashAnimation` 控制，本方法只负责绘制。
      *
      * @param {object} flashData - 高亮数据
-     * @param {{ x: number; y: number }[]} flashData.cells - 需要高亮的格子坐标数组
      * @returns {void}
      */
     renderLandingFlash(flashData) {
@@ -7409,15 +7409,47 @@ var tetris = (() => {
     renderNextPiece() {
       this.Renderer.renderNextPiece();
     }
+    /**
+     * ## 渲染 Hold 方块预览
+     *
+     * 在预览画布中绘制缓存区方块的形状。 通过 `ui:<id>:render:hold:piece` 事件触发。
+     *
+     * @returns {void}
+     */
     renderHoldPiece() {
       this.Renderer.renderHoldPiece();
     }
+    /**
+     * ## 清除下一个方块预览
+     *
+     * 清空 Next 预览画布。 切换模式或重置时调用。
+     *
+     * @returns {void}
+     */
     clearNextPiece() {
       this.Renderer.clearNextPiece();
     }
+    /**
+     * ## 清除 Hold 方块预览
+     *
+     * 清空 Hold 预览画布。 切换模式或重置时调用。
+     *
+     * @returns {void}
+     */
     clearHoldPiece() {
       this.Renderer.clearHoldPiece();
     }
+    /**
+     * ## 渲染 Ghost 方块（半透明落点预览）
+     *
+     * 在当前方块正下方的投影位置绘制半透明 Ghost， 帮助玩家预判落点。仅在 level ≤ 9 时显示。 通过每帧主循环直接调用（非事件驱动）。
+     *
+     * @param {object} ghost - Ghost 定位数据
+     * @param {object} ghost.curr - 当前活动方块对象
+     * @param {number} ghost.cx - Ghost 的 X 坐标
+     * @param {number} ghost.ghostY - Ghost 的 Y 坐标
+     * @returns {void}
+     */
     renderGhostPiece(ghost) {
       this.Renderer.renderGhostPiece(ghost);
     }
@@ -7446,6 +7478,20 @@ var tetris = (() => {
     renderClearLines(state) {
       this.Renderer.renderClearLines(state);
     }
+    /**
+     * ## 渲染消除得分动画
+     *
+     * 在消除行位置绘制上浮渐隐的得分数字和 Combo 提示。 通过 `ui:<id>:render:clear:score` 事件触发。
+     *
+     * @param {object} state - 得分动画状态
+     * @param {number} state.score - 消除得分
+     * @param {number} state.y - 消除行号
+     * @param {number} state.alpha - 透明度
+     * @param {number} state.offsetY - Y 轴上浮偏移量
+     * @param {number} state.combo - 当前连击次数
+     * @param {number} state.comboScore - 连击额外加分
+     * @returns {void}
+     */
     renderClearScore(state) {
       this.Renderer.renderClearScore(state);
     }
@@ -7461,6 +7507,15 @@ var tetris = (() => {
     renderLevelUp(level, fireworks) {
       this.Renderer.renderLevelUp(level, fireworks);
     }
+    /**
+     * ## 渲染落地高亮特效
+     *
+     * 方块硬降或落底锁定时，在落点位置短暂显示白色高亮闪烁。 通过 `ui:<id>:render:landing:flash` 事件触发。
+     *
+     * @param {object} flashData - 落地高亮数据
+     * @param {object} flashData.piece - 方块位置和形状信息
+     * @returns {void}
+     */
     renderLandingFlash(flashData) {
       this.Renderer.renderLandingFlash(flashData);
     }
@@ -8859,107 +8914,6 @@ var tetris = (() => {
   };
   var evaluate_board_default = evaluateBoard;
 
-  // lib/game/constants/shapes.js
-  var SHAPES = [
-    /**
-     * ## I 型方块（标准长条）
-     *
-     * 形状：1 行 4 列 colorIndex: 0（TEAL 系）
-     */
-    { shape: [[1, 1, 1, 1]], colorIndex: 0, type: "I", rotation: 0 },
-    /**
-     * ## I 型方块（加长版）
-     *
-     * 形状：1 行 5 列 colorIndex: 1（GREEN 系）
-     */
-    { shape: [[1, 1, 1, 1, 1]], colorIndex: 1, type: "I5", rotation: 0 },
-    /**
-     * ## O 型方块（正方形）
-     *
-     * 形状：2×2 实心方块，旋转后形状不变 colorIndex: 2（ORANGE 系）
-     */
-    {
-      shape: [
-        [1, 1],
-        [1, 1]
-      ],
-      colorIndex: 2,
-      type: "O",
-      rotation: 0
-    },
-    /**
-     * ## T 型方块
-     *
-     * 形状：第一行中间一个，第二行三个 colorIndex: 3（YELLOW 系）
-     */
-    {
-      shape: [
-        [0, 1, 0],
-        [1, 1, 1]
-      ],
-      colorIndex: 3,
-      type: "T",
-      rotation: 0
-    },
-    /**
-     * ## L 型方块
-     *
-     * 形状：第一行左侧一个，第二行三个 colorIndex: 4（BLUE 系）
-     */
-    {
-      shape: [
-        [1, 0, 0],
-        [1, 1, 1]
-      ],
-      colorIndex: 4,
-      type: "L",
-      rotation: 0
-    },
-    /**
-     * ## J 型方块（反 L 型）
-     *
-     * 形状：第一行右侧一个，第二行三个 colorIndex: 5（PINK 系）
-     */
-    {
-      shape: [
-        [0, 0, 1],
-        [1, 1, 1]
-      ],
-      colorIndex: 5,
-      type: "J",
-      rotation: 0
-    },
-    /**
-     * ## S 型方块（右斜）
-     *
-     * 形状：第一行右侧两个，第二行左侧两个 colorIndex: 6（RED 系）
-     */
-    {
-      shape: [
-        [0, 1, 1],
-        [1, 1, 0]
-      ],
-      colorIndex: 6,
-      type: "S",
-      rotation: 0
-    },
-    /**
-     * ## Z 型方块（左斜）
-     *
-     * 形状：第一行左侧两个，第二行右侧两个 colorIndex: 7（VIOLET 系）
-     */
-    {
-      shape: [
-        [1, 1, 0],
-        [0, 1, 1]
-      ],
-      colorIndex: 7,
-      type: "Z",
-      rotation: 0
-    }
-  ];
-  var shapes_default = SHAPES;
-
   // lib/game/constants/color-palettes.js
   var {
     TEAL: TEAL4,
@@ -9101,6 +9055,107 @@ var tetris = (() => {
     ]
   ];
   var color_palettes_default = PALETTES;
+
+  // lib/game/constants/shapes.js
+  var SHAPES = [
+    /**
+     * ## I 型方块（标准长条）
+     *
+     * 形状：1 行 4 列 colorIndex: 0（TEAL 系）
+     */
+    { shape: [[1, 1, 1, 1]], colorIndex: 0, type: "I", rotation: 0 },
+    /**
+     * ## I 型方块（加长版）
+     *
+     * 形状：1 行 5 列 colorIndex: 1（GREEN 系）
+     */
+    { shape: [[1, 1, 1, 1, 1]], colorIndex: 1, type: "I5", rotation: 0 },
+    /**
+     * ## O 型方块（正方形）
+     *
+     * 形状：2×2 实心方块，旋转后形状不变 colorIndex: 2（ORANGE 系）
+     */
+    {
+      shape: [
+        [1, 1],
+        [1, 1]
+      ],
+      colorIndex: 2,
+      type: "O",
+      rotation: 0
+    },
+    /**
+     * ## T 型方块
+     *
+     * 形状：第一行中间一个，第二行三个 colorIndex: 3（YELLOW 系）
+     */
+    {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1]
+      ],
+      colorIndex: 3,
+      type: "T",
+      rotation: 0
+    },
+    /**
+     * ## L 型方块
+     *
+     * 形状：第一行左侧一个，第二行三个 colorIndex: 4（BLUE 系）
+     */
+    {
+      shape: [
+        [1, 0, 0],
+        [1, 1, 1]
+      ],
+      colorIndex: 4,
+      type: "L",
+      rotation: 0
+    },
+    /**
+     * ## J 型方块（反 L 型）
+     *
+     * 形状：第一行右侧一个，第二行三个 colorIndex: 5（PINK 系）
+     */
+    {
+      shape: [
+        [0, 0, 1],
+        [1, 1, 1]
+      ],
+      colorIndex: 5,
+      type: "J",
+      rotation: 0
+    },
+    /**
+     * ## S 型方块（右斜）
+     *
+     * 形状：第一行右侧两个，第二行左侧两个 colorIndex: 6（RED 系）
+     */
+    {
+      shape: [
+        [0, 1, 1],
+        [1, 1, 0]
+      ],
+      colorIndex: 6,
+      type: "S",
+      rotation: 0
+    },
+    /**
+     * ## Z 型方块（左斜）
+     *
+     * 形状：第一行左侧两个，第二行右侧两个 colorIndex: 7（VIOLET 系）
+     */
+    {
+      shape: [
+        [1, 1, 0],
+        [0, 1, 1]
+      ],
+      colorIndex: 7,
+      type: "Z",
+      rotation: 0
+    }
+  ];
+  var shapes_default = SHAPES;
 
   // lib/game/utils/refill-bag.js
   var isFirstBag = true;
@@ -10287,6 +10342,17 @@ var tetris = (() => {
     }
     return { level, levelUpSteps: required };
   };
+  var getTSpinScore = (cleared, isTSpin, isTSpinMini) => {
+    if (isTSpin) {
+      const scores = [400, 800, 1200, 1600];
+      return scores[cleared] || 0;
+    }
+    if (isTSpinMini) {
+      const scores = [100, 200, 400];
+      return scores[cleared] || 0;
+    }
+    return 0;
+  };
   var applyClearLines = (runtime) => {
     const { MAX_LEVEL: MAX_LEVEL2, CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
     const { Elements, Store } = runtime;
@@ -10308,7 +10374,9 @@ var tetris = (() => {
       MAX_LEVEL2
     );
     const levelUp = newLevel > state.level;
-    const baseScore = CLEAR_LINE_SCORES2[cleared] || 0;
+    const { isTSpin = false, isTSpinMini = false } = state.tSpin || {};
+    const tSpinScore = getTSpinScore(cleared, isTSpin, isTSpinMini);
+    const baseScore = tSpinScore || CLEAR_LINE_SCORES2[cleared] || 0;
     const clearScore = baseScore * newLevel;
     const combo = cleared > 0 ? (state.combo || 0) + 1 : 0;
     const comboScore = combo > 1 ? (combo - 1) * 50 : 0;
@@ -10325,6 +10393,8 @@ var tetris = (() => {
         ...prev,
         /** 清空待消除行列表 */
         clearLines: [],
+        /** 清空 T-Spin 标记（仅当次消行有效） */
+        tSpin: null,
         /** 更新棋盘 */
         board,
         /** 更新累计消除行数 */
@@ -10336,7 +10406,7 @@ var tetris = (() => {
         /**
          * 更新总分
          *
-         * 总分 = 原分数 + 消行得分 + Combo 额外加分
+         * 总分 = 原分数 + (基础分 × 等级) + Combo 额外加分
          */
         score: prev.score + clearScore + comboScore,
         /** 本次消行得分（用于飘字动画） */
@@ -10358,6 +10428,10 @@ var tetris = (() => {
       clearScore,
       /** 消除行数 */
       cleared,
+      /** 是否为 T-Spin */
+      isTSpin,
+      /** 是否为 T-Spin Mini */
+      isTSpinMini,
       /** 当前连击次数 */
       combo,
       /** 本次连击额外加分 */
@@ -11036,7 +11110,7 @@ var tetris = (() => {
   };
   var restart_default = restart;
 
-  // lib/game/utils/get-ghost-position.js
+  // lib/game/selector/get-ghost-position.js
   var getGhostPosition = (runtime) => {
     const { Store } = runtime;
     const state = Store.getState();
@@ -11180,7 +11254,7 @@ var tetris = (() => {
     ]
   ];
 
-  // lib/game/utils/get-kick-data.js
+  // lib/game/logic/rotate/get-kick-data.js
   var getKickData = (type) => {
     if (type === "I") {
       return KICK_I;
@@ -11195,11 +11269,11 @@ var tetris = (() => {
   };
   var get_kick_data_default = getKickData;
 
-  // lib/game/utils/compute-new-rotation.js
+  // lib/game/logic/rotate/compute-new-rotation.js
   var computeNewRotation = (current, direction) => ((current ?? 0) + direction + 4) % 4;
   var compute_new_rotation_default = computeNewRotation;
 
-  // lib/game/utils/rotate-counter-clockwise.js
+  // lib/game/logic/rotate/rotate-counter-clockwise.js
   var rotateCounterClockwise = (matrix) => {
     const rows = matrix.length;
     const cols = matrix[0].length;
@@ -11213,7 +11287,7 @@ var tetris = (() => {
   };
   var rotate_counter_clockwise_default = rotateCounterClockwise;
 
-  // lib/game/utils/rotate-clockwise.js
+  // lib/game/logic/rotate/rotate-clockwise.js
   var rotateClockwise = (matrix) => {
     const rows = matrix.length;
     const cols = matrix[0].length;
@@ -11227,11 +11301,11 @@ var tetris = (() => {
   };
   var rotate_clockwise_default = rotateClockwise;
 
-  // lib/game/utils/compute-rotated-shape.js
+  // lib/game/logic/rotate/compute-rotated-shape.js
   var computeRotatedShape = (shape, direction) => direction === 1 ? rotate_clockwise_default(shape) : rotate_counter_clockwise_default(shape);
   var compute_rotated_shape_default = computeRotatedShape;
 
-  // lib/game/utils/apply-rotation.js
+  // lib/game/logic/rotate/apply-rotation.js
   var applyRotation = (Store, curr, rotated, newRotation, cx, cy) => {
     const updates = {
       curr: { ...curr, shape: rotated, rotation: newRotation }
@@ -11243,14 +11317,19 @@ var tetris = (() => {
       updates.cy = cy;
     }
     Store.setState(updates);
-    const { curr: updatedCurr } = Store.getState();
-    if (updatedCurr._lockTimer) {
-      updatedCurr._lockTimer = 0;
-    }
   };
   var apply_rotation_default = applyRotation;
 
-  // lib/game/utils/try-kick-rotation.js
+  // lib/game/logic/rotate/reset-lock-delay.js
+  var resetLockDelay = (runtime) => {
+    const { curr: updatedCurr } = runtime.Store.getState();
+    if (updatedCurr?._lockTimer) {
+      updatedCurr._lockTimer = 0;
+    }
+  };
+  var reset_lock_delay_default = resetLockDelay;
+
+  // lib/game/logic/rotate/try-kick-rotation.js
   var tryKickRotation = (runtime, curr, rotated, newRotation, tests) => {
     const { cx, cy } = runtime.Store.getState();
     for (const [ox, oy] of tests) {
@@ -11265,6 +11344,7 @@ var tetris = (() => {
           cx + offsetX,
           cy + offsetY
         );
+        reset_lock_delay_default(runtime);
         return true;
       }
     }
@@ -11272,17 +11352,18 @@ var tetris = (() => {
   };
   var try_kick_rotation_default = tryKickRotation;
 
-  // lib/game/utils/try-normal-rotation.js
+  // lib/game/logic/rotate/try-normal-rotation.js
   var tryNormalRotation = (runtime, curr, rotated, newRotation) => {
     if (!collision_default2(runtime, 0, 0, rotated)) {
       apply_rotation_default(runtime.Store, curr, rotated, newRotation);
+      reset_lock_delay_default(runtime);
       return true;
     }
     return false;
   };
   var try_normal_rotation_default = tryNormalRotation;
 
-  // lib/game/logic/rotate.js
+  // lib/game/logic/rotate/rotate.js
   var rotate = (runtime, direction = 1) => {
     const { Store } = runtime;
     const { curr } = Store.getState();
@@ -11294,15 +11375,59 @@ var tetris = (() => {
     if (kickData?.length) {
       const tests = kickData[(curr.rotation ?? 0) % 4];
       if (tests?.length && try_kick_rotation_default(runtime, curr, rotated, newRotation, tests)) {
+        curr._lastAction = "rotate";
         runtime.emit(AE.PLAY_SOUND, { sound: "ROTATE" });
         return;
       }
     }
     if (try_normal_rotation_default(runtime, curr, rotated, newRotation)) {
+      curr._lastAction = "rotate";
       runtime.emit(AE.PLAY_SOUND, { sound: "ROTATE" });
     }
   };
   var rotate_default = rotate;
+
+  // lib/game/logic/rotate/t-spin.js
+  var detectTSpin = (runtime) => {
+    const { Store, Elements } = runtime;
+    const state = Store.getState();
+    const { curr, cx, cy, board } = state;
+    const { rows, cols } = Elements.Canvas;
+    if (curr?.colorIndex !== 3) {
+      return { isTSpin: false, isTSpinMini: false };
+    }
+    if (curr?._lastAction !== "rotate") {
+      return { isTSpin: false, isTSpinMini: false };
+    }
+    const corners = [
+      { x: cx, y: cy },
+      // A: 左上
+      { x: cx + 2, y: cy },
+      // B: 右上
+      { x: cx + 2, y: cy + 2 },
+      // C: 右下
+      { x: cx, y: cy + 2 }
+      // D: 左下
+    ];
+    let filledCorners = 0;
+    for (const { x: nx, y: ny } of corners) {
+      if (nx < 0 || nx >= cols || ny >= rows) {
+        filledCorners++;
+        continue;
+      }
+      if (ny >= 0 && board[ny][nx]) {
+        filledCorners++;
+      }
+    }
+    if (filledCorners >= 3) {
+      return { isTSpin: true, isTSpinMini: false };
+    }
+    if (filledCorners === 2) {
+      return { isTSpin: false, isTSpinMini: true };
+    }
+    return { isTSpin: false, isTSpinMini: false };
+  };
+  var t_spin_default = detectTSpin;
 
   // lib/game/logic/lock.js
   var lock = (runtime) => {
@@ -11315,10 +11440,15 @@ var tetris = (() => {
       for (let x = 0; x < s[y].length; x++) {
         if (s[y][x]) {
           board[state.cy + y][state.cx + x] = curr.color;
-          Store.setState({ board });
         }
       }
     }
+    const tSpinResult = t_spin_default(runtime);
+    Store.setState({
+      board,
+      tSpin: tSpinResult
+    });
+    curr._lastAction = null;
   };
   var lock_default = lock;
 
@@ -12565,7 +12695,8 @@ var tetris = (() => {
     replay: replay_actions_default,
     "game-over": game_over_actions_default
   };
-  var dispatchCommand = (cmd, { mode }) => {
+  var dispatchCommand = (cmd, options) => {
+    const { mode } = options;
     const { action, payload } = cmd;
     const actions = ACTIONS_MAP[mode];
     if (!actions) {

@@ -1,4 +1,10 @@
 import lock from '@/lib/game/logic/lock.js';
+import detectTSpin from '@/lib/game/logic/rotate/t-spin.js';
+
+jest.mock('@/lib/game/logic/rotate/t-spin.js', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ isTSpin: false, isTSpinMini: false })),
+}));
 
 describe('lock', () => {
   let mockContext;
@@ -34,6 +40,9 @@ describe('lock', () => {
 
     mockContext = {
       Store: mockStore,
+      Elements: {
+        Canvas: { rows: 20, cols: 10 },
+      },
     };
   });
 
@@ -50,13 +59,17 @@ describe('lock', () => {
 
       expect(mockStore.setState).toHaveBeenCalled();
     });
+
+    it('应该调用 detectTSpin 进行 T-Spin 检测', () => {
+      lock(mockContext);
+
+      expect(detectTSpin).toHaveBeenCalledWith(mockContext);
+    });
   });
 
   // ==================== 方块写入棋盘 ====================
   describe('方块写入棋盘', () => {
     it('应该将方块颜色写入正确的位置', () => {
-      // curr 是 2×2 的方块，cx=4, cy=5
-      // 应该占据 board[5][4], board[5][5], board[6][4], board[6][5]
       lock(mockContext);
 
       const setStateCall = mockStore.setState.mock.calls[0][0];
@@ -84,17 +97,11 @@ describe('lock', () => {
       const setStateCall = mockStore.setState.mock.calls[0][0];
       const board = setStateCall.board;
 
-      // shape[0][0] = 0，不应写入
       expect(board[5][3]).toBe(0);
-      // shape[0][1] = 1，应写入
       expect(board[5][4]).toBe('#FFFF00');
-      // shape[0][2] = 0，不应写入
       expect(board[5][5]).toBe(0);
-      // shape[1][0] = 1
       expect(board[6][3]).toBe('#FFFF00');
-      // shape[1][1] = 1
       expect(board[6][4]).toBe('#FFFF00');
-      // shape[1][2] = 1
       expect(board[6][5]).toBe('#FFFF00');
     });
 
@@ -103,7 +110,6 @@ describe('lock', () => {
 
       lock(mockContext);
 
-      // 使用了 structuredClone，原始 board 不受影响
       expect(JSON.stringify(mockState.board)).toBe(originalBoardSnapshot);
     });
   });
@@ -156,7 +162,6 @@ describe('lock', () => {
       const setStateCall = mockStore.setState.mock.calls[0][0];
       const board = setStateCall.board;
 
-      // 1行4列，全部写入 cy=19
       expect(board[19][3]).toBe('#008080');
       expect(board[19][4]).toBe('#008080');
       expect(board[19][5]).toBe('#008080');
@@ -166,23 +171,24 @@ describe('lock', () => {
 
   // ==================== setState 调用 ====================
   describe('setState 调用', () => {
-    it('应该用 board 字段调用 setState', () => {
+    it('应该用 board 和 tSpin 字段调用 setState', () => {
       lock(mockContext);
 
       const setStateArg = mockStore.setState.mock.calls[0][0];
 
       expect(setStateArg).toHaveProperty('board');
       expect(Array.isArray(setStateArg.board)).toBe(true);
+      expect(setStateArg).toHaveProperty('tSpin');
+      expect(setStateArg.tSpin).toEqual({ isTSpin: false, isTSpinMini: false });
     });
 
-    it('每次写入一个格子都会调用 setState', () => {
-      // 2×2 方块，4 个有值的格子
+    it('应该只调用一次 setState', () => {
       lock(mockContext);
 
-      expect(mockStore.setState).toHaveBeenCalledTimes(4);
+      expect(mockStore.setState).toHaveBeenCalledTimes(1);
     });
 
-    it('shape 中值为 0 的格子不应该触发 setState', () => {
+    it('shape 中值为 0 的格子不应该写入颜色', () => {
       mockState.curr = {
         shape: [
           [0, 1, 0],
@@ -190,11 +196,22 @@ describe('lock', () => {
         ],
         color: '#FFFF00',
       };
+      mockState.cx = 3;
+      mockState.cy = 5;
 
       lock(mockContext);
 
-      // T 型方块有 4 个有值的格子（中间 1、下面 3 个）
-      expect(mockStore.setState).toHaveBeenCalledTimes(4);
+      const setStateCall = mockStore.setState.mock.calls[0][0];
+      const board = setStateCall.board;
+
+      // 值为 0 的位置保持原样
+      expect(board[5][3]).toBe(0);
+      expect(board[5][5]).toBe(0);
+      // 值为 1 的位置正确写入
+      expect(board[5][4]).toBe('#FFFF00');
+      expect(board[6][3]).toBe('#FFFF00');
+      expect(board[6][4]).toBe('#FFFF00');
+      expect(board[6][5]).toBe('#FFFF00');
     });
   });
 
@@ -212,6 +229,22 @@ describe('lock', () => {
     });
   });
 
+  // ==================== T-Spin 标记 ====================
+  describe('T-Spin 标记', () => {
+    it('锁定后应该清空 _lastAction', () => {
+      mockState.curr._lastAction = 'rotate';
+
+      lock(mockContext);
+
+      expect(mockState.curr._lastAction).toBeNull();
+    });
+
+    it('_lastAction 不存在时清空也不应崩溃', () => {
+      // 没有 _lastAction
+      expect(() => lock(mockContext)).not.toThrow();
+    });
+  });
+
   // ==================== 边界情况 ====================
   describe('边界情况', () => {
     it('curr 为空时不应崩溃（但 shape 访问会报错）', () => {
@@ -222,7 +255,7 @@ describe('lock', () => {
       }).toThrow();
     });
 
-    it('空方块时不应调用 setState', () => {
+    it('空方块时不应写入任何颜色', () => {
       mockState.curr = {
         shape: [
           [0, 0],
@@ -233,20 +266,15 @@ describe('lock', () => {
 
       lock(mockContext);
 
-      expect(mockStore.setState).not.toHaveBeenCalled();
-    });
+      const setStateCall = mockStore.setState.mock.calls[0][0];
+      const board = setStateCall.board;
 
-    it('每次 setState 传递的 board 不同引用', () => {
-      // 由于 structuredClone，每次调用 setState 的 board 是新的
-      // 但逻辑中在循环内对同一个 board 修改并多次 setState
-      // 需要确认是否是同一个引用
-      lock(mockContext);
-
-      const firstCallBoard = mockStore.setState.mock.calls[0][0].board;
-      const secondCallBoard = mockStore.setState.mock.calls[1][0].board;
-
-      // 同一个循环内，用的是同一个 structuredClone 的 board
-      expect(firstCallBoard).toBe(secondCallBoard);
+      // 棋盘应保持原样（全 0）
+      for (let y = 0; y < 20; y++) {
+        for (let x = 0; x < 10; x++) {
+          expect(board[y][x]).toBe(0);
+        }
+      }
     });
   });
 });

@@ -1,9 +1,11 @@
-import tryNormalRotation from '@/lib/game/utils/try-normal-rotation';
-import collision from '@/lib/game/logic/collision';
-import applyRotation from '@/lib/game/utils/apply-rotation';
+import tryNormalRotation from '@/lib/game/logic/rotate/try-normal-rotation.js';
+import collision from '@/lib/game/logic/collision.js';
+import applyRotation from '@/lib/game/logic/rotate/apply-rotation.js';
+import resetLockDelay from '@/lib/game/logic/rotate/reset-lock-delay.js';
 
-jest.mock('@/lib/game/logic/collision', () => jest.fn());
-jest.mock('@/lib/game/utils/apply-rotation', () => jest.fn());
+jest.mock('@/lib/game/logic/collision.js', () => jest.fn());
+jest.mock('@/lib/game/logic/rotate/apply-rotation.js', () => jest.fn());
+jest.mock('@/lib/game/logic/rotate/reset-lock-delay.js', () => jest.fn());
 
 describe('tryNormalRotation', () => {
   let runtime;
@@ -37,6 +39,7 @@ describe('tryNormalRotation', () => {
       rotated,
       newRotation,
     );
+    expect(resetLockDelay).toHaveBeenCalledWith(runtime);
   });
 
   it('有碰撞时返回 false', () => {
@@ -46,6 +49,7 @@ describe('tryNormalRotation', () => {
 
     expect(result).toBe(false);
     expect(applyRotation).not.toHaveBeenCalled();
+    expect(resetLockDelay).not.toHaveBeenCalled();
   });
 
   it('碰撞检测用 (0, 0) 偏移', () => {

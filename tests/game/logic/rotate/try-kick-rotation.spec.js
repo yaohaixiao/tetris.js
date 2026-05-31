@@ -1,9 +1,11 @@
-import tryKickRotation from '@/lib/game/utils/try-kick-rotation';
-import collision from '@/lib/game/logic/collision';
-import applyRotation from '@/lib/game/utils/apply-rotation';
+import tryKickRotation from '@/lib/game/logic/rotate/try-kick-rotation.js';
+import collision from '@/lib/game/logic/collision.js';
+import applyRotation from '@/lib/game/logic/rotate/apply-rotation.js';
+import resetLockDelay from '@/lib/game/logic/rotate/reset-lock-delay.js';
 
-jest.mock('@/lib/game/logic/collision', () => jest.fn());
-jest.mock('@/lib/game/utils/apply-rotation', () => jest.fn());
+jest.mock('@/lib/game/logic/collision.js', () => jest.fn());
+jest.mock('@/lib/game/logic/rotate/apply-rotation.js', () => jest.fn());
+jest.mock('@/lib/game/logic/rotate/reset-lock-delay.js', () => jest.fn());
 
 describe('tryKickRotation', () => {
   let runtime;
@@ -48,6 +50,7 @@ describe('tryKickRotation', () => {
       4,
       18,
     );
+    expect(resetLockDelay).toHaveBeenCalledWith(runtime);
   });
 
   it('遍历所有偏移找到可用位置', () => {
@@ -68,6 +71,7 @@ describe('tryKickRotation', () => {
       3,
       17,
     );
+    expect(resetLockDelay).toHaveBeenCalledWith(runtime);
   });
 
   it('所有偏移都失败时返回 false', () => {
@@ -77,6 +81,7 @@ describe('tryKickRotation', () => {
 
     expect(result).toBe(false);
     expect(applyRotation).not.toHaveBeenCalled();
+    expect(resetLockDelay).not.toHaveBeenCalled();
   });
 
   it('SRS 坐标系转换：oy 取反', () => {

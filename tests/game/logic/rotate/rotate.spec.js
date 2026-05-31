@@ -1,15 +1,15 @@
-import rotate from '@/lib/game/logic/rotate.js';
+import rotate from '@/lib/game/logic/rotate/rotate.js';
 import collision from '@/lib/game/logic/collision.js';
 import { AudioEvents } from '@/lib/events/event-catalog.js';
-import getKickData from '@/lib/game/utils/get-kick-data.js';
-import rotateClockwise from '@/lib/game/utils/rotate-clockwise.js';
-import rotateCounterClockwise from '@/lib/game/utils/rotate-counter-clockwise.js';
+import getKickData from '@/lib/game/logic/rotate/get-kick-data.js';
+import rotateClockwise from '@/lib/game/logic/rotate/rotate-clockwise.js';
+import rotateCounterClockwise from '@/lib/game/logic/rotate/rotate-counter-clockwise.js';
 
 jest.mock('@/lib/game/logic/collision.js');
 jest.mock('@/lib/events/event-catalog.js');
-jest.mock('@/lib/game/utils/get-kick-data.js');
-jest.mock('@/lib/game/utils/rotate-clockwise.js');
-jest.mock('@/lib/game/utils/rotate-counter-clockwise.js');
+jest.mock('@/lib/game/logic/rotate/get-kick-data.js');
+jest.mock('@/lib/game/logic/rotate/rotate-clockwise.js');
+jest.mock('@/lib/game/logic/rotate/rotate-counter-clockwise.js');
 
 describe('rotate', () => {
   let mockRuntime;

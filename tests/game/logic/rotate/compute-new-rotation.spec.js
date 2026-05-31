@@ -1,4 +1,4 @@
-import computeNewRotation from '@/lib/game/utils/compute-new-rotation';
+import computeNewRotation from '@/lib/game/logic/rotate/compute-new-rotation.js';
 
 describe('computeNewRotation', () => {
   it('顺时针：0 → 1', () => {

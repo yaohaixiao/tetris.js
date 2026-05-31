@@ -1,4 +1,4 @@
-import getGhostPosition from '@/lib/game/utils/get-ghost-position.js';
+import getGhostPosition from '@/lib/game/selector/get-ghost-position.js';
 import collision from '@/lib/game/logic/collision.js';
 
 jest.mock('@/lib/game/logic/collision.js', () => ({
