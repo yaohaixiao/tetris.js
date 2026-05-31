@@ -8669,7 +8669,7 @@ var tetris = (() => {
      */
     EXPERT: {
       /** 前瞻深度：多看两步 */
-      lookahead: 3,
+      lookahead: 4,
       /** 随机噪声：不犯错 */
       noise: 0,
       /** Beam Search 剪枝宽度 */
@@ -8686,234 +8686,6 @@ var tetris = (() => {
     }
   };
   var ai_difficulty_default = AIDifficulty;
-
-  // lib/ai/snapshot/create-snapshot.js
-  var createSnapshot = (state) => structuredClone({
-    // 控制者身份
-    controller: state.controller,
-    // 棋盘状态
-    board: state.board,
-    // 游戏进度
-    level: state.level,
-    score: state.score,
-    lines: state.lines,
-    // 原始方块对象（保留完整信息，方便后续扩展）
-    cur: state.curr,
-    next: state.next,
-    // AI 决策专用的方块信息：从 state.curr 和 state.cx/cy 中提取并结构化
-    piece: state.curr ? {
-      shape: state.curr.shape,
-      position: {
-        x: state.cx,
-        y: state.cy
-      }
-    } : null,
-    // 游戏模式
-    mode: state.mode
-  });
-  var create_snapshot_default = createSnapshot;
-
-  // lib/ai/simulator/rotate-matrix.js
-  var rotateMatrix = (matrix) => {
-    const rows = matrix.length;
-    const cols = matrix[0].length;
-    const next = Array.from(
-      { length: cols },
-      () => Array.from({ length: rows }).fill(0)
-    );
-    for (let y = 0; y < rows; y += 1) {
-      for (let x = 0; x < cols; x += 1) {
-        next[x][rows - y - 1] = matrix[y][x];
-      }
-    }
-    return next;
-  };
-  var rotate_matrix_default = rotateMatrix;
-
-  // lib/ai/utils/collision.js
-  var collision = (board, shape, offsetX, offsetY) => {
-    for (let y = 0; y < shape.length; y += 1) {
-      for (let x = 0; x < shape[y].length; x += 1) {
-        if (!shape[y][x]) {
-          continue;
-        }
-        const bx = offsetX + x;
-        const by = offsetY + y;
-        if (bx < 0 || bx >= board[0].length || by >= board.length) {
-          return true;
-        }
-        if (by >= 0 && board[by][bx]) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-  var collision_default = collision;
-
-  // lib/ai/utils/clone-board.js
-  var cloneBoard = (board) => board.map((row) => [...row]);
-  var clone_board_default = cloneBoard;
-
-  // lib/ai/simulator/simulate-placement.js
-  var simulatePlacement = (board, shape, offsetX, offsetY) => {
-    const next = clone_board_default(board);
-    for (let y = 0; y < shape.length; y++) {
-      for (let x = 0; x < shape[0].length; x++) {
-        if (!shape[y][x]) continue;
-        const bx = x + offsetX;
-        const by = y + offsetY;
-        if (by >= 0 && by < next.length) {
-          next[by][bx] = 1;
-        }
-      }
-    }
-    return next;
-  };
-  var simulate_placement_default = simulatePlacement;
-
-  // lib/ai/simulator/simulate-drop.js
-  var simulateDrop = (board, shape, startX) => {
-    let y = 0;
-    while (!collision_default(board, shape, startX, y + 1)) {
-      y += 1;
-    }
-    const nextBoard = simulate_placement_default(board, shape, startX, y);
-    return {
-      board: nextBoard,
-      y
-    };
-  };
-  var simulate_drop_default = simulateDrop;
-
-  // lib/ai/planner/generate-moves.js
-  var getValidXPositions = (board, shape) => {
-    const boardWidth = board[0].length;
-    const shapeWidth = shape[0].length;
-    const maxX = boardWidth - shapeWidth;
-    const positions = [];
-    for (let x = 0; x <= maxX; x++) {
-      positions.push(x);
-    }
-    return positions;
-  };
-  var addRotateActions = (actions, count) => {
-    for (let i = 0; i < count; i++) {
-      actions.push("ROTATE");
-    }
-  };
-  var addMoveActions = (actions, delta) => {
-    if (delta === 0) return;
-    const moveDirection = delta > 0 ? "MOVE_RIGHT" : "MOVE_LEFT";
-    const moveCount = Math.abs(delta);
-    for (let i = 0; i < moveCount; i++) {
-      actions.push(moveDirection);
-    }
-  };
-  var buildActionSequence = ({ rotationCount, targetX, originalX }) => {
-    const actions = [];
-    addRotateActions(actions, rotationCount);
-    addMoveActions(actions, targetX - originalX);
-    actions.push("DROP");
-    return actions;
-  };
-  var createCandidate = ({
-    board,
-    currentShape,
-    targetX,
-    originalPiece,
-    rotationCount
-  }) => {
-    const result = simulate_drop_default(board, currentShape, targetX);
-    const actions = buildActionSequence({
-      rotationCount,
-      targetX,
-      originalX: originalPiece.position.x
-    });
-    return {
-      board: result.board,
-      actions
-    };
-  };
-  var generateMoves = (snapshot) => {
-    const { board, piece } = snapshot;
-    const moves = [];
-    let currentShape = piece.shape;
-    for (let rotation = 0; rotation < 4; rotation++) {
-      const validXPositions = getValidXPositions(board, currentShape);
-      for (const targetX of validXPositions) {
-        const candidate = createCandidate({
-          board,
-          currentShape,
-          targetX,
-          originalPiece: piece,
-          rotationCount: rotation
-        });
-        moves.push(candidate);
-      }
-      currentShape = rotate_matrix_default(currentShape);
-    }
-    return moves;
-  };
-  var generate_moves_default = generateMoves;
-
-  // lib/ai/utils/get-column-height.js
-  var getColumnHeight = (board, x) => {
-    for (let y = 0; y < board.length; y++) {
-      if (board[y][x]) {
-        return board.length - y;
-      }
-    }
-    return 0;
-  };
-  var get_column_height_default = getColumnHeight;
-
-  // lib/ai/utils/count-holes.js
-  var countHoles = (board) => {
-    let holes = 0;
-    for (let x = 0; x < board[0].length; x++) {
-      let blockFound = false;
-      for (const row of board) {
-        if (row[x]) {
-          blockFound = true;
-        } else if (blockFound) {
-          holes += 1;
-        }
-      }
-    }
-    return holes;
-  };
-  var count_holes_default = countHoles;
-
-  // lib/ai/simulator/evaluate-board.js
-  var evaluateBoard = (board, weights) => {
-    const heights = [];
-    const w = {
-      height: -0.51,
-      holes: -0.35,
-      bumpiness: -0.18,
-      completeLines: 1.5,
-      // 自定义权重覆盖默认值
-      ...weights
-    };
-    for (let x = 0; x < board[0].length; x++) {
-      heights.push(get_column_height_default(board, x));
-    }
-    const aggregateHeight = heights.reduce((a, b) => a + b, 0);
-    let bumpiness = 0;
-    for (let i = 0; i < heights.length - 1; i++) {
-      bumpiness += Math.abs(heights[i] - heights[i + 1]);
-    }
-    const holes = count_holes_default(board);
-    let completeLines = 0;
-    for (const row of board) {
-      if (row.every((cell) => cell !== 0)) {
-        completeLines += 1;
-      }
-    }
-    return aggregateHeight * w.height + holes * w.holes + bumpiness * w.bumpiness + Math.pow(completeLines, 2) * w.completeLines;
-  };
-  var evaluate_board_default = evaluateBoard;
 
   // lib/game/constants/color-palettes.js
   var {
@@ -9195,7 +8967,278 @@ var tetris = (() => {
       colorIndex: piece.colorIndex
     };
   };
+  var getBagSnapshot = () => [...bag];
   var random_shape_default = randomShape;
+
+  // lib/ai/snapshot/create-snapshot.js
+  var createSnapshot = (state) => structuredClone({
+    // 控制者身份
+    controller: state.controller,
+    // 棋盘状态
+    board: state.board,
+    // 游戏进度
+    level: state.level,
+    score: state.score,
+    lines: state.lines,
+    // 计分状态（供 AI 评估 T-Spin / Combo / Back-to-Back）
+    combo: state.combo || 0,
+    backToBack: state.backToBack || false,
+    tSpin: state.tSpin || null,
+    // 原始方块对象（保留完整信息，方便后续扩展）
+    cur: state.curr,
+    next: state.next,
+    // AI 决策专用的方块信息：从 state.curr 和 state.cx/cy 中提取并结构化
+    piece: state.curr ? {
+      shape: state.curr.shape,
+      position: {
+        x: state.cx,
+        y: state.cy
+      }
+    } : null,
+    // 游戏模式
+    mode: state.mode,
+    // 7-bag 状态（供 AI 确定性前瞻）
+    bag: getBagSnapshot()
+  });
+  var create_snapshot_default = createSnapshot;
+
+  // lib/ai/simulator/rotate-matrix.js
+  var rotateMatrix = (matrix) => {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const next = Array.from(
+      { length: cols },
+      () => Array.from({ length: rows }).fill(0)
+    );
+    for (let y = 0; y < rows; y += 1) {
+      for (let x = 0; x < cols; x += 1) {
+        next[x][rows - y - 1] = matrix[y][x];
+      }
+    }
+    return next;
+  };
+  var rotate_matrix_default = rotateMatrix;
+
+  // lib/ai/utils/collision.js
+  var collision = (board, shape, offsetX, offsetY) => {
+    for (let y = 0; y < shape.length; y += 1) {
+      for (let x = 0; x < shape[y].length; x += 1) {
+        if (!shape[y][x]) {
+          continue;
+        }
+        const bx = offsetX + x;
+        const by = offsetY + y;
+        if (bx < 0 || bx >= board[0].length || by >= board.length) {
+          return true;
+        }
+        if (by >= 0 && board[by][bx]) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+  var collision_default = collision;
+
+  // lib/ai/utils/clone-board.js
+  var cloneBoard = (board) => board.map((row) => [...row]);
+  var clone_board_default = cloneBoard;
+
+  // lib/ai/simulator/simulate-placement.js
+  var simulatePlacement = (board, shape, offsetX, offsetY) => {
+    const next = clone_board_default(board);
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[0].length; x++) {
+        if (!shape[y][x]) continue;
+        const bx = x + offsetX;
+        const by = y + offsetY;
+        if (by >= 0 && by < next.length) {
+          next[by][bx] = 1;
+        }
+      }
+    }
+    return next;
+  };
+  var simulate_placement_default = simulatePlacement;
+
+  // lib/ai/simulator/simulate-drop.js
+  var simulateDrop = (board, shape, startX) => {
+    let y = 0;
+    while (!collision_default(board, shape, startX, y + 1)) {
+      y += 1;
+    }
+    const nextBoard = simulate_placement_default(board, shape, startX, y);
+    return {
+      board: nextBoard,
+      y
+    };
+  };
+  var simulate_drop_default = simulateDrop;
+
+  // lib/ai/planner/generate-moves.js
+  var getValidXPositions = (board, shape) => {
+    const boardWidth = board[0].length;
+    const shapeWidth = shape[0].length;
+    const maxX = boardWidth - shapeWidth;
+    const positions = [];
+    for (let x = 0; x <= maxX; x++) {
+      positions.push(x);
+    }
+    return positions;
+  };
+  var addRotateActions = (actions, count) => {
+    for (let i = 0; i < count; i++) {
+      actions.push("ROTATE");
+    }
+  };
+  var addMoveActions = (actions, delta) => {
+    if (delta === 0) return;
+    const moveDirection = delta > 0 ? "MOVE_RIGHT" : "MOVE_LEFT";
+    const moveCount = Math.abs(delta);
+    for (let i = 0; i < moveCount; i++) {
+      actions.push(moveDirection);
+    }
+  };
+  var buildActionSequence = ({ rotationCount, targetX, originalX }) => {
+    const actions = [];
+    addRotateActions(actions, rotationCount);
+    addMoveActions(actions, targetX - originalX);
+    actions.push("DROP");
+    return actions;
+  };
+  var createCandidate = ({
+    board,
+    currentShape,
+    targetX,
+    originalPiece,
+    rotationCount
+  }) => {
+    const result = simulate_drop_default(board, currentShape, targetX);
+    const actions = buildActionSequence({
+      rotationCount,
+      targetX,
+      originalX: originalPiece.position.x
+    });
+    return {
+      board: result.board,
+      actions
+    };
+  };
+  var generateMoves = (snapshot) => {
+    const { board, piece } = snapshot;
+    const moves = [];
+    let currentShape = piece.shape;
+    for (let rotation = 0; rotation < 4; rotation++) {
+      const validXPositions = getValidXPositions(board, currentShape);
+      for (const targetX of validXPositions) {
+        const candidate = createCandidate({
+          board,
+          currentShape,
+          targetX,
+          originalPiece: piece,
+          rotationCount: rotation
+        });
+        moves.push(candidate);
+      }
+      currentShape = rotate_matrix_default(currentShape);
+    }
+    return moves;
+  };
+  var generate_moves_default = generateMoves;
+
+  // lib/ai/utils/get-column-height.js
+  var getColumnHeight = (board, x) => {
+    for (let y = 0; y < board.length; y++) {
+      if (board[y][x]) {
+        return board.length - y;
+      }
+    }
+    return 0;
+  };
+  var get_column_height_default = getColumnHeight;
+
+  // lib/ai/utils/count-holes.js
+  var countHoles = (board) => {
+    let holes = 0;
+    for (let x = 0; x < board[0].length; x++) {
+      let blockFound = false;
+      for (const row of board) {
+        if (row[x]) {
+          blockFound = true;
+        } else if (blockFound) {
+          holes += 1;
+        }
+      }
+    }
+    return holes;
+  };
+  var count_holes_default = countHoles;
+
+  // lib/ai/utils/count-t-spin-slots.js
+  var countTSpinSlots = (board) => {
+    let slots = 0;
+    for (let y = 1; y < board.length - 2; y++) {
+      for (let x = 1; x < board[0].length - 1; x++) {
+        if (board[y][x] === 0 && // 中间空
+        board[y + 1] && board[y + 1][x] !== 0 && // 下方有方块（支撑）
+        board[y][x - 1] !== 0 && // 左侧有方块
+        board[y][x + 1] !== 0) {
+          slots++;
+        }
+      }
+    }
+    return slots;
+  };
+  var count_t_spin_slots_default = countTSpinSlots;
+
+  // lib/ai/simulator/evaluate-board.js
+  var evaluateBoard = (board, weights, clearResult) => {
+    const heights = [];
+    const w = {
+      height: -0.51,
+      holes: -0.35,
+      bumpiness: -0.18,
+      completeLines: 1.5,
+      // 自定义权重覆盖默认值
+      ...weights
+    };
+    for (let x = 0; x < board[0].length; x++) {
+      heights.push(get_column_height_default(board, x));
+    }
+    const aggregateHeight = heights.reduce((a, b) => a + b, 0);
+    let bumpiness = 0;
+    for (let i = 0; i < heights.length - 1; i++) {
+      bumpiness += Math.abs(heights[i] - heights[i + 1]);
+    }
+    const holes = count_holes_default(board);
+    let completeLines = 0;
+    for (const row of board) {
+      if (row.every((cell) => cell !== 0)) {
+        completeLines += 1;
+      }
+    }
+    const staticScore = aggregateHeight * w.height + holes * w.holes + bumpiness * w.bumpiness + Math.pow(completeLines, 2) * w.completeLines;
+    let scoreBonus = 0;
+    if (clearResult) {
+      scoreBonus += clearResult.clearScore * 0.01;
+      if (clearResult.isTSpin) {
+        scoreBonus += 5;
+      } else if (clearResult.isTSpinMini) {
+        scoreBonus += 2;
+      }
+      if (clearResult.isBackToBack) {
+        scoreBonus += 3;
+      }
+      if (clearResult.isAllClear) {
+        scoreBonus += 10;
+      }
+      scoreBonus += clearResult.combo * 0.5;
+    } else {
+      scoreBonus += count_t_spin_slots_default(board) * 2;
+    }
+    return staticScore + scoreBonus;
+  };
+  var evaluate_board_default = evaluateBoard;
 
   // lib/ai/utils/clear-full-lines.js
   var clearFullLines = (board) => {
@@ -9207,6 +9250,52 @@ var tetris = (() => {
   };
   var clear_full_lines_default = clearFullLines;
 
+  // lib/game/utils/get-t-spin-score.js
+  var getTSpinScore = (cleared, isTSpin, isTSpinMini) => {
+    if (isTSpin) {
+      const scores = [400, 800, 1200, 1600];
+      return scores[cleared] || 0;
+    }
+    if (isTSpinMini) {
+      const scores = [100, 200, 400];
+      return scores[cleared] || 0;
+    }
+    return 0;
+  };
+  var get_t_spin_score_default = getTSpinScore;
+
+  // lib/ai/simulator/simulate-clear-result.js
+  var simulateClearResult = (board, snapshot) => {
+    const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
+    const cleared = board.filter((row) => row.every((cell) => cell !== 0)).length;
+    if (cleared === 0) return null;
+    const { isTSpin = false, isTSpinMini = false } = snapshot.tSpin || {};
+    const tSpinScore = get_t_spin_score_default(cleared, isTSpin, isTSpinMini);
+    const baseScore = tSpinScore || CLEAR_LINE_SCORES2[cleared] || 0;
+    const isBigMove = cleared >= 4 || isTSpin || isTSpinMini;
+    const isBackToBack = isBigMove && snapshot.backToBack === true;
+    const multiplier = isBackToBack ? 1.5 : 1;
+    const combo = (snapshot.combo || 0) + 1;
+    const comboScore = combo > 1 ? (combo - 1) * 50 : 0;
+    const isAllClear = board.every((row) => row.every((cell) => cell === 0));
+    const allClearScore = isAllClear ? 2e3 : 0;
+    const clearScore = Math.floor(baseScore * multiplier) + comboScore + allClearScore;
+    return {
+      cleared,
+      baseScore,
+      clearScore,
+      isTSpin,
+      isTSpinMini,
+      isBigMove,
+      isBackToBack,
+      isAllClear,
+      combo,
+      comboScore,
+      allClearScore
+    };
+  };
+  var simulate_clear_result_default = simulateClearResult;
+
   // lib/ai/simulator/advance-snapshot.js
   var advanceSnapshot = (snapshot, move2) => {
     const board = simulate_placement_default(
@@ -9214,29 +9303,39 @@ var tetris = (() => {
       snapshot.piece.shape,
       snapshot.piece.position.x,
       move2.y
-      // simulateDrop 返回的最终 Y 坐标
     );
     const clearedBoard = clear_full_lines_default(board);
-    const nextPiece = snapshot.next || random_shape_default();
+    const clearResult = simulate_clear_result_default(clearedBoard, snapshot);
+    let bag2 = snapshot.bag ? [...snapshot.bag] : [];
+    const nextPiece = bag2.length > 0 ? bag2.shift() : snapshot.next || {
+      shape: [[1, 1, 1, 1]],
+      type: "I",
+      rotation: 0,
+      colorIndex: 0
+    };
+    let nextNext = null;
+    if (bag2.length > 0) {
+      nextNext = bag2.shift();
+    }
     const newPiece = {
       shape: nextPiece.shape,
       position: {
         x: Math.floor(10 / 2) - Math.floor(nextPiece.shape[0].length / 2),
         y: 0
-        // 从顶部开始
       }
     };
     return {
       ...snapshot,
-      // 保留原始快照中的其他字段
       board: clearedBoard,
-      // 更新为清理后的棋盘
       piece: newPiece,
-      // 新活动方块
       cur: nextPiece,
-      // 新活动方块的原始对象
-      next: random_shape_default()
-      // 再随机生成下一个预览方块
+      next: nextNext,
+      bag: bag2,
+      // 更新计分状态
+      combo: clearResult ? clearResult.combo : 0,
+      backToBack: clearResult ? clearResult.isBigMove : snapshot.backToBack,
+      tSpin: null
+      // 锁定后清空 T-Spin 标记（下一块需重新检测）
     };
   };
   var advance_snapshot_default = advanceSnapshot;
@@ -9246,10 +9345,13 @@ var tetris = (() => {
     const moves = generate_moves_default(snapshot);
     if (moves.length === 0) return null;
     if (depth > 1 && moves.length > beam) {
-      const scored = moves.map((move2) => ({
-        move: move2,
-        score: evaluate_board_default(move2.board, weights)
-      }));
+      const scored = moves.map((move2) => {
+        const clearResult = simulate_clear_result_default(move2.board, snapshot);
+        return {
+          move: move2,
+          score: evaluate_board_default(move2.board, weights, clearResult)
+        };
+      });
       scored.sort((a, b) => b.score - a.score);
       moves.length = 0;
       moves.push(...scored.slice(0, beam).map((s) => s.move));
@@ -9258,12 +9360,13 @@ var tetris = (() => {
     let bestScore = -Infinity;
     for (const move2 of moves) {
       let score;
+      const clearResult = simulate_clear_result_default(move2.board, snapshot);
       if (depth <= 1) {
-        score = evaluate_board_default(move2.board, weights);
+        score = evaluate_board_default(move2.board, weights, clearResult);
       } else {
         const nextSnapshot = advance_snapshot_default(snapshot, move2);
         const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam);
-        score = nextBest ? evaluate_board_default(nextBest.board, weights) : evaluate_board_default(move2.board, weights);
+        score = nextBest ? evaluate_board_default(nextBest.board, weights) : evaluate_board_default(move2.board, weights, clearResult);
       }
       if (score > bestScore) {
         bestScore = score;
@@ -10343,20 +10446,6 @@ var tetris = (() => {
     return { level, levelUpSteps: required };
   };
   var calculate_level_default = calculateLevel;
-
-  // lib/game/utils/get-t-spin-score.js
-  var getTSpinScore = (cleared, isTSpin, isTSpinMini) => {
-    if (isTSpin) {
-      const scores = [400, 800, 1200, 1600];
-      return scores[cleared] || 0;
-    }
-    if (isTSpinMini) {
-      const scores = [100, 200, 400];
-      return scores[cleared] || 0;
-    }
-    return 0;
-  };
-  var get_t_spin_score_default = getTSpinScore;
 
   // lib/game/actions/apply-clear-lines.js
   var createEmptyRow = (cols) => Array.from({ length: cols }).fill(0);

@@ -215,7 +215,7 @@ describe('evaluateBoard', () => {
       }
 
       const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-19.73, 2);
+      expect(score).toBeCloseTo(-17.73, 2);  // -19.73 + 2 (T-Spin slot)
     });
 
     it('即将消除一行的状态应该比纯堆叠得分高', () => {

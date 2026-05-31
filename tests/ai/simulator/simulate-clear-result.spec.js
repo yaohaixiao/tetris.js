@@ -1,0 +1,311 @@
+import simulateClearResult from '@/lib/ai/simulator/simulate-clear-result.js';
+
+jest.mock('@/lib/game/constants/game.js', () => ({
+  __esModule: true,
+  default: {
+    CLEAR_LINE_SCORES: [0, 100, 300, 500, 800, 1200],
+  },
+}));
+
+describe('simulateClearResult', () => {
+  const createBoard = () =>
+    Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0));
+
+  const createSnapshot = (overrides = {}) => ({
+    combo: 0,
+    backToBack: false,
+    tSpin: null,
+    ...overrides,
+  });
+
+  // ==================== 无消行 ====================
+  describe('无消行', () => {
+    it('空棋盘应该返回 null', () => {
+      const board = createBoard();
+      const snapshot = createSnapshot();
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result).toBeNull();
+    });
+
+    it('没有满行时应该返回 null', () => {
+      const board = createBoard();
+      board[19][0] = 1;
+      const snapshot = createSnapshot();
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  // ==================== 普通消行 ====================
+  describe('普通消行', () => {
+    it('消 1 行应该返回 cleared=1', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot();
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.cleared).toBe(1);
+      expect(result.baseScore).toBe(100);
+      expect(result.clearScore).toBe(100);
+    });
+
+    it('消 2 行应该返回 cleared=2, baseScore=300', () => {
+      const board = createBoard();
+      board[18] = Array(10).fill(1);
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot();
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.cleared).toBe(2);
+      expect(result.baseScore).toBe(300);
+    });
+
+    it('消 4 行应该返回 cleared=4, baseScore=800', () => {
+      const board = createBoard();
+      board[16] = Array(10).fill(1);
+      board[17] = Array(10).fill(1);
+      board[18] = Array(10).fill(1);
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot();
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.cleared).toBe(4);
+      expect(result.baseScore).toBe(800);
+    });
+  });
+
+  // ==================== T-Spin ====================
+  describe('T-Spin', () => {
+    it('T-Spin 消 0 行应该返回 baseScore=400', () => {
+      const board = createBoard();
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: true, isTSpinMini: false },
+      });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isTSpin).toBe(true);
+      expect(result.cleared).toBe(0);
+      expect(result.baseScore).toBe(400);
+      expect(result.clearScore).toBe(400);
+    });
+
+    it('T-Spin 消 1 行应该返回 baseScore=800', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: true, isTSpinMini: false },
+      });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.cleared).toBe(1);
+      expect(result.baseScore).toBe(800);
+    });
+
+    it('T-Spin Mini 消 1 行应该返回 baseScore=200', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: false, isTSpinMini: true },
+      });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isTSpinMini).toBe(true);
+      expect(result.cleared).toBe(1);
+      expect(result.baseScore).toBe(200);
+    });
+  });
+
+  // ==================== Back-to-Back ====================
+  describe('Back-to-Back', () => {
+    it('Tetris 接 Tetris 应该触发 Back-to-Back', () => {
+      const board = createBoard();
+      board[16] = Array(10).fill(1);
+      board[17] = Array(10).fill(1);
+      board[18] = Array(10).fill(1);
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({ backToBack: true });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isBackToBack).toBe(true);
+      expect(result.clearScore).toBe(1200); // 800 × 1.5
+    });
+
+    it('第一次 Tetris 不应该触发 Back-to-Back', () => {
+      const board = createBoard();
+      board[16] = Array(10).fill(1);
+      board[17] = Array(10).fill(1);
+      board[18] = Array(10).fill(1);
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({ backToBack: false });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isBackToBack).toBe(false);
+      expect(result.clearScore).toBe(800);
+    });
+
+    it('普通消行不触发 Back-to-Back', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({ backToBack: true });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isBackToBack).toBe(false);
+      expect(result.clearScore).toBe(100);
+    });
+  });
+
+  // ==================== Combo ====================
+  describe('Combo', () => {
+    it('首次消行 combo=1，不加分', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({ combo: 0 });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.combo).toBe(1);
+      expect(result.comboScore).toBe(0);
+    });
+
+    it('combo=2 时额外加 50', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({ combo: 1 });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.combo).toBe(2);
+      expect(result.comboScore).toBe(50);
+      expect(result.clearScore).toBe(150); // 100 + 50
+    });
+
+    it('combo=4 时额外加 150', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({ combo: 3 });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.combo).toBe(4);
+      expect(result.comboScore).toBe(150);
+    });
+  });
+
+  // ==================== All Clear ====================
+  describe('All Clear', () => {
+    it('消行后棋盘全空应该加 2000', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot();
+
+      const result = simulateClearResult(board, snapshot);
+
+      // board 有 1 行满（cleared=1），但尚未消行，棋盘不全空
+      expect(result.isAllClear).toBe(false);
+      expect(result.allClearScore).toBe(0);
+    });
+
+    it('非全清时 isAllClear 为 false', () => {
+      const board = createBoard();
+      board[18] = Array(10).fill(1);
+      board[19][0] = 1;
+      const snapshot = createSnapshot();
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isAllClear).toBe(false);
+      expect(result.allClearScore).toBe(0);
+    });
+  });
+
+  // ==================== 综合场景 ====================
+  describe('综合场景', () => {
+    it('T-Spin + Back-to-Back + Combo 叠加', () => {
+      const board = createBoard();
+      board[18] = Array(10).fill(1);
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: true, isTSpinMini: false },
+        backToBack: true,
+        combo: 2,
+      });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isTSpin).toBe(true);
+      expect(result.isBackToBack).toBe(true);
+      expect(result.combo).toBe(3);
+      // T-Spin Double: 1200 × 1.5 + (3-1)×50 = 1800 + 100 = 1900
+      expect(result.clearScore).toBe(1900);
+    });
+
+    it('isBigMove 判定正确', () => {
+      // Tetris
+      const board1 = createBoard();
+      board1[16] = Array(10).fill(1);
+      board1[17] = Array(10).fill(1);
+      board1[18] = Array(10).fill(1);
+      board1[19] = Array(10).fill(1);
+      expect(simulateClearResult(board1, createSnapshot()).isBigMove).toBe(true);
+
+      // T-Spin
+      const board2 = createBoard();
+      expect(
+        simulateClearResult(
+          board2,
+          createSnapshot({ tSpin: { isTSpin: true, isTSpinMini: false } }),
+        ).isBigMove,
+      ).toBe(true);
+
+      // 普通消行
+      const board3 = createBoard();
+      board3[19] = Array(10).fill(1);
+      expect(
+        simulateClearResult(board3, createSnapshot()).isBigMove,
+      ).toBe(false);
+    });
+  });
+
+  // ==================== 边界情况 ====================
+  describe('边界情况', () => {
+    it('snapshot 中缺少字段时应使用默认值', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = {};
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result).not.toBeNull();
+      expect(result.combo).toBe(1);
+      expect(result.isBackToBack).toBe(false);
+    });
+
+    it('清除 5 行应正确计分', () => {
+      const board = createBoard();
+      board[15] = Array(10).fill(1);
+      board[16] = Array(10).fill(1);
+      board[17] = Array(10).fill(1);
+      board[18] = Array(10).fill(1);
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot();
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.cleared).toBe(5);
+      expect(result.baseScore).toBe(1200);
+    });
+  });
+});

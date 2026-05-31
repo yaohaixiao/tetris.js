@@ -15,6 +15,11 @@ jest.mock('@/lib/ai/simulator/advance-snapshot.js', () => ({
   default: jest.fn(),
 }));
 
+jest.mock('@/lib/ai/simulator/simulate-clear-result.js', () => ({
+  __esModule: true,
+  default: jest.fn(() => null),
+}));
+
 import generateMoves from '@/lib/ai/planner/generate-moves.js';
 import evaluateBoard from '@/lib/ai/simulator/evaluate-board.js';
 import advanceSnapshot from '@/lib/ai/simulator/advance-snapshot.js';
@@ -25,6 +30,9 @@ describe('selfPlay', () => {
     board: Array.from({ length: 20 }, () =>
       Array.from({ length: 10 }, () => 0),
     ),
+    combo: 0,
+    backToBack: false,
+    tSpin: null,
     level: 1,
     score: 0,
     lines: 0,
@@ -138,7 +146,7 @@ describe('selfPlay', () => {
       expect(evaluateBoard).toHaveBeenCalledTimes(3);
     });
 
-    it('应该将 weights 传给 evaluateBoard', () => {
+    it('应该将 weights 和 clearResult 传给 evaluateBoard', () => {
       const snapshot = createSnapshot();
       const weights = {
         holes: -0.75,
@@ -151,7 +159,11 @@ describe('selfPlay', () => {
 
       selfPlay(snapshot, weights, 1);
 
-      expect(evaluateBoard).toHaveBeenCalledWith(expect.any(Array), weights);
+      expect(evaluateBoard).toHaveBeenCalledWith(
+        expect.any(Array),
+        weights,
+        null, // simulateClearResult mocked to return null
+      );
     });
   });
 
@@ -202,7 +214,11 @@ describe('selfPlay', () => {
       const best = selfPlay(snapshot, undefined, 2);
 
       expect(best).toBe(move);
-      expect(evaluateBoard).toHaveBeenCalledWith(move.board, undefined);
+      expect(evaluateBoard).toHaveBeenCalledWith(
+        move.board,
+        undefined,
+        null,
+      );
     });
 
     it('递归时应传递 weights', () => {
@@ -224,8 +240,11 @@ describe('selfPlay', () => {
 
       selfPlay(snapshot, weights, 2);
 
-      // 验证 evaluateBoard 收到了 weights
-      expect(evaluateBoard).toHaveBeenCalledWith(expect.any(Array), weights);
+      expect(evaluateBoard).toHaveBeenCalledWith(
+        expect.any(Array),
+        weights,
+        null,
+      );
     });
   });
 
@@ -247,7 +266,7 @@ describe('selfPlay', () => {
 
       expect(generateMoves).toHaveBeenCalledTimes(3);
       expect(advanceSnapshot).toHaveBeenCalledTimes(2);
-      expect(evaluateBoard).toHaveBeenCalledTimes(3); // 改这里
+      expect(evaluateBoard).toHaveBeenCalledTimes(3);
     });
   });
 
