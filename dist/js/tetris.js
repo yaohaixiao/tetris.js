@@ -9158,23 +9158,6 @@ var tetris = (() => {
   };
   var count_holes_default = countHoles;
 
-  // lib/ai/utils/count-t-spin-slots.js
-  var countTSpinSlots = (board) => {
-    let slots = 0;
-    for (let y = 1; y < board.length - 2; y++) {
-      for (let x = 1; x < board[0].length - 1; x++) {
-        if (board[y][x] === 0 && // 中间空
-        board[y + 1] && board[y + 1][x] !== 0 && // 下方有方块（支撑）
-        board[y][x - 1] !== 0 && // 左侧有方块
-        board[y][x + 1] !== 0) {
-          slots++;
-        }
-      }
-    }
-    return slots;
-  };
-  var count_t_spin_slots_default = countTSpinSlots;
-
   // lib/ai/simulator/evaluate-board.js
   var evaluateBoard = (board, weights, clearResult) => {
     const heights = [];
@@ -9183,13 +9166,13 @@ var tetris = (() => {
       holes: -0.35,
       bumpiness: -0.18,
       completeLines: 1.5,
-      // 自定义权重覆盖默认值
       ...weights
     };
     for (let x = 0; x < board[0].length; x++) {
       heights.push(get_column_height_default(board, x));
     }
     const aggregateHeight = heights.reduce((a, b) => a + b, 0);
+    const maxHeight = Math.max(...heights);
     let bumpiness = 0;
     for (let i = 0; i < heights.length - 1; i++) {
       bumpiness += Math.abs(heights[i] - heights[i + 1]);
@@ -9201,7 +9184,7 @@ var tetris = (() => {
         completeLines += 1;
       }
     }
-    const staticScore = aggregateHeight * w.height + holes * w.holes + bumpiness * w.bumpiness + Math.pow(completeLines, 2) * w.completeLines;
+    const staticScore = aggregateHeight * w.height + maxHeight * -1.2 + holes * w.holes + bumpiness * w.bumpiness + Math.pow(completeLines, 2) * w.completeLines;
     let scoreBonus = 0;
     if (clearResult) {
       scoreBonus += clearResult.clearScore * 0.01;
@@ -9217,8 +9200,6 @@ var tetris = (() => {
         scoreBonus += 10;
       }
       scoreBonus += clearResult.combo * 0.5;
-    } else {
-      scoreBonus += count_t_spin_slots_default(board) * 2;
     }
     return staticScore + scoreBonus;
   };
