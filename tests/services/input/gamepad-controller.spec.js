@@ -898,4 +898,114 @@ describe('GamepadController', () => {
       }).not.toThrow();
     });
   });
+
+  // ==================== _onConnect 边界 ====================
+  describe('_onConnect 边界', () => {
+    it('已有激活手柄时连接新手柄应该被忽略，不发送事件', () => {
+      gamepad.activeGamepadIndex = 0;
+      gamepad.emit.mockClear();
+
+      gamepad._onConnect({ gamepad: { index: 1, id: 'Standard Gamepad' } });
+
+      expect(gamepad.activeGamepadIndex).toBe(0);
+      expect(gamepad.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  // ==================== _handleStandardButtons 边界 ====================
+  describe('_handleStandardButtons 边界', () => {
+    let mockPad;
+
+    beforeEach(() => {
+      mockPad = {
+        index: 0,
+        id: 'Standard Gamepad',
+        buttons: Array.from({ length: 16 }, () => ({
+          value: 0,
+          pressed: false,
+        })),
+        axes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      };
+      mockGetGamepads.mockReturnValue([mockPad]);
+      gamepad._refreshGamepadState();
+    });
+
+    it('被屏蔽的按键返回时不应崩溃', () => {
+      // 模拟 replay 模式下的非 START 键
+      const result = gamepad._handleStandardButtons(mockPad, 'replay', 1, 0);
+
+      expect(result).toBe(gamepad);
+    });
+
+    it('main-menu 模式 DPAD 冷却期内不应触发', () => {
+      gamepad.lastDpadTime = Date.now();
+      mockPad.buttons[12] = { value: 1, pressed: true }; // DPAD_UP
+      gamepad.emit.mockClear();
+
+      gamepad._handleStandardButtons(mockPad, 'main-menu', 1, Date.now());
+
+      // DPAD_UP 因为冷却期被跳过，不应有 dispatch:input
+      const calls = gamepad.emit.mock.calls.filter(
+        (call) => call[0] === 'dispatch:input',
+      );
+      expect(calls.length).toBe(0);
+    });
+  });
+
+  // ==================== _handleBetopDpad 边界 ====================
+  describe('_handleBetopDpad 边界', () => {
+    it('main-menu 模式冷却期内不应触发', () => {
+      gamepad.lastDpadTime = Date.now();
+      const state = { mode: 'main-menu', level: 3 };
+      gamepad.emit.mockClear();
+
+      gamepad._handleBetopDpad(-1, state);
+
+      expect(gamepad.emit).not.toHaveBeenCalled();
+    });
+
+    it('非冷却期的主菜单上方向应该触发等级更新', () => {
+      gamepad.lastDpadTime = 0;
+      const state = { mode: 'main-menu', level: 3 };
+      gamepad.emit.mockClear();
+
+      gamepad._handleBetopDpad(-1, state);
+
+      expect(gamepad.emit).toHaveBeenCalledWith(
+        `game:${mockGame.id}:update:level`,
+        { level: 4 },
+      );
+    });
+  });
+
+  // ==================== _collectCommands 边界 ====================
+  describe('_collectCommands 边界', () => {
+    it('activeGamepad 为 null 时不应崩溃', () => {
+      gamepad.activeGamepad = null;
+
+      expect(() => gamepad._collectCommands()).not.toThrow();
+    });
+
+    it('replay 模式不应处理摇杆和 DPAD', () => {
+      const mockPad = {
+        index: 0,
+        id: 'Standard Gamepad',
+        buttons: Array.from({ length: 16 }, () => ({
+          value: 0,
+          pressed: false,
+        })),
+        axes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      };
+      mockGetGamepads.mockReturnValue([mockPad]);
+      gamepad._refreshGamepadState();
+      mockState.mode = 'replay';
+      gamepad._handleStickMove = jest.fn();
+      gamepad._handleBetopDpad = jest.fn();
+
+      gamepad._collectCommands();
+
+      expect(gamepad._handleStickMove).not.toHaveBeenCalled();
+      expect(gamepad._handleBetopDpad).not.toHaveBeenCalled();
+    });
+  });
 });

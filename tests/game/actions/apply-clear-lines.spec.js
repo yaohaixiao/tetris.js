@@ -29,6 +29,9 @@ describe('applyClearLines', () => {
       score: 0,
       baseLines: 0,
       levelUpSteps: 10,
+      backToBack: false,
+      tSpin: null,
+      combo: 0,
     };
 
     mockStore = {
@@ -58,6 +61,12 @@ describe('applyClearLines', () => {
 
     it('stateHandler 应该是函数', () => {
       expect(typeof applyClearLines(mockContext).stateHandler).toBe('function');
+    });
+
+    it('应该返回 isBackToBack 字段', () => {
+      const result = applyClearLines(mockContext);
+      expect(result).toHaveProperty('isBackToBack');
+      expect(typeof result.isBackToBack).toBe('boolean');
     });
   });
 
@@ -118,7 +127,7 @@ describe('applyClearLines', () => {
     it('连续升级步长累计正确', () => {
       mockState.level = 2;
       mockState.levelUpSteps = 12;
-      mockState.lines = 23; // totalLines=24, newLevel=floor(24/12)+1=3 > 2
+      mockState.lines = 23;
       mockState.clearLines = [19];
       const { stateHandler } = applyClearLines(mockContext);
       expect(stateHandler(mockState).levelUpSteps).toBe(14);
@@ -127,7 +136,7 @@ describe('applyClearLines', () => {
     it('步长封顶 60', () => {
       mockState.level = 26;
       mockState.levelUpSteps = 58;
-      mockState.lines = 1507; // totalLines=1508, newLevel=floor(1508/58)+1=27 > 26
+      mockState.lines = 1507;
       mockState.clearLines = [19];
       const { stateHandler } = applyClearLines(mockContext);
       expect(stateHandler(mockState).levelUpSteps).toBe(60);
@@ -200,6 +209,147 @@ describe('applyClearLines', () => {
       mockState.clearLines = [19, 18];
       const { stateHandler } = applyClearLines(mockContext);
       expect(stateHandler(mockState).clearLines).toEqual([]);
+    });
+  });
+
+  // ==================== Back-to-Back ====================
+  describe('Back-to-Back', () => {
+    it('第一次 Tetris 不触发 Back-to-Back（×1.0）', () => {
+      mockState.clearLines = [16, 17, 18, 19];
+      mockState.backToBack = false;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(result.isBackToBack).toBe(false);
+      expect(newState.score).toBe(800);
+      expect(newState.backToBack).toBe(true);
+    });
+
+    it('连续两次 Tetris 触发 Back-to-Back（×1.5）', () => {
+      mockState.clearLines = [16, 17, 18, 19];
+      mockState.backToBack = true;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(result.isBackToBack).toBe(true);
+      expect(newState.score).toBe(1200); // 800 × 1.5 = 1200
+      expect(newState.backToBack).toBe(true);
+    });
+
+    it('普通消行中断 Back-to-Back（×1.0）', () => {
+      mockState.clearLines = [19];
+      mockState.backToBack = true;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(result.isBackToBack).toBe(false);
+      expect(newState.score).toBe(100);
+      expect(newState.backToBack).toBe(false);
+    });
+
+    it('Tetris 后接普通消行再 Tetris 不触发 B2B', () => {
+      // 第一轮：Tetris，B2B=true
+      mockState.clearLines = [16, 17, 18, 19];
+      mockState.backToBack = false;
+      let result = applyClearLines(mockContext);
+      let newState = result.stateHandler(mockState);
+      expect(newState.backToBack).toBe(true);
+
+      // 第二轮：普通消行，B2B=false
+      mockState.backToBack = true;
+      mockState.clearLines = [19];
+      mockState.score = newState.score;
+      result = applyClearLines(mockContext);
+      newState = result.stateHandler(mockState);
+      expect(result.isBackToBack).toBe(false);
+      expect(newState.backToBack).toBe(false);
+
+      // 第三轮：Tetris，B2B=false → 不触发
+      mockState.backToBack = false;
+      mockState.clearLines = [16, 17, 18, 19];
+      mockState.score = newState.score;
+      result = applyClearLines(mockContext);
+      newState = result.stateHandler(mockState);
+      expect(result.isBackToBack).toBe(false);
+      expect(newState.backToBack).toBe(true);
+    });
+
+    it('T-Spin 触发 Back-to-Back', () => {
+      mockState.clearLines = [18, 19];
+      mockState.tSpin = { isTSpin: true, isTSpinMini: false };
+      mockState.backToBack = true;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(result.isBackToBack).toBe(true);
+      // T-Spin Double = 1200 × 1.5 × 1 = 1800
+      expect(newState.score).toBe(1800);
+    });
+
+    it('T-Spin Mini 也视为大招', () => {
+      mockState.clearLines = [19];
+      mockState.tSpin = { isTSpin: false, isTSpinMini: true };
+      mockState.backToBack = true;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(result.isBackToBack).toBe(true);
+      // T-Spin Mini Single = 200 × 1.5 = 300
+      expect(newState.score).toBe(300);
+    });
+
+    it('消 5 行（I5）视为大招触发 Back-to-Back', () => {
+      mockState.clearLines = [15, 16, 17, 18, 19];
+      mockState.backToBack = true;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(result.isBackToBack).toBe(true);
+      // 1200 × 1.5 = 1800
+      expect(newState.score).toBe(1800);
+    });
+
+    it('消 3 行不视为大招，中断 Back-to-Back', () => {
+      mockState.clearLines = [17, 18, 19];
+      mockState.backToBack = true;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(result.isBackToBack).toBe(false);
+      expect(newState.score).toBe(500);
+      expect(newState.backToBack).toBe(false);
+    });
+
+    it('Combo 加分不受 Back-to-Back 影响', () => {
+      mockState.clearLines = [16, 17, 18, 19];
+      mockState.backToBack = true;
+      mockState.combo = 2;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      // 800 × 1.5 + combo(3-1)×50 = 1200 + 100 = 1300
+      expect(newState.score).toBe(1300);
+    });
+
+    it('Back-to-Back ×1.5 后向下取整', () => {
+      // 使用 T-Spin Mini 0 行：100 × 1.5 = 150，无小数
+      mockState.clearLines = [];
+      mockState.tSpin = { isTSpin: false, isTSpinMini: true };
+      mockState.backToBack = true;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      // T-Spin Mini 0 = 100 × 1.5 = 150，Math.floor(150) = 150
+      expect(newState.score).toBe(150);
     });
   });
 

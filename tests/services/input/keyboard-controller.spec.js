@@ -11,10 +11,14 @@ describe('KeyboardController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockGame = { id: 'test-game-uuid' };
     mockStore = {
       getMode: jest.fn().mockReturnValue('playing'),
       getController: jest.fn().mockReturnValue('human'),
+    };
+
+    mockGame = {
+      id: 'test-game-uuid',
+      Store: mockStore
     };
 
     keyboard = new KeyboardController({
@@ -406,6 +410,178 @@ describe('KeyboardController', () => {
 
     it('链式调用 _onKeydown 和 _onResize', () => {
       const result = keyboard._onKeydown({ key: 'ArrowLeft' })._onResize();
+
+      expect(result).toBe(keyboard);
+    });
+  });
+
+  // ==================== DAS/ARR ====================
+  describe('DAS/ARR（长按自动移动）', () => {
+    it('按下左键应该设置 dasState.direction = -1', () => {
+      keyboard._onKeydown({ key: 'ArrowLeft' });
+
+      expect(keyboard.dasState.direction).toBe(-1);
+      expect(keyboard.dasState.dasTimer).toBe(0);
+      expect(keyboard.dasState.arrTimer).toBe(0);
+      expect(keyboard.dasState.active).toBe(true);
+    });
+
+    it('按下右键应该设置 dasState.direction = 1', () => {
+      keyboard._onKeydown({ key: 'ArrowRight' });
+
+      expect(keyboard.dasState.direction).toBe(1);
+      expect(keyboard.dasState.dasTimer).toBe(0);
+      expect(keyboard.dasState.arrTimer).toBe(0);
+      expect(keyboard.dasState.active).toBe(true);
+    });
+
+    it('非左右键不应该设置 DAS 状态', () => {
+      keyboard._onKeydown({ key: 'ArrowDown' });
+
+      expect(keyboard.dasState.active).toBe(false);
+    });
+  });
+
+  // ==================== update ====================
+  describe('update 方法（DAS/ARR 帧更新）', () => {
+    beforeEach(() => {
+      jest.spyOn(keyboard, 'emit').mockClear();
+    });
+
+    it('dasState.active 为 false 时不执行', () => {
+      keyboard.dasState.active = false;
+      keyboard.dasState.direction = 1;
+
+      keyboard.update();
+
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('direction 为 0 时不执行', () => {
+      keyboard.dasState.active = true;
+      keyboard.dasState.direction = 0;
+
+      keyboard.update();
+
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('非 playing 模式时不执行', () => {
+      mockStore.getMode.mockReturnValue('paused');
+      keyboard.dasState.active = true;
+      keyboard.dasState.direction = 1;
+
+      keyboard.update();
+
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('DAS 阶段：dasTimer < 10 时递增但不触发移动', () => {
+      keyboard.dasState.active = true;
+      keyboard.dasState.direction = 1;
+      keyboard.dasState.dasTimer = 5;
+
+      keyboard.update();
+
+      expect(keyboard.dasState.dasTimer).toBe(6);
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('DAS 完成：dasTimer 达到 10 后触发 ARR 移动', () => {
+      keyboard.dasState.active = true;
+      keyboard.dasState.direction = -1;
+      keyboard.dasState.dasTimer = 10;
+      keyboard.dasState.arrTimer = 2;
+
+      keyboard.update();
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'MOVE_LEFT',
+        payload: { Game: mockGame },
+      });
+      expect(keyboard.dasState.arrTimer).toBe(0);
+    });
+
+    it('ARR 阶段：arrTimer < 2 时递增但不触发移动', () => {
+      keyboard.dasState.active = true;
+      keyboard.dasState.direction = 1;
+      keyboard.dasState.dasTimer = 10;
+      keyboard.dasState.arrTimer = 1;
+
+      keyboard.update();
+
+      expect(keyboard.dasState.arrTimer).toBe(2);
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('ARR 触发后应该发送 MOVE_RIGHT', () => {
+      keyboard.dasState.active = true;
+      keyboard.dasState.direction = 1;
+      keyboard.dasState.dasTimer = 10;
+      keyboard.dasState.arrTimer = 2;
+
+      keyboard.update();
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'MOVE_RIGHT',
+        payload: { Game: mockGame },
+      });
+    });
+  });
+
+  // ==================== _onKeyup ====================
+  describe('_onKeyup 回调', () => {
+    it('松开左键应该重置 DAS 状态', () => {
+      keyboard.dasState.direction = -1;
+      keyboard.dasState.dasTimer = 5;
+      keyboard.dasState.active = true;
+
+      keyboard._onKeyup({ key: 'ArrowLeft' });
+
+      expect(keyboard.dasState.direction).toBe(0);
+      expect(keyboard.dasState.dasTimer).toBe(-1);
+      expect(keyboard.dasState.active).toBe(false);
+    });
+
+    it('松开右键应该重置 DAS 状态', () => {
+      keyboard.dasState.direction = 1;
+      keyboard.dasState.dasTimer = 5;
+      keyboard.dasState.active = true;
+
+      keyboard._onKeyup({ key: 'ArrowRight' });
+
+      expect(keyboard.dasState.direction).toBe(0);
+      expect(keyboard.dasState.dasTimer).toBe(-1);
+      expect(keyboard.dasState.active).toBe(false);
+    });
+
+    it('当前方向与松开键方向不一致时不重置', () => {
+      keyboard.dasState.direction = -1;
+
+      keyboard._onKeyup({ key: 'ArrowRight' });
+
+      expect(keyboard.dasState.direction).toBe(-1);
+    });
+
+    it('松开非方向键不应该影响 DAS 状态', () => {
+      keyboard.dasState.direction = -1;
+      keyboard.dasState.dasTimer = 5;
+      keyboard.dasState.active = true;
+
+      keyboard._onKeyup({ key: 'ArrowDown' });
+
+      expect(keyboard.dasState.direction).toBe(-1);
+      expect(keyboard.dasState.active).toBe(true);
+    });
+
+    it('空 key 不应该崩溃', () => {
+      expect(() => keyboard._onKeyup({})).not.toThrow();
+    });
+
+    it('应该返回 KeyboardController 实例', () => {
+      const result = keyboard._onKeyup({ key: 'ArrowLeft' });
 
       expect(result).toBe(keyboard);
     });
