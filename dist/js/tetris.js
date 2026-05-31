@@ -9268,8 +9268,8 @@ var tetris = (() => {
   var simulateClearResult = (board, snapshot) => {
     const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
     const cleared = board.filter((row) => row.every((cell) => cell !== 0)).length;
-    if (cleared === 0) return null;
     const { isTSpin = false, isTSpinMini = false } = snapshot.tSpin || {};
+    if (cleared === 0 && !isTSpin && !isTSpinMini) return null;
     const tSpinScore = get_t_spin_score_default(cleared, isTSpin, isTSpinMini);
     const baseScore = tSpinScore || CLEAR_LINE_SCORES2[cleared] || 0;
     const isBigMove = cleared >= 4 || isTSpin || isTSpinMini;
@@ -9277,20 +9277,31 @@ var tetris = (() => {
     const multiplier = isBackToBack ? 1.5 : 1;
     const combo = (snapshot.combo || 0) + 1;
     const comboScore = combo > 1 ? (combo - 1) * 50 : 0;
-    const isAllClear = board.every((row) => row.every((cell) => cell === 0));
+    const isAllClear = cleared > 0 && board.every((row) => row.every((cell) => cell === 0));
     const allClearScore = isAllClear ? 2e3 : 0;
     const clearScore = Math.floor(baseScore * multiplier) + comboScore + allClearScore;
     return {
+      /** 消除行数 */
       cleared,
+      /** 基础分（乘倍率前） */
       baseScore,
+      /** 最终得分 */
       clearScore,
+      /** 是否为 T-Spin */
       isTSpin,
+      /** 是否为 T-Spin Mini */
       isTSpinMini,
+      /** 是否为大招（用于更新 Back-to-Back 状态） */
       isBigMove,
+      /** 是否触发了 Back-to-Back 奖励 */
       isBackToBack,
+      /** 是否触发了 All Clear */
       isAllClear,
+      /** 更新后的连击次数 */
       combo,
+      /** 本次 Combo 额外加分 */
       comboScore,
+      /** 本次 All Clear 加分 */
       allClearScore
     };
   };
@@ -13015,8 +13026,8 @@ var tetris = (() => {
     subscribe: () => {
       const { Game: Game2, Audio: Audio2 } = Engine;
       Engine._subscribe();
-      Audio2.subscribe();
-      Game2.subscribe();
+      Audio2?.subscribe?.();
+      Game2?.subscribe?.();
     },
     /**
      * ## 取消订阅各模块事件
@@ -13028,8 +13039,8 @@ var tetris = (() => {
     unsubscribe: () => {
       const { Game: Game2, Audio: Audio2 } = Engine;
       Engine._unsubscribe();
-      Audio2.unsubscribe();
-      Game2.unsubscribe();
+      Audio2?.unsubscribe?.();
+      Game2?.unsubscribe?.();
     },
     /**
      * ## Engine 内部事件订阅
@@ -13054,6 +13065,9 @@ var tetris = (() => {
      */
     _unsubscribe: () => {
       const { Game: Game2 } = Engine;
+      if (!Game2) {
+        return;
+      }
       Game2.off(`dispatch:command`, Engine._onDispatchCommand);
       Game2.off(`dispatch:input`, Engine._onDispatchInput);
     },
