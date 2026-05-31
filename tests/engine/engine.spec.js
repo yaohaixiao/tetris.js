@@ -80,6 +80,7 @@ jest.mock('@/lib/game', () => {
     tick: jest.fn(),
     getSpeed: jest.fn(() => 1000),
     on: jest.fn(),
+    off: jest.fn(),
     subscribe: jest.fn(),
     unsubscribe: jest.fn(),
   }));
@@ -408,6 +409,158 @@ describe('Engine', () => {
         'dispatch:input',
         expect.any(Function),
       );
+    });
+  });
+
+  // ==================== _onDispatchCommand ====================
+  describe('_onDispatchCommand', () => {
+    let mockCmd;
+
+    beforeEach(() => {
+      Engine.Game = new (require('@/lib/game'))();
+      Engine.lastTickTime = 0;
+      mockCmd = { payload: {} };
+    });
+
+    it('应该注入 isBlocked 到 payload', () => {
+      Engine._onDispatchCommand(mockCmd);
+
+      expect(mockCmd.payload).toHaveProperty('isBlocked');
+      expect(typeof mockCmd.payload.isBlocked).toBe('boolean');
+    });
+
+    it('应该调用 dispatchCommand', () => {
+      Engine._onDispatchCommand(mockCmd);
+
+      expect(dispatchCommand).toHaveBeenCalledWith(
+        mockCmd,
+        expect.objectContaining({ mode: expect.any(String) }),
+      );
+    });
+
+    it('阻塞动画时 isBlocked 为 true', () => {
+      Engine.Game.Animations.hasBlocking.mockReturnValue(true);
+
+      Engine._onDispatchCommand(mockCmd);
+
+      expect(mockCmd.payload.isBlocked).toBe(true);
+    });
+
+    it('无阻塞动画时 isBlocked 为 false', () => {
+      Engine.Game.Animations.hasBlocking.mockReturnValue(false);
+
+      Engine._onDispatchCommand(mockCmd);
+
+      expect(mockCmd.payload.isBlocked).toBe(false);
+    });
+  });
+
+  // ==================== _onDispatchInput ====================
+  describe('_onDispatchInput', () => {
+    let mockInput;
+
+    beforeEach(() => {
+      Engine.Game = new (require('@/lib/game'))();
+      Engine.lastTickTime = 1000;
+      Engine.Game.Replay.startTime = 500;
+      mockInput = { device: 'keyboard', action: 'MOVE_LEFT', payload: {} };
+    });
+
+    it('应该调用 dispatchInput', () => {
+      Engine._onDispatchInput(mockInput);
+
+      expect(dispatchInput).toHaveBeenCalledWith(
+        mockInput,
+        expect.objectContaining({
+          isBlocked: expect.any(Boolean),
+          ms: expect.any(Number),
+        }),
+      );
+    });
+
+    it('ms 应该等于 lastTickTime - Replay.startTime', () => {
+      Engine._onDispatchInput(mockInput);
+
+      expect(dispatchInput).toHaveBeenCalledWith(
+        mockInput,
+        expect.objectContaining({ ms: 500 }),
+      );
+    });
+
+    it('阻塞动画时 isBlocked 为 true', () => {
+      Engine.Game.Animations.hasBlocking.mockReturnValue(true);
+
+      Engine._onDispatchInput(mockInput);
+
+      expect(dispatchInput).toHaveBeenCalledWith(
+        mockInput,
+        expect.objectContaining({ isBlocked: true }),
+      );
+    });
+  });
+
+  // ==================== _unsubscribe ====================
+  describe('_unsubscribe', () => {
+    it('应该调用 Game.off 取消 dispatch:command', () => {
+      Engine.Game = new (require('@/lib/game'))();
+      Engine._unsubscribe();
+
+      expect(Engine.Game.off).toHaveBeenCalledWith(
+        'dispatch:command',
+        expect.any(Function),
+      );
+    });
+
+    it('应该调用 Game.off 取消 dispatch:input', () => {
+      Engine.Game = new (require('@/lib/game'))();
+      Engine._unsubscribe();
+
+      expect(Engine.Game.off).toHaveBeenCalledWith(
+        'dispatch:input',
+        expect.any(Function),
+      );
+    });
+  });
+
+  // ==================== destroy ====================
+  describe('destroy', () => {
+    beforeEach(() => {
+      Engine.Game = new (require('@/lib/game'))();
+      Engine.Audio = { subscribe: jest.fn(), unsubscribe: jest.fn() };
+      Engine.Scheduler = new Scheduler();
+      Engine.rafId = 123;
+    });
+
+    it('应该调用 stop', () => {
+      const stopSpy = jest.spyOn(Engine, 'stop');
+      Engine.destroy();
+      expect(stopSpy).toHaveBeenCalled();
+      stopSpy.mockRestore();
+    });
+
+    it('应该调用 unsubscribe', () => {
+      const unsubSpy = jest.spyOn(Engine, 'unsubscribe');
+      Engine.destroy();
+      expect(unsubSpy).toHaveBeenCalled();
+      unsubSpy.mockRestore();
+    });
+
+    it('应该调用 Game.removeEventListeners', () => {
+      const gameRef = Engine.Game;
+      Engine.destroy();
+      expect(gameRef.removeEventListeners).toHaveBeenCalled();
+    });
+
+    it('应该重置子模块为 null', () => {
+      Engine.destroy();
+      expect(Engine.Audio).toBeNull();
+      expect(Engine.Game).toBeNull();
+      expect(Engine.Scheduler).toBeNull();
+    });
+
+    it('Game 不存在时不应崩溃', () => {
+      Engine.Game = null;
+      expect(() => Engine.destroy()).not.toThrow();
     });
   });
 });
