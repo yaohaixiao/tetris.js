@@ -1,3 +1,16 @@
+# [1.11.0](https://github.com/yaohaixiao/tetris.js/compare/1.10.0...1.11.0) (2026-05-31)
+
+
+### Features
+
+* 实现 7-bag 随机生成器 ([90e4b55](https://github.com/yaohaixiao/tetris.js/commit/90e4b55bde4c57e96ccbf2d886239efac688344d))
+* 实现 All Clear 全清奖励 ([d0c3e0c](https://github.com/yaohaixiao/tetris.js/commit/d0c3e0c30ca68af5402fe21d7d66ae93be9b8382))
+* 实现 Back-to-Back 连续大招奖励 ([ac8e798](https://github.com/yaohaixiao/tetris.js/commit/ac8e798f57e4cb76ba1bcf2a43204f89579c829e))
+* 实现 Combo 连击计数与加分系统 ([6918a46](https://github.com/yaohaixiao/tetris.js/commit/6918a463ec708523ac573f3be1deec93de19f7ed))
+* 实现 Ghost 方块预览（半透明落点投影） ([1930430](https://github.com/yaohaixiao/tetris.js/commit/1930430122ced20261ea8b1ac517ca697819a825))
+* 实现 T-Spin 检测与计分 ([287a9d9](https://github.com/yaohaixiao/tetris.js/commit/287a9d97efd83d3947fec817f84d7fb11329d94c))
+* 实现软降/硬降计分 ([d0fc507](https://github.com/yaohaixiao/tetris.js/commit/d0fc507f7a00065d30eb4615eec0941849a13897))
+
 # [1.10.0](https://github.com/yaohaixiao/tetris.js/compare/1.9.0...1.10.0) (2026-05-30)
 
 ### Features
