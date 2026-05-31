@@ -1,3 +1,19 @@
+# [1.12.0](https://github.com/yaohaixiao/tetris.js/compare/1.11.0...1.12.0) (2026-05-31)
+
+
+### Bug Fixes
+
+* lock 添加 curr 空值守卫，防止 Game Over 时崩溃 ([fd6744d](https://github.com/yaohaixiao/tetris.js/commit/fd6744d0818bf18ceb61cfeae63ac04e08670eaa))
+
+
+### Features
+
+* 优化 AI 难度权重配置 ([6f7f1a3](https://github.com/yaohaixiao/tetris.js/commit/6f7f1a3c241ba28914b99794c9f13e84b3829af1))
+* add maxHeight penalty, simplify to 5 core metrics ([503a832](https://github.com/yaohaixiao/tetris.js/commit/503a832efae3b162bae3daaa5ec8c0d15bd58401))
+* AI 计分感知 — 模拟消行奖励([8231d90](https://github.com/yaohaixiao/tetris.js/commit/8231d900ff8af494c4e7aad575eed4fa703f410c))
+* AI 确定性前瞻 — 从 7-bag 消费方块替代随机生成 ([1cfac1e](https://github.com/yaohaixiao/tetris.js/commit/1cfac1e7186d19a7b38086b3500a6be1605f5815))
+
+
 # [1.11.0](https://github.com/yaohaixiao/tetris.js/compare/1.10.0...1.11.0) (2026-05-31)
 
 
