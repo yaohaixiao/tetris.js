@@ -1,10 +1,5 @@
 import advanceSnapshot from '@/lib/ai/simulator/advance-snapshot.js';
 
-jest.mock('@/lib/game/utils/random-shape.js', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
 jest.mock('@/lib/ai/simulator/simulate-placement.js', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -15,7 +10,6 @@ jest.mock('@/lib/ai/utils/clear-full-lines.js', () => ({
   default: jest.fn(),
 }));
 
-import randomShape from '@/lib/game/utils/random-shape.js';
 import simulatePlacement from '@/lib/ai/simulator/simulate-placement.js';
 import clearFullLines from '@/lib/ai/utils/clear-full-lines.js';
 
@@ -35,6 +29,10 @@ describe('advanceSnapshot', () => {
     board: Array.from({ length: 20 }, () =>
       Array.from({ length: 10 }, () => 0),
     ),
+    bag: [
+      { shape: O_SHAPE, type: 'O', rotation: 0, colorIndex: 2 },
+      { shape: [[1, 1, 1, 1]], type: 'I', rotation: 0, colorIndex: 0 },
+    ],
     level: 1,
     score: 0,
     lines: 0,
@@ -68,10 +66,6 @@ describe('advanceSnapshot', () => {
       board.map((row) => [...row]),
     );
     clearFullLines.mockImplementation((board) => board.map((row) => [...row]));
-    randomShape.mockReturnValue({
-      shape: [[1]],
-      color: '#fff',
-    });
   });
 
   // ==================== 基本功能 ====================
@@ -119,14 +113,15 @@ describe('advanceSnapshot', () => {
       expect(clearFullLines).toHaveBeenCalled();
     });
 
-    it('应该调用 randomShape 生成下一个预览方块（仅 1 次）', () => {
+    it('应该从 snapshot.bag 消费方块，不再依赖 randomShape', () => {
       const snapshot = createSnapshot();
       const move = createMove();
+      const originalBagLength = snapshot.bag.length;
 
-      advanceSnapshot(snapshot, move);
+      const result = advanceSnapshot(snapshot, move);
 
-      // 改用 snapshot.next 后，只有 next 字段需要 randomShape
-      expect(randomShape).toHaveBeenCalledTimes(1);
+      // bag 被消费了 2 个（cur + next）
+      expect(result.bag.length).toBe(originalBagLength - 2);
     });
   });
 
@@ -144,7 +139,7 @@ describe('advanceSnapshot', () => {
       expect(result.board).toBe(clearedBoard);
     });
 
-    it('piece 应该包含 snapshot.next 方块的 shape', () => {
+    it('piece 应该包含 bag 中第一个方块的 shape', () => {
       const snapshot = createSnapshot();
       const move = createMove();
 
@@ -154,7 +149,7 @@ describe('advanceSnapshot', () => {
       expect(result.piece.shape).toEqual(O_SHAPE);
     });
 
-    it('piece.position.x 应该根据 next 方块居中计算', () => {
+    it('piece.position.x 应该根据新方块居中计算', () => {
       const snapshot = createSnapshot();
       const move = createMove();
 
@@ -173,26 +168,33 @@ describe('advanceSnapshot', () => {
       expect(result.piece.position.y).toBe(0);
     });
 
-    it('cur 应该等于 snapshot.next', () => {
+    it('cur 应该等于 bag 中第一个方块', () => {
       const snapshot = createSnapshot();
       const move = createMove();
 
       const result = advanceSnapshot(snapshot, move);
 
-      // cur 现在是 snapshot.next，不是 randomShape 的返回值
-      expect(result.cur.shape).toEqual(snapshot.next.shape);
-      expect(result.cur.color).toBe(snapshot.next.color);
+      expect(result.cur.shape).toEqual(O_SHAPE);
     });
 
-    it('next 应该是 randomShape 的返回值', () => {
+    it('next 应该是 bag 中第二个方块', () => {
       const snapshot = createSnapshot();
       const move = createMove();
-      const nextShape = { shape: [[1]], color: '#fff' };
-      randomShape.mockReturnValue(nextShape);
 
       const result = advanceSnapshot(snapshot, move);
 
-      expect(result.next).toBe(nextShape);
+      expect(result.next).not.toBeNull();
+      expect(result.next.shape).toEqual([[1, 1, 1, 1]]);
+    });
+
+    it('bag 只有一个方块时 next 应该为 null', () => {
+      const snapshot = createSnapshot();
+      snapshot.bag = [{ shape: O_SHAPE, type: 'O', rotation: 0, colorIndex: 2 }];
+      const move = createMove();
+
+      const result = advanceSnapshot(snapshot, move);
+
+      expect(result.next).toBeNull();
     });
   });
 
@@ -229,19 +231,38 @@ describe('advanceSnapshot', () => {
     });
   });
 
-  // ==================== snapshot.next 为 null 时的降级处理 ====================
-  describe('snapshot.next 为 null', () => {
-    it('应该降级使用 randomShape 作为当前方块', () => {
+  // ==================== bag 为空的降级处理 ====================
+  describe('bag 为空或不存在', () => {
+    it('bag 为空时应该降级使用 snapshot.next', () => {
       const snapshot = createSnapshot();
-      snapshot.next = null;
+      snapshot.bag = [];
       const move = createMove();
-      const fallbackShape = { shape: [[1]], color: '#fff' };
-      randomShape.mockReturnValue(fallbackShape);
 
       const result = advanceSnapshot(snapshot, move);
 
-      // cur 应该降级使用 randomShape
-      expect(result.cur).toBe(fallbackShape);
+      expect(result.cur.shape).toEqual(O_SHAPE);
+    });
+
+    it('bag 和 next 都为空时应该使用默认 I 块', () => {
+      const snapshot = createSnapshot();
+      snapshot.bag = [];
+      snapshot.next = null;
+      const move = createMove();
+
+      const result = advanceSnapshot(snapshot, move);
+
+      expect(result.cur.shape).toEqual([[1, 1, 1, 1]]);
+      expect(result.cur.type).toBe('I');
+    });
+
+    it('bag 不存在时应该降级使用 snapshot.next', () => {
+      const snapshot = createSnapshot();
+      delete snapshot.bag;
+      const move = createMove();
+
+      const result = advanceSnapshot(snapshot, move);
+
+      expect(result.cur.shape).toEqual(O_SHAPE);
     });
   });
 
