@@ -19,25 +19,49 @@ describe('applyRotation', () => {
   });
 
   it('原地旋转：不传 cx/cy，不更新坐标', () => {
-    applyRotation(mockStore, curr, [[0, 1], [1, 0]], 1);
+    applyRotation(
+      mockStore,
+      curr,
+      [
+        [0, 1],
+        [1, 0],
+      ],
+      1,
+    );
 
     expect(mockStore.setState).toHaveBeenCalledWith({
       curr: {
-        shape: [[0, 1], [1, 0]],
+        shape: [
+          [0, 1],
+          [1, 0],
+        ],
         rotation: 1,
         colorIndex: 3,
-        _lockTimer: 100,  // setState 时还未归零
+        _lockTimer: 100, // setState 时还未归零
       },
     });
     expect(curr._lockTimer).toBe(0); // 之后归零
   });
 
   it('墙踢偏移：传 cx/cy，同步更新坐标', () => {
-    applyRotation(mockStore, curr, [[0, 1], [1, 0]], 1, 5, 10);
+    applyRotation(
+      mockStore,
+      curr,
+      [
+        [0, 1],
+        [1, 0],
+      ],
+      1,
+      5,
+      10,
+    );
 
     expect(mockStore.setState).toHaveBeenCalledWith({
       curr: {
-        shape: [[0, 1], [1, 0]],
+        shape: [
+          [0, 1],
+          [1, 0],
+        ],
         rotation: 1,
         colorIndex: 3,
         _lockTimer: 100,

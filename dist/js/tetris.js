@@ -3178,6 +3178,8 @@ var tetris = (() => {
     RESET: `game:${uuid}:reset`,
     RESTART: `game:${uuid}:restart`,
     OVER: `game:${uuid}:over`,
+    /* ---------- 获取 ghost 定位 ---------- */
+    GET_GHOST_POSITION: `game:${uuid}:get:ghost:position`,
     /* ---------- 方块操作 ---------- */
     BLOCK_MOVE: `game:${uuid}:block:move`,
     BLOCK_ROTATE: `game:${uuid}:block:rotate`,
@@ -3222,6 +3224,7 @@ var tetris = (() => {
     RENDER_HOLD_PIECE: `ui:${uuid}:render:hold:piece`,
     CLEAR_NEXT_PIECE: `ui:${uuid}:clear:next:piece`,
     CLEAR_HOLD_PIECE: `ui:${uuid}:clear:hold:piece`,
+    RENDER_GHOST_PIECE: `ui:${uuid}:render:ghost:piece`,
     /* ---------- 动画特效 ---------- */
     RENDER_COUNTDOWN: `ui:${uuid}:render:countdown`,
     RENDER_CLEAR_LINES: `ui:${uuid}:render:clear:lines`,
@@ -3406,6 +3409,7 @@ var tetris = (() => {
       this.on(events.RESTART, this._onGameRestart);
       this.on(events.RESET, this._onGameReset);
       this.on(events.OVER, this._onGameOver);
+      this.on(events.GET_GHOST_POSITION, this._onGetGhostPosition);
       this.on(events.BLOCK_MOVE, this._onBlockMove);
       this.on(events.BLOCK_ROTATE, this._onBlockRotate);
       this.on(events.BLOCK_DROP, this._onBlockDrop);
@@ -3454,6 +3458,7 @@ var tetris = (() => {
       this.off(events.RESTART, this._onGameRestart);
       this.off(events.RESET, this._onGameReset);
       this.off(events.OVER, this._onGameOver);
+      this.off(events.GET_GHOST_POSITION, this._onGetGhostPosition);
       this.off(events.BLOCK_MOVE, this._onBlockMove);
       this.off(events.BLOCK_ROTATE, this._onBlockRotate);
       this.off(events.BLOCK_DROP, this._onBlockDrop);
@@ -3694,6 +3699,17 @@ var tetris = (() => {
     _onGameOver = () => {
       const { Game: Game2 } = this;
       Game2.over();
+    };
+    /**
+     * ## 获取 Ghost 定位
+     *
+     * @private
+     * @param {object} payload - 参数对象
+     * @returns {void}
+     */
+    _onGetGhostPosition = (payload) => {
+      const { Game: Game2 } = this;
+      Game2.getGhostPosition(payload);
     };
     /**
      * ## 生成新方块
@@ -4831,7 +4847,7 @@ var tetris = (() => {
   var animation_system_default = AnimationSystem;
 
   // lib/services/ui/core/canvas-manager.js
-  var CanvasManager = class {
+  var CanvasManager = class extends core_default {
     /**
      * ## 构造函数
      *
@@ -4840,14 +4856,11 @@ var tetris = (() => {
      * @param {object} options - 配置选项
      */
     constructor(options) {
+      super(options);
       this.initialize(options);
     }
     initialize(options) {
-      const { cols, rows, board, next, hold: hold2, style, pattern } = options;
-      this.style = style;
-      this.pattern = pattern;
-      this.rows = rows;
-      this.cols = cols;
+      const { board, next, hold: hold2 } = options;
       this.gameBoard = document.querySelector(`#${board}`);
       this.gameBoardContext = this.gameBoard.getContext("2d");
       this.nextPiece = document.querySelector(`#${next}`);
@@ -6190,9 +6203,13 @@ var tetris = (() => {
 
   // lib/services/ui/board/render-active-only.js
   var renderActiveOnly = (canvas, state) => {
-    const { board, curr, cx, cy } = state;
+    const { board, curr, cx, cy, level } = state;
     if (board) {
       render_board_default(canvas, board);
+    }
+    if (curr && level <= 9) {
+      const events = GameEvents(canvas.uuid);
+      canvas.emit(events.GET_GHOST_POSITION, { curr, cy });
     }
     if (curr) {
       render_active_pieces_default(canvas, curr, cx, cy);
@@ -6490,6 +6507,23 @@ var tetris = (() => {
   };
   var lazy_render_scene_default = lazyRenderScene;
 
+  // lib/services/ui/board/render-ghost-piece.js
+  var renderGhostPiece = (canvas, ghost) => {
+    const { gameBoardContext: ctx } = canvas;
+    const { curr, cx, cy } = ghost;
+    const { shape, color } = curr;
+    ctx.globalAlpha = 0.65;
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (shape[y][x]) {
+          render_block_default(canvas, cx + x, cy + y, color);
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+  var render_ghost_piece_default = renderGhostPiece;
+
   // lib/services/ui/core/resize.js
   var resize = (canvas) => {
     const { gameBoard, nextPiece, holdPiece, rows, cols } = canvas;
@@ -6734,21 +6768,21 @@ var tetris = (() => {
      */
     constructor(options) {
       super(options);
-      this.initialize(options);
+      this.initialize();
     }
     /**
      * ## 初始化渲染器
      *
      * 创建 HudManager 和 Canvas 实例。
      *
-     * @param {object} options - 配置对象
      * @returns {void}
      */
-    initialize(options) {
-      const { Elements, Block } = options;
+    initialize() {
+      const { Game: Game2, Elements, Block } = this;
       const { Hud, Canvas } = Elements;
       this.Hud = new hud_manager_default(Hud);
       this.Canvas = new canvas_manager_default({
+        uuid: Game2.id,
         ...Canvas,
         ...Block
       });
@@ -6868,6 +6902,10 @@ var tetris = (() => {
       const { Canvas } = this;
       clear_hold_piece_default(Canvas);
     }
+    renderGhostPiece(ghost) {
+      const { Canvas } = this;
+      render_ghost_piece_default(Canvas, ghost);
+    }
     /**
      * ## 渲染倒计时特效
      *
@@ -6972,6 +7010,7 @@ var tetris = (() => {
       this.on(events.RENDER_HOLD_PIECE, this._onRenderHoldPiece);
       this.on(events.CLEAR_NEXT_PIECE, this._onClearNextPiece);
       this.on(events.CLEAR_HOLD_PIECE, this._onClearHoldPiece);
+      this.on(events.RENDER_GHOST_PIECE, this._onRenderGhostPiece);
       this.on(events.RENDER_COUNTDOWN, this._onRenderCountdown);
       this.on(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
       this.on(events.RENDER_CLEAR_SCORE, this._onRenderClearScore);
@@ -6996,6 +7035,7 @@ var tetris = (() => {
       this.off(events.RENDER_HOLD_PIECE, this._onRenderHoldPiece);
       this.off(events.CLEAR_NEXT_PIECE, this._onClearNextPiece);
       this.off(events.CLEAR_HOLD_PIECE, this._onClearHoldPiece);
+      this.off(events.RENDER_GHOST_PIECE, this._onRenderGhostPiece);
       this.off(events.RENDER_COUNTDOWN, this._onRenderCountdown);
       this.off(events.RENDER_CLEAR_LINES, this._onRenderClearLines);
       this.off(events.RENDER_CLEAR_SCORE, this._onRenderClearScore);
@@ -7129,6 +7169,20 @@ var tetris = (() => {
     _onClearHoldPiece = () => {
       const { UI: UI2 } = this;
       UI2.clearHoldPiece();
+    };
+    /**
+     * ## 绘制 ghost 方块
+     *
+     * Level <= 9 时才绘制 ghost 方块。
+     *
+     * @private
+     * @param {object} payload - 参数对象
+     * @returns {void}
+     */
+    _onRenderGhostPiece = (payload) => {
+      const { UI: UI2 } = this;
+      const { ghost } = payload;
+      UI2.renderGhostPiece(ghost);
     };
     /**
      * ## 处理渲染倒计时事件
@@ -7363,6 +7417,9 @@ var tetris = (() => {
     }
     clearHoldPiece() {
       this.Renderer.clearHoldPiece();
+    }
+    renderGhostPiece(ghost) {
+      this.Renderer.renderGhostPiece(ghost);
     }
     /**
      * ## 渲染倒计时特效
@@ -10979,6 +11036,22 @@ var tetris = (() => {
   };
   var restart_default = restart;
 
+  // lib/game/utils/get-ghost-position.js
+  var getGhostPosition = (runtime) => {
+    const { Store } = runtime;
+    const state = Store.getState();
+    const { curr, cx, cy } = state;
+    if (!curr) {
+      return null;
+    }
+    let ghostY = cy;
+    while (!collision_default2(runtime, 0, ghostY - cy + 1)) {
+      ghostY++;
+    }
+    return { cx, cy: ghostY };
+  };
+  var get_ghost_position_default = getGhostPosition;
+
   // lib/game/logic/move.js
   var move = (runtime, ox, oy, isHardDrop = false) => {
     const { Store } = runtime;
@@ -11595,6 +11668,24 @@ var tetris = (() => {
      */
     over() {
       over_default(this);
+    }
+    /**
+     * ## 游戏结束
+     *
+     * @param {object} payload - 参数对象
+     * @returns {object} - 返回 ghost 定位数据
+     */
+    getGhostPosition(payload) {
+      const position = get_ghost_position_default(this);
+      const events = UIEvents(this.id);
+      if (position && position.cy !== payload.cy) {
+        this.emit(events.RENDER_GHOST_PIECE, {
+          ghost: {
+            ...payload,
+            ...position
+          }
+        });
+      }
     }
     /**
      * ## 生成新方块

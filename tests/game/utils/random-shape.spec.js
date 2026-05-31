@@ -5,12 +5,60 @@ jest.mock('@/lib/game/utils/refill-bag', () => ({
   default: () => [
     { shape: [[1, 1, 1, 1]], colorIndex: 0, type: 'I', rotation: 0 },
     { shape: [[1, 1, 1, 1, 1]], colorIndex: 1, type: 'I5', rotation: 0 },
-    { shape: [[1, 1], [1, 1]], colorIndex: 2, type: 'O', rotation: 0 },
-    { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 3, type: 'T', rotation: 0 },
-    { shape: [[1, 0, 0], [1, 1, 1]], colorIndex: 4, type: 'L', rotation: 0 },
-    { shape: [[0, 0, 1], [1, 1, 1]], colorIndex: 5, type: 'J', rotation: 0 },
-    { shape: [[0, 1, 1], [1, 1, 0]], colorIndex: 6, type: 'S', rotation: 0 },
-    { shape: [[1, 1, 0], [0, 1, 1]], colorIndex: 7, type: 'Z', rotation: 0 },
+    {
+      shape: [
+        [1, 1],
+        [1, 1],
+      ],
+      colorIndex: 2,
+      type: 'O',
+      rotation: 0,
+    },
+    {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1],
+      ],
+      colorIndex: 3,
+      type: 'T',
+      rotation: 0,
+    },
+    {
+      shape: [
+        [1, 0, 0],
+        [1, 1, 1],
+      ],
+      colorIndex: 4,
+      type: 'L',
+      rotation: 0,
+    },
+    {
+      shape: [
+        [0, 0, 1],
+        [1, 1, 1],
+      ],
+      colorIndex: 5,
+      type: 'J',
+      rotation: 0,
+    },
+    {
+      shape: [
+        [0, 1, 1],
+        [1, 1, 0],
+      ],
+      colorIndex: 6,
+      type: 'S',
+      rotation: 0,
+    },
+    {
+      shape: [
+        [1, 1, 0],
+        [0, 1, 1],
+      ],
+      colorIndex: 7,
+      type: 'Z',
+      rotation: 0,
+    },
   ],
   _reset: jest.fn(),
 }));

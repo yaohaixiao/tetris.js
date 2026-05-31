@@ -19,7 +19,10 @@ describe('hold', () => {
 
     mockState = {
       curr: {
-        shape: [[1, 1], [1, 1]],
+        shape: [
+          [1, 1],
+          [1, 1],
+        ],
         color: '#ffa500',
         colorIndex: 2,
         type: 'O',

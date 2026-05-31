@@ -32,7 +32,10 @@ describe('rotate', () => {
     mockState = {
       curr: {
         type: 'T',
-        shape: [[0, 1, 0], [1, 1, 1]],
+        shape: [
+          [0, 1, 0],
+          [1, 1, 1],
+        ],
         rotation: 0,
         color: '#FF0000',
       },
@@ -44,10 +47,18 @@ describe('rotate', () => {
 
     // Mock 旋转函数
     rotateClockwise.mockImplementation((shape) => {
-      return [[1, 0], [1, 1], [1, 0]];
+      return [
+        [1, 0],
+        [1, 1],
+        [1, 0],
+      ];
     });
     rotateCounterClockwise.mockImplementation((shape) => {
-      return [[0, 1], [1, 1], [0, 1]];
+      return [
+        [0, 1],
+        [1, 1],
+        [0, 1],
+      ];
     });
 
     // Mock 音效事件
@@ -59,7 +70,15 @@ describe('rotate', () => {
   // ==================== 基础功能 ====================
   describe('基础功能', () => {
     it('应该成功顺时针旋转方块', () => {
-      const kickData = [[[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]]];
+      const kickData = [
+        [
+          [0, 0],
+          [-1, 0],
+          [-1, 1],
+          [0, -2],
+          [-1, -2],
+        ],
+      ];
       getKickData.mockReturnValue(kickData);
       collision.mockReturnValue(false);
 
@@ -67,11 +86,21 @@ describe('rotate', () => {
 
       expect(rotateClockwise).toHaveBeenCalledWith(mockState.curr.shape);
       expect(mockStore.setState).toHaveBeenCalled();
-      expect(mockRuntime.emit).toHaveBeenCalledWith('PLAY_SOUND', { sound: 'ROTATE' });
+      expect(mockRuntime.emit).toHaveBeenCalledWith('PLAY_SOUND', {
+        sound: 'ROTATE',
+      });
     });
 
     it('应该成功逆时针旋转方块', () => {
-      const kickData = [[[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]]];
+      const kickData = [
+        [
+          [0, 0],
+          [-1, 0],
+          [-1, 1],
+          [0, -2],
+          [-1, -2],
+        ],
+      ];
       getKickData.mockReturnValue(kickData);
       collision.mockReturnValue(false);
 
@@ -86,7 +115,10 @@ describe('rotate', () => {
   describe('O 型方块', () => {
     it('O 型方块应该直接返回，不进行旋转', () => {
       mockState.curr.type = 'O';
-      mockState.curr.shape = [[1, 1], [1, 1]];
+      mockState.curr.shape = [
+        [1, 1],
+        [1, 1],
+      ];
 
       rotate(mockRuntime, 1);
 
@@ -130,9 +162,10 @@ describe('rotate', () => {
       getKickData.mockReturnValue(kickData);
 
       // 前两次碰撞，第三次成功
-      collision.mockReturnValueOnce(true)  // [0,0] 碰撞
-               .mockReturnValueOnce(true)  // [-1,0] 碰撞
-               .mockReturnValueOnce(false) // [-1,1] 成功
+      collision
+        .mockReturnValueOnce(true) // [0,0] 碰撞
+        .mockReturnValueOnce(true) // [-1,0] 碰撞
+        .mockReturnValueOnce(false); // [-1,1] 成功
 
       rotate(mockRuntime, 1);
 
@@ -157,12 +190,13 @@ describe('rotate', () => {
       collision.mockReturnValue(true);
       // 然后原地旋转成功 - 需要重新设置 mock 行为
       // 注意：前5次返回 true，第6次返回 false
-      collision.mockReturnValueOnce(true)  // 第1个偏移
-               .mockReturnValueOnce(true)  // 第2个偏移
-               .mockReturnValueOnce(true)  // 第3个偏移
-               .mockReturnValueOnce(true)  // 第4个偏移
-               .mockReturnValueOnce(true)  // 第5个偏移
-               .mockReturnValueOnce(false); // 原地旋转
+      collision
+        .mockReturnValueOnce(true) // 第1个偏移
+        .mockReturnValueOnce(true) // 第2个偏移
+        .mockReturnValueOnce(true) // 第3个偏移
+        .mockReturnValueOnce(true) // 第4个偏移
+        .mockReturnValueOnce(true) // 第5个偏移
+        .mockReturnValueOnce(false); // 原地旋转
 
       rotate(mockRuntime, 1);
 
@@ -201,7 +235,12 @@ describe('rotate', () => {
 
       rotate(mockRuntime, 1);
 
-      expect(collision).toHaveBeenCalledWith(mockRuntime, 0, 0, expect.any(Array));
+      expect(collision).toHaveBeenCalledWith(
+        mockRuntime,
+        0,
+        0,
+        expect.any(Array),
+      );
       expect(mockStore.setState).toHaveBeenCalled();
     });
 
@@ -260,7 +299,15 @@ describe('rotate', () => {
   describe('不同方块类型', () => {
     it('I 型方块应该使用对应的墙踢数据', () => {
       mockState.curr.type = 'I';
-      const kickData = [[[0, 0], [-2, 0], [1, 0], [-2, -1], [1, 2]]];
+      const kickData = [
+        [
+          [0, 0],
+          [-2, 0],
+          [1, 0],
+          [-2, -1],
+          [1, 2],
+        ],
+      ];
       getKickData.mockReturnValue(kickData);
       collision.mockReturnValue(false);
 
@@ -272,7 +319,15 @@ describe('rotate', () => {
 
     it('I5 型方块应该使用对应的墙踢数据', () => {
       mockState.curr.type = 'I5';
-      const kickData = [[[0, 0], [-2, 0], [1, 0], [-2, -1], [1, 2]]];
+      const kickData = [
+        [
+          [0, 0],
+          [-2, 0],
+          [1, 0],
+          [-2, -1],
+          [1, 2],
+        ],
+      ];
       getKickData.mockReturnValue(kickData);
       collision.mockReturnValue(false);
 
@@ -284,9 +339,17 @@ describe('rotate', () => {
 
     it('J/L/S/Z/T 型方块应该使用对应的墙踢数据', () => {
       const types = ['J', 'L', 'S', 'Z', 'T'];
-      const kickData = [[[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]]];
+      const kickData = [
+        [
+          [0, 0],
+          [-1, 0],
+          [-1, 1],
+          [0, -2],
+          [-1, -2],
+        ],
+      ];
 
-      types.forEach(type => {
+      types.forEach((type) => {
         jest.clearAllMocks();
         mockState.curr.type = type;
         getKickData.mockReturnValue(kickData);
@@ -309,7 +372,12 @@ describe('rotate', () => {
       rotate(mockRuntime, 1);
 
       // Y 值应该取反：2 -> -2
-      expect(collision).toHaveBeenCalledWith(mockRuntime, 1, -2, expect.any(Array));
+      expect(collision).toHaveBeenCalledWith(
+        mockRuntime,
+        1,
+        -2,
+        expect.any(Array),
+      );
     });
   });
 
@@ -350,7 +418,9 @@ describe('rotate', () => {
 
       rotate(mockRuntime, 1);
 
-      expect(mockRuntime.emit).toHaveBeenCalledWith('PLAY_SOUND', { sound: 'ROTATE' });
+      expect(mockRuntime.emit).toHaveBeenCalledWith('PLAY_SOUND', {
+        sound: 'ROTATE',
+      });
     });
 
     it('旋转失败时不应该播放音效', () => {

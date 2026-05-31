@@ -17,13 +17,13 @@ describe('move', () => {
     mockState = {
       cx: 4,
       cy: 5,
-      score: 0,                                  // ✅ 新增
+      score: 0, // ✅ 新增
       curr: { shape: [[1]], color: '#ffa500' },
     };
 
     mockStore = {
       getState: jest.fn().mockReturnValue(mockState),
-      getScore: jest.fn().mockReturnValue(mockState.score),  // ✅ 新增
+      getScore: jest.fn().mockReturnValue(mockState.score), // ✅ 新增
       setState: jest.fn(),
     };
 
@@ -140,7 +140,7 @@ describe('move', () => {
       mockStore.getScore.mockReturnValue(100);
       collision.mockReturnValue(false);
 
-      move(mockContext, 0, 1, true);  // isHardDrop = true
+      move(mockContext, 0, 1, true); // isHardDrop = true
 
       expect(mockStore.setState).toHaveBeenCalledTimes(1);
       expect(mockStore.setState).toHaveBeenCalledWith({ cx: 4, cy: 6 });
@@ -264,7 +264,7 @@ describe('move', () => {
 
       move(mockContext, 0, 1);
       expect(mockStore.setState).toHaveBeenCalledWith({ cx: 5, cy: 6 });
-      expect(mockStore.setState).toHaveBeenCalledWith({ score: 1 });  // 软降分
+      expect(mockStore.setState).toHaveBeenCalledWith({ score: 1 }); // 软降分
     });
   });
 });

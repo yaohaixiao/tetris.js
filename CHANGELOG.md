@@ -1,33 +1,32 @@
 # [1.10.0](https://github.com/yaohaixiao/tetris.js/compare/1.9.0...1.10.0) (2026-05-30)
 
-
 ### Features
 
-* 添加 Hold 暂存方块功能 ([d856580](https://github.com/yaohaixiao/tetris.js/commit/d856580ad6f8009fd6de6460a4f0ad65b6a102da))
-
+- 添加 Hold 暂存方块功能 ([d856580](https://github.com/yaohaixiao/tetris.js/commit/d856580ad6f8009fd6de6460a4f0ad65b6a102da))
 
 # [1.9.0](https://github.com/yaohaixiao/tetris.js/compare/1.8.0...1.9.0) (2026-05-28)
 
-
 ### Bug Fixes
 
-* 修复 1×4、1×5、2×3 等非正方形矩阵旋转可能出现的错误， 修复负数 rotation 溢出问题 (curRotation + direction + 4) % 4 ([2f67571](https://github.com/yaohaixiao/tetris.js/commit/2f675710aa3b8a5961aff4d788a36422068a099c))
-
+- 修复 1×4、1×5、2×3 等非正方形矩阵旋转可能出现的错误， 修复负数 rotation 溢出问题 (curRotation +
+  direction + 4) % 4
+  ([2f67571](https://github.com/yaohaixiao/tetris.js/commit/2f675710aa3b8a5961aff4d788a36422068a099c))
 
 ### Features
 
-* 添加 Lock Delay 机制 ([d163a6f](https://github.com/yaohaixiao/tetris.js/commit/d163a6f63fee50de14da69725af47313aa621c89))
-* 添加 SRS KICK 墙踢数据 ([d9a0795](https://github.com/yaohaixiao/tetris.js/commit/d9a0795febcce38f30506f0494126ded43d493d8))
-* KeyboardController 添加 DAS/ARR 支持 ([4f4e5de](https://github.com/yaohaixiao/tetris.js/commit/4f4e5de18b1af24074f96d91302aa20ea238f9ec))
+- 添加 Lock
+  Delay 机制 ([d163a6f](https://github.com/yaohaixiao/tetris.js/commit/d163a6f63fee50de14da69725af47313aa621c89))
+- 添加 SRS
+  KICK 墙踢数据 ([d9a0795](https://github.com/yaohaixiao/tetris.js/commit/d9a0795febcce38f30506f0494126ded43d493d8))
+- KeyboardController 添加 DAS/ARR 支持 ([4f4e5de](https://github.com/yaohaixiao/tetris.js/commit/4f4e5de18b1af24074f96d91302aa20ea238f9ec))
 
 # [1.8.0](https://github.com/yaohaixiao/tetris.js/compare/1.7.3...1.8.0) (2026-05-28)
 
-
 ### Features
 
-* 调增绘制预览方块的细节，减少预览方块间的间隙； ([88595f2](https://github.com/yaohaixiao/tetris.js/commit/88595f233893a21ffef6b45aad425e9f8dbe9330))
-* 添加3中方块绘制风格：gradient（渐变风格）、pixel（矩形像素风格）、shaded（立体风格） ([ef56dc5](https://github.com/yaohaixiao/tetris.js/commit/ef56dc5146d9338dcd79581e9780a7138b4a1da4))
-* 调整暂停时钟样式；
+- 调增绘制预览方块的细节，减少预览方块间的间隙； ([88595f2](https://github.com/yaohaixiao/tetris.js/commit/88595f233893a21ffef6b45aad425e9f8dbe9330))
+- 添加3中方块绘制风格：gradient（渐变风格）、pixel（矩形像素风格）、shaded（立体风格） ([ef56dc5](https://github.com/yaohaixiao/tetris.js/commit/ef56dc5146d9338dcd79581e9780a7138b4a1da4))
+- 调整暂停时钟样式；
 
 ## [1.7.3](https://github.com/yaohaixiao/tetris.js/compare/1.7.2...1.7.3) (2026-05-27)
 

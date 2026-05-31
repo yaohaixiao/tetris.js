@@ -19,7 +19,7 @@ jest.mock('@/lib/services/ui/hud/hud-elements.js', () => ({
     highScore: { textContent: '' },
     lines: { textContent: '' },
     level: { textContent: '' },
-    combo: { textContent: '' },         // ✅ 新增
+    combo: { textContent: '' }, // ✅ 新增
     controller: { textContent: '' },
   })),
 }));
@@ -38,7 +38,7 @@ describe('HudManager', () => {
       highScore: 'highScore',
       lines: 'lines',
       level: 'level',
-      combo: 'combo',                   // ✅ 新增
+      combo: 'combo', // ✅ 新增
       controller: 'controller',
     });
 
@@ -142,7 +142,13 @@ describe('HudManager', () => {
     });
 
     it('应该同时更新多个字段', () => {
-      hud.update({ score: 1000, highScore: 5000, lines: 10, level: 5, combo: 2 });
+      hud.update({
+        score: 1000,
+        highScore: 5000,
+        lines: 10,
+        level: 5,
+        combo: 2,
+      });
 
       expect(hud.scoreTracker.target).toBe(1000);
       expect(hud.highScoreTracker.target).toBe(5000);
@@ -312,7 +318,13 @@ describe('HudManager', () => {
       });
 
       hud1.update({ score: 100, highScore: 200, lines: 5, level: 3, combo: 1 });
-      hud2.update({ score: 999, highScore: 888, lines: 10, level: 8, combo: 2 });
+      hud2.update({
+        score: 999,
+        highScore: 888,
+        lines: 10,
+        level: 8,
+        combo: 2,
+      });
 
       expect(hud1.scoreTracker.target).toBe(100);
       expect(hud2.scoreTracker.target).toBe(999);

@@ -15,7 +15,10 @@ describe('tryNormalRotation', () => {
     jest.clearAllMocks();
 
     curr = { shape: [[1]], rotation: 0 };
-    rotated = [[0, 1], [1, 0]];
+    rotated = [
+      [0, 1],
+      [1, 0],
+    ];
 
     runtime = {
       Store: { getState: jest.fn(), setState: jest.fn() },
@@ -29,7 +32,10 @@ describe('tryNormalRotation', () => {
 
     expect(result).toBe(true);
     expect(applyRotation).toHaveBeenCalledWith(
-      runtime.Store, curr, rotated, newRotation,
+      runtime.Store,
+      curr,
+      rotated,
+      newRotation,
     );
   });
 

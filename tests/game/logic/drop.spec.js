@@ -98,10 +98,8 @@ describe('drop', () => {
 
       // 但需要 startY 和 endY 不同，才能测试计分
       // 所以用 once 单独覆盖第一次
-      mockStore.getState
-               .mockReturnValueOnce({ cy: 18 })  // ① startY = 18
+      mockStore.getState.mockReturnValueOnce({ cy: 18 }); // ① startY = 18
       // 之后全部走 mockReturnValue：cy = 20，cellsDropped = 2
-      ;
 
       move
         .mockReturnValueOnce(true)

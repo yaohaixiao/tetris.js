@@ -22,7 +22,10 @@ describe('tryKickRotation', () => {
     jest.clearAllMocks();
 
     curr = { shape: [[1]], rotation: 0 };
-    rotated = [[0, 1], [1, 0]];
+    rotated = [
+      [0, 1],
+      [1, 0],
+    ];
 
     runtime = {
       Store: {
@@ -38,7 +41,12 @@ describe('tryKickRotation', () => {
 
     expect(result).toBe(true);
     expect(applyRotation).toHaveBeenCalledWith(
-      runtime.Store, curr, rotated, newRotation, 4, 18,
+      runtime.Store,
+      curr,
+      rotated,
+      newRotation,
+      4,
+      18,
     );
   });
 
@@ -53,7 +61,12 @@ describe('tryKickRotation', () => {
     expect(result).toBe(true);
     // 第三个偏移 [-1, 1]：cx=4-1=3, cy=18-1=17
     expect(applyRotation).toHaveBeenCalledWith(
-      runtime.Store, curr, rotated, newRotation, 3, 17,
+      runtime.Store,
+      curr,
+      rotated,
+      newRotation,
+      3,
+      17,
     );
   });
 

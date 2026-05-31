@@ -60,7 +60,7 @@ jest.mock('@/lib/game', () => {
     Keyboard: {
       addEventListeners: jest.fn(),
       removeEventListeners: jest.fn(),
-      update: jest.fn(),  // 新增
+      update: jest.fn(), // 新增
     },
     UI: {
       updateMode: jest.fn(),
