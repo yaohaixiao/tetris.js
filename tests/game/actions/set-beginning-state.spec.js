@@ -37,6 +37,7 @@ describe('setBeginningState', () => {
         comboScore: 0,
         next: null,
         hold: null,
+        backToBack: false,
       });
     });
   });
@@ -197,6 +198,7 @@ describe('setBeginningState', () => {
         comboScore: 0,
         next: null,
         hold: null,
+        backToBack: false,
       });
     });
   });

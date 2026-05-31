@@ -3952,6 +3952,7 @@ var tetris = (() => {
     /** ## 缓存的方块 */
     hold: null,
     tSpin: null,
+    backToBack: false,
     /** ## 当前得分 */
     score: 0,
     /** ## 累计消除行数 */
@@ -10329,8 +10330,7 @@ var tetris = (() => {
   };
   var paused_animation_default = PausedAnimation;
 
-  // lib/game/actions/apply-clear-lines.js
-  var createEmptyRow = (cols) => Array.from({ length: cols }).fill(0);
+  // lib/game/utils/calculate-level.js
   var calculateLevel = (totalLines, maxLevel) => {
     let level = 1;
     let required = 10;
@@ -10342,6 +10342,9 @@ var tetris = (() => {
     }
     return { level, levelUpSteps: required };
   };
+  var calculate_level_default = calculateLevel;
+
+  // lib/game/utils/get-t-spin-score.js
   var getTSpinScore = (cleared, isTSpin, isTSpinMini) => {
     if (isTSpin) {
       const scores = [400, 800, 1200, 1600];
@@ -10353,6 +10356,10 @@ var tetris = (() => {
     }
     return 0;
   };
+  var get_t_spin_score_default = getTSpinScore;
+
+  // lib/game/actions/apply-clear-lines.js
+  var createEmptyRow = (cols) => Array.from({ length: cols }).fill(0);
   var applyClearLines = (runtime) => {
     const { MAX_LEVEL: MAX_LEVEL2, CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
     const { Elements, Store } = runtime;
@@ -10369,15 +10376,19 @@ var tetris = (() => {
     }
     const nextLines = state.lines + cleared;
     const totalLines = state.baseLines + nextLines;
-    const { level: newLevel, levelUpSteps } = calculateLevel(
+    const { level: newLevel, levelUpSteps } = calculate_level_default(
       totalLines,
       MAX_LEVEL2
     );
     const levelUp = newLevel > state.level;
     const { isTSpin = false, isTSpinMini = false } = state.tSpin || {};
-    const tSpinScore = getTSpinScore(cleared, isTSpin, isTSpinMini);
+    const tSpinScore = get_t_spin_score_default(cleared, isTSpin, isTSpinMini);
+    const isBigMove = cleared >= 4 || isTSpin || isTSpinMini;
+    const isBackToBack = isBigMove && state.backToBack === true;
+    const backToBackMultiplier = isBackToBack ? 1.5 : 1;
+    const nextBackToBack = isBigMove;
     const baseScore = tSpinScore || CLEAR_LINE_SCORES2[cleared] || 0;
-    const clearScore = baseScore * newLevel;
+    const clearScore = Math.floor(baseScore * backToBackMultiplier * newLevel);
     const combo = cleared > 0 ? (state.combo || 0) + 1 : 0;
     const comboScore = combo > 1 ? (combo - 1) * 50 : 0;
     return {
@@ -10395,6 +10406,8 @@ var tetris = (() => {
         clearLines: [],
         /** 清空 T-Spin 标记（仅当次消行有效） */
         tSpin: null,
+        /** 更新 Back-to-Back 状态 */
+        backToBack: nextBackToBack,
         /** 更新棋盘 */
         board,
         /** 更新累计消除行数 */
@@ -10406,7 +10419,7 @@ var tetris = (() => {
         /**
          * 更新总分
          *
-         * 总分 = 原分数 + (基础分 × 等级) + Combo 额外加分
+         * 总分 = 原分数 + (基础分 × B2B倍率 × 等级) + Combo 额外加分
          */
         score: prev.score + clearScore + comboScore,
         /** 本次消行得分（用于飘字动画） */
@@ -10432,6 +10445,8 @@ var tetris = (() => {
       isTSpin,
       /** 是否为 T-Spin Mini */
       isTSpinMini,
+      /** 是否为 Back-to-Back */
+      isBackToBack,
       /** 当前连击次数 */
       combo,
       /** 本次连击额外加分 */
@@ -10974,8 +10989,9 @@ var tetris = (() => {
       // 设置 combo 得分
       next: null,
       // 清空预览方块
-      hold: null
+      hold: null,
       // 清空缓存方块
+      backToBack: false
     });
     if (mode === "playing") {
       Store.setBeginningBoard(Store.generateBoard());
