@@ -17,9 +17,14 @@ describe('applyClearLines', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // 底部有 2 行方块，消 1 行不会 All Clear
     baseBoard = Array.from({ length: 20 }, () =>
       Array.from({ length: 10 }, () => 0),
     );
+    for (let x = 0; x < 10; x++) {
+      baseBoard[18][x] = '#0000FF';
+      baseBoard[19][x] = '#FF0000';
+    }
 
     mockState = {
       board: baseBoard,
@@ -68,6 +73,12 @@ describe('applyClearLines', () => {
       expect(result).toHaveProperty('isBackToBack');
       expect(typeof result.isBackToBack).toBe('boolean');
     });
+
+    it('应该返回 isAllClear 字段', () => {
+      const result = applyClearLines(mockContext);
+      expect(result).toHaveProperty('isAllClear');
+      expect(typeof result.isAllClear).toBe('boolean');
+    });
   });
 
   // ==================== 计分 ====================
@@ -79,6 +90,10 @@ describe('applyClearLines', () => {
     });
 
     it('1 级消 4 行 = 800', () => {
+      // 消 4 行后棋盘还剩第15行，不全空
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[15][x] = '#888888';
+      mockState.board = board;
       mockState.clearLines = [16, 17, 18, 19];
       const { stateHandler } = applyClearLines(mockContext);
       expect(stateHandler(mockState).score).toBe(800);
@@ -215,6 +230,9 @@ describe('applyClearLines', () => {
   // ==================== Back-to-Back ====================
   describe('Back-to-Back', () => {
     it('第一次 Tetris 不触发 Back-to-Back（×1.0）', () => {
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[15][x] = '#888888';
+      mockState.board = board;
       mockState.clearLines = [16, 17, 18, 19];
       mockState.backToBack = false;
 
@@ -227,6 +245,9 @@ describe('applyClearLines', () => {
     });
 
     it('连续两次 Tetris 触发 Back-to-Back（×1.5）', () => {
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[15][x] = '#888888';
+      mockState.board = board;
       mockState.clearLines = [16, 17, 18, 19];
       mockState.backToBack = true;
 
@@ -234,7 +255,7 @@ describe('applyClearLines', () => {
       const newState = result.stateHandler(mockState);
 
       expect(result.isBackToBack).toBe(true);
-      expect(newState.score).toBe(1200); // 800 × 1.5 = 1200
+      expect(newState.score).toBe(1200);
       expect(newState.backToBack).toBe(true);
     });
 
@@ -251,14 +272,15 @@ describe('applyClearLines', () => {
     });
 
     it('Tetris 后接普通消行再 Tetris 不触发 B2B', () => {
-      // 第一轮：Tetris，B2B=true
+      const board1 = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board1[15][x] = '#888888';
+      mockState.board = board1;
       mockState.clearLines = [16, 17, 18, 19];
       mockState.backToBack = false;
       let result = applyClearLines(mockContext);
       let newState = result.stateHandler(mockState);
       expect(newState.backToBack).toBe(true);
 
-      // 第二轮：普通消行，B2B=false
       mockState.backToBack = true;
       mockState.clearLines = [19];
       mockState.score = newState.score;
@@ -267,7 +289,9 @@ describe('applyClearLines', () => {
       expect(result.isBackToBack).toBe(false);
       expect(newState.backToBack).toBe(false);
 
-      // 第三轮：Tetris，B2B=false → 不触发
+      const board2 = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board2[15][x] = '#888888';
+      mockState.board = board2;
       mockState.backToBack = false;
       mockState.clearLines = [16, 17, 18, 19];
       mockState.score = newState.score;
@@ -277,7 +301,11 @@ describe('applyClearLines', () => {
       expect(newState.backToBack).toBe(true);
     });
 
+    // T-Spin 触发 Back-to-Back — 消 18,19 行，加第 16 行保底
     it('T-Spin 触发 Back-to-Back', () => {
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[16][x] = '#888888';
+      mockState.board = board;
       mockState.clearLines = [18, 19];
       mockState.tSpin = { isTSpin: true, isTSpinMini: false };
       mockState.backToBack = true;
@@ -286,7 +314,6 @@ describe('applyClearLines', () => {
       const newState = result.stateHandler(mockState);
 
       expect(result.isBackToBack).toBe(true);
-      // T-Spin Double = 1200 × 1.5 × 1 = 1800
       expect(newState.score).toBe(1800);
     });
 
@@ -299,11 +326,13 @@ describe('applyClearLines', () => {
       const newState = result.stateHandler(mockState);
 
       expect(result.isBackToBack).toBe(true);
-      // T-Spin Mini Single = 200 × 1.5 = 300
       expect(newState.score).toBe(300);
     });
 
     it('消 5 行（I5）视为大招触发 Back-to-Back', () => {
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[14][x] = '#888888';
+      mockState.board = board;
       mockState.clearLines = [15, 16, 17, 18, 19];
       mockState.backToBack = true;
 
@@ -311,11 +340,14 @@ describe('applyClearLines', () => {
       const newState = result.stateHandler(mockState);
 
       expect(result.isBackToBack).toBe(true);
-      // 1200 × 1.5 = 1800
       expect(newState.score).toBe(1800);
     });
 
+    // 消 3 行不视为大招，中断 Back-to-Back — 消 17,18,19 行，加第 15 行保底
     it('消 3 行不视为大招，中断 Back-to-Back', () => {
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[15][x] = '#888888';
+      mockState.board = board;
       mockState.clearLines = [17, 18, 19];
       mockState.backToBack = true;
 
@@ -328,6 +360,9 @@ describe('applyClearLines', () => {
     });
 
     it('Combo 加分不受 Back-to-Back 影响', () => {
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[15][x] = '#888888';
+      mockState.board = board;
       mockState.clearLines = [16, 17, 18, 19];
       mockState.backToBack = true;
       mockState.combo = 2;
@@ -335,12 +370,10 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
-      // 800 × 1.5 + combo(3-1)×50 = 1200 + 100 = 1300
       expect(newState.score).toBe(1300);
     });
 
     it('Back-to-Back ×1.5 后向下取整', () => {
-      // 使用 T-Spin Mini 0 行：100 × 1.5 = 150，无小数
       mockState.clearLines = [];
       mockState.tSpin = { isTSpin: false, isTSpinMini: true };
       mockState.backToBack = true;
@@ -348,8 +381,86 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
-      // T-Spin Mini 0 = 100 × 1.5 = 150，Math.floor(150) = 150
       expect(newState.score).toBe(150);
+    });
+  });
+
+  // ==================== All Clear ====================
+  describe('All Clear', () => {
+    it('消行后棋盘全空应该加 2000 分', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      board[19] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board = board;
+      mockState.clearLines = [19];
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(result.isAllClear).toBe(true);
+      expect(newState.score).toBe(2100);
+    });
+
+    it('非全清时 isAllClear 为 false', () => {
+      mockState.clearLines = [19];
+
+      const result = applyClearLines(mockContext);
+
+      expect(result.isAllClear).toBe(false);
+    });
+
+    it('无消行时不应触发 All Clear', () => {
+      mockState.clearLines = [];
+
+      const result = applyClearLines(mockContext);
+
+      expect(result.isAllClear).toBe(false);
+    });
+
+    it('All Clear + Combo 加分正确叠加', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      board[19] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board = board;
+      mockState.clearLines = [19];
+      mockState.combo = 2;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(newState.score).toBe(2200);
+    });
+
+    it('All Clear + Back-to-Back 不叠加', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      board[19] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board = board;
+      mockState.clearLines = [19];
+      mockState.backToBack = true;
+
+      const result = applyClearLines(mockContext);
+      const newState = result.stateHandler(mockState);
+
+      expect(result.isBackToBack).toBe(false);
+      expect(newState.score).toBe(2100);
+    });
+
+    it('All Clear 后棋盘应为全空', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      board[19] = Array.from({ length: 10 }, () => '#FF0000');
+      mockState.board = board;
+      mockState.clearLines = [19];
+
+      const { stateHandler } = applyClearLines(mockContext);
+      const newState = stateHandler(mockState);
+
+      expect(newState.board.every(row => row.every(cell => cell === 0))).toBe(true);
     });
   });
 
@@ -361,6 +472,9 @@ describe('applyClearLines', () => {
     });
 
     it('消除 5 行计分正确', () => {
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[14][x] = '#888888';
+      mockState.board = board;
       mockState.clearLines = [15, 16, 17, 18, 19];
       const { stateHandler } = applyClearLines(mockContext);
       expect(stateHandler(mockState).score).toBe(1200);
