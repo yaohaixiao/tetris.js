@@ -10361,7 +10361,7 @@ var tetris = (() => {
   // lib/game/actions/apply-clear-lines.js
   var createEmptyRow = (cols) => Array.from({ length: cols }).fill(0);
   var applyClearLines = (runtime) => {
-    const { MAX_LEVEL: MAX_LEVEL2, CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
+    const { MAX_LEVEL: MAX_LEVEL2, CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, ALL_CLEAR_SCORE = 2e3 } = game_default;
     const { Elements, Store } = runtime;
     const state = Store.getState();
     const { cols } = Elements.Canvas;
@@ -10387,6 +10387,8 @@ var tetris = (() => {
     const isBackToBack = isBigMove && state.backToBack === true;
     const backToBackMultiplier = isBackToBack ? 1.5 : 1;
     const nextBackToBack = isBigMove;
+    const isAllClear = cleared > 0 && board.every((row) => row.every((cell) => cell === 0));
+    const allClearScore = isAllClear ? ALL_CLEAR_SCORE : 0;
     const baseScore = tSpinScore || CLEAR_LINE_SCORES2[cleared] || 0;
     const clearScore = Math.floor(baseScore * backToBackMultiplier * newLevel);
     const combo = cleared > 0 ? (state.combo || 0) + 1 : 0;
@@ -10419,9 +10421,9 @@ var tetris = (() => {
         /**
          * 更新总分
          *
-         * 总分 = 原分数 + (基础分 × B2B倍率 × 等级) + Combo 额外加分
+         * 总分 = 原分数 + (基础分 × B2B倍率 × 等级) + Combo 额外加分 + All Clear 加分
          */
-        score: prev.score + clearScore + comboScore,
+        score: prev.score + clearScore + comboScore + allClearScore,
         /** 本次消行得分（用于飘字动画） */
         clearScore,
         /** 当前连击次数（用于 HUD 显示） */
@@ -10447,6 +10449,8 @@ var tetris = (() => {
       isTSpinMini,
       /** 是否为 Back-to-Back */
       isBackToBack,
+      /** 是否为 All Clear */
+      isAllClear,
       /** 当前连击次数 */
       combo,
       /** 本次连击额外加分 */
