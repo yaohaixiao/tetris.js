@@ -752,35 +752,35 @@ var tetris = (() => {
   var PARAM_SETS = [
     { volMul: 1, spdMul: 1, wave: "square" },
     // 0: 1-16 关
-    { volMul: 0.95, spdMul: 1.05, wave: "square" },
+    { volMul: 1, spdMul: 1.05, wave: "square" },
     // 1: 17-32 关
-    { volMul: 0.9, spdMul: 1.1, wave: "triangle" },
+    { volMul: 1, spdMul: 1.1, wave: "triangle" },
     // 2: 33-48 关
-    { volMul: 0.85, spdMul: 1.15, wave: "triangle" },
+    { volMul: 0.95, spdMul: 1.15, wave: "triangle" },
     // 3: 49-64 关
-    { volMul: 0.8, spdMul: 1.2, wave: "sine" },
+    { volMul: 0.9, spdMul: 1.2, wave: "sine" },
     // 4: 65-80 关
-    { volMul: 0.85, spdMul: 1.1, wave: "square" },
+    { volMul: 0.9, spdMul: 1.1, wave: "square" },
     // 5: 81-96 关
-    { volMul: 0.8, spdMul: 1.15, wave: "triangle" },
+    { volMul: 0.85, spdMul: 1.15, wave: "triangle" },
     // 6: 97-112 关
-    { volMul: 0.75, spdMul: 1.2, wave: "sine" },
+    { volMul: 0.8, spdMul: 1.2, wave: "sine" },
     // 7: 113-128 关
-    { volMul: 0.7, spdMul: 1.25, wave: "square" },
+    { volMul: 0.8, spdMul: 1.25, wave: "square" },
     // 8: 129-144 关
-    { volMul: 0.65, spdMul: 1.3, wave: "triangle" },
+    { volMul: 0.75, spdMul: 1.3, wave: "triangle" },
     // 9: 145-160 关
-    { volMul: 0.7, spdMul: 1.2, wave: "square" },
+    { volMul: 0.8, spdMul: 1.2, wave: "square" },
     // 10: 161-176 关
-    { volMul: 0.65, spdMul: 1.25, wave: "sine" },
+    { volMul: 0.75, spdMul: 1.25, wave: "sine" },
     // 11: 177-192 关
-    { volMul: 0.6, spdMul: 1.3, wave: "square" },
+    { volMul: 0.74, spdMul: 1.3, wave: "square" },
     // 12: 193-208 关
-    { volMul: 0.55, spdMul: 1.35, wave: "triangle" },
+    { volMul: 0.75, spdMul: 1.35, wave: "triangle" },
     // 13: 209-224 关
-    { volMul: 0.5, spdMul: 1.4, wave: "sine" },
+    { volMul: 0.86, spdMul: 1.4, wave: "sine" },
     // 14: 225-240 关
-    { volMul: 0.5, spdMul: 1.5, wave: "square" }
+    { volMul: 0.96, spdMul: 1.5, wave: "square" }
     // 15: 241-256 关
   ];
   var param_sets_default = PARAM_SETS;
@@ -8924,7 +8924,8 @@ var tetris = (() => {
     // 游戏模式
     mode: state.mode,
     // 7-bag 状态（供 AI 确定性前瞻）
-    bag: getBagSnapshot()
+    bag: getBagSnapshot(),
+    hold: state.hold || null
   });
   var create_snapshot_default = createSnapshot;
 
@@ -8944,6 +8945,19 @@ var tetris = (() => {
     return next;
   };
   var rotate_matrix_default = rotateMatrix;
+
+  // lib/ai/utils/get-valid-x-positions.js
+  var getValidXPositions = (board, shape) => {
+    const boardWidth = board[0].length;
+    const shapeWidth = shape[0].length;
+    const maxX = boardWidth - shapeWidth;
+    const positions = [];
+    for (let x = 0; x <= maxX; x++) {
+      positions.push(x);
+    }
+    return positions;
+  };
+  var get_valid_x_positions_default = getValidXPositions;
 
   // lib/ai/utils/collision.js
   var collision = (board, shape, offsetX, offsetY) => {
@@ -9001,22 +9015,15 @@ var tetris = (() => {
   };
   var simulate_drop_default = simulateDrop;
 
-  // lib/ai/planner/generate-moves.js
-  var getValidXPositions = (board, shape) => {
-    const boardWidth = board[0].length;
-    const shapeWidth = shape[0].length;
-    const maxX = boardWidth - shapeWidth;
-    const positions = [];
-    for (let x = 0; x <= maxX; x++) {
-      positions.push(x);
-    }
-    return positions;
-  };
+  // lib/ai/utils/add-rotate-actions.js
   var addRotateActions = (actions, count) => {
     for (let i = 0; i < count; i++) {
       actions.push("ROTATE");
     }
   };
+  var add_rotate_actions_default = addRotateActions;
+
+  // lib/ai/utils/add-move-actions.js
   var addMoveActions = (actions, delta) => {
     if (delta === 0) return;
     const moveDirection = delta > 0 ? "MOVE_RIGHT" : "MOVE_LEFT";
@@ -9025,13 +9032,19 @@ var tetris = (() => {
       actions.push(moveDirection);
     }
   };
+  var add_move_actions_default = addMoveActions;
+
+  // lib/ai/planner/build-action-sequence.js
   var buildActionSequence = ({ rotationCount, targetX, originalX }) => {
     const actions = [];
-    addRotateActions(actions, rotationCount);
-    addMoveActions(actions, targetX - originalX);
+    add_rotate_actions_default(actions, rotationCount);
+    add_move_actions_default(actions, targetX - originalX);
     actions.push("DROP");
     return actions;
   };
+  var build_action_sequence_default = buildActionSequence;
+
+  // lib/ai/planner/create-candidate.js
   var createCandidate = ({
     board,
     currentShape,
@@ -9040,7 +9053,7 @@ var tetris = (() => {
     rotationCount
   }) => {
     const result = simulate_drop_default(board, currentShape, targetX);
-    const actions = buildActionSequence({
+    const actions = build_action_sequence_default({
       rotationCount,
       targetX,
       originalX: originalPiece.position.x
@@ -9050,23 +9063,46 @@ var tetris = (() => {
       actions
     };
   };
-  var generateMoves = (snapshot) => {
-    const { board, piece } = snapshot;
+  var create_candidate_default = createCandidate;
+
+  // lib/ai/planner/generate-for-piece.js
+  var generateForPiece = (board, pieceData, isHold = false) => {
     const moves = [];
-    let currentShape = piece.shape;
+    let currentShape = pieceData.shape;
     for (let rotation = 0; rotation < 4; rotation++) {
-      const validXPositions = getValidXPositions(board, currentShape);
+      const validXPositions = get_valid_x_positions_default(board, currentShape);
       for (const targetX of validXPositions) {
-        const candidate = createCandidate({
+        const candidate = create_candidate_default({
           board,
           currentShape,
           targetX,
-          originalPiece: piece,
+          originalPiece: pieceData,
           rotationCount: rotation
         });
+        if (isHold) {
+          candidate.actions = ["HOLD", ...candidate.actions];
+        }
         moves.push(candidate);
       }
       currentShape = rotate_matrix_default(currentShape);
+    }
+    return moves;
+  };
+  var generate_for_piece_default = generateForPiece;
+
+  // lib/ai/planner/generate-moves.js
+  var generateMoves = (snapshot) => {
+    const { board, piece, hold: hold2 } = snapshot;
+    const moves = generate_for_piece_default(board, piece, false);
+    if (hold2) {
+      const holdPiece = {
+        shape: hold2.shape,
+        position: {
+          x: Math.floor(board[0].length / 2) - Math.floor(hold2.shape[0].length / 2),
+          y: 0
+        }
+      };
+      moves.push(...generate_for_piece_default(board, holdPiece, true));
     }
     return moves;
   };
@@ -9263,15 +9299,18 @@ var tetris = (() => {
   // lib/ai/planner/self-play.js
   var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
     const moves = generate_moves_default(snapshot);
-    if (moves.length === 0) return null;
+    if (moves.length === 0) {
+      return null;
+    }
     if (depth > 1 && moves.length > beam) {
       const scored = moves.map((move2) => {
         const clearedBoard = clear_full_lines_default(move2.board);
         const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
-        return {
-          move: move2,
-          score: evaluate_board_default(clearedBoard, weights, afterClearResult)
-        };
+        let score = evaluate_board_default(clearedBoard, weights, afterClearResult);
+        if (move2.actions.includes("HOLD")) {
+          score += 2;
+        }
+        return { move: move2, score };
       });
       scored.sort((a, b) => b.score - a.score);
       moves.length = 0;
@@ -9299,6 +9338,9 @@ var tetris = (() => {
           const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
           score = evaluate_board_default(clearedBoard, weights, afterClearResult);
         }
+      }
+      if (move2.actions.includes("HOLD")) {
+        score += 2;
       }
       if (score > bestScore) {
         bestScore = score;
