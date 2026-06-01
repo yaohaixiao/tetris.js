@@ -50,7 +50,7 @@ Queue 与 Replay 系统，实现清晰的游戏更新管线，是一个轻量级
 ### 系统能力
 
 - **操作回放**：游戏结束后，可完整回看整局游戏的操作过程（视频：https://www.bilibili.com/video/BV1oRVA6uEXG/?vd_source=8d9b68dd3ed316bb9b3a13e3f3f778eb）
-- **AI 操控**：具备多步预判能力，通过棋盘评估算法选择最优落子方案，并区分不同难度；（视频：https://www.bilibili.com/video/BV1GPG86KEcy/?vd_source=8d9b68dd3ed316bb9b3a13e3f3f778eb）
+- **AI 操控**：具备多步预判能力，通过棋盘评估算法选择最优落子方案，并区分不同难度；（HARD 级别 AI 视频：https://www.bilibili.com/video/BV16CVd6tEEY/?vd_source=8d9b68dd3ed316bb9b3a13e3f3f778eb）
 - **本地存储**：自动持久化保存游戏最高分；
 - **自适应布局**：完美适配桌面端、平板、手机等各类设备屏幕；
 

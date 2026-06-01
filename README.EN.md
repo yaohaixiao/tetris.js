@@ -49,7 +49,7 @@ The game fully implements classic Tetris core features including piece generatio
 ### System Capabilities
 
 - **Replay**: Watch full gameplay replays after each game (Video: https://www.bilibili.com/video/BV1oRVA6uEXG/)
-- **AI Control**: Multi-step lookahead AI that selects optimal placements via board evaluation, with distinct difficulty levels (Video: https://www.bilibili.com/video/BV1GPG86KEcy/)
+- **AI Control**: Multi-step lookahead AI that selects optimal placements via board evaluation, with distinct difficulty levels (Video - HARD Level AI: https://www.bilibili.com/video/BV16CVd6tEEY/?vd_source=8d9b68dd3ed316bb9b3a13e3f3f778eb)
 - **Local Storage**: Automatically persists high scores
 - **Responsive Layout**: Perfectly adapts to desktop, tablet, and mobile screens
 
