@@ -7,7 +7,7 @@
 
 [中文](./README.md) | English
 
-![Tetris Game Screenshot](assets/img/screen-shot.png)
+![Tetris Game Screenshot](assets/img/screen-shot.gif)
 
 tetris.js is a zero-dependency, vanilla JavaScript Tetris game built on Canvas, supporting multi-device input and AI control. The project uses a fixed-frame pipeline architecture with Scheduler, Command Queue, and Replay systems to deliver a clear game update pipeline—a lightweight frontend game engine design and architecture practice example.
 
