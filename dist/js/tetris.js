@@ -8545,127 +8545,69 @@ var tetris = (() => {
   var gamepad_controller_default = GamepadController;
 
   // lib/ai/core/ai-difficulty.js
+  var AI_WEIGHTS = {
+    holes: -5,
+    height: -0.3,
+    bumpiness: -0.2,
+    completeLines: 20
+  };
   var AIDifficulty = {
     /**
      * ## 简单难度（EASY）
      *
-     * - 只看当前方块（lookahead=1），不做深层推演
+     * - 多看一步（lookahead=2），有基本前瞻
      * - 25% 概率随机选择非最优解，模拟人类失误
-     * - 评估权重最轻，对不平整度几乎不惩罚
      * - 决策延迟 580ms，给玩家充足的操作时间
-     *
-     * ### 权重设计
-     *
-     * | 指标          | 权重  | 说明                                                 |
-     * | ------------- | ----- | ---------------------------------------------------- |
-     * | holes         | -0.45 | 轻度惩罚空洞，偶尔漏填无妨                           |
-     * | height        | -0.35 | 允许堆高，不主动压高度                               |
-     * | bumpiness     | -0.05 | 几乎不惩罚不平整，允许粗糙表面                       |
-     * | completeLines | 2     | 消 1 行奖 2 分，消 2 行奖 8 分，消 4 行奖 32 分     |
      */
     EASY: {
-      lookahead: 1,
+      lookahead: 2,
       noise: 0.25,
-      weights: {
-        holes: -0.45,
-        height: -0.35,
-        bumpiness: -0.05,
-        completeLines: 2
-      },
+      weights: AI_WEIGHTS,
       delay: 580
     },
     /**
      * ## 普通难度（NORMAL）
      *
-     * - 多看一步（lookahead=2），有一定前瞻能力
-     * - 0% 噪声，不会浪费深度搜索的结果
-     * - 评估权重适中，开始重视空洞和不平整度
+     * - 多看两步（lookahead=3），深度推演
+     * - Beam Search 剪枝宽度 2，保证流畅
+     * - 15% 概率随机选择，偶尔失误
      * - 决策延迟 480ms，中等响应速度
-     *
-     * ### 权重设计
-     *
-     * | 指标          | 权重  | 说明                                                 |
-     * | ------------- | ----- | ---------------------------------------------------- |
-     * | holes         | -0.75 | 明显惩罚空洞，减少留洞                               |
-     * | height        | -0.45 | 适度控制高度                                         |
-     * | bumpiness     | -0.18 | 惩罚不平整，保持表面平整                             |
-     * | completeLines | 3     | 消 1 行奖 3 分，消 2 行奖 12 分，消 4 行奖 48 分    |
      */
     NORMAL: {
-      lookahead: 2,
-      noise: 0,
-      weights: {
-        holes: -0.75,
-        height: -0.45,
-        bumpiness: -0.18,
-        completeLines: 3
-      },
+      lookahead: 3,
+      beam: 2,
+      noise: 0.15,
+      weights: AI_WEIGHTS,
       delay: 480
     },
     /**
      * ## 困难难度（HARD）
      *
-     * - 多看两步（lookahead=3），深度推演
-     * - Beam Search 剪枝宽度 5，平衡性能与智能
-     * - 0% 噪声，始终选择最优解，不犯错
-     * - 评估权重严格，强力惩罚空洞和高度
-     * - 不平整度惩罚加重，要求表面更平整
+     * - 多看三步（lookahead=4），极限推演
+     * - Beam Search 剪枝宽度 4，保留更多候选
+     * - 5% 概率随机选择，很少失误
      * - 决策延迟 280ms，较快响应
-     *
-     * ### 权重设计
-     *
-     * | 指标          | 权重   | 说明                                                 |
-     * | ------------- | ------ | ---------------------------------------------------- |
-     * | holes         | -0.9   | 重罚空洞，几乎不留洞                                 |
-     * | height        | -1.15  | 强力压高度。10列各高4行惩罚 -46，AI 不敢随意堆       |
-     * | bumpiness     | -0.25  | 加重不平整惩罚，要求表面平整                         |
-     * | completeLines | 6      | 消 1 行奖 6 分，消 2 行奖 24 分，消 4 行奖 96 分    |
-     *
-     * 平衡点：10列各高4行罚 -46，Tetris 奖 96，净赚 50。 AI 愿意为 Tetris 短暂堆高，但不会长期维持高堆叠。
      */
     HARD: {
-      lookahead: 3,
-      beam: 5,
-      noise: 0,
-      weights: {
-        holes: -0.9,
-        height: -1.15,
-        bumpiness: -0.25,
-        completeLines: 6
-      },
+      lookahead: 4,
+      beam: 4,
+      noise: 0.05,
+      weights: AI_WEIGHTS,
       delay: 280
     },
     /**
      * ## 专家难度（EXPERT）
      *
      * - 多看三步（lookahead=4），极限推演
-     * - Beam Search 剪枝宽度 3，保证流畅性
+     * - Beam Search 剪枝宽度 5，最宽搜索
      * - 0% 噪声，始终选择最优解，不犯错
-     * - 评估权重最严格，对高度、空洞、不平整全部零容忍
      * - 决策延迟仅为 150ms，给玩家极短的反应窗口
-     *
-     * ### 权重设计
-     *
-     * | 指标          | 权重   | 说明                                                   |
-     * | ------------- | ------ | ------------------------------------------------------ |
-     * | holes         | -1.0   | 最重空洞惩罚，绝不留洞                                 |
-     * | height        | -1.6   | 极限压高度。10列各高4行罚 -64，与 HARD 拉开明显差距    |
-     * | bumpiness     | -0.3   | 最重不平整惩罚，表面必须平整                           |
-     * | completeLines | 8      | 消 1 行奖 8 分，消 2 行奖 32 分，消 4 行奖 128 分     |
-     *
-     * 平衡点：10列各高4行罚 -64，Tetris 奖 128，净赚 64。 配合 7-bag 确定性前瞻（lookahead=4），AI
-     * 能精确规划"短暂堆高→Tetris→快速回落"的循环。
      */
     EXPERT: {
       lookahead: 4,
       noise: 0,
-      beam: 3,
-      weights: {
-        holes: -1,
-        height: -1.6,
-        bumpiness: -0.3,
-        completeLines: 8
-      },
+      beam: 5,
+      weights: AI_WEIGHTS,
       delay: 150
     }
   };
@@ -9162,10 +9104,10 @@ var tetris = (() => {
   var evaluateBoard = (board, weights, clearResult) => {
     const heights = [];
     const w = {
-      height: -0.51,
-      holes: -0.35,
-      bumpiness: -0.18,
-      completeLines: 1.5,
+      height: -0.3,
+      holes: -5,
+      bumpiness: -0.2,
+      completeLines: 20,
       ...weights
     };
     for (let x = 0; x < board[0].length; x++) {
@@ -9178,13 +9120,14 @@ var tetris = (() => {
       bumpiness += Math.abs(heights[i] - heights[i + 1]);
     }
     const holes = count_holes_default(board);
-    let completeLines = 0;
-    for (const row of board) {
-      if (row.every((cell) => cell !== 0)) {
-        completeLines += 1;
-      }
+    let maxHeightPenalty = 0;
+    if (maxHeight > 10) {
+      maxHeightPenalty = -Math.pow(maxHeight - 10, 2) * 1;
     }
-    const staticScore = aggregateHeight * w.height + maxHeight * -1.5 + holes * w.holes + bumpiness * w.bumpiness + Math.pow(completeLines, 2) * w.completeLines;
+    const lineRewards = [0, 1, 4, 8, 20, 30];
+    const linesCleared = clearResult ? clearResult.cleared : 0;
+    const lineReward = lineRewards[linesCleared] || 0;
+    const staticScore = aggregateHeight * w.height + maxHeightPenalty + holes * w.holes + bumpiness * w.bumpiness + lineReward * (w.completeLines / 5);
     let scoreBonus = 0;
     if (clearResult) {
       scoreBonus += clearResult.clearScore * 0.01;
@@ -9282,7 +9225,7 @@ var tetris = (() => {
     );
     const clearedBoard = clear_full_lines_default(board);
     const clearResult = simulate_clear_result_default(clearedBoard, snapshot);
-    let bag2 = snapshot.bag ? [...snapshot.bag] : [];
+    const bag2 = snapshot.bag ? [...snapshot.bag] : [];
     const nextPiece = bag2.length > 0 ? bag2.shift() : snapshot.next || {
       shape: [[1, 1, 1, 1]],
       type: "I",
@@ -9310,8 +9253,9 @@ var tetris = (() => {
       // 更新计分状态
       combo: clearResult ? clearResult.combo : 0,
       backToBack: clearResult ? clearResult.isBigMove : snapshot.backToBack,
-      tSpin: null
-      // 锁定后清空 T-Spin 标记（下一块需重新检测）
+      tSpin: null,
+      // 传递消行结果到下一层，确保深层搜索能看到消行价值
+      clearResult: clearResult || null
     };
   };
   var advance_snapshot_default = advanceSnapshot;
@@ -9322,10 +9266,11 @@ var tetris = (() => {
     if (moves.length === 0) return null;
     if (depth > 1 && moves.length > beam) {
       const scored = moves.map((move2) => {
-        const clearResult = simulate_clear_result_default(move2.board, snapshot);
+        const clearedBoard = clear_full_lines_default(move2.board);
+        const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
         return {
           move: move2,
-          score: evaluate_board_default(move2.board, weights, clearResult)
+          score: evaluate_board_default(clearedBoard, weights, afterClearResult)
         };
       });
       scored.sort((a, b) => b.score - a.score);
@@ -9336,13 +9281,24 @@ var tetris = (() => {
     let bestScore = -Infinity;
     for (const move2 of moves) {
       let score;
-      const clearResult = simulate_clear_result_default(move2.board, snapshot);
       if (depth <= 1) {
-        score = evaluate_board_default(move2.board, weights, clearResult);
+        const clearedBoard = clear_full_lines_default(move2.board);
+        const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
+        score = evaluate_board_default(clearedBoard, weights, afterClearResult);
       } else {
         const nextSnapshot = advance_snapshot_default(snapshot, move2);
         const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam);
-        score = nextBest ? evaluate_board_default(nextBest.board, weights) : evaluate_board_default(move2.board, weights, clearResult);
+        if (nextBest) {
+          const nextClearResult = simulate_clear_result_default(
+            nextBest.board,
+            nextSnapshot
+          );
+          score = evaluate_board_default(nextBest.board, weights, nextClearResult);
+        } else {
+          const clearedBoard = clear_full_lines_default(move2.board);
+          const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
+          score = evaluate_board_default(clearedBoard, weights, afterClearResult);
+        }
       }
       if (score > bestScore) {
         bestScore = score;

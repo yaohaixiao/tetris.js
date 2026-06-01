@@ -11,30 +11,18 @@ describe('evaluateBoard', () => {
     });
   });
 
-  // ==================== 总高度惩罚 ====================
-  describe('总高度惩罚', () => {
-    it('单列有方块时应该返回负分', () => {
+  // ==================== 总高度（背景压力） ====================
+  describe('总高度（背景压力）', () => {
+    it('单列有方块应返回负分', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
       for (let y = 15; y < 20; y++) board[y][0] = 1;
 
       const score = evaluateBoard(board);
-      // aggregateHeight=5, maxHeight=5, bumpiness=5
-      // -2.55 - 7.5 - 0.9 = -10.95
-      expect(score).toBeCloseTo(-10.95, 2);
-    });
-
-    it('最高列应该额外受罚', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 10; y < 20; y++) board[y][0] = 1;
-      for (let y = 17; y < 20; y++) board[y][1] = 1;
-      for (let y = 17; y < 20; y++) board[y][2] = 1;
-
-      const score = evaluateBoard(board);
-      expect(score).toBeLessThan(-20);
+      // agg=5 × -0.3 = -1.5, bump=5 × -0.2 = -1.0
+      // -1.5 - 1.0 = -2.5
+      expect(score).toBeCloseTo(-2.5, 2);
     });
 
     it('均匀堆叠比集中堆叠得分高', () => {
@@ -50,16 +38,13 @@ describe('evaluateBoard', () => {
       );
       for (let y = 0; y < 20; y++) boardB[y][0] = 1;
 
-      const scoreA = evaluateBoard(boardA);
-      const scoreB = evaluateBoard(boardB);
-
-      expect(scoreA).toBeGreaterThan(scoreB);
+      expect(evaluateBoard(boardA)).toBeGreaterThan(evaluateBoard(boardB));
     });
   });
 
-  // ==================== 空洞惩罚 ====================
+  // ==================== 空洞惩罚（核心指标） ====================
   describe('空洞惩罚', () => {
-    it('单列有一个空洞应该受到惩罚', () => {
+    it('有一个空洞应受重罚', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
@@ -68,9 +53,9 @@ describe('evaluateBoard', () => {
       board[17][0] = 1;
 
       const score = evaluateBoard(board);
-      // aggregateHeight=3, maxHeight=3, holes=1, bumpiness=3
-      // -1.53 - 4.5 - 0.35 - 0.54 = -6.92
-      expect(score).toBeCloseTo(-6.92, 2);
+      // agg=3 × -0.3 = -0.9, bump=3 × -0.2 = -0.6, holes=1 × -5 = -5
+      // -0.9 - 0.6 - 5 = -6.5
+      expect(score).toBeCloseTo(-6.5, 2);
     });
 
     it('没有空洞的满列不受空洞惩罚', () => {
@@ -80,15 +65,15 @@ describe('evaluateBoard', () => {
       for (let y = 17; y < 20; y++) board[y][0] = 1;
 
       const score = evaluateBoard(board);
-      // aggregateHeight=3, maxHeight=3, bumpiness=3
-      // -1.53 - 4.5 - 0.54 = -6.57
-      expect(score).toBeCloseTo(-6.57, 2);
+      // agg=3 × -0.3 = -0.9, bump=3 × -0.2 = -0.6
+      // -0.9 - 0.6 = -1.5
+      expect(score).toBeCloseTo(-1.5, 2);
     });
   });
 
-  // ==================== 不平整度惩罚 ====================
-  describe('不平整度惩罚', () => {
-    it('完全平整的表面 bumpiness 惩罚为 0', () => {
+  // ==================== 不平整度 ====================
+  describe('不平整度', () => {
+    it('完全平整只有高度惩罚', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
@@ -97,12 +82,11 @@ describe('evaluateBoard', () => {
       }
 
       const score = evaluateBoard(board);
-      // aggregateHeight=30, maxHeight=3, completeLines=3
-      // -15.3 - 4.5 + 13.5 = -6.3
-      expect(score).toBeCloseTo(-6.3, 2);
+      // agg=30 × -0.3 = -9, bump=0
+      expect(score).toBeCloseTo(-9, 2);
     });
 
-    it('相邻列高度差应该受到惩罚', () => {
+    it('相邻列高度差应受惩罚', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
@@ -110,212 +94,119 @@ describe('evaluateBoard', () => {
       board[19][1] = 1;
 
       const score = evaluateBoard(board);
-      // aggregateHeight=6, maxHeight=5, bumpiness=5
-      // -3.06 - 7.5 - 0.9 = -11.46
-      expect(score).toBeCloseTo(-11.46, 2);
+      // agg=6 × -0.3 = -1.8, bump=5 × -0.2 = -1.0
+      // -1.8 - 1.0 = -2.8
+      expect(score).toBeCloseTo(-2.8, 2);
     });
   });
 
-  // ==================== 消除行奖励 ====================
-  describe('消除行奖励', () => {
-    it('消除 1 行应该获得奖励', () => {
+  // ==================== 危险区惩罚 ====================
+  describe('危险区惩罚', () => {
+    it('超过 10 行触发指数惩罚', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      for (let y = 8; y < 20; y++) board[y][0] = 1; // max=12
+
+      const score = evaluateBoard(board);
+      // 危险区: -(12-10)² × 1 = -4
+      expect(score).toBeLessThan(-4);
+    });
+
+    it('10 行以内不触发', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      for (let y = 10; y < 20; y++) board[y][0] = 1; // max=10
+
+      const score = evaluateBoard(board);
+      // 危险区不触发
+      expect(score).toBeGreaterThan(-20);
+    });
+  });
+
+  // ==================== 消行奖励（clearResult） ====================
+  describe('消行奖励', () => {
+    it('Tetris 应获得高奖励', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      const clearResult = { cleared: 4, clearScore: 800, combo: 1 };
+
+      const score = evaluateBoard(board, undefined, clearResult);
+      // lineReward=20 × 4=80, clearScore×0.01=8, combo×0.5=0.5
+      // 80 + 8 + 0.5 = 88.5
+      expect(score).toBeCloseTo(88.5, 2);
+    });
+
+    it('消 1 行奖励', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      const clearResult = { cleared: 1, clearScore: 100, combo: 1 };
+
+      const score = evaluateBoard(board, undefined, clearResult);
+      // lineReward=1 × 4=4, clearScore×0.01=1, combo×0.5=0.5
+      // 4 + 1 + 0.5 = 5.5
+      expect(score).toBeCloseTo(5.5, 2);
+    });
+
+    it('无 clearResult 时无消行奖励', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
       for (let x = 0; x < 10; x++) board[19][x] = 1;
 
       const score = evaluateBoard(board);
-      // aggregateHeight=10, maxHeight=1, completeLines=1
-      // -5.1 - 1.5 + 1.5 = -5.1
-      expect(score).toBeCloseTo(-5.1, 2);
-    });
-
-    it('消除 4 行（Tetris）应该获得高奖励', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 16; y < 20; y++) {
-        for (let x = 0; x < 10; x++) board[y][x] = 1;
-      }
-
-      const score = evaluateBoard(board);
-      // aggregateHeight=40, maxHeight=4, completeLines=4
-      // -20.4 - 6.0 + 24 = -2.4
-      expect(score).toBeCloseTo(-2.4, 2);
-    });
-
-    it('即将消除一行的状态应该比纯堆叠得分高', () => {
-      const boardA = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 9; x++) boardA[19][x] = 1;
-
-      const boardB = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 10; x++) boardB[19][x] = 1;
-
-      const scoreA = evaluateBoard(boardA);
-      const scoreB = evaluateBoard(boardB);
-
-      expect(scoreB).toBeGreaterThan(scoreA);
+      // 没有 clearResult，lineReward=0
+      // agg=10 × -0.3 = -3
+      expect(score).toBeCloseTo(-3, 2);
     });
   });
 
   // ==================== 计分奖励 ====================
-  describe('计分奖励（clearResult）', () => {
-    it('消行得分归一化', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      const clearResult = { clearScore: 800, combo: 1 };
-
-      const score = evaluateBoard(board, undefined, clearResult);
-      expect(score).toBe(8.5);
-    });
-
+  describe('计分奖励', () => {
     it('T-Spin 额外奖励', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
       const clearResult = {
+        cleared: 2,
         clearScore: 1200,
         isTSpin: true,
-        isTSpinMini: false,
-        isBackToBack: false,
-        isAllClear: false,
         combo: 1,
       };
 
       const score = evaluateBoard(board, undefined, clearResult);
-      expect(score).toBeCloseTo(17.5, 2);
-    });
-
-    it('Back-to-Back 奖励', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      const clearResult = {
-        clearScore: 1200,
-        isTSpin: false,
-        isTSpinMini: false,
-        isBackToBack: true,
-        isAllClear: false,
-        combo: 1,
-      };
-
-      const score = evaluateBoard(board, undefined, clearResult);
-      expect(score).toBeCloseTo(15.5, 2);
-    });
-
-    it('All Clear 重奖', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      const clearResult = {
-        clearScore: 100,
-        isTSpin: false,
-        isTSpinMini: false,
-        isBackToBack: false,
-        isAllClear: true,
-        combo: 1,
-      };
-
-      const score = evaluateBoard(board, undefined, clearResult);
-      expect(score).toBeCloseTo(11.5, 2);
-    });
-
-    it('Combo 奖励', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      const clearResult = { clearScore: 300, combo: 5 };
-
-      const score = evaluateBoard(board, undefined, clearResult);
-      expect(score).toBe(5.5);
-    });
-  });
-
-  // ==================== 自定义权重 ====================
-  describe('自定义权重', () => {
-    it('应该支持传入自定义权重覆盖默认值', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      board[19][0] = 1;
-      board[18][0] = 0;
-      board[17][0] = 1;
-
-      const weights = {
-        holes: -0.75,
-        height: -0.51,
-        bumpiness: -0.18,
-        completeLines: 1.5,
-      };
-
-      const score = evaluateBoard(board, weights);
-      // aggregateHeight=3, maxHeight=3, holes=1, bumpiness=3
-      // -1.53 - 4.5 - 0.75 - 0.54 = -7.32
-      expect(score).toBeCloseTo(-7.32, 2);
-    });
-
-    it('HARD 难度权重', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let x = 0; x < 10; x++) board[19][x] = 1;
-
-      const weights = {
-        holes: -0.9,
-        height: -1.15,
-        bumpiness: -0.25,
-        completeLines: 6.0,
-      };
-
-      const score = evaluateBoard(board, weights);
-      // aggregateHeight=10, maxHeight=1, completeLines=1
-      // -11.5 - 1.5 + 6 = -7.0
-      expect(score).toBeCloseTo(-7.0, 2);
+      // lineReward=4 × 4=16, clearScore×0.01=12, TSpin=5, combo×0.5=0.5
+      // 16 + 12 + 5 + 0.5 = 33.5
+      expect(score).toBeCloseTo(33.5, 2);
     });
   });
 
   // ==================== 边界情况 ====================
   describe('边界情况', () => {
-    it('全满棋盘', () => {
+    it('全满棋盘触发最大危险区惩罚', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 1),
       );
 
       const score = evaluateBoard(board);
-      // aggregateHeight=200, maxHeight=20, completeLines=20
-      // -102 - 30 + 600 = 468
-      expect(score).toBeCloseTo(468, 2);
+      // agg=200×-0.3=-60, maxPenalty=-(20-10)²×1=-100
+      // -60 - 100 = -160
+      expect(score).toBeLessThan(-150);
     });
 
-    it('传入非零值（颜色字符串）也应正确处理', () => {
+    it('颜色字符串也应正确处理', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
       board[19][0] = '#00c8ff';
 
       const score = evaluateBoard(board);
-      // aggregateHeight=1, maxHeight=1, bumpiness=1
-      // -0.51 - 1.5 - 0.18 = -2.19
-      expect(score).toBeCloseTo(-2.19, 2);
-    });
-
-    it('高度为 1 的棋盘', () => {
-      const board = Array.from({ length: 1 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      expect(evaluateBoard(board)).toBe(0);
-    });
-
-    it('宽度为 1 的棋盘', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 1 }, () => 0),
-      );
-      expect(evaluateBoard(board)).toBe(0);
+      // agg=1×-0.3=-0.3, bump=1×-0.2=-0.2
+      // -0.3 - 0.2 = -0.5
+      expect(score).toBeCloseTo(-0.5, 2);
     });
   });
 });

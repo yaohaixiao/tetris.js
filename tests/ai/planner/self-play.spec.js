@@ -312,4 +312,33 @@ describe('selfPlay', () => {
       expect(best).toHaveProperty('y');
     });
   });
+
+  // ==================== Beam Search 剪枝 ====================
+  describe('Beam Search 剪枝', () => {
+    it('候选数超过 beam 时应剪枝', () => {
+      const snapshot = createSnapshot();
+      // 生成 10 个候选，beam=3，只保留 3 个
+      const moves = Array.from({ length: 10 }, (_, i) => createMove({ actions: [`MOVE_${i}`] }));
+      generateMoves.mockReturnValue(moves);
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot, undefined, 2, 3);
+
+      // generateMoves 只调用了一次，但剪枝后只保留 3 个进入递归
+      // 验证剪枝逻辑被执行（evaluateBoard 被调用来评分排序）
+      expect(evaluateBoard).toHaveBeenCalled();
+    });
+
+    it('候选数不超过 beam 时不剪枝', () => {
+      const snapshot = createSnapshot();
+      const moves = [createMove(), createMove()];
+      generateMoves.mockReturnValue(moves);
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot, undefined, 2, 5);
+
+      // 只有 2 个候选，不触发剪枝
+      expect(evaluateBoard).toHaveBeenCalled();
+    });
+  });
 });

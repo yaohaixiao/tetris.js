@@ -181,5 +181,80 @@ describe('ClearLinesAnimation', () => {
 
       expect(spy).toHaveBeenCalledTimes(7);
     });
+
+    it('dispose 后 sequence 的 4 个回调应被注册', () => {
+      const scheduler = new Scheduler();
+      const spy = jest.spyOn(scheduler, 'sequence');
+      const { anim } = createAnimation({ Scheduler: scheduler });
+
+      anim.dispose();
+
+      // dispose 里调了一次 Scheduler.sequence
+      const callsAfterDispose = spy.mock.calls.length;
+      // initialize 调了 1 次，dispose 调了 1 次，总共 2 次
+      expect(callsAfterDispose).toBe(2);
+    });
+
+    it('第 1 个回调：STOP_CLEAR_LINES', () => {
+      const scheduler = new Scheduler();
+      const spy = jest.spyOn(scheduler, 'sequence');
+      const { anim } = createAnimation({ Scheduler: scheduler });
+      const emitSpy = jest.spyOn(anim, 'emit');
+
+      anim.dispose();
+
+      // 取 dispose 里的 sequence 调用（第 2 次）
+      const arg = spy.mock.calls[1][0];
+      arg[0].fn();
+
+      expect(emitSpy).toHaveBeenCalledWith('replay:test-uuid:stop:clear:lines', {
+        isLevelUp: true,
+        level: 6,
+      });
+    });
+
+    it('第 2 个回调：UPDATE_STATE', () => {
+      const scheduler = new Scheduler();
+      const spy = jest.spyOn(scheduler, 'sequence');
+      const { anim } = createAnimation({ Scheduler: scheduler });
+      const emitSpy = jest.spyOn(anim, 'emit');
+
+      anim.dispose();
+
+      const arg = spy.mock.calls[1][0];
+      arg[1].fn();
+
+      expect(emitSpy).toHaveBeenCalledWith('game:test-uuid:update:state', {
+        stateHandler: expect.any(Function),
+      });
+    });
+
+    it('第 3 个回调：SAVE_HIGH_SCORE', () => {
+      const scheduler = new Scheduler();
+      const spy = jest.spyOn(scheduler, 'sequence');
+      const { anim } = createAnimation({ Scheduler: scheduler });
+      const emitSpy = jest.spyOn(anim, 'emit');
+
+      anim.dispose();
+
+      const arg = spy.mock.calls[1][0];
+      arg[2].fn();
+
+      expect(emitSpy).toHaveBeenCalledWith('game:test-uuid:save:high:score');
+    });
+
+    it('第 4 个回调：UPDATE_HUD', () => {
+      const scheduler = new Scheduler();
+      const spy = jest.spyOn(scheduler, 'sequence');
+      const { anim } = createAnimation({ Scheduler: scheduler });
+      const emitSpy = jest.spyOn(anim, 'emit');
+
+      anim.dispose();
+
+      const arg = spy.mock.calls[1][0];
+      arg[3].fn();
+
+      expect(emitSpy).toHaveBeenCalledWith('game:test-uuid:update:hud');
+    });
   });
 });
