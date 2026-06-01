@@ -1,3 +1,11 @@
+# [1.13.0](https://github.com/yaohaixiao/tetris.js/compare/1.12.0...1.13.0) (2026-06-01)
+
+
+### Features
+
+* AI 评估函数 v2 — 统一权重、危险区指数惩罚、消行后评分 ([4cac445](https://github.com/yaohaixiao/tetris.js/commit/4cac4458f3ff4e4fba07125794b910fcc2293a1f))
+
+
 # [1.12.0](https://github.com/yaohaixiao/tetris.js/compare/1.11.0...1.12.0) (2026-05-31)
 
 
