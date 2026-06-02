@@ -1,3 +1,13 @@
+# [1.14.0](https://github.com/yaohaixiao/tetris.js/compare/1.13.0...1.14.0) (2026-06-02)
+
+
+### Features
+
+* 调整不同级别的 clear 音效的音量； ([05fdeef](https://github.com/yaohaixiao/tetris.js/commit/05fdeef6b0df05d96f1c2f8be756723aa670876f))
+* AI 支持 Hold 决策 + 补充规划器单测 ([e47ee96](https://github.com/yaohaixiao/tetris.js/commit/e47ee9612f27032e92d5fdd726aef51f0fb351df))
+* **ai:** 新增 AI 旋转墙踢系统 ([c38e75b](https://github.com/yaohaixiao/tetris.js/commit/c38e75b29a1e6520ffba878304374651f36adacb))
+
+
 # [1.13.0](https://github.com/yaohaixiao/tetris.js/compare/1.12.0...1.13.0) (2026-06-01)
 
 
