@@ -383,4 +383,113 @@ describe('generateMoves', () => {
       });
     });
   });
+
+  // ==================== Hold 支持 ====================
+  describe('Hold 支持', () => {
+    it('有 hold 方块时应生成 hold 候选', () => {
+      const board = createBoard();
+      const piece = {
+        shape: T_SHAPE,
+        position: { x: 3, y: 0 },
+      };
+      const hold = {
+        shape: O_SHAPE,
+      };
+
+      const moves = generateMoves({ board, piece, hold });
+
+      // 应有 hold 候选（actions 以 'HOLD' 开头）
+      const holdMoves = moves.filter((m) => m.actions[0] === 'HOLD');
+      expect(holdMoves.length).toBeGreaterThan(0);
+    });
+
+    it('hold 为空但有 next 时应生成候选', () => {
+      const board = createBoard();
+      const piece = {
+        shape: T_SHAPE,
+        position: { x: 3, y: 0 },
+      };
+      const next = {
+        shape: O_SHAPE,
+      };
+
+      const moves = generateMoves({ board, piece, next });
+
+      // 应有 hold 候选（用 next 作为 hold 后会得到的方块）
+      const holdMoves = moves.filter((m) => m.actions[0] === 'HOLD');
+      expect(holdMoves.length).toBeGreaterThan(0);
+    });
+
+    it('hold 和 next 都为空时不应生成 hold 候选', () => {
+      const board = createBoard();
+      const piece = {
+        shape: T_SHAPE,
+        position: { x: 3, y: 0 },
+      };
+
+      const moves = generateMoves({ board, piece });
+
+      const holdMoves = moves.filter((m) => m.actions[0] === 'HOLD');
+      expect(holdMoves.length).toBe(0);
+    });
+
+    it('hold 候选的动作序列应以 HOLD 开头', () => {
+      const board = createBoard();
+      const piece = {
+        shape: T_SHAPE,
+        position: { x: 3, y: 0 },
+      };
+      const hold = {
+        shape: O_SHAPE,
+      };
+
+      const moves = generateMoves({ board, piece, hold });
+      const holdMoves = moves.filter((m) => m.actions[0] === 'HOLD');
+
+      holdMoves.forEach((move) => {
+        expect(move.actions[0]).toBe('HOLD');
+        expect(move.actions[move.actions.length - 1]).toBe('DROP');
+      });
+    });
+
+    it('hold 候选应包含 O 型方块的所有旋转状态', () => {
+      const board = createBoard();
+      const piece = {
+        shape: T_SHAPE,
+        position: { x: 3, y: 0 },
+      };
+      const hold = {
+        shape: O_SHAPE,
+      };
+
+      // O 型方块旋转不变
+      rotateMatrix.mockReturnValue(O_SHAPE);
+
+      const moves = generateMoves({ board, piece, hold });
+      const holdMoves = moves.filter((m) => m.actions[0] === 'HOLD');
+
+      // O 型方块：4 旋转 × 9 位置 = 36 个 hold 候选
+      expect(holdMoves.length).toBe(36);
+    });
+
+    it('有 hold 时总候选数应 = 当前方块候选 + hold 候选', () => {
+      const board = createBoard();
+      const piece = {
+        shape: T_SHAPE,
+        position: { x: 3, y: 0 },
+      };
+      const hold = {
+        shape: O_SHAPE,
+      };
+
+      // 不 mock rotateMatrix，让它正常旋转
+      // T 块和 O 块各自独立旋转，不会互相干扰
+      const moves = generateMoves({ board, piece, hold });
+
+      // T 型方块：4 × 8 = 32，O 型方块：4 × 9 = 36，总共 68
+      // 但 rotateMatrix 没 mock，T 块 4 次旋转，O 块 4 次旋转
+      // T 块 32 + O 块 36 = 68
+      expect(moves.length).toBe(68);
+    });
+  });
 });

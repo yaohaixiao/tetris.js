@@ -9092,13 +9092,14 @@ var tetris = (() => {
 
   // lib/ai/planner/generate-moves.js
   var generateMoves = (snapshot) => {
-    const { board, piece, hold: hold2 } = snapshot;
+    const { board, piece, hold: hold2, next } = snapshot;
     const moves = generate_for_piece_default(board, piece, false);
-    if (hold2) {
+    const holdPieceSource = hold2 || next;
+    if (holdPieceSource) {
       const holdPiece = {
-        shape: hold2.shape,
+        shape: holdPieceSource.shape,
         position: {
-          x: Math.floor(board[0].length / 2) - Math.floor(hold2.shape[0].length / 2),
+          x: Math.floor(board[0].length / 2) - Math.floor(holdPieceSource.shape[0].length / 2),
           y: 0
         }
       };
