@@ -7,10 +7,11 @@ var tetris = (() => {
        *
        * - classic（默认）
        * - gradient
+       * - inset
        * - pixel
        * - shaded
        */
-      style: "shaded",
+      style: "pixel",
       /*
        * 图案：
        *
@@ -5801,6 +5802,31 @@ var tetris = (() => {
   };
   var darken_default = darken;
 
+  // lib/services/ui/block/render-inset-block.js
+  var renderInsetBlock = (canvas, x, y, color) => {
+    const { gameBoardContext: ctx, blockSize } = canvas;
+    const gap = 1;
+    const size = blockSize - gap;
+    const px = x * blockSize + gap;
+    const py = y * blockSize + gap;
+    ctx.fillStyle = color;
+    ctx.fillRect(px, py, size, size);
+    ctx.strokeStyle = lighten_default(color, 0.4);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(px, py + size);
+    ctx.lineTo(px, py);
+    ctx.lineTo(px + size, py);
+    ctx.stroke();
+    ctx.strokeStyle = darken_default(color, 0.6);
+    ctx.beginPath();
+    ctx.moveTo(px + size, py);
+    ctx.lineTo(px + size, py + size);
+    ctx.lineTo(px, py + size);
+    ctx.stroke();
+  };
+  var render_inset_block_default = renderInsetBlock;
+
   // lib/services/ui/block/render-gradient-block.js
   var renderGradientBlock = (canvas, x, y, color) => {
     const { gameBoardContext: ctx, blockSize } = canvas;
@@ -5932,12 +5958,16 @@ var tetris = (() => {
         render_gradient_block_default(canvas, x, y, color);
         break;
       }
-      case "shaded": {
-        render_shaded_block_default(canvas, x, y, color);
+      case "inset": {
+        render_inset_block_default(canvas, x, y, color);
         break;
       }
       case "pixel": {
         render_pixel_block_default(canvas, x, y, color, pattern);
+        break;
+      }
+      case "shaded": {
+        render_shaded_block_default(canvas, x, y, color);
         break;
       }
       default: {
