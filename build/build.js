@@ -1,6 +1,7 @@
 import buildHTML from './build-html.js';
 import buildStyle from './build-style.js';
 import buildScript from './build-script.js';
+import buildWorker from './build-worker.js';
 import copyFile from './utils/copy-file.js';
 import copyDir from './utils/copy-dir.js';
 
@@ -20,6 +21,9 @@ const build = async () => {
     })
     .then(() => {
       return buildScript(args);
+    })
+    .then(() => {
+      return buildWorker(args);
     })
     .then(() => {
       return copyFile('./assets/img/bg.jpg', './dist/img/bg.jpg');

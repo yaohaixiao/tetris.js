@@ -256,11 +256,17 @@ describe('AIController', () => {
 
   // ==================== think ====================
   describe('think 方法', () => {
+    const difficulty = {
+      lookahead: 1,
+      weights: { holes: -5, height: -0.3, bumpiness: -0.2, completeLines: 20 },
+      beam: 5,
+    };
+
     it('应该调用 selfPlay 并传入快照', () => {
       selfPlay.mockReturnValue(null);
       const state = mockStore.getState();
 
-      ai.think(state);
+      ai.think(state, difficulty);
 
       expect(selfPlay).toHaveBeenCalledTimes(1);
       const snapshot = selfPlay.mock.calls[0][0];
@@ -273,7 +279,7 @@ describe('AIController', () => {
       const bestMove = { board: [[1]], actions: ['MOVE_LEFT', 'DROP'] };
       selfPlay.mockReturnValue(bestMove);
 
-      const result = ai.think(mockStore.getState());
+      const result = ai.think(mockStore.getState(), difficulty);
 
       expect(result).toBe(bestMove);
     });
@@ -281,7 +287,7 @@ describe('AIController', () => {
     it('selfPlay 返回 null 时应该返回 null', () => {
       selfPlay.mockReturnValue(null);
 
-      const result = ai.think(mockStore.getState());
+      const result = ai.think(mockStore.getState(), difficulty);
 
       expect(result).toBeNull();
     });
@@ -304,7 +310,7 @@ describe('AIController', () => {
       });
       selfPlay.mockReturnValue(null);
 
-      const result = ai.think(mockStore.getState());
+      const result = ai.think(mockStore.getState(), difficulty);
 
       expect(result).toBeNull();
     });
@@ -364,6 +370,56 @@ describe('AIController', () => {
         ai.start();
         ai.start();
       }).not.toThrow();
+    });
+  });
+
+  // ==================== Worker 模式 ====================
+  describe('Worker 模式', () => {
+    it('_initialize 应该在 Worker 不可用时设为 null', () => {
+      const originalWorker = globalThis.Worker;
+      globalThis.Worker = undefined;
+      const ai2 = new AIController({
+        Game: mockGame, Store: mockStore, Scheduler: mockScheduler,
+      });
+      expect(ai2.worker).toBeNull();
+      globalThis.Worker = originalWorker;
+    });
+
+    it('addEventListeners 在 worker 为 null 时应该安全返回', () => {
+      expect(() => ai.addEventListeners()).not.toThrow();
+    });
+
+    it('removeEventListeners 在 worker 为 null 时应该安全返回', () => {
+      expect(() => ai.removeEventListeners()).not.toThrow();
+    });
+
+    it('_onWorkerError 应该设置 worker 为 null 并解锁', () => {
+      ai.workerBusy = true;
+      ai.worker = {};
+      ai._onWorkerError(new ErrorEvent('error', { message: 'test' }));
+      expect(ai.workerBusy).toBe(false);
+      expect(ai.worker).toBeNull();
+    });
+
+    it('_onWorkerMessage 处理 error 类型应该解锁', () => {
+      ai.workerBusy = true;
+      ai._onWorkerMessage({ data: { type: 'error', error: 'test error' } });
+      expect(ai.workerBusy).toBe(false);
+    });
+
+    it('_onWorkerMessage 处理 result 类型应该写入 actions', () => {
+      ai.workerBusy = true;
+      ai._onWorkerMessage({ data: { type: 'result', best: { actions: ['DROP'] } } });
+      expect(ai.workerBusy).toBe(false);
+      expect(ai.actions).toEqual(['DROP']);
+    });
+
+    it('loop 在 Worker 忙碌且无 action 时应该继续调度', () => {
+      ai.enabled = true;
+      ai.workerBusy = true;
+      ai.actions = [];
+      ai.loop();
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
     });
   });
 });

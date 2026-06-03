@@ -2,8 +2,6 @@ import chalk from 'chalk';
 import esbuild from 'esbuild';
 
 import CONSTANTS from './constants.js';
-import isFileExists from './utils/is-file-exists.js';
-import removeFile from './utils/remove-file.js';
 
 // 执行打包
 const buildScript = (args) => {
@@ -19,7 +17,9 @@ const buildScript = (args) => {
   return esbuild
     .build({
       // 入口文件（你的 ES6 主模块）
-      entryPoints: [`${BASE_PATH}/lib/tetris.js`],
+      entryPoints: [
+        `${BASE_PATH}/lib/tetris.js`,
+      ],
       // 输出文件（浏览器直接用）
       outfile,
       // 打包模式：浏览器环境

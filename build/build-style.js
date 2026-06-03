@@ -2,9 +2,7 @@ import chalk from 'chalk';
 import less from 'less';
 
 import CONSTANTS from './constants.js';
-import isFileExists from './utils/is-file-exists.js';
 import readFile from './utils/read-file.js';
-import removeFile from './utils/remove-file.js';
 import writeFile from './utils/write-file.js';
 
 const buildStyle = (args) => {

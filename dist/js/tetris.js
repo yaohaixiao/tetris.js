@@ -9223,7 +9223,14 @@ var tetris = (() => {
   var generateForPiece = (board, pieceData, isHold = false) => {
     const moves = [];
     let currentShape = pieceData.shape;
-    for (let rotation = 0; rotation < 4; rotation++) {
+    const type = pieceData.type || "";
+    let uniqueRotations = 4;
+    if (type === "O") {
+      uniqueRotations = 1;
+    } else if (type === "I" || type === "I5") {
+      uniqueRotations = 2;
+    }
+    for (let rotation = 0; rotation < uniqueRotations; rotation++) {
       const validXPositions = get_valid_x_positions_default(board, currentShape);
       for (const targetX of validXPositions) {
         const candidate = create_candidate_default({
@@ -9536,19 +9543,43 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 初始化 AI 控制器的默认状态。
+     * 接收依赖配置，通过 Base.inject() 自动注入依赖， 然后调用 initialize() 初始化内部状态。
      *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Store - 游戏状态存储
-     * @param {object} options.Scheduler - 调度器
-     * @param {object} options.Animations - 动画系统
+     * @param {object} options - 依赖配置对象
      */
     constructor(options) {
       super(options);
+      this.initialize();
+    }
+    /**
+     * ## 初始化内部状态
+     *
+     * 设置所有实例属性的默认值，并尝试创建 Web Worker。 依赖（Game/Store/Scheduler/Animations）已由 Base
+     * 构造函数注入， 此方法中可直接通过 this 访问。
+     *
+     * @returns {void}
+     */
+    initialize() {
       this.enabled = false;
       this.actions = [];
       this.aiSchedulerId = 0;
+      this.worker = null;
+      this.workerBusy = false;
+      this._initialize();
+    }
+    /**
+     * ## 初始化 Web Worker
+     *
+     * 创建独立线程运行 selfPlay 决策。如果浏览器不支持 Worker 或创建过程中抛出异常，自动将 this.worker 设为 null， 后续
+     * `think()` 会降级为主线程同步模式。
+     *
+     * Worker 创建成功后，绑定 message 和 error 事件监听器。
+     *
+     * @private
+     * @returns {void}
+     */
+    _initialize() {
+      this.worker = typeof Worker === "undefined" ? null : new Worker("js/ai-worker.js", { type: "module" });
     }
     /**
      * ## 启动 AI
@@ -9564,7 +9595,7 @@ var tetris = (() => {
     /**
      * ## 停止 AI
      *
-     * 清除 enabled 标志、清空待执行动作、取消调度任务。
+     * 清除 enabled 标志、清空待执行动作、重置 Worker 忙碌状态、 取消当前调度任务。
      *
      * @returns {void}
      */
@@ -9572,19 +9603,22 @@ var tetris = (() => {
       const { Scheduler: Scheduler2 } = this;
       this.enabled = false;
       this.actions = [];
+      this.workerBusy = false;
       Scheduler2.cancel(this.aiSchedulerId);
       this.aiSchedulerId = 0;
     }
     /**
      * ## AI 主循环
      *
-     * 每帧（由调度器触发）执行以下逻辑：
+     * 每帧（由 Scheduler 按难度 delay 触发）执行以下步骤：
      *
-     * 1. 检查是否启用
-     * 2. 检查游戏状态（必须为 playing 且无动画阻塞）
-     * 3. 如果没有待执行动作，调用 `think()` 生成新的动作计划
-     * 4. 从队列中取出一个动作，通过 `dispatch:input` 发送给 Game
-     * 5. 根据当前难度配置的 delay 调度下一次循环
+     * 1. 检查 enabled 标志
+     * 2. 检查游戏状态（必须为 'playing' 且无动画阻塞），否则 100ms 后重试
+     * 3. 如果动作队列为空且 Worker 空闲，调用 `think()` 发起决策
+     * 4. 从队列头部取出一个动作，通过 `dispatch:input` 事件发送给 Game
+     * 5. 调度下一次循环（延迟 = 难度配置的 delay）
+     *
+     * 每个决策周期只执行一个动作，保证动作节奏与游戏下落速度同步。
      *
      * @returns {void}
      */
@@ -9599,62 +9633,61 @@ var tetris = (() => {
         return;
       }
       const difficulty = this.getDifficultyConfig();
-      if (this.actions.length === 0) {
-        const best = this.think(state);
+      if (this.actions.length === 0 && !this.workerBusy) {
+        const best = this.think(state, difficulty);
         if (best) {
           this.actions = [...best.actions];
         }
       }
       const action = this.actions.shift();
-      if (action) {
-        this.emit("dispatch:input", {
-          device: "ai",
-          action,
-          payload: {
-            Game: Game2
-          }
-        });
+      if (!action && this.workerBusy) {
+        this.aiSchedulerId = Scheduler2.delay(this.loop, difficulty.delay);
+        return;
       }
+      if (!action) {
+        return;
+      }
+      this.emit("dispatch:input", {
+        device: "ai",
+        action,
+        payload: { Game: Game2 }
+      });
       this.aiSchedulerId = Scheduler2.delay(this.loop, difficulty.delay);
     };
     /**
-     * ## AI 决策
+     * ## AI 决策入口
      *
-     * 分析当前游戏状态，计算最佳动作序列。
+     * 根据运行模式选择决策方式：
      *
-     * ### 决策算法选择
-     *
-     * | 难度   | 算法                          | 说明                            |
-     * | ------ | ----------------------------- | ------------------------------- |
-     * | EASY   | selfPlay (lookahead=1)        | 只看当前方块，轻度启发式评估    |
-     * | NORMAL | selfPlay (lookahead=1)        | 同上，但权重更严格              |
-     * | HARD   | selfPlay (lookahead=2 + beam) | 前瞻搜索 + 束搜索剪枝           |
-     * | EXPERT | MCTS (iterations=300)         | 蒙特卡洛树搜索，随机模拟 300 次 |
-     *
-     * ### 流程
-     *
-     * 1. 根据当前难度等级读取配置（lookahead、weights、beam 等）
-     * 2. 从真实游戏状态创建快照（深拷贝，隔离 AI 模拟）
-     * 3. 调用对应的决策算法
-     * 4. 返回最佳移动对象（{ board, actions, y }）
+     * - **Worker 模式**（this.worker 存在）：发送 `{ type: 'think', ... }` 消息给 Worker
+     *   线程。Worker 完成后通过 `_onWorkerMessage` 回调 将结果写入 `this.actions`。此方法不返回任何值。
+     * - **主线程模式**（this.worker 为 null）：同步调用 selfPlay， 直接返回最佳移动对象 `{ actions, y,
+     *   evaluate }`。
      *
      * @param {object} state - 游戏状态对象（Store.getState() 的返回值）
-     * @param {string[][]} state.board - 棋盘二维数组（颜色字符串格式）
-     * @param {object} state.curr - 当前活动方块对象（含 shape、color）
-     * @param {number} state.cx - 当前方块的 X 坐标（列索引）
-     * @param {number} state.cy - 当前方块的 Y 坐标（行索引）
-     * @returns {object | null} 最佳移动对象 `{ board, actions, y }`，无法决策时返回 null
+     * @param {object} difficulty - 难度配置对象（由 getDifficultyConfig() 返回）
+     * @returns {object | void} 主线程模式返回最佳移动，Worker 模式无返回值
      */
-    think(state) {
-      const difficulty = this.getDifficultyConfig();
+    think(state, difficulty) {
       const { lookahead, weights, beam } = difficulty;
-      const snapshot = create_snapshot_default(state);
-      return self_play_default(snapshot, weights, lookahead, beam);
+      if (this.worker) {
+        this.workerBusy = true;
+        this.worker.postMessage({
+          type: "think",
+          state,
+          weights,
+          depth: lookahead,
+          beam
+        });
+      } else {
+        const snapshot = create_snapshot_default(state);
+        return self_play_default(snapshot, weights, lookahead, beam);
+      }
     }
     /**
      * ## 获取当前难度的完整配置
      *
-     * 从 Store 读取当前选择的难度等级（easy/normal/hard/expert）， 映射到对应的 `AIDifficulty` 配置对象。
+     * 从 Store 读取当前选择的难度等级，映射到对应的 AIDifficulty 配置对象。 未知难度降级为 NORMAL。
      *
      * @returns {object} 难度配置对象，包含 lookahead、noise、weights、delay、beam 等字段
      */
@@ -9670,6 +9703,71 @@ var tetris = (() => {
       return map[difficulty] || ai_difficulty_default.NORMAL;
     }
     /**
+     * ## 绑定 Worker 事件监听器
+     *
+     * 在 Worker 创建成功后调用，绑定 message 和 error 事件。
+     *
+     * @returns {void}
+     */
+    addEventListeners() {
+      if (!this.worker) {
+        return;
+      }
+      this.worker.addEventListener("message", this._onWorkerMessage);
+      this.worker.addEventListener("error", this._onWorkerError);
+    }
+    /**
+     * ## 移除 Worker 事件监听器
+     *
+     * 在销毁 Worker 或停止 AI 时调用。
+     *
+     * @returns {void}
+     */
+    removeEventListeners() {
+      if (!this.worker) {
+        return;
+      }
+      this.worker.removeEventListener("message", this._onWorkerMessage);
+      this.worker.removeEventListener("error", this._onWorkerError);
+    }
+    /**
+     * ## 处理 Worker 返回的消息
+     *
+     * Worker 完成 selfPlay 决策后，通过 postMessage 发送结果。 此回调将结果写入 this.actions 队列，并解除
+     * workerBusy 锁。
+     *
+     * @private
+     * @param {MessageEvent} e - Worker 消息事件
+     * @returns {void}
+     */
+    _onWorkerMessage = (e) => {
+      const { type, best, error } = e.data;
+      if (type === "result") {
+        this.workerBusy = false;
+        if (best) {
+          this.actions = [...best.actions];
+        }
+      }
+      if (type === "error") {
+        this.workerBusy = false;
+        console.error("AI Worker Error:", error);
+      }
+    };
+    /**
+     * ## 处理 Worker 自身错误
+     *
+     * Worker 线程崩溃或无法响应时触发。 解除忙碌锁并将 worker 设为 null，后续决策降级为主线程模式。
+     *
+     * @private
+     * @param {ErrorEvent} err - Worker 错误事件
+     * @returns {void}
+     */
+    _onWorkerError = (err) => {
+      this.workerBusy = false;
+      console.error("AI Worker Error:", err);
+      this.worker = null;
+    };
+    /**
      * ## 订阅 AI 事件
      *
      * 监听 `ai:<uuid>:start` 和 `ai:<uuid>:stop` 事件。
@@ -9678,8 +9776,7 @@ var tetris = (() => {
      */
     subscribe() {
       const { Game: Game2 } = this;
-      const uuid = Game2.id;
-      const events = AIEvents(uuid);
+      const events = AIEvents(Game2.id);
       this.on(events.START, this._onStart);
       this.on(events.STOP, this._onStop);
     }
@@ -9690,29 +9787,14 @@ var tetris = (() => {
      */
     unsubscribe() {
       const { Game: Game2 } = this;
-      const uuid = Game2.id;
-      const events = AIEvents(uuid);
+      const events = AIEvents(Game2.id);
       this.off(events.START, this._onStart);
       this.off(events.STOP, this._onStop);
     }
-    /**
-     * ## 处理 AI 启动事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onStart = () => {
-      this.start();
-    };
-    /**
-     * ## 处理 AI 停止事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onStop = () => {
-      this.stop();
-    };
+    /** @private */
+    _onStart = () => this.start();
+    /** @private */
+    _onStop = () => this.stop();
   };
   var ai_controller_default = AIController;
 
@@ -12284,6 +12366,7 @@ var tetris = (() => {
      * @returns {void}
      */
     addEventListeners() {
+      this.AI.addEventListeners();
       this.Keyboard.addEventListeners();
       this.Gamepad.addEventListeners();
       this.Touch.addEventsListeners();
@@ -12296,6 +12379,7 @@ var tetris = (() => {
      * @returns {void}
      */
     removeEventListeners() {
+      this.AI.removerEventListeners();
       this.Keyboard.removeEventListeners();
       this.Gamepad.removeEventListeners();
       this.Touch.removeEventListeners();
