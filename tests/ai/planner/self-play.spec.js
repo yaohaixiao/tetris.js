@@ -20,6 +20,16 @@ jest.mock('@/lib/ai/simulator/simulate-clear-result.js', () => ({
   default: jest.fn(() => null),
 }));
 
+jest.mock('@/lib/ai/utils/clear-full-lines.js', () => ({
+  __esModule: true,
+  default: jest.fn((board) => board.map((row) => [...row])),
+}));
+
+jest.mock('@/lib/ai/utils/clone-board.js', () => ({
+  __esModule: true,
+  default: jest.fn((board) => board.map((row) => [...row])),
+}));
+
 import generateMoves from '@/lib/ai/planner/generate-moves.js';
 import evaluateBoard from '@/lib/ai/simulator/evaluate-board.js';
 import advanceSnapshot from '@/lib/ai/simulator/advance-snapshot.js';
@@ -61,12 +71,9 @@ describe('selfPlay', () => {
   });
 
   const createMove = (overrides = {}) => ({
-    board: Array.from({ length: 20 }, () =>
-      Array.from({ length: 10 }, () => 0),
-    ),
     actions: ['DROP'],
     y: 18,
-    evaluate: jest.fn((cb) => cb(overrides.board || createMove().board)),
+    placeOn: jest.fn((board) => board),
     ...overrides,
   });
 
@@ -74,8 +81,8 @@ describe('selfPlay', () => {
     jest.clearAllMocks();
   });
 
-  // ==================== depth = 1（基础模式） ====================
-  describe('depth = 1（基础模式）', () => {
+  // ==================== depth = 1 ====================
+  describe('depth = 1', () => {
     it('应该返回评分最高的移动', () => {
       const snapshot = createSnapshot();
       const move1 = createMove({ actions: ['DROP'] });
@@ -163,13 +170,13 @@ describe('selfPlay', () => {
       expect(evaluateBoard).toHaveBeenCalledWith(
         expect.any(Array),
         weights,
-        null, // simulateClearResult mocked to return null
+        null,
       );
     });
   });
 
-  // ==================== depth = 2（前瞻模式） ====================
-  describe('depth = 2（前瞻模式）', () => {
+  // ==================== depth = 2 ====================
+  describe('depth = 2', () => {
     it('应该调用 advanceSnapshot 推进快照', () => {
       const snapshot = createSnapshot();
       const move = createMove();
@@ -215,7 +222,11 @@ describe('selfPlay', () => {
       const best = selfPlay(snapshot, undefined, 2);
 
       expect(best).toBe(move);
-      expect(evaluateBoard).toHaveBeenCalledWith(move.board, undefined, null);
+      expect(evaluateBoard).toHaveBeenCalledWith(
+        expect.any(Array),
+        undefined,
+        null,
+      );
     });
 
     it('递归时应传递 weights', () => {
@@ -245,8 +256,8 @@ describe('selfPlay', () => {
     });
   });
 
-  // ==================== depth = 3（深度前瞻） ====================
-  describe('depth = 3（深度前瞻）', () => {
+  // ==================== depth = 3 ====================
+  describe('depth = 3', () => {
     it('应该递归 3 层', () => {
       const snapshot = createSnapshot();
       const move = createMove();
@@ -256,7 +267,7 @@ describe('selfPlay', () => {
         .mockReturnValueOnce([move])
         .mockReturnValueOnce([move]);
 
-      advanceSnapshot.mockReturnValue({ ...snapshot });
+      advanceSnapshot.mockReturnValue({ ...snapshot, board: [] });
       evaluateBoard.mockReturnValue(0);
 
       selfPlay(snapshot, undefined, 3);
@@ -296,7 +307,7 @@ describe('selfPlay', () => {
 
   // ==================== 返回值结构 ====================
   describe('返回值结构', () => {
-    it('返回的最佳移动应包含 board、actions、y 属性', () => {
+    it('返回的最佳移动应包含 placeOn、actions、y 属性', () => {
       const snapshot = createSnapshot();
       const move = createMove();
       generateMoves.mockReturnValue([move]);
@@ -304,7 +315,7 @@ describe('selfPlay', () => {
 
       const best = selfPlay(snapshot, undefined, 1);
 
-      expect(best).toHaveProperty('board');
+      expect(best).toHaveProperty('placeOn');
       expect(best).toHaveProperty('actions');
       expect(best).toHaveProperty('y');
     });
@@ -314,7 +325,6 @@ describe('selfPlay', () => {
   describe('Beam Search 剪枝', () => {
     it('候选数超过 beam 时应剪枝', () => {
       const snapshot = createSnapshot();
-      // 生成 10 个候选，beam=3，只保留 3 个
       const moves = Array.from({ length: 10 }, (_, i) =>
         createMove({ actions: [`MOVE_${i}`] }),
       );
@@ -323,8 +333,6 @@ describe('selfPlay', () => {
 
       selfPlay(snapshot, undefined, 2, 3);
 
-      // generateMoves 只调用了一次，但剪枝后只保留 3 个进入递归
-      // 验证剪枝逻辑被执行（evaluateBoard 被调用来评分排序）
       expect(evaluateBoard).toHaveBeenCalled();
     });
 
@@ -336,7 +344,6 @@ describe('selfPlay', () => {
 
       selfPlay(snapshot, undefined, 2, 5);
 
-      // 只有 2 个候选，不触发剪枝
       expect(evaluateBoard).toHaveBeenCalled();
     });
   });

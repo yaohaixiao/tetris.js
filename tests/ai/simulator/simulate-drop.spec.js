@@ -5,11 +5,6 @@ jest.mock('@/lib/ai/utils/collision.js', () => ({
   default: jest.fn(),
 }));
 
-jest.mock('@/lib/ai/simulator/simulate-placement-in-place.js', () => ({
-  __esModule: true,
-  default: jest.fn((board, shape, x, y, cb) => cb(board)),
-}));
-
 import collision from '@/lib/ai/utils/collision.js';
 
 describe('simulateDrop', () => {
@@ -58,8 +53,8 @@ describe('simulateDrop', () => {
       const result = simulateDrop(board, T_SHAPE, 3);
 
       expect(result.y).toBe(18);
-      expect(result.evaluate).toBeDefined();
-      expect(typeof result.evaluate).toBe('function');
+      expect(result.placeOn).toBeDefined();
+      expect(typeof result.placeOn).toBe('function');
     });
 
     it('I 型方块应该下落到最底部', () => {
@@ -93,41 +88,61 @@ describe('simulateDrop', () => {
     });
   });
 
-  // ==================== 延迟评分 ====================
-  describe('延迟评分', () => {
-    it('evaluate 应返回回调的返回值', () => {
+  // ==================== placeOn 放置函数 ====================
+  describe('placeOn 放置函数', () => {
+    it('placeOn 应将方块写入目标棋盘', () => {
       const board = createBoard();
       mockBottomCollision();
 
       const result = simulateDrop(board, T_SHAPE, 0);
-      const score = result.evaluate(() => 42);
+      const targetBoard = createBoard();
+      result.placeOn(targetBoard);
 
-      expect(score).toBe(42);
+      // T_SHAPE 停在 y=18，(0,18) 处 shape[0][1] → (1,18)
+      expect(targetBoard[18][1]).toBe(1);
+      // shape[1][0] → (0,19)
+      expect(targetBoard[19][0]).toBe(1);
+      // shape[1][1] → (1,19)
+      expect(targetBoard[19][1]).toBe(1);
+      // shape[1][2] → (2,19)
+      expect(targetBoard[19][2]).toBe(1);
     });
 
-    it('evaluate 应接收棋盘作为参数', () => {
-      const board = createBoard();
-      mockBottomCollision();
-
-      const result = simulateDrop(board, T_SHAPE, 0);
-      let receivedBoard = null;
-      result.evaluate((b) => {
-        receivedBoard = b;
-        return 0;
-      });
-
-      expect(receivedBoard).toBe(board);
-    });
-
-    it('evaluate 不应修改原棋盘', () => {
+    it('placeOn 不应修改原棋盘', () => {
       const board = createBoard();
       mockBottomCollision();
       const snapshot = JSON.stringify(board);
 
       const result = simulateDrop(board, T_SHAPE, 0);
-      result.evaluate(() => 0);
+      const targetBoard = createBoard();
+      result.placeOn(targetBoard);
 
+      // 原棋盘不变
       expect(JSON.stringify(board)).toBe(snapshot);
+    });
+
+    it('placeOn 应返回目标棋盘引用', () => {
+      const board = createBoard();
+      mockBottomCollision();
+
+      const result = simulateDrop(board, T_SHAPE, 0);
+      const targetBoard = createBoard();
+      const returned = result.placeOn(targetBoard);
+
+      expect(returned).toBe(targetBoard);
+    });
+
+    it('placeOn 应跳过形状中的空格子', () => {
+      const board = createBoard();
+      mockBottomCollision();
+
+      const result = simulateDrop(board, T_SHAPE, 0);
+      const targetBoard = createBoard();
+      result.placeOn(targetBoard);
+
+      // T_SHAPE 的 (0,0) 和 (0,2) 是空的，不应写入
+      expect(targetBoard[18][0]).toBe(0);
+      expect(targetBoard[18][2]).toBe(0);
     });
   });
 
@@ -156,15 +171,15 @@ describe('simulateDrop', () => {
 
   // ==================== 返回结构 ====================
   describe('返回结构', () => {
-    it('应该返回 { y, evaluate } 对象', () => {
+    it('应该返回 { y, placeOn } 对象', () => {
       const board = createBoard();
       mockBottomCollision();
 
       const result = simulateDrop(board, T_SHAPE, 0);
 
       expect(result).toHaveProperty('y');
-      expect(result).toHaveProperty('evaluate');
-      expect(typeof result.evaluate).toBe('function');
+      expect(result).toHaveProperty('placeOn');
+      expect(typeof result.placeOn).toBe('function');
     });
 
     it('返回的 y 应该是非负整数', () => {

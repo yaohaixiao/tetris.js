@@ -16,7 +16,7 @@ const buildWorker = (args) => {
 
   return esbuild.build({
     entryPoints: [
-      `${BASE_PATH}/lib/ai/worker/ai-worker.js`,
+      `${BASE_PATH}/lib/worker/ai-worker.js`,
     ],
 
     outfile,

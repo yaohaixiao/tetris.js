@@ -49,46 +49,30 @@ var collision = (board, shape, offsetX, offsetY) => {
 };
 var collision_default = collision;
 
-// lib/ai/simulator/simulate-placement-in-place.js
-var simulatePlacementInPlace = (board, shape, offsetX, offsetY, callback) => {
-  const changes = [];
-  for (let y = 0; y < shape.length; y++) {
-    for (let x = 0; x < shape[0].length; x++) {
-      if (!shape[y][x]) continue;
-      const by = offsetY + y;
-      const bx = offsetX + x;
-      if (by >= 0 && by < board.length) {
-        changes.push({ y: by, x: bx, old: board[by][bx] });
-        board[by][bx] = 1;
-      }
-    }
-  }
-  const result = callback(board);
-  for (const { y, x, old } of changes) {
-    board[y][x] = old;
-  }
-  return result;
-};
-var simulate_placement_in_place_default = simulatePlacementInPlace;
-
 // lib/ai/simulator/simulate-drop.js
 var simulateDrop = (board, shape, startX) => {
   let y = 0;
   while (!collision_default(board, shape, startX, y + 1)) {
     y++;
   }
+  const placeOn = (targetBoard) => {
+    for (let row = 0; row < shape.length; row++) {
+      for (let col = 0; col < shape[0].length; col++) {
+        if (!shape[row][col]) continue;
+        const by = y + row;
+        const bx = startX + col;
+        if (by >= 0 && by < targetBoard.length) {
+          targetBoard[by][bx] = 1;
+        }
+      }
+    }
+    return targetBoard;
+  };
   return {
     /** 硬降终点的 Y 坐标 */
     y,
-    /**
-     * 延迟评分：调用方需要评分时传 callback
-     *
-     * 内部流程：原地放置方块 → 调 callback 评分 → 回滚棋盘
-     *
-     * @param {Function} callback - 评分函数，接收放置后的棋盘，返回评分
-     * @returns {any} 评分结果
-     */
-    evaluate: (callback) => simulate_placement_in_place_default(board, shape, startX, y, callback)
+    /** 放置函数：在分支棋盘上写入方块 */
+    placeOn
   };
 };
 var simulate_drop_default = simulateDrop;
@@ -130,7 +114,7 @@ var createCandidate = ({
   originalPiece,
   rotationCount
 }) => {
-  const result = simulate_drop_default(board, currentShape, targetX);
+  const { y, placeOn } = simulate_drop_default(board, currentShape, targetX);
   const actions = build_action_sequence_default({
     rotationCount,
     targetX,
@@ -138,16 +122,11 @@ var createCandidate = ({
   });
   return {
     /** 硬降终点 Y 坐标 */
-    y: result.y,
+    y,
+    /** 放置函数：在分支棋盘上写入方块 */
+    placeOn,
     /** 动作序列 */
-    actions,
-    /**
-     * 延迟评分：只在真正需要评分时才放置 + 评分 + 回滚
-     *
-     * @param {Function} callback - 评分函数，接收放置后的棋盘，返回评分
-     * @returns {any} 评分结果
-     */
-    evaluate: (callback) => result.evaluate(callback)
+    actions
   };
 };
 var create_candidate_default = createCandidate;
@@ -439,11 +418,11 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
   }
   if (depth > 1 && moves.length > beam) {
     const scored = moves.map((move) => {
-      let score = move.evaluate((board) => {
-        const clearedBoard = clear_full_lines_default(board);
-        const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
-        return evaluate_board_default(clearedBoard, weights, afterClearResult);
-      });
+      const branchBoard = clone_board_default(snapshot.board);
+      move.placeOn(branchBoard);
+      const clearedBoard = clear_full_lines_default(branchBoard);
+      const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
+      let score = evaluate_board_default(clearedBoard, weights, afterClearResult);
       if (move.actions.includes("HOLD")) {
         score += 2;
       }
@@ -456,27 +435,25 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
   let best = null;
   let bestScore = -Infinity;
   for (const move of moves) {
+    const branchBoard = clone_board_default(snapshot.board);
+    move.placeOn(branchBoard);
+    const clearedBoard = clear_full_lines_default(branchBoard);
+    const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
     let score;
     if (depth <= 1) {
-      score = move.evaluate((board) => {
-        const clearedBoard = clear_full_lines_default(board);
-        const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
-        return evaluate_board_default(clearedBoard, weights, afterClearResult);
-      });
+      score = evaluate_board_default(clearedBoard, weights, afterClearResult);
     } else {
       const nextSnapshot = advance_snapshot_default(snapshot, move);
       const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam);
-      score = nextBest ? nextBest.evaluate((board) => {
-        const nextClearResult = simulate_clear_result_default(board, nextSnapshot);
-        return evaluate_board_default(board, weights, nextClearResult);
-      }) : move.evaluate((board) => {
-        const clearedBoard = clear_full_lines_default(board);
-        const afterClearResult = simulate_clear_result_default(
-          clearedBoard,
-          snapshot
+      if (nextBest) {
+        const nextClearResult = simulate_clear_result_default(
+          nextSnapshot.board,
+          nextSnapshot
         );
-        return evaluate_board_default(clearedBoard, weights, afterClearResult);
-      });
+        score = evaluate_board_default(nextSnapshot.board, weights, nextClearResult);
+      } else {
+        score = evaluate_board_default(clearedBoard, weights, afterClearResult);
+      }
     }
     if (move.actions.includes("HOLD")) {
       score += 2;
@@ -931,12 +908,10 @@ var createSnapshot = (state) => structuredClone({
 });
 var create_snapshot_default = createSnapshot;
 
-// lib/ai/worker/ai-worker.js
+// lib/worker/ai-worker.js
 globalThis.addEventListener("message", (e) => {
   const { type, state, weights, depth, beam } = e.data;
-  if (type !== "think") {
-    return;
-  }
+  if (type !== "think") return;
   try {
     const snapshot = create_snapshot_default(state);
     const best = self_play_default(snapshot, weights, depth, beam);
