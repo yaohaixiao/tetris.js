@@ -66,6 +66,7 @@ describe('selfPlay', () => {
     ),
     actions: ['DROP'],
     y: 18,
+    evaluate: jest.fn((cb) => cb(overrides.board || createMove().board)),
     ...overrides,
   });
 

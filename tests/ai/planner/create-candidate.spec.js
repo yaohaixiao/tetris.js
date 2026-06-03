@@ -57,19 +57,15 @@ describe('createCandidate', () => {
     });
   });
 
-  it('应该返回包含 board 和 actions 的对象', () => {
-    const result = createCandidate({
-      board,
-      currentShape: shape,
-      targetX: 4,
-      originalPiece: piece,
-      rotationCount: 0,
-    });
+  it('应该返回包含 evaluate、actions 和 y 的对象', () => {
+    const result = createCandidate({ board, currentShape: shape, targetX: 4, originalPiece: piece, rotationCount: 0 });
 
-    expect(result).toEqual({
-      board,
-      actions: ['ROTATE', 'MOVE_RIGHT', 'DROP'],
-    });
+    expect(result).toHaveProperty('evaluate');
+    expect(result).toHaveProperty('actions');
+    expect(result).toHaveProperty('y');
+    expect(typeof result.evaluate).toBe('function');
+    expect(result.actions).toEqual(['ROTATE', 'MOVE_RIGHT', 'DROP']);
+    expect(result.y).toBe(18);
   });
 
   it('rotationCount 为 0 时应正确传递', () => {

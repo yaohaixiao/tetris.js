@@ -9116,37 +9116,46 @@ var tetris = (() => {
   };
   var collision_default = collision;
 
-  // lib/ai/utils/clone-board.js
-  var cloneBoard = (board) => board.map((row) => [...row]);
-  var clone_board_default = cloneBoard;
-
-  // lib/ai/simulator/simulate-placement.js
-  var simulatePlacement = (board, shape, offsetX, offsetY) => {
-    const next = clone_board_default(board);
+  // lib/ai/simulator/simulate-placement-in-place.js
+  var simulatePlacementInPlace = (board, shape, offsetX, offsetY, callback) => {
+    const changes = [];
     for (let y = 0; y < shape.length; y++) {
       for (let x = 0; x < shape[0].length; x++) {
         if (!shape[y][x]) continue;
-        const bx = x + offsetX;
-        const by = y + offsetY;
-        if (by >= 0 && by < next.length) {
-          next[by][bx] = 1;
+        const by = offsetY + y;
+        const bx = offsetX + x;
+        if (by >= 0 && by < board.length) {
+          changes.push({ y: by, x: bx, old: board[by][bx] });
+          board[by][bx] = 1;
         }
       }
     }
-    return next;
+    const result = callback(board);
+    for (const { y, x, old } of changes) {
+      board[y][x] = old;
+    }
+    return result;
   };
-  var simulate_placement_default = simulatePlacement;
+  var simulate_placement_in_place_default = simulatePlacementInPlace;
 
   // lib/ai/simulator/simulate-drop.js
   var simulateDrop = (board, shape, startX) => {
     let y = 0;
     while (!collision_default(board, shape, startX, y + 1)) {
-      y += 1;
+      y++;
     }
-    const nextBoard = simulate_placement_default(board, shape, startX, y);
     return {
-      board: nextBoard,
-      y
+      /** 硬降终点的 Y 坐标 */
+      y,
+      /**
+       * 延迟评分：调用方需要评分时传 callback
+       *
+       * 内部流程：原地放置方块 → 调 callback 评分 → 回滚棋盘
+       *
+       * @param {Function} callback - 评分函数，接收放置后的棋盘，返回评分
+       * @returns {any} 评分结果
+       */
+      evaluate: (callback) => simulate_placement_in_place_default(board, shape, startX, y, callback)
     };
   };
   var simulate_drop_default = simulateDrop;
@@ -9181,8 +9190,13 @@ var tetris = (() => {
   var build_action_sequence_default = buildActionSequence;
 
   // lib/ai/planner/create-candidate.js
-  var createCandidate = (options) => {
-    const { board, currentShape, targetX, originalPiece, rotationCount } = options;
+  var createCandidate = ({
+    board,
+    currentShape,
+    targetX,
+    originalPiece,
+    rotationCount
+  }) => {
     const result = simulate_drop_default(board, currentShape, targetX);
     const actions = build_action_sequence_default({
       rotationCount,
@@ -9190,8 +9204,17 @@ var tetris = (() => {
       originalX: originalPiece.position.x
     });
     return {
-      board: result.board,
-      actions
+      /** 硬降终点 Y 坐标 */
+      y: result.y,
+      /** 动作序列 */
+      actions,
+      /**
+       * 延迟评分：只在真正需要评分时才放置 + 评分 + 回滚
+       *
+       * @param {Function} callback - 评分函数，接收放置后的棋盘，返回评分
+       * @returns {any} 评分结果
+       */
+      evaluate: (callback) => result.evaluate(callback)
     };
   };
   var create_candidate_default = createCandidate;
@@ -9316,6 +9339,27 @@ var tetris = (() => {
   };
   var evaluate_board_default = evaluateBoard;
 
+  // lib/ai/utils/clone-board.js
+  var cloneBoard = (board) => board.map((row) => [...row]);
+  var clone_board_default = cloneBoard;
+
+  // lib/ai/simulator/simulate-placement.js
+  var simulatePlacement = (board, shape, offsetX, offsetY) => {
+    const next = clone_board_default(board);
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[0].length; x++) {
+        if (!shape[y][x]) continue;
+        const bx = x + offsetX;
+        const by = y + offsetY;
+        if (by >= 0 && by < next.length) {
+          next[by][bx] = 1;
+        }
+      }
+    }
+    return next;
+  };
+  var simulate_placement_default = simulatePlacement;
+
   // lib/ai/utils/clear-full-lines.js
   var clearFullLines = (board) => {
     const result = board.filter((row) => !row.every((cell) => cell !== 0));
@@ -9436,9 +9480,11 @@ var tetris = (() => {
     }
     if (depth > 1 && moves.length > beam) {
       const scored = moves.map((move2) => {
-        const clearedBoard = clear_full_lines_default(move2.board);
-        const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
-        let score = evaluate_board_default(clearedBoard, weights, afterClearResult);
+        let score = move2.evaluate((board) => {
+          const clearedBoard = clear_full_lines_default(board);
+          const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
+          return evaluate_board_default(clearedBoard, weights, afterClearResult);
+        });
         if (move2.actions.includes("HOLD")) {
           score += 2;
         }
@@ -9453,23 +9499,25 @@ var tetris = (() => {
     for (const move2 of moves) {
       let score;
       if (depth <= 1) {
-        const clearedBoard = clear_full_lines_default(move2.board);
-        const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
-        score = evaluate_board_default(clearedBoard, weights, afterClearResult);
+        score = move2.evaluate((board) => {
+          const clearedBoard = clear_full_lines_default(board);
+          const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
+          return evaluate_board_default(clearedBoard, weights, afterClearResult);
+        });
       } else {
         const nextSnapshot = advance_snapshot_default(snapshot, move2);
         const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam);
-        if (nextBest) {
-          const nextClearResult = simulate_clear_result_default(
-            nextBest.board,
-            nextSnapshot
+        score = nextBest ? nextBest.evaluate((board) => {
+          const nextClearResult = simulate_clear_result_default(board, nextSnapshot);
+          return evaluate_board_default(board, weights, nextClearResult);
+        }) : move2.evaluate((board) => {
+          const clearedBoard = clear_full_lines_default(board);
+          const afterClearResult = simulate_clear_result_default(
+            clearedBoard,
+            snapshot
           );
-          score = evaluate_board_default(nextBest.board, weights, nextClearResult);
-        } else {
-          const clearedBoard = clear_full_lines_default(move2.board);
-          const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
-          score = evaluate_board_default(clearedBoard, weights, afterClearResult);
-        }
+          return evaluate_board_default(clearedBoard, weights, afterClearResult);
+        });
       }
       if (move2.actions.includes("HOLD")) {
         score += 2;

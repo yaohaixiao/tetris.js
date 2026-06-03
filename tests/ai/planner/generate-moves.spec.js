@@ -66,7 +66,7 @@ describe('generateMoves', () => {
       const moves = generateMoves({ board, piece });
 
       moves.forEach((move) => {
-        expect(move).toHaveProperty('board');
+        expect(move).toHaveProperty('evaluate');  // board → evaluate
         expect(move).toHaveProperty('actions');
         expect(Array.isArray(move.actions)).toBe(true);
       });
