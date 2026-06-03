@@ -1,55 +1,79 @@
 var tetris = (() => {
   // lib/configuration.js
   var Configuration = {
+    /*
+     * ==================== 方块渲染配置 ====================
+     */
     Block: {
-      /*
-       * 样式：
-       *
-       * - classic（默认）
-       * - glass
-       * - gradient
-       * - inset
-       * - pixel
-       * - shaded
+      /**
+       * 渲染风格：'classic' | 'frosted' | 'glass' | 'gradient' | 'inset' | 'pixel' |
+       * 'shaded'
        */
-      style: "gradient",
-      /*
-       * 图案：
-       *
-       * - square（默认）
-       * - jay
-       * - ell
-       * - tee
-       */
+      style: "frosted",
+      /** 方块图案：'square' | 'jay' | 'ell' | 'tee' */
       pattern: "tee"
     },
+    /*
+     * ==================== 游戏元素配置 ====================
+     */
     Elements: {
+      /*
+       * ==================== 棋盘 Canvas 配置 ====================
+       */
       Canvas: {
+        /** 棋盘列数（宽度） */
         cols: 10,
+        /** 棋盘行数（高度） */
         rows: 20,
+        /** 棋盘 Canvas 元素 ID */
         board: "tetris-game-board",
+        /** 预览方块 Canvas 元素 ID */
         next: "tetris-next-piece",
+        /** 暂存方块 Canvas 元素 ID */
         hold: "tetri-hold-piece"
       },
+      /*
+       * ==================== HUD 显示元素配置 ====================
+       */
       Hud: {
+        /** 控制者标识 DOM 元素 ID */
         controller: "tetris-controller",
+        /** 分数 DOM 元素 ID */
         score: "tetris-score",
+        /** 消除行数 DOM 元素 ID */
         lines: "tetris-lines",
+        /** 等级 DOM 元素 ID */
         level: "tetris-level",
+        /** 连击数 DOM 元素 ID */
         combo: "tetris-combo",
+        /** 最高分 DOM 元素 ID */
         highScore: "tetris-high-score"
       },
+      /*
+       * ==================== 手柄按钮元素配置 ====================
+       */
       Controls: {
+        /** 返回按钮 DOM 元素 ID */
         back: "tetris-btn-back",
+        /** 暂存按钮 DOM 元素 ID */
         hold: "tetris-btn-hold",
+        /** 开始按钮 DOM 元素 ID */
         start: "tetris-btn-start",
+        /** 方向上键 DOM 元素 ID */
         up: "tetris-dpad-up",
+        /** 方向下键 DOM 元素 ID */
         down: "tetris-dpad-down",
+        /** 方向左键 DOM 元素 ID */
         left: "tetris-dpad-left",
+        /** 方向右键 DOM 元素 ID */
         right: "tetris-dpad-right",
+        /** A 按钮 DOM 元素 ID */
         a: "tetris-btn-a",
+        /** B 按钮 DOM 元素 ID */
         b: "tetris-btn-b",
+        /** X 按钮 DOM 元素 ID */
         x: "tetris-btn-x",
+        /** Y 按钮 DOM 元素 ID */
         y: "tetris-btn-y"
       }
     }
@@ -5817,16 +5841,57 @@ var tetris = (() => {
 
   // lib/utils/hex-to-rgba.js
   var hexToRgba = (hex, alpha) => {
-    const r = Number.parseInt(hex.slice(1, 3), 16);
-    const g = Number.parseInt(hex.slice(3, 5), 16);
-    const b = Number.parseInt(hex.slice(5, 7), 16);
+    let fullHex = hex;
+    if (hex.length === 4) {
+      fullHex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+    }
+    const r = Number.parseInt(fullHex.slice(1, 3), 16);
+    const g = Number.parseInt(fullHex.slice(3, 5), 16);
+    const b = Number.parseInt(fullHex.slice(5, 7), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
   var hex_to_rgba_default = hexToRgba;
 
+  // lib/services/ui/block/render-frosted-block.js
+  var renderFrostedBlock = (canvas, x, y, color) => {
+    const { gameBoardContext: ctx, blockSize } = canvas;
+    const gap = 1;
+    const size = blockSize - gap;
+    const px = x * blockSize + gap;
+    const py = y * blockSize + gap;
+    ctx.fillStyle = hex_to_rgba_default(color, 0.65);
+    ctx.fillRect(px, py, size, size);
+    ctx.strokeStyle = hex_to_rgba_default(color, 0.75);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(px, py, size, size);
+    ctx.clip();
+    const topGradient = ctx.createLinearGradient(px, py, px, py + size);
+    topGradient.addColorStop(0, hex_to_rgba_default("#FFFFFF", 0.15));
+    topGradient.addColorStop(0.25, hex_to_rgba_default("#FFFFFF", 0));
+    ctx.fillStyle = topGradient;
+    ctx.fillRect(px, py, size, size);
+    const seed = (x * 31 + y * 17 + size * 13) % 1e3;
+    for (let i = 0; i < size * size * 0.3; i++) {
+      const nx = px + (seed + i * 7) % size;
+      const ny = py + (seed + i * 11) % size;
+      const alpha = 0.03 + (seed + i * 3) % 8 * 0.01;
+      ctx.fillStyle = hex_to_rgba_default("#FFFFFF", alpha);
+      ctx.fillRect(nx, ny, 1, 1);
+    }
+    ctx.restore();
+    ctx.strokeStyle = darken_default(color, 0.45);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
+  };
+  var render_frosted_block_default = renderFrostedBlock;
+
   // lib/services/ui/block/render-glass-block.js
   var renderGlassBlock = (canvas, x, y, color) => {
     const { gameBoardContext: ctx, blockSize } = canvas;
+    const { WHITE: WHITE3 } = colors_default;
     const gap = 1;
     const size = blockSize - gap;
     const px = x * blockSize + gap;
@@ -5841,8 +5906,8 @@ var tetris = (() => {
     ctx.rect(px, py, size, size);
     ctx.clip();
     const topGradient = ctx.createLinearGradient(px, py, px, py + size);
-    topGradient.addColorStop(0, "rgba(255, 255, 255, 0.25)");
-    topGradient.addColorStop(0.4, "rgba(255, 255, 255, 0)");
+    topGradient.addColorStop(0, hex_to_rgba_default(WHITE3, 0.25));
+    topGradient.addColorStop(0.4, hex_to_rgba_default(WHITE3, 0));
     ctx.fillStyle = topGradient;
     ctx.fillRect(px, py, size, size);
     ctx.restore();
@@ -6020,6 +6085,10 @@ var tetris = (() => {
   var renderBlock = (canvas, x, y, color) => {
     const { style = "classic", pattern = "square" } = canvas;
     switch (style) {
+      case "frosted": {
+        render_frosted_block_default(canvas, x, y, color);
+        break;
+      }
       case "glass": {
         render_glass_block_default(canvas, x, y, color);
         break;
