@@ -6,11 +6,26 @@ var tetris = (() => {
      */
     Block: {
       /**
-       * 渲染风格：'classic' | 'frosted' | 'glass' | 'gradient' | 'inset' | 'pixel' |
-       * 'shaded'
+       * 渲染风格：
+       *
+       * - 'classic'
+       * - 'frosted'
+       * - 'glass'
+       * - 'glossy'
+       * - 'gradient'
+       * - 'inset'
+       * - 'pixel' |
+       * - 'shaded'
        */
-      style: "frosted",
-      /** 方块图案：'square' | 'jay' | 'ell' | 'tee' */
+      style: "gradient",
+      /**
+       * 方块图案：
+       *
+       * - 'square'
+       * - 'jay'
+       * - 'ell'
+       * - 'tee'
+       */
       pattern: "tee"
     },
     /*
@@ -5896,11 +5911,8 @@ var tetris = (() => {
     const size = blockSize - gap;
     const px = x * blockSize + gap;
     const py = y * blockSize + gap;
-    ctx.fillStyle = hex_to_rgba_default(color, 0.7);
+    ctx.fillStyle = hex_to_rgba_default(color, 0.65);
     ctx.fillRect(px, py, size, size);
-    ctx.strokeStyle = hex_to_rgba_default(color, 0.8);
-    ctx.lineWidth = 1;
-    ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
     ctx.save();
     ctx.beginPath();
     ctx.rect(px, py, size, size);
@@ -5911,7 +5923,7 @@ var tetris = (() => {
     ctx.fillStyle = topGradient;
     ctx.fillRect(px, py, size, size);
     ctx.restore();
-    ctx.strokeStyle = darken_default(color, 0.45);
+    ctx.strokeStyle = darken_default(color, 0.35);
     ctx.lineWidth = 2;
     ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
   };
@@ -5929,6 +5941,26 @@ var tetris = (() => {
   };
   var lighten_default = lighten;
 
+  // lib/services/ui/block/render-glossy-block.js
+  var renderGlossyBlock = (canvas, x, y, color) => {
+    const { gameBoardContext: ctx, blockSize } = canvas;
+    const gap = 1;
+    const size = blockSize - gap;
+    const px = x * blockSize + gap;
+    const py = y * blockSize + gap;
+    ctx.fillStyle = darken_default(color, 0.15);
+    ctx.fillRect(px, py, size, size);
+    ctx.strokeStyle = colors_default.BLACK;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px, py, size, size);
+    const highlightColor = lighten_default(color, 0.25);
+    const highlightSize = Math.max(2, Math.floor(size / 4));
+    ctx.fillStyle = highlightColor;
+    ctx.fillRect(px, py, size, highlightSize);
+    ctx.fillRect(px, py, highlightSize, size);
+  };
+  var render_glossy_block_default = renderGlossyBlock;
+
   // lib/services/ui/block/render-gradient-block.js
   var renderGradientBlock = (canvas, x, y, color) => {
     const { RGBA_BLACK: RGBA_BLACK2, RGBA_WHITE: RGBA_WHITE5 } = colors_default;
@@ -5938,7 +5970,7 @@ var tetris = (() => {
     const w = blockSize;
     const h = blockSize;
     const light = lighten_default(color, 0.15);
-    const dark = darken_default(color, 0.25);
+    const dark = darken_default(color, 0.2);
     const grad = ctx.createLinearGradient(px, py, px, py + h);
     grad.addColorStop(0, light);
     grad.addColorStop(0.5, color);
@@ -6091,6 +6123,10 @@ var tetris = (() => {
       }
       case "glass": {
         render_glass_block_default(canvas, x, y, color);
+        break;
+      }
+      case "glossy": {
+        render_glossy_block_default(canvas, x, y, color);
         break;
       }
       case "gradient": {
