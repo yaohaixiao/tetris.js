@@ -460,7 +460,9 @@ describe('applyClearLines', () => {
       const { stateHandler } = applyClearLines(mockContext);
       const newState = stateHandler(mockState);
 
-      expect(newState.board.every(row => row.every(cell => cell === 0))).toBe(true);
+      expect(
+        newState.board.every((row) => row.every((cell) => cell === 0)),
+      ).toBe(true);
     });
   });
 

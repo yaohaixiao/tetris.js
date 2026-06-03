@@ -49,9 +49,10 @@ describe('getGhostPosition', () => {
     });
 
     it('应该返回 Ghost 的 cx 和 cy', () => {
-      collision.mockReturnValueOnce(false)  // oy=1 无碰撞
-               .mockReturnValueOnce(false)  // oy=2 无碰撞
-               .mockReturnValueOnce(true);  // oy=3 碰撞
+      collision
+        .mockReturnValueOnce(false) // oy=1 无碰撞
+        .mockReturnValueOnce(false) // oy=2 无碰撞
+        .mockReturnValueOnce(true); // oy=3 碰撞
 
       const result = getGhostPosition(mockRuntime);
 
@@ -71,11 +72,11 @@ describe('getGhostPosition', () => {
 
     it('应该逐行下移直到碰撞', () => {
       collision
-        .mockReturnValueOnce(false)  // oy=1
-        .mockReturnValueOnce(false)  // oy=2
-        .mockReturnValueOnce(false)  // oy=3
-        .mockReturnValueOnce(false)  // oy=4
-        .mockReturnValueOnce(true);  // oy=5 碰撞
+        .mockReturnValueOnce(false) // oy=1
+        .mockReturnValueOnce(false) // oy=2
+        .mockReturnValueOnce(false) // oy=3
+        .mockReturnValueOnce(false) // oy=4
+        .mockReturnValueOnce(true); // oy=5 碰撞
 
       const result = getGhostPosition(mockRuntime);
 
@@ -118,7 +119,11 @@ describe('getGhostPosition', () => {
 
       getGhostPosition(mockRuntime);
 
-      expect(collision).toHaveBeenCalledWith(mockRuntime, 0, expect.any(Number));
+      expect(collision).toHaveBeenCalledWith(
+        mockRuntime,
+        0,
+        expect.any(Number),
+      );
     });
 
     it('ox 始终为 0（垂直下落）', () => {
@@ -126,7 +131,11 @@ describe('getGhostPosition', () => {
 
       getGhostPosition(mockRuntime);
 
-      expect(collision).toHaveBeenCalledWith(expect.anything(), 0, expect.any(Number));
+      expect(collision).toHaveBeenCalledWith(
+        expect.anything(),
+        0,
+        expect.any(Number),
+      );
     });
 
     it('应该从 Store.getState 获取状态', () => {
@@ -142,8 +151,7 @@ describe('getGhostPosition', () => {
   describe('边界情况', () => {
     it('cx 非 4 时应该正确返回', () => {
       mockState.cx = 0;
-      collision.mockReturnValueOnce(false)
-               .mockReturnValueOnce(true);
+      collision.mockReturnValueOnce(false).mockReturnValueOnce(true);
 
       const result = getGhostPosition(mockRuntime);
 
@@ -152,8 +160,7 @@ describe('getGhostPosition', () => {
 
     it('cy 为 0 时应该从顶部计算', () => {
       mockState.cy = 0;
-      collision.mockReturnValueOnce(false)
-               .mockReturnValueOnce(true);
+      collision.mockReturnValueOnce(false).mockReturnValueOnce(true);
 
       const result = getGhostPosition(mockRuntime);
 

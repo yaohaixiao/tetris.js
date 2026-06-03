@@ -214,11 +214,7 @@ describe('selfPlay', () => {
       const best = selfPlay(snapshot, undefined, 2);
 
       expect(best).toBe(move);
-      expect(evaluateBoard).toHaveBeenCalledWith(
-        move.board,
-        undefined,
-        null,
-      );
+      expect(evaluateBoard).toHaveBeenCalledWith(move.board, undefined, null);
     });
 
     it('递归时应传递 weights', () => {
@@ -318,7 +314,9 @@ describe('selfPlay', () => {
     it('候选数超过 beam 时应剪枝', () => {
       const snapshot = createSnapshot();
       // 生成 10 个候选，beam=3，只保留 3 个
-      const moves = Array.from({ length: 10 }, (_, i) => createMove({ actions: [`MOVE_${i}`] }));
+      const moves = Array.from({ length: 10 }, (_, i) =>
+        createMove({ actions: [`MOVE_${i}`] }),
+      );
       generateMoves.mockReturnValue(moves);
       evaluateBoard.mockReturnValue(0);
 

@@ -14,7 +14,9 @@ import simulateDrop from '@/lib/ai/simulator/simulate-drop.js';
 import buildActionSequence from '@/lib/ai/planner/build-action-sequence.js';
 
 describe('createCandidate', () => {
-  const board = Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0));
+  const board = Array.from({ length: 20 }, () =>
+    Array.from({ length: 10 }, () => 0),
+  );
   const shape = [
     [0, 1, 0],
     [1, 1, 1],
@@ -28,13 +30,25 @@ describe('createCandidate', () => {
   });
 
   it('应该调用 simulateDrop 模拟硬降', () => {
-    createCandidate({ board, currentShape: shape, targetX: 4, originalPiece: piece, rotationCount: 1 });
+    createCandidate({
+      board,
+      currentShape: shape,
+      targetX: 4,
+      originalPiece: piece,
+      rotationCount: 1,
+    });
 
     expect(simulateDrop).toHaveBeenCalledWith(board, shape, 4);
   });
 
   it('应该调用 buildActionSequence 生成动作序列', () => {
-    createCandidate({ board, currentShape: shape, targetX: 5, originalPiece: piece, rotationCount: 2 });
+    createCandidate({
+      board,
+      currentShape: shape,
+      targetX: 5,
+      originalPiece: piece,
+      rotationCount: 2,
+    });
 
     expect(buildActionSequence).toHaveBeenCalledWith({
       rotationCount: 2,
@@ -44,7 +58,13 @@ describe('createCandidate', () => {
   });
 
   it('应该返回包含 board 和 actions 的对象', () => {
-    const result = createCandidate({ board, currentShape: shape, targetX: 4, originalPiece: piece, rotationCount: 0 });
+    const result = createCandidate({
+      board,
+      currentShape: shape,
+      targetX: 4,
+      originalPiece: piece,
+      rotationCount: 0,
+    });
 
     expect(result).toEqual({
       board,
@@ -53,7 +73,13 @@ describe('createCandidate', () => {
   });
 
   it('rotationCount 为 0 时应正确传递', () => {
-    createCandidate({ board, currentShape: shape, targetX: 3, originalPiece: piece, rotationCount: 0 });
+    createCandidate({
+      board,
+      currentShape: shape,
+      targetX: 3,
+      originalPiece: piece,
+      rotationCount: 0,
+    });
 
     expect(buildActionSequence).toHaveBeenCalledWith({
       rotationCount: 0,

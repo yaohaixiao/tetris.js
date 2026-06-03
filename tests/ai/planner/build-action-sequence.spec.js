@@ -34,7 +34,13 @@ describe('buildActionSequence', () => {
       targetX: 5,
       originalX: 3,
     });
-    expect(result).toEqual(['ROTATE', 'ROTATE', 'MOVE_RIGHT', 'MOVE_RIGHT', 'DROP']);
+    expect(result).toEqual([
+      'ROTATE',
+      'ROTATE',
+      'MOVE_RIGHT',
+      'MOVE_RIGHT',
+      'DROP',
+    ]);
   });
 
   it('不需要移动时只有旋转和硬降', () => {

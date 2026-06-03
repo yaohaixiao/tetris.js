@@ -1,12 +1,13 @@
 /**
- * tryAiKickRotation 单元测试 (Jest)
+ * TryAiKickRotation 单元测试 (Jest)
  *
  * 测试覆盖：
+ *
  * 1. 开阔场地原位旋转成功（测试0生效）
  * 2. 原位碰撞但偏移1成功（墙踢生效）
  * 3. 所有偏移都失败返回 null
  * 4. O 块无墙踢返回 null
- * 5. kickTable 缺失时的兜底逻辑
+ * 5. KickTable 缺失时的兜底逻辑
  * 6. 旋转后返回正确的 newRotation 和坐标
  * 7. 偏移测试按顺序执行（碰到第一个有效即停止）
  */
@@ -122,9 +123,7 @@ describe('tryAiKickRotation', () => {
        * 第 1 次 (0,0) 返回 true 表示碰撞
        * 第 2 次 (-1,0) 返回 false 表示不碰撞
        */
-      collision
-        .mockReturnValueOnce(true)
-        .mockReturnValueOnce(false);
+      collision.mockReturnValueOnce(true).mockReturnValueOnce(false);
 
       getKickData.mockReturnValue({
         0: { 1: STANDARD_KICK_0_TO_1 },
@@ -133,7 +132,7 @@ describe('tryAiKickRotation', () => {
       const result = tryAiKickRotation(board, piece);
 
       expect(result).not.toBeNull();
-      expect(result.x).toBe(4);  /* 5 + (-1) = 4 */
+      expect(result.x).toBe(4); /* 5 + (-1) = 4 */
       expect(result.y).toBe(10); /* 10 + (-0) = 10 */
     });
 
@@ -142,8 +141,8 @@ describe('tryAiKickRotation', () => {
       const piece = makePiece({ cx: 5, cy: 10 });
 
       collision
-        .mockReturnValueOnce(true)   /* (0, 0) 碰撞 */
-        .mockReturnValueOnce(true)   /* (-1, 0) 碰撞 */
+        .mockReturnValueOnce(true) /* (0, 0) 碰撞 */
+        .mockReturnValueOnce(true) /* (-1, 0) 碰撞 */
         .mockReturnValueOnce(false); /* (-1, 1) 不碰撞 */
 
       getKickData.mockReturnValue({
@@ -154,8 +153,8 @@ describe('tryAiKickRotation', () => {
 
       expect(result).not.toBeNull();
       /* Y 轴取反：标准偏移 +1 -> 屏幕坐标 -1 */
-      expect(result.x).toBe(4);  /* 5 + (-1) = 4 */
-      expect(result.y).toBe(9);  /* 10 + (-(+1)) = 10 - 1 = 9 */
+      expect(result.x).toBe(4); /* 5 + (-1) = 4 */
+      expect(result.y).toBe(9); /* 10 + (-(+1)) = 10 - 1 = 9 */
     });
 
     test('所有偏移都碰撞时返回 null', () => {
@@ -194,8 +193,8 @@ describe('tryAiKickRotation', () => {
       expect(collision).toHaveBeenCalledWith(
         board,
         MOCK_ROTATED_SHAPE,
-        5,   /* cx + 0 */
-        10   /* cy - 0 */
+        5 /* cx + 0 */,
+        10 /* cy - 0 */,
       );
     });
   });
@@ -208,8 +207,8 @@ describe('tryAiKickRotation', () => {
       const piece = makePiece({ cx: 5, cy: 10 });
 
       collision
-        .mockReturnValueOnce(true)   /* (0, 0) */
-        .mockReturnValueOnce(true)   /* (-1, 0) */
+        .mockReturnValueOnce(true) /* (0, 0) */
+        .mockReturnValueOnce(true) /* (-1, 0) */
         .mockReturnValueOnce(false); /* (-1, +1) -> (-1, -1) */
 
       getKickData.mockReturnValue({
@@ -227,9 +226,9 @@ describe('tryAiKickRotation', () => {
       const piece = makePiece({ cx: 5, cy: 10 });
 
       collision
-        .mockReturnValueOnce(true)   /* (0, 0) */
-        .mockReturnValueOnce(true)   /* (-1, 0) */
-        .mockReturnValueOnce(true)   /* (-1, +1) */
+        .mockReturnValueOnce(true) /* (0, 0) */
+        .mockReturnValueOnce(true) /* (-1, 0) */
+        .mockReturnValueOnce(true) /* (-1, +1) */
         .mockReturnValueOnce(false); /* (0, -2) -> (0, +2) */
 
       getKickData.mockReturnValue({
@@ -319,8 +318,8 @@ describe('tryAiKickRotation', () => {
       expect(collision).toHaveBeenCalledWith(
         board,
         MOCK_ROTATED_SHAPE,
-        3,   /* cx + 0 */
-        15   /* cy - 0 */
+        3 /* cx + 0 */,
+        15 /* cy - 0 */,
       );
     });
   });

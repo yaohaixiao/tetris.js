@@ -16,7 +16,9 @@ describe('getValidXPositions', () => {
       [1, 1],
       [1, 1],
     ];
-    expect(getValidXPositions(board, shape)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(getValidXPositions(board, shape)).toEqual([
+      0, 1, 2, 3, 4, 5, 6, 7, 8,
+    ]);
   });
 
   it('3×2 的 T 块在 10 列棋盘上有 8 个合法位置', () => {

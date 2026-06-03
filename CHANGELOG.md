@@ -1,49 +1,46 @@
 # [1.14.0](https://github.com/yaohaixiao/tetris.js/compare/1.13.0...1.14.0) (2026-06-02)
 
-
 ### Features
 
-* 调整不同级别的 clear 音效的音量； ([05fdeef](https://github.com/yaohaixiao/tetris.js/commit/05fdeef6b0df05d96f1c2f8be756723aa670876f))
-* AI 支持 Hold 决策 + 补充规划器单测 ([e47ee96](https://github.com/yaohaixiao/tetris.js/commit/e47ee9612f27032e92d5fdd726aef51f0fb351df))
-* **ai:** 新增 AI 旋转墙踢系统 ([c38e75b](https://github.com/yaohaixiao/tetris.js/commit/c38e75b29a1e6520ffba878304374651f36adacb))
-
+- 调整不同级别的 clear 音效的音量； ([05fdeef](https://github.com/yaohaixiao/tetris.js/commit/05fdeef6b0df05d96f1c2f8be756723aa670876f))
+- AI 支持 Hold 决策 + 补充规划器单测 ([e47ee96](https://github.com/yaohaixiao/tetris.js/commit/e47ee9612f27032e92d5fdd726aef51f0fb351df))
+- **ai:**
+  新增 AI 旋转墙踢系统 ([c38e75b](https://github.com/yaohaixiao/tetris.js/commit/c38e75b29a1e6520ffba878304374651f36adacb))
 
 # [1.13.0](https://github.com/yaohaixiao/tetris.js/compare/1.12.0...1.13.0) (2026-06-01)
 
-
 ### Features
 
-* AI 评估函数 v2 — 统一权重、危险区指数惩罚、消行后评分 ([4cac445](https://github.com/yaohaixiao/tetris.js/commit/4cac4458f3ff4e4fba07125794b910fcc2293a1f))
-
+- AI 评估函数 v2
+  — 统一权重、危险区指数惩罚、消行后评分 ([4cac445](https://github.com/yaohaixiao/tetris.js/commit/4cac4458f3ff4e4fba07125794b910fcc2293a1f))
 
 # [1.12.0](https://github.com/yaohaixiao/tetris.js/compare/1.11.0...1.12.0) (2026-05-31)
 
-
 ### Bug Fixes
 
-* lock 添加 curr 空值守卫，防止 Game Over 时崩溃 ([fd6744d](https://github.com/yaohaixiao/tetris.js/commit/fd6744d0818bf18ceb61cfeae63ac04e08670eaa))
-
+- lock 添加 curr 空值守卫，防止 Game
+  Over 时崩溃 ([fd6744d](https://github.com/yaohaixiao/tetris.js/commit/fd6744d0818bf18ceb61cfeae63ac04e08670eaa))
 
 ### Features
 
-* 优化 AI 难度权重配置 ([6f7f1a3](https://github.com/yaohaixiao/tetris.js/commit/6f7f1a3c241ba28914b99794c9f13e84b3829af1))
-* add maxHeight penalty, simplify to 5 core metrics ([503a832](https://github.com/yaohaixiao/tetris.js/commit/503a832efae3b162bae3daaa5ec8c0d15bd58401))
-* AI 计分感知 — 模拟消行奖励([8231d90](https://github.com/yaohaixiao/tetris.js/commit/8231d900ff8af494c4e7aad575eed4fa703f410c))
-* AI 确定性前瞻 — 从 7-bag 消费方块替代随机生成 ([1cfac1e](https://github.com/yaohaixiao/tetris.js/commit/1cfac1e7186d19a7b38086b3500a6be1605f5815))
-
+- 优化 AI 难度权重配置 ([6f7f1a3](https://github.com/yaohaixiao/tetris.js/commit/6f7f1a3c241ba28914b99794c9f13e84b3829af1))
+- add maxHeight penalty, simplify to 5 core metrics
+  ([503a832](https://github.com/yaohaixiao/tetris.js/commit/503a832efae3b162bae3daaa5ec8c0d15bd58401))
+- AI 计分感知 — 模拟消行奖励([8231d90](https://github.com/yaohaixiao/tetris.js/commit/8231d900ff8af494c4e7aad575eed4fa703f410c))
+- AI 确定性前瞻 — 从 7-bag 消费方块替代随机生成 ([1cfac1e](https://github.com/yaohaixiao/tetris.js/commit/1cfac1e7186d19a7b38086b3500a6be1605f5815))
 
 # [1.11.0](https://github.com/yaohaixiao/tetris.js/compare/1.10.0...1.11.0) (2026-05-31)
 
-
 ### Features
 
-* 实现 7-bag 随机生成器 ([90e4b55](https://github.com/yaohaixiao/tetris.js/commit/90e4b55bde4c57e96ccbf2d886239efac688344d))
-* 实现 All Clear 全清奖励 ([d0c3e0c](https://github.com/yaohaixiao/tetris.js/commit/d0c3e0c30ca68af5402fe21d7d66ae93be9b8382))
-* 实现 Back-to-Back 连续大招奖励 ([ac8e798](https://github.com/yaohaixiao/tetris.js/commit/ac8e798f57e4cb76ba1bcf2a43204f89579c829e))
-* 实现 Combo 连击计数与加分系统 ([6918a46](https://github.com/yaohaixiao/tetris.js/commit/6918a463ec708523ac573f3be1deec93de19f7ed))
-* 实现 Ghost 方块预览（半透明落点投影） ([1930430](https://github.com/yaohaixiao/tetris.js/commit/1930430122ced20261ea8b1ac517ca697819a825))
-* 实现 T-Spin 检测与计分 ([287a9d9](https://github.com/yaohaixiao/tetris.js/commit/287a9d97efd83d3947fec817f84d7fb11329d94c))
-* 实现软降/硬降计分 ([d0fc507](https://github.com/yaohaixiao/tetris.js/commit/d0fc507f7a00065d30eb4615eec0941849a13897))
+- 实现 7-bag 随机生成器 ([90e4b55](https://github.com/yaohaixiao/tetris.js/commit/90e4b55bde4c57e96ccbf2d886239efac688344d))
+- 实现 All
+  Clear 全清奖励 ([d0c3e0c](https://github.com/yaohaixiao/tetris.js/commit/d0c3e0c30ca68af5402fe21d7d66ae93be9b8382))
+- 实现 Back-to-Back 连续大招奖励 ([ac8e798](https://github.com/yaohaixiao/tetris.js/commit/ac8e798f57e4cb76ba1bcf2a43204f89579c829e))
+- 实现 Combo 连击计数与加分系统 ([6918a46](https://github.com/yaohaixiao/tetris.js/commit/6918a463ec708523ac573f3be1deec93de19f7ed))
+- 实现 Ghost 方块预览（半透明落点投影） ([1930430](https://github.com/yaohaixiao/tetris.js/commit/1930430122ced20261ea8b1ac517ca697819a825))
+- 实现 T-Spin 检测与计分 ([287a9d9](https://github.com/yaohaixiao/tetris.js/commit/287a9d97efd83d3947fec817f84d7fb11329d94c))
+- 实现软降/硬降计分 ([d0fc507](https://github.com/yaohaixiao/tetris.js/commit/d0fc507f7a00065d30eb4615eec0941849a13897))
 
 # [1.10.0](https://github.com/yaohaixiao/tetris.js/compare/1.9.0...1.10.0) (2026-05-30)
 

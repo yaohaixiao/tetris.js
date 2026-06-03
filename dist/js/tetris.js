@@ -6,12 +6,13 @@ var tetris = (() => {
        * 样式：
        *
        * - classic（默认）
+       * - glass
        * - gradient
        * - inset
        * - pixel
        * - shaded
        */
-      style: "pixel",
+      style: "gradient",
       /*
        * 图案：
        *
@@ -20,7 +21,7 @@ var tetris = (() => {
        * - ell
        * - tee
        */
-      pattern: "square"
+      pattern: "tee"
     },
     Elements: {
       Canvas: {
@@ -3936,52 +3937,76 @@ var tetris = (() => {
 
   // lib/state/game-state.js
   var GameState = {
-    /** ## 当前控制者身份：human / ai */
-    controller: "human",
-    /** ## 游戏初始化时的棋盘数据（用于回放） */
-    beginningBoard: [],
-    /** ## 游戏棋盘（20×10），存储颜色值字符串 */
-    board: [],
-    /** ## 当前活动方块 */
-    curr: null,
-    /** ## 当前方块 X 坐标（列） */
-    cx: 0,
-    /** ## 当前方块 Y 坐标（行） */
-    cy: 0,
-    /** ## 下一个预览方块 */
-    next: null,
-    /** ## 缓存的方块 */
-    hold: null,
-    tSpin: null,
-    backToBack: false,
-    /** ## 当前得分 */
-    score: 0,
-    /** ## 累计消除行数 */
-    lines: 0,
-    /** ## 当前等级 */
-    level: 1,
-    combo: 0,
-    comboScore: 0,
-    /** ## 历史最高分 */
-    highScore: 0,
-    /** ## 升级基准行数 */
-    baseLines: 0,
-    /** ## 升级消减行数 */
-    levelUpSteps: 10,
-    /** ## 当前待消除行号 */
-    clearLines: [],
-    /** ## 游戏难度 */
-    difficulty: "easy",
-    /**
-     * ## 游戏模式
-     *
-     * - `main-menu`：等级选择（主菜单）
-     * - `playing`：游戏中
-     * - `paused`：游戏暂停
-     * - `game-over`：游戏结束
+    /*
+     * ==================== 控制者 ====================
      */
+    /** 当前控制者身份：'human'（玩家）| 'ai'（AI） */
+    controller: "human",
+    /*
+     * ==================== 棋盘数据 ====================
+     */
+    /** 游戏初始化时的棋盘数据（用于回放模式） */
+    beginningBoard: [],
+    /** 游戏棋盘（20×10），存储颜色值字符串，空字符串表示空格 */
+    board: [],
+    /*
+     * ==================== 方块数据 ====================
+     */
+    /** 当前活动方块对象 */
+    curr: null,
+    /** 当前方块 X 坐标（列索引） */
+    cx: 0,
+    /** 当前方块 Y 坐标（行索引） */
+    cy: 0,
+    /** 下一个预览方块对象 */
+    next: null,
+    /** 暂存方块对象 */
+    hold: null,
+    /*
+     * ==================== 特殊消行 ====================
+     */
+    /** T-Spin 检测结果 */
+    tSpin: null,
+    /** Back-to-Back 连续特殊消行标记 */
+    backToBack: false,
+    /*
+     * ==================== 计分数据 ====================
+     */
+    /** 当前得分 */
+    score: 0,
+    /** 累计消除行数 */
+    lines: 0,
+    /** 当前等级（从 1 开始） */
+    level: 1,
+    /** 连击计数 */
+    combo: 0,
+    /** 连击累计得分 */
+    comboScore: 0,
+    /** 历史最高分（持久化存储） */
+    highScore: 0,
+    /*
+     * ==================== 等级系统 ====================
+     */
+    /** 升级基准行数 */
+    baseLines: 0,
+    /** 每升一级需要消除的行数（默认 10 行） */
+    levelUpSteps: 10,
+    /*
+     * ==================== 消行数据 ====================
+     */
+    /** 当前待消除的满行行号数组 */
+    clearLines: [],
+    /*
+     * ==================== 游戏设置 ====================
+     */
+    /** 游戏难度：'easy' | 'normal' | 'hard' | 'expert' */
+    difficulty: "easy",
+    /** 游戏模式：'main-menu' | 'playing' | 'paused' | 'game-over' */
     mode: "main-menu",
-    /** ## 手柄连接状态 */
+    /*
+     * ==================== 外设状态 ====================
+     */
+    /** 游戏手柄是否已连接 */
     gamepadConnected: false
   };
   var game_state_default = GameState;
@@ -5074,14 +5099,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-tetris-text.js
   var renderTetrisText = (canvas) => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN4 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "TETRIS.JS",
       x: width / 2,
       y: height * 0.1,
-      color: GREEN5,
+      color: GREEN4,
       size: 1.1
     });
   };
@@ -5089,14 +5114,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-level-text.js
   var renderLevelText = (canvas) => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN4 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "LEVEL",
       x: width / 2,
       y: height * 0.35,
-      color: GREEN5,
+      color: GREEN4,
       size: 1,
       center: true
     });
@@ -5105,14 +5130,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-level-number.js
   var renderLevelNumber = (canvas, level, y) => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN4 } = colors_default;
     const { gameBoard } = canvas;
     const { width } = gameBoard;
     render_text_default(canvas, {
       text: String(level),
       x: width / 2,
       y,
-      color: GREEN5,
+      color: GREEN4,
       size: 3,
       center: true
     });
@@ -5137,14 +5162,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-enter-continue-text.js
   var renderEnterContinueText = (canvas) => {
-    const { TEAL: TEAL5, BLACK: BLACK2 } = colors_default;
+    const { TEAL: TEAL4, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "ENTER CONTINUE",
       x: width / 2,
       y: height * 0.74,
-      color: TEAL5,
+      color: TEAL4,
       strokeColor: BLACK2,
       size: 1,
       center: true,
@@ -5303,14 +5328,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-difficulty-text.js
   var renderDifficultText = (canvas) => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN4 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "DIFFICULTY",
       x: width / 2,
       y: height * 0.35,
-      color: GREEN5,
+      color: GREEN4,
       size: 1,
       center: true
     });
@@ -5319,14 +5344,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-difficult-words.js
   var renderDifficultyWords = (canvas, difficulty, y) => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN4 } = colors_default;
     const { gameBoard } = canvas;
     const { width } = gameBoard;
     render_text_default(canvas, {
       text: difficulty.toUpperCase(),
       x: width / 2,
       y,
-      color: GREEN5,
+      color: GREEN4,
       size: 2.2,
       center: true
     });
@@ -5355,14 +5380,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-enter-start-text.js
   var renderEnterStartText = (canvas) => {
-    const { TEAL: TEAL5, BLACK: BLACK2 } = colors_default;
+    const { TEAL: TEAL4, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "ENTER START",
       x: width / 2,
       y: height * 0.74,
-      color: TEAL5,
+      color: TEAL4,
       strokeColor: BLACK2,
       size: 1.15,
       center: true,
@@ -5394,14 +5419,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-paused-text.js
   var renderPausedText = (canvas) => {
-    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
+    const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "PAUSED",
       x: width / 2,
       y: height / 1.4,
-      color: YELLOW5,
+      color: YELLOW4,
       strokeColor: BLACK2,
       size: 1.6,
       center: true,
@@ -5778,7 +5803,56 @@ var tetris = (() => {
   };
   var render_classic_block_default = renderClassicBlock;
 
-  // lib/services/ui/block/utils/lighten.js
+  // lib/utils/darken.js
+  var darken = (hex, factor) => {
+    const r = Number.parseInt(hex.slice(1, 3), 16);
+    const g = Number.parseInt(hex.slice(3, 5), 16);
+    const b = Number.parseInt(hex.slice(5, 7), 16);
+    const dr = Math.floor(r * (1 - factor));
+    const dg = Math.floor(g * (1 - factor));
+    const db = Math.floor(b * (1 - factor));
+    return `#${dr.toString(16).padStart(2, "0")}${dg.toString(16).padStart(2, "0")}${db.toString(16).padStart(2, "0")}`;
+  };
+  var darken_default = darken;
+
+  // lib/utils/hex-to-rgba.js
+  var hexToRgba = (hex, alpha) => {
+    const r = Number.parseInt(hex.slice(1, 3), 16);
+    const g = Number.parseInt(hex.slice(3, 5), 16);
+    const b = Number.parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+  var hex_to_rgba_default = hexToRgba;
+
+  // lib/services/ui/block/render-glass-block.js
+  var renderGlassBlock = (canvas, x, y, color) => {
+    const { gameBoardContext: ctx, blockSize } = canvas;
+    const gap = 1;
+    const size = blockSize - gap;
+    const px = x * blockSize + gap;
+    const py = y * blockSize + gap;
+    ctx.fillStyle = hex_to_rgba_default(color, 0.7);
+    ctx.fillRect(px, py, size, size);
+    ctx.strokeStyle = hex_to_rgba_default(color, 0.8);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(px, py, size, size);
+    ctx.clip();
+    const topGradient = ctx.createLinearGradient(px, py, px, py + size);
+    topGradient.addColorStop(0, "rgba(255, 255, 255, 0.25)");
+    topGradient.addColorStop(0.4, "rgba(255, 255, 255, 0)");
+    ctx.fillStyle = topGradient;
+    ctx.fillRect(px, py, size, size);
+    ctx.restore();
+    ctx.strokeStyle = darken_default(color, 0.45);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
+  };
+  var render_glass_block_default = renderGlassBlock;
+
+  // lib/utils/lighten.js
   var lighten = (hex, factor) => {
     const r = Number.parseInt(hex.slice(1, 3), 16);
     const g = Number.parseInt(hex.slice(3, 5), 16);
@@ -5790,17 +5864,39 @@ var tetris = (() => {
   };
   var lighten_default = lighten;
 
-  // lib/services/ui/block/utils/darken.js
-  var darken = (hex, factor) => {
-    const r = Number.parseInt(hex.slice(1, 3), 16);
-    const g = Number.parseInt(hex.slice(3, 5), 16);
-    const b = Number.parseInt(hex.slice(5, 7), 16);
-    const dr = Math.floor(r * (1 - factor));
-    const dg = Math.floor(g * (1 - factor));
-    const db = Math.floor(b * (1 - factor));
-    return `#${dr.toString(16).padStart(2, "0")}${dg.toString(16).padStart(2, "0")}${db.toString(16).padStart(2, "0")}`;
+  // lib/services/ui/block/render-gradient-block.js
+  var renderGradientBlock = (canvas, x, y, color) => {
+    const { RGBA_BLACK: RGBA_BLACK2, RGBA_WHITE: RGBA_WHITE5 } = colors_default;
+    const { gameBoardContext: ctx, blockSize } = canvas;
+    const px = x * blockSize;
+    const py = y * blockSize;
+    const w = blockSize;
+    const h = blockSize;
+    const light = lighten_default(color, 0.15);
+    const dark = darken_default(color, 0.25);
+    const grad = ctx.createLinearGradient(px, py, px, py + h);
+    grad.addColorStop(0, light);
+    grad.addColorStop(0.5, color);
+    grad.addColorStop(1, dark);
+    ctx.fillStyle = grad;
+    ctx.fillRect(px, py, w, h);
+    ctx.fillStyle = RGBA_WHITE5;
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.lineTo(px + w * 0.3, py + h * 0.5);
+    ctx.lineTo(px, py + h);
+    ctx.fill();
+    ctx.fillStyle = RGBA_BLACK2;
+    ctx.beginPath();
+    ctx.moveTo(px + w, py);
+    ctx.lineTo(px + w * 0.7, py + h * 0.5);
+    ctx.lineTo(px + w, py + h);
+    ctx.fill();
+    ctx.strokeStyle = RGBA_BLACK2;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + 0.5, py + 0.5, w - 1, h - 1);
   };
-  var darken_default = darken;
+  var render_gradient_block_default = renderGradientBlock;
 
   // lib/services/ui/block/render-inset-block.js
   var renderInsetBlock = (canvas, x, y, color) => {
@@ -5826,36 +5922,6 @@ var tetris = (() => {
     ctx.stroke();
   };
   var render_inset_block_default = renderInsetBlock;
-
-  // lib/services/ui/block/render-gradient-block.js
-  var renderGradientBlock = (canvas, x, y, color) => {
-    const { gameBoardContext: ctx, blockSize } = canvas;
-    const px = x * blockSize;
-    const py = y * blockSize;
-    const w = blockSize;
-    const h = blockSize;
-    const light = lighten_default(color, 0.15);
-    const dark = darken_default(color, 0.25);
-    const grad = ctx.createLinearGradient(px, py, px, py + h);
-    grad.addColorStop(0, light);
-    grad.addColorStop(0.5, color);
-    grad.addColorStop(1, dark);
-    ctx.fillStyle = grad;
-    ctx.fillRect(px, py, w, h);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-    ctx.beginPath();
-    ctx.moveTo(px, py);
-    ctx.lineTo(px + w * 0.3, py + h * 0.5);
-    ctx.lineTo(px, py + h);
-    ctx.fill();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.06)";
-    ctx.beginPath();
-    ctx.moveTo(px + w, py);
-    ctx.lineTo(px + w * 0.7, py + h * 0.5);
-    ctx.lineTo(px + w, py + h);
-    ctx.fill();
-  };
-  var render_gradient_block_default = renderGradientBlock;
 
   // lib/services/ui/block/render-pixel-block.js
   var layer = (options) => {
@@ -5954,6 +6020,10 @@ var tetris = (() => {
   var renderBlock = (canvas, x, y, color) => {
     const { style = "classic", pattern = "square" } = canvas;
     switch (style) {
+      case "glass": {
+        render_glass_block_default(canvas, x, y, color);
+        break;
+      }
       case "gradient": {
         render_gradient_block_default(canvas, x, y, color);
         break;
@@ -6270,15 +6340,15 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-game-text.js
   var renderGameText = (canvas) => {
-    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
+    const { RED: RED4, YELLOW: YELLOW4 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "GAME",
       x: width / 2,
       y: height / 1.8,
-      color: RED5,
-      strokeColor: YELLOW5,
+      color: RED4,
+      strokeColor: YELLOW4,
       size: 2.3,
       center: true,
       stroke: true
@@ -6288,15 +6358,15 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-over-text.js
   var renderOverText = (canvas) => {
-    const { RED: RED5, YELLOW: YELLOW5 } = colors_default;
+    const { RED: RED4, YELLOW: YELLOW4 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "OVER",
       x: width / 2,
       y: height / 1.6,
-      color: RED5,
-      strokeColor: YELLOW5,
+      color: RED4,
+      strokeColor: YELLOW4,
       size: 2.3,
       center: true,
       stroke: true
@@ -6603,7 +6673,7 @@ var tetris = (() => {
 
   // lib/services/ui/effects/render-clear-score.js
   var renderClearScore = (canvas, scoreData) => {
-    const { WHITE: WHITE3, YELLOW: YELLOW5 } = colors_default;
+    const { WHITE: WHITE3, YELLOW: YELLOW4 } = colors_default;
     const { gameBoard, blockSize } = canvas;
     const { width } = gameBoard;
     const { score, y: rowY, alpha, offsetY, combo, comboScore } = scoreData;
@@ -6617,7 +6687,7 @@ var tetris = (() => {
         text: `Combo x${combo} (+${comboScore})`,
         x,
         y: y - blockSize * 0.65,
-        color: YELLOW5,
+        color: YELLOW4,
         size: 0.75,
         center: true,
         alpha
@@ -6637,7 +6707,7 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-countdown-text.js
   var renderCountdownText = (canvas, count, scale = 1) => {
-    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
+    const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
     const { FONT_FAMILY: FONT_FAMILY2 } = game_default;
     const { gameBoard, gameBoardContext: ctx, fontSize } = canvas;
     const { width, height } = gameBoard;
@@ -6647,7 +6717,7 @@ var tetris = (() => {
     ctx.translate(width / 2, height / 2);
     ctx.scale(scale, scale);
     ctx.font = `${fontSize * 3.25}px ${FONT_FAMILY2}`;
-    ctx.fillStyle = YELLOW5;
+    ctx.fillStyle = YELLOW4;
     ctx.strokeStyle = BLACK2;
     ctx.lineWidth = 6;
     const text = String(count);
@@ -6659,14 +6729,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-get-ready-text.js
   var renderGetReadyText = (canvas) => {
-    const { GREEN: GREEN5, BLACK: BLACK2 } = colors_default;
+    const { GREEN: GREEN4, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "GET READY!",
       x: width / 2,
       y: height / 1.46,
-      color: GREEN5,
+      color: GREEN4,
       stroke: true,
       strokeColor: BLACK2,
       // 固定字号
@@ -6722,14 +6792,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-level-up-text.js
   var renderLevelUpText = (canvas) => {
-    const { GREEN: GREEN5 } = colors_default;
+    const { GREEN: GREEN4 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "LEVEL UP",
       x: width / 2,
       y: height / 2.5,
-      color: GREEN5,
+      color: GREEN4,
       size: 1.2,
       center: true
     });
@@ -6738,14 +6808,14 @@ var tetris = (() => {
 
   // lib/services/ui/text/render-congrats-text.js
   var renderCongratsText = (canvas) => {
-    const { YELLOW: YELLOW5, BLACK: BLACK2 } = colors_default;
+    const { YELLOW: YELLOW4, BLACK: BLACK2 } = colors_default;
     const { gameBoard } = canvas;
     const { width, height } = gameBoard;
     render_text_default(canvas, {
       text: "CONGRATS!",
       x: width / 2,
       y: height / 1.6,
-      color: YELLOW5,
+      color: YELLOW4,
       // 黄色填充
       stroke: true,
       // 启用描边
@@ -8644,143 +8714,110 @@ var tetris = (() => {
   var ai_difficulty_default = AIDifficulty;
 
   // lib/game/constants/color-palettes.js
-  var {
-    TEAL: TEAL4,
-    GREEN: GREEN4,
-    ORANGE: ORANGE4,
-    YELLOW: YELLOW4,
-    BLUE: BLUE4,
-    PINK: PINK3,
-    RED: RED4,
-    VIOLET: VIOLET3,
-    WARM_TEAL: WARM_TEAL2,
-    WARM_GREEN: WARM_GREEN2,
-    WARM_ORANGE: WARM_ORANGE2,
-    WARM_YELLOW: WARM_YELLOW2,
-    WARM_BLUE: WARM_BLUE2,
-    WARM_PINK: WARM_PINK2,
-    WARM_RED: WARM_RED2,
-    WARM_VIOLET: WARM_VIOLET2,
-    COOL_TEAL: COOL_TEAL2,
-    COOL_GREEN: COOL_GREEN2,
-    COOL_ORANGE: COOL_ORANGE2,
-    COOL_YELLOW: COOL_YELLOW2,
-    COOL_BLUE: COOL_BLUE2,
-    COOL_PINK: COOL_PINK2,
-    COOL_RED: COOL_RED2,
-    COOL_VIOLET: COOL_VIOLET2,
-    CANDY_TEAL: CANDY_TEAL2,
-    CANDY_GREEN: CANDY_GREEN2,
-    CANDY_ORANGE: CANDY_ORANGE2,
-    CANDY_YELLOW: CANDY_YELLOW2,
-    CANDY_BLUE: CANDY_BLUE2,
-    CANDY_PINK: CANDY_PINK2,
-    CANDY_RED: CANDY_RED2,
-    CANDY_VIOLET: CANDY_VIOLET2,
-    FOREST_TEAL: FOREST_TEAL2,
-    FOREST_GREEN: FOREST_GREEN2,
-    FOREST_ORANGE: FOREST_ORANGE2,
-    FOREST_YELLOW: FOREST_YELLOW2,
-    FOREST_BLUE: FOREST_BLUE2,
-    FOREST_PINK: FOREST_PINK2,
-    FOREST_RED: FOREST_RED2,
-    FOREST_VIOLET: FOREST_VIOLET2,
-    SUNSET_TEAL: SUNSET_TEAL2,
-    SUNSET_GREEN: SUNSET_GREEN2,
-    SUNSET_ORANGE: SUNSET_ORANGE2,
-    SUNSET_YELLOW: SUNSET_YELLOW2,
-    SUNSET_BLUE: SUNSET_BLUE2,
-    SUNSET_PINK: SUNSET_PINK2,
-    SUNSET_RED: SUNSET_RED2,
-    SUNSET_VIOLET: SUNSET_VIOLET2,
-    NEON_TEAL: NEON_TEAL2,
-    NEON_GREEN: NEON_GREEN2,
-    NEON_ORANGE: NEON_ORANGE2,
-    NEON_YELLOW: NEON_YELLOW2,
-    NEON_BLUE: NEON_BLUE2,
-    NEON_PINK: NEON_PINK2,
-    NEON_RED: NEON_RED2,
-    NEON_VIOLET: NEON_VIOLET2,
-    JEWEL_TEAL: JEWEL_TEAL2,
-    JEWEL_GREEN: JEWEL_GREEN2,
-    JEWEL_ORANGE: JEWEL_ORANGE2,
-    JEWEL_YELLOW: JEWEL_YELLOW2,
-    JEWEL_BLUE: JEWEL_BLUE2,
-    JEWEL_PINK: JEWEL_PINK2,
-    JEWEL_RED: JEWEL_RED2,
-    JEWEL_VIOLET: JEWEL_VIOLET2
-  } = colors_default;
   var PALETTES = [
-    [TEAL4, GREEN4, ORANGE4, YELLOW4, BLUE4, PINK3, RED4, VIOLET3],
+    /*
+     * ==================== 方案 0：基础经典（关卡 0-31） ====================
+     */
     [
-      WARM_TEAL2,
-      WARM_GREEN2,
-      WARM_ORANGE2,
-      WARM_YELLOW2,
-      WARM_BLUE2,
-      WARM_PINK2,
-      WARM_RED2,
-      WARM_VIOLET2
+      colors_default.TEAL,
+      colors_default.GREEN,
+      colors_default.ORANGE,
+      colors_default.YELLOW,
+      colors_default.BLUE,
+      colors_default.PINK,
+      colors_default.RED,
+      colors_default.VIOLET
     ],
+    /*
+     * ==================== 方案 1：暖色系（关卡 32-63） ====================
+     */
     [
-      COOL_TEAL2,
-      COOL_GREEN2,
-      COOL_ORANGE2,
-      COOL_YELLOW2,
-      COOL_BLUE2,
-      COOL_PINK2,
-      COOL_RED2,
-      COOL_VIOLET2
+      colors_default.WARM_TEAL,
+      colors_default.WARM_GREEN,
+      colors_default.WARM_ORANGE,
+      colors_default.WARM_YELLOW,
+      colors_default.WARM_BLUE,
+      colors_default.WARM_PINK,
+      colors_default.WARM_RED,
+      colors_default.WARM_VIOLET
     ],
+    /*
+     * ==================== 方案 2：冷色系（关卡 64-95） ====================
+     */
     [
-      CANDY_TEAL2,
-      CANDY_GREEN2,
-      CANDY_ORANGE2,
-      CANDY_YELLOW2,
-      CANDY_BLUE2,
-      CANDY_PINK2,
-      CANDY_RED2,
-      CANDY_VIOLET2
+      colors_default.COOL_TEAL,
+      colors_default.COOL_GREEN,
+      colors_default.COOL_ORANGE,
+      colors_default.COOL_YELLOW,
+      colors_default.COOL_BLUE,
+      colors_default.COOL_PINK,
+      colors_default.COOL_RED,
+      colors_default.COOL_VIOLET
     ],
+    /*
+     * ==================== 方案 3：糖果色（关卡 96-127） ====================
+     */
     [
-      FOREST_TEAL2,
-      FOREST_GREEN2,
-      FOREST_ORANGE2,
-      FOREST_YELLOW2,
-      FOREST_BLUE2,
-      FOREST_PINK2,
-      FOREST_RED2,
-      FOREST_VIOLET2
+      colors_default.CANDY_TEAL,
+      colors_default.CANDY_GREEN,
+      colors_default.CANDY_ORANGE,
+      colors_default.CANDY_YELLOW,
+      colors_default.CANDY_BLUE,
+      colors_default.CANDY_PINK,
+      colors_default.CANDY_RED,
+      colors_default.CANDY_VIOLET
     ],
+    /*
+     * ==================== 方案 4：森林色（关卡 128-159） ====================
+     */
     [
-      SUNSET_TEAL2,
-      SUNSET_GREEN2,
-      SUNSET_ORANGE2,
-      SUNSET_YELLOW2,
-      SUNSET_BLUE2,
-      SUNSET_PINK2,
-      SUNSET_RED2,
-      SUNSET_VIOLET2
+      colors_default.FOREST_TEAL,
+      colors_default.FOREST_GREEN,
+      colors_default.FOREST_ORANGE,
+      colors_default.FOREST_YELLOW,
+      colors_default.FOREST_BLUE,
+      colors_default.FOREST_PINK,
+      colors_default.FOREST_RED,
+      colors_default.FOREST_VIOLET
     ],
+    /*
+     * ==================== 方案 5：日落色（关卡 160-191） ====================
+     */
     [
-      NEON_TEAL2,
-      NEON_GREEN2,
-      NEON_ORANGE2,
-      NEON_YELLOW2,
-      NEON_BLUE2,
-      NEON_PINK2,
-      NEON_RED2,
-      NEON_VIOLET2
+      colors_default.SUNSET_TEAL,
+      colors_default.SUNSET_GREEN,
+      colors_default.SUNSET_ORANGE,
+      colors_default.SUNSET_YELLOW,
+      colors_default.SUNSET_BLUE,
+      colors_default.SUNSET_PINK,
+      colors_default.SUNSET_RED,
+      colors_default.SUNSET_VIOLET
     ],
+    /*
+     * ==================== 方案 6：霓虹色（关卡 192-223） ====================
+     */
     [
-      JEWEL_TEAL2,
-      JEWEL_GREEN2,
-      JEWEL_ORANGE2,
-      JEWEL_YELLOW2,
-      JEWEL_BLUE2,
-      JEWEL_PINK2,
-      JEWEL_RED2,
-      JEWEL_VIOLET2
+      colors_default.NEON_TEAL,
+      colors_default.NEON_GREEN,
+      colors_default.NEON_ORANGE,
+      colors_default.NEON_YELLOW,
+      colors_default.NEON_BLUE,
+      colors_default.NEON_PINK,
+      colors_default.NEON_RED,
+      colors_default.NEON_VIOLET
+    ],
+    /*
+     * ==================== 方案 7：宝石色（关卡 224-255） ====================
+     */
+    [
+      colors_default.JEWEL_TEAL,
+      colors_default.JEWEL_GREEN,
+      colors_default.JEWEL_ORANGE,
+      colors_default.JEWEL_YELLOW,
+      colors_default.JEWEL_BLUE,
+      colors_default.JEWEL_PINK,
+      colors_default.JEWEL_RED,
+      colors_default.JEWEL_VIOLET
     ]
   ];
   var color_palettes_default = PALETTES;
@@ -9075,13 +9112,8 @@ var tetris = (() => {
   var build_action_sequence_default = buildActionSequence;
 
   // lib/ai/planner/create-candidate.js
-  var createCandidate = ({
-    board,
-    currentShape,
-    targetX,
-    originalPiece,
-    rotationCount
-  }) => {
+  var createCandidate = (options) => {
+    const { board, currentShape, targetX, originalPiece, rotationCount } = options;
     const result = simulate_drop_default(board, currentShape, targetX);
     const actions = build_action_sequence_default({
       rotationCount,
@@ -11515,13 +11547,13 @@ var tetris = (() => {
     }
     const corners = [
       { x: cx, y: cy },
-      // A: 左上
+      // A — 左上
       { x: cx + 2, y: cy },
-      // B: 右上
+      // B — 右上
       { x: cx + 2, y: cy + 2 },
-      // C: 右下
+      // C — 右下
       { x: cx, y: cy + 2 }
-      // D: 左下
+      // D — 左下
     ];
     let filledCorners = 0;
     for (const { x: nx, y: ny } of corners) {
@@ -11687,6 +11719,12 @@ var tetris = (() => {
       Store.setState({
         curr: newCurr,
         hold: newHold,
+        /*
+         * ==================== 居中放置新方块 ====================
+         *
+         * X 坐标 = 棋盘宽度的一半 - 方块宽度的一半
+         * Y 坐标 = 0（从顶部开始）
+         */
         cx: Math.floor(cols / 2) - Math.floor(newCurr.shape[0].length / 2),
         cy: 0
       });

@@ -1,7 +1,8 @@
 /**
- * getShapeByRotation 单元测试 (Jest)
+ * GetShapeByRotation 单元测试 (Jest)
  *
  * 测试覆盖：
+ *
  * 1. 所有方块类型在所有旋转状态下的矩阵尺寸正确
  * 2. 每个矩阵中填充单元格数量正确
  * 3. O 块四个状态完全一致

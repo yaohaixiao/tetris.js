@@ -20,7 +20,9 @@ import getValidXPositions from '@/lib/ai/utils/get-valid-x-positions.js';
 import createCandidate from '@/lib/ai/planner/create-candidate.js';
 
 describe('generateForPiece', () => {
-  const board = Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0));
+  const board = Array.from({ length: 20 }, () =>
+    Array.from({ length: 10 }, () => 0),
+  );
   const shape = [
     [0, 1, 0],
     [1, 1, 1],

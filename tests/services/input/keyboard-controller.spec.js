@@ -18,7 +18,7 @@ describe('KeyboardController', () => {
 
     mockGame = {
       id: 'test-game-uuid',
-      Store: mockStore
+      Store: mockStore,
     };
 
     keyboard = new KeyboardController({

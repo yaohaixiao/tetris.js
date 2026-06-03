@@ -145,10 +145,13 @@ describe('calculateLevel', () => {
       [136, 9, 26],
       [162, 10, 28],
       [910, 27, 60],
-    ])('累计 %i 行 → 等级 %i，步长 %i', (totalLines, expectedLevel, expectedSteps) => {
-      const result = calculateLevel(totalLines, MAX_LEVEL);
-      expect(result.level).toBe(expectedLevel);
-      expect(result.levelUpSteps).toBe(expectedSteps);
-    });
+    ])(
+      '累计 %i 行 → 等级 %i，步长 %i',
+      (totalLines, expectedLevel, expectedSteps) => {
+        const result = calculateLevel(totalLines, MAX_LEVEL);
+        expect(result.level).toBe(expectedLevel);
+        expect(result.levelUpSteps).toBe(expectedSteps);
+      },
+    );
   });
 });

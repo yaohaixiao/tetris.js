@@ -207,10 +207,13 @@ describe('ClearLinesAnimation', () => {
       const arg = spy.mock.calls[1][0];
       arg[0].fn();
 
-      expect(emitSpy).toHaveBeenCalledWith('replay:test-uuid:stop:clear:lines', {
-        isLevelUp: true,
-        level: 6,
-      });
+      expect(emitSpy).toHaveBeenCalledWith(
+        'replay:test-uuid:stop:clear:lines',
+        {
+          isLevelUp: true,
+          level: 6,
+        },
+      );
     });
 
     it('第 2 个回调：UPDATE_STATE', () => {

@@ -189,7 +189,9 @@ describe('advanceSnapshot', () => {
 
     it('bag 只有一个方块时 next 应该为 null', () => {
       const snapshot = createSnapshot();
-      snapshot.bag = [{ shape: O_SHAPE, type: 'O', rotation: 0, colorIndex: 2 }];
+      snapshot.bag = [
+        { shape: O_SHAPE, type: 'O', rotation: 0, colorIndex: 2 },
+      ];
       const move = createMove();
 
       const result = advanceSnapshot(snapshot, move);
