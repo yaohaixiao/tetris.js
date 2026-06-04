@@ -14,10 +14,10 @@ var tetris = (() => {
        * - 'glossy'
        * - 'gradient'
        * - 'inset'
-       * - 'pixel' |
+       * - 'pixel'
        * - 'shaded'
        */
-      style: "gradient",
+      style: "glossy",
       /**
        * 方块图案：
        *
@@ -9708,7 +9708,10 @@ var tetris = (() => {
      *   undefined
      */
     think(state, difficulty) {
+      const { Store } = this;
       const { lookahead, weights, beam } = difficulty;
+      const difficultyLevel = Store.getDifficulty();
+      const algorithm = difficultyLevel === "expert" ? "mcts" : "selfPlay";
       if (this.worker) {
         this.workerBusy = true;
         this.worker.postMessage({
@@ -9716,7 +9719,8 @@ var tetris = (() => {
           state,
           weights,
           depth: lookahead,
-          beam
+          beam,
+          algorithm
         });
       } else {
         const snapshot = create_snapshot_default(state);
