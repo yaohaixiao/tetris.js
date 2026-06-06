@@ -63,10 +63,31 @@ body {
 }
 /* ====== 容器样式 ====== */
 .tetris-container {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
+}
+.tetris-container[data-mode="versus"] {
+  flex-direction: row;
+  gap: 14vw;
+}
+.tetris-container[data-mode="versus"]:before {
+  content: ':';
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2vw;
+  font-size: 2vw;
+  margin: 0;
+  text-indent: 0;
+  text-align: center;
+  user-select: none;
+  overflow: hidden;
 }
 .tetris-screen {
   display: flex;
@@ -77,6 +98,26 @@ body {
   box-sizing: border-box;
   align-items: flex-start;
   justify-content: center;
+}
+.tetris-battle-score {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  margin: -3vw 0 0;
+  transform: translateX(-6vw);
+  width: 6vw;
+  height: 6vw;
+  line-height: 6vw;
+  text-align: center;
+  font-size: 2.4vw;
+  color: #fff;
+  font-family: 'Press Start 2P', Arial, Helvetica, sans-serif;
+  user-select: none;
+  overflow: visible;
+}
+.tetris-battle-score:last-child {
+  transform: translateX(0);
 }
 /* ====== 游戏界面：主体画布区域样式 ====== */
 .tetris-screen-main {

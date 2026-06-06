@@ -2,10 +2,33 @@
 
 /* ====== 容器样式 ====== */
 .tetris-container {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
+
+  &[data-mode="versus"]{
+    flex-direction: row;
+    gap: 14vw;
+
+    &:before{
+      content: ':';
+      position:absolute;
+      z-index:3;
+      top:50%;
+      left:50%;
+      transform: translate(-50%, -50%);
+      width: 2vw;
+      font-size: 2vw;
+      margin:0;
+      text-indent: 0;
+      text-align:center;
+      user-select: none;
+      overflow: hidden;
+    }
+  }
 }
 
 .tetris-screen {

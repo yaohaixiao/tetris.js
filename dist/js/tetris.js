@@ -1,6 +1,19 @@
 var tetris = (() => {
   // lib/configuration.js
   var Configuration = {
+    /**
+     * ## 游戏模式
+     *
+     * - 'single'：单人模式；
+     * - 'versus'：对战模式；
+     */
+    Mode: "versus",
+    /**
+     * ## 对战玩家列表：
+     *
+     * - 人机对战：['human', 'ai']； — 双人对战：['human', 'human']； — AI 对战：['ai', 'ai']；
+     */
+    Players: ["human", "ai"],
     /*
      * ==================== 方块渲染配置 ====================
      */
@@ -3310,6 +3323,9 @@ var tetris = (() => {
      * @returns {void}
      */
     playBGM(level) {
+      if (this.bgmSchedulerId !== 0) {
+        return;
+      }
       play_bgm_default(this, level);
     }
     /**
@@ -3855,7 +3871,8 @@ var tetris = (() => {
         board: Store.getBeginningBoard(),
         score: 0,
         lines: 0,
-        level: 1,
+        // 对战模式，等级保留，单人模式，重置等级为 1
+        level: Game2.isVersus() ? Store.getLevel() : 1,
         next: null,
         hold: null
       });
@@ -4927,12 +4944,12 @@ var tetris = (() => {
       this.initialize(options);
     }
     initialize(options) {
-      const { board, next, hold: hold2 } = options;
-      this.gameBoard = document.querySelector(`#${board}`);
+      const { board, next, hold: hold2, name, index } = options;
+      this.gameBoard = document.querySelector(`#${name}-${index}-${board}`);
       this.gameBoardContext = this.gameBoard.getContext("2d");
-      this.nextPiece = document.querySelector(`#${next}`);
+      this.nextPiece = document.querySelector(`#${name}-${index}-${next}`);
       this.nextPieceContext = this.nextPiece.getContext("2d");
-      this.holdPiece = document.querySelector(`#${hold2}`);
+      this.holdPiece = document.querySelector(`#${name}-${index}-${hold2}`);
       this.holdPieceContext = this.holdPiece.getContext("2d");
       this.fontSize = 0;
       this.blockSize = 0;
@@ -4955,20 +4972,22 @@ var tetris = (() => {
 
   // lib/services/ui/hud/hud-elements.js
   var HudElements = (options) => {
-    const { controller, score, lines, level, combo, highScore } = options;
+    const { Hud, Player } = options;
+    const { controller, score, lines, level, combo, highScore } = Hud;
+    const { name, index } = Player;
     return {
       /** @type {HTMLElement | null} 分数显示元素 */
-      controller: document.querySelector(`#${controller}`),
+      controller: document.querySelector(`#${name}-${index}-${controller}`),
       /** @type {HTMLElement | null} 分数显示元素 */
-      score: document.querySelector(`#${score}`),
+      score: document.querySelector(`#${name}-${index}-${score}`),
       /** @type {HTMLElement | null} 行数显示元素 */
-      lines: document.querySelector(`#${lines}`),
+      lines: document.querySelector(`#${name}-${index}-${lines}`),
       /** @type {HTMLElement | null} 等级显示元素 */
-      level: document.querySelector(`#${level}`),
+      level: document.querySelector(`#${name}-${index}-${level}`),
       /** @type {HTMLElement | null} 连续消减显示元素 */
-      combo: document.querySelector(`#${combo}`),
+      combo: document.querySelector(`#${name}-${index}-${combo}`),
       /** @type {HTMLElement | null} 最高分显示元素 */
-      highScore: document.querySelector(`#${highScore}`)
+      highScore: document.querySelector(`#${name}-${index}-${highScore}`)
     };
   };
   var hud_elements_default = HudElements;
@@ -4998,13 +5017,7 @@ var tetris = (() => {
     /**
      * ## 创建 HUD 实例
      *
-     * @param {object} options - HUD 各 DOM 元素的配置信息
-     * @param {string} options.score - 分数显示元素名称
-     * @param {string} options.highScore - 最高分显示元素名称
-     * @param {string} options.lines - 消除行数显示元素名称
-     * @param {string} options.level - 等级显示元素名称
-     * @param {string} options.combo - Combo显示元素名称
-     * @param {string} options.controller - 控制者标识显示元素名称
+     * @param {object} options - HUD 各 DOM 元素和 Player 信息
      */
     constructor(options) {
       this.elements = hud_elements_default(options);
@@ -5844,9 +5857,10 @@ var tetris = (() => {
 
   // lib/utils/darken.js
   var darken = (hex, factor) => {
-    const r = Number.parseInt(hex.slice(1, 3), 16);
-    const g = Number.parseInt(hex.slice(3, 5), 16);
-    const b = Number.parseInt(hex.slice(5, 7), 16);
+    const fullHex = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+    const r = Number.parseInt(fullHex.slice(1, 3), 16);
+    const g = Number.parseInt(fullHex.slice(3, 5), 16);
+    const b = Number.parseInt(fullHex.slice(5, 7), 16);
     const dr = Math.floor(r * (1 - factor));
     const dg = Math.floor(g * (1 - factor));
     const db = Math.floor(b * (1 - factor));
@@ -5931,9 +5945,10 @@ var tetris = (() => {
 
   // lib/utils/lighten.js
   var lighten = (hex, factor) => {
-    const r = Number.parseInt(hex.slice(1, 3), 16);
-    const g = Number.parseInt(hex.slice(3, 5), 16);
-    const b = Number.parseInt(hex.slice(5, 7), 16);
+    const fullHex = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+    const r = Number.parseInt(fullHex.slice(1, 3), 16);
+    const g = Number.parseInt(fullHex.slice(3, 5), 16);
+    const b = Number.parseInt(fullHex.slice(5, 7), 16);
     const lr = Math.min(255, Math.floor(r + (255 - r) * factor));
     const lg = Math.min(255, Math.floor(g + (255 - g) * factor));
     const lb = Math.min(255, Math.floor(b + (255 - b) * factor));
@@ -6985,13 +7000,14 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize() {
-      const { Game: Game2, Elements, Block } = this;
+      const { Game: Game2, Elements, Block, Player } = this;
       const { Hud, Canvas } = Elements;
-      this.Hud = new hud_manager_default(Hud);
+      this.Hud = new hud_manager_default({ Hud, Player });
       this.Canvas = new canvas_manager_default({
         uuid: Game2.id,
         ...Canvas,
-        ...Block
+        ...Block,
+        ...Player
       });
     }
     // ==================== 状态更新方法 ====================
@@ -7925,11 +7941,11 @@ var tetris = (() => {
      * @returns {boolean} 按键被屏蔽返回 true，否则返回 false
      */
     _isBlocked(key) {
-      const { Store } = this;
+      const { Store, Game: Game2 } = this;
       const action = resolveKeyboardAction(key);
       const mode = Store.getMode();
       const controller = Store.getController();
-      return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action);
+      return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && key === "r";
     }
     /**
      * ## resize 事件处理
@@ -7955,11 +7971,18 @@ var tetris = (() => {
      * @returns {KeyboardController} - 返回 KeyboardController，支持链式方法调用
      */
     _onKeydown = (e) => {
-      const { Game: Game2 } = this;
+      const { Game: Game2, Store, Player } = this;
       const key = e.key?.toLowerCase();
-      if (!key) return this;
+      if (!key) {
+        return this;
+      }
       const action = resolveKeyboardAction(key);
-      if (this._isBlocked(key)) return this;
+      if (this._isBlocked(key) || !action) {
+        return this;
+      }
+      if (Store.getMode() === "playing" && Player.name === "ai") {
+        return this;
+      }
       if (key === "arrowleft") {
         this.dasState.direction = -1;
         this.dasState.dasTimer = 0;
@@ -8115,6 +8138,9 @@ var tetris = (() => {
      */
     constructor(options) {
       super(options);
+      this.initialize();
+    }
+    initialize() {
       this.activeGamepadIndex = null;
       this.DEAD_ZONE = 0.15;
       this.DPAD_THRESHOLD = 0.5;
@@ -8150,7 +8176,11 @@ var tetris = (() => {
      * @returns {GamepadController} - 返回 GamepadController 对象，可链式调用
      */
     update(now) {
+      const { Store, Player } = this;
       this._refreshGamepadState();
+      if (Store.getMode() === "playing" && Player.name === "ai") {
+        return this;
+      }
       if (!this.activeGamepad) {
         return this;
       }
@@ -8346,7 +8376,7 @@ var tetris = (() => {
       const { Game: Game2, Store } = this;
       const controller = Store.getController();
       for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
-        const isBlocked = !action || (mode === "replay" || mode === "game-over") && btnName !== "START" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action);
+        const isBlocked = !action || (mode === "replay" || mode === "game-over") && btnName !== "START" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && btnName === "X";
         const isDPad = btnName.startsWith("DPAD_");
         if (!this._isPressed(btnName)) {
           continue;
@@ -9972,19 +10002,20 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize() {
-      const { Controls } = this;
+      const { Controls, Player } = this;
+      const { name, index } = Player;
       this.level = 0;
-      this.$back = document.querySelector(`#${Controls.back}`);
-      this.$hold = document.querySelector(`#${Controls.hold}`);
-      this.$start = document.querySelector(`#${Controls.start}`);
-      this.$up = document.querySelector(`#${Controls.up}`);
-      this.$down = document.querySelector(`#${Controls.down}`);
-      this.$left = document.querySelector(`#${Controls.left}`);
-      this.$right = document.querySelector(`#${Controls.right}`);
-      this.$a = document.querySelector(`#${Controls.a}`);
-      this.$b = document.querySelector(`#${Controls.b}`);
-      this.$x = document.querySelector(`#${Controls.x}`);
-      this.$y = document.querySelector(`#${Controls.y}`);
+      this.$back = document.querySelector(`#${name}-${index}-${Controls.back}`);
+      this.$hold = document.querySelector(`#${name}-${index}-${Controls.hold}`);
+      this.$start = document.querySelector(`#${name}-${index}-${Controls.start}`);
+      this.$up = document.querySelector(`#${name}-${index}-${Controls.up}`);
+      this.$down = document.querySelector(`#${name}-${index}-${Controls.down}`);
+      this.$left = document.querySelector(`#${name}-${index}-${Controls.left}`);
+      this.$right = document.querySelector(`#${name}-${index}-${Controls.right}`);
+      this.$a = document.querySelector(`#${name}-${index}-${Controls.a}`);
+      this.$b = document.querySelector(`#${name}-${index}-${Controls.b}`);
+      this.$x = document.querySelector(`#${name}-${index}-${Controls.x}`);
+      this.$y = document.querySelector(`#${name}-${index}-${Controls.y}`);
       this.addEventsListeners();
     }
     /**
@@ -10278,9 +10309,11 @@ var tetris = (() => {
       }
       const AE = AudioEvents();
       const GE = GameEvents(Game2.id);
-      this.emit(AE.STOP_BGM);
-      this.emit(AE.PLAY_SOUND, { sound: "LEVEL_UP" });
-      this.emit(GE.START_LEVEL_UP, { level });
+      if (!Game2.isVersus()) {
+        this.emit(AE.STOP_BGM);
+        this.emit(AE.PLAY_SOUND, { sound: "LEVEL_UP" });
+        this.emit(GE.START_LEVEL_UP, { level });
+      }
     };
   };
   var replay_router_default = ReplayRouter;
@@ -10909,7 +10942,7 @@ var tetris = (() => {
      * @returns {void}
      */
     dispose() {
-      const { Scheduler: Scheduler2, Game: Game2 } = this;
+      const { Scheduler: Scheduler2, Game: Game2, lines } = this;
       for (const id of this._schedulerIds) {
         Scheduler2.cancel(id);
       }
@@ -10940,6 +10973,11 @@ var tetris = (() => {
           fn: () => {
             this.emit(GE.UPDATE_HUD);
           }
+        },
+        {
+          fn: () => {
+            this.emit("battle:send:garbage", { from: Game2, lines });
+          }
         }
       ]);
     }
@@ -10951,9 +10989,9 @@ var tetris = (() => {
      * @returns {void}
      */
     render() {
-      const { Game: Game2 } = this;
+      const { Game: Game2, lines } = this;
       const UE = UIEvents(Game2.id);
-      this.emit(UE.RENDER_CLEAR_LINES, { state: { lines: this.lines } });
+      this.emit(UE.RENDER_CLEAR_LINES, { state: { lines } });
     }
   };
   var clear_lines_animation_default = ClearLinesAnimation;
@@ -11314,7 +11352,13 @@ var tetris = (() => {
     runtime.emit(RE.STOP_RECORD);
     runtime.emit(AE.STOP_BGM);
     runtime.emit(AE.PLAY_SOUND, { sound: "GAME_OVER" });
-    runtime.emit(RE.GAME_OVER);
+    if (runtime.isVersus()) {
+      runtime.emit("battle:update:winner", {
+        loser: runtime
+      });
+    } else {
+      runtime.emit(RE.GAME_OVER);
+    }
   };
   var over_default = over;
 
@@ -11413,7 +11457,9 @@ var tetris = (() => {
     }
     runtime.emit(UE.UPDATE_MODE, { mode: "paused" });
     Store.setMode("paused");
-    runtime.emit(AE.STOP_BGM);
+    if (!runtime.isVersus()) {
+      runtime.emit(AE.STOP_BGM);
+    }
     runtime.emit(AE.PLAY_SOUND, { sound: "PAUSED" });
     runtime.emit(GE.START_PAUSED);
   };
@@ -11440,7 +11486,8 @@ var tetris = (() => {
 
   // lib/game/core/toggle-pause.js
   var togglePause = (runtime) => {
-    const mode = runtime.Store.getMode();
+    const { Store } = runtime;
+    const mode = Store.getMode();
     if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
       return;
     }
@@ -11461,14 +11508,17 @@ var tetris = (() => {
     const CE = CommandEvents(id);
     const RE = ReplayEvents(id);
     const UE = UIEvents(id);
+    const difficulty = runtime.isVersus() ? Store.getDifficulty() : "easy";
     let level = Store.getLevel();
     runtime.emit(AUE.STOP_BGM);
     runtime.emit(ANE.CLEAR);
     runtime.emit(CE.CLEAR);
     Store.resetBoard();
     if (mode === "main-menu") {
-      Store.setDifficulty("easy");
-      level = 1;
+      Store.setDifficulty(difficulty);
+      if (!runtime.isVersus()) {
+        level = 1;
+      }
       runtime.emit(AUE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
     }
     set_beginning_state_default(runtime, mode, level);
@@ -11477,9 +11527,13 @@ var tetris = (() => {
     runtime.emit(UE.CLEAR_NEXT_PIECE);
     runtime.emit(UE.CLEAR_HOLD_PIECE);
     runtime.emit(AIE.STOP);
-    Store.setController("human");
-    runtime.emit(UE.UPDATE_CONTROLLER, { controller: "human" });
+    const controller = runtime.isVersus() ? Store.getController() : "human";
+    Store.setController(controller);
+    runtime.emit(UE.UPDATE_CONTROLLER, { controller });
     runtime.emit(RE.RESET);
+    if (controller === "ai") {
+      runtime.emit(AIE.START);
+    }
   };
   var reset_default = reset;
 
@@ -12036,31 +12090,34 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize() {
-      const { Elements, Block, Scheduler: Scheduler2 } = this;
+      const { Elements, Block, Scheduler: Scheduler2, Player } = this;
       const { Controls } = Elements;
       const Store = new game_store_default({
         ...Elements.Canvas,
+        Player,
         GameState: game_state_default
       });
       this.id = crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
       this.effect = null;
       this.Store = Store;
-      this.Animations = new animation_system_default({ Game: this });
-      this.CommandQueue = new command_queue_default({ Game: this });
+      this.Animations = new animation_system_default({ Game: this, Player });
+      this.CommandQueue = new command_queue_default({ Game: this, Player });
       this.AI = new ai_controller_default({
         Game: this,
         Store,
         Scheduler: Scheduler2,
-        Animations: this.Animations
+        Animations: this.Animations,
+        Player
       });
-      this.UI = new ui_default({ Game: this, Store, Elements, Block });
-      this.Keyboard = new keyboard_controller_default({ Game: this, Store });
-      this.Gamepad = new gamepad_controller_default({ Game: this, Store });
-      this.Touch = new touch_controller_default({ Game: this, Store, Controls });
+      this.UI = new ui_default({ Game: this, Store, Elements, Block, Player });
+      this.Keyboard = new keyboard_controller_default({ Game: this, Store, Player });
+      this.Gamepad = new gamepad_controller_default({ Game: this, Store, Player });
+      this.Touch = new touch_controller_default({ Game: this, Store, Controls, Player });
       this.Replay = new replay_controller_default({
         Game: this,
         Store,
-        Scheduler: Scheduler2
+        Scheduler: Scheduler2,
+        Player
       });
       this.Router = new game_router_default({
         Animations: this.Animations,
@@ -12069,8 +12126,17 @@ var tetris = (() => {
         Game: this,
         Replay: this.Replay,
         Store,
-        UI: this.UI
+        UI: this.UI,
+        Player
       });
+      if (this.isVersus() && Player.name === "ai") {
+        this.Store.setController("ai");
+        this.AI.start();
+      }
+    }
+    isVersus() {
+      const { Mode } = this;
+      return Mode === "versus";
     }
     // ==================== 场景控制 ====================
     /**
@@ -12422,7 +12488,7 @@ var tetris = (() => {
      * @returns {void}
      */
     removeEventListeners() {
-      this.AI.removerEventListeners();
+      this.AI.removeEventListeners();
       this.Keyboard.removeEventListeners();
       this.Gamepad.removeEventListeners();
       this.Touch.removeEventListeners();
@@ -12449,6 +12515,216 @@ var tetris = (() => {
     }
   };
   var game_default2 = Game;
+
+  // lib/battle/versus-state.js
+  var VersusState = class extends core_default {
+    constructor(options) {
+      super(options);
+      this.initialize();
+    }
+    initialize() {
+      this._initialize();
+    }
+    _initialize() {
+      const { games } = this;
+      this.running = false;
+      this.winner = null;
+      this.scores = {};
+      for (const game of games) {
+        const { Player } = game;
+        const playerId = `${Player.name}-${Player.index}`;
+        this.scores[playerId] = 0;
+      }
+    }
+    setRunning(running) {
+      this.running = running;
+    }
+    isRunning() {
+      return this.running;
+    }
+    setWinner(winner) {
+      this.winner = winner;
+    }
+    getWinner() {
+      return this.winner;
+    }
+    getScore(id) {
+      return this.scores[id];
+    }
+    updateScores(options) {
+      const { winner, loser } = options;
+      const winnerPlayer = winner.Player;
+      const winnerId = `${winnerPlayer.name}-${winnerPlayer.index}`;
+      let winnerScore = this.scores[winnerId];
+      const loserPlayer = loser.Player;
+      const loserId = `${loserPlayer.name}-${loserPlayer.index}`;
+      let loserScore = this.scores[loserId];
+      winnerScore += 1;
+      if (loserScore <= 0) {
+        loserScore = 0;
+      }
+      this.scores[winnerId] = winnerScore;
+      this.scores[loserId] = loserScore;
+    }
+    reset() {
+      this._initialize();
+    }
+  };
+  var versus_state_default = VersusState;
+
+  // lib/battle/battle-hud.js
+  var BattleHUD = class extends core_default {
+    constructor(options) {
+      super(options);
+      this.initialize();
+    }
+    initialize() {
+      const { games } = this;
+      this.elements = {};
+      for (const game of games) {
+        const { Player } = game;
+        const id = `${Player.name}-${Player.index}`;
+        const $score = document.querySelector(`#${id}-tetris-battle-score`);
+        this.elements[id] = $score || null;
+      }
+    }
+    getEl(id) {
+      return this.elements[id];
+    }
+    updateScores(winner, loser) {
+      const { state } = this;
+      const winnerPlayer = winner.Player;
+      const winnerId = `${winnerPlayer.name}-${winnerPlayer.index}`;
+      const $winner = this.getEl(winnerId);
+      const winnerScore = state.getScore(winnerId);
+      const loserPlayer = loser.Player;
+      const loserId = `${loserPlayer.name}-${loserPlayer.index}`;
+      const $loser = this.getEl(loserId);
+      const loserScore = state.getScore(loserId);
+      if ($winner) {
+        $winner.textContent = winnerScore;
+      }
+      if ($loser) {
+        $loser.textContent = loserScore;
+      }
+    }
+  };
+  var battle_hud_default = BattleHUD;
+
+  // lib/battle/garbage-system.js
+  var GARBAGE_MAP = {
+    1: 0,
+    2: 1,
+    3: 2,
+    4: 3,
+    5: 4
+  };
+  var DIFFICULTY_HOLES = {
+    easy: 1,
+    normal: 2,
+    hard: 3,
+    expert: 4
+  };
+  var calculateGarbage = (lines) => GARBAGE_MAP[lines] || 0;
+  var applyGarbage = (board, amount, difficulty) => {
+    if (amount <= 0) {
+      return board;
+    }
+    const width = board[0].length;
+    const holeCount = DIFFICULTY_HOLES[difficulty] || 1;
+    const next = [...board];
+    next.splice(0, amount);
+    for (let i = 0; i < amount; i += 1) {
+      const row = Array.from({ length: width }).fill(lighten_default(colors_default.BLACK, 0.6));
+      const holes = /* @__PURE__ */ new Set();
+      while (holes.size < holeCount) {
+        holes.add(Math.floor(Math.random() * width));
+      }
+      for (const h of holes) {
+        row[h] = 0;
+      }
+      next.push(row);
+    }
+    return next;
+  };
+
+  // lib/battle/battle-controller.js
+  var BattleController = class extends core_default {
+    constructor(options) {
+      super(options);
+      this.initialize();
+    }
+    initialize() {
+      const { games } = this;
+      const state = new versus_state_default({ games });
+      this.state = state;
+      this.hud = new battle_hud_default({ games, state });
+      this.start();
+    }
+    start() {
+      if (this.state.isRunning()) {
+        return;
+      }
+      this.state.setRunning(true);
+    }
+    stop() {
+      if (!this.state.isRunning()) {
+        return;
+      }
+      this.state.setRunning(false);
+    }
+    update(loser) {
+      const { games } = this;
+      const winner = this.getOpponent(loser);
+      this.stop();
+      this.state.setWinner(winner);
+      this.state.updateScores({ winner, loser });
+      this.hud.updateScores(winner, loser);
+      for (const game of games) {
+        const events = GameEvents(game.id);
+        game.emit(events.RESTART);
+      }
+      this.start();
+    }
+    getOpponent(yourself) {
+      const { games } = this;
+      return games.find((game) => game.id !== yourself.id);
+    }
+    sendGarbage(payload) {
+      const { to, amount } = payload;
+      const { Store } = to;
+      const { board, difficulty } = Store.getState();
+      const next = applyGarbage(board, amount, difficulty);
+      Store.setState({ board: next });
+    }
+    subscribe() {
+      this.on("battle:send:garbage", this._onBattleSendGarbage);
+      this.on("battle:update:winner", this._onBattleUpdateWinner);
+    }
+    unsubscribe() {
+      this.off("battle:send:garbage", this._onBattleSendGarbage);
+      this.off("battle:update:winner", this._onBattleUpdateWinner);
+    }
+    /**
+     * 玩家消行
+     *
+     * @param {object} payload - 参数对象
+     */
+    _onBattleSendGarbage = (payload) => {
+      const { from, lines } = payload;
+      const to = this.getOpponent(from);
+      const garbage = calculateGarbage(lines.length);
+      if (garbage <= 0) {
+        return;
+      }
+      this.sendGarbage({ to, amount: garbage });
+    };
+    _onBattleUpdateWinner = (payload) => {
+      const { loser } = payload;
+      this.update(loser);
+    };
+  };
+  var battle_controller_default = BattleController;
 
   // lib/core/command/command.js
   var Command = class extends core_default {
@@ -13170,10 +13446,20 @@ var tetris = (() => {
      *
      * 管理游戏状态、输入、UI、回放等所有子系统。
      *
-     * @default null
-     * @type {Game | null}
+     * @default [ ]
+     * @type {Game[]}
      */
-    Game: null,
+    Games: [],
+    /**
+     * ## 游戏对战实例
+     *
+     * 管理游戏状态、输入、UI、回放等所有子系统。
+     *
+     * @default [ ]
+     * @type {object}
+     */
+    Battle: [],
+    isVersus: () => Engine.Configuration.Mode === "versus",
     /**
      * ## 初始化引擎
      *
@@ -13185,6 +13471,7 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize: (options) => {
+      const { Players } = options;
       Engine.Scheduler = new scheduler_default();
       const normalizedOptions = {
         ...options,
@@ -13192,7 +13479,22 @@ var tetris = (() => {
         isAIPlayer: true
       };
       Engine.Audio = new audio_default(normalizedOptions);
-      Engine.Game = new game_default2(normalizedOptions);
+      for (const [index, player] of Players.entries()) {
+        Engine.Games.push(
+          new game_default2({
+            Player: {
+              index,
+              name: player
+            },
+            ...normalizedOptions
+          })
+        );
+      }
+      if (Engine.isVersus()) {
+        Engine.Battle = new battle_controller_default({
+          games: Engine.Games
+        });
+      }
     },
     /**
      * ## 初始化游戏
@@ -13214,18 +13516,19 @@ var tetris = (() => {
      */
     launch: () => {
       Engine.initialize(Engine.Configuration);
-      const { Game: Game2 } = Engine;
-      const { Store, UI: UI2 } = Game2;
-      Store.resetBoard();
-      Game2.loadHighScore();
-      Game2.setBeginningState("main-menu");
-      UI2.updateMode("main-menu");
-      UI2.resize();
-      UI2.updateHud();
-      UI2.updateController(Store.getController());
-      UI2.lazyRender();
+      for (const Game2 of Engine.Games) {
+        const { Store, UI: UI2 } = Game2;
+        Store.resetBoard();
+        Game2.loadHighScore();
+        Game2.setBeginningState("main-menu");
+        UI2.updateMode("main-menu");
+        UI2.resize();
+        UI2.updateHud();
+        UI2.updateController(Store.getController());
+        UI2.lazyRender();
+        Game2.addEventListeners();
+      }
       Engine.subscribe();
-      Game2.addEventListeners();
       Engine.start();
     },
     /**
@@ -13273,31 +13576,33 @@ var tetris = (() => {
         Engine.lastTickTime = timestamp;
         Engine.fixedAccumulator = timestamp;
       }
-      const { Game: Game2, Scheduler: Scheduler2 } = Engine;
-      const { UI: UI2, Replay, Gamepad, Keyboard, Animations, CommandQueue: CommandQueue2 } = Game2;
-      const isBlocked = Animations.hasBlocking();
+      const { Games, Scheduler: Scheduler2 } = Engine;
       const stepDelta = timestamp - Engine.fixedAccumulator;
       Engine.lastTickTime = timestamp;
       Scheduler2.tick(timestamp);
-      Replay.syncPlayElapsed({
-        timestamp: Engine.lastTickTime,
-        isBlocked
-      });
-      Replay.update({
-        speed: Game2.getSpeed(),
-        timestamp: Engine.lastTickTime
-      });
-      Gamepad.update(timestamp);
-      Keyboard.update();
-      CommandQueue2.flush();
-      if ((!Engine.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
-        Game2.tick(isBlocked);
-        Engine.fixedAccumulator = timestamp;
+      for (const Game2 of Games) {
+        const { UI: UI2, Replay, Gamepad, Keyboard, Animations, CommandQueue: CommandQueue2 } = Game2;
+        const isBlocked = Animations.hasBlocking();
+        Replay.syncPlayElapsed({
+          timestamp: Engine.lastTickTime,
+          isBlocked
+        });
+        Replay.update({
+          speed: Game2.getSpeed(),
+          timestamp: Engine.lastTickTime
+        });
+        Gamepad.update(timestamp);
+        Keyboard.update();
+        CommandQueue2.flush();
+        if ((!Engine.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
+          Game2.tick(isBlocked);
+          Engine.fixedAccumulator = timestamp;
+        }
+        Animations.flush();
+        UI2.tickHud();
+        UI2.render();
+        Animations.render();
       }
-      Animations.flush();
-      UI2.tickHud();
-      UI2.render();
-      Animations.render();
       Engine.rafId = requestAnimationFrame(Engine.tick);
     },
     /**
@@ -13308,10 +13613,15 @@ var tetris = (() => {
      * @returns {void}
      */
     subscribe: () => {
-      const { Game: Game2, Audio: Audio2 } = Engine;
+      const { Games, Audio: Audio2, Battle } = Engine;
       Engine._subscribe();
       Audio2?.subscribe?.();
-      Game2?.subscribe?.();
+      for (const Game2 of Games) {
+        Game2?.subscribe?.();
+      }
+      if (Engine.isVersus()) {
+        Battle?.subscribe?.();
+      }
     },
     /**
      * ## 取消订阅各模块事件
@@ -13321,10 +13631,15 @@ var tetris = (() => {
      * @returns {void}
      */
     unsubscribe: () => {
-      const { Game: Game2, Audio: Audio2 } = Engine;
+      const { Games, Audio: Audio2, Battle } = Engine;
       Engine._unsubscribe();
       Audio2?.unsubscribe?.();
-      Game2?.unsubscribe?.();
+      for (const Game2 of Games) {
+        Game2?.unsubscribe?.();
+      }
+      if (Engine.isVersus()) {
+        Battle?.unsubscribe?.();
+      }
     },
     /**
      * ## Engine 内部事件订阅
@@ -13335,9 +13650,11 @@ var tetris = (() => {
      * @returns {void}
      */
     _subscribe: () => {
-      const { Game: Game2 } = Engine;
-      Game2.on(`dispatch:command`, Engine._onDispatchCommand);
-      Game2.on(`dispatch:input`, Engine._onDispatchInput);
+      const { Games } = Engine;
+      for (const Game2 of Games) {
+        Game2.on(`dispatch:command`, Engine._onDispatchCommand);
+        Game2.on(`dispatch:input`, Engine._onDispatchInput);
+      }
     },
     /**
      * ## Engine 内部事件取消订阅
@@ -13348,12 +13665,11 @@ var tetris = (() => {
      * @returns {void}
      */
     _unsubscribe: () => {
-      const { Game: Game2 } = Engine;
-      if (!Game2) {
-        return;
+      const { Games } = Engine;
+      for (const Game2 of Games) {
+        Game2.off(`dispatch:command`, Engine._onDispatchCommand);
+        Game2.off(`dispatch:input`, Engine._onDispatchInput);
       }
-      Game2.off(`dispatch:command`, Engine._onDispatchCommand);
-      Game2.off(`dispatch:input`, Engine._onDispatchInput);
     },
     /**
      * ## 命令分发处理器
@@ -13366,7 +13682,8 @@ var tetris = (() => {
      * @returns {void}
      */
     _onDispatchCommand: (cmd) => {
-      const { Game: Game2 } = Engine;
+      const { payload } = cmd;
+      const { Game: Game2 } = payload;
       const { Animations, Store } = Game2;
       const mode = Store.getMode();
       const isBlocked = Animations.hasBlocking([
@@ -13374,7 +13691,6 @@ var tetris = (() => {
         "countdown",
         "level-up"
       ]);
-      const { payload } = cmd;
       payload.isBlocked = isBlocked;
       dispatch_command_default(cmd, { mode });
     },
@@ -13388,7 +13704,8 @@ var tetris = (() => {
      * @returns {void}
      */
     _onDispatchInput: (input) => {
-      const { Game: Game2 } = Engine;
+      const { payload } = input;
+      const { Game: Game2 } = payload;
       const { Animations, Replay } = Game2;
       const isBlocked = Animations.hasBlocking([
         "clear-lines",
@@ -13443,13 +13760,16 @@ var tetris = (() => {
      * @returns {void}
      */
     destroy: () => {
-      const { Game: Game2 } = Engine;
+      const { Games } = Engine;
       Engine.stop();
       Engine.unsubscribe();
-      Game2?.removeEventListeners?.();
+      for (const Game2 of Games) {
+        Game2?.removeEventListeners?.();
+        Game2?.destroy?.();
+      }
       Engine.Audio = null;
-      Engine.Game = null;
       Engine.Scheduler = null;
+      Engine.Games = [];
     }
   };
   var engine_default = Engine;

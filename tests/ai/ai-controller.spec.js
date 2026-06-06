@@ -379,7 +379,9 @@ describe('AIController', () => {
       const originalWorker = globalThis.Worker;
       globalThis.Worker = undefined;
       const ai2 = new AIController({
-        Game: mockGame, Store: mockStore, Scheduler: mockScheduler,
+        Game: mockGame,
+        Store: mockStore,
+        Scheduler: mockScheduler,
       });
       expect(ai2.worker).toBeNull();
       globalThis.Worker = originalWorker;
@@ -409,7 +411,9 @@ describe('AIController', () => {
 
     it('_onWorkerMessage 处理 result 类型应该写入 actions', () => {
       ai.workerBusy = true;
-      ai._onWorkerMessage({ data: { type: 'result', best: { actions: ['DROP'] } } });
+      ai._onWorkerMessage({
+        data: { type: 'result', best: { actions: ['DROP'] } },
+      });
       expect(ai.workerBusy).toBe(false);
       expect(ai.actions).toEqual(['DROP']);
     });

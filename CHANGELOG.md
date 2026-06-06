@@ -1,20 +1,18 @@
 # [1.15.0](https://github.com/yaohaixiao/tetris.js/compare/1.14.0...1.15.0) (2026-06-04)
 
-
 ### Features
 
-* 添加 glossy 风格方块 ([9e11b8f](https://github.com/yaohaixiao/tetris.js/commit/9e11b8f82468228455ae800b77230a8d6a64c3ad))
-* 添加 render-glass-block.js，绘制玻璃风格方块 ([b6a67b6](https://github.com/yaohaixiao/tetris.js/commit/b6a67b6b9a48b44e97843b62c8ee430269d67b7b))
-* 添加磨砂玻璃风格方块； ([14b79a8](https://github.com/yaohaixiao/tetris.js/commit/14b79a8c06db08c20f626a9167e17a82affa4516))
-* 添加透明玻璃风格方块； ([f1c8041](https://github.com/yaohaixiao/tetris.js/commit/f1c8041f94ca470af64e025cfe53d5355262a23c))
-* 新增 Inset（内凹）方块渲染风格 ([b55e90c](https://github.com/yaohaixiao/tetris.js/commit/b55e90cd5d029069c624a30bc6ecd807aeb5998d))
-* AI 支持 Web Worker 并行决策 ([e2f8e51](https://github.com/yaohaixiao/tetris.js/commit/e2f8e51816c5e8a5b44ac1534056a2606884c2a8))
-
+- 添加 glossy 风格方块 ([9e11b8f](https://github.com/yaohaixiao/tetris.js/commit/9e11b8f82468228455ae800b77230a8d6a64c3ad))
+- 添加 render-glass-block.js，绘制玻璃风格方块 ([b6a67b6](https://github.com/yaohaixiao/tetris.js/commit/b6a67b6b9a48b44e97843b62c8ee430269d67b7b))
+- 添加磨砂玻璃风格方块； ([14b79a8](https://github.com/yaohaixiao/tetris.js/commit/14b79a8c06db08c20f626a9167e17a82affa4516))
+- 添加透明玻璃风格方块； ([f1c8041](https://github.com/yaohaixiao/tetris.js/commit/f1c8041f94ca470af64e025cfe53d5355262a23c))
+- 新增 Inset（内凹）方块渲染风格 ([b55e90c](https://github.com/yaohaixiao/tetris.js/commit/b55e90cd5d029069c624a30bc6ecd807aeb5998d))
+- AI 支持 Web
+  Worker 并行决策 ([e2f8e51](https://github.com/yaohaixiao/tetris.js/commit/e2f8e51816c5e8a5b44ac1534056a2606884c2a8))
 
 ### Performance Improvements
 
-* AI 旋转去重优化 ([cfad552](https://github.com/yaohaixiao/tetris.js/commit/cfad552a8450a681623f62d1773280b45d75ba54))
-
+- AI 旋转去重优化 ([cfad552](https://github.com/yaohaixiao/tetris.js/commit/cfad552a8450a681623f62d1773280b45d75ba54))
 
 # [1.14.0](https://github.com/yaohaixiao/tetris.js/compare/1.13.0...1.14.0) (2026-06-02)
 
