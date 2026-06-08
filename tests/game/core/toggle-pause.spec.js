@@ -1,9 +1,8 @@
 import togglePause from '@/lib/game/core/toggle-pause.js';
-import resume from '../../../lib/game/core/resume.js';
+import resume from '@/lib/game/core/resume.js';
 import pause from '@/lib/game/core/pause.js';
 
-// Mock 依赖
-jest.mock('../../../lib/game/core/resume.js', () => ({
+jest.mock('@/lib/game/core/resume.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));
@@ -26,6 +25,8 @@ describe('togglePause', () => {
 
     mockContext = {
       Store: mockStore,
+      emit: jest.fn(),
+      isVersus: jest.fn(() => false),
     };
   });
 
@@ -69,6 +70,26 @@ describe('togglePause', () => {
       expect(pause).toHaveBeenCalledWith(mockContext);
       expect(resume).not.toHaveBeenCalled();
     });
+
+    it('单人模式 playing 时不应该发送对战同步事件', () => {
+      mockContext.isVersus.mockReturnValue(false);
+      mockStore.getMode.mockReturnValue('playing');
+
+      togglePause(mockContext);
+
+      expect(mockContext.emit).not.toHaveBeenCalledWith('battle:sync:pause', expect.any(Object));
+    });
+
+    it('对战模式 playing 时应该发送暂停同步事件', () => {
+      mockContext.isVersus.mockReturnValue(true);
+      mockStore.getMode.mockReturnValue('playing');
+
+      togglePause(mockContext);
+
+      expect(mockContext.emit).toHaveBeenCalledWith('battle:sync:pause', {
+        from: mockContext,
+      });
+    });
   });
 
   // ==================== 继续逻辑 ====================
@@ -89,6 +110,26 @@ describe('togglePause', () => {
 
       expect(resume).toHaveBeenCalledWith(mockContext);
       expect(pause).not.toHaveBeenCalled();
+    });
+
+    it('单人模式 paused 时不应该发送对战同步事件', () => {
+      mockContext.isVersus.mockReturnValue(false);
+      mockStore.getMode.mockReturnValue('paused');
+
+      togglePause(mockContext);
+
+      expect(mockContext.emit).not.toHaveBeenCalledWith('battle:sync:resume', expect.any(Object));
+    });
+
+    it('对战模式 paused 时应该发送恢复同步事件', () => {
+      mockContext.isVersus.mockReturnValue(true);
+      mockStore.getMode.mockReturnValue('paused');
+
+      togglePause(mockContext);
+
+      expect(mockContext.emit).toHaveBeenCalledWith('battle:sync:resume', {
+        from: mockContext,
+      });
     });
   });
 
@@ -116,7 +157,6 @@ describe('togglePause', () => {
 
       togglePause(mockContext);
 
-      // null !== 'playing'，走 else 分支
       expect(resume).toHaveBeenCalled();
     });
 

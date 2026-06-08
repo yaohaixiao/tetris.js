@@ -5,6 +5,8 @@ describe('TouchController', () => {
   let mockGame;
   let controller;
   let controls;
+  const playerName = 'human';
+  const playerIndex = 0;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -25,7 +27,7 @@ describe('TouchController', () => {
 
     Object.values(controls).forEach((id) => {
       const el = document.createElement('div');
-      el.id = id;
+      el.id = `${playerName}-${playerIndex}-${id}`;
       el.dataset.key = id.replace('tetris-', '');
       document.body.appendChild(el);
     });
@@ -40,12 +42,16 @@ describe('TouchController', () => {
       Controls: controls,
       Store: mockStore,
       Game: mockGame,
+      Player: {
+        name: playerName,
+        index: playerIndex,
+      },
     });
   });
 
   afterEach(() => {
     Object.values(controls).forEach((id) => {
-      const el = document.getElementById(id);
+      const el = document.getElementById(`${playerName}-${playerIndex}-${id}`);
       if (el) document.body.removeChild(el);
     });
   });

@@ -15,6 +15,7 @@ describe('over', () => {
       id: 'test-game-uuid',
       Store: mockStore,
       emit: jest.fn(),
+      isVersus: jest.fn(() => false),
     };
   });
 
@@ -42,10 +43,29 @@ describe('over', () => {
       });
     });
 
-    it('应该发送游戏结束事件', () => {
+    it('单人模式应该发送 GAME_OVER 事件', () => {
+      mockContext.isVersus.mockReturnValue(false);
       over(mockContext);
 
       expect(mockContext.emit).toHaveBeenCalledWith(
+        'replay:test-game-uuid:game:over',
+      );
+    });
+
+    it('对战模式应该发送 battle:update:winner 事件', () => {
+      mockContext.isVersus.mockReturnValue(true);
+      over(mockContext);
+
+      expect(mockContext.emit).toHaveBeenCalledWith('battle:update:winner', {
+        loser: mockContext,
+      });
+    });
+
+    it('对战模式不应该发送 GAME_OVER 事件', () => {
+      mockContext.isVersus.mockReturnValue(true);
+      over(mockContext);
+
+      expect(mockContext.emit).not.toHaveBeenCalledWith(
         'replay:test-game-uuid:game:over',
       );
     });
@@ -100,10 +120,6 @@ describe('over', () => {
       const gameOverSoundIndex = calls.indexOf('audio:play:sound');
       const gameOverIndex = calls.indexOf('replay:test-game-uuid:game:over');
 
-      // 1. stop:record
-      // 2. audio:stop:bgm
-      // 3. audio:play:sound
-      // 4. game:over
       expect(stopRecordIndex).toBeLessThan(stopBgmIndex);
       expect(stopBgmIndex).toBeLessThan(gameOverSoundIndex);
       expect(gameOverSoundIndex).toBeLessThan(gameOverIndex);
@@ -121,18 +137,14 @@ describe('over', () => {
     });
 
     it('连续调用两次时第二次应该被阻止', () => {
-      // 第一次正常执行
       over(mockContext);
 
       const firstCallCount = mockContext.emit.mock.calls.length;
 
-      // 第一次执行可能改变了 mode，需要 mock 返回 game-over
       mockStore.getMode.mockReturnValue('game-over');
 
-      // 第二次应该被阻止
       over(mockContext);
 
-      // 第二次没有新增调用
       expect(mockContext.emit).toHaveBeenCalledTimes(firstCallCount);
     });
   });

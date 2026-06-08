@@ -18,6 +18,7 @@ describe('pause', () => {
       id: 'test-game-uuid',
       Store: mockStore,
       emit: jest.fn(),
+      isVersus: jest.fn(() => false),
     };
   });
 
@@ -38,10 +39,18 @@ describe('pause', () => {
       expect(mockStore.setMode).toHaveBeenCalledWith('paused');
     });
 
-    it('应该停止背景音乐', () => {
+    it('单人模式应该停止背景音乐', () => {
+      mockContext.isVersus.mockReturnValue(false);
       pause(mockContext);
 
       expect(mockContext.emit).toHaveBeenCalledWith('audio:stop:bgm');
+    });
+
+    it('对战模式不应该停止背景音乐', () => {
+      mockContext.isVersus.mockReturnValue(true);
+      pause(mockContext);
+
+      expect(mockContext.emit).not.toHaveBeenCalledWith('audio:stop:bgm');
     });
 
     it('应该播放暂停音效', () => {
@@ -121,7 +130,6 @@ describe('pause', () => {
       const firstEmitOrder = mockContext.emit.mock.invocationCallOrder[0];
       const setModeOrder = mockStore.setMode.mock.invocationCallOrder[0];
 
-      // pause 里先 emit 再 setMode
       expect(firstEmitOrder).toBeLessThan(setModeOrder);
     });
   });
@@ -145,14 +153,11 @@ describe('pause', () => {
     });
 
     it('连续调用两次时第二次应该被阻止', () => {
-      // 第一次正常执行
       pause(mockContext);
       expect(mockStore.setMode).toHaveBeenCalledTimes(1);
 
-      // mode 已经被设置为 paused
       mockStore.getMode.mockReturnValue('paused');
 
-      // 第二次应该被阻止
       pause(mockContext);
       expect(mockStore.setMode).toHaveBeenCalledTimes(1);
     });

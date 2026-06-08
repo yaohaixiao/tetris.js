@@ -3206,6 +3206,13 @@ var tetris = (() => {
     START: `ai:${uuid}:start`,
     STOP: `ai:${uuid}:stop`
   });
+  var BattleEvents = () => ({
+    PROCESS_ATTACK: "battle:process:attack",
+    FLUSH_GARBAGE: "battle:flush:garbage",
+    UPDATE_WINNER: "battle:update:winner",
+    SYNC_PAUSE: "battle:sync:pause",
+    SYNC_RESUME: "battle:sync:resume"
+  });
   var CommandEvents = (uuid) => ({
     CLEAR: `command:queue:${uuid}:clear`,
     ENQUEUE: `command:queue:${uuid}:enqueue`
@@ -3482,7 +3489,7 @@ var tetris = (() => {
       this.on(events.START_LANDING_FLASH, this._onStartLandingFlash);
       this.on(events.TOGGLE_BGM, this._onToggleBGM);
       this.on(events.REPLAY_PREPARE, this._onReplayPrepare);
-      AI.subscribe();
+      AI?.subscribe?.();
       Animations.subscribe();
       CommandQueue2.subscribe();
       Replay.subscribe();
@@ -3531,7 +3538,7 @@ var tetris = (() => {
       this.off(events.START_LANDING_FLASH, this._onStartLandingFlash);
       this.off(events.TOGGLE_BGM, this._onToggleBGM);
       this.off(events.REPLAY_PREPARE, this._onReplayPrepare);
-      AI.unsubscribe();
+      AI?.unsubscribe?.();
       Animations.unsubscribe();
       CommandQueue2.unsubscribe();
       Replay.unsubscribe();
@@ -7942,10 +7949,11 @@ var tetris = (() => {
      */
     _isBlocked(key) {
       const { Store, Game: Game2 } = this;
+      const { Player } = Game2;
       const action = resolveKeyboardAction(key);
       const mode = Store.getMode();
       const controller = Store.getController();
-      return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && key === "r";
+      return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (key === "r" || Player.name === "ai" && (key === "p" || key === "c") || Player.name === "human" && key === "s");
     }
     /**
      * ## resize 事件处理
@@ -8374,9 +8382,10 @@ var tetris = (() => {
     _handleStandardButtons(pad, mode, level, now) {
       const isBetop = this._isBetop(pad.id);
       const { Game: Game2, Store } = this;
+      const { Player } = Game2;
       const controller = Store.getController();
       for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
-        const isBlocked = !action || (mode === "replay" || mode === "game-over") && btnName !== "START" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && btnName === "X";
+        const isBlocked = !action || (mode === "replay" || mode === "game-over") && btnName !== "START" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (btnName === "X" || Player.name === "ai" && (btnName === "Y" || btnName === "RT") || Player.name === "human" && btnName === "RB");
         const isDPad = btnName.startsWith("DPAD_");
         if (!this._isPressed(btnName)) {
           continue;
@@ -10942,7 +10951,7 @@ var tetris = (() => {
      * @returns {void}
      */
     dispose() {
-      const { Scheduler: Scheduler2, Game: Game2, lines } = this;
+      const { Scheduler: Scheduler2, Game: Game2 } = this;
       for (const id of this._schedulerIds) {
         Scheduler2.cancel(id);
       }
@@ -10972,11 +10981,6 @@ var tetris = (() => {
         {
           fn: () => {
             this.emit(GE.UPDATE_HUD);
-          }
-        },
-        {
-          fn: () => {
-            this.emit("battle:send:garbage", { from: Game2, lines });
           }
         }
       ]);
@@ -11493,8 +11497,14 @@ var tetris = (() => {
     }
     if (mode === "playing") {
       pause_default(runtime);
+      if (runtime.isVersus()) {
+        runtime.emit("battle:sync:pause", { from: runtime });
+      }
     } else {
       resume_default(runtime);
+      if (runtime.isVersus()) {
+        runtime.emit("battle:sync:resume", { from: runtime });
+      }
     }
   };
   var toggle_pause_default = togglePause;
@@ -11899,6 +11909,9 @@ var tetris = (() => {
       tSpin: tSpinResult
     });
     curr._lastAction = null;
+    if (runtime.isVersus()) {
+      runtime.emit("battle:flush:garbage", { from: runtime });
+    }
   };
   var lock_default = lock;
 
@@ -12102,14 +12115,16 @@ var tetris = (() => {
       this.Store = Store;
       this.Animations = new animation_system_default({ Game: this, Player });
       this.CommandQueue = new command_queue_default({ Game: this, Player });
-      this.AI = new ai_controller_default({
-        Game: this,
-        Store,
-        Scheduler: Scheduler2,
-        Animations: this.Animations,
-        Player
-      });
       this.UI = new ui_default({ Game: this, Store, Elements, Block, Player });
+      if (this.isVersus() && Player.name === "ai" || !this.isVersus()) {
+        this.AI = new ai_controller_default({
+          Game: this,
+          Store,
+          Scheduler: Scheduler2,
+          Animations: this.Animations,
+          Player
+        });
+      }
       this.Keyboard = new keyboard_controller_default({ Game: this, Store, Player });
       this.Gamepad = new gamepad_controller_default({ Game: this, Store, Player });
       this.Touch = new touch_controller_default({ Game: this, Store, Controls, Player });
@@ -12226,6 +12241,9 @@ var tetris = (() => {
      */
     begin() {
       begin_default(this);
+      if (this.isVersus()) {
+        this.emit("battle:sync:begin", { form: this });
+      }
     }
     /**
      * ## 启动游戏（进入倒计时）
@@ -12234,6 +12252,25 @@ var tetris = (() => {
      */
     start() {
       start_default(this);
+      if (this.isVersus()) {
+        this.emit("battle:sync:start", { form: this });
+      }
+    }
+    /**
+     * ## 暂停游戏
+     *
+     * @returns {void}
+     */
+    pause() {
+      pause_default(this);
+    }
+    /**
+     * ## 恢复游戏
+     *
+     * @returns {void}
+     */
+    resume() {
+      resume_default(this);
     }
     /**
      * ## 切换暂停状态
@@ -12403,6 +12440,9 @@ var tetris = (() => {
      */
     startClearLines(linesToClear) {
       const { Scheduler: Scheduler2, Store } = this;
+      if (this.isVersus()) {
+        this.emit("battle:process:attack", { from: this, lines: linesToClear });
+      }
       this.Animations.register(
         new clear_lines_animation_default({
           Game: this,
@@ -12475,10 +12515,10 @@ var tetris = (() => {
      * @returns {void}
      */
     addEventListeners() {
-      this.AI.addEventListeners();
-      this.Keyboard.addEventListeners();
-      this.Gamepad.addEventListeners();
-      this.Touch.addEventsListeners();
+      this.AI?.addEventListeners?.();
+      this.Keyboard?.addEventListeners?.();
+      this.Gamepad?.addEventListeners?.();
+      this.Touch?.addEventsListeners?.();
     }
     /**
      * ## 移除输入设备事件监听
@@ -12488,10 +12528,10 @@ var tetris = (() => {
      * @returns {void}
      */
     removeEventListeners() {
-      this.AI.removeEventListeners();
-      this.Keyboard.removeEventListeners();
-      this.Gamepad.removeEventListeners();
-      this.Touch.removeEventListeners();
+      this.AI?.removeEventListeners?.();
+      this.Keyboard?.removeEventListeners?.();
+      this.Gamepad?.removeEventListeners?.();
+      this.Touch?.removeEventListeners?.();
     }
     /**
      * ## 订阅所有游戏事件
@@ -12530,10 +12570,11 @@ var tetris = (() => {
       this.running = false;
       this.winner = null;
       this.scores = {};
+      this.pendingGarbage = {};
       for (const game of games) {
-        const { Player } = game;
-        const playerId = `${Player.name}-${Player.index}`;
+        const playerId = this.getPlayerId(game);
         this.scores[playerId] = 0;
+        this.pendingGarbage[playerId] = 0;
       }
     }
     setRunning(running) {
@@ -12551,13 +12592,15 @@ var tetris = (() => {
     getScore(id) {
       return this.scores[id];
     }
+    getPlayerId(game) {
+      const { Player } = game;
+      return `${Player.name}-${Player.index}`;
+    }
     updateScores(options) {
       const { winner, loser } = options;
-      const winnerPlayer = winner.Player;
-      const winnerId = `${winnerPlayer.name}-${winnerPlayer.index}`;
+      const winnerId = this.getPlayerId(winner);
       let winnerScore = this.scores[winnerId];
-      const loserPlayer = loser.Player;
-      const loserId = `${loserPlayer.name}-${loserPlayer.index}`;
+      const loserId = this.getPlayerId(loser);
       let loserScore = this.scores[loserId];
       winnerScore += 1;
       if (loserScore <= 0) {
@@ -12565,6 +12608,29 @@ var tetris = (() => {
       }
       this.scores[winnerId] = winnerScore;
       this.scores[loserId] = loserScore;
+    }
+    /** 累加待处理的垃圾行 */
+    addGarbage(game, amount) {
+      const playerId = this.getPlayerId(game);
+      this.pendingGarbage[playerId] = (this.pendingGarbage[playerId] || 0) + amount;
+    }
+    /** 用消行攻击抵消对方的 pendingGarbage 返回实际能发给对方的垃圾行数 */
+    offsetGarbage(game, attackLines) {
+      const playerId = this.getPlayerId(game);
+      const pending = this.pendingGarbage[playerId] || 0;
+      const remaining = Math.max(0, pending - attackLines);
+      this.pendingGarbage[playerId] = remaining;
+      return remaining > 0 ? 0 : attackLines - pending;
+    }
+    /** 获取待处理的垃圾行数 */
+    getPendingGarbage(game) {
+      const playerId = this.getPlayerId(game);
+      return this.pendingGarbage[playerId] || 0;
+    }
+    /** 清空某个玩家的待处理垃圾行 */
+    clearGarbage(game) {
+      const playerId = this.getPlayerId(game);
+      this.pendingGarbage[playerId] = 0;
     }
     reset() {
       this._initialize();
@@ -12610,6 +12676,59 @@ var tetris = (() => {
     }
   };
   var battle_hud_default = BattleHUD;
+
+  // lib/events/router/battle-router.js
+  var BattleRouter = class extends core_default {
+    constructor(options) {
+      super(options);
+    }
+    subscribe() {
+      const events = BattleEvents();
+      this.on(events.PROCESS_ATTACK, this._onBattleProcessAttack);
+      this.on(events.FLUSH_GARBAGE, this._onBattleFlushGarbage);
+      this.on(events.UPDATE_WINNER, this._onBattleUpdateWinner);
+      this.on(events.SYNC_PAUSE, this._onBattleSyncPause);
+      this.on(events.SYNC_RESUME, this._onBattleSyncResume);
+    }
+    unsubscribe() {
+      const events = BattleEvents();
+      this.off(events.PROCESS_ATTACK, this._onBattleProcessAttack);
+      this.off(events.FLUSH_GARBAGE, this._onBattleFlushGarbage);
+      this.off(events.UPDATE_WINNER, this._onBattleUpdateWinner);
+      this.off(events.SYNC_PAUSE, this._onBattleSyncPause);
+      this.off(events.SYNC_RESUME, this._onBattleSyncResume);
+    }
+    /** 消行动画开始前：计算攻击，抵消对方 pendingGarbage */
+    _onBattleProcessAttack = (payload) => {
+      const { battle } = this;
+      const { from, lines } = payload;
+      battle.processAttack(from, lines);
+    };
+    /** 消行动画 dispose 最后：插入待处理的垃圾行 */
+    _onBattleFlushGarbage = (payload) => {
+      const { battle } = this;
+      const { from } = payload;
+      battle.flushGarbage(from);
+    };
+    _onBattleUpdateWinner = (payload) => {
+      const { battle } = this;
+      const { loser } = payload;
+      battle.update(loser);
+    };
+    _onBattleSyncPause = (payload) => {
+      const { battle } = this;
+      const { from } = payload;
+      const opponent = battle.getOpponent(from);
+      opponent.pause(opponent);
+    };
+    _onBattleSyncResume = (payload) => {
+      const { battle } = this;
+      const { from } = payload;
+      const opponent = battle.getOpponent(from);
+      opponent.resume(opponent);
+    };
+  };
+  var battle_router_default = BattleRouter;
 
   // lib/battle/garbage-system.js
   var GARBAGE_MAP = {
@@ -12659,6 +12778,7 @@ var tetris = (() => {
       const state = new versus_state_default({ games });
       this.state = state;
       this.hud = new battle_hud_default({ games, state });
+      this.router = new battle_router_default({ battle: this });
       this.start();
     }
     start() {
@@ -12674,55 +12794,50 @@ var tetris = (() => {
       this.state.setRunning(false);
     }
     update(loser) {
-      const { games } = this;
       const winner = this.getOpponent(loser);
       this.stop();
       this.state.setWinner(winner);
       this.state.updateScores({ winner, loser });
       this.hud.updateScores(winner, loser);
-      for (const game of games) {
-        const events = GameEvents(game.id);
-        game.emit(events.RESTART);
-      }
+      const events = GameEvents(loser.id);
+      loser.emit(events.RESTART);
       this.start();
     }
     getOpponent(yourself) {
       const { games } = this;
       return games.find((game) => game.id !== yourself.id);
     }
-    sendGarbage(payload) {
-      const { to, amount } = payload;
-      const { Store } = to;
+    /** 处理消行攻击：先抵消对方的 pendingGarbage，剩余的发给对方 返回实际发出的垃圾行数 */
+    processAttack(from, lines) {
+      const to = this.getOpponent(from);
+      const attack = calculateGarbage(lines.length);
+      if (attack <= 0) {
+        return 0;
+      }
+      const remaining = this.state.offsetGarbage(from, attack);
+      if (remaining > 0) {
+        this.state.addGarbage(to, remaining);
+      }
+      return remaining;
+    }
+    /** 消行动画 dispose 最后：插入待处理的垃圾行 */
+    flushGarbage(game) {
+      const amount = this.state.getPendingGarbage(game);
+      if (amount <= 0) {
+        return;
+      }
+      const { Store } = game;
       const { board, difficulty } = Store.getState();
       const next = applyGarbage(board, amount, difficulty);
       Store.setState({ board: next });
+      this.state.clearGarbage(game);
     }
     subscribe() {
-      this.on("battle:send:garbage", this._onBattleSendGarbage);
-      this.on("battle:update:winner", this._onBattleUpdateWinner);
+      this.router.subscribe();
     }
     unsubscribe() {
-      this.off("battle:send:garbage", this._onBattleSendGarbage);
-      this.off("battle:update:winner", this._onBattleUpdateWinner);
+      this.router.unsubscribe();
     }
-    /**
-     * 玩家消行
-     *
-     * @param {object} payload - 参数对象
-     */
-    _onBattleSendGarbage = (payload) => {
-      const { from, lines } = payload;
-      const to = this.getOpponent(from);
-      const garbage = calculateGarbage(lines.length);
-      if (garbage <= 0) {
-        return;
-      }
-      this.sendGarbage({ to, amount: garbage });
-    };
-    _onBattleUpdateWinner = (payload) => {
-      const { loser } = payload;
-      this.update(loser);
-    };
   };
   var battle_controller_default = BattleController;
 
@@ -13591,8 +13706,8 @@ var tetris = (() => {
           speed: Game2.getSpeed(),
           timestamp: Engine.lastTickTime
         });
-        Gamepad.update(timestamp);
-        Keyboard.update();
+        Gamepad?.update?.(timestamp);
+        Keyboard?.update?.();
         CommandQueue2.flush();
         if ((!Engine.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
           Game2.tick(isBlocked);

@@ -1,6 +1,5 @@
 import reset from '@/lib/game/core/reset.js';
 
-// Mock 依赖
 jest.mock('@/lib/game/actions/set-beginning-state.js', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -18,6 +17,8 @@ describe('reset', () => {
       id: 'test-uuid',
       Store: {
         getLevel: jest.fn().mockReturnValue(5),
+        getDifficulty: jest.fn().mockReturnValue('normal'),
+        getController: jest.fn().mockReturnValue('human'),
         resetBoard: jest.fn(),
         getState: jest.fn().mockReturnValue({ score: 0, lines: 0, level: 1 }),
         setDifficulty: jest.fn(),
@@ -26,6 +27,7 @@ describe('reset', () => {
         setState: jest.fn(),
       },
       emit: jest.fn(),
+      isVersus: jest.fn(() => false),
     };
   });
 
@@ -73,7 +75,10 @@ describe('reset', () => {
       });
     });
 
-    // ========== 新增验证 ==========
+    it('应该清空 next 和 hold 预览', () => {
+      expect(mockGame.emit).toHaveBeenCalledWith('ui:test-uuid:clear:next:piece');
+      expect(mockGame.emit).toHaveBeenCalledWith('ui:test-uuid:clear:hold:piece');
+    });
 
     it('应该停止 AI', () => {
       expect(mockGame.emit).toHaveBeenCalledWith('ai:test-uuid:stop');
@@ -83,18 +88,45 @@ describe('reset', () => {
       expect(mockGame.Store.setController).toHaveBeenCalledWith('human');
       expect(mockGame.emit).toHaveBeenCalledWith(
         'ui:test-uuid:update:controller',
-        {
-          controller: 'human',
-        },
+        { controller: 'human' },
       );
     });
 
     it('应该重置回放状态', () => {
       expect(mockGame.emit).toHaveBeenCalledWith('replay:test-uuid:reset');
     });
+
+    it('单人模式不应该重启 AI', () => {
+      expect(mockGame.emit).not.toHaveBeenCalledWith('ai:test-uuid:start');
+    });
   });
 
-  // ==================== playing 模式（重新开始） ====================
+  // ==================== 对战模式 main-menu ====================
+  describe('对战模式 main-menu', () => {
+    beforeEach(() => {
+      mockGame.isVersus.mockReturnValue(true);
+      mockGame.Store.getController.mockReturnValue('ai');
+      reset(mockGame);
+    });
+
+    it('对战模式应该保留难度', () => {
+      expect(mockGame.Store.setDifficulty).toHaveBeenCalledWith('normal');
+    });
+
+    it('对战模式不应该将等级重置为 1', () => {
+      expect(setBeginningState).toHaveBeenCalledWith(mockGame, 'main-menu', 5);
+    });
+
+    it('对战模式应该保留 controller', () => {
+      expect(mockGame.Store.setController).toHaveBeenCalledWith('ai');
+    });
+
+    it('AI controller 时应该重启 AI', () => {
+      expect(mockGame.emit).toHaveBeenCalledWith('ai:test-uuid:start');
+    });
+  });
+
+  // ==================== playing 模式 ====================
   describe('playing 模式（重新开始）', () => {
     beforeEach(() => {
       reset(mockGame, 'playing');
@@ -105,15 +137,11 @@ describe('reset', () => {
     });
 
     it('不应该将等级重置为 1', () => {
-      expect(setBeginningState).toHaveBeenCalledWith(
-        mockGame,
-        'playing',
-        5, // 保持原等级
-      );
+      expect(setBeginningState).toHaveBeenCalledWith(mockGame, 'playing', 5);
     });
 
     it('不应该播放场景切换音效', () => {
-      expect(mockGame.emit).not.toHaveBeenCalledWith('audio:resume:sound', {
+      expect(mockGame.emit).not.toHaveBeenCalledWith('audio:play:sound', {
         sound: 'SWITCH_SCENE',
       });
     });
@@ -124,20 +152,12 @@ describe('reset', () => {
       });
     });
 
-    // ========== 新增验证 ==========
-
     it('应该停止 AI', () => {
       expect(mockGame.emit).toHaveBeenCalledWith('ai:test-uuid:stop');
     });
 
     it('应该将 controller 重置为 human', () => {
       expect(mockGame.Store.setController).toHaveBeenCalledWith('human');
-      expect(mockGame.emit).toHaveBeenCalledWith(
-        'ui:test-uuid:update:controller',
-        {
-          controller: 'human',
-        },
-      );
     });
 
     it('应该重置回放状态', () => {

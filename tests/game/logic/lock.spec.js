@@ -15,7 +15,6 @@ describe('lock', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // 创建 20行 × 10列 的空棋盘
     emptyBoard = Array.from({ length: 20 }, () =>
       Array.from({ length: 10 }, () => 0),
     );
@@ -43,6 +42,8 @@ describe('lock', () => {
       Elements: {
         Canvas: { rows: 20, cols: 10 },
       },
+      isVersus: jest.fn(() => false),
+      emit: jest.fn(),
     };
   });
 
@@ -64,6 +65,24 @@ describe('lock', () => {
       lock(mockContext);
 
       expect(detectTSpin).toHaveBeenCalledWith(mockContext);
+    });
+
+    it('单人模式不应该发送 battle:flush:garbage', () => {
+      mockContext.isVersus.mockReturnValue(false);
+
+      lock(mockContext);
+
+      expect(mockContext.emit).not.toHaveBeenCalled();
+    });
+
+    it('对战模式应该发送 battle:flush:garbage', () => {
+      mockContext.isVersus.mockReturnValue(true);
+
+      lock(mockContext);
+
+      expect(mockContext.emit).toHaveBeenCalledWith('battle:flush:garbage', {
+        from: mockContext,
+      });
     });
   });
 
@@ -204,10 +223,8 @@ describe('lock', () => {
       const setStateCall = mockStore.setState.mock.calls[0][0];
       const board = setStateCall.board;
 
-      // 值为 0 的位置保持原样
       expect(board[5][3]).toBe(0);
       expect(board[5][5]).toBe(0);
-      // 值为 1 的位置正确写入
       expect(board[5][4]).toBe('#FFFF00');
       expect(board[6][3]).toBe('#FFFF00');
       expect(board[6][4]).toBe('#FFFF00');
@@ -240,7 +257,6 @@ describe('lock', () => {
     });
 
     it('_lastAction 不存在时清空也不应崩溃', () => {
-      // 没有 _lastAction
       expect(() => lock(mockContext)).not.toThrow();
     });
   });
@@ -271,7 +287,6 @@ describe('lock', () => {
       const setStateCall = mockStore.setState.mock.calls[0][0];
       const board = setStateCall.board;
 
-      // 棋盘应保持原样（全 0）
       for (let y = 0; y < 20; y++) {
         for (let x = 0; x < 10; x++) {
           expect(board[y][x]).toBe(0);
