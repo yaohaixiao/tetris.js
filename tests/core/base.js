@@ -449,4 +449,272 @@ describe('Base', () => {
       expect(handler2).not.toHaveBeenCalled();
     });
   });
+
+  // ==================== 补充覆盖 103: once 方法委托给 EventBus ====================
+  describe('once 方法 - 验证委托给 EventBus', () => {
+    it('应该直接调用 EventBus.once', () => {
+      const onceSpy = jest.spyOn(EventBus, 'once');
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.once('test:direct:once', handler);
+
+      expect(onceSpy).toHaveBeenCalledTimes(1);
+      expect(onceSpy).toHaveBeenCalledWith('test:direct:once', handler);
+
+      onceSpy.mockRestore();
+    });
+
+    it('多次调用 once 应该多次委托给 EventBus', () => {
+      const onceSpy = jest.spyOn(EventBus, 'once');
+      const handler1 = jest.fn();
+      const handler2 = jest.fn();
+      const handler3 = jest.fn();
+      const base = new Base();
+
+      base.once('event:a', handler1);
+      base.once('event:b', handler2);
+      base.once('event:c', handler3);
+
+      expect(onceSpy).toHaveBeenCalledTimes(3);
+      expect(onceSpy).toHaveBeenNthCalledWith(1, 'event:a', handler1);
+      expect(onceSpy).toHaveBeenNthCalledWith(2, 'event:b', handler2);
+      expect(onceSpy).toHaveBeenNthCalledWith(3, 'event:c', handler3);
+
+      onceSpy.mockRestore();
+    });
+
+    it('同一个 handler 多次 once 应该多次委托', () => {
+      const onceSpy = jest.spyOn(EventBus, 'once');
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.once('event:x', handler);
+      base.once('event:x', handler);
+
+      expect(onceSpy).toHaveBeenCalledTimes(2);
+
+      onceSpy.mockRestore();
+    });
+
+    it('once 注册后实际只触发一次', () => {
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.once('test:once:verify', handler);
+
+      // 触发第一次
+      EventBus.emit('test:once:verify', 'first');
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith('first');
+
+      // 触发第二次 - 不应该再调用
+      EventBus.emit('test:once:verify', 'second');
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('once 和 on 混合使用', () => {
+      const onHandler = jest.fn();
+      const onceHandler = jest.fn();
+      const base = new Base();
+
+      base.on('test:mixed', onHandler);
+      base.once('test:mixed', onceHandler);
+
+      // 第一次触发
+      EventBus.emit('test:mixed', 'first');
+      expect(onHandler).toHaveBeenCalledTimes(1);
+      expect(onceHandler).toHaveBeenCalledTimes(1);
+
+      // 第二次触发 - once 不再触发
+      EventBus.emit('test:mixed', 'second');
+      expect(onHandler).toHaveBeenCalledTimes(2);
+      expect(onceHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ==================== 补充覆盖 127: off 方法委托给 EventBus ====================
+  describe('off 方法 - 验证委托给 EventBus', () => {
+    it('应该直接调用 EventBus.off', () => {
+      const offSpy = jest.spyOn(EventBus, 'off');
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.on('test:direct:off', handler);
+      base.off('test:direct:off', handler);
+
+      expect(offSpy).toHaveBeenCalledTimes(1);
+      expect(offSpy).toHaveBeenCalledWith('test:direct:off', handler);
+
+      offSpy.mockRestore();
+    });
+
+    it('多次调用 off 应该多次委托给 EventBus', () => {
+      const offSpy = jest.spyOn(EventBus, 'off');
+      const handler1 = jest.fn();
+      const handler2 = jest.fn();
+      const base = new Base();
+
+      base.on('event:a', handler1);
+      base.on('event:b', handler2);
+
+      base.off('event:a', handler1);
+      base.off('event:b', handler2);
+
+      expect(offSpy).toHaveBeenCalledTimes(2);
+      expect(offSpy).toHaveBeenNthCalledWith(1, 'event:a', handler1);
+      expect(offSpy).toHaveBeenNthCalledWith(2, 'event:b', handler2);
+
+      offSpy.mockRestore();
+    });
+
+    it('off 未注册的 handler 也应该委托给 EventBus', () => {
+      const offSpy = jest.spyOn(EventBus, 'off');
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.off('nonexistent:event', handler);
+
+      // 即使不存在，也应该委托给 EventBus
+      expect(offSpy).toHaveBeenCalledWith('nonexistent:event', handler);
+
+      offSpy.mockRestore();
+    });
+
+    it('off 后 handler 不应该再被调用', () => {
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.on('test:off:verify', handler);
+      base.off('test:off:verify', handler);
+
+      EventBus.emit('test:off:verify', 'data');
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('off 一个 handler 不应该影响同一事件的其他 handler', () => {
+      const handler1 = jest.fn();
+      const handler2 = jest.fn();
+      const handler3 = jest.fn();
+      const base = new Base();
+
+      base.on('test:off:partial', handler1);
+      base.on('test:off:partial', handler2);
+      base.on('test:off:partial', handler3);
+
+      base.off('test:off:partial', handler2);
+
+      EventBus.emit('test:off:partial', 'data');
+
+      expect(handler1).toHaveBeenCalledTimes(1);
+      expect(handler2).not.toHaveBeenCalled();
+      expect(handler3).toHaveBeenCalledTimes(1);
+    });
+
+    it('重复 off 不应该报错', () => {
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.on('test:off:dup', handler);
+      base.off('test:off:dup', handler);
+
+      expect(() => {
+        base.off('test:off:dup', handler);
+      }).not.toThrow();
+    });
+  });
+
+  // ==================== 所有方法的 spy 验证 ====================
+  describe('所有方法委托验证', () => {
+    it('emit 应该委托给 EventBus.emit', () => {
+      const emitSpy = jest.spyOn(EventBus, 'emit');
+      const base = new Base();
+
+      base.emit('test:spy:emit', { key: 'value' });
+
+      expect(emitSpy).toHaveBeenCalledWith('test:spy:emit', { key: 'value' });
+      emitSpy.mockRestore();
+    });
+
+    it('on 应该委托给 EventBus.on', () => {
+      const onSpy = jest.spyOn(EventBus, 'on');
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.on('test:spy:on', handler);
+
+      expect(onSpy).toHaveBeenCalledWith('test:spy:on', handler);
+      onSpy.mockRestore();
+    });
+
+    it('once 应该委托给 EventBus.once', () => {
+      const onceSpy = jest.spyOn(EventBus, 'once');
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.once('test:spy:once', handler);
+
+      expect(onceSpy).toHaveBeenCalledWith('test:spy:once', handler);
+      onceSpy.mockRestore();
+    });
+
+    it('off 应该委托给 EventBus.off', () => {
+      const offSpy = jest.spyOn(EventBus, 'off');
+      const handler = jest.fn();
+      const base = new Base();
+
+      base.off('test:spy:off', handler);
+
+      expect(offSpy).toHaveBeenCalledWith('test:spy:off', handler);
+      offSpy.mockRestore();
+    });
+
+    it('clear 应该委托给 EventBus.clear', () => {
+      const clearSpy = jest.spyOn(EventBus, 'clear');
+      const base = new Base();
+
+      base.clear();
+
+      expect(clearSpy).toHaveBeenCalledTimes(1);
+      clearSpy.mockRestore();
+    });
+  });
+
+  // ==================== 委托方法的返回值验证 ====================
+  describe('委托方法返回值', () => {
+    it('emit 应该返回 EventBus.emit 的返回值', () => {
+      // EventBus.emit 返回 void (undefined)
+      const base = new Base();
+      const result = base.emit('test:return');
+      expect(result).toBeUndefined();
+    });
+
+    it('on 应该返回 EventBus.on 的返回值', () => {
+      const base = new Base();
+      const handler = jest.fn();
+      const result = base.on('test:return:on', handler);
+      expect(result).toBeUndefined();
+    });
+
+    it('once 应该返回 EventBus.once 的返回值', () => {
+      const base = new Base();
+      const handler = jest.fn();
+      const result = base.once('test:return:once', handler);
+      expect(result).toBeUndefined();
+    });
+
+    it('off 应该返回 EventBus.off 的返回值', () => {
+      const base = new Base();
+      const handler = jest.fn();
+      const result = base.off('test:return:off', handler);
+      expect(result).toBeUndefined();
+    });
+
+    it('clear 应该返回 EventBus.clear 的返回值', () => {
+      const base = new Base();
+      const result = base.clear();
+      expect(result).toBeUndefined();
+    });
+  });
 });
