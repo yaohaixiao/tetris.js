@@ -8805,7 +8805,7 @@ var tetris = (() => {
      */
     EASY: {
       lookahead: 2,
-      noise: 0.25,
+      noise: 0.15,
       weights: AI_WEIGHTS,
       delay: 580
     },
@@ -8820,7 +8820,7 @@ var tetris = (() => {
     NORMAL: {
       lookahead: 3,
       beam: 2,
-      noise: 0.15,
+      noise: 0.08,
       weights: AI_WEIGHTS,
       delay: 480
     },
@@ -9874,9 +9874,13 @@ var tetris = (() => {
       this.off(events.STOP, this._onStop);
     }
     /** @private */
-    _onStart = () => this.start();
+    _onStart = () => {
+      this.start();
+    };
     /** @private */
-    _onStop = () => this.stop();
+    _onStop = () => {
+      this.stop();
+    };
   };
   var ai_controller_default = AIController;
 
@@ -12558,13 +12562,60 @@ var tetris = (() => {
 
   // lib/battle/versus-state.js
   var VersusState = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * 初始化对战状态管理器，接收 Game 实例数组。 构造完成后立即调用 initialize() 初始化所有状态字段。
+     *
+     * @example
+     *   const state = new VersusState({
+     *     games: [
+     *       { Player: { name: 'Alice', index: 0 } },
+     *       { Player: { name: 'Bob', index: 1 } },
+     *     ],
+     *   });
+     *
+     * @param {object} options - 配置选项
+     * @param {object[]} options.games - Game 实例数组，用于初始化玩家状态
+     */
     constructor(options) {
       super(options);
       this.initialize();
     }
+    /**
+     * ## 初始化状态
+     *
+     * 公共初始化接口，内部委托给 `_initialize()` 私有方法。 这样设计的目的是：
+     *
+     * - 提供清晰的公共 API（`initialize`）
+     * - 内部实现细节封装在 `_initialize` 中
+     * - `reset()` 可以复用 `_initialize` 逻辑
+     *
+     * @returns {void}
+     */
     initialize() {
       this._initialize();
     }
+    /**
+     * ## 内部初始化实现
+     *
+     * 设置所有状态的初始值：
+     *
+     * 1. 设置 `running` 为 false（未开始）
+     * 2. 清空 `winner`（无胜者）
+     * 3. 初始化 `scores` 为空对象
+     * 4. 初始化 `pendingGarbage` 为空对象
+     * 5. 遍历所有 Game 实例，为每个玩家设置初始分数和垃圾行数为 0
+     *
+     * ### 为什么要为每个玩家初始化？
+     *
+     * - 确保所有玩家在 scores 和 pendingGarbage 中都有条目
+     * - 避免后续访问时出现 `undefined`
+     * - 保证数据结构的一致性
+     *
+     * @private
+     * @returns {void}
+     */
     _initialize() {
       const { games } = this;
       this.running = false;
@@ -12577,25 +12628,141 @@ var tetris = (() => {
         this.pendingGarbage[playerId] = 0;
       }
     }
+    /**
+     * ## 设置对战运行状态
+     *
+     * 控制对战的开始和结束。
+     *
+     * @example
+     *   state.setRunning(true); // 开始对战
+     *   state.setRunning(false); // 结束对战
+     *
+     * @param {boolean} running - True 表示对战进行中，false 表示已结束
+     */
     setRunning(running) {
       this.running = running;
     }
+    /**
+     * ## 获取对战运行状态
+     *
+     * 查询对战是否正在进行中。
+     *
+     * @example
+     *   if (state.isRunning()) {
+     *     // 处理游戏逻辑
+     *   }
+     *
+     * @returns {boolean} True 表示对战进行中，false 表示已结束或未开始
+     */
     isRunning() {
       return this.running;
     }
+    /**
+     * ## 设置胜者
+     *
+     * 在游戏结束时调用，记录获胜的玩家。
+     *
+     * @example
+     *   state.setWinner(gameInstance);
+     *
+     * @param {object} winner - 胜者的 Game 实例
+     */
     setWinner(winner) {
       this.winner = winner;
     }
+    /**
+     * ## 获取胜者
+     *
+     * 查询当前对战的胜者。
+     *
+     * @example
+     *   const winner = state.getWinner();
+     *   if (winner) {
+     *     console.log('胜者是：', winner.Player.name);
+     *   }
+     *
+     * @returns {object | null} 胜者的 Game 实例，未决出胜者时返回 null
+     */
     getWinner() {
       return this.winner;
     }
+    /**
+     * ## 获取指定玩家的分数
+     *
+     * 查询某位玩家的胜场数。
+     *
+     * @example
+     *   const score = state.getScore('Alice-0');
+     *   console.log(score); // 例如：3
+     *
+     * @param {string} id - 玩家唯一标识，格式为 `{name}-{index}`
+     * @returns {number} 玩家的胜场数
+     */
     getScore(id) {
       return this.scores[id];
     }
+    /**
+     * ## 获取玩家唯一标识
+     *
+     * 根据 Game 实例生成玩家的唯一标识 ID。
+     *
+     * ### ID 生成规则
+     *
+     *     {Player.name}-{Player.index}
+     *
+     * - `Player.name`：玩家名称（如 "Alice"）
+     * - `Player.index`：玩家索引（如 0 或 1）
+     * - 连接符：`-`
+     *
+     * ### 示例
+     *
+     * | Player.name | Player.index | 生成的 ID |
+     * | ----------- | ------------ | --------- |
+     * | Alice       | 0            | `Alice-0` |
+     * | Bob         | 1            | `Bob-1`   |
+     *
+     * @example
+     *   const id = state.getPlayerId(game);
+     *   console.log(id); // "Alice-0"
+     *
+     * @param {object} game - Game 实例
+     * @param {object} game.Player - 玩家信息
+     * @param {string} game.Player.name - 玩家名称
+     * @param {number} game.Player.index - 玩家索引
+     * @returns {string} 玩家唯一标识
+     */
     getPlayerId(game) {
       const { Player } = game;
       return `${Player.name}-${Player.index}`;
     }
+    /**
+     * ## 更新双方胜场数
+     *
+     * 在一局对战结束后调用，给胜者增加 1 个胜场， 同时确保败者的胜场数不会变成负数。
+     *
+     * ### 更新规则
+     *
+     * - **胜者**：胜场数 +1
+     * - **败者**：胜场数不变（但如果 ≤ 0，重置为 0）
+     *
+     * ### 为什么败者分数可能为负？
+     *
+     * 理论上败者分数不会为负，这是一个**防御性检查**：
+     *
+     * - 防止外部错误调用导致分数异常
+     * - 确保数据完整性
+     *
+     * @example
+     *   state.updateScores({
+     *     winner: game1, // Alice 获胜
+     *     loser: game2, // Bob 落败
+     *   });
+     *   // Alice 胜场 +1，Bob 胜场不变
+     *
+     * @param {object} options - 更新选项
+     * @param {object} options.winner - 胜者的 Game 实例
+     * @param {object} options.loser - 败者的 Game 实例
+     */
     updateScores(options) {
       const { winner, loser } = options;
       const winnerId = this.getPlayerId(winner);
@@ -12609,12 +12776,84 @@ var tetris = (() => {
       this.scores[winnerId] = winnerScore;
       this.scores[loserId] = loserScore;
     }
-    /** 累加待处理的垃圾行 */
+    /**
+     * ## 累加待处理垃圾行
+     *
+     * 当玩家受到攻击时，将攻击产生的垃圾行累加到该玩家的 `pendingGarbage` 中。这些垃圾行不会立即生效，而是等待
+     * 该玩家消行时尝试用攻击力抵消。
+     *
+     * ### 处理流程
+     *
+     *     对手消行产生攻击 → addGarbage(受攻击玩家, 垃圾行数)
+     *       → pendingGarbage[受攻击玩家] += 垃圾行数
+     *       → 等待受攻击玩家消行时通过 offsetGarbage 抵消
+     *
+     * ### 为什么延迟处理？
+     *
+     * - **公平性**：给被攻击者一个反击的机会
+     * - **策略性**：玩家可以通过快速消行来抵消即将到来的垃圾行
+     * - **视觉流畅**：垃圾行在消行动画结束后才出现
+     *
+     * @example
+     *   // Alice 受到 3 行垃圾攻击
+     *   state.addGarbage(aliceGame, 3);
+     *   // pendingGarbage['Alice-0'] 现在增加了 3
+     *
+     * @param {object} game - 受到攻击的玩家 Game 实例
+     * @param {number} amount - 要添加的垃圾行数量
+     */
     addGarbage(game, amount) {
       const playerId = this.getPlayerId(game);
       this.pendingGarbage[playerId] = (this.pendingGarbage[playerId] || 0) + amount;
     }
-    /** 用消行攻击抵消对方的 pendingGarbage 返回实际能发给对方的垃圾行数 */
+    /**
+     * ## 用消行攻击抵消待处理垃圾行
+     *
+     * 当玩家消行时，用产生的攻击力抵消自己累积的待处理垃圾行。 返回实际能够发送给对手的垃圾行数量。
+     *
+     * ### 抵消逻辑
+     *
+     *     玩家消行（attackLines） vs 待处理垃圾行（pending）
+     *
+     *     情况 1：attackLines > pending
+     *       → 完全抵消 pending
+     *       → pending 清零
+     *       → 返回 attackLines - pending（剩余攻击力发给对手）
+     *
+     *     情况 2：attackLines <= pending
+     *       → 抵消对应数量的 pending
+     *       → pending 减少 attackLines
+     *       → 返回 0（无剩余攻击力发送给对手）
+     *
+     *     情况 3：pending = 0
+     *       → 无垃圾行需要抵消
+     *       → 返回 attackLines（全部攻击力发给对手）
+     *
+     * ### 举例说明
+     *
+     * | pending | attackLines | 抵消后 pending | 返回值（发给对手） |
+     * | ------- | ----------- | -------------- | ------------------ |
+     * | 5       | 3           | 2              | 0（攻击力不足）    |
+     * | 3       | 5           | 0              | 2（剩余攻击力）    |
+     * | 0       | 4           | 0              | 4（全部攻击）      |
+     * | 2       | 2           | 0              | 0（刚好抵消）      |
+     *
+     * @example
+     *   // Bob 有 5 行待处理垃圾，消了 2 行（攻击力 1）
+     *   const actualGarbage = state.offsetGarbage(bobGame, 1);
+     *   // actualGarbage = 0（攻击力不足以抵消）
+     *   // pendingGarbage['Bob-1'] 现在 = 4
+     *
+     * @example
+     *   // Bob 有 2 行待处理垃圾，消了 4 行（攻击力 3）
+     *   const actualGarbage = state.offsetGarbage(bobGame, 3);
+     *   // actualGarbage = 1（抵消 2 行后剩余 1 行攻击力）
+     *   // pendingGarbage['Bob-1'] 现在 = 0
+     *
+     * @param {object} game - 消行的玩家 Game 实例（拥有 pendingGarbage 的一方）
+     * @param {number} attackLines - 本次消行产生的攻击力（垃圾行数）
+     * @returns {number} 抵消后剩余的攻击力，即可实际发送给对手的垃圾行数
+     */
     offsetGarbage(game, attackLines) {
       const playerId = this.getPlayerId(game);
       const pending = this.pendingGarbage[playerId] || 0;
@@ -12622,16 +12861,62 @@ var tetris = (() => {
       this.pendingGarbage[playerId] = remaining;
       return remaining > 0 ? 0 : attackLines - pending;
     }
-    /** 获取待处理的垃圾行数 */
+    /**
+     * ## 获取待处理垃圾行数
+     *
+     * 查询某位玩家当前累积的待处理垃圾行数量。
+     *
+     * @example
+     *   const pending = state.getPendingGarbage(game);
+     *   console.log(`你有 ${pending} 行垃圾待处理`);
+     *
+     * @param {object} game - 要查询的玩家 Game 实例
+     * @returns {number} 待处理的垃圾行数量，未初始化时返回 0
+     */
     getPendingGarbage(game) {
       const playerId = this.getPlayerId(game);
       return this.pendingGarbage[playerId] || 0;
     }
-    /** 清空某个玩家的待处理垃圾行 */
+    /**
+     * ## 清空待处理垃圾行
+     *
+     * 将某位玩家的待处理垃圾行数重置为 0。
+     *
+     * ### 使用场景
+     *
+     * - 游戏结束/重置时，清除所有待处理状态
+     * - 特殊道具效果（如清除全部垃圾行）
+     * - 调试和测试
+     *
+     * @example
+     *   // 清除 Alice 的所有待处理垃圾
+     *   state.clearGarbage(aliceGame);
+     *   // pendingGarbage['Alice-0'] 现在 = 0
+     *
+     * @param {object} game - 要清空垃圾行的玩家 Game 实例
+     */
     clearGarbage(game) {
       const playerId = this.getPlayerId(game);
       this.pendingGarbage[playerId] = 0;
     }
+    /**
+     * ## 重置状态
+     *
+     * 将所有状态恢复到初始值。内部委托给 `_initialize()` 方法， 确保重置逻辑与初始化逻辑完全一致。
+     *
+     * ### 重置内容
+     *
+     * - `running` → false
+     * - `winner` → null
+     * - `scores` → 所有玩家归零
+     * - `pendingGarbage` → 所有玩家归零
+     *
+     * @example
+     *   // 一局对战结束后，重置状态准备下一局
+     *   state.reset();
+     *
+     * @returns {void}
+     */
     reset() {
       this._initialize();
     }
@@ -12640,10 +12925,48 @@ var tetris = (() => {
 
   // lib/battle/battle-hud.js
   var BattleHUD = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * 初始化对战 HUD，接收 Game 实例数组和状态管理对象。 构造完成后立即调用 initialize() 缓存 DOM 元素。
+     *
+     * @example
+     *   const hud = new BattleHUD({
+     *     games: [
+     *       { Player: { name: 'Alice', index: 0 } },
+     *       { Player: { name: 'Bob', index: 1 } },
+     *     ],
+     *     state: battleState,
+     *   });
+     *
+     * @param {object} options - 配置选项
+     * @param {object[]} options.games - Game 实例数组，每个实例包含 Player 信息
+     * @param {object} options.state - 对战状态管理对象，提供 getScore 等方法
+     */
     constructor(options) {
       super(options);
       this.initialize();
     }
+    /**
+     * ## 初始化 DOM 元素缓存
+     *
+     * 在构造函数中自动调用，执行以下步骤：
+     *
+     * 1. 初始化空的元素缓存对象 `this.elements`
+     * 2. 遍历所有 Game 实例
+     * 3. 根据 `{PlayerName}-{PlayerIndex}-tetris-battle-score` 规则生成元素 ID
+     * 4. 通过 `document.querySelector` 查找 DOM 元素
+     * 5. 将找到的元素（或 null）缓存到 `this.elements` 中
+     *
+     * ### 为什么缓存 DOM 元素？
+     *
+     * - **性能优化**：避免每次更新分数时都重新查询 DOM
+     * - **容错处理**：如果元素不存在，缓存 null 而不是在运行时报错
+     * - **统一访问**：通过 `getEl()` 方法统一获取元素
+     *
+     * @private
+     * @returns {void}
+     */
     initialize() {
       const { games } = this;
       this.elements = {};
@@ -12654,9 +12977,54 @@ var tetris = (() => {
         this.elements[id] = $score || null;
       }
     }
+    /**
+     * ## 获取玩家对应的 DOM 元素
+     *
+     * 根据玩家唯一标识从缓存中获取分数 DOM 元素。
+     *
+     * @example
+     *   const $score = hud.getEl('Alice-0');
+     *   if ($score) {
+     *     $score.textContent = '999';
+     *   }
+     *
+     * @param {string} id - 玩家唯一标识，格式为 `{name}-{index}`
+     * @returns {HTMLElement | null} 对应的 DOM 元素，如果不存在则返回 null
+     */
     getEl(id) {
       return this.elements[id];
     }
+    /**
+     * ## 更新双方分数显示
+     *
+     * 在游戏结束时被调用，更新胜者和败者的分数到对应的 DOM 元素。
+     *
+     * ### 更新流程
+     *
+     *     传入 winner, loser
+     *       → 提取双方 Player 信息
+     *         → 生成双方唯一标识 ID
+     *           → 从缓存获取对应 DOM 元素
+     *             → 从 state 获取最新分数
+     *               → 更新 DOM textContent
+     *
+     * ### 为什么需要 winner 和 loser 两个参数？
+     *
+     * - 胜者和败者的分数可能都需要更新
+     * - 即使游戏结束，败者可能也有消行得分
+     * - 确保双方显示的分数是最新状态
+     *
+     * @example
+     *   // 游戏结束时更新分数
+     *   hud.updateScores(
+     *     { Player: { name: 'Alice', index: 0 } }, // winner
+     *     { Player: { name: 'Bob', index: 1 } }, // loser
+     *   );
+     *
+     * @param {object} winner - 胜者 Game 实例
+     * @param {object} loser - 败者 Game 实例
+     * @returns {void}
+     */
     updateScores(winner, loser) {
       const { state } = this;
       const winnerPlayer = winner.Player;
@@ -12679,9 +13047,32 @@ var tetris = (() => {
 
   // lib/events/router/battle-router.js
   var BattleRouter = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * 初始化对战路由器，接收包含 Battle 实例的配置选项。
+     *
+     * @param {object} options - 配置选项
+     * @param {object} options.battle - Battle 实例引用，用于实际执行对战逻辑
+     */
     constructor(options) {
       super(options);
     }
+    /**
+     * ## 订阅对战事件
+     *
+     * 注册所有对战相关的事件处理器，建立事件到 Battle 方法的映射关系。
+     *
+     * ### 订阅的事件列表
+     *
+     * 1. **PROCESS_ATTACK** → 处理攻击计算
+     * 2. **FLUSH_GARBAGE** → 处理垃圾行插入
+     * 3. **UPDATE_WINNER** → 处理胜者更新
+     * 4. **SYNC_PAUSE** → 处理暂停同步
+     * 5. **SYNC_RESUME** → 处理恢复同步
+     *
+     * @returns {void}
+     */
     subscribe() {
       const events = BattleEvents();
       this.on(events.PROCESS_ATTACK, this._onBattleProcessAttack);
@@ -12690,6 +13081,14 @@ var tetris = (() => {
       this.on(events.SYNC_PAUSE, this._onBattleSyncPause);
       this.on(events.SYNC_RESUME, this._onBattleSyncResume);
     }
+    /**
+     * ## 取消订阅对战事件
+     *
+     * 移除所有在 subscribe() 中注册的事件处理器，防止内存泄漏。
+     * 通常在组件销毁或切换模式时调用。
+     *
+     * @returns {void}
+     */
     unsubscribe() {
       const events = BattleEvents();
       this.off(events.PROCESS_ATTACK, this._onBattleProcessAttack);
@@ -12698,29 +13097,120 @@ var tetris = (() => {
       this.off(events.SYNC_PAUSE, this._onBattleSyncPause);
       this.off(events.SYNC_RESUME, this._onBattleSyncResume);
     }
-    /** 消行动画开始前：计算攻击，抵消对方 pendingGarbage */
+    /**
+     * ## 处理攻击事件
+     *
+     * 在**消行动画开始前**被调用，负责计算攻击力并抵消对方的待处理垃圾行。
+     *
+     * ### 处理流程
+     *
+     * ```
+     * 玩家消行 → 触发 PROCESS_ATTACK 事件
+     *          → 路由到本方法
+     *          → 调用 battle.processAttack(from, lines)
+     *          → 计算攻击力，尝试抵消对方 pendingGarbage
+     * ```
+     *
+     * @param {object} payload - 事件负载
+     * @param {string|number} payload.from - 发起攻击的玩家标识（攻击来源）
+     * @param {number} payload.lines - 消除的行数，用于计算攻击力
+     *
+     * @private
+     */
     _onBattleProcessAttack = (payload) => {
       const { battle } = this;
       const { from, lines } = payload;
       battle.processAttack(from, lines);
     };
-    /** 消行动画 dispose 最后：插入待处理的垃圾行 */
+    /**
+     * ## 处理垃圾行刷新事件
+     *
+     * 在**消行动画 dispose 的最后阶段**被调用，负责将计算好的待处理垃圾行实际插入到对方棋盘。
+     *
+     * ### 为什么分两步？
+     *
+     * 攻击系统采用**延迟插入**策略：
+     * 1. **PROCESS_ATTACK**（消行开始时）：先计算攻击力，抵消对方的 pendingGarbage
+     * 2. **FLUSH_GARBAGE**（消行动画结束时）：再将最终确定的垃圾行插入对方棋盘
+     *
+     * 这样可以确保消行动画播放完毕后，垃圾行才出现，视觉效果更流畅。
+     *
+     * @param {object} payload - 事件负载
+     * @param {string|number} payload.from - 发起攻击的玩家标识（攻击来源），
+     *                                       垃圾行将插入到对方的棋盘
+     *
+     * @private
+     */
     _onBattleFlushGarbage = (payload) => {
       const { battle } = this;
       const { from } = payload;
       battle.flushGarbage(from);
     };
+    /**
+     * ## 处理胜者更新事件
+     *
+     * 当有玩家**游戏结束（Game Over）**时被调用，更新对战结果。
+     *
+     * ### 触发场景
+     *
+     * - 方块堆叠到顶部，无法继续游戏
+     * - 主动认输
+     * - 其他导致游戏结束的条件
+     *
+     * @param {object} payload - 事件负载
+     * @param {string|number} payload.loser - 失败的玩家标识
+     *
+     * @private
+     */
     _onBattleUpdateWinner = (payload) => {
       const { battle } = this;
       const { loser } = payload;
       battle.update(loser);
     };
+    /**
+     * ## 处理暂停同步事件
+     *
+     * 当某玩家**暂停游戏**时被调用，将暂停状态同步给对方。
+     *
+     * ### 同步策略
+     *
+     * 对战模式下的暂停需要**双方同步**：
+     * - 玩家 A 暂停 → 触发 SYNC_PAUSE
+     * - 路由到本方法 → 获取对手（玩家 B）
+     * - 调用对手的 pause 方法 → 玩家 B 也被暂停
+     *
+     * 这样可以避免一方暂停时另一方还能继续操作的不公平情况。
+     *
+     * @param {object} payload - 事件负载
+     * @param {string|number} payload.from - 发起暂停的玩家标识
+     *
+     * @private
+     */
     _onBattleSyncPause = (payload) => {
       const { battle } = this;
       const { from } = payload;
       const opponent = battle.getOpponent(from);
       opponent.pause(opponent);
     };
+    /**
+     * ## 处理恢复同步事件
+     *
+     * 当某玩家**恢复游戏**时被调用，将恢复状态同步给对方。
+     *
+     * ### 同步策略
+     *
+     * 与暂停对称：
+     * - 玩家 A 恢复 → 触发 SYNC_RESUME
+     * - 路由到本方法 → 获取对手（玩家 B）
+     * - 调用对手的 resume 方法 → 玩家 B 也恢复
+     *
+     * 确保双方始终处于相同的游戏状态（运行中 / 暂停中）。
+     *
+     * @param {object} payload - 事件负载
+     * @param {string|number} payload.from - 发起恢复的玩家标识
+     *
+     * @private
+     */
     _onBattleSyncResume = (payload) => {
       const { battle } = this;
       const { from } = payload;
@@ -12733,16 +13223,25 @@ var tetris = (() => {
   // lib/battle/garbage-system.js
   var GARBAGE_MAP = {
     1: 0,
+    // 消 1 行 → 无攻击
     2: 1,
+    // 消 2 行 → 1 行垃圾
     3: 2,
+    // 消 3 行 → 2 行垃圾
     4: 3,
+    // 消 4 行 → 3 行垃圾
     5: 4
+    // 消 5 行 → 4 行垃圾（超出常规的最大攻击）
   };
   var DIFFICULTY_HOLES = {
     easy: 1,
+    // 简单：1 个空洞
     normal: 2,
+    // 普通：2 个空洞
     hard: 3,
+    // 困难：3 个空洞
     expert: 4
+    // 专家：4 个空洞
   };
   var calculateGarbage = (lines) => GARBAGE_MAP[lines] || 0;
   var applyGarbage = (board, amount, difficulty) => {
@@ -12769,10 +13268,50 @@ var tetris = (() => {
 
   // lib/battle/battle-controller.js
   var BattleController = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * 初始化对战控制器及其所有子系统，完成后自动开始对战。
+     *
+     * ### 初始化步骤
+     *
+     * 1. 调用父类构造函数传递配置
+     * 2. 调用 `initialize()` 创建所有子系统
+     *
+     * @example
+     *   const battle = new BattleController({
+     *     games: [game1, game2],
+     *   });
+     *
+     * @param {object} options - 配置选项
+     * @param {object[]} options.games - Game 实例数组（长度为 2）
+     */
     constructor(options) {
       super(options);
       this.initialize();
     }
+    /**
+     * ## 初始化对战系统
+     *
+     * 创建对战所需的三个核心子系统，按依赖顺序初始化：
+     *
+     * 1. **VersusState**：状态管理（无依赖）
+     * 2. **BattleHUD**：界面更新（依赖 state）
+     * 3. **BattleRouter**：事件路由（依赖 battle 实例自身）
+     *
+     * 完成后自动调用 `start()` 开始对战。
+     *
+     * ### 为什么先创建 state？
+     *
+     * BattleHUD 的构造函数需要 state 参数来查询分数， 所以必须先创建 state 再创建 hud。
+     *
+     * ### 为什么传入 `this` 给 BattleRouter？
+     *
+     * BattleRouter 需要调用 BattleController 的方法（如 processAttack）， 通过 `{ battle: this
+     * }` 将自身引用注入到路由器中。
+     *
+     * @returns {void}
+     */
     initialize() {
       const { games } = this;
       const state = new versus_state_default({ games });
@@ -12781,18 +13320,82 @@ var tetris = (() => {
       this.router = new battle_router_default({ battle: this });
       this.start();
     }
+    /**
+     * ## 开始对战
+     *
+     * 将对战状态设置为运行中。如果已经在运行中，则忽略此调用。
+     *
+     * ### 幂等性保证
+     *
+     * 通过检查 `state.isRunning()` 确保多次调用不会产生副作用。 这是一个**幂等操作**。
+     *
+     * @returns {void}
+     */
     start() {
       if (this.state.isRunning()) {
         return;
       }
       this.state.setRunning(true);
     }
+    /**
+     * ## 停止对战
+     *
+     * 将对战状态设置为已停止。如果已经停止，则忽略此调用。
+     *
+     * ### 使用场景
+     *
+     * - 游戏结束时（有玩家失败）
+     * - 手动停止对战
+     *
+     * ### 幂等性保证
+     *
+     * 与 start() 对称，通过检查确保不会重复停止。
+     *
+     * @returns {void}
+     */
     stop() {
       if (!this.state.isRunning()) {
         return;
       }
       this.state.setRunning(false);
     }
+    /**
+     * ## 更新对战结果
+     *
+     * 当有玩家游戏结束时调用，执行完整的游戏结束处理流程：
+     *
+     * 1. 找到对手（胜者）
+     * 2. 停止对战
+     * 3. 设置胜者
+     * 4. 更新双方胜场数
+     * 5. 更新 HUD 分数显示
+     * 6. 通知败者重新开始
+     * 7. 重新开始对战
+     *
+     * ### 为什么自动重新开始？
+     *
+     * 对战模式通常是**多局制**（如五局三胜），一局结束后 自动开始下一局，直到达到总局数。
+     *
+     * ### 流程顺序说明
+     *
+     * 先 `stop()` 再 `start()` 确保：
+     *
+     * - 在计分期间游戏逻辑暂停
+     * - 计分完成后重新开始新一局
+     *
+     * @example
+     *   // 当 Bob 游戏结束时
+     *   battle.update(bobGame);
+     *   // → 自动判定 Alice 获胜
+     *   // → 更新分数显示
+     *   // → 通知 Bob 重新开始
+     *   // → 开始新一局
+     *
+     * @param {object} loser - 失败的玩家 Game 实例
+     * @param {string | number} loser.id - 失败的玩家唯一标识
+     * @param {Function} loser.emit - 事件触发方法
+     * @returns {void}
+     */
     update(loser) {
       const winner = this.getOpponent(loser);
       this.stop();
@@ -12803,11 +13406,80 @@ var tetris = (() => {
       loser.emit(events.RESTART);
       this.start();
     }
+    /**
+     * ## 获取对手
+     *
+     * 在 games 数组中查找与指定玩家不同的另一个玩家。
+     *
+     * ### 查找逻辑
+     *
+     * 使用 `Array.find()` 在 games 数组中查找第一个 `id` 不等于 `yourself.id` 的 Game 实例。
+     *
+     * ### 适用场景
+     *
+     * - 游戏结束时找胜者
+     * - 攻击时找目标对手
+     * - 暂停/恢复时找需要同步的对象
+     *
+     * @example
+     *   const opponent = battle.getOpponent(game1);
+     *   console.log(opponent.Player.name); // 对手的名称
+     *
+     * @param {object} yourself - 当前玩家 Game 实例
+     * @param {string | number} yourself.id - 当前玩家唯一标识
+     * @returns {object} 对手的 Game 实例
+     */
     getOpponent(yourself) {
       const { games } = this;
       return games.find((game) => game.id !== yourself.id);
     }
-    /** 处理消行攻击：先抵消对方的 pendingGarbage，剩余的发给对方 返回实际发出的垃圾行数 */
+    /**
+     * ## 处理消行攻击
+     *
+     * 在玩家消行动画**开始前**被调用，处理攻击的抵消和转发。 这是对战系统的核心攻击逻辑。
+     *
+     * ### 处理步骤
+     *
+     *     1. 找到对手
+     *     2. 根据消行数计算攻击力
+     *     3. 如果攻击力 ≤ 0，直接返回（无攻击）
+     *     4. 用攻击力抵消自己的待处理垃圾行
+     *     5. 如果有剩余攻击力，发送给对手
+     *     6. 返回实际发出的垃圾行数
+     *
+     * ### 为什么先抵消自己的垃圾行？
+     *
+     * 这是对战系统的**核心策略机制**：
+     *
+     * - 当玩家受到攻击时（有 pendingGarbage），消行可以用于**防御**
+     * - 消行产生的攻击力首先抵消自己即将受到的垃圾行
+     * - 只有抵消后还有剩余，才会攻击对手
+     * - 这鼓励玩家在受攻击时积极消行来自保
+     *
+     * ### 攻击计算说明
+     *
+     * 使用 `calculateGarbage` 函数根据消行数查询 `GARBAGE_MAP`：
+     *
+     * - 1 行 → 0 攻击力（单消不给攻击）
+     * - 2 行 → 1 攻击力
+     * - 3 行 → 2 攻击力
+     * - 4 行 → 3 攻击力（Tetris）
+     *
+     * @example
+     *   // 玩家完成 Tetris（4行），没有待处理垃圾
+     *   const sent = battle.processAttack(playerGame, clearedLines);
+     *   // sent = 3（给对手发送 3 行垃圾）
+     *
+     * @example
+     *   // 玩家消 2 行，但有 5 行待处理垃圾
+     *   const sent = battle.processAttack(playerGame, clearedLines);
+     *   // sent = 0（攻击力全部用于抵消自己的垃圾行）
+     *   // pendingGarbage 从 5 减少到 4
+     *
+     * @param {object} from - 发起攻击的玩家 Game 实例（消行的一方）
+     * @param {Array} lines - 消除的行数组，用于计算攻击力
+     * @returns {number} 实际发送给对手的垃圾行数，0 表示无攻击
+     */
     processAttack(from, lines) {
       const to = this.getOpponent(from);
       const attack = calculateGarbage(lines.length);
@@ -12820,7 +13492,48 @@ var tetris = (() => {
       }
       return remaining;
     }
-    /** 消行动画 dispose 最后：插入待处理的垃圾行 */
+    /**
+     * ## 刷新垃圾行到棋盘
+     *
+     * 在消行动画 **dispose 的最后阶段**被调用， 将累积的待处理垃圾行实际应用到指定玩家的棋盘上。
+     *
+     * ### 处理步骤
+     *
+     *     1. 获取该玩家的待处理垃圾行数
+     *     2. 如果 amount ≤ 0，直接返回（无垃圾行）
+     *     3. 获取当前棋盘状态（board + difficulty）
+     *     4. 调用 applyGarbage 生成带垃圾行的新棋盘
+     *     5. 更新 Store 中的棋盘状态
+     *     6. 清空该玩家的待处理垃圾行计数
+     *
+     * ### 为什么分两步处理垃圾行？
+     *
+     * 1. **PROCESS_ATTACK**（消行开始时）：
+     *
+     *    - 计算攻击力和抵消
+     *    - 将剩余攻击力加入对手的 pendingGarbage
+     *    - 此时垃圾行只存在于状态中，棋盘未改变
+     * 2. **FLUSH_GARBAGE**（消行动画结束时）：
+     *
+     *    - 将 pendingGarbage 实际写入棋盘
+     *    - 此时消行动画已播放完毕，视觉效果流畅
+     *
+     * 这种**延迟应用**策略确保了：
+     *
+     * - 攻击计算和抵消是即时的（游戏逻辑层面）
+     * - 垃圾行的出现配合动画时机（视觉层面）
+     *
+     * @example
+     *   // 对手的消行动画结束后，将垃圾行应用到玩家棋盘
+     *   battle.flushGarbage(playerGame);
+     *   // 棋盘底部出现垃圾行，pendingGarbage 清零
+     *
+     * @param {object} game - 要应用垃圾行的玩家 Game 实例
+     * @param {object} game.Store - 游戏状态存储
+     * @param {Function} game.Store.getState - 获取当前状态
+     * @param {Function} game.Store.setState - 更新状态
+     * @returns {void}
+     */
     flushGarbage(game) {
       const amount = this.state.getPendingGarbage(game);
       if (amount <= 0) {
@@ -12832,9 +13545,31 @@ var tetris = (() => {
       Store.setState({ board: next });
       this.state.clearGarbage(game);
     }
+    /**
+     * ## 订阅对战事件
+     *
+     * 通过 BattleRouter 注册所有对战相关的事件处理器。
+     *
+     * ### 订阅的事件
+     *
+     * - PROCESS_ATTACK：处理消行攻击
+     * - FLUSH_GARBAGE：处理垃圾行刷新
+     * - UPDATE_WINNER：处理游戏结束
+     * - SYNC_PAUSE：处理暂停同步
+     * - SYNC_RESUME：处理恢复同步
+     *
+     * @returns {void}
+     */
     subscribe() {
       this.router.subscribe();
     }
+    /**
+     * ## 取消订阅对战事件
+     *
+     * 通过 BattleRouter 移除所有对战事件处理器。 在销毁对战控制器时必须调用，防止内存泄漏。
+     *
+     * @returns {void}
+     */
     unsubscribe() {
       this.router.unsubscribe();
     }
