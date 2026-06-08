@@ -425,5 +425,625 @@ describe('AIController', () => {
       ai.loop();
       expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
     });
+  })
+
+  // ==================== 补充覆盖 313-314: expert 难度使用 mcts ====================
+  describe('getDifficultyConfig', () => {
+    it('应该为 expert 难度返回 EXPERT 配置', () => {
+      mockStore.getDifficulty.mockReturnValue('expert');
+      const config = ai.getDifficultyConfig();
+      // AIDifficulty.EXPERT 应该有特定的 lookahead 值
+      expect(config).toBeDefined();
+      expect(config.lookahead).toBeDefined();
+      expect(config.weights).toBeDefined();
+    });
+
+    it('应该为 unknown 难度降级为 NORMAL', () => {
+      mockStore.getDifficulty.mockReturnValue('unknown');
+      const config = ai.getDifficultyConfig();
+      expect(config).toBeDefined();
+    });
+
+    it('所有难度都应该返回有效配置', () => {
+      const difficulties = ['easy', 'normal', 'hard', 'expert'];
+      difficulties.forEach((diff) => {
+        mockStore.getDifficulty.mockReturnValue(diff);
+        const config = ai.getDifficultyConfig();
+        expect(config).toBeDefined();
+        expect(config.lookahead).toBeGreaterThanOrEqual(1);
+        expect(config.delay).toBeGreaterThan(0);
+      });
+    });
+  });
+
+  // ==================== 补充覆盖 382-383: Worker 模式发送消息 ====================
+  describe('think - Worker 模式', () => {
+    it('Worker 模式下应该发送 postMessage 并设置 workerBusy', () => {
+      const mockWorker = {
+        postMessage: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      };
+      ai.worker = mockWorker;
+      ai.workerBusy = false;
+
+      const state = mockStore.getState();
+      const difficulty = {
+        lookahead: 2,
+        weights: { holes: -5, height: -0.3, bumpiness: -0.2, completeLines: 20 },
+        beam: 5,
+      };
+
+      ai.think(state, difficulty);
+
+      expect(ai.workerBusy).toBe(true);
+      expect(mockWorker.postMessage).toHaveBeenCalledWith({
+        type: 'think',
+        state,
+        weights: difficulty.weights,
+        depth: difficulty.lookahead,
+        beam: difficulty.beam,
+        algorithm: 'selfPlay', // easy/normal/hard 用 selfPlay
+      });
+
+      ai.worker = null;
+    });
+
+    it('expert 难度 Worker 模式应该使用 mcts 算法', () => {
+      mockStore.getDifficulty.mockReturnValue('expert');
+
+      const mockWorker = {
+        postMessage: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      };
+      ai.worker = mockWorker;
+      ai.workerBusy = false;
+
+      const state = mockStore.getState();
+      const difficulty = ai.getDifficultyConfig();
+
+      ai.think(state, difficulty);
+
+      expect(mockWorker.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          algorithm: 'mcts',
+        })
+      );
+
+      ai.worker = null;
+    });
+
+    it('Worker 模式下 think 应该返回 undefined', () => {
+      const mockWorker = {
+        postMessage: jest.fn(),
+      };
+      ai.worker = mockWorker;
+
+      const state = mockStore.getState();
+      const difficulty = {
+        lookahead: 1,
+        weights: {},
+        beam: 3,
+      };
+
+      const result = ai.think(state, difficulty);
+      expect(result).toBeUndefined();
+
+      ai.worker = null;
+    });
+
+    it('Worker 模式发送的消息应包含完整的配置参数', () => {
+      const mockWorker = {
+        postMessage: jest.fn(),
+      };
+      ai.worker = mockWorker;
+
+      const state = mockStore.getState();
+      const difficulty = {
+        lookahead: 4,
+        weights: {
+          holes: -10,
+          height: -0.5,
+          bumpiness: -0.3,
+          completeLines: 30,
+        },
+        beam: 8,
+      };
+
+      ai.think(state, difficulty);
+
+      const callArgs = mockWorker.postMessage.mock.calls[0][0];
+      expect(callArgs).toEqual({
+        type: 'think',
+        state,
+        weights: difficulty.weights,
+        depth: 4,
+        beam: 8,
+        algorithm: 'selfPlay',
+      });
+
+      ai.worker = null;
+    });
+  });
+
+  // ==================== 补充覆盖 398-399: 主线程 createSnapshot + selfPlay ====================
+  describe('think - 主线程模式（覆盖 createSnapshot + selfPlay）', () => {
+    it('应该调用 createSnapshot 创建快照', () => {
+      const state = mockStore.getState();
+      const difficulty = {
+        lookahead: 1,
+        weights: {},
+        beam: 3,
+      };
+
+      // 确保 worker 为 null，走主线程模式
+      ai.worker = null;
+      selfPlay.mockReturnValue({ actions: ['DROP'], y: 18 });
+
+      ai.think(state, difficulty);
+
+      // selfPlay 的第一个参数应该是 createSnapshot 的结果
+      expect(selfPlay).toHaveBeenCalledTimes(1);
+      const snapshot = selfPlay.mock.calls[0][0];
+      expect(snapshot).toHaveProperty('board');
+      expect(snapshot).toHaveProperty('piece');
+      expect(snapshot.board).toBeDefined();
+      expect(snapshot.piece).toBeDefined();
+    });
+
+    it('应该将 weights、lookahead、beam 传递给 selfPlay', () => {
+      const state = mockStore.getState();
+      const difficulty = {
+        lookahead: 3,
+        weights: {
+          holes: -8,
+          height: -0.4,
+          bumpiness: -0.25,
+          completeLines: 15,
+        },
+        beam: 6,
+      };
+
+      ai.worker = null;
+      selfPlay.mockReturnValue({ actions: ['MOVE_LEFT', 'DROP'], y: 17 });
+
+      ai.think(state, difficulty);
+
+      expect(selfPlay).toHaveBeenCalledWith(
+        expect.any(Object),
+        difficulty.weights,
+        difficulty.lookahead,
+        difficulty.beam,
+      );
+    });
+
+    it('应该返回 selfPlay 的完整结果（包含 actions）', () => {
+      const state = mockStore.getState();
+      const difficulty = {
+        lookahead: 1,
+        weights: {},
+        beam: 3,
+      };
+
+      const expectedResult = {
+        actions: ['ROTATE', 'MOVE_RIGHT', 'MOVE_RIGHT', 'DROP'],
+        y: 16,
+        placeOn: jest.fn(),
+      };
+
+      ai.worker = null;
+      selfPlay.mockReturnValue(expectedResult);
+
+      const result = ai.think(state, difficulty);
+
+      expect(result).toBe(expectedResult);
+      expect(result.actions).toEqual(expectedResult.actions);
+    });
+
+    it('主线程模式 selfPlay 返回 null 时应返回 null', () => {
+      const state = mockStore.getState();
+      const difficulty = {
+        lookahead: 1,
+        weights: {},
+        beam: 3,
+      };
+
+      ai.worker = null;
+      selfPlay.mockReturnValue(null);
+
+      const result = ai.think(state, difficulty);
+
+      expect(result).toBeNull();
+    });
+
+    it('主线程模式应该正确序列化棋盘状态', () => {
+      const state = {
+        mode: 'playing',
+        board: [
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ],
+        curr: {
+          shape: [[1, 1], [1, 1]],
+          color: '#ff0000',
+        },
+        cx: 4,
+        cy: 0,
+      };
+
+      const difficulty = {
+        lookahead: 2,
+        weights: { holes: -5 },
+        beam: 4,
+      };
+
+      ai.worker = null;
+      selfPlay.mockReturnValue({ actions: ['DROP'], y: 0 });
+
+      ai.think(state, difficulty);
+
+      const snapshot = selfPlay.mock.calls[0][0];
+      expect(snapshot.board).toEqual(state.board);
+      expect(snapshot.piece.shape).toEqual(state.curr.shape);
+    });
+
+    it('主线程模式不支持时 think 内部算法分支正确（expert → selfPlay）', () => {
+      // 主线程模式下，expert 也走 selfPlay（因为 worker 为 null）
+      mockStore.getDifficulty.mockReturnValue('expert');
+
+      const state = mockStore.getState();
+      const difficulty = ai.getDifficultyConfig();
+
+      ai.worker = null;
+      selfPlay.mockReturnValue({ actions: ['DROP'], y: 15 });
+
+      ai.think(state, difficulty);
+
+      // 应该走 else 分支（主线程模式），调用 selfPlay
+      expect(selfPlay).toHaveBeenCalledTimes(1);
+    });
+
+    it('包含复杂棋盘的快照创建', () => {
+      const state = {
+        mode: 'playing',
+        board: Array.from({ length: 20 }, (_, i) =>
+          Array.from({ length: 10 }, (_, j) =>
+            i > 15 && j < 8 ? '#cccccc' : 0
+          )
+        ),
+        curr: {
+          shape: [
+            [0, 1, 0],
+            [1, 1, 1],
+          ],
+          color: '#00ff00',
+        },
+        cx: 5,
+        cy: 17,
+      };
+
+      const difficulty = {
+        lookahead: 3,
+        weights: {
+          holes: -10,
+          height: -0.5,
+          bumpiness: -0.3,
+          completeLines: 20,
+        },
+        beam: 5,
+      };
+
+      ai.worker = null;
+      selfPlay.mockReturnValue({ actions: ['MOVE_LEFT', 'DROP'], y: 18 });
+
+      ai.think(state, difficulty);
+
+      const snapshot = selfPlay.mock.calls[0][0];
+      expect(snapshot.board.length).toBe(20);
+      expect(snapshot.board[0].length).toBe(10);
+      // 第 16 行应该有非零值
+      expect(snapshot.board[19].some((c) => c !== 0)).toBe(true); // 第 20 行全空
+    });
+  });
+
+  // ==================== Worker 忙碌状态下的 loop 分支 ====================
+  describe('loop - Worker 忙碌状态', () => {
+    it('Worker 忙碌且无 action 时应继续调度不退出', () => {
+      ai.enabled = true;
+      ai.worker = {};
+      ai.workerBusy = true;
+      ai.actions = [];
+
+      ai.loop();
+
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
+      expect(emitSpy).not.toHaveBeenCalled();
+      ai.worker = null;
+    });
+
+    it('Worker 忙碌但有 action 时应该执行 action', () => {
+      ai.enabled = true;
+      ai.worker = {};
+      ai.workerBusy = true;
+      ai.actions = ['DROP'];
+
+      ai.loop();
+
+      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+        device: 'ai',
+        action: 'DROP',
+        payload: { Game: mockGame },
+      });
+      ai.worker = null;
+    });
+
+    it('Worker 完成后的 _onWorkerMessage 应正确恢复状态', () => {
+      ai.workerBusy = true;
+      ai.actions = [];
+
+      ai._onWorkerMessage({
+        data: {
+          type: 'result',
+          best: { actions: ['MOVE_LEFT', 'ROTATE', 'DROP'] },
+        },
+      });
+
+      expect(ai.workerBusy).toBe(false);
+      expect(ai.actions).toEqual(['MOVE_LEFT', 'ROTATE', 'DROP']);
+    });
+
+    it('Worker result 为 null 时不应修改 actions', () => {
+      ai.workerBusy = true;
+      ai.actions = [];
+
+      ai._onWorkerMessage({
+        data: { type: 'result', best: null },
+      });
+
+      expect(ai.workerBusy).toBe(false);
+      expect(ai.actions).toEqual([]);
+    });
+  });
+
+  // ==================== addEventListeners / removeEventListeners ====================
+  describe('Worker 事件监听器', () => {
+    it('addEventListeners 应该绑定 message 和 error 事件', () => {
+      const mockWorker = {
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      };
+      ai.worker = mockWorker;
+
+      ai.addEventListeners();
+
+      expect(mockWorker.addEventListener).toHaveBeenCalledWith(
+        'message',
+        ai._onWorkerMessage
+      );
+      expect(mockWorker.addEventListener).toHaveBeenCalledWith(
+        'error',
+        ai._onWorkerError
+      );
+
+      ai.worker = null;
+    });
+
+    it('removeEventListeners 应该解绑 message 和 error 事件', () => {
+      const mockWorker = {
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      };
+      ai.worker = mockWorker;
+
+      ai.removeEventListeners();
+
+      expect(mockWorker.removeEventListener).toHaveBeenCalledWith(
+        'message',
+        ai._onWorkerMessage
+      );
+      expect(mockWorker.removeEventListener).toHaveBeenCalledWith(
+        'error',
+        ai._onWorkerError
+      );
+
+      ai.worker = null;
+    });
+
+    it('addEventListeners 在 worker 为 null 时不报错', () => {
+      ai.worker = null;
+      expect(() => ai.addEventListeners()).not.toThrow();
+    });
+
+    it('removeEventListeners 在 worker 为 null 时不报错', () => {
+      ai.worker = null;
+      expect(() => ai.removeEventListeners()).not.toThrow();
+    });
+  });
+
+  // ==================== _onWorkerError 完整测试 ====================
+  describe('_onWorkerError', () => {
+    it('应该设置 workerBusy 为 false', () => {
+      ai.workerBusy = true;
+      ai.worker = {};
+      ai._onWorkerError(new ErrorEvent('error', { message: 'test' }));
+      expect(ai.workerBusy).toBe(false);
+    });
+
+    it('应该设置 worker 为 null（降级为主线程）', () => {
+      ai.worker = {};
+      ai._onWorkerError(new ErrorEvent('error', { message: 'test' }));
+      expect(ai.worker).toBeNull();
+    });
+
+    it('应该记录错误日志', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      ai.worker = {};
+
+      ai._onWorkerError(new ErrorEvent('error', { message: 'worker crash' }));
+
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+  });
+
+  // ==================== _onWorkerMessage 完整测试 ====================
+  describe('_onWorkerMessage', () => {
+    it('result 类型应该设置 workerBusy 为 false', () => {
+      ai.workerBusy = true;
+      ai._onWorkerMessage({
+        data: { type: 'result', best: { actions: ['DROP'] } },
+      });
+      expect(ai.workerBusy).toBe(false);
+    });
+
+    it('result 类型应该写入 actions', () => {
+      ai._onWorkerMessage({
+        data: {
+          type: 'result',
+          best: { actions: ['MOVE_RIGHT', 'MOVE_RIGHT', 'DROP'] },
+        },
+      });
+      expect(ai.actions).toEqual(['MOVE_RIGHT', 'MOVE_RIGHT', 'DROP']);
+    });
+
+    it('error 类型应该设置 workerBusy 为 false', () => {
+      ai.workerBusy = true;
+      ai._onWorkerMessage({
+        data: { type: 'error', error: 'something went wrong' },
+      });
+      expect(ai.workerBusy).toBe(false);
+    });
+
+    it('error 类型应该记录错误日志', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      ai._onWorkerMessage({
+        data: { type: 'error', error: 'worker error message' },
+      });
+      expect(consoleSpy).toHaveBeenCalledWith('AI Worker Error:', 'worker error message');
+      consoleSpy.mockRestore();
+    });
+
+    it('未知 type 不应该修改 actions', () => {
+      ai.workerBusy = true;
+      ai.actions = ['EXISTING'];
+      ai._onWorkerMessage({
+        data: { type: 'unknown', data: {} },
+      });
+      expect(ai.workerBusy).toBe(true); // 不会解锁
+      expect(ai.actions).toEqual(['EXISTING']); // actions 不变
+    });
+  });
+
+  // ==================== 综合场景 ====================
+  describe('综合场景', () => {
+    it('完整的主线程 AI 决策到执行流程', () => {
+      ai.worker = null;
+      ai.enabled = true;
+
+      const bestMove = {
+        actions: ['ROTATE', 'MOVE_LEFT', 'MOVE_LEFT', 'DROP'],
+        y: 18,
+        placeOn: jest.fn(),
+      };
+      selfPlay.mockReturnValue(bestMove);
+
+      // 第一帧：决策 + 执行第一个动作
+      ai.loop();
+      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+        device: 'ai',
+        action: 'ROTATE',
+        payload: { Game: mockGame },
+      });
+      expect(ai.actions).toEqual(['MOVE_LEFT', 'MOVE_LEFT', 'DROP']);
+
+      // 第二帧：执行第二个动作
+      emitSpy.mockClear();
+      ai.loop();
+      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+        device: 'ai',
+        action: 'MOVE_LEFT',
+        payload: { Game: mockGame },
+      });
+      expect(ai.actions).toEqual(['MOVE_LEFT', 'DROP']);
+    });
+
+    it('Worker 模式下完整异步决策流程', () => {
+      const mockWorker = {
+        postMessage: jest.fn(),
+      };
+      ai.worker = mockWorker;
+      ai.enabled = true;
+      ai.workerBusy = false;
+
+      const state = mockStore.getState();
+      const difficulty = {
+        lookahead: 1,
+        weights: {},
+        beam: 3,
+      };
+
+      // 1. think 发送消息给 Worker
+      ai.think(state, difficulty);
+      expect(ai.workerBusy).toBe(true);
+      expect(mockWorker.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'think' })
+      );
+
+      // 2. loop 在 Worker 忙碌时继续调度
+      emitSpy.mockClear();
+      ai.loop();
+      expect(emitSpy).not.toHaveBeenCalled(); // 无 action 可执行
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
+
+      // 3. Worker 返回结果
+      ai._onWorkerMessage({
+        data: {
+          type: 'result',
+          best: { actions: ['ROTATE', 'DROP'] },
+        },
+      });
+      expect(ai.workerBusy).toBe(false);
+      expect(ai.actions).toEqual(['ROTATE', 'DROP']);
+
+      // 4. 下一帧执行 action
+      emitSpy.mockClear();
+      ai.loop();
+      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+        device: 'ai',
+        action: 'ROTATE',
+        payload: { Game: mockGame },
+      });
+
+      ai.worker = null;
+    });
+
+    it('Worker 错误后降级为主线程模式', () => {
+      const mockWorker = {
+        postMessage: jest.fn(),
+      };
+      ai.worker = mockWorker;
+      ai.workerBusy = true;
+
+      // Worker 错误
+      ai._onWorkerError(new ErrorEvent('error', { message: 'crash' }));
+      expect(ai.worker).toBeNull();
+      expect(ai.workerBusy).toBe(false);
+
+      // 后续 think 走主线程模式
+      selfPlay.mockReturnValue({ actions: ['DROP'], y: 19 });
+
+      const state = mockStore.getState();
+      const difficulty = {
+        lookahead: 1,
+        weights: {},
+        beam: 3,
+      };
+
+      const result = ai.think(state, difficulty);
+      expect(result).toBeDefined();
+      expect(result.actions).toEqual(['DROP']);
+      expect(selfPlay).toHaveBeenCalled();
+    });
   });
 });
