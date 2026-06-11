@@ -1,6 +1,7 @@
 /**
+ * 测试对战 HUD 控制器的 DOM 元素管理和分数更新功能
+ *
  * @file BattleHUD 单元测试
- * @description 测试对战 HUD 控制器的 DOM 元素管理和分数更新功能
  */
 
 import BattleHUD from '@/lib/battle/battle-hud.js';
@@ -15,25 +16,19 @@ jest.mock('@/lib/core', () => {
 describe('BattleHUD', () => {
   // ==================== 测试数据 ====================
 
-  /**
-   * 创建模拟的 DOM 元素
-   */
+  /** 创建模拟的 DOM 元素 */
   const createMockElement = (textContent = '0') => ({
     textContent,
     nodeType: 1,
     tagName: 'SPAN',
   });
 
-  /**
-   * 创建模拟的 Game 实例
-   */
+  /** 创建模拟的 Game 实例 */
   const createMockGame = (name, index) => ({
     Player: { name, index },
   });
 
-  /**
-   * 创建模拟的 State 实例
-   */
+  /** 创建模拟的 State 实例 */
   const createMockState = (scores = {}) => ({
     getScore: jest.fn((id) => scores[id] ?? 0),
   });
@@ -100,7 +95,7 @@ describe('BattleHUD', () => {
 
       // 验证选择器格式：{name}-{index}-tetris-battle-score
       expect(mockQuerySelector).toHaveBeenCalledWith(
-        '#Alice-0-tetris-battle-score'
+        '#Alice-0-tetris-battle-score',
       );
     });
 
@@ -108,20 +103,17 @@ describe('BattleHUD', () => {
       const mockQuerySelector = jest.fn();
       document.querySelector = mockQuerySelector;
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createMockState();
 
       new BattleHUD({ games, state });
 
       expect(mockQuerySelector).toHaveBeenCalledTimes(2);
       expect(mockQuerySelector).toHaveBeenCalledWith(
-        '#Alice-0-tetris-battle-score'
+        '#Alice-0-tetris-battle-score',
       );
       expect(mockQuerySelector).toHaveBeenCalledWith(
-        '#Bob-1-tetris-battle-score'
+        '#Bob-1-tetris-battle-score',
       );
     });
 
@@ -162,13 +154,13 @@ describe('BattleHUD', () => {
       new BattleHUD({ games, state });
 
       expect(mockQuerySelector).toHaveBeenCalledWith(
-        '#Player1-0-tetris-battle-score'
+        '#Player1-0-tetris-battle-score',
       );
       expect(mockQuerySelector).toHaveBeenCalledWith(
-        '#Player2-1-tetris-battle-score'
+        '#Player2-1-tetris-battle-score',
       );
       expect(mockQuerySelector).toHaveBeenCalledWith(
-        '#Player3-2-tetris-battle-score'
+        '#Player3-2-tetris-battle-score',
       );
     });
 
@@ -176,19 +168,16 @@ describe('BattleHUD', () => {
       const mockQuerySelector = jest.fn();
       document.querySelector = mockQuerySelector;
 
-      const games = [
-        createMockGame('Player', 0),
-        createMockGame('Player', 1),
-      ];
+      const games = [createMockGame('Player', 0), createMockGame('Player', 1)];
       const state = createMockState();
 
       new BattleHUD({ games, state });
 
       expect(mockQuerySelector).toHaveBeenCalledWith(
-        '#Player-0-tetris-battle-score'
+        '#Player-0-tetris-battle-score',
       );
       expect(mockQuerySelector).toHaveBeenCalledWith(
-        '#Player-1-tetris-battle-score'
+        '#Player-1-tetris-battle-score',
       );
     });
 
@@ -251,10 +240,7 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(mockElement1)
         .mockReturnValueOnce(mockElement2);
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createMockState();
       const hud = new BattleHUD({ games, state });
 
@@ -278,10 +264,7 @@ describe('BattleHUD', () => {
       const scores = { 'Alice-0': 3, 'Bob-1': 1 };
       const state = createMockState(scores);
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const hud = new BattleHUD({ games, state });
 
       const winner = createMockGame('Alice', 0);
@@ -299,10 +282,7 @@ describe('BattleHUD', () => {
 
       const state = createMockState({ 'Alice-0': 5, 'Bob-1': 2 });
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const hud = new BattleHUD({ games, state });
 
       const winner = createMockGame('Alice', 0);
@@ -319,10 +299,7 @@ describe('BattleHUD', () => {
 
       const state = createMockState({ 'Alice-0': 3, 'Bob-1': 1 });
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const hud = new BattleHUD({ games, state });
 
       const winner = createMockGame('Alice', 0);
@@ -343,10 +320,7 @@ describe('BattleHUD', () => {
 
       const state = createMockState({ 'Alice-0': 3, 'Bob-1': 1 });
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const hud = new BattleHUD({ games, state });
 
       const winner = createMockGame('Alice', 0);
@@ -369,10 +343,7 @@ describe('BattleHUD', () => {
 
       const state = createMockState({ 'Alice-0': 3, 'Bob-1': 1 });
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const hud = new BattleHUD({ games, state });
 
       const winner = createMockGame('Alice', 0);
@@ -396,10 +367,7 @@ describe('BattleHUD', () => {
 
       const state = createMockState({ 'Alice-0': 42, 'Bob-1': 7 });
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const hud = new BattleHUD({ games, state });
 
       const winner = createMockGame('Alice', 0);
@@ -423,10 +391,7 @@ describe('BattleHUD', () => {
 
       const state = createMockState({ 'Alice-0': 0, 'Bob-1': 0 });
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const hud = new BattleHUD({ games, state });
 
       const winner = createMockGame('Alice', 0);
@@ -449,10 +414,7 @@ describe('BattleHUD', () => {
 
       const state = createMockState({ 'Alice-0': 99, 'Bob-1': 88 });
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const hud = new BattleHUD({ games, state });
 
       const winner = createMockGame('Alice', 0);
@@ -477,10 +439,7 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(winnerEl)
         .mockReturnValueOnce(loserEl);
 
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createMockState();
       const hud = new BattleHUD({ games, state });
 
@@ -542,10 +501,7 @@ describe('BattleHUD', () => {
 
       // 2. 创建 HUD 实例
       const state = createMockState({ 'Alice-0': 0, 'Bob-1': 0 });
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const hud = new BattleHUD({ games, state });
 
       // 3. 验证初始化状态
@@ -561,10 +517,7 @@ describe('BattleHUD', () => {
         return 0;
       });
 
-      hud.updateScores(
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1)
-      );
+      hud.updateScores(createMockGame('Alice', 0), createMockGame('Bob', 1));
 
       expect(winnerEl.textContent).toBe(1);
       expect(loserEl.textContent).toBe(0);
@@ -576,10 +529,7 @@ describe('BattleHUD', () => {
         return 0;
       });
 
-      hud.updateScores(
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1)
-      );
+      hud.updateScores(createMockGame('Alice', 0), createMockGame('Bob', 1));
 
       expect(winnerEl.textContent).toBe(2);
       expect(loserEl.textContent).toBe(0);
@@ -615,10 +565,7 @@ describe('BattleHUD', () => {
       expect(hud.getEl('Charlie-2')).toBe(el3);
 
       // 更新 Alice（胜者）和 Bob（败者）的分数
-      hud.updateScores(
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1)
-      );
+      hud.updateScores(createMockGame('Alice', 0), createMockGame('Bob', 1));
 
       expect(el1.textContent).toBe(1);
       expect(el2.textContent).toBe(2);

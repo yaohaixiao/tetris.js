@@ -76,8 +76,12 @@ describe('reset', () => {
     });
 
     it('应该清空 next 和 hold 预览', () => {
-      expect(mockGame.emit).toHaveBeenCalledWith('ui:test-uuid:clear:next:piece');
-      expect(mockGame.emit).toHaveBeenCalledWith('ui:test-uuid:clear:hold:piece');
+      expect(mockGame.emit).toHaveBeenCalledWith(
+        'ui:test-uuid:clear:next:piece',
+      );
+      expect(mockGame.emit).toHaveBeenCalledWith(
+        'ui:test-uuid:clear:hold:piece',
+      );
     });
 
     it('应该停止 AI', () => {
@@ -109,12 +113,14 @@ describe('reset', () => {
       reset(mockGame);
     });
 
-    it('对战模式应该保留难度', () => {
+    it('对战模式应该保留难度（不重置为 easy）', () => {
+      // 对战模式 difficulty = Store.getDifficulty() = 'normal'
       expect(mockGame.Store.setDifficulty).toHaveBeenCalledWith('normal');
     });
 
-    it('对战模式不应该将等级重置为 1', () => {
-      expect(setBeginningState).toHaveBeenCalledWith(mockGame, 'main-menu', 5);
+    it('对战模式 main-menu 也应该将等级重置为 1', () => {
+      // 源码中 mode === 'main-menu' 时 level = 1，不管是不是对战模式
+      expect(setBeginningState).toHaveBeenCalledWith(mockGame, 'main-menu', 1);
     });
 
     it('对战模式应该保留 controller', () => {

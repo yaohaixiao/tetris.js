@@ -425,7 +425,7 @@ describe('AIController', () => {
       ai.loop();
       expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
     });
-  })
+  });
 
   // ==================== 补充覆盖 313-314: expert 难度使用 mcts ====================
   describe('getDifficultyConfig', () => {
@@ -470,7 +470,12 @@ describe('AIController', () => {
       const state = mockStore.getState();
       const difficulty = {
         lookahead: 2,
-        weights: { holes: -5, height: -0.3, bumpiness: -0.2, completeLines: 20 },
+        weights: {
+          holes: -5,
+          height: -0.3,
+          bumpiness: -0.2,
+          completeLines: 20,
+        },
         beam: 5,
       };
 
@@ -508,7 +513,7 @@ describe('AIController', () => {
       expect(mockWorker.postMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           algorithm: 'mcts',
-        })
+        }),
       );
 
       ai.worker = null;
@@ -665,7 +670,10 @@ describe('AIController', () => {
           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         ],
         curr: {
-          shape: [[1, 1], [1, 1]],
+          shape: [
+            [1, 1],
+            [1, 1],
+          ],
           color: '#ff0000',
         },
         cx: 4,
@@ -709,8 +717,8 @@ describe('AIController', () => {
         mode: 'playing',
         board: Array.from({ length: 20 }, (_, i) =>
           Array.from({ length: 10 }, (_, j) =>
-            i > 15 && j < 8 ? '#cccccc' : 0
-          )
+            i > 15 && j < 8 ? '#cccccc' : 0,
+          ),
         ),
         curr: {
           shape: [
@@ -819,11 +827,11 @@ describe('AIController', () => {
 
       expect(mockWorker.addEventListener).toHaveBeenCalledWith(
         'message',
-        ai._onWorkerMessage
+        ai._onWorkerMessage,
       );
       expect(mockWorker.addEventListener).toHaveBeenCalledWith(
         'error',
-        ai._onWorkerError
+        ai._onWorkerError,
       );
 
       ai.worker = null;
@@ -840,11 +848,11 @@ describe('AIController', () => {
 
       expect(mockWorker.removeEventListener).toHaveBeenCalledWith(
         'message',
-        ai._onWorkerMessage
+        ai._onWorkerMessage,
       );
       expect(mockWorker.removeEventListener).toHaveBeenCalledWith(
         'error',
-        ai._onWorkerError
+        ai._onWorkerError,
       );
 
       ai.worker = null;
@@ -920,7 +928,10 @@ describe('AIController', () => {
       ai._onWorkerMessage({
         data: { type: 'error', error: 'worker error message' },
       });
-      expect(consoleSpy).toHaveBeenCalledWith('AI Worker Error:', 'worker error message');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'AI Worker Error:',
+        'worker error message',
+      );
       consoleSpy.mockRestore();
     });
 
@@ -987,7 +998,7 @@ describe('AIController', () => {
       ai.think(state, difficulty);
       expect(ai.workerBusy).toBe(true);
       expect(mockWorker.postMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'think' })
+        expect.objectContaining({ type: 'think' }),
       );
 
       // 2. loop 在 Worker 忙碌时继续调度

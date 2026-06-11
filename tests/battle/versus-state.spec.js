@@ -1,6 +1,7 @@
 /**
+ * 测试对战状态管理器的所有状态操作和垃圾行管理功能
+ *
  * @file VersusState 单元测试
- * @description 测试对战状态管理器的所有状态操作和垃圾行管理功能
  */
 
 import VersusState from '@/lib/battle/versus-state.js';
@@ -15,17 +16,13 @@ jest.mock('@/lib/core', () => {
 describe('VersusState', () => {
   // ==================== 辅助函数 ====================
 
-  /**
-   * 创建模拟的 Game 实例
-   */
+  /** 创建模拟的 Game 实例 */
   const createMockGame = (name, index) => ({
     Player: { name, index },
     id: `${name}-${index}`,
   });
 
-  /**
-   * 创建 VersusState 实例的快捷方法
-   */
+  /** 创建 VersusState 实例的快捷方法 */
   const createState = (games) => {
     return new VersusState({ games });
   };
@@ -89,10 +86,7 @@ describe('VersusState', () => {
     });
 
     test('应该为每个玩家初始化分数为 0', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       expect(state.scores['Alice-0']).toBe(0);
@@ -100,10 +94,7 @@ describe('VersusState', () => {
     });
 
     test('应该为每个玩家初始化待处理垃圾行为 0', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       expect(state.pendingGarbage['Alice-0']).toBe(0);
@@ -176,10 +167,7 @@ describe('VersusState', () => {
       const state = createState(initialGames);
 
       // 修改 games
-      state.games = [
-        createMockGame('Bob', 1),
-        createMockGame('Charlie', 2),
-      ];
+      state.games = [createMockGame('Bob', 1), createMockGame('Charlie', 2)];
 
       state._initialize();
 
@@ -243,7 +231,10 @@ describe('VersusState', () => {
 
     test('应该可以设置任意对象为胜者', () => {
       const state = createState([createMockGame('Alice', 0)]);
-      const winner = { id: 'custom-winner', Player: { name: 'Winner', index: 99 } };
+      const winner = {
+        id: 'custom-winner',
+        Player: { name: 'Winner', index: 99 },
+      };
 
       state.setWinner(winner);
       expect(state.getWinner()).toEqual(winner);
@@ -284,10 +275,7 @@ describe('VersusState', () => {
     });
 
     test('应该区分不同玩家的分数', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       state.scores['Alice-0'] = 3;
@@ -313,7 +301,9 @@ describe('VersusState', () => {
 
       expect(state.getPlayerId(createMockGame('Player1', 5))).toBe('Player1-5');
       expect(state.getPlayerId(createMockGame('Bob', 10))).toBe('Bob-10');
-      expect(state.getPlayerId(createMockGame('Charlie', 999))).toBe('Charlie-999');
+      expect(state.getPlayerId(createMockGame('Charlie', 999))).toBe(
+        'Charlie-999',
+      );
     });
 
     test('应该处理空字符串名称', () => {
@@ -342,10 +332,7 @@ describe('VersusState', () => {
 
   describe('updateScores', () => {
     test('应该给胜者增加 1 个胜场', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       state.updateScores({ winner: games[0], loser: games[1] });
@@ -355,10 +342,7 @@ describe('VersusState', () => {
     });
 
     test('应该保持败者分数不变', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       state.scores['Bob-1'] = 2;
@@ -368,10 +352,7 @@ describe('VersusState', () => {
     });
 
     test('应该多次调用累积胜场数', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       // Alice 连胜 3 局
@@ -384,10 +365,7 @@ describe('VersusState', () => {
     });
 
     test('应该支持交替获胜', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       // Alice 赢
@@ -405,10 +383,7 @@ describe('VersusState', () => {
     });
 
     test('应该将败者负数分数重置为 0', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       // 手动设置负数（异常数据）
@@ -420,10 +395,7 @@ describe('VersusState', () => {
     });
 
     test('败者分数为 0 时应该保持 0', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       state.updateScores({ winner: games[0], loser: games[1] });
@@ -432,10 +404,7 @@ describe('VersusState', () => {
     });
 
     test('应该处理胜者分数从非零开始累加', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       state.scores['Alice-0'] = 10;
@@ -483,10 +452,7 @@ describe('VersusState', () => {
     });
 
     test('应该为不同玩家独立累加', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       state.addGarbage(games[0], 3);
@@ -717,10 +683,7 @@ describe('VersusState', () => {
     });
 
     test('应该只清空指定玩家的垃圾行', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       state.addGarbage(games[0], 5);
@@ -770,10 +733,7 @@ describe('VersusState', () => {
 
   describe('reset', () => {
     test('应该重置所有状态为初始值', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       // 修改状态
@@ -822,10 +782,7 @@ describe('VersusState', () => {
 
   describe('集成测试', () => {
     test('完整的对战生命周期', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       // 1. 开始对战
@@ -869,10 +826,7 @@ describe('VersusState', () => {
     });
 
     test('多局对战分数累积', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       // 模拟 5 局对战
@@ -896,10 +850,7 @@ describe('VersusState', () => {
     });
 
     test('垃圾行攻防交互', () => {
-      const games = [
-        createMockGame('Alice', 0),
-        createMockGame('Bob', 1),
-      ];
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const state = createState(games);
 
       // Alice 消 4 行 → 攻击力 3

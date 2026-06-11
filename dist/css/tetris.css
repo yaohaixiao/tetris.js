@@ -119,6 +119,66 @@ body {
 .tetris-battle-score:last-child {
   transform: translateX(0);
 }
+.tetris-battle-overlay {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  border: 3px solid #fff;
+  overflow: hidden;
+}
+.tetris-battle-overlay:after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #333;
+  opacity: 0.3;
+  overflow: hidden;
+}
+.tetris-battle-title {
+  position: relative;
+  z-index: 4;
+  margin: 12% auto 0;
+  font-size: 2.4vw;
+  text-align: center;
+  user-select: none;
+  width: 86%;
+}
+.tetris-battle-winner {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  transform: translate(-50%, 12vh);
+  user-select: none;
+  text-align: center;
+  width: 86%;
+  overflow: hidden;
+}
+.tetris-battle-actions {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  transform: translate(-50%, 24vh);
+  width: 86%;
+  text-align: center;
+  color: #0afa04;
+  overflow: hidden;
+}
+.tetris-hidden {
+  display: none;
+}
 /* ====== 游戏界面：主体画布区域样式 ====== */
 .tetris-screen-main {
   position: relative;

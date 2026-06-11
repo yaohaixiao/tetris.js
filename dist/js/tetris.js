@@ -14,6 +14,8 @@ var tetris = (() => {
      * - 人机对战：['human', 'ai']； — 双人对战：['human', 'human']； — AI 对战：['ai', 'ai']；
      */
     Players: ["human", "ai"],
+    // 先得 20 分者获胜
+    victoryScore: 2,
     /*
      * ==================== 方块渲染配置 ====================
      */
@@ -45,6 +47,10 @@ var tetris = (() => {
      * ==================== 游戏元素配置 ====================
      */
     Elements: {
+      Battle: {
+        overlay: "tetris-battle-overlay",
+        winner: "tetris-battle-winner"
+      },
       /*
        * ==================== 棋盘 Canvas 配置 ====================
        */
@@ -3211,7 +3217,8 @@ var tetris = (() => {
     FLUSH_GARBAGE: "battle:flush:garbage",
     UPDATE_WINNER: "battle:update:winner",
     SYNC_PAUSE: "battle:sync:pause",
-    SYNC_RESUME: "battle:sync:resume"
+    SYNC_RESUME: "battle:sync:resume",
+    RESET: "battle:reset"
   });
   var CommandEvents = (uuid) => ({
     CLEAR: `command:queue:${uuid}:clear`,
@@ -6707,6 +6714,15 @@ var tetris = (() => {
      */
     replay: (canvas, state) => {
       replay_scene_default(canvas, state);
+    },
+    /**
+     * ## 对战结束场景
+     *
+     * @param {object} canvas - 游戏 canvas 信息对象
+     * @param {object} state 游戏状态
+     */
+    "battle-over": (canvas, state) => {
+      main_menu_scene_default(canvas, state);
     }
   };
   var scenes_default = Scenes;
@@ -8800,7 +8816,7 @@ var tetris = (() => {
      * ## 简单难度（EASY）
      *
      * - 多看一步（lookahead=2），有基本前瞻
-     * - 25% 概率随机选择非最优解，模拟人类失误
+     * - 15% 概率随机选择非最优解，模拟人类失误
      * - 决策延迟 580ms，给玩家充足的操作时间
      */
     EASY: {
@@ -8814,7 +8830,7 @@ var tetris = (() => {
      *
      * - 多看两步（lookahead=3），深度推演
      * - Beam Search 剪枝宽度 2，保证流畅
-     * - 15% 概率随机选择，偶尔失误
+     * - 8% 概率随机选择，偶尔失误
      * - 决策延迟 480ms，中等响应速度
      */
     NORMAL: {
@@ -8829,13 +8845,13 @@ var tetris = (() => {
      *
      * - 多看三步（lookahead=4），极限推演
      * - Beam Search 剪枝宽度 4，保留更多候选
-     * - 5% 概率随机选择，很少失误
+     * - 4% 概率随机选择，很少失误
      * - 决策延迟 280ms，较快响应
      */
     HARD: {
       lookahead: 4,
       beam: 4,
-      noise: 0.05,
+      noise: 0.04,
       weights: AI_WEIGHTS,
       delay: 280
     },
@@ -11530,9 +11546,7 @@ var tetris = (() => {
     Store.resetBoard();
     if (mode === "main-menu") {
       Store.setDifficulty(difficulty);
-      if (!runtime.isVersus()) {
-        level = 1;
-      }
+      level = 1;
       runtime.emit(AUE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
     }
     set_beginning_state_default(runtime, mode, level);
@@ -13045,6 +13059,29 @@ var tetris = (() => {
   };
   var battle_hud_default = BattleHUD;
 
+  // lib/battle/battle-ui.js
+  var BattleUI = class extends core_default {
+    constructor(options) {
+      super(options);
+      this.initialize();
+    }
+    /** 初始化：缓存 DOM 元素引用，绑定按钮事件 */
+    initialize() {
+      const { overlay, winner } = this.elements;
+      this.$overlay = document.querySelector(`#${overlay}`);
+      this.$winner = document.querySelector(`#${winner}`);
+    }
+    show(winner) {
+      this.$winner.textContent = winner;
+      this.$overlay.classList.remove("tetris-hidden");
+    }
+    hide() {
+      this.$winner.textContent = "";
+      this.$overlay.classList.add("tetris-hidden");
+    }
+  };
+  var battle_ui_default = BattleUI;
+
   // lib/events/router/battle-router.js
   var BattleRouter = class extends core_default {
     /**
@@ -13080,12 +13117,12 @@ var tetris = (() => {
       this.on(events.UPDATE_WINNER, this._onBattleUpdateWinner);
       this.on(events.SYNC_PAUSE, this._onBattleSyncPause);
       this.on(events.SYNC_RESUME, this._onBattleSyncResume);
+      this.on(events.RESET, this._onBattleReset);
     }
     /**
      * ## 取消订阅对战事件
      *
-     * 移除所有在 subscribe() 中注册的事件处理器，防止内存泄漏。
-     * 通常在组件销毁或切换模式时调用。
+     * 移除所有在 subscribe() 中注册的事件处理器，防止内存泄漏。 通常在组件销毁或切换模式时调用。
      *
      * @returns {void}
      */
@@ -13096,6 +13133,7 @@ var tetris = (() => {
       this.off(events.UPDATE_WINNER, this._onBattleUpdateWinner);
       this.off(events.SYNC_PAUSE, this._onBattleSyncPause);
       this.off(events.SYNC_RESUME, this._onBattleSyncResume);
+      this.off(events.SYNC_RESUME, this._onBattleReset);
     }
     /**
      * ## 处理攻击事件
@@ -13104,18 +13142,15 @@ var tetris = (() => {
      *
      * ### 处理流程
      *
-     * ```
-     * 玩家消行 → 触发 PROCESS_ATTACK 事件
-     *          → 路由到本方法
-     *          → 调用 battle.processAttack(from, lines)
-     *          → 计算攻击力，尝试抵消对方 pendingGarbage
-     * ```
-     *
-     * @param {object} payload - 事件负载
-     * @param {string|number} payload.from - 发起攻击的玩家标识（攻击来源）
-     * @param {number} payload.lines - 消除的行数，用于计算攻击力
+     *     玩家消行 → 触发 PROCESS_ATTACK 事件
+     *      → 路由到本方法
+     *      → 调用 battle.processAttack(from, lines)
+     *      → 计算攻击力，尝试抵消对方 pendingGarbage
      *
      * @private
+     * @param {object} payload - 事件负载
+     * @param {string | number} payload.from - 发起攻击的玩家标识（攻击来源）
+     * @param {Array} payload.lines - 消除的行数数据，用于计算攻击力
      */
     _onBattleProcessAttack = (payload) => {
       const { battle } = this;
@@ -13130,16 +13165,15 @@ var tetris = (() => {
      * ### 为什么分两步？
      *
      * 攻击系统采用**延迟插入**策略：
+     *
      * 1. **PROCESS_ATTACK**（消行开始时）：先计算攻击力，抵消对方的 pendingGarbage
      * 2. **FLUSH_GARBAGE**（消行动画结束时）：再将最终确定的垃圾行插入对方棋盘
      *
      * 这样可以确保消行动画播放完毕后，垃圾行才出现，视觉效果更流畅。
      *
-     * @param {object} payload - 事件负载
-     * @param {string|number} payload.from - 发起攻击的玩家标识（攻击来源），
-     *                                       垃圾行将插入到对方的棋盘
-     *
      * @private
+     * @param {object} payload - 事件负载
+     * @param {string | number} payload.from - 发起攻击的玩家标识（攻击来源）， 垃圾行将插入到对方的棋盘
      */
     _onBattleFlushGarbage = (payload) => {
       const { battle } = this;
@@ -13157,10 +13191,9 @@ var tetris = (() => {
      * - 主动认输
      * - 其他导致游戏结束的条件
      *
-     * @param {object} payload - 事件负载
-     * @param {string|number} payload.loser - 失败的玩家标识
-     *
      * @private
+     * @param {object} payload - 事件负载
+     * @param {string | number} payload.loser - 失败的玩家标识
      */
     _onBattleUpdateWinner = (payload) => {
       const { battle } = this;
@@ -13175,16 +13208,16 @@ var tetris = (() => {
      * ### 同步策略
      *
      * 对战模式下的暂停需要**双方同步**：
+     *
      * - 玩家 A 暂停 → 触发 SYNC_PAUSE
      * - 路由到本方法 → 获取对手（玩家 B）
      * - 调用对手的 pause 方法 → 玩家 B 也被暂停
      *
      * 这样可以避免一方暂停时另一方还能继续操作的不公平情况。
      *
-     * @param {object} payload - 事件负载
-     * @param {string|number} payload.from - 发起暂停的玩家标识
-     *
      * @private
+     * @param {object} payload - 事件负载
+     * @param {string | number} payload.from - 发起暂停的玩家标识
      */
     _onBattleSyncPause = (payload) => {
       const { battle } = this;
@@ -13200,22 +13233,27 @@ var tetris = (() => {
      * ### 同步策略
      *
      * 与暂停对称：
+     *
      * - 玩家 A 恢复 → 触发 SYNC_RESUME
      * - 路由到本方法 → 获取对手（玩家 B）
      * - 调用对手的 resume 方法 → 玩家 B 也恢复
      *
      * 确保双方始终处于相同的游戏状态（运行中 / 暂停中）。
      *
-     * @param {object} payload - 事件负载
-     * @param {string|number} payload.from - 发起恢复的玩家标识
-     *
      * @private
+     * @param {object} payload - 事件负载
+     * @param {string | number} payload.from - 发起恢复的玩家标识
      */
     _onBattleSyncResume = (payload) => {
       const { battle } = this;
       const { from } = payload;
       const opponent = battle.getOpponent(from);
       opponent.resume(opponent);
+    };
+    _onBattleReset = (payload) => {
+      const { battle } = this;
+      const { from } = payload;
+      battle.reset(from);
     };
   };
   var battle_router_default = BattleRouter;
@@ -13313,11 +13351,12 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize() {
-      const { games } = this;
+      const { games, elements } = this;
       const state = new versus_state_default({ games });
       this.state = state;
       this.hud = new battle_hud_default({ games, state });
       this.router = new battle_router_default({ battle: this });
+      this.ui = new battle_ui_default({ elements });
       this.start();
     }
     /**
@@ -13397,14 +13436,52 @@ var tetris = (() => {
      * @returns {void}
      */
     update(loser) {
+      const { victoryScore, state } = this;
       const winner = this.getOpponent(loser);
       this.stop();
-      this.state.setWinner(winner);
-      this.state.updateScores({ winner, loser });
+      state.setWinner(winner);
+      state.updateScores({ winner, loser });
       this.hud.updateScores(winner, loser);
+      const winnerId = state.getPlayerId(winner);
+      const winnerScore = state.getScore(winnerId);
+      if (winnerScore >= victoryScore) {
+        this.over(winner, loser);
+      } else {
+        this.restart(loser);
+      }
+    }
+    /**
+     * ## 整场对战结束
+     *
+     * @param {object} winner - 获胜的游戏实例
+     * @param {object} loser - 落败的游戏实例
+     * @returns {void}
+     */
+    over(winner, loser) {
+      const WE = GameEvents(winner.id);
+      const LE = GameEvents(loser.id);
+      const payload = { mode: "battle-over" };
+      winner.emit(WE.UPDATE_MODE, payload);
+      loser.emit(LE.UPDATE_MODE, payload);
+      this.ui.show(winner.Player?.name?.toUpperCase() || "HUMAN");
+    }
+    /**
+     * ## 重新开始一局对战
+     *
+     * @param {object} loser - 落败的游戏实例
+     * @returns {void}
+     */
+    restart(loser) {
       const events = GameEvents(loser.id);
       loser.emit(events.RESTART);
       this.start();
+    }
+    reset(from) {
+      const opponent = this.getOpponent(from);
+      console.log("battle reset", opponent, from);
+      this.state.reset();
+      this.hud.updateScores(from, opponent);
+      this.ui.hide();
     }
     /**
      * ## 获取对手
@@ -13426,7 +13503,6 @@ var tetris = (() => {
      *   console.log(opponent.Player.name); // 对手的名称
      *
      * @param {object} yourself - 当前玩家 Game 实例
-     * @param {string | number} yourself.id - 当前玩家唯一标识
      * @returns {object} 对手的 Game 实例
      */
     getOpponent(yourself) {
@@ -14216,6 +14292,29 @@ var tetris = (() => {
   };
   var replay_actions_default = REPLAY_ACTIONS;
 
+  // lib/game/actions/battle-over-actions.js
+  var BATTLE_OVER_ACTIONS = {
+    /**
+     * 确认操作（例如：Enter / Space / OK）
+     *
+     * 作用：
+     *
+     * - 重置游戏状态
+     * - 返回主菜单
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     */
+    CONFIRM: (payload) => {
+      const { Game: Game2 } = payload;
+      if (!Game2) {
+        return;
+      }
+      const events = BattleEvents();
+      Game2.emit(events.RESET, { from: Game2 });
+    }
+  };
+  var battle_over_actions_default = BATTLE_OVER_ACTIONS;
+
   // lib/engine/dispatch-command.js
   var ACTIONS_MAP = {
     "main-menu": main_menu_actions_default,
@@ -14223,7 +14322,8 @@ var tetris = (() => {
     playing: game_playing_actions_default,
     paused: paused_actions_default,
     replay: replay_actions_default,
-    "game-over": game_over_actions_default
+    "game-over": game_over_actions_default,
+    "battle-over": battle_over_actions_default
   };
   var dispatchCommand = (cmd, options) => {
     const { mode } = options;
@@ -14321,7 +14421,7 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize: (options) => {
-      const { Players } = options;
+      const { Players, Mode, victoryScore, Elements } = options;
       Engine.Scheduler = new scheduler_default();
       const normalizedOptions = {
         ...options,
@@ -14329,7 +14429,11 @@ var tetris = (() => {
         isAIPlayer: true
       };
       Engine.Audio = new audio_default(normalizedOptions);
-      for (const [index, player] of Players.entries()) {
+      const finalPlayers = [...Players];
+      if (Mode === "single") {
+        finalPlayers.pop();
+      }
+      for (const [index, player] of finalPlayers.entries()) {
         Engine.Games.push(
           new game_default2({
             Player: {
@@ -14342,7 +14446,9 @@ var tetris = (() => {
       }
       if (Engine.isVersus()) {
         Engine.Battle = new battle_controller_default({
-          games: Engine.Games
+          games: Engine.Games,
+          victoryScore,
+          elements: Elements.Battle
         });
       }
     },

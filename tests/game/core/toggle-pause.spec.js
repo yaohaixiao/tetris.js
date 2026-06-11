@@ -77,7 +77,10 @@ describe('togglePause', () => {
 
       togglePause(mockContext);
 
-      expect(mockContext.emit).not.toHaveBeenCalledWith('battle:sync:pause', expect.any(Object));
+      expect(mockContext.emit).not.toHaveBeenCalledWith(
+        'battle:sync:pause',
+        expect.any(Object),
+      );
     });
 
     it('对战模式 playing 时应该发送暂停同步事件', () => {
@@ -118,7 +121,10 @@ describe('togglePause', () => {
 
       togglePause(mockContext);
 
-      expect(mockContext.emit).not.toHaveBeenCalledWith('battle:sync:resume', expect.any(Object));
+      expect(mockContext.emit).not.toHaveBeenCalledWith(
+        'battle:sync:resume',
+        expect.any(Object),
+      );
     });
 
     it('对战模式 paused 时应该发送恢复同步事件', () => {

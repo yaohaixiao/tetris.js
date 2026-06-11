@@ -1,6 +1,4 @@
-/**
- * @file 垃圾行系统单元测试 - 完整修正版
- */
+/** @file 垃圾行系统单元测试 - 完整修正版 */
 
 import { calculateGarbage, applyGarbage } from '@/lib/battle/garbage-system.js';
 import COLORS from '@/lib/constants/colors.js';
@@ -97,7 +95,6 @@ describe('Garbage System', () => {
   // ==================== applyGarbage ====================
 
   describe('applyGarbage', () => {
-
     // ==================== 基本功能 ====================
     describe('基本功能', () => {
       test('应该在棋盘底部添加垃圾行', () => {
@@ -451,7 +448,9 @@ describe('Garbage System', () => {
         const board = createEmptyBoard(10, 10);
         ['easy', 'normal', 'hard', 'expert'].forEach((diff) => {
           const result = applyGarbage(board, 1, diff);
-          expect(result[9].filter((c) => c === 0).length).toBeGreaterThanOrEqual(1);
+          expect(
+            result[9].filter((c) => c === 0).length,
+          ).toBeGreaterThanOrEqual(1);
         });
       });
     });

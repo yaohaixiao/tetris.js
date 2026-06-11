@@ -29,7 +29,7 @@ describe('KeyboardController', () => {
     jest.clearAllMocks();
 
     mockPlayer = {
-      name: 'human'
+      name: 'human',
     };
 
     mockStore = {

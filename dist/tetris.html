@@ -18,6 +18,14 @@
   </head>
   <body>
     <div class="tetris-container" data-mode="versus">
+      <section id="tetris-battle-overlay" class="tetris-battle-overlay tetris-hidden">
+        <h2 class="tetris-battle-title">BATTILE OVER</h2>
+        <div class="tetris-battle-winner">WINNER IS <span id="tetris-battle-winner" class="tetris-highlight">HUMAN</span></div>
+        <footer class="tetris-battle-actions">
+          <div id="tetris-battle-rematch">ENTER TO REMATCH</div>
+        </footer>
+      </section>
+
       <div id="human-0-tetris-player" class="tetris-player">
         <section class="tetris-screen">
           <section id="human-0-tetris-screen-main" class="tetris-screen-main">
@@ -72,7 +80,9 @@
           </section>
         </footer>
       </div>
+
       <div id="human-0-tetris-battle-score" class="tetris-battle-score">0</div>
+
       <div id="ai-1-tetris-player" class="tetris-player">
         <section class="tetris-screen">
           <section id="ai-1-tetris-screen-main" class="tetris-screen-main">
@@ -127,6 +137,7 @@
           </section>
         </footer>
       </div>
+
       <div id="ai-1-tetris-battle-score" class="tetris-battle-score">0</div>
     </div>
     <script src="js/tetris.js"></script>

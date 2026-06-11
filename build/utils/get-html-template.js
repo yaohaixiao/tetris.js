@@ -7,8 +7,23 @@ const getHtmlTemplate = (args) => {
   const stylePath = minify ? 'css/tetris.min.css' : 'css/tetris.css';
   const scriptPath = minify ? 'js/tetris.min.js' : 'js/tetris.js';
   const templates = [];
+  const finalPlayers = [...Players];
 
-  for (const [index, player] of Players.entries()) {
+  if (Mode === 'single') {
+    finalPlayers.pop();
+  } else {
+    templates.push(`
+      <section id="tetris-battle-overlay" class="tetris-battle-overlay tetris-hidden">
+        <h2 class="tetris-battle-title">BATTILE OVER</h2>
+        <div class="tetris-battle-winner">WINNER IS <span id="tetris-battle-winner" class="tetris-highlight">HUMAN</span></div>
+        <footer class="tetris-battle-actions">
+          <div id="tetris-battle-rematch">ENTER TO REMATCH</div>
+        </footer>
+      </section>
+    `);
+  }
+
+  for (const [index, player] of finalPlayers.entries()) {
     const html = `
       <div id="${player}-${index}-tetris-player" class="tetris-player">
         <section class="tetris-screen">
@@ -70,9 +85,9 @@ const getHtmlTemplate = (args) => {
 
     // 对战模式记分
     if (Mode === 'versus') {
-      templates.push(
-        `<div id="${player}-${index}-tetris-battle-score" class="tetris-battle-score">0</div>`,
-      );
+      templates.push(`
+        <div id="${player}-${index}-tetris-battle-score" class="tetris-battle-score">0</div>
+      `);
     }
   }
 

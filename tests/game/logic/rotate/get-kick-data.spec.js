@@ -1,6 +1,7 @@
 /**
- * @file getKickData 单元测试
- * @description 测试根据方块类型获取对应墙踢数据的功能
+ * 测试根据方块类型获取对应墙踢数据的功能
+ *
+ * @file GetKickData 单元测试
  */
 
 import getKickData from '@/lib/game/logic/rotate/get-kick-data.js';
@@ -184,14 +185,14 @@ describe('getKickData', () => {
   describe('所有有效类型对照验证', () => {
     it('应该为每种类型返回正确的数据', () => {
       const expectedMap = {
-        'I': KICK_I,
-        'I5': KICK_I5,
-        'O': null,
-        'J': KICK_JLSZT,
-        'L': KICK_JLSZT,
-        'S': KICK_JLSZT,
-        'Z': KICK_JLSZT,
-        'T': KICK_JLSZT,
+        I: KICK_I,
+        I5: KICK_I5,
+        O: null,
+        J: KICK_JLSZT,
+        L: KICK_JLSZT,
+        S: KICK_JLSZT,
+        Z: KICK_JLSZT,
+        T: KICK_JLSZT,
       };
 
       Object.entries(expectedMap).forEach(([type, expected]) => {
@@ -262,7 +263,20 @@ describe('getKickData', () => {
     });
 
     it('不应该抛出异常', () => {
-      const types = ['I', 'I5', 'O', 'J', 'L', 'S', 'Z', 'T', '', null, undefined, 'unknown'];
+      const types = [
+        'I',
+        'I5',
+        'O',
+        'J',
+        'L',
+        'S',
+        'Z',
+        'T',
+        '',
+        null,
+        undefined,
+        'unknown',
+      ];
       types.forEach((type) => {
         expect(() => getKickData(type)).not.toThrow();
       });
