@@ -15,7 +15,7 @@ var tetris = (() => {
      */
     Players: ["human", "human"],
     // 先得 15 分者获胜
-    victoryScore: 5,
+    victoryScore: 15,
     /*
      * ==================== 方块渲染配置 ====================
      */
@@ -12666,15 +12666,32 @@ var tetris = (() => {
   };
   var game_default2 = Game;
 
-  // lib/battle/versus-state.js
-  var VersusState = class extends core_default {
+  // lib/battle/battle-state.js
+  var BattleState = {
+    /** 对战是否进行中 */
+    running: false,
+    /** 当前单局胜者 Game 实例，null 表示尚未决出 */
+    winner: null,
+    /** 双方胜场数，key: playerId, value: 胜场数 */
+    scores: {},
+    /**
+     * 双方待处理垃圾行数 key: playerId（将要接收垃圾行的玩家） value: 累积的垃圾行数量
+     *
+     * 注意：pendingGarbage[playerId] 表示该玩家尚未处理的垃圾行， 在当前消行时可以被攻击力抵消。
+     */
+    pendingGarbage: {}
+  };
+  var battle_state_default = BattleState;
+
+  // lib/battle/battle-store.js
+  var BattleStore = class extends core_default {
     /**
      * ## 构造函数
      *
      * 初始化对战状态管理器，接收 Game 实例数组。 构造完成后立即调用 initialize() 初始化所有状态字段。
      *
      * @example
-     *   const state = new VersusState({
+     *   const store = new BattleStore({
      *     games: [
      *       { Player: { name: 'Alice', index: 0 } },
      *       { Player: { name: 'Bob', index: 1 } },
@@ -12691,7 +12708,9 @@ var tetris = (() => {
     /**
      * ## 初始化状态
      *
-     * 公共初始化接口，内部委托给 `_initialize()` 私有方法。 这样设计的目的是：
+     * 公共初始化接口，内部委托给 `_initialize()` 私有方法。
+     *
+     * 这样设计的目的是：
      *
      * - 提供清晰的公共 API（`initialize`）
      * - 内部实现细节封装在 `_initialize` 中
@@ -12705,13 +12724,16 @@ var tetris = (() => {
     /**
      * ## 内部初始化实现
      *
-     * 设置所有状态的初始值：
+     * 执行以下步骤：
      *
-     * 1. 设置 `running` 为 false（未开始）
-     * 2. 清空 `winner`（无胜者）
-     * 3. 初始化 `scores` 为空对象
-     * 4. 初始化 `pendingGarbage` 为空对象
-     * 5. 遍历所有 Game 实例，为每个玩家设置初始分数和垃圾行数为 0
+     * 1. 通过 `structuredClone(BattleState)` 深拷贝初始状态模板
+     * 2. 遍历所有 Game 实例，为每个玩家初始化分数和垃圾行数为 0
+     *
+     * ### 为什么用 structuredClone？
+     *
+     * - 深拷贝保证每次初始化都是全新的独立对象
+     * - 避免多个 BattleStore 实例共享同一份数据
+     * - 比 JSON.parse(JSON.stringify()) 性能更好，且支持更多类型
      *
      * ### 为什么要为每个玩家初始化？
      *
@@ -12724,14 +12746,12 @@ var tetris = (() => {
      */
     _initialize() {
       const { games } = this;
-      this.running = false;
-      this.winner = null;
-      this.scores = {};
-      this.pendingGarbage = {};
+      this.state = structuredClone(battle_state_default);
+      const { scores, pendingGarbage } = this.state;
       for (const game of games) {
         const playerId = this.getPlayerId(game);
-        this.scores[playerId] = 0;
-        this.pendingGarbage[playerId] = 0;
+        scores[playerId] = 0;
+        pendingGarbage[playerId] = 0;
       }
     }
     /**
@@ -12740,13 +12760,13 @@ var tetris = (() => {
      * 控制对战的开始和结束。
      *
      * @example
-     *   state.setRunning(true); // 开始对战
-     *   state.setRunning(false); // 结束对战
+     *   store.setRunning(true); // 开始对战
+     *   store.setRunning(false); // 结束对战
      *
      * @param {boolean} running - True 表示对战进行中，false 表示已结束
      */
     setRunning(running) {
-      this.running = running;
+      this.state.running = running;
     }
     /**
      * ## 获取对战运行状态
@@ -12754,35 +12774,35 @@ var tetris = (() => {
      * 查询对战是否正在进行中。
      *
      * @example
-     *   if (state.isRunning()) {
+     *   if (store.isRunning()) {
      *     // 处理游戏逻辑
      *   }
      *
      * @returns {boolean} True 表示对战进行中，false 表示已结束或未开始
      */
     isRunning() {
-      return this.running;
+      return this.state.running;
     }
     /**
-     * ## 设置胜者
+     * ## 设置单局胜者
      *
-     * 在游戏结束时调用，记录获胜的玩家。
+     * 在单局游戏结束时调用，记录获胜的玩家。
      *
      * @example
-     *   state.setWinner(gameInstance);
+     *   store.setWinner(gameInstance);
      *
      * @param {object} winner - 胜者的 Game 实例
      */
     setWinner(winner) {
-      this.winner = winner;
+      this.state.winner = winner;
     }
     /**
-     * ## 获取胜者
+     * ## 获取单局胜者
      *
-     * 查询当前对战的胜者。
+     * 查询当前单局的胜者。
      *
      * @example
-     *   const winner = state.getWinner();
+     *   const winner = store.getWinner();
      *   if (winner) {
      *     console.log('胜者是：', winner.Player.name);
      *   }
@@ -12790,7 +12810,7 @@ var tetris = (() => {
      * @returns {object | null} 胜者的 Game 实例，未决出胜者时返回 null
      */
     getWinner() {
-      return this.winner;
+      return this.state.winner;
     }
     /**
      * ## 获取指定玩家的分数
@@ -12798,14 +12818,14 @@ var tetris = (() => {
      * 查询某位玩家的胜场数。
      *
      * @example
-     *   const score = state.getScore('Alice-0');
+     *   const score = store.getScore('human-0');
      *   console.log(score); // 例如：3
      *
      * @param {string} id - 玩家唯一标识，格式为 `{name}-{index}`
      * @returns {number} 玩家的胜场数
      */
     getScore(id) {
-      return this.scores[id];
+      return this.state.scores[id];
     }
     /**
      * ## 获取玩家唯一标识
@@ -12816,7 +12836,7 @@ var tetris = (() => {
      *
      *     {Player.name}-{Player.index}
      *
-     * - `Player.name`：玩家名称（如 "Alice"）
+     * - `Player.name`：玩家名称（如 "human"、"ai"）
      * - `Player.index`：玩家索引（如 0 或 1）
      * - 连接符：`-`
      *
@@ -12824,12 +12844,13 @@ var tetris = (() => {
      *
      * | Player.name | Player.index | 生成的 ID |
      * | ----------- | ------------ | --------- |
+     * | human       | 0            | `human-0` |
+     * | ai          | 1            | `ai-1`    |
      * | Alice       | 0            | `Alice-0` |
-     * | Bob         | 1            | `Bob-1`   |
      *
      * @example
-     *   const id = state.getPlayerId(game);
-     *   console.log(id); // "Alice-0"
+     *   const id = store.getPlayerId(game);
+     *   console.log(id); // "human-0"
      *
      * @param {object} game - Game 实例
      * @param {object} game.Player - 玩家信息
@@ -12859,11 +12880,11 @@ var tetris = (() => {
      * - 确保数据完整性
      *
      * @example
-     *   state.updateScores({
-     *     winner: game1, // Alice 获胜
-     *     loser: game2, // Bob 落败
+     *   store.updateScores({
+     *     winner: game1, // human 获胜
+     *     loser: game2, // ai 落败
      *   });
-     *   // Alice 胜场 +1，Bob 胜场不变
+     *   // human 胜场 +1，ai 胜场不变
      *
      * @param {object} options - 更新选项
      * @param {object} options.winner - 胜者的 Game 实例
@@ -12871,16 +12892,17 @@ var tetris = (() => {
      */
     updateScores(options) {
       const { winner, loser } = options;
+      const { scores } = this.state;
       const winnerId = this.getPlayerId(winner);
-      let winnerScore = this.scores[winnerId];
+      let winnerScore = scores[winnerId];
       const loserId = this.getPlayerId(loser);
-      let loserScore = this.scores[loserId];
+      let loserScore = scores[loserId];
       winnerScore += 1;
       if (loserScore <= 0) {
         loserScore = 0;
       }
-      this.scores[winnerId] = winnerScore;
-      this.scores[loserId] = loserScore;
+      scores[winnerId] = winnerScore;
+      scores[loserId] = loserScore;
     }
     /**
      * ## 累加待处理垃圾行
@@ -12901,16 +12923,17 @@ var tetris = (() => {
      * - **视觉流畅**：垃圾行在消行动画结束后才出现
      *
      * @example
-     *   // Alice 受到 3 行垃圾攻击
-     *   state.addGarbage(aliceGame, 3);
-     *   // pendingGarbage['Alice-0'] 现在增加了 3
+     *   // human 受到 3 行垃圾攻击
+     *   store.addGarbage(humanGame, 3);
+     *   // pendingGarbage['human-0'] 现在增加了 3
      *
      * @param {object} game - 受到攻击的玩家 Game 实例
      * @param {number} amount - 要添加的垃圾行数量
      */
     addGarbage(game, amount) {
+      const { pendingGarbage } = this.state;
       const playerId = this.getPlayerId(game);
-      this.pendingGarbage[playerId] = (this.pendingGarbage[playerId] || 0) + amount;
+      pendingGarbage[playerId] = (pendingGarbage[playerId] || 0) + amount;
     }
     /**
      * ## 用消行攻击抵消待处理垃圾行
@@ -12945,26 +12968,27 @@ var tetris = (() => {
      * | 2       | 2           | 0              | 0（刚好抵消）      |
      *
      * @example
-     *   // Bob 有 5 行待处理垃圾，消了 2 行（攻击力 1）
-     *   const actualGarbage = state.offsetGarbage(bobGame, 1);
+     *   // ai 有 5 行待处理垃圾，消了 2 行（攻击力 1）
+     *   const actualGarbage = store.offsetGarbage(aiGame, 1);
      *   // actualGarbage = 0（攻击力不足以抵消）
-     *   // pendingGarbage['Bob-1'] 现在 = 4
+     *   // pendingGarbage['ai-1'] 现在 = 4
      *
      * @example
-     *   // Bob 有 2 行待处理垃圾，消了 4 行（攻击力 3）
-     *   const actualGarbage = state.offsetGarbage(bobGame, 3);
+     *   // ai 有 2 行待处理垃圾，消了 4 行（攻击力 3）
+     *   const actualGarbage = store.offsetGarbage(aiGame, 3);
      *   // actualGarbage = 1（抵消 2 行后剩余 1 行攻击力）
-     *   // pendingGarbage['Bob-1'] 现在 = 0
+     *   // pendingGarbage['ai-1'] 现在 = 0
      *
      * @param {object} game - 消行的玩家 Game 实例（拥有 pendingGarbage 的一方）
      * @param {number} attackLines - 本次消行产生的攻击力（垃圾行数）
      * @returns {number} 抵消后剩余的攻击力，即可实际发送给对手的垃圾行数
      */
     offsetGarbage(game, attackLines) {
+      const { pendingGarbage } = this.state;
       const playerId = this.getPlayerId(game);
-      const pending = this.pendingGarbage[playerId] || 0;
+      const pending = pendingGarbage[playerId] || 0;
       const remaining = Math.max(0, pending - attackLines);
-      this.pendingGarbage[playerId] = remaining;
+      pendingGarbage[playerId] = remaining;
       return remaining > 0 ? 0 : attackLines - pending;
     }
     /**
@@ -12973,7 +12997,7 @@ var tetris = (() => {
      * 查询某位玩家当前累积的待处理垃圾行数量。
      *
      * @example
-     *   const pending = state.getPendingGarbage(game);
+     *   const pending = store.getPendingGarbage(game);
      *   console.log(`你有 ${pending} 行垃圾待处理`);
      *
      * @param {object} game - 要查询的玩家 Game 实例
@@ -12981,7 +13005,7 @@ var tetris = (() => {
      */
     getPendingGarbage(game) {
       const playerId = this.getPlayerId(game);
-      return this.pendingGarbage[playerId] || 0;
+      return this.state.pendingGarbage[playerId] || 0;
     }
     /**
      * ## 清空待处理垃圾行
@@ -12995,15 +13019,15 @@ var tetris = (() => {
      * - 调试和测试
      *
      * @example
-     *   // 清除 Alice 的所有待处理垃圾
-     *   state.clearGarbage(aliceGame);
-     *   // pendingGarbage['Alice-0'] 现在 = 0
+     *   // 清除 human 的所有待处理垃圾
+     *   store.clearGarbage(humanGame);
+     *   // pendingGarbage['human-0'] 现在 = 0
      *
      * @param {object} game - 要清空垃圾行的玩家 Game 实例
      */
     clearGarbage(game) {
       const playerId = this.getPlayerId(game);
-      this.pendingGarbage[playerId] = 0;
+      this.state.pendingGarbage[playerId] = 0;
     }
     /**
      * ## 重置状态
@@ -13018,8 +13042,8 @@ var tetris = (() => {
      * - `pendingGarbage` → 所有玩家归零
      *
      * @example
-     *   // 一局对战结束后，重置状态准备下一局
-     *   state.reset();
+     *   // 整场对战结束后，重置状态准备下一场
+     *   store.reset();
      *
      * @returns {void}
      */
@@ -13027,14 +13051,19 @@ var tetris = (() => {
       this._initialize();
     }
   };
-  var versus_state_default = VersusState;
+  var battle_store_default = BattleStore;
 
   // lib/battle/battle-hud.js
   var BattleHUD = class extends core_default {
     /**
      * ## 构造函数
      *
-     * 初始化对战 HUD，接收 Game 实例数组和状态管理对象。 构造完成后立即调用 initialize() 缓存 DOM 元素。
+     * 初始化对战 HUD，接收 Game 实例数组和 BattleStore 实例。 构造完成后立即调用 initialize() 缓存 DOM 元素。
+     *
+     * ### 参数说明
+     *
+     * - `games`：用于遍历生成 playerId，定位 DOM 元素
+     * - `store`：BattleStore 实例，提供 `getScore(playerId)` 方法获取最新分数
      *
      * @example
      *   const hud = new BattleHUD({
@@ -13042,12 +13071,12 @@ var tetris = (() => {
      *       { Player: { name: 'Alice', index: 0 } },
      *       { Player: { name: 'Bob', index: 1 } },
      *     ],
-     *     state: battleState,
+     *     store: battleStore,
      *   });
      *
      * @param {object} options - 配置选项
-     * @param {object[]} options.games - Game 实例数组，每个实例包含 Player 信息
-     * @param {object} options.state - 对战状态管理对象，提供 getScore 等方法
+     * @param {object[]} options.games - Game 实例数组，每个实例包含 Player 信息（name + index）
+     * @param {object} options.store - BattleStore 实例，提供 getScore 等方法
      */
     constructor(options) {
       super(options);
@@ -13068,7 +13097,7 @@ var tetris = (() => {
      *
      * - **性能优化**：避免每次更新分数时都重新查询 DOM
      * - **容错处理**：如果元素不存在，缓存 null 而不是在运行时报错
-     * - **统一访问**：通过 `getEl()` 方法统一获取元素
+     * - **统一访问**：通过 `getEl()` 方法统一获取元素引用
      *
      * @private
      * @returns {void}
@@ -13086,16 +13115,16 @@ var tetris = (() => {
     /**
      * ## 获取玩家对应的 DOM 元素
      *
-     * 根据玩家唯一标识从缓存中获取分数 DOM 元素。
+     * 根据玩家唯一标识从缓存中获取分数 DOM 元素引用。
      *
      * @example
-     *   const $score = hud.getEl('Alice-0');
+     *   const $score = hud.getEl('human-0');
      *   if ($score) {
-     *     $score.textContent = '999';
+     *     $score.textContent = '5'; // 更新 P1 分数为 5
      *   }
      *
-     * @param {string} id - 玩家唯一标识，格式为 `{name}-{index}`
-     * @returns {HTMLElement | null} 对应的 DOM 元素，如果不存在则返回 null
+     * @param {string} id - 玩家唯一标识，格式为 `{name}-{index}`（如 "human-0"）
+     * @returns {HTMLElement | null} 对应的 DOM 元素，不存在时返回 null
      */
     getEl(id) {
       return this.elements[id];
@@ -13103,44 +13132,49 @@ var tetris = (() => {
     /**
      * ## 更新双方分数显示
      *
-     * 在游戏结束时被调用，更新胜者和败者的分数到对应的 DOM 元素。
+     * 在单局游戏结束时被调用，更新胜者和败者的分数到对应的 DOM 元素。
      *
      * ### 更新流程
      *
      *     传入 winner, loser
-     *       → 提取双方 Player 信息
-     *         → 生成双方唯一标识 ID
-     *           → 从缓存获取对应 DOM 元素
-     *             → 从 state 获取最新分数
+     *       → 提取双方 Player 信息（name + index）
+     *         → 生成双方唯一标识 ID（如 "human-0"、"ai-1"）
+     *           → 从缓存获取对应 DOM 元素（getEl）
+     *             → 从 BattleStore 获取最新分数（store.getScore）
      *               → 更新 DOM textContent
      *
      * ### 为什么需要 winner 和 loser 两个参数？
      *
-     * - 胜者和败者的分数可能都需要更新
-     * - 即使游戏结束，败者可能也有消行得分
+     * - 胜者和败者的分数可能都需要更新（败者之前可能也有胜场）
      * - 确保双方显示的分数是最新状态
+     * - 参数是 Game 实例，可以直接获取 Player 信息
+     *
+     * ### 为什么从 store 获取分数而不是直接传分数值？
+     *
+     * - BattleStore 是分数的唯一数据源（Single Source of Truth）
+     * - 避免调用方传错分数导致 UI 与实际状态不一致
+     * - 解耦：HUD 不需要知道分数如何计算，只需要从 store 读取
      *
      * @example
-     *   // 游戏结束时更新分数
-     *   hud.updateScores(
-     *     { Player: { name: 'Alice', index: 0 } }, // winner
-     *     { Player: { name: 'Bob', index: 1 } }, // loser
-     *   );
+     *   // 单局结束：human 获胜，ai 落败
+     *   hud.updateScores(humanGame, aiGame);
+     *   // → DOM 中 human-0-tetris-battle-score 显示 human 的最新胜场
+     *   // → DOM 中 ai-1-tetris-battle-score 显示 ai 的最新胜场
      *
      * @param {object} winner - 胜者 Game 实例
      * @param {object} loser - 败者 Game 实例
      * @returns {void}
      */
     updateScores(winner, loser) {
-      const { state } = this;
+      const { store } = this;
       const winnerPlayer = winner.Player;
       const winnerId = `${winnerPlayer.name}-${winnerPlayer.index}`;
       const $winner = this.getEl(winnerId);
-      const winnerScore = state.getScore(winnerId);
+      const winnerScore = store.getScore(winnerId);
       const loserPlayer = loser.Player;
       const loserId = `${loserPlayer.name}-${loserPlayer.index}`;
       const $loser = this.getEl(loserId);
-      const loserScore = state.getScore(loserId);
+      const loserScore = store.getScore(loserId);
       if ($winner) {
         $winner.textContent = winnerScore;
       }
@@ -13480,8 +13514,8 @@ var tetris = (() => {
      *
      * @param {object} options - 配置选项
      * @param {object[]} options.games - Game 实例数组（长度为 2）
-     * @param {number} [options.victoryScore=20] - 目标分数，先达到者赢得整场对战. Default is
-     *   `20`
+     * @param {number} [options.victoryScore=20] - 目标分数，先达到者赢得整场对战。默认值为 `20`.
+     *   Default is `20`
      * @param {object} options.elements - BattleUI 所需的 DOM 元素 ID 配置
      * @param {string} options.elements.overlay - 结果覆盖层元素 ID
      * @param {string} options.elements.winner - 胜者名称显示元素 ID
@@ -13495,29 +13529,29 @@ var tetris = (() => {
      *
      * 创建对战所需的四个核心子系统，按依赖顺序初始化：
      *
-     * 1. **VersusState**：状态管理（无依赖）
-     * 2. **BattleHUD**：实时分数更新（依赖 state）
+     * 1. **BattleStore**：状态管理（无依赖，最先创建）
+     * 2. **BattleHUD**：实时分数更新（依赖 store）
      * 3. **BattleRouter**：事件路由（依赖 battle 实例自身）
      * 4. **BattleUI**：结果展示界面（依赖 elements 配置）
      *
      * 完成后自动调用 `start()` 开始对战。
      *
-     * ### 为什么先创建 state？
+     * ### 为什么先创建 store？
      *
-     * BattleHUD 的构造函数需要 state 参数来查询分数， 所以必须先创建 state 再创建 hud。
+     * BattleHUD 的构造函数需要 store 参数来查询分数， 所以必须先创建 store 再创建 hud。
      *
      * ### 为什么传入 `this` 给 BattleRouter？
      *
      * BattleRouter 需要调用 BattleController 的方法（如 processAttack）， 通过 `{ battle: this
-     * }` 将自身引用注入到路由器中。
+     * }` 将自身引用注入到路由器中。 此时 this 已完整初始化（store、hud 已就绪），可以安全传递。
      *
      * @returns {void}
      */
     initialize() {
       const { games, elements } = this;
-      const state = new versus_state_default({ games });
-      this.state = state;
-      this.hud = new battle_hud_default({ games, state });
+      const store = new battle_store_default({ games });
+      this.store = store;
+      this.hud = new battle_hud_default({ games, store });
       this.router = new battle_router_default({ battle: this });
       this.ui = new battle_ui_default({ elements });
       this.start();
@@ -13529,15 +13563,16 @@ var tetris = (() => {
      *
      * ### 幂等性保证
      *
-     * 通过检查 `state.isRunning()` 确保多次调用不会产生副作用。 这是一个**幂等操作**——多次调用与一次调用效果相同。
+     * 通过检查 `store.isRunning()` 确保多次调用不会产生副作用。 这是一个**幂等操作**——多次调用与一次调用效果相同。
      *
      * @returns {void}
      */
     start() {
-      if (this.state.isRunning()) {
+      const { store } = this;
+      if (store.isRunning()) {
         return;
       }
-      this.state.setRunning(true);
+      store.setRunning(true);
     }
     /**
      * ## 停止对战
@@ -13557,10 +13592,11 @@ var tetris = (() => {
      * @returns {void}
      */
     stop() {
-      if (!this.state.isRunning()) {
+      const { store } = this;
+      if (!store.isRunning()) {
         return;
       }
-      this.state.setRunning(false);
+      store.setRunning(false);
     }
     /**
      * ## 更新对战结果（单局结束）
@@ -13597,14 +13633,14 @@ var tetris = (() => {
      * @returns {void}
      */
     update(loser) {
-      const { victoryScore, state } = this;
+      const { victoryScore, store } = this;
       const winner = this.getOpponent(loser);
       this.stop();
-      state.setWinner(winner);
-      state.updateScores({ winner, loser });
+      store.setWinner(winner);
+      store.updateScores({ winner, loser });
       this.hud.updateScores(winner, loser);
-      const winnerId = state.getPlayerId(winner);
-      const winnerScore = state.getScore(winnerId);
+      const winnerId = store.getPlayerId(winner);
+      const winnerScore = store.getScore(winnerId);
       if (winnerScore >= victoryScore) {
         this.over(winner, loser);
       } else {
@@ -13623,7 +13659,7 @@ var tetris = (() => {
      *
      * ### 覆盖层显示
      *
-     * BattleUI 会移除覆盖层的 `tetris-hidden` 类， 展示胜者名称。用户按 Enter 后触发 `reset()` 重新开始。
+     * BattleUI 会移除覆盖层的 `tetris-hidden` 类，展示胜者名称。 用户按 Enter 后触发 `reset()` 重新开始。
      *
      * @param {object} winner - 整场对战的胜者 Game 实例
      * @param {object} loser - 整场对战的败者 Game 实例
@@ -13686,7 +13722,7 @@ var tetris = (() => {
      */
     reset(from) {
       const opponent = this.getOpponent(from);
-      this.state.reset();
+      this.store.reset();
       this.hud.updateScores(from, opponent);
       this.ui.hide();
       const FE = GameEvents(from.id);
@@ -13731,10 +13767,10 @@ var tetris = (() => {
      * ### 处理步骤
      *
      * 1. 找到对手
-     * 2. 根据消行数计算攻击力
+     * 2. 根据消行数计算攻击力（calculateGarbage）
      * 3. 如果攻击力 ≤ 0，直接返回（无攻击）
-     * 4. 用攻击力抵消自己的待处理垃圾行
-     * 5. 如果有剩余攻击力，发送给对手
+     * 4. 用攻击力抵消自己的待处理垃圾行（store.offsetGarbage）
+     * 5. 如果有剩余攻击力，发送给对手（store.addGarbage）
      * 6. 返回实际发出的垃圾行数
      *
      * ### 为什么先抵消自己的垃圾行？
@@ -13776,9 +13812,10 @@ var tetris = (() => {
       if (attack <= 0) {
         return 0;
       }
-      const remaining = this.state.offsetGarbage(from, attack);
+      const { store } = this;
+      const remaining = store.offsetGarbage(from, attack);
       if (remaining > 0) {
-        this.state.addGarbage(to, remaining);
+        store.addGarbage(to, remaining);
       }
       return remaining;
     }
@@ -13789,12 +13826,12 @@ var tetris = (() => {
      *
      * ### 处理步骤
      *
-     * 1. 获取该玩家的待处理垃圾行数
+     * 1. 获取该玩家的待处理垃圾行数（store.getPendingGarbage）
      * 2. 如果 amount ≤ 0，直接返回（无垃圾行）
      * 3. 获取当前棋盘状态（board + difficulty）
      * 4. 调用 applyGarbage 生成带垃圾行的新棋盘
-     * 5. 更新 Store 中的棋盘状态
-     * 6. 清空该玩家的待处理垃圾行计数
+     * 5. 更新 Store 中的棋盘状态（Store.setState）
+     * 6. 清空该玩家的待处理垃圾行计数（store.clearGarbage）
      *
      * ### 为什么分两步处理垃圾行？
      *
@@ -13825,7 +13862,7 @@ var tetris = (() => {
      * @returns {void}
      */
     flushGarbage(game) {
-      const amount = this.state.getPendingGarbage(game);
+      const amount = this.store.getPendingGarbage(game);
       if (amount <= 0) {
         return;
       }
@@ -13833,7 +13870,7 @@ var tetris = (() => {
       const { board, difficulty } = Store.getState();
       const next = applyGarbage(board, amount, difficulty);
       Store.setState({ board: next });
-      this.state.clearGarbage(game);
+      this.store.clearGarbage(game);
     }
     /**
      * ## 订阅对战事件

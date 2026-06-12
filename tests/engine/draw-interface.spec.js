@@ -1,6 +1,7 @@
 /**
- * @file drawInterface 单元测试
- * @description 测试游戏界面绘制函数
+ * 测试游戏界面绘制函数
+ *
+ * @file DrawInterface 单元测试
  */
 
 /** @jest-environment jsdom */
@@ -8,9 +9,7 @@
 import drawInterface from '@/lib/engine/draw-interface.js';
 
 describe('drawInterface', () => {
-  /**
-   * 创建新的配置对象（避免测试间共享状态）
-   */
+  /** 创建新的配置对象（避免测试间共享状态） */
   const createConfig = (overrides = {}) => ({
     Mode: 'single',
     Players: ['Player1', 'Player1_extra'],
@@ -108,8 +107,12 @@ describe('drawInterface', () => {
       expect(document.querySelector('#Player1-0-tetris-lines')).not.toBeNull();
       expect(document.querySelector('#Player1-0-tetris-level')).not.toBeNull();
       expect(document.querySelector('#Player1-0-tetris-combo')).not.toBeNull();
-      expect(document.querySelector('#Player1-0-tetris-high-score')).not.toBeNull();
-      expect(document.querySelector('#Player1-0-tetris-controller')).not.toBeNull();
+      expect(
+        document.querySelector('#Player1-0-tetris-high-score'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('#Player1-0-tetris-controller'),
+      ).not.toBeNull();
     });
 
     it('应该生成棋盘 Canvas', () => {
@@ -134,13 +137,27 @@ describe('drawInterface', () => {
     });
 
     it('应该生成所有控制按钮', () => {
-      expect(document.querySelector('#Player1-0-tetris-btn-back')).not.toBeNull();
-      expect(document.querySelector('#Player1-0-tetris-btn-hold')).not.toBeNull();
-      expect(document.querySelector('#Player1-0-tetris-btn-start')).not.toBeNull();
-      expect(document.querySelector('#Player1-0-tetris-dpad-up')).not.toBeNull();
-      expect(document.querySelector('#Player1-0-tetris-dpad-down')).not.toBeNull();
-      expect(document.querySelector('#Player1-0-tetris-dpad-left')).not.toBeNull();
-      expect(document.querySelector('#Player1-0-tetris-dpad-right')).not.toBeNull();
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-back'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-hold'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-start'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('#Player1-0-tetris-dpad-up'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('#Player1-0-tetris-dpad-down'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('#Player1-0-tetris-dpad-left'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('#Player1-0-tetris-dpad-right'),
+      ).not.toBeNull();
       expect(document.querySelector('#Player1-0-tetris-btn-a')).not.toBeNull();
       expect(document.querySelector('#Player1-0-tetris-btn-b')).not.toBeNull();
       expect(document.querySelector('#Player1-0-tetris-btn-x')).not.toBeNull();
@@ -148,17 +165,39 @@ describe('drawInterface', () => {
     });
 
     it('控制按钮应该有正确的 data-key 属性', () => {
-      expect(document.querySelector('#Player1-0-tetris-btn-back').dataset.key).toBe('back');
-      expect(document.querySelector('#Player1-0-tetris-btn-hold').dataset.key).toBe('hold');
-      expect(document.querySelector('#Player1-0-tetris-btn-start').dataset.key).toBe('start');
-      expect(document.querySelector('#Player1-0-tetris-dpad-up').dataset.key).toBe('dpad_up');
-      expect(document.querySelector('#Player1-0-tetris-dpad-down').dataset.key).toBe('dpad_down');
-      expect(document.querySelector('#Player1-0-tetris-dpad-left').dataset.key).toBe('dpad_left');
-      expect(document.querySelector('#Player1-0-tetris-dpad-right').dataset.key).toBe('dpad_right');
-      expect(document.querySelector('#Player1-0-tetris-btn-a').dataset.key).toBe('a');
-      expect(document.querySelector('#Player1-0-tetris-btn-b').dataset.key).toBe('b');
-      expect(document.querySelector('#Player1-0-tetris-btn-x').dataset.key).toBe('x');
-      expect(document.querySelector('#Player1-0-tetris-btn-y').dataset.key).toBe('y');
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-back').dataset.key,
+      ).toBe('back');
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-hold').dataset.key,
+      ).toBe('hold');
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-start').dataset.key,
+      ).toBe('start');
+      expect(
+        document.querySelector('#Player1-0-tetris-dpad-up').dataset.key,
+      ).toBe('dpad_up');
+      expect(
+        document.querySelector('#Player1-0-tetris-dpad-down').dataset.key,
+      ).toBe('dpad_down');
+      expect(
+        document.querySelector('#Player1-0-tetris-dpad-left').dataset.key,
+      ).toBe('dpad_left');
+      expect(
+        document.querySelector('#Player1-0-tetris-dpad-right').dataset.key,
+      ).toBe('dpad_right');
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-a').dataset.key,
+      ).toBe('a');
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-b').dataset.key,
+      ).toBe('b');
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-x').dataset.key,
+      ).toBe('x');
+      expect(
+        document.querySelector('#Player1-0-tetris-btn-y').dataset.key,
+      ).toBe('y');
     });
 
     it('不应该修改原始 Players 数组', () => {
@@ -220,13 +259,21 @@ describe('drawInterface', () => {
     });
 
     it('记分牌应该包含记分 span', () => {
-      expect(document.querySelector('#human-0-tetris-battle-score')).not.toBeNull();
-      expect(document.querySelector('#human-1-tetris-battle-score')).not.toBeNull();
+      expect(
+        document.querySelector('#human-0-tetris-battle-score'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('#human-1-tetris-battle-score'),
+      ).not.toBeNull();
     });
 
     it('记分牌初始值应该为 0', () => {
-      expect(document.querySelector('#human-0-tetris-battle-score').textContent).toBe('0');
-      expect(document.querySelector('#human-1-tetris-battle-score').textContent).toBe('0');
+      expect(
+        document.querySelector('#human-0-tetris-battle-score').textContent,
+      ).toBe('0');
+      expect(
+        document.querySelector('#human-1-tetris-battle-score').textContent,
+      ).toBe('0');
     });
 
     it('P1 和 P2 界面应该独立', () => {
@@ -254,23 +301,34 @@ describe('drawInterface', () => {
     });
 
     it('应该使用正确的玩家名称生成 ID', () => {
-      expect(document.querySelector('#human-0-tetris-game-board')).not.toBeNull();
+      expect(
+        document.querySelector('#human-0-tetris-game-board'),
+      ).not.toBeNull();
       expect(document.querySelector('#ai-1-tetris-game-board')).not.toBeNull();
     });
 
     it('记分牌应该使用正确的玩家名称', () => {
-      expect(document.querySelector('#human-0-tetris-battle-score')).not.toBeNull();
-      expect(document.querySelector('#ai-1-tetris-battle-score')).not.toBeNull();
+      expect(
+        document.querySelector('#human-0-tetris-battle-score'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('#ai-1-tetris-battle-score'),
+      ).not.toBeNull();
     });
   });
 
   // ==================== 元素 ID 命名规则 ====================
   describe('元素 ID 命名规则', () => {
     it('应该遵循 {name}-{index}-{elementId} 格式', () => {
-      const config = createConfig({ Players: ['Alice', 'Bob'], Mode: 'versus' });
+      const config = createConfig({
+        Players: ['Alice', 'Bob'],
+        Mode: 'versus',
+      });
       drawInterface(config);
 
-      expect(document.querySelector('#Alice-0-tetris-game-board')).not.toBeNull();
+      expect(
+        document.querySelector('#Alice-0-tetris-game-board'),
+      ).not.toBeNull();
       expect(document.querySelector('#Alice-0-tetris-score')).not.toBeNull();
       expect(document.querySelector('#Alice-0-tetris-btn-a')).not.toBeNull();
 
@@ -280,7 +338,10 @@ describe('drawInterface', () => {
     });
 
     it('相同名称不同索引应该生成不同 ID', () => {
-      const config = createConfig({ Players: ['Player', 'Player'], Mode: 'versus' });
+      const config = createConfig({
+        Players: ['Player', 'Player'],
+        Mode: 'versus',
+      });
       drawInterface(config);
 
       const p1 = document.querySelector('#Player-0-tetris-game-board');
@@ -302,27 +363,39 @@ describe('drawInterface', () => {
     });
 
     it('分数初始值应该为 00000', () => {
-      expect(document.querySelector('#Player1-0-tetris-score').textContent).toBe('00000');
+      expect(
+        document.querySelector('#Player1-0-tetris-score').textContent,
+      ).toBe('00000');
     });
 
     it('行数初始值应该为 00', () => {
-      expect(document.querySelector('#Player1-0-tetris-lines').textContent).toBe('00');
+      expect(
+        document.querySelector('#Player1-0-tetris-lines').textContent,
+      ).toBe('00');
     });
 
     it('等级初始值应该为 01', () => {
-      expect(document.querySelector('#Player1-0-tetris-level').textContent).toBe('01');
+      expect(
+        document.querySelector('#Player1-0-tetris-level').textContent,
+      ).toBe('01');
     });
 
     it('连击初始值应该为 00', () => {
-      expect(document.querySelector('#Player1-0-tetris-combo').textContent).toBe('00');
+      expect(
+        document.querySelector('#Player1-0-tetris-combo').textContent,
+      ).toBe('00');
     });
 
     it('最高分初始值应该为 00000', () => {
-      expect(document.querySelector('#Player1-0-tetris-high-score').textContent).toBe('00000');
+      expect(
+        document.querySelector('#Player1-0-tetris-high-score').textContent,
+      ).toBe('00000');
     });
 
     it('控制者标识初始值应该为 Human', () => {
-      expect(document.querySelector('#Player1-0-tetris-controller').textContent).toBe('Human');
+      expect(
+        document.querySelector('#Player1-0-tetris-controller').textContent,
+      ).toBe('Human');
     });
   });
 
@@ -351,14 +424,24 @@ describe('drawInterface', () => {
     });
 
     it('重复调用应该覆盖之前的内容', () => {
-      const config1 = createConfig({ Players: ['First', 'Extra'], Mode: 'single' });
+      const config1 = createConfig({
+        Players: ['First', 'Extra'],
+        Mode: 'single',
+      });
       drawInterface(config1);
-      expect(document.querySelector('#First-0-tetris-game-board')).not.toBeNull();
+      expect(
+        document.querySelector('#First-0-tetris-game-board'),
+      ).not.toBeNull();
 
-      const config2 = createConfig({ Players: ['Second', 'Extra'], Mode: 'single' });
+      const config2 = createConfig({
+        Players: ['Second', 'Extra'],
+        Mode: 'single',
+      });
       drawInterface(config2);
       expect(document.querySelector('#First-0-tetris-game-board')).toBeNull();
-      expect(document.querySelector('#Second-0-tetris-game-board')).not.toBeNull();
+      expect(
+        document.querySelector('#Second-0-tetris-game-board'),
+      ).not.toBeNull();
     });
   });
 });

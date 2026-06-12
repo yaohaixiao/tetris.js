@@ -16,7 +16,7 @@
   -webkit-touch-callout: none;
 }
 .level-button {
-  font-family: "Press Start 2P", monospace;
+  font-family: 'Press Start 2P', monospace;
   font-size: 12px;
   background: #444;
   color: #fff;
@@ -43,7 +43,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Press Start 2P', monospace, "Microsoft YaHei", sans-serif;
+  font-family: 'Press Start 2P', monospace, 'Microsoft YaHei', sans-serif;
 }
 /* ====== 基础样式 ====== */
 html,
@@ -70,11 +70,11 @@ body {
   align-items: stretch;
   justify-content: center;
 }
-.tetris-container[data-mode="versus"] {
+.tetris-container[data-mode='versus'] {
   flex-direction: row;
   gap: 14vw;
 }
-.tetris-container[data-mode="versus"]:before {
+.tetris-container[data-mode='versus']:before {
   content: ':';
   position: absolute;
   z-index: 3;

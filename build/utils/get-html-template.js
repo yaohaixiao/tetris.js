@@ -1,7 +1,7 @@
 import Configuration from '../../lib/configuration.js';
 
 const getHtmlTemplate = (args) => {
-  const {Mode} = Configuration;
+  const { Mode } = Configuration;
   const minify = args.action === 'minify';
   const stylePath = minify ? 'css/tetris.min.css' : 'css/tetris.css';
   const scriptPath = minify ? 'js/tetris.min.js' : 'js/tetris.js';

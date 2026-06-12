@@ -167,8 +167,16 @@ describe('Engine Core - 完整测试', () => {
 
     test('所有核心方法应该存在', () => {
       [
-        'initialize', 'launch', 'tick', 'start', 'stop', 'restart',
-        'destroy', 'subscribe', 'unsubscribe', 'isVersus',
+        'initialize',
+        'launch',
+        'tick',
+        'start',
+        'stop',
+        'restart',
+        'destroy',
+        'subscribe',
+        'unsubscribe',
+        'isVersus',
       ].forEach((m) => {
         expect(typeof Engine[m]).toBe('function');
       });
@@ -221,16 +229,21 @@ describe('Engine Core - 完整测试', () => {
     test('Game 接收正确 Player 配置', () => {
       Engine.initialize({ Players: ['Alice', 'Bob'] });
       expect(GameMock.mock.calls[0][0].Player).toEqual({
-        index: 0, name: 'Alice',
+        index: 0,
+        name: 'Alice',
       });
       expect(GameMock.mock.calls[1][0].Player).toEqual({
-        index: 1, name: 'Bob',
+        index: 1,
+        name: 'Bob',
       });
     });
 
     test('versus 模式创建 Battle（含 elements 和 victoryScore）', () => {
       Configuration.Mode = 'versus';
-      const battleElements = { overlay: 'battle-overlay', winner: 'battle-winner' };
+      const battleElements = {
+        overlay: 'battle-overlay',
+        winner: 'battle-winner',
+      };
 
       Engine.initialize({
         Players: ['P1', 'P2'],
@@ -307,7 +320,9 @@ describe('Engine Core - 完整测试', () => {
 
     test('设置初始状态', () => {
       Engine.launch();
-      expect(Engine.Games[0].setBeginningState).toHaveBeenCalledWith('main-menu');
+      expect(Engine.Games[0].setBeginningState).toHaveBeenCalledWith(
+        'main-menu',
+      );
     });
 
     test('更新 UI', () => {
@@ -595,7 +610,9 @@ describe('Engine Core - 完整测试', () => {
       const cmd = { payload: { Game: game, action: 'move-left' } };
       Engine._onDispatchCommand(cmd);
       expect(cmd.payload.isBlocked).toBe(true);
-      expect(dispatchCommandMock).toHaveBeenCalledWith(cmd, { mode: 'playing' });
+      expect(dispatchCommandMock).toHaveBeenCalledWith(cmd, {
+        mode: 'playing',
+      });
     });
 
     test('处理不同模式', () => {

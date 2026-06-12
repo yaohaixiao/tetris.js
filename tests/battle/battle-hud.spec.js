@@ -28,8 +28,8 @@ describe('BattleHUD', () => {
     Player: { name, index },
   });
 
-  /** 创建模拟的 State 实例 */
-  const createMockState = (scores = {}) => ({
+  /** 创建模拟的 BattleStore 实例 */
+  const createMockStore = (scores = {}) => ({
     getScore: jest.fn((id) => scores[id] ?? 0),
   });
 
@@ -38,22 +38,21 @@ describe('BattleHUD', () => {
   describe('构造函数', () => {
     test('应该正确继承 Base 类', () => {
       const games = [createMockGame('Alice', 0)];
-      const state = createMockState();
+      const store = createMockStore();
 
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       expect(hud.games).toEqual(games);
-      expect(hud.state).toEqual(state);
+      expect(hud.store).toEqual(store);
     });
 
     test('应该自动调用 initialize 方法', () => {
       const games = [createMockGame('Alice', 0)];
-      const state = createMockState();
+      const store = createMockStore();
 
-      // 监听 initialize 方法
       const initializeSpy = jest.spyOn(BattleHUD.prototype, 'initialize');
 
-      new BattleHUD({ games, state });
+      new BattleHUD({ games, store });
 
       expect(initializeSpy).toHaveBeenCalledTimes(1);
 
@@ -61,9 +60,9 @@ describe('BattleHUD', () => {
     });
 
     test('应该接受空的 games 数组', () => {
-      const state = createMockState();
+      const store = createMockStore();
 
-      const hud = new BattleHUD({ games: [], state });
+      const hud = new BattleHUD({ games: [], store });
 
       expect(hud.games).toEqual([]);
       expect(hud.elements).toEqual({});
@@ -75,25 +74,23 @@ describe('BattleHUD', () => {
   describe('initialize', () => {
     test('应该初始化空的 elements 缓存对象', () => {
       const games = [createMockGame('Alice', 0)];
-      const state = createMockState();
+      const store = createMockStore();
 
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       expect(hud.elements).toBeDefined();
       expect(typeof hud.elements).toBe('object');
     });
 
     test('应该根据命名规则生成正确的选择器', () => {
-      // Mock document.querySelector
       const mockQuerySelector = jest.fn();
       document.querySelector = mockQuerySelector;
 
       const games = [createMockGame('Alice', 0)];
-      const state = createMockState();
+      const store = createMockStore();
 
-      new BattleHUD({ games, state });
+      new BattleHUD({ games, store });
 
-      // 验证选择器格式：{name}-{index}-tetris-battle-score
       expect(mockQuerySelector).toHaveBeenCalledWith(
         '#Alice-0-tetris-battle-score',
       );
@@ -104,9 +101,9 @@ describe('BattleHUD', () => {
       document.querySelector = mockQuerySelector;
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const state = createMockState();
+      const store = createMockStore();
 
-      new BattleHUD({ games, state });
+      new BattleHUD({ games, store });
 
       expect(mockQuerySelector).toHaveBeenCalledTimes(2);
       expect(mockQuerySelector).toHaveBeenCalledWith(
@@ -122,9 +119,9 @@ describe('BattleHUD', () => {
       document.querySelector = jest.fn(() => mockElement);
 
       const games = [createMockGame('Alice', 0)];
-      const state = createMockState();
+      const store = createMockStore();
 
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       expect(hud.elements['Alice-0']).toBe(mockElement);
     });
@@ -133,9 +130,9 @@ describe('BattleHUD', () => {
       document.querySelector = jest.fn(() => null);
 
       const games = [createMockGame('Alice', 0)];
-      const state = createMockState();
+      const store = createMockStore();
 
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       expect(hud.elements['Alice-0']).toBeNull();
     });
@@ -149,9 +146,9 @@ describe('BattleHUD', () => {
         createMockGame('Player2', 1),
         createMockGame('Player3', 2),
       ];
-      const state = createMockState();
+      const store = createMockStore();
 
-      new BattleHUD({ games, state });
+      new BattleHUD({ games, store });
 
       expect(mockQuerySelector).toHaveBeenCalledWith(
         '#Player1-0-tetris-battle-score',
@@ -169,9 +166,9 @@ describe('BattleHUD', () => {
       document.querySelector = mockQuerySelector;
 
       const games = [createMockGame('Player', 0), createMockGame('Player', 1)];
-      const state = createMockState();
+      const store = createMockStore();
 
-      new BattleHUD({ games, state });
+      new BattleHUD({ games, store });
 
       expect(mockQuerySelector).toHaveBeenCalledWith(
         '#Player-0-tetris-battle-score',
@@ -185,9 +182,9 @@ describe('BattleHUD', () => {
       const mockQuerySelector = jest.fn();
       document.querySelector = mockQuerySelector;
 
-      const state = createMockState();
+      const store = createMockStore();
 
-      new BattleHUD({ games: [], state });
+      new BattleHUD({ games: [], store });
 
       expect(mockQuerySelector).not.toHaveBeenCalled();
     });
@@ -201,8 +198,8 @@ describe('BattleHUD', () => {
       document.querySelector = jest.fn(() => mockElement);
 
       const games = [createMockGame('Alice', 0)];
-      const state = createMockState();
-      const hud = new BattleHUD({ games, state });
+      const store = createMockStore();
+      const hud = new BattleHUD({ games, store });
 
       const result = hud.getEl('Alice-0');
 
@@ -213,8 +210,8 @@ describe('BattleHUD', () => {
       document.querySelector = jest.fn(() => null);
 
       const games = [createMockGame('Alice', 0)];
-      const state = createMockState();
-      const hud = new BattleHUD({ games, state });
+      const store = createMockStore();
+      const hud = new BattleHUD({ games, store });
 
       const result = hud.getEl('Alice-0');
 
@@ -223,8 +220,8 @@ describe('BattleHUD', () => {
 
     test('应该在 ID 不存在时返回 undefined', () => {
       const games = [createMockGame('Alice', 0)];
-      const state = createMockState();
-      const hud = new BattleHUD({ games, state });
+      const store = createMockStore();
+      const hud = new BattleHUD({ games, store });
 
       const result = hud.getEl('NonExistent-99');
 
@@ -241,8 +238,8 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(mockElement2);
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const state = createMockState();
-      const hud = new BattleHUD({ games, state });
+      const store = createMockStore();
+      const hud = new BattleHUD({ games, store });
 
       expect(hud.getEl('Alice-0')).toBe(mockElement1);
       expect(hud.getEl('Bob-1')).toBe(mockElement2);
@@ -262,10 +259,10 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(loserEl);
 
       const scores = { 'Alice-0': 3, 'Bob-1': 1 };
-      const state = createMockState(scores);
+      const store = createMockStore(scores);
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       const winner = createMockGame('Alice', 0);
       const loser = createMockGame('Bob', 1);
@@ -276,31 +273,31 @@ describe('BattleHUD', () => {
       expect(loserEl.textContent).toBe(1);
     });
 
-    test('应该从 state 获取正确的分数', () => {
+    test('应该从 store 获取正确的分数', () => {
       const mockElement = createMockElement('0');
       document.querySelector = jest.fn(() => mockElement);
 
-      const state = createMockState({ 'Alice-0': 5, 'Bob-1': 2 });
+      const store = createMockStore({ 'Alice-0': 5, 'Bob-1': 2 });
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       const winner = createMockGame('Alice', 0);
       const loser = createMockGame('Bob', 1);
 
       hud.updateScores(winner, loser);
 
-      expect(state.getScore).toHaveBeenCalledWith('Alice-0');
-      expect(state.getScore).toHaveBeenCalledWith('Bob-1');
+      expect(store.getScore).toHaveBeenCalledWith('Alice-0');
+      expect(store.getScore).toHaveBeenCalledWith('Bob-1');
     });
 
     test('应该在元素不存在时不更新（不抛错）', () => {
       document.querySelector = jest.fn(() => null);
 
-      const state = createMockState({ 'Alice-0': 3, 'Bob-1': 1 });
+      const store = createMockStore({ 'Alice-0': 3, 'Bob-1': 1 });
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       const winner = createMockGame('Alice', 0);
       const loser = createMockGame('Bob', 1);
@@ -318,10 +315,10 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(winnerEl)
         .mockReturnValueOnce(null);
 
-      const state = createMockState({ 'Alice-0': 3, 'Bob-1': 1 });
+      const store = createMockStore({ 'Alice-0': 3, 'Bob-1': 1 });
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       const winner = createMockGame('Alice', 0);
       const loser = createMockGame('Bob', 1);
@@ -341,10 +338,10 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(null)
         .mockReturnValueOnce(loserEl);
 
-      const state = createMockState({ 'Alice-0': 3, 'Bob-1': 1 });
+      const store = createMockStore({ 'Alice-0': 3, 'Bob-1': 1 });
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       const winner = createMockGame('Alice', 0);
       const loser = createMockGame('Bob', 1);
@@ -365,17 +362,16 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(winnerEl)
         .mockReturnValueOnce(loserEl);
 
-      const state = createMockState({ 'Alice-0': 42, 'Bob-1': 7 });
+      const store = createMockStore({ 'Alice-0': 42, 'Bob-1': 7 });
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       const winner = createMockGame('Alice', 0);
       const loser = createMockGame('Bob', 1);
 
       hud.updateScores(winner, loser);
 
-      // textContent 会自动将数字转为字符串
       expect(winnerEl.textContent).toBe(42);
       expect(loserEl.textContent).toBe(7);
     });
@@ -389,10 +385,10 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(winnerEl)
         .mockReturnValueOnce(loserEl);
 
-      const state = createMockState({ 'Alice-0': 0, 'Bob-1': 0 });
+      const store = createMockStore({ 'Alice-0': 0, 'Bob-1': 0 });
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       const winner = createMockGame('Alice', 0);
       const loser = createMockGame('Bob', 1);
@@ -412,17 +408,16 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(winnerEl)
         .mockReturnValueOnce(loserEl);
 
-      const state = createMockState({ 'Alice-0': 99, 'Bob-1': 88 });
+      const store = createMockStore({ 'Alice-0': 99, 'Bob-1': 88 });
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
       const winner = createMockGame('Alice', 0);
       const loser = createMockGame('Bob', 1);
 
       hud.updateScores(winner, loser);
 
-      // 验证旧值被覆盖
       expect(winnerEl.textContent).toBe(99);
       expect(winnerEl.textContent).not.toBe('old-winner-score');
 
@@ -440,14 +435,14 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(loserEl);
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const state = createMockState();
-      const hud = new BattleHUD({ games, state });
+      const store = createMockStore();
+      const hud = new BattleHUD({ games, store });
 
       const winner = createMockGame('Alice', 0);
       const loser = createMockGame('Bob', 1);
 
       // 第一次更新
-      state.getScore.mockImplementation((id) => {
+      store.getScore.mockImplementation((id) => {
         if (id === 'Alice-0') return 1;
         if (id === 'Bob-1') return 0;
         return 0;
@@ -457,7 +452,7 @@ describe('BattleHUD', () => {
       expect(loserEl.textContent).toBe(0);
 
       // 第二次更新
-      state.getScore.mockImplementation((id) => {
+      store.getScore.mockImplementation((id) => {
         if (id === 'Alice-0') return 3;
         if (id === 'Bob-1') return 0;
         return 0;
@@ -471,18 +466,16 @@ describe('BattleHUD', () => {
       const mockElement = createMockElement('0');
       document.querySelector = jest.fn(() => mockElement);
 
-      const state = createMockState({ 'Alice-0': 5 });
+      const store = createMockStore({ 'Alice-0': 5 });
 
       const games = [createMockGame('Alice', 0)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
-      // 传入相同的玩家作为胜者和败者（极端边界情况）
       const player = createMockGame('Alice', 0);
 
       hud.updateScores(player, player);
 
-      // 不应该抛错
-      expect(state.getScore).toHaveBeenCalledWith('Alice-0');
+      expect(store.getScore).toHaveBeenCalledWith('Alice-0');
     });
   });
 
@@ -490,7 +483,6 @@ describe('BattleHUD', () => {
 
   describe('集成测试', () => {
     test('完整的初始化到更新流程', () => {
-      // 1. 准备 DOM 元素
       const winnerEl = createMockElement('');
       const loserEl = createMockElement('');
 
@@ -499,19 +491,16 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(winnerEl)
         .mockReturnValueOnce(loserEl);
 
-      // 2. 创建 HUD 实例
-      const state = createMockState({ 'Alice-0': 0, 'Bob-1': 0 });
+      const store = createMockStore({ 'Alice-0': 0, 'Bob-1': 0 });
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
-      // 3. 验证初始化状态
       expect(hud.elements).toHaveProperty('Alice-0');
       expect(hud.elements).toHaveProperty('Bob-1');
       expect(hud.getEl('Alice-0')).toBe(winnerEl);
       expect(hud.getEl('Bob-1')).toBe(loserEl);
 
-      // 4. 模拟第一局结束
-      state.getScore.mockImplementation((id) => {
+      store.getScore.mockImplementation((id) => {
         if (id === 'Alice-0') return 1;
         if (id === 'Bob-1') return 0;
         return 0;
@@ -522,8 +511,7 @@ describe('BattleHUD', () => {
       expect(winnerEl.textContent).toBe(1);
       expect(loserEl.textContent).toBe(0);
 
-      // 5. 模拟第二局结束
-      state.getScore.mockImplementation((id) => {
+      store.getScore.mockImplementation((id) => {
         if (id === 'Alice-0') return 2;
         if (id === 'Bob-1') return 0;
         return 0;
@@ -546,7 +534,7 @@ describe('BattleHUD', () => {
         .mockReturnValueOnce(el2)
         .mockReturnValueOnce(el3);
 
-      const state = createMockState({
+      const store = createMockStore({
         'Alice-0': 1,
         'Bob-1': 2,
         'Charlie-2': 3,
@@ -557,19 +545,16 @@ describe('BattleHUD', () => {
         createMockGame('Bob', 1),
         createMockGame('Charlie', 2),
       ];
-      const hud = new BattleHUD({ games, state });
+      const hud = new BattleHUD({ games, store });
 
-      // 所有元素都正确缓存
       expect(hud.getEl('Alice-0')).toBe(el1);
       expect(hud.getEl('Bob-1')).toBe(el2);
       expect(hud.getEl('Charlie-2')).toBe(el3);
 
-      // 更新 Alice（胜者）和 Bob（败者）的分数
       hud.updateScores(createMockGame('Alice', 0), createMockGame('Bob', 1));
 
       expect(el1.textContent).toBe(1);
       expect(el2.textContent).toBe(2);
-      // Charlie 的元素未被更新，保持原值
       expect(el3.textContent).toBe('0');
     });
   });
