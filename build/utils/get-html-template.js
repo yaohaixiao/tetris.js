@@ -54,9 +54,9 @@ const getHtmlTemplate = (args) => {
         <footer class="tetris-controls">
           <!-- START / SELECT -->
           <section class="tetris-system-controls">
-            <div id="${player}-${index}-${Controls.back}" data-key="back" class="tetris-system-btn tetris-btn-back">BACK</div>
-            <div id="${player}-${index}-${Controls.hold}" data-key="hold" class="tetris-system-btn tetris-btn-hold">HOLD</div>
-            <div id="${player}-${index}-${Controls.start}" data-key="start" class="tetris-system-btn tetris-btn-start">START</div>
+            <div id="${player}-${index}-${Controls.back}" data-key="back" class="tetris-system-button tetris-btn-back">BACK</div>
+            <div id="${player}-${index}-${Controls.hold}" data-key="hold" class="tetris-system-button tetris-btn-hold">HOLD</div>
+            <div id="${player}-${index}-${Controls.start}" data-key="start" class="tetris-system-button tetris-btn-start">START</div>
           </section>
           <section class="tetris-main-controls">
             <!-- D-PAD -->
@@ -71,10 +71,10 @@ const getHtmlTemplate = (args) => {
             </div>
             <!-- BUTTONS -->
             <div class="tetris-buttons">
-              <div id="${player}-${index}-${Controls.x}" data-key="x" class="tetris-action-btn tetris-btn-x">X</div>
-              <div id="${player}-${index}-${Controls.y}" data-key="y" class="tetris-action-btn tetris-btn-y">Y</div>
-              <div id="${player}-${index}-${Controls.b}" data-key="b" class="tetris-action-btn tetris-btn-b">B</div>
-              <div id="${player}-${index}-${Controls.a}" data-key="a" class="tetris-action-btn tetris-btn-a">A</div>
+              <div id="${player}-${index}-${Controls.x}" data-key="x" class="tetris-action-button tetris-button-x">X</div>
+              <div id="${player}-${index}-${Controls.y}" data-key="y" class="tetris-action-button tetris-button-y">Y</div>
+              <div id="${player}-${index}-${Controls.b}" data-key="b" class="tetris-action-button tetris-button-b">B</div>
+              <div id="${player}-${index}-${Controls.a}" data-key="a" class="tetris-action-button tetris-button-a">A</div>
             </div>
           </section>
         </footer>
@@ -86,7 +86,10 @@ const getHtmlTemplate = (args) => {
     // 对战模式记分
     if (Mode === 'versus') {
       templates.push(`
-        <div id="${player}-${index}-tetris-battle-score" class="tetris-battle-score">0</div>
+        <div class="tetris-battle-score">
+          <h3 class="tetris-battle-player">${index + 1}P</h3>
+          <span id="${player}-${index}-tetris-battle-score" >0</span>
+        </div>
       `);
     }
   }

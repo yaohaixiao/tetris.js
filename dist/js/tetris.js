@@ -14,8 +14,8 @@ var tetris = (() => {
      * - 人机对战：['human', 'ai']； — 双人对战：['human', 'human']； — AI 对战：['ai', 'ai']；
      */
     Players: ["human", "ai"],
-    // 先得 20 分者获胜
-    victoryScore: 2,
+    // 先得 15 分者获胜
+    victoryScore: 5,
     /*
      * ==================== 方块渲染配置 ====================
      */
@@ -11538,7 +11538,7 @@ var tetris = (() => {
     const CE = CommandEvents(id);
     const RE = ReplayEvents(id);
     const UE = UIEvents(id);
-    const difficulty = runtime.isVersus() ? Store.getDifficulty() : "easy";
+    const difficulty = runtime.isVersus() && Store.getMode() !== "battle-over" ? Store.getDifficulty() : "easy";
     let level = Store.getLevel();
     runtime.emit(AUE.STOP_BGM);
     runtime.emit(ANE.CLEAR);
@@ -13061,20 +13061,83 @@ var tetris = (() => {
 
   // lib/battle/battle-ui.js
   var BattleUI = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * 接收 DOM 元素的 ID 配置，缓存元素引用。
+     *
+     * @param {object} options - 配置选项
+     * @param {object} options.elements - DOM 元素 ID 配置
+     * @param {string} options.elements.overlay - 覆盖层元素 ID
+     * @param {string} options.elements.winner - 胜者名称显示元素 ID
+     */
     constructor(options) {
       super(options);
       this.initialize();
     }
-    /** 初始化：缓存 DOM 元素引用，绑定按钮事件 */
+    /**
+     * ## 初始化
+     *
+     * 根据配置中的元素 ID，通过 `document.querySelector` 查找并缓存 DOM 元素引用。
+     *
+     * ### 缓存内容
+     *
+     * - `$overlay`：覆盖层元素，控制整个结果界面的显示/隐藏
+     * - `$winner`：胜者名称显示元素，用于展示赢家名称
+     *
+     * @returns {void}
+     */
     initialize() {
       const { overlay, winner } = this.elements;
       this.$overlay = document.querySelector(`#${overlay}`);
       this.$winner = document.querySelector(`#${winner}`);
     }
+    /**
+     * ## 显示对战结果
+     *
+     * 在覆盖层中展示胜者名称，并显示覆盖层。
+     *
+     * ### 操作步骤
+     *
+     * 1. 将胜者名称写入 `$winner` 元素的 textContent
+     * 2. 移除 `$overlay` 的 `tetris-hidden` 类，使覆盖层可见
+     *
+     * ### 为什么用 class 控制显示？
+     *
+     * - `tetris-hidden` 类设置 `display: none`
+     * - 移除该类后覆盖层恢复默认显示状态
+     * - 比直接操作 `style.display` 更易维护，样式集中在 CSS 中
+     *
+     * @example
+     *   battleUI.show('Alice');
+     *   // → 覆盖层显示，内容为 "Alice"
+     *
+     * @param {string} winner - 胜者名称（如 "Alice"、"Player1"）
+     */
     show(winner) {
       this.$winner.textContent = winner;
       this.$overlay.classList.remove("tetris-hidden");
     }
+    /**
+     * ## 隐藏对战结果
+     *
+     * 清空胜者名称并隐藏覆盖层。
+     *
+     * ### 操作步骤
+     *
+     * 1. 清空 `$winner` 元素的 textContent
+     * 2. 添加 `tetris-hidden` 类，隐藏覆盖层
+     *
+     * ### 为什么清空 textContent？
+     *
+     * - 防止下次 show 时短暂闪现旧内容
+     * - 保持 DOM 清洁
+     * - 避免屏幕阅读器读到过时的内容
+     *
+     * @example
+     *   battleUI.hide();
+     *   // → 覆盖层隐藏，胜者名称清空
+     */
     hide() {
       this.$winner.textContent = "";
       this.$overlay.classList.add("tetris-hidden");
@@ -13313,16 +13376,23 @@ var tetris = (() => {
      *
      * ### 初始化步骤
      *
-     * 1. 调用父类构造函数传递配置
-     * 2. 调用 `initialize()` 创建所有子系统
+     * 1. 调用父类构造函数传递配置（games、victoryScore、elements）
+     * 2. 调用 `initialize()` 创建所有子系统并自动开始
      *
      * @example
      *   const battle = new BattleController({
      *     games: [game1, game2],
+     *     victoryScore: 20,
+     *     elements: { overlay: 'battle-overlay', winner: 'battle-winner' },
      *   });
      *
      * @param {object} options - 配置选项
      * @param {object[]} options.games - Game 实例数组（长度为 2）
+     * @param {number} [options.victoryScore=20] - 目标分数，先达到者赢得整场对战. Default is
+     *   `20`
+     * @param {object} options.elements - BattleUI 所需的 DOM 元素 ID 配置
+     * @param {string} options.elements.overlay - 结果覆盖层元素 ID
+     * @param {string} options.elements.winner - 胜者名称显示元素 ID
      */
     constructor(options) {
       super(options);
@@ -13331,11 +13401,12 @@ var tetris = (() => {
     /**
      * ## 初始化对战系统
      *
-     * 创建对战所需的三个核心子系统，按依赖顺序初始化：
+     * 创建对战所需的四个核心子系统，按依赖顺序初始化：
      *
      * 1. **VersusState**：状态管理（无依赖）
-     * 2. **BattleHUD**：界面更新（依赖 state）
+     * 2. **BattleHUD**：实时分数更新（依赖 state）
      * 3. **BattleRouter**：事件路由（依赖 battle 实例自身）
+     * 4. **BattleUI**：结果展示界面（依赖 elements 配置）
      *
      * 完成后自动调用 `start()` 开始对战。
      *
@@ -13366,7 +13437,7 @@ var tetris = (() => {
      *
      * ### 幂等性保证
      *
-     * 通过检查 `state.isRunning()` 确保多次调用不会产生副作用。 这是一个**幂等操作**。
+     * 通过检查 `state.isRunning()` 确保多次调用不会产生副作用。 这是一个**幂等操作**——多次调用与一次调用效果相同。
      *
      * @returns {void}
      */
@@ -13383,7 +13454,8 @@ var tetris = (() => {
      *
      * ### 使用场景
      *
-     * - 游戏结束时（有玩家失败）
+     * - 单局游戏结束时（有玩家失败）
+     * - 整场对战结束时
      * - 手动停止对战
      *
      * ### 幂等性保证
@@ -13399,39 +13471,36 @@ var tetris = (() => {
       this.state.setRunning(false);
     }
     /**
-     * ## 更新对战结果
+     * ## 更新对战结果（单局结束）
      *
-     * 当有玩家游戏结束时调用，执行完整的游戏结束处理流程：
+     * 当有玩家游戏结束时调用，执行完整的单局结束处理流程：
      *
      * 1. 找到对手（胜者）
      * 2. 停止对战
-     * 3. 设置胜者
+     * 3. 设置单局胜者
      * 4. 更新双方胜场数
-     * 5. 更新 HUD 分数显示
-     * 6. 通知败者重新开始
-     * 7. 重新开始对战
+     * 5. 更新 HUD 实时分数显示
+     * 6. 检查赛制判定：胜者分数是否达到 victoryScore
      *
-     * ### 为什么自动重新开始？
+     *    - 达到 → `over(winner, loser)` 整场结束
+     *    - 未达到 → `restart(loser)` 开始下一局
      *
-     * 对战模式通常是**多局制**（如五局三胜），一局结束后 自动开始下一局，直到达到总局数。
+     * ### 为什么先 stop 再处理？
      *
-     * ### 流程顺序说明
-     *
-     * 先 `stop()` 再 `start()` 确保：
-     *
-     * - 在计分期间游戏逻辑暂停
-     * - 计分完成后重新开始新一局
+     * - 在计分期间暂停游戏逻辑
+     * - 防止计分过程中新的输入干扰
      *
      * @example
-     *   // 当 Bob 游戏结束时
+     *   // Bob 游戏结束（方块堆满）
      *   battle.update(bobGame);
-     *   // → 自动判定 Alice 获胜
-     *   // → 更新分数显示
-     *   // → 通知 Bob 重新开始
-     *   // → 开始新一局
+     *   // → Alice 得分 +1
+     *   // → 检查 Alice 分数 >= 20？
+     *   //   → 是：显示结果界面
+     *   //   → 否：通知 Bob 重新开始下一局
      *
      * @param {object} loser - 失败的玩家 Game 实例
      * @param {string | number} loser.id - 失败的玩家唯一标识
+     * @param {object} loser.Player - 失败的玩家信息
      * @param {Function} loser.emit - 事件触发方法
      * @returns {void}
      */
@@ -13453,8 +13522,19 @@ var tetris = (() => {
     /**
      * ## 整场对战结束
      *
-     * @param {object} winner - 获胜的游戏实例
-     * @param {object} loser - 落败的游戏实例
+     * 当有人达到 victoryScore 时调用。
+     *
+     * ### 执行流程
+     *
+     * 1. 通知双方切换到 `battle-over` 模式（停止游戏逻辑）
+     * 2. 通过 BattleUI 显示胜者名称
+     *
+     * ### 覆盖层显示
+     *
+     * BattleUI 会移除覆盖层的 `tetris-hidden` 类， 展示胜者名称。用户按 Enter 后触发 `reset()` 重新开始。
+     *
+     * @param {object} winner - 整场对战的胜者 Game 实例
+     * @param {object} loser - 整场对战的败者 Game 实例
      * @returns {void}
      */
     over(winner, loser) {
@@ -13468,7 +13548,20 @@ var tetris = (() => {
     /**
      * ## 重新开始一局对战
      *
-     * @param {object} loser - 落败的游戏实例
+     * 当前单局结束但整场未结束时调用。
+     *
+     * ### 执行流程
+     *
+     * 1. 通知败者重新初始化棋盘（RESTART 事件）
+     * 2. 重新开始对战（start）
+     *
+     * ### 为什么只通知败者？
+     *
+     * 胜者的游戏状态没有变化，不需要重置。 败者需要重新初始化棋盘准备下一局。
+     *
+     * @param {object} loser - 本局失败的玩家 Game 实例
+     * @param {string} loser.id - 失败者的唯一标识
+     * @param {Function} loser.emit - 事件触发方法
      * @returns {void}
      */
     restart(loser) {
@@ -13476,12 +13569,38 @@ var tetris = (() => {
       loser.emit(events.RESTART);
       this.start();
     }
+    /**
+     * ## 重置整场对战
+     *
+     * 清空所有分数和状态，重新开始一场全新的对战。
+     *
+     * ### 触发场景
+     *
+     * - 用户在结果覆盖层按 Enter 键
+     * - 外部调用强制重置
+     *
+     * ### 执行流程
+     *
+     * 1. 找到对手
+     * 2. 重置状态管理器（清空所有分数和垃圾行）
+     * 3. 重置 HUD 分数显示为 0
+     * 4. 隐藏结果覆盖层
+     * 5. 通知双方重置到 main-menu 模式
+     *
+     * @param {object} from - 发起重置的玩家 Game 实例
+     * @param {string} from.id - 发起者的唯一标识
+     * @param {Function} from.emit - 事件触发方法
+     * @returns {void}
+     */
     reset(from) {
       const opponent = this.getOpponent(from);
-      console.log("battle reset", opponent, from);
       this.state.reset();
       this.hud.updateScores(from, opponent);
       this.ui.hide();
+      const FE = GameEvents(from.id);
+      const OE = GameEvents(opponent.id);
+      from.emit(FE.RESET);
+      opponent.emit(OE.RESET);
     }
     /**
      * ## 获取对手
@@ -13491,6 +13610,8 @@ var tetris = (() => {
      * ### 查找逻辑
      *
      * 使用 `Array.find()` 在 games 数组中查找第一个 `id` 不等于 `yourself.id` 的 Game 实例。
+     *
+     * 在标准的 1v1 对战中，games 数组长度为 2， 返回的就是唯一的对手。
      *
      * ### 适用场景
      *
@@ -13503,6 +13624,7 @@ var tetris = (() => {
      *   console.log(opponent.Player.name); // 对手的名称
      *
      * @param {object} yourself - 当前玩家 Game 实例
+     * @param {string | number} yourself.id - 当前玩家唯一标识
      * @returns {object} 对手的 Game 实例
      */
     getOpponent(yourself) {
@@ -13516,12 +13638,12 @@ var tetris = (() => {
      *
      * ### 处理步骤
      *
-     *     1. 找到对手
-     *     2. 根据消行数计算攻击力
-     *     3. 如果攻击力 ≤ 0，直接返回（无攻击）
-     *     4. 用攻击力抵消自己的待处理垃圾行
-     *     5. 如果有剩余攻击力，发送给对手
-     *     6. 返回实际发出的垃圾行数
+     * 1. 找到对手
+     * 2. 根据消行数计算攻击力
+     * 3. 如果攻击力 ≤ 0，直接返回（无攻击）
+     * 4. 用攻击力抵消自己的待处理垃圾行
+     * 5. 如果有剩余攻击力，发送给对手
+     * 6. 返回实际发出的垃圾行数
      *
      * ### 为什么先抵消自己的垃圾行？
      *
@@ -13553,7 +13675,7 @@ var tetris = (() => {
      *   // pendingGarbage 从 5 减少到 4
      *
      * @param {object} from - 发起攻击的玩家 Game 实例（消行的一方）
-     * @param {Array} lines - 消除的行数组，用于计算攻击力
+     * @param {Array} lines - 消除的行数组，使用 `lines.length` 计算攻击力
      * @returns {number} 实际发送给对手的垃圾行数，0 表示无攻击
      */
     processAttack(from, lines) {
@@ -13575,12 +13697,12 @@ var tetris = (() => {
      *
      * ### 处理步骤
      *
-     *     1. 获取该玩家的待处理垃圾行数
-     *     2. 如果 amount ≤ 0，直接返回（无垃圾行）
-     *     3. 获取当前棋盘状态（board + difficulty）
-     *     4. 调用 applyGarbage 生成带垃圾行的新棋盘
-     *     5. 更新 Store 中的棋盘状态
-     *     6. 清空该玩家的待处理垃圾行计数
+     * 1. 获取该玩家的待处理垃圾行数
+     * 2. 如果 amount ≤ 0，直接返回（无垃圾行）
+     * 3. 获取当前棋盘状态（board + difficulty）
+     * 4. 调用 applyGarbage 生成带垃圾行的新棋盘
+     * 5. 更新 Store 中的棋盘状态
+     * 6. 清空该玩家的待处理垃圾行计数
      *
      * ### 为什么分两步处理垃圾行？
      *
@@ -13630,7 +13752,7 @@ var tetris = (() => {
      *
      * - PROCESS_ATTACK：处理消行攻击
      * - FLUSH_GARBAGE：处理垃圾行刷新
-     * - UPDATE_WINNER：处理游戏结束
+     * - UPDATE_WINNER：处理单局游戏结束
      * - SYNC_PAUSE：处理暂停同步
      * - SYNC_RESUME：处理恢复同步
      *

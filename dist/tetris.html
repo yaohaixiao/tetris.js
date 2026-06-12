@@ -55,9 +55,9 @@
         <footer class="tetris-controls">
           <!-- START / SELECT -->
           <section class="tetris-system-controls">
-            <div id="human-0-tetris-btn-back" data-key="back" class="tetris-system-btn tetris-btn-back">BACK</div>
-            <div id="human-0-tetris-btn-hold" data-key="hold" class="tetris-system-btn tetris-btn-hold">HOLD</div>
-            <div id="human-0-tetris-btn-start" data-key="start" class="tetris-system-btn tetris-btn-start">START</div>
+            <div id="human-0-tetris-btn-back" data-key="back" class="tetris-system-button tetris-btn-back">BACK</div>
+            <div id="human-0-tetris-btn-hold" data-key="hold" class="tetris-system-button tetris-btn-hold">HOLD</div>
+            <div id="human-0-tetris-btn-start" data-key="start" class="tetris-system-button tetris-btn-start">START</div>
           </section>
           <section class="tetris-main-controls">
             <!-- D-PAD -->
@@ -72,16 +72,19 @@
             </div>
             <!-- BUTTONS -->
             <div class="tetris-buttons">
-              <div id="human-0-tetris-btn-x" data-key="x" class="tetris-action-btn tetris-btn-x">X</div>
-              <div id="human-0-tetris-btn-y" data-key="y" class="tetris-action-btn tetris-btn-y">Y</div>
-              <div id="human-0-tetris-btn-b" data-key="b" class="tetris-action-btn tetris-btn-b">B</div>
-              <div id="human-0-tetris-btn-a" data-key="a" class="tetris-action-btn tetris-btn-a">A</div>
+              <div id="human-0-tetris-btn-x" data-key="x" class="tetris-action-button tetris-button-x">X</div>
+              <div id="human-0-tetris-btn-y" data-key="y" class="tetris-action-button tetris-button-y">Y</div>
+              <div id="human-0-tetris-btn-b" data-key="b" class="tetris-action-button tetris-button-b">B</div>
+              <div id="human-0-tetris-btn-a" data-key="a" class="tetris-action-button tetris-button-a">A</div>
             </div>
           </section>
         </footer>
       </div>
 
-      <div id="human-0-tetris-battle-score" class="tetris-battle-score">0</div>
+      <div class="tetris-battle-score">
+        <h3 class="tetris-battle-player">1P</h3>
+        <span id="human-0-tetris-battle-score">0</span>
+      </div>
 
       <div id="ai-1-tetris-player" class="tetris-player">
         <section class="tetris-screen">
@@ -112,9 +115,9 @@
         <footer class="tetris-controls">
           <!-- START / SELECT -->
           <section class="tetris-system-controls">
-            <div id="ai-1-tetris-btn-back" data-key="back" class="tetris-system-btn tetris-btn-back">BACK</div>
-            <div id="ai-1-tetris-btn-hold" data-key="hold" class="tetris-system-btn tetris-btn-hold">HOLD</div>
-            <div id="ai-1-tetris-btn-start" data-key="start" class="tetris-system-btn tetris-btn-start">START</div>
+            <div id="ai-1-tetris-btn-back" data-key="back" class="tetris-system-button tetris-btn-back">BACK</div>
+            <div id="ai-1-tetris-btn-hold" data-key="hold" class="tetris-system-button tetris-btn-hold">HOLD</div>
+            <div id="ai-1-tetris-btn-start" data-key="start" class="tetris-system-button tetris-btn-start">START</div>
           </section>
           <section class="tetris-main-controls">
             <!-- D-PAD -->
@@ -129,16 +132,19 @@
             </div>
             <!-- BUTTONS -->
             <div class="tetris-buttons">
-              <div id="ai-1-tetris-btn-x" data-key="x" class="tetris-action-btn tetris-btn-x">X</div>
-              <div id="ai-1-tetris-btn-y" data-key="y" class="tetris-action-btn tetris-btn-y">Y</div>
-              <div id="ai-1-tetris-btn-b" data-key="b" class="tetris-action-btn tetris-btn-b">B</div>
-              <div id="ai-1-tetris-btn-a" data-key="a" class="tetris-action-btn tetris-btn-a">A</div>
+              <div id="ai-1-tetris-btn-x" data-key="x" class="tetris-action-button tetris-button-x">X</div>
+              <div id="ai-1-tetris-btn-y" data-key="y" class="tetris-action-button tetris-button-y">Y</div>
+              <div id="ai-1-tetris-btn-b" data-key="b" class="tetris-action-button tetris-button-b">B</div>
+              <div id="ai-1-tetris-btn-a" data-key="a" class="tetris-action-button tetris-button-a">A</div>
             </div>
           </section>
         </footer>
       </div>
 
-      <div id="ai-1-tetris-battle-score" class="tetris-battle-score">0</div>
+      <div class="tetris-battle-score">
+        <h3 class="tetris-battle-player">2P</h3>
+        <span id="ai-1-tetris-battle-score">0</span>
+      </div>
     </div>
     <script src="js/tetris.js"></script>
   </body>
