@@ -13915,14 +13915,14 @@ var tetris = (() => {
           </aside>
         </section>
         <footer class="tetris-controls">
-          <!-- START / SELECT -->
+          <!-- START / SELECT \u7CFB\u7EDF\u6309\u94AE -->
           <section class="tetris-system-controls">
             <div id="${player}-${index}-${Controls.back}" data-key="back" class="tetris-system-button tetris-btn-back">BACK</div>
             <div id="${player}-${index}-${Controls.hold}" data-key="hold" class="tetris-system-button tetris-btn-hold">HOLD</div>
             <div id="${player}-${index}-${Controls.start}" data-key="start" class="tetris-system-button tetris-btn-start">START</div>
           </section>
           <section class="tetris-main-controls">
-            <!-- D-PAD -->
+            <!-- D-PAD \u65B9\u5411\u952E\uFF08GAME BOY \u7ECF\u5178\u5341\u5B57\u952E\u5E03\u5C40\uFF09 -->
             <div class="tetris-dpad">
               <div id="${player}-${index}-${Controls.up}" data-key="dpad_up" class="tetris-dpad-up">\u2191</div>
               <div class="tetris-dpad-mid">
@@ -13932,7 +13932,7 @@ var tetris = (() => {
               </div>
               <div id="${player}-${index}-${Controls.down}" data-key="dpad_down" class="tetris-dpad-down">\u2193</div>
             </div>
-            <!-- BUTTONS -->
+            <!-- ABXY \u52A8\u4F5C\u6309\u94AE\uFF08GAME BOY \u7ECF\u5178\u83F1\u5F62\u5E03\u5C40\uFF09 -->
             <div class="tetris-buttons">
               <div id="${player}-${index}-${Controls.x}" data-key="x" class="tetris-action-button tetris-button-x">X</div>
               <div id="${player}-${index}-${Controls.y}" data-key="y" class="tetris-action-button tetris-button-y">Y</div>
