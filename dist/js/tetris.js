@@ -11,7 +11,7 @@ var tetris = (() => {
     /**
      * ## 对战玩家列表：
      *
-     * 人机对战：['human', 'ai'] 双人对战：['human', 'human'] AI 对战：['ai', 'ai']；
+     * 人机对战：['human', 'ai'] 双人对战：['human', 'human']
      */
     Players: ["human", "human"],
     // 先得 15 分者获胜
@@ -51,6 +51,7 @@ var tetris = (() => {
         overlay: "tetris-battle-overlay",
         winner: "tetris-battle-winner"
       },
+      Container: "tetris-container",
       /*
        * ==================== 棋盘 Canvas 配置 ====================
        */
@@ -13865,6 +13866,97 @@ var tetris = (() => {
   };
   var battle_controller_default = BattleController;
 
+  // lib/engine/draw-interface.js
+  var drawInterface = (config) => {
+    const { Elements, Mode, Players } = config;
+    const { Canvas, Hud, Controls, Container } = Elements;
+    const templates = [];
+    const finalPlayers = [...Players];
+    const $container = document.querySelector(`#${Container}`);
+    if (Mode === "single") {
+      finalPlayers.pop();
+    } else {
+      templates.push(`
+      <section id="tetris-battle-overlay" class="tetris-battle-overlay tetris-hidden">
+        <h2 class="tetris-battle-title">BATTLE OVER</h2>
+        <div class="tetris-battle-winner">WINNER IS <span id="tetris-battle-winner" class="tetris-highlight">HUMAN</span></div>
+        <footer class="tetris-battle-actions">
+          <div id="tetris-battle-rematch">ENTER TO REMATCH</div>
+        </footer>
+      </section>
+    `);
+    }
+    for (const [index, player] of finalPlayers.entries()) {
+      const html = `
+      <div id="${player}-${index}-tetris-player" class="tetris-player">
+        <section class="tetris-screen">
+          <section id="${player}-${index}-tetris-screen-main" class="tetris-screen-main">
+            <canvas id="${player}-${index}-${Canvas.board}" data-mode="main-menu"></canvas>
+          </section>
+          <aside class="tetris-screen-aside">
+            <section class="tetris-panel next">
+              <h3 class="tetris-next-title">NEXT</h3>
+              <canvas id="${player}-${index}-${Canvas.next}" class="tetris-next-piece"></canvas>
+            </section>
+            <section class="tetris-panel controller">
+              <p class="tetris-panel-text tetris-highlight"><span id="${player}-${index}-${Hud.controller}">Human</span></p>
+            </section>
+            <section class="tetris-panel data">
+              <p class="tetris-panel-text">SCORE:<br><span id="${player}-${index}-${Hud.score}">00000</span></p>
+              <p class="tetris-panel-text">LINE:<br><span id="${player}-${index}-${Hud.lines}">00</span></p>
+              <p class="tetris-panel-text">LEVEL:<br><span id="${player}-${index}-${Hud.level}">01</span></p>
+              <p class="tetris-panel-text">COMBO:<br><span id="${player}-${index}-${Hud.combo}">00</span></p>
+              <p class="tetris-panel-text tetris-highlight">HI-SCORE:<br><span id="${player}-${index}-${Hud.highScore}">00000</span></p>
+            </section>
+            <section class="tetris-panel hold">
+              <h3 class="tetris-hold-title">HOLD</h3>
+              <canvas id="${player}-${index}-${Canvas.hold}" class="tetris-hold-piece"></canvas>
+            </section>
+          </aside>
+        </section>
+        <footer class="tetris-controls">
+          <!-- START / SELECT -->
+          <section class="tetris-system-controls">
+            <div id="${player}-${index}-${Controls.back}" data-key="back" class="tetris-system-button tetris-btn-back">BACK</div>
+            <div id="${player}-${index}-${Controls.hold}" data-key="hold" class="tetris-system-button tetris-btn-hold">HOLD</div>
+            <div id="${player}-${index}-${Controls.start}" data-key="start" class="tetris-system-button tetris-btn-start">START</div>
+          </section>
+          <section class="tetris-main-controls">
+            <!-- D-PAD -->
+            <div class="tetris-dpad">
+              <div id="${player}-${index}-${Controls.up}" data-key="dpad_up" class="tetris-dpad-up">\u2191</div>
+              <div class="tetris-dpad-mid">
+                <div id="${player}-${index}-${Controls.left}" data-key="dpad_left" class="tetris-dpad-left">\u2190</div>
+                <div class="tetris-dpad-center"></div>
+                <div id="${player}-${index}-${Controls.right}" data-key="dpad_right" class="tetris-dpad-right">\u2192</div>
+              </div>
+              <div id="${player}-${index}-${Controls.down}" data-key="dpad_down" class="tetris-dpad-down">\u2193</div>
+            </div>
+            <!-- BUTTONS -->
+            <div class="tetris-buttons">
+              <div id="${player}-${index}-${Controls.x}" data-key="x" class="tetris-action-button tetris-button-x">X</div>
+              <div id="${player}-${index}-${Controls.y}" data-key="y" class="tetris-action-button tetris-button-y">Y</div>
+              <div id="${player}-${index}-${Controls.b}" data-key="b" class="tetris-action-button tetris-button-b">B</div>
+              <div id="${player}-${index}-${Controls.a}" data-key="a" class="tetris-action-button tetris-button-a">A</div>
+            </div>
+          </section>
+        </footer>
+      </div>
+    `;
+      templates.push(html);
+      if (Mode === "versus") {
+        templates.push(`
+        <div class="tetris-battle-score">
+          <h3 class="tetris-battle-player">${index + 1}P</h3>
+          <span id="${player}-${index}-tetris-battle-score" >0</span>
+        </div>
+      `);
+      }
+    }
+    $container.innerHTML = templates.join("");
+  };
+  var draw_interface_default = drawInterface;
+
   // lib/core/command/command.js
   var Command = class extends core_default {
     /**
@@ -14636,6 +14728,7 @@ var tetris = (() => {
      */
     initialize: (options) => {
       const { Players, Mode, victoryScore, Elements } = options;
+      draw_interface_default(options);
       Engine.Scheduler = new scheduler_default();
       const normalizedOptions = {
         ...options,

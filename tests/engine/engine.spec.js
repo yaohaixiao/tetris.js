@@ -66,6 +66,11 @@ jest.mock('@/lib/battle/battle-controller.js', () => ({
   default: jest.fn(() => ({ subscribe: jest.fn(), unsubscribe: jest.fn() })),
 }));
 
+jest.mock('@/lib/engine/draw-interface.js', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
 jest.mock('@/lib/engine/dispatch-input.js', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -97,6 +102,7 @@ describe('Engine Core - 完整测试', () => {
   let BattleMock;
   let dispatchInputMock;
   let dispatchCommandMock;
+  let drawInterfaceMock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -119,6 +125,8 @@ describe('Engine Core - 完整测试', () => {
     };
     Configuration.Level = {};
 
+    drawInterfaceMock = require('@/lib/engine/draw-interface.js').default;
+
     requestAnimationFrame.mockReturnValue(123);
 
     Engine.rafId = null;
@@ -134,6 +142,18 @@ describe('Engine Core - 完整测试', () => {
 
   // ==================== 初始状态 ====================
   describe('初始状态', () => {
+    test('应该调用 drawInterface 绘制界面', () => {
+      Engine.initialize({ Players: ['P1'] });
+      expect(drawInterfaceMock).toHaveBeenCalledWith({ Players: ['P1'] });
+    });
+
+    test('drawInterface 应该在创建 Scheduler 之前调用', () => {
+      Engine.initialize({ Players: ['P1'], Elements: {} });
+      const drawCallOrder = drawInterfaceMock.mock.invocationCallOrder[0];
+      const schedulerCallOrder = SchedulerMock.mock.invocationCallOrder[0];
+      expect(drawCallOrder).toBeLessThan(schedulerCallOrder);
+    });
+
     test('应该具有正确的初始属性值', () => {
       expect(Engine.rafId).toBeNull();
       expect(Engine.fixedAccumulator).toBe(0);
