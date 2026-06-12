@@ -1,6 +1,7 @@
 /**
+ * 测试对战结果界面的显示和隐藏功能
+ *
  * @file BattleUI 单元测试
- * @description 测试对战结果界面的显示和隐藏功能
  */
 
 import BattleUI from '@/lib/battle/battle-ui.js';

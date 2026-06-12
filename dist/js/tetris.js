@@ -11,9 +11,9 @@ var tetris = (() => {
     /**
      * ## 对战玩家列表：
      *
-     * - 人机对战：['human', 'ai']； — 双人对战：['human', 'human']； — AI 对战：['ai', 'ai']；
+     * 人机对战：['human', 'ai'] 双人对战：['human', 'human'] AI 对战：['ai', 'ai']；
      */
-    Players: ["human", "ai"],
+    Players: ["human", "human"],
     // 先得 15 分者获胜
     victoryScore: 5,
     /*
@@ -7890,6 +7890,17 @@ var tetris = (() => {
         direction: 0,
         active: false
       };
+      this.disabled = false;
+    }
+    /**
+     * ## 设置键盘禁用状态
+     *
+     * @param {boolean} disabled - True 禁用，false 启用
+     * @returns {KeyboardController} 返回自身，支持链式调用
+     */
+    setDisabled(disabled) {
+      this.disabled = disabled;
+      return this;
     }
     /**
      * ## 每帧更新 DAS/ARR（由 Engine.tick 驱动）
@@ -7900,9 +7911,16 @@ var tetris = (() => {
      * @returns {void}
      */
     update() {
+      if (this.disabled) {
+        return;
+      }
       const { dasState, Game: Game2 } = this;
-      if (!dasState.active || dasState.direction === 0) return;
-      if (Game2.Store.getMode() !== "playing") return;
+      if (!dasState.active || dasState.direction === 0) {
+        return;
+      }
+      if (Game2.Store.getMode() !== "playing") {
+        return;
+      }
       if (dasState.dasTimer < DAS_CONFIG.DAS) {
         dasState.dasTimer++;
         return;
@@ -7969,7 +7987,7 @@ var tetris = (() => {
       const action = resolveKeyboardAction(key);
       const mode = Store.getMode();
       const controller = Store.getController();
-      return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (key === "r" || Player.name === "ai" && (key === "p" || key === "c") || Player.name === "human" && key === "s");
+      return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (key === "r" || Player.name === "ai" && (key === "p" || key === "c") || Player.name === "human" && (key === "s" || key === "p" && Player.index === 1 || mode === "playing" && Player.index === 1));
     }
     /**
      * ## resize 事件处理
@@ -7997,7 +8015,7 @@ var tetris = (() => {
     _onKeydown = (e) => {
       const { Game: Game2, Store, Player } = this;
       const key = e.key?.toLowerCase();
-      if (!key) {
+      if (!key || this.disabled) {
         return this;
       }
       const action = resolveKeyboardAction(key);
@@ -8186,6 +8204,20 @@ var tetris = (() => {
         LEFT_STICK_Y: 1
         // 左摇杆 Y 轴
       };
+      this.boundGamepadIndex = null;
+    }
+    /**
+     * ## 设置绑定的手柄索引
+     *
+     * 对战模式下，P2 调用此方法绑定到 index=1 的手柄。
+     *
+     * @param {number} index - 手柄索引
+     * @returns {GamepadController} 返回自身，支持链式调用
+     */
+    setBoundIndex(index) {
+      this.boundGamepadIndex = index;
+      this.activeGamepadIndex = index;
+      return this;
     }
     /**
      * ## 每帧调用
@@ -8201,8 +8233,12 @@ var tetris = (() => {
      */
     update(now) {
       const { Store, Player } = this;
+      const mode = Store.getMode();
       this._refreshGamepadState();
-      if (Store.getMode() === "playing" && Player.name === "ai") {
+      if (this.boundGamepadIndex !== null && this.boundGamepadIndex > 0 && mode !== "playing") {
+        return this;
+      }
+      if (mode === "playing" && Player.name === "ai") {
         return this;
       }
       if (!this.activeGamepad) {
@@ -8254,6 +8290,17 @@ var tetris = (() => {
      */
     _onConnect = (e) => {
       const pad = e.gamepad;
+      if (this.boundGamepadIndex !== null) {
+        if (pad.index !== this.boundGamepadIndex) {
+          return this;
+        }
+        this.activeGamepadIndex = pad.index;
+        this.curBtnMap = this._isBetop(pad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+        const { Game: Game3 } = this;
+        const events2 = GameEvents(Game3.id);
+        this.emit(events2.UPDATE_GAMEPAD_CONNECTED, { connected: true });
+        return this;
+      }
       if (this.activeGamepadIndex !== null) {
         return this;
       }
@@ -8313,6 +8360,14 @@ var tetris = (() => {
      */
     _refreshGamepadState() {
       const pads = navigator.getGamepads?.() || [];
+      if (this.boundGamepadIndex !== null) {
+        this.activeGamepadIndex = this.boundGamepadIndex;
+        this.activeGamepad = pads[this.boundGamepadIndex] || null;
+        if (this.activeGamepad) {
+          this.curBtnMap = this._isBetop(this.activeGamepad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
+        }
+        return this;
+      }
       if (this.activeGamepadIndex === null) {
         const firstPad = Array.from(pads).find(Boolean);
         if (firstPad) {
@@ -12134,7 +12189,8 @@ var tetris = (() => {
       this.Animations = new animation_system_default({ Game: this, Player });
       this.CommandQueue = new command_queue_default({ Game: this, Player });
       this.UI = new ui_default({ Game: this, Store, Elements, Block, Player });
-      if (this.isVersus() && Player.name === "ai" || !this.isVersus()) {
+      const isVersus = this.isVersus();
+      if (isVersus && Player.name === "ai" || !isVersus) {
         this.AI = new ai_controller_default({
           Game: this,
           Store,
@@ -12144,8 +12200,15 @@ var tetris = (() => {
         });
       }
       this.Keyboard = new keyboard_controller_default({ Game: this, Store, Player });
-      this.Gamepad = new gamepad_controller_default({ Game: this, Store, Player });
-      this.Touch = new touch_controller_default({ Game: this, Store, Controls, Player });
+      this._initializeGamepadController();
+      if (!isVersus) {
+        this.Touch = new touch_controller_default({
+          Game: this,
+          Store,
+          Controls,
+          Player
+        });
+      }
       this.Replay = new replay_controller_default({
         Game: this,
         Store,
@@ -12165,6 +12228,34 @@ var tetris = (() => {
       if (this.isVersus() && Player.name === "ai") {
         this.Store.setController("ai");
         this.AI.start();
+      }
+    }
+    _initializeGamepadController() {
+      const { Store, Player } = this;
+      const isHumanPlayer = Player.name !== "ai";
+      const gamepadCount = (navigator.getGamepads?.() || []).filter(
+        Boolean
+      ).length;
+      if (!isHumanPlayer) {
+        return this;
+      }
+      if (this.isVersus()) {
+        const playerIndex = Player.index;
+        if (playerIndex === 0) {
+          if (gamepadCount >= 2) {
+            this.Gamepad = new gamepad_controller_default({
+              Game: this,
+              Store,
+              Player
+            });
+            this.Gamepad.setBoundIndex(0);
+          }
+        } else {
+          this.Gamepad = new gamepad_controller_default({ Game: this, Store, Player });
+          this.Gamepad.setBoundIndex(gamepadCount >= 2 ? 1 : 0);
+        }
+      } else {
+        this.Gamepad = new gamepad_controller_default({ Game: this, Store, Player });
       }
     }
     isVersus() {
@@ -14532,6 +14623,7 @@ var tetris = (() => {
      */
     Battle: [],
     isVersus: () => Engine.Configuration.Mode === "versus",
+    gameAccumulators: /* @__PURE__ */ new Map(),
     /**
      * ## 初始化引擎
      *
@@ -14650,12 +14742,13 @@ var tetris = (() => {
      * @returns {void}
      */
     tick: (timestamp) => {
+      const { Games, Scheduler: Scheduler2 } = Engine;
       if (!Engine.lastTickTime) {
         Engine.lastTickTime = timestamp;
-        Engine.fixedAccumulator = timestamp;
+        for (const Game2 of Games) {
+          Engine.gameAccumulators.set(Game2, timestamp);
+        }
       }
-      const { Games, Scheduler: Scheduler2 } = Engine;
-      const stepDelta = timestamp - Engine.fixedAccumulator;
       Engine.lastTickTime = timestamp;
       Scheduler2.tick(timestamp);
       for (const Game2 of Games) {
@@ -14672,15 +14765,18 @@ var tetris = (() => {
         Gamepad?.update?.(timestamp);
         Keyboard?.update?.();
         CommandQueue2.flush();
-        if ((!Engine.fixedAccumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
+        const accumulator = Engine.gameAccumulators.get(Game2) || timestamp;
+        const stepDelta = timestamp - accumulator;
+        if ((!accumulator || stepDelta > Game2.getSpeed()) && !Replay.playing) {
           Game2.tick(isBlocked);
-          Engine.fixedAccumulator = timestamp;
+          Engine.gameAccumulators.set(Game2, timestamp);
         }
         Animations.flush();
         UI2.tickHud();
         UI2.render();
         Animations.render();
       }
+      Engine.fixedAccumulator = timestamp;
       Engine.rafId = requestAnimationFrame(Engine.tick);
     },
     /**
@@ -14817,7 +14913,7 @@ var tetris = (() => {
       cancelAnimationFrame(Engine.rafId);
       Engine.rafId = 0;
       Engine.lastTickTime = 0;
-      Engine.fixedAccumulator = 0;
+      Engine.gameAccumulators?.clear?.();
     },
     /**
      * ## 重启游戏循环

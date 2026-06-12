@@ -109,13 +109,14 @@ describe('Engine Core - 完整测试', () => {
     dispatchInputMock = require('@/lib/engine/dispatch-input.js').default;
     dispatchCommandMock = require('@/lib/engine/dispatch-command.js').default;
 
-    // launch 需要 single + 2 个玩家（pop 后剩 1）
     Configuration.Mode = 'single';
     Configuration.Players = ['Player1', 'Player1_extra'];
     Configuration.Speed = 1000;
     Configuration.BoardWidth = 10;
     Configuration.BoardHeight = 20;
-    Configuration.Elements = { Battle: { overlay: 'battle-overlay', winner: 'battle-winner' } };
+    Configuration.Elements = {
+      Battle: { overlay: 'battle-overlay', winner: 'battle-winner' },
+    };
     Configuration.Level = {};
 
     requestAnimationFrame.mockReturnValue(123);
@@ -127,6 +128,7 @@ describe('Engine Core - 完整测试', () => {
     Engine.Battle = [];
     Engine.Scheduler = null;
     Engine.Audio = null;
+    Engine.gameAccumulators = new Map();
     Engine.Configuration = Configuration;
   });
 
@@ -145,19 +147,15 @@ describe('Engine Core - 完整测试', () => {
 
     test('所有核心方法应该存在', () => {
       [
-        'initialize',
-        'launch',
-        'tick',
-        'start',
-        'stop',
-        'restart',
-        'destroy',
-        'subscribe',
-        'unsubscribe',
-        'isVersus',
+        'initialize', 'launch', 'tick', 'start', 'stop', 'restart',
+        'destroy', 'subscribe', 'unsubscribe', 'isVersus',
       ].forEach((m) => {
         expect(typeof Engine[m]).toBe('function');
       });
+    });
+
+    test('gameAccumulators 应该是 Map 实例', () => {
+      expect(Engine.gameAccumulators).toBeInstanceOf(Map);
     });
   });
 
@@ -203,12 +201,10 @@ describe('Engine Core - 完整测试', () => {
     test('Game 接收正确 Player 配置', () => {
       Engine.initialize({ Players: ['Alice', 'Bob'] });
       expect(GameMock.mock.calls[0][0].Player).toEqual({
-        index: 0,
-        name: 'Alice',
+        index: 0, name: 'Alice',
       });
       expect(GameMock.mock.calls[1][0].Player).toEqual({
-        index: 1,
-        name: 'Bob',
+        index: 1, name: 'Bob',
       });
     });
 
@@ -345,12 +341,14 @@ describe('Engine Core - 完整测试', () => {
       game = Engine.Games[0];
     });
 
-    test('首次调用初始化时间基准', () => {
+    test('首次调用初始化时间基准和累积器', () => {
       Engine.lastTickTime = 0;
-      Engine.fixedAccumulator = 0;
+      Engine.gameAccumulators.clear();
       Engine.tick(1000);
       expect(Engine.lastTickTime).toBe(1000);
       expect(Engine.fixedAccumulator).toBe(1000);
+      // 累积器应该被初始化
+      expect(Engine.gameAccumulators.get(game)).toBe(1000);
     });
 
     test('非首次更新 lastTickTime', () => {
@@ -424,9 +422,11 @@ describe('Engine Core - 完整测试', () => {
         game.getSpeed.mockReturnValue(100);
         game.Replay.playing = false;
         Engine.lastTickTime = 1000;
-        Engine.fixedAccumulator = 1000;
+        Engine.gameAccumulators.set(game, 1000);
         Engine.tick(1200);
         expect(game.tick).toHaveBeenCalled();
+        // 累积器应该更新
+        expect(Engine.gameAccumulators.get(game)).toBe(1200);
       });
 
       test('未超过不更新', () => {
@@ -434,9 +434,11 @@ describe('Engine Core - 完整测试', () => {
         game.getSpeed.mockReturnValue(1000);
         game.Replay.playing = false;
         Engine.lastTickTime = 1000;
-        Engine.fixedAccumulator = 1000;
+        Engine.gameAccumulators.set(game, 1000);
         Engine.tick(1016);
         expect(game.tick).not.toHaveBeenCalled();
+        // 累积器不应该更新
+        expect(Engine.gameAccumulators.get(game)).toBe(1000);
       });
 
       test('回放中不更新', () => {
@@ -444,20 +446,37 @@ describe('Engine Core - 完整测试', () => {
         game.getSpeed.mockReturnValue(100);
         game.Replay.playing = true;
         Engine.lastTickTime = 1000;
-        Engine.fixedAccumulator = 1000;
+        Engine.gameAccumulators.set(game, 1000);
         Engine.tick(1200);
         expect(game.tick).not.toHaveBeenCalled();
       });
     });
 
-    test('多个 Game 实例', () => {
+    test('多个 Game 实例各自独立的累积器', () => {
       Engine.Games = [];
       Engine.initialize({ Players: ['P1', 'P2'] });
+      const game0 = Engine.Games[0];
+      const game1 = Engine.Games[1];
+
+      // 首次 tick 初始化
+      Engine.lastTickTime = 0;
       Engine.tick(1000);
-      Engine.Games.forEach((g) => {
-        expect(g.UI.render).toHaveBeenCalled();
-        expect(g.CommandQueue.flush).toHaveBeenCalled();
-      });
+
+      // 设置不同速度
+      game0.getSpeed.mockReturnValue(100);
+      game1.getSpeed.mockReturnValue(1000);
+
+      // ★ 清除首次 tick 的调用记录
+      game0.tick.mockClear();
+      game1.tick.mockClear();
+
+      // stepDelta = 1101 - 1000 = 101 > 100
+      Engine.tick(1101);
+
+      // P1 速度 100，101ms 后应该 tick
+      expect(game0.tick).toHaveBeenCalled();
+      // P2 速度 1000，101ms 后不应该 tick
+      expect(game1.tick).not.toHaveBeenCalled();
     });
 
     test('空 Games 不报错', () => {
@@ -611,15 +630,17 @@ describe('Engine Core - 完整测试', () => {
   });
 
   describe('stop', () => {
-    test('停止并重置', () => {
+    test('停止并重置（含 gameAccumulators 清空）', () => {
       Engine.rafId = 456;
       Engine.lastTickTime = 5000;
       Engine.fixedAccumulator = 3000;
+      Engine.gameAccumulators.set('test', 100);
       Engine.stop();
       expect(cancelAnimationFrame).toHaveBeenCalledWith(456);
       expect(Engine.rafId).toBe(0);
       expect(Engine.lastTickTime).toBe(0);
-      expect(Engine.fixedAccumulator).toBe(0);
+      // gameAccumulators 应该被清空
+      expect(Engine.gameAccumulators.size).toBe(0);
     });
 
     test('rafId 为空直接返回', () => {
@@ -655,9 +676,10 @@ describe('Engine Core - 完整测试', () => {
       Engine.rafId = 123;
     });
 
-    test('完整清理', () => {
+    test('完整清理（含 gameAccumulators）', () => {
       const a = jest.spyOn(Engine, 'stop');
       const b = jest.spyOn(Engine, 'unsubscribe');
+      Engine.gameAccumulators.set(Engine.Games[0], 500);
       Engine.destroy();
       expect(a).toHaveBeenCalled();
       expect(b).toHaveBeenCalled();
@@ -695,14 +717,27 @@ describe('Engine Core - 完整测试', () => {
       expect(Engine.Audio).toBeNull();
     });
 
-    test('versus 模式', () => {
+    test('versus 模式（含独立累积器验证）', () => {
       Configuration.Mode = 'versus';
       Configuration.Players = ['P1', 'P2'];
       Configuration.Elements = { Battle: { overlay: 'battle-overlay' } };
       Engine.launch();
       expect(Engine.Games).toHaveLength(2);
       expect(Engine.Battle).toBeDefined();
+
+      // 首次 tick 初始化累积器
+      Engine.lastTickTime = 0;
       Engine.tick(1000);
+
+      const game0 = Engine.Games[0];
+      const game1 = Engine.Games[1];
+      expect(Engine.gameAccumulators.get(game0)).toBe(1000);
+      expect(Engine.gameAccumulators.get(game1)).toBe(1000);
+
+      // 两个 Game 都应该正常渲染
+      expect(game0.UI.render).toHaveBeenCalled();
+      expect(game1.UI.render).toHaveBeenCalled();
+
       Engine.destroy();
     });
   });
@@ -713,7 +748,7 @@ describe('Engine Core - 完整测试', () => {
       Engine.initialize({ Players: ['Player1'] });
       const game = Engine.Games[0];
       Engine.lastTickTime = 1000;
-      Engine.fixedAccumulator = 1000;
+      Engine.gameAccumulators.set(game, 1000);
       Engine.tick(1001);
       expect(game.tick).not.toHaveBeenCalled();
     });
@@ -722,7 +757,7 @@ describe('Engine Core - 完整测试', () => {
       Engine.initialize({ Players: ['Player1'] });
       const game = Engine.Games[0];
       Engine.lastTickTime = 1000;
-      Engine.fixedAccumulator = 1000;
+      Engine.gameAccumulators.set(game, 1000);
       Engine.tick(3601000);
       expect(game.tick).toHaveBeenCalled();
     });
@@ -755,7 +790,6 @@ describe('Engine Core - 完整测试', () => {
       Engine.initialize({ Players: ['Player1'] });
       game = Engine.Games[0];
 
-      // ★ 给 game.on/once/off 添加真实委托到 EventBus
       game.on = jest.fn((event, handler) => {
         EventBus.on(event, handler);
       });
@@ -767,7 +801,6 @@ describe('Engine Core - 完整测试', () => {
       });
     });
 
-    // ==================== once 方法 (行103) ====================
     describe('once 方法', () => {
       test('应该委托给 EventBus.once，只触发一次', () => {
         const handler = jest.fn();
@@ -845,7 +878,6 @@ describe('Engine Core - 完整测试', () => {
       });
     });
 
-    // ==================== off 方法 (行127) ====================
     describe('off 方法', () => {
       test('应该委托给 EventBus.off，取消已注册的监听', () => {
         const handler = jest.fn();

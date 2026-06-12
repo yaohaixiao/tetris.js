@@ -16,6 +16,7 @@ describe('reset', () => {
     mockGame = {
       id: 'test-uuid',
       Store: {
+        getMode: jest.fn().mockReturnValue('playing'),
         getLevel: jest.fn().mockReturnValue(5),
         getDifficulty: jest.fn().mockReturnValue('normal'),
         getController: jest.fn().mockReturnValue('human'),
@@ -109,21 +110,70 @@ describe('reset', () => {
   describe('对战模式 main-menu', () => {
     beforeEach(() => {
       mockGame.isVersus.mockReturnValue(true);
+      mockGame.Store.getMode.mockReturnValue('playing');
       mockGame.Store.getController.mockReturnValue('ai');
       reset(mockGame);
     });
 
     it('对战模式应该保留难度（不重置为 easy）', () => {
-      // 对战模式 difficulty = Store.getDifficulty() = 'normal'
       expect(mockGame.Store.setDifficulty).toHaveBeenCalledWith('normal');
     });
 
     it('对战模式 main-menu 也应该将等级重置为 1', () => {
-      // 源码中 mode === 'main-menu' 时 level = 1，不管是不是对战模式
       expect(setBeginningState).toHaveBeenCalledWith(mockGame, 'main-menu', 1);
     });
 
     it('对战模式应该保留 controller', () => {
+      expect(mockGame.Store.setController).toHaveBeenCalledWith('ai');
+    });
+
+    it('AI controller 时应该重启 AI', () => {
+      expect(mockGame.emit).toHaveBeenCalledWith('ai:test-uuid:start');
+    });
+  });
+
+  // ==================== 对战模式 battle-over ====================
+  describe('对战模式 battle-over', () => {
+    beforeEach(() => {
+      mockGame.isVersus.mockReturnValue(true);
+      mockGame.Store.getMode.mockReturnValue('battle-over');
+      mockGame.Store.getController.mockReturnValue('human');
+      reset(mockGame);
+    });
+
+    it('battle-over 模式应该将难度重置为 easy', () => {
+      // battle-over 时 Store.getMode() === 'battle-over'，条件不满足
+      // difficulty = 'easy'，不保留原难度
+      expect(mockGame.Store.setDifficulty).toHaveBeenCalledWith('easy');
+    });
+
+    it('battle-over 模式应该将等级重置为 1', () => {
+      expect(setBeginningState).toHaveBeenCalledWith(mockGame, 'main-menu', 1);
+    });
+
+    it('battle-over 重置 controller 为 human', () => {
+      expect(mockGame.Store.setController).toHaveBeenCalledWith('human');
+    });
+
+    it('battle-over 不应该重启 AI', () => {
+      expect(mockGame.emit).not.toHaveBeenCalledWith('ai:test-uuid:start');
+    });
+  });
+
+  // ==================== 对战模式 battle-over + AI controller ====================
+  describe('对战模式 battle-over（AI controller）', () => {
+    beforeEach(() => {
+      mockGame.isVersus.mockReturnValue(true);
+      mockGame.Store.getMode.mockReturnValue('battle-over');
+      mockGame.Store.getController.mockReturnValue('ai');
+      reset(mockGame);
+    });
+
+    it('battle-over 模式应该将难度重置为 easy（即使是 AI）', () => {
+      expect(mockGame.Store.setDifficulty).toHaveBeenCalledWith('easy');
+    });
+
+    it('battle-over 应该保留 AI controller', () => {
       expect(mockGame.Store.setController).toHaveBeenCalledWith('ai');
     });
 

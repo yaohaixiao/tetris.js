@@ -734,4 +734,133 @@ describe('KeyboardController', () => {
       expect(result).toBe(keyboard);
     });
   });
+
+  // ==================== setDisabled ====================
+  describe('setDisabled 方法', () => {
+    it('应该设置 disabled 为 true', () => {
+      keyboard.setDisabled(true);
+      expect(keyboard.disabled).toBe(true);
+    });
+
+    it('应该设置 disabled 为 false', () => {
+      keyboard.setDisabled(true);
+      keyboard.setDisabled(false);
+      expect(keyboard.disabled).toBe(false);
+    });
+
+    it('应该返回 KeyboardController 实例以支持链式调用', () => {
+      const result = keyboard.setDisabled(true);
+      expect(result).toBe(keyboard);
+    });
+  });
+
+  // ==================== disabled 状态下的行为 ====================
+  describe('disabled 状态', () => {
+    beforeEach(() => {
+      mockStore.getMode.mockReturnValue('playing');
+      mockStore.getController.mockReturnValue('human');
+      mockPlayer.name = 'human';
+      mockGame.isVersus.mockReturnValue(false);
+      keyboard.Player = mockPlayer;
+      keyboard.setDisabled(true);
+      keyboard.emit.mockClear();
+    });
+
+    it('disabled 时 _onKeydown 不应该发送事件', () => {
+      keyboard._onKeydown({ key: 'ArrowLeft' });
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('disabled 时 _onKeydown 应该直接返回', () => {
+      const result = keyboard._onKeydown({ key: 'ArrowLeft' });
+      expect(result).toBe(keyboard);
+    });
+
+    it('disabled 时 update 不应该执行 DAS/ARR', () => {
+      keyboard.dasState.active = true;
+      keyboard.dasState.direction = 1;
+      keyboard.dasState.dasTimer = 10;
+      keyboard.dasState.arrTimer = 2;
+
+      keyboard.update();
+
+      expect(keyboard.emit).not.toHaveBeenCalled();
+      // DAS 状态不应该变化（因为直接 return 了）
+      expect(keyboard.dasState.arrTimer).toBe(2);
+    });
+  });
+
+  // ==================== 对战模式 P2 键盘屏蔽 (行181-182) ====================
+  describe('对战模式 P2 (index=1) 键盘屏蔽', () => {
+    beforeEach(() => {
+      mockStore.getMode.mockReturnValue('playing');
+      mockStore.getController.mockReturnValue('human');
+      mockPlayer.name = 'human';
+      mockPlayer.index = 1; // P2
+      mockGame.isVersus.mockReturnValue(true);
+      keyboard.Player = mockPlayer;
+      keyboard.emit.mockClear();
+    });
+
+    it('P2 在 playing 模式下所有按键都应该被屏蔽', () => {
+      keyboard._onKeydown({ key: 'ArrowLeft' });
+      expect(keyboard.emit).not.toHaveBeenCalled();
+
+      keyboard._onKeydown({ key: 'ArrowRight' });
+      expect(keyboard.emit).not.toHaveBeenCalled();
+
+      keyboard._onKeydown({ key: 'ArrowDown' });
+      expect(keyboard.emit).not.toHaveBeenCalled();
+
+      keyboard._onKeydown({ key: 'ArrowUp' });
+      expect(keyboard.emit).not.toHaveBeenCalled();
+
+      keyboard._onKeydown({ key: ' ' });
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('P2 在 playing 模式下按 p 键应该被屏蔽', () => {
+      keyboard._onKeydown({ key: 'p' });
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('P2 在 playing 模式下按 m 键应该被屏蔽', () => {
+      keyboard._onKeydown({ key: 'm' });
+      expect(keyboard.emit).not.toHaveBeenCalled();
+    });
+
+    it('P2 在非 playing 模式（如 main-menu）下不应该被屏蔽', () => {
+      mockStore.getMode.mockReturnValue('main-menu');
+      keyboard._onKeydown({ key: 'ArrowLeft' });
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'MOVE_LEFT',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('P2 在 difficulty 模式下不应该被屏蔽', () => {
+      mockStore.getMode.mockReturnValue('difficulty');
+      keyboard._onKeydown({ key: 'Enter' });
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'CONFIRM',
+        payload: { Game: mockGame },
+      });
+    });
+
+    it('P1 (index=0) 在 playing 模式下不应该被屏蔽', () => {
+      mockPlayer.index = 0;
+      keyboard.Player = mockPlayer;
+      keyboard._onKeydown({ key: 'ArrowLeft' });
+
+      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        device: 'keyboard',
+        action: 'MOVE_LEFT',
+        payload: { Game: mockGame },
+      });
+    });
+  });
 });
