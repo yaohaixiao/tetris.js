@@ -1,3 +1,13 @@
+# [1.16.0](https://github.com/yaohaixiao/tetris.js/compare/1.15.0...1.16.0) (2026-06-12)
+
+
+### Features
+
+* 添加人机对战模式； ([0ae36e1](https://github.com/yaohaixiao/tetris.js/commit/0ae36e1be44535f3f2bb1b4362197baab63adf41))
+* 完成 drawInterface 界面绘制 + Engine 集成 ([37a6d3d](https://github.com/yaohaixiao/tetris.js/commit/37a6d3deffaf47c07eda8e480de26223cc52a666))
+* 添加双人对战模式: 完成对战模式核心功能开发 ([a2305fa](https://github.com/yaohaixiao/tetris.js/commit/a2305fa116950e79c25fbfaac93be0fe56f14178))
+
+
 # [1.15.0](https://github.com/yaohaixiao/tetris.js/compare/1.14.0...1.15.0) (2026-06-04)
 
 ### Features
