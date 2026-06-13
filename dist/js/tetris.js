@@ -3313,6 +3313,8 @@ var tetris = (() => {
     START_CLEAR_SCORE: `game:${uuid}:start:clear:score`,
     START_LEVEL_UP: `game:${uuid}:start:level:up`,
     START_LANDING_FLASH: `game:${uuid}:start:landing:flash`,
+    START_GARBAGE_WARNING: `game:${uuid}:start:garbage:warning`,
+    START_GARBAGE_PUSH: `game:${uuid}:start:garbage:push`,
     /* ---------- 背景音乐 ---------- */
     TOGGLE_BGM: `game:${uuid}:toggle:bgm`,
     /* ---------- 回放准备 ---------- */
@@ -3348,7 +3350,9 @@ var tetris = (() => {
     RENDER_CLEAR_LINES: `ui:${uuid}:render:clear:lines`,
     RENDER_CLEAR_SCORE: `ui:${uuid}:render:clear:score`,
     RENDER_LEVEL_UP: `ui:${uuid}:render:level:up`,
-    RENDER_LANDING_FLASH: `ui:${uuid}:render:landing:flash`
+    RENDER_LANDING_FLASH: `ui:${uuid}:render:landing:flash`,
+    RENDER_GARBAGE_WARNING: `ui:${uuid}:render:garbage:warning`,
+    RENDER_GARBAGE_PUSH: `ui:${uuid}:render:garbage:push`
   });
 
   // lib/services/audio/index.js
@@ -3544,6 +3548,8 @@ var tetris = (() => {
       this.on(events.START_CLEAR_SCORE, this._onStartClearScore);
       this.on(events.START_LEVEL_UP, this._onStartLevelUp);
       this.on(events.START_LANDING_FLASH, this._onStartLandingFlash);
+      this.on(events.START_GARBAGE_WARNING, this._onStartGarbageWarning);
+      this.on(events.START_GARBAGE_PUSH, this._onStartGarbagePush);
       this.on(events.TOGGLE_BGM, this._onToggleBGM);
       this.on(events.REPLAY_PREPARE, this._onReplayPrepare);
       AI?.subscribe?.();
@@ -3593,6 +3599,8 @@ var tetris = (() => {
       this.off(events.START_CLEAR_SCORE, this._onStartClearScore);
       this.off(events.START_LEVEL_UP, this._onStartLevelUp);
       this.off(events.START_LANDING_FLASH, this._onStartLandingFlash);
+      this.off(events.START_GARBAGE_WARNING, this._onStartGarbageWarning);
+      this.off(events.START_GARBAGE_PUSH, this._onStartGarbagePush);
       this.off(events.TOGGLE_BGM, this._onToggleBGM);
       this.off(events.REPLAY_PREPARE, this._onReplayPrepare);
       AI?.unsubscribe?.();
@@ -3627,9 +3635,11 @@ var tetris = (() => {
     /**
      * ## 更新 Store 状态
      *
+     * 接收 stateHandler 函数，通过 Store.setState 执行状态更新。
+     *
      * @private
      * @param {object} options - 参数对象
-     * @param {Function} options.stateHandler - 状态更新函数
+     * @param {Function} options.stateHandler - 状态更新函数（接收 prev state，返回 new state）
      * @returns {void}
      */
     _onUpdateState = (options) => {
@@ -3644,7 +3654,8 @@ var tetris = (() => {
      *
      * @private
      * @param {object} options - 参数对象
-     * @param {string} options.mode - 游戏模式
+     * @param {string} options.mode - 游戏模式（main-menu / difficulty / playing /
+     *   paused / game-over / replay）
      * @returns {void}
      */
     _onUpdateMode = (options) => {
@@ -3670,7 +3681,7 @@ var tetris = (() => {
     /**
      * ## 刷新 HUD 显示
      *
-     * 读取当前 Store 状态，通知 UI 层更新分数、等级、行数等。
+     * 读取当前 Store 状态，通知 UI 层更新分数、等级、行数、连击数等 HUD 信息。
      *
      * @private
      * @returns {void}
@@ -3695,9 +3706,11 @@ var tetris = (() => {
     /**
      * ## 选择等级
      *
+     * 更新游戏等级，同时刷新 HUD 显示。
+     *
      * @private
      * @param {object} options - 参数对象
-     * @param {number} options.level - 等级值
+     * @param {number} options.level - 等级值（1-10）
      * @returns {void}
      */
     _onSelectLevel = (options) => {
@@ -3824,8 +3837,10 @@ var tetris = (() => {
     /**
      * ## 获取 Ghost 定位
      *
+     * 计算当前方块硬降后的落点位置，用于绘制幽灵方块预览。
+     *
      * @private
-     * @param {object} payload - 参数对象
+     * @param {object} payload - 参数对象（含当前方块信息）
      * @returns {void}
      */
     _onGetGhostPosition = (payload) => {
@@ -3834,6 +3849,8 @@ var tetris = (() => {
     };
     /**
      * ## 生成新方块
+     *
+     * 从预览队列中取出下一个方块放置到棋盘顶部。
      *
      * @private
      * @returns {void}
@@ -3844,6 +3861,8 @@ var tetris = (() => {
     };
     /**
      * ## 缓存方块
+     *
+     * 将当前活动方块存入 Hold 区，或与 Hold 区方块交换。
      *
      * @private
      * @returns {void}
@@ -3869,6 +3888,8 @@ var tetris = (() => {
     /**
      * ## 旋转方块
      *
+     * 尝试顺时针旋转当前方块，包含 SRS 墙踢检测。
+     *
      * @private
      * @returns {void}
      */
@@ -3879,7 +3900,7 @@ var tetris = (() => {
     /**
      * ## 硬降方块
      *
-     * 将方块瞬间落到底部。
+     * 将方块瞬间落到底部，触发落地锁定和消行检测。
      *
      * @private
      * @returns {void}
@@ -3891,11 +3912,11 @@ var tetris = (() => {
     /**
      * ## 游戏逻辑帧
      *
-     * 处理自动下落、锁定、消行等逻辑。
+     * 处理自动下落、锁定、消行等每帧逻辑。
      *
      * @private
      * @param {object} options - 参数对象
-     * @param {boolean} options.isBlocked - 是否被动画阻塞
+     * @param {boolean} options.isBlocked - 是否被动画阻塞（消行动画等期间暂停下落）
      * @returns {void}
      */
     _onBlockTick = (options) => {
@@ -3919,7 +3940,7 @@ var tetris = (() => {
     /**
      * ## 回放准备棋盘
      *
-     * 重置棋盘为初始状态，设置回放模式，开始回放。
+     * 重置棋盘为初始状态，设置回放模式，开始回放。 对战模式下保留当前等级，单人模式重置等级为 1。
      *
      * @private
      * @returns {void}
@@ -3935,7 +3956,7 @@ var tetris = (() => {
         board: Store.getBeginningBoard(),
         score: 0,
         lines: 0,
-        // 对战模式，等级保留，单人模式，重置等级为 1
+        // 对战模式：等级保留；单人模式：等级重置为 1
         level: Game2.isVersus() ? Store.getLevel() : 1,
         next: null,
         hold: null
@@ -3953,7 +3974,7 @@ var tetris = (() => {
      *
      * @private
      * @param {object} options - 参数对象
-     * @param {boolean} options.connected - 是否已连接
+     * @param {boolean} options.connected - 手柄是否已连接
      * @returns {void}
      */
     _onUpdateGamepadConnected = (options) => {
@@ -3961,8 +3982,11 @@ var tetris = (() => {
       const { connected } = options;
       Store.setGamepadConnected(connected);
     };
+    // ==================== 动画特效处理器 ====================
     /**
      * ## 开始倒计时动画
+     *
+     * 注册 3-2-1 倒计时缩放动画到 AnimationSystem。
      *
      * @private
      * @returns {void}
@@ -3974,6 +3998,8 @@ var tetris = (() => {
     /**
      * ## 开始暂停动画
      *
+     * 注册暂停呼吸灯动画到 AnimationSystem。
+     *
      * @private
      * @returns {void}
      */
@@ -3984,6 +4010,8 @@ var tetris = (() => {
     /**
      * ## 停止暂停动画
      *
+     * 从 AnimationSystem 中移除暂停动画。
+     *
      * @private
      * @returns {void}
      */
@@ -3993,6 +4021,8 @@ var tetris = (() => {
     };
     /**
      * ## 开始消行动画
+     *
+     * 注册消行闪烁动画到 AnimationSystem。 对战模式下先处理攻击逻辑再播放动画。
      *
      * @private
      * @param {object} options - 参数对象
@@ -4007,7 +4037,7 @@ var tetris = (() => {
     /**
      * ## 开始消除得分动画
      *
-     * 在消除行的位置显示上浮渐隐的得分数字。
+     * 在消除行的位置显示上浮渐隐的得分数字和 Combo 提示。
      *
      * @private
      * @param {object} options - 参数对象
@@ -4022,7 +4052,7 @@ var tetris = (() => {
     /**
      * ## 开始升级动画
      *
-     * 播放烟花粒子特效庆祝升级。
+     * 播放烟花粒子特效庆祝升级，显示 "LEVEL UP" 文字。
      *
      * @private
      * @param {object} options - 参数对象
@@ -4037,7 +4067,7 @@ var tetris = (() => {
     /**
      * ## 开始落地高亮动画
      *
-     * 方块落地的瞬间在落地格子上显示半透明白色闪烁。
+     * 方块落地的瞬间在落地格子上显示半透明白色闪烁。 持续约 200ms 后自动消失。
      *
      * @private
      * @param {object} options - 参数对象
@@ -4051,6 +4081,35 @@ var tetris = (() => {
       const { Game: Game2 } = this;
       const { piece } = options;
       Game2.startLandingFlash(piece);
+    };
+    /**
+     * ## 开始垃圾行预警动画
+     *
+     * 注册垃圾行预警动画（橙色网格 + "INCOMING ATTACK" 文字闪烁）到 AnimationSystem。 动画层 150，不阻塞操作，5
+     * 次闪烁共 500ms。
+     *
+     * @private
+     * @returns {void}
+     */
+    _onStartGarbageWarning = () => {
+      const { Game: Game2 } = this;
+      Game2.startGarbageWarning();
+    };
+    /**
+     * ## 开始垃圾行闪烁动画
+     *
+     * 注册垃圾行闪烁动画（垃圾方块灰/白交替闪烁）到 AnimationSystem。 动画层 100，阻塞操作（blocking=true），5 次闪烁共
+     * 500ms。
+     *
+     * @private
+     * @param {object} payload - 参数对象
+     * @param {number[][]} payload.rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
+     * @returns {void}
+     */
+    _onStartGarbagePush = (payload) => {
+      const { Game: Game2 } = this;
+      const { rows } = payload;
+      Game2.startGarbagePush(rows);
     };
   };
   var game_router_default = GameRouter;
@@ -6195,6 +6254,9 @@ var tetris = (() => {
   // lib/services/ui/block/render-block.js
   var renderBlock = (canvas, x, y, color) => {
     const { style = "classic", pattern = "square" } = canvas;
+    if (!color) {
+      return;
+    }
     switch (style) {
       case "frosted": {
         render_frosted_block_default(canvas, x, y, color);
@@ -7054,6 +7116,73 @@ var tetris = (() => {
   };
   var render_landing_flash_default = renderLandingFlash;
 
+  // lib/services/ui/effects/render-garbage-warning.js
+  var renderGarbageWarning = (canvas) => {
+    const { ORANGE: ORANGE4 } = colors_default;
+    const { gameBoardContext: ctx, blockSize, rows, cols } = canvas;
+    const boardWidth = cols * blockSize;
+    const boardHeight = rows * blockSize;
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = ORANGE4;
+    ctx.fillRect(0, 0, boardWidth, boardHeight);
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = ORANGE4;
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= cols; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * blockSize, 0);
+      ctx.lineTo(x * blockSize, boardHeight);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= rows; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * blockSize);
+      ctx.lineTo(boardWidth, y * blockSize);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    const centerX = boardWidth / 2;
+    const centerY = boardHeight / 2;
+    render_text_default(canvas, {
+      text: "INCOMING",
+      x: centerX,
+      y: centerY - blockSize * 0.6,
+      color: ORANGE4,
+      size: 1.2,
+      center: true,
+      baseline: "bottom",
+      alpha: 0.9
+    });
+    render_text_default(canvas, {
+      text: "ATTACK",
+      x: centerX,
+      y: centerY + blockSize * 0.6,
+      color: ORANGE4,
+      size: 1.2,
+      center: true,
+      baseline: "top",
+      alpha: 0.9
+    });
+  };
+  var render_garbage_warning_default = renderGarbageWarning;
+
+  // lib/services/ui/effects/render-garbage-push.js
+  var renderGarbagePush = (canvas, rows, visible) => {
+    if (!rows || rows.length === 0) return;
+    const { GRAY, WHITE: WHITE3 } = colors_default;
+    const { rows: totalRows } = canvas;
+    const color = visible ? GRAY : WHITE3;
+    const startRow = totalRows - rows.length;
+    for (let r = 0; r < rows.length; r++) {
+      for (let c = 0; c < rows[r].length; c++) {
+        if (rows[r][c] !== 0) {
+          render_block_default(canvas, c, startRow + r, color);
+        }
+      }
+    }
+  };
+  var render_garbage_push_default = renderGarbagePush;
+
   // lib/services/ui/core/canvas-renderer.js
   var CanvasRenderer = class extends core_default {
     /**
@@ -7186,18 +7315,47 @@ var tetris = (() => {
       const { Canvas, Store } = this;
       render_next_piece_default(Canvas, Store.getState());
     }
+    /**
+     * ## 渲染缓存方块预览
+     *
+     * 在缓存画布中居中绘制缓存（Hold）方块的形状。
+     *
+     * @returns {void}
+     */
     renderHoldPiece() {
       const { Canvas, Store } = this;
       render_hold_piece_default(Canvas, Store.getState());
     }
+    /**
+     * ## 清空预览方块画布
+     *
+     * 清除下一个方块预览区域的 Canvas 内容。
+     *
+     * @returns {void}
+     */
     clearNextPiece() {
       const { Canvas } = this;
       clear_next_piece_default(Canvas);
     }
+    /**
+     * ## 清空缓存方块画布
+     *
+     * 清除缓存（Hold）方块预览区域的 Canvas 内容。
+     *
+     * @returns {void}
+     */
     clearHoldPiece() {
       const { Canvas } = this;
       clear_hold_piece_default(Canvas);
     }
+    /**
+     * ## 渲染幽灵方块（落点预览）
+     *
+     * 在当前方块的正下方绘制半透明的"幽灵"方块， 显示如果直接硬降（Hard Drop）方块将落到的位置。
+     *
+     * @param {object} ghost - 幽灵方块数据
+     * @returns {void}
+     */
     renderGhostPiece(ghost) {
       const { Canvas } = this;
       render_ghost_piece_default(Canvas, ghost);
@@ -7264,6 +7422,26 @@ var tetris = (() => {
     renderLandingFlash(flashData) {
       render_landing_flash_default(this.Canvas, flashData);
     }
+    /**
+     * ## 渲染垃圾行预警特效
+     *
+     * 在棋盘顶部绘制红色半透明警告条，提示即将受到垃圾行攻击。 动画由 `GarbageWarningAnimation` 控制，本方法只负责绘制。
+     *
+     * @returns {void}
+     */
+    renderGarbageWarning() {
+      render_garbage_warning_default(this.Canvas);
+    }
+    /**
+     * ## 渲染垃圾行推入动画
+     *
+     * 垃圾行插入后，棋盘整体下移的过渡动画。 动画由 `GarbagePushAnimation` 控制，本方法只负责绘制。
+     *
+     * @returns {void}
+     */
+    renderGarbagePush(rows, visible) {
+      render_garbage_push_default(this.Canvas, rows, visible);
+    }
   };
   var canvas_renderer_default = CanvasRenderer;
 
@@ -7290,7 +7468,7 @@ var tetris = (() => {
      *
      * 1. **HUD 绘制事件**：模式更新、控制者更新、抬头显示更新
      * 2. **画布绘制事件**：窗口大小调整、预览方块渲染、暂存方块渲染
-     * 3. **动画特效事件**：倒计时、消行、得分、升级、落地高亮等
+     * 3. **动画特效事件**：倒计时、消行、得分、升级、落地高亮、垃圾行预警、垃圾行推入
      *
      * @returns {void}
      */
@@ -7311,6 +7489,8 @@ var tetris = (() => {
       this.on(events.RENDER_CLEAR_SCORE, this._onRenderClearScore);
       this.on(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
       this.on(events.RENDER_LANDING_FLASH, this._onRenderLandingFlash);
+      this.on(events.RENDER_GARBAGE_WARNING, this._onRenderGarbageWarning);
+      this.on(events.RENDER_GARBAGE_PUSH, this._onRenderGarbagePush);
     }
     /**
      * ## 取消订阅 UI 事件
@@ -7336,6 +7516,8 @@ var tetris = (() => {
       this.off(events.RENDER_CLEAR_SCORE, this._onRenderClearScore);
       this.off(events.RENDER_LEVEL_UP, this._onRenderLevelUp);
       this.off(events.RENDER_LANDING_FLASH, this._onRenderLandingFlash);
+      this.off(events.RENDER_GARBAGE_WARNING, this._onRenderGarbageWarning);
+      this.off(events.RENDER_GARBAGE_PUSH, this._onRenderGarbagePush);
     }
     // ==================== 事件处理器（私有） ====================
     /**
@@ -7345,14 +7527,8 @@ var tetris = (() => {
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {string} payload.mode - 游戏模式
-     *
-     *   - `main-menu`: 主菜单界面
-     *   - `difficulty`: 难度选择界面
-     *   - `playing`: 游戏中界面
-     *   - `replay`: 回放界面
-     *   - `game-over`: 游戏结束界面
-     *
+     * @param {string} payload.mode - 游戏模式（main-menu / difficulty / playing /
+     *   replay / game-over）
      * @returns {void}
      */
     _onUpdateMode = ({ mode }) => {
@@ -7366,11 +7542,7 @@ var tetris = (() => {
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {string} payload.controller - 控制者身份
-     *
-     *   - `human`: 玩家手动控制
-     *   - `ai`: AI 自动控制
-     *
+     * @param {string} payload.controller - 控制者身份（human / ai）
      * @returns {void}
      */
     _onUpdateController = ({ controller }) => {
@@ -7388,7 +7560,7 @@ var tetris = (() => {
      * - 历史最高分
      * - 当前等级
      * - 消除行数
-     * - 游戏难度
+     * - 连击数
      *
      * @private
      * @returns {void}
@@ -7466,12 +7638,13 @@ var tetris = (() => {
       UI2.clearHoldPiece();
     };
     /**
-     * ## 绘制 ghost 方块
+     * ## 绘制 ghost 方块（落点预览）
      *
-     * Level <= 9 时才绘制 ghost 方块。
+     * Level <= 9 时才绘制 ghost 方块，高等级不显示落点预览增加难度。
      *
      * @private
      * @param {object} payload - 参数对象
+     * @param {object} payload.ghost - Ghost 方块数据（cx, cy, shape, color）
      * @returns {void}
      */
     _onRenderGhostPiece = (payload) => {
@@ -7482,7 +7655,7 @@ var tetris = (() => {
     /**
      * ## 处理渲染倒计时事件
      *
-     * 当游戏开始倒计时特效运行时触发。 通知 UI 根据当前倒计时状态渲染数字和视觉效果。
+     * 当游戏开始倒计时特效运行时触发。 通知 UI 根据当前倒计时状态渲染数字和缩放动画。
      *
      * ### 倒计时流程
      *
@@ -7492,7 +7665,7 @@ var tetris = (() => {
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {object} payload.state - 倒计时动画状态
+     * @param {object} payload.state - 倒计时动画状态（含 number、scale）
      * @returns {void}
      */
     _onRenderCountdown = (payload) => {
@@ -7566,12 +7739,12 @@ var tetris = (() => {
     /**
      * ## 处理渲染落地高亮事件
      *
-     * 方块落地的瞬间在落地格子上显示半透明白色高亮。
+     * 方块落地的瞬间在落地格子上显示半透明白色高亮。 动画由 `LandingFlashAnimation` 控制，持续约 200ms。
      *
      * ### 动画效果
      *
      * - 落地格子上覆盖 60% 透明度白色
-     * - 持续 150ms 后消失
+     * - 短暂的"高亮一闪"视觉反馈
      *
      * @private
      * @param {object} payload - 事件参数
@@ -7582,6 +7755,34 @@ var tetris = (() => {
       const { state } = payload;
       const { UI: UI2 } = this;
       UI2.renderLandingFlash(state);
+    };
+    /**
+     * ## 处理渲染垃圾行预警事件
+     *
+     * 当玩家即将受到垃圾行攻击时触发。 通知 UI 在棋盘顶部绘制红色半透明警告条。 动画由 `GarbageWarningAnimation` 控制，3
+     * 次闪烁共 300ms。
+     *
+     * @private
+     * @returns {void}
+     */
+    _onRenderGarbageWarning = () => {
+      const { UI: UI2 } = this;
+      UI2.renderGarbageWarning();
+    };
+    /**
+     * ## 处理渲染垃圾行推入事件
+     *
+     * 当垃圾行实际插入棋盘后触发。 通知 UI 渲染棋盘整体下移的过渡动画。 动画由 `GarbagePushAnimation` 控制，5 步共
+     * 200ms。
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @returns {void}
+     */
+    _onRenderGarbagePush = (payload) => {
+      const { rows, visible } = payload;
+      const { UI: UI2 } = this;
+      UI2.renderGarbagePush(rows, visible);
     };
   };
   var ui_router_default = UIRouter;
@@ -7621,7 +7822,8 @@ var tetris = (() => {
     /**
      * ## 更新游戏模式标识
      *
-     * 修改棋盘 Canvas 的 `data-mode` 属性，用于 CSS 样式切换。 通过 `ui:<id>:update:mode` 事件触发。
+     * 修改棋盘 Canvas 的 `data-mode` 属性，用于 CSS 样式切换。 不同模式对应不同边框颜色（如 playing=白色,
+     * paused=黄色, game-over=红色）。 通过 `ui:<id>:update:mode` 事件触发。
      *
      * @param {string} mode - 游戏模式（main-menu / playing / paused / game-over /
      *   replay）
@@ -7633,9 +7835,10 @@ var tetris = (() => {
     /**
      * ## 更新控制者标识
      *
-     * 在 HUD 上显示当前控制者身份（HUMAN 或 AI）。 通过 `ui:<id>:update:controller` 事件触发。
+     * 在 HUD 上显示当前控制者身份（HUMAN 或 AI）。 对战模式下 P1 和 P2 各自独立显示。 通过
+     * `ui:<id>:update:controller` 事件触发。
      *
-     * @param {string} controller - 当前控制者（'human' 或 'ai'）
+     * @param {string} controller - 当前控制者（'human' 或 'ai'），显示时转为大写
      * @returns {void}
      */
     updateController(controller) {
@@ -7644,7 +7847,7 @@ var tetris = (() => {
     /**
      * ## 更新 HUD 显示
      *
-     * 从 Store 读取最新状态（分数、行数、等级、最高分）， 更新 HUD 的数字显示。主菜单模式下会先重置 HUD。 通过
+     * 从 Store 读取最新状态（分数、行数、等级、最高分、连击数）， 更新 HUD 的数字显示。 主菜单模式下会先重置 HUD 为初始值。 通过
      * `ui:<id>:update:hud` 事件触发。
      *
      * @returns {void}
@@ -7655,7 +7858,7 @@ var tetris = (() => {
     /**
      * ## 更新 HUD 动画
      *
-     * 每帧调用，驱动 HUD 数字（分数、最高分）的平滑过渡动画。 在游戏主循环 `startGameLoop` 中每帧调用。
+     * 每帧调用，驱动 HUD 数字（分数、最高分）的平滑过渡动画。 数字变化时不是瞬间跳变，而是逐帧递增/递减到目标值。 在游戏主循环中每帧调用。
      *
      * @returns {void}
      */
@@ -7666,7 +7869,8 @@ var tetris = (() => {
     /**
      * ## 延迟渲染场景
      *
-     * 等待像素字体 "Press Start 2P" 加载完成后渲染主菜单场景。 在 Engine 初始化时调用一次。
+     * 等待像素字体 "Press Start 2P" 加载完成后渲染主菜单场景。 使用 `document.fonts.ready` Promise
+     * 确保字体可用后再绘制， 避免主菜单文字因字体未加载而使用 fallback 字体。 在 Engine 初始化时调用一次。
      *
      * @returns {void}
      */
@@ -7676,7 +7880,14 @@ var tetris = (() => {
     /**
      * ## 渲染游戏场景
      *
-     * 每帧调用，绘制棋盘和当前活动方块。 在游戏主循环 `startGameLoop` 中每帧调用。
+     * 每帧调用，根据当前游戏模式（mode）路由到对应场景渲染：
+     *
+     * - Main-menu：主菜单
+     * - Difficulty：难度选择
+     * - Playing：棋盘 + 方块 + 幽灵方块
+     * - Paused：暂停覆盖层
+     * - Game-over：游戏结束画面
+     * - Replay：回放界面 在游戏主循环中每帧调用。
      *
      * @returns {void}
      */
@@ -7686,18 +7897,20 @@ var tetris = (() => {
     /**
      * ## 画布自适应
      *
-     * 根据窗口尺寸调整棋盘大小。 通过 `ui:<id>:resize` 事件触发。
+     * 根据窗口尺寸重新计算棋盘和预览画布的大小。 重新计算 `blockSize`（每格像素尺寸）和 `fontSize` 等全局参数。 通过
+     * `ui:<id>:resize` 事件触发。
      *
      * @returns {void}
      */
     resize() {
       this.Renderer.resize();
     }
-    // ==================== 动画特效方法 ====================
+    // ==================== 预览方块方法 ====================
     /**
      * ## 渲染下一个方块预览
      *
-     * 在预览画布中绘制下一个方块的形状。 通过 `ui:<id>:render:next:piece` 事件触发。
+     * 在预览画布中居中绘制下一个方块的形状。 方块颜色和样式由 Block 配置决定。 通过 `ui:<id>:render:next:piece`
+     * 事件触发。
      *
      * @returns {void}
      */
@@ -7707,7 +7920,7 @@ var tetris = (() => {
     /**
      * ## 渲染 Hold 方块预览
      *
-     * 在预览画布中绘制缓存区方块的形状。 通过 `ui:<id>:render:hold:piece` 事件触发。
+     * 在缓存画布中居中绘制缓存（Hold）方块的形状。 如果缓存为空则不绘制。 通过 `ui:<id>:render:hold:piece` 事件触发。
      *
      * @returns {void}
      */
@@ -7717,7 +7930,7 @@ var tetris = (() => {
     /**
      * ## 清除下一个方块预览
      *
-     * 清空 Next 预览画布。 切换模式或重置时调用。
+     * 清空 Next 预览画布的 Canvas 内容。 切换模式或重置时调用。
      *
      * @returns {void}
      */
@@ -7727,7 +7940,7 @@ var tetris = (() => {
     /**
      * ## 清除 Hold 方块预览
      *
-     * 清空 Hold 预览画布。 切换模式或重置时调用。
+     * 清空 Hold 预览画布的 Canvas 内容。 切换模式或重置时调用。
      *
      * @returns {void}
      */
@@ -7737,7 +7950,8 @@ var tetris = (() => {
     /**
      * ## 渲染 Ghost 方块（半透明落点预览）
      *
-     * 在当前方块正下方的投影位置绘制半透明 Ghost， 帮助玩家预判落点。仅在 level ≤ 9 时显示。 通过每帧主循环直接调用（非事件驱动）。
+     * 在当前方块正下方的投影位置绘制半透明 Ghost， 帮助玩家预判硬降后的落点位置。 仅在 level ≤ 9 时显示，高等级不显示落点预览增加难度。
+     * 通过每帧主循环直接调用（非事件驱动）。
      *
      * @param {object} ghost - Ghost 定位数据
      * @param {object} ghost.curr - 当前活动方块对象
@@ -7748,14 +7962,16 @@ var tetris = (() => {
     renderGhostPiece(ghost) {
       this.Renderer.renderGhostPiece(ghost);
     }
+    // ==================== 动画特效方法 ====================
     /**
      * ## 渲染倒计时特效
      *
-     * 在游戏开始前显示 3、2、1 的倒计时数字和缩放动画。 通过 `ui:<id>:render:countdown` 事件触发。
+     * 在游戏开始前显示 3、2、1 的倒计时数字和缩放动画。 数字从大到小缩放，同时逐渐变透明。 通过 `ui:<id>:render:countdown`
+     * 事件触发。
      *
      * @param {object} state - 倒计时动画状态
      * @param {number} state.number - 当前倒计时数字（3/2/1）
-     * @param {number} state.scale - 数字缩放比例
+     * @param {number} state.scale - 数字缩放比例（从 1.0 开始逐渐缩小）
      * @returns {void}
      */
     renderCountdown(state) {
@@ -7764,7 +7980,8 @@ var tetris = (() => {
     /**
      * ## 渲染消行闪烁特效
      *
-     * 在消除满行时，将待消除的行以白色高亮闪烁 3 次。 通过 `ui:<id>:render:clear` 事件触发。
+     * 在消除满行时，将待消除的行以白色高亮闪烁。 闪烁由 `ClearLinesAnimation` 控制（120ms 切换一次，共 6 次），
+     * 本方法只负责将动画状态传递给 Renderer。 通过 `ui:<id>:render:clear:lines` 事件触发。
      *
      * @param {object} state - 消行动画状态
      * @param {{ y: number; alpha: number }[]} state.lines - 待消除行的动画数据
@@ -7776,12 +7993,13 @@ var tetris = (() => {
     /**
      * ## 渲染消除得分动画
      *
-     * 在消除行位置绘制上浮渐隐的得分数字和 Combo 提示。 通过 `ui:<id>:render:clear:score` 事件触发。
+     * 在消除行的位置绘制上浮渐隐的得分数字和 Combo 提示。 文字从消除位置开始，向上浮动的同时逐渐变透明。 动画由
+     * `ClearScoreAnimation` 控制，本方法只负责传递状态。 通过 `ui:<id>:render:clear:score` 事件触发。
      *
      * @param {object} state - 得分动画状态
      * @param {number} state.score - 消除得分
      * @param {number} state.y - 消除行号
-     * @param {number} state.alpha - 透明度
+     * @param {number} state.alpha - 透明度（1 → 0）
      * @param {number} state.offsetY - Y 轴上浮偏移量
      * @param {number} state.combo - 当前连击次数
      * @param {number} state.comboScore - 连击额外加分
@@ -7793,7 +8011,8 @@ var tetris = (() => {
     /**
      * ## 渲染升级烟花特效
      *
-     * 在玩家升级时显示烟花粒子动画和 "LEVEL UP" 文字。 通过 `ui:<id>:render:level:up` 事件触发。
+     * 在玩家升级时显示烟花粒子动画和 "LEVEL UP" 文字。 烟花粒子从棋盘中心向外爆发，同时显示升级文字。 通过
+     * `ui:<id>:render:level:up` 事件触发。
      *
      * @param {number} level - 升级后的新等级
      * @param {object[]} fireworks - 烟花粒子数组
@@ -7805,7 +8024,8 @@ var tetris = (() => {
     /**
      * ## 渲染落地高亮特效
      *
-     * 方块硬降或落底锁定时，在落点位置短暂显示白色高亮闪烁。 通过 `ui:<id>:render:landing:flash` 事件触发。
+     * 方块硬降或落底锁定时，在落点位置短暂显示白色高亮闪烁。 动画由 `LandingFlashAnimation` 控制（约 200ms），
+     * 本方法只负责将高亮数据传递给 Renderer。 通过 `ui:<id>:render:landing:flash` 事件触发。
      *
      * @param {object} flashData - 落地高亮数据
      * @param {object} flashData.piece - 方块位置和形状信息
@@ -7813,6 +8033,32 @@ var tetris = (() => {
      */
     renderLandingFlash(flashData) {
       this.Renderer.renderLandingFlash(flashData);
+    }
+    /**
+     * ## 渲染垃圾行预警特效
+     *
+     * 在棋盘上绘制橙色网格覆盖 + "INCOMING ATTACK" 警告文字。 动画由 `GarbageWarningAnimation` 控制（5
+     * 次闪烁，共 500ms）， 本方法只负责触发 Renderer 绘制。 通过 `ui:<id>:render:garbage:warning`
+     * 事件触发。
+     *
+     * @returns {void}
+     */
+    renderGarbageWarning() {
+      this.Renderer.renderGarbageWarning();
+    }
+    /**
+     * ## 渲染垃圾行闪烁特效
+     *
+     * 垃圾行中非空洞的方块在灰色和白色之间交替闪烁。 动画由 `GarbagePushAnimation` 控制（5 次闪烁，共
+     * 500ms，blocking=true）， 本方法只负责将垃圾行数据和可见状态传递给 Renderer。 通过
+     * `ui:<id>:render:garbage:push` 事件触发。
+     *
+     * @param {number[][]} rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
+     * @param {boolean} visible - 当前帧是否可见（true=灰色, false=白色）
+     * @returns {void}
+     */
+    renderGarbagePush(rows, visible) {
+      this.Renderer.renderGarbagePush(rows, visible);
     }
     // ==================== 事件订阅管理 ====================
     /**
@@ -11421,6 +11667,162 @@ var tetris = (() => {
   };
   var landing_flash_animation_default = LandingFlashAnimation;
 
+  // lib/services/animations/garbage-warning-animation.js
+  var GarbageWarningAnimation = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * @param {object} options - 配置对象
+     * @param {object} options.Game - 游戏主实例
+     * @param {object} options.Scheduler - 调度器实例
+     */
+    constructor(options) {
+      super(options);
+      this.initialize();
+    }
+    /**
+     * ## 初始化动画
+     *
+     * 设置动画属性，启动闪烁序列。
+     *
+     * @returns {void}
+     */
+    initialize() {
+      const { Scheduler: Scheduler2 } = this;
+      this.layer = 150;
+      this.blocking = true;
+      this.name = "garbage-warning";
+      this._finished = false;
+      this._flashes = 0;
+      this._maxFlashes = 5;
+      this._visible = true;
+      this._schedulerIds = [];
+      const toggle = () => {
+        this._visible = !this._visible;
+        this._flashes++;
+        if (this._flashes >= this._maxFlashes) {
+          this._finished = true;
+        }
+      };
+      const ids = Scheduler2.sequence([
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 }
+      ]);
+      this._schedulerIds = ids;
+    }
+    /**
+     * ## 清理资源
+     *
+     * 由 AnimationSystem 在移除动画时自动调用。 取消所有 Scheduler 定时器。
+     *
+     * @returns {void}
+     */
+    dispose() {
+      const { Scheduler: Scheduler2 } = this;
+      for (const id of this._schedulerIds) {
+        Scheduler2.cancel(id);
+      }
+    }
+    /**
+     * ## 渲染动画
+     *
+     * 仅在可见帧发送渲染事件给 UI 层。 UI 层收到事件后在棋盘上绘制红色半透明覆盖。
+     *
+     * @returns {void}
+     */
+    render() {
+      if (!this._visible) return;
+      const { Game: Game2 } = this;
+      const events = UIEvents(Game2.id);
+      this.emit(events.RENDER_GARBAGE_WARNING);
+    }
+  };
+  var garbage_warning_animation_default = GarbageWarningAnimation;
+
+  // lib/services/animations/garbage-push-animation.js
+  var GarbagePushAnimation = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * @param {object} options - 配置对象
+     * @param {object} options.Game - 游戏主实例
+     * @param {object} options.Scheduler - 调度器实例
+     * @param {number[][]} options.rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
+     */
+    constructor(options) {
+      super(options);
+      this.initialize();
+    }
+    /**
+     * ## 初始化动画
+     *
+     * 设置动画属性，启动闪烁序列。 每 120ms 切换一次 visible 状态，共 5 次（总时长 600ms）。
+     *
+     * @returns {void}
+     */
+    initialize() {
+      const { rows, Scheduler: Scheduler2 } = this;
+      this.layer = 100;
+      this.blocking = true;
+      this.name = "garbage-push";
+      this._finished = false;
+      this._rows = rows;
+      this._visible = true;
+      this._flashes = 0;
+      this._maxFlashes = 5;
+      this._schedulerIds = [];
+      const toggle = () => {
+        this._visible = !this._visible;
+        this._flashes++;
+        if (this._flashes >= this._maxFlashes) {
+          this._finished = true;
+        }
+      };
+      const ids = Scheduler2.sequence([
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 },
+        { fn: toggle, delay: 120 }
+      ]);
+      this._schedulerIds = ids;
+    }
+    /**
+     * ## 清理资源
+     *
+     * 由 AnimationSystem 在动画标记为 _finished 后自动调用。 取消所有 Scheduler 定时器，释放资源。
+     *
+     * @returns {void}
+     */
+    dispose() {
+      const { Scheduler: Scheduler2 } = this;
+      for (const id of this._schedulerIds) {
+        Scheduler2.cancel(id);
+      }
+    }
+    /**
+     * ## 渲染动画
+     *
+     * 每帧由 AnimationSystem 调用。 发送 RENDER_GARBAGE_PUSH 事件给 UI 层，携带：
+     *
+     * - Rows：垃圾行数据（用于确定哪些格子需要绘制）
+     * - Visible：当前可见状态（决定绘制灰色还是白色）
+     *
+     * UI 层收到事件后调用 renderGarbagePush(rows, visible) 执行实际绘制。
+     *
+     * @returns {void}
+     */
+    render() {
+      const { Game: Game2, _rows, _visible } = this;
+      const events = UIEvents(Game2.id);
+      this.emit(events.RENDER_GARBAGE_PUSH, { rows: _rows, visible: _visible });
+    }
+  };
+  var garbage_push_animation_default = GarbagePushAnimation;
+
   // lib/game/utils/get-next-piece.js
   var getNextPiece = (runtime) => {
     const { Replay, Store } = runtime;
@@ -11471,9 +11873,9 @@ var tetris = (() => {
 
   // lib/game/core/over.js
   var over = (runtime) => {
-    const { id, Store } = runtime;
+    const { id, Store, Animations } = runtime;
     const mode = Store.getMode();
-    if (mode === "game-over" || mode === "replay") {
+    if (mode === "game-over" || mode === "replay" || Animations.hasBlocking()) {
       return;
     }
     const AE = AudioEvents();
@@ -12409,9 +12811,6 @@ var tetris = (() => {
      */
     begin() {
       begin_default(this);
-      if (this.isVersus()) {
-        this.emit("battle:sync:begin", { form: this });
-      }
     }
     /**
      * ## 启动游戏（进入倒计时）
@@ -12420,9 +12819,6 @@ var tetris = (() => {
      */
     start() {
       start_default(this);
-      if (this.isVersus()) {
-        this.emit("battle:sync:start", { form: this });
-      }
     }
     /**
      * ## 暂停游戏
@@ -12609,7 +13005,8 @@ var tetris = (() => {
     startClearLines(linesToClear) {
       const { Scheduler: Scheduler2, Store } = this;
       if (this.isVersus()) {
-        this.emit("battle:process:attack", { from: this, lines: linesToClear });
+        const events = BattleEvents();
+        this.emit(events.PROCESS_ATTACK, { from: this, lines: linesToClear });
       }
       this.Animations.register(
         new clear_lines_animation_default({
@@ -12671,6 +13068,44 @@ var tetris = (() => {
           Game: this,
           piece,
           Scheduler: Scheduler2
+        })
+      );
+    }
+    /**
+     * ## 开始垃圾行预警动画
+     *
+     * 注册 `GarbageWarningAnimation` 到 AnimationSystem。 在棋盘上显示橙色网格覆盖 + "INCOMING
+     * ATTACK" 警告文字， 动画层 150，不阻塞操作，5 次闪烁共 500ms。 由
+     * `GameRouter._onStartGarbageWarning` 调用。
+     *
+     * @returns {void}
+     */
+    startGarbageWarning() {
+      const { Scheduler: Scheduler2 } = this;
+      this.Animations.register(
+        new garbage_warning_animation_default({
+          Game: this,
+          Scheduler: Scheduler2
+        })
+      );
+    }
+    /**
+     * ## 开始垃圾行闪烁动画
+     *
+     * 注册 `GarbagePushAnimation` 到 AnimationSystem。 垃圾行中非空洞的方块在灰色和白色之间交替闪烁， 动画层
+     * 100，阻塞操作（blocking=true），5 次闪烁共 500ms。 由 `GameRouter._onStartGarbagePush`
+     * 调用。
+     *
+     * @param {number[][]} rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
+     * @returns {void}
+     */
+    startGarbagePush(rows) {
+      const { Scheduler: Scheduler2 } = this;
+      this.Animations.register(
+        new garbage_push_animation_default({
+          Game: this,
+          Scheduler: Scheduler2,
+          rows
         })
       );
     }
@@ -13810,7 +14245,6 @@ var tetris = (() => {
      *   console.log(opponent.Player.name); // 对手的名称
      *
      * @param {object} yourself - 当前玩家 Game 实例
-     * @param {string | number} yourself.id - 当前玩家唯一标识
      * @returns {object} 对手的 Game 实例
      */
     getOpponent(yourself) {
@@ -13829,7 +14263,8 @@ var tetris = (() => {
      * 3. 如果攻击力 ≤ 0，直接返回（无攻击）
      * 4. 用攻击力抵消自己的待处理垃圾行（store.offsetGarbage）
      * 5. 如果有剩余攻击力，发送给对手（store.addGarbage）
-     * 6. 返回实际发出的垃圾行数
+     * 6. 触发预警动画 + 预警音效（Scheduler.sequence 延时 120ms）
+     * 7. 返回实际发出的垃圾行数
      *
      * ### 为什么先抵消自己的垃圾行？
      *
@@ -13874,8 +14309,22 @@ var tetris = (() => {
       const remaining = store.offsetGarbage(from, attack);
       if (remaining > 0) {
         store.addGarbage(to, remaining);
-        const events = AudioEvents();
-        this.emit(events.PLAY_SOUND, { sound: "GARBAGE_WARNING" });
+        const { Scheduler: Scheduler2 } = to;
+        Scheduler2.sequence([
+          {
+            fn: () => {
+              const events = GameEvents(to.id);
+              to.emit(events.START_GARBAGE_WARNING);
+            }
+          },
+          {
+            fn: () => {
+              const events = AudioEvents();
+              this.emit(events.PLAY_SOUND, { sound: "GARBAGE_WARNING" });
+            },
+            delay: 120
+          }
+        ]);
       }
       return remaining;
     }
@@ -13892,6 +14341,7 @@ var tetris = (() => {
      * 4. 调用 applyGarbage 生成带垃圾行的新棋盘
      * 5. 更新 Store 中的棋盘状态（Store.setState）
      * 6. 清空该玩家的待处理垃圾行计数（store.clearGarbage）
+     * 7. 提取垃圾行数据，触发闪烁动画 + 音效
      *
      * ### 为什么分两步处理垃圾行？
      *
@@ -13924,15 +14374,27 @@ var tetris = (() => {
       if (amount <= 0) {
         return;
       }
-      Scheduler2.delay(() => {
-        const events = AudioEvents();
-        this.emit(events.PLAY_SOUND, { sound: "GARBAGE_RECEIVED" });
-      }, 150);
       const { Store } = game;
       const { board, difficulty } = Store.getState();
       const next = applyGarbage(board, amount, difficulty);
       Store.setState({ board: next });
       this.store.clearGarbage(game);
+      const garbageRows = next.slice(-amount);
+      Scheduler2.sequence([
+        {
+          fn: () => {
+            const events = GameEvents(game.id);
+            game.emit(events.START_GARBAGE_PUSH, { rows: garbageRows });
+          }
+        },
+        {
+          fn: () => {
+            const events = AudioEvents();
+            this.emit(events.PLAY_SOUND, { sound: "GARBAGE_RECEIVED" });
+          },
+          delay: 120
+        }
+      ]);
     }
     /**
      * ## 订阅对战事件

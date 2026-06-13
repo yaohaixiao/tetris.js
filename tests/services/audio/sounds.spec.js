@@ -306,4 +306,125 @@ describe('Sounds', () => {
       expect(freqs).toEqual([330, 294, 262]);
     });
   });
+
+  // ==================== GARBAGE_WARNING ====================
+  describe('GARBAGE_WARNING', () => {
+    test('应该使用 Scheduler.sequence 播放 3 段降调音', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GARBAGE_WARNING();
+
+      expect(scheduler.sequence).toHaveBeenCalledTimes(1);
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      expect(tasks.length).toBe(3);
+    });
+
+    test('第一段：900Hz, 100ms, 方波, volume=0.3', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GARBAGE_WARNING();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      tasks[0].fn();
+
+      expect(playTone).toHaveBeenCalledWith(sounds, 900, 100, {
+        volume: 0.3,
+        wave: 'square',
+      });
+    });
+
+    test('第二段：700Hz, 100ms, 方波, volume=0.3, 延迟 100ms', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GARBAGE_WARNING();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      tasks[1].fn();
+
+      expect(playTone).toHaveBeenCalledWith(sounds, 700, 100, {
+        volume: 0.3,
+        wave: 'square',
+        startTime: 100.1, // 100 + 0.1
+      });
+    });
+
+    test('第三段：500Hz, 120ms, 方波, volume=0.25, 延迟 200ms', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GARBAGE_WARNING();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      tasks[2].fn();
+
+      expect(playTone).toHaveBeenCalledWith(sounds, 500, 120, {
+        volume: 0.25,
+        wave: 'square',
+        startTime: 100.2, // 100 + 0.2
+      });
+    });
+
+    test('三段音效按顺序播放', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GARBAGE_WARNING();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      const callOrder = [];
+      playTone.mockImplementation(() => callOrder.push('tone'));
+
+      tasks[0].fn();
+      tasks[1].fn();
+      tasks[2].fn();
+
+      expect(callOrder).toEqual(['tone', 'tone', 'tone']);
+    });
+  });
+
+  // ==================== GARBAGE_RECEIVED ====================
+  describe('GARBAGE_RECEIVED', () => {
+    test('应该使用 Scheduler.sequence 播放 2 段低沉音', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GARBAGE_RECEIVED();
+
+      expect(scheduler.sequence).toHaveBeenCalledTimes(1);
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      expect(tasks.length).toBe(2);
+    });
+
+    test('第一段：250Hz, 80ms, 方波, volume=0.22', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GARBAGE_RECEIVED();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      tasks[0].fn();
+
+      expect(playTone).toHaveBeenCalledWith(sounds, 250, 80, {
+        volume: 0.22,
+        wave: 'square',
+      });
+    });
+
+    test('第二段：150Hz, 120ms, 方波, volume=0.18, 延迟 80ms', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GARBAGE_RECEIVED();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      tasks[1].fn();
+
+      expect(playTone).toHaveBeenCalledWith(sounds, 150, 120, {
+        volume: 0.18,
+        wave: 'square',
+        startTime: 100.08, // 100 + 0.08
+      });
+    });
+
+    test('两段音效按顺序播放', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GARBAGE_RECEIVED();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      const callOrder = [];
+      playTone.mockImplementation(() => callOrder.push('tone'));
+
+      tasks[0].fn();
+      tasks[1].fn();
+
+      expect(callOrder).toEqual(['tone', 'tone']);
+    });
+  });
 });
