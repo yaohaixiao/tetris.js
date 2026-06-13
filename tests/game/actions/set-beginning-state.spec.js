@@ -29,15 +29,16 @@ describe('setBeginningState', () => {
       setBeginningState(mockContext, 'paused');
 
       expect(mockStore.setState).toHaveBeenCalledWith({
-        mode: 'paused',
-        score: 0,
-        lines: 0,
-        level: 1,
+        backToBack: false,
+        baseLines: 0,
         combo: 0,
         comboScore: 0,
-        next: null,
         hold: null,
-        backToBack: false,
+        level: 1,
+        lines: 0,
+        mode: 'paused',
+        next: null,
+        score: 0,
       });
     });
   });
@@ -153,6 +154,14 @@ describe('setBeginningState', () => {
       );
     });
 
+    it('每次调用都应该重置 baseLines 为 0', () => {
+      setBeginningState(mockContext, 'playing');
+
+      expect(mockStore.setState).toHaveBeenCalledWith(
+        expect.objectContaining({ baseLines: 0 }),
+      );
+    });
+
     it('每次调用都应该重置 next 为 null', () => {
       setBeginningState(mockContext, 'playing');
 
@@ -199,6 +208,7 @@ describe('setBeginningState', () => {
         next: null,
         hold: null,
         backToBack: false,
+        baseLines: 0,
       });
     });
   });
