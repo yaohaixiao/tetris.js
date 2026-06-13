@@ -7,7 +7,7 @@ var tetris = (() => {
      * - 'single'：单人模式；
      * - 'versus'：对战模式；
      */
-    Mode: "versus",
+    Mode: "single",
     /**
      * ## 对战玩家列表：
      *
@@ -11473,6 +11473,7 @@ var tetris = (() => {
     const { Store } = runtime;
     Store.setState({
       mode,
+      baseLines: 0,
       score: 0,
       // 分数归零
       lines: 0,
@@ -12273,8 +12274,15 @@ var tetris = (() => {
      * @returns {void}
      */
     selectLevel(level) {
+      const { Store } = this;
       const AE = AudioEvents();
-      this.Store.setLevel(level);
+      const state = Store.getState();
+      this.Store.setState({
+        ...state,
+        baseLines: 0,
+        level,
+        lines: 0
+      });
       this.emit(AE.PLAY_SOUND, { sound: "LEVEL_CHANGED" });
     }
     /**
