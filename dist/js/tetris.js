@@ -7,7 +7,7 @@ var tetris = (() => {
      * - 'single'：单人模式；
      * - 'versus'：对战模式；
      */
-    Mode: "single",
+    Mode: "versus",
     /**
      * ## 对战玩家列表：
      *
@@ -1124,6 +1124,55 @@ var tetris = (() => {
         { fn: () => play_tone_default(this, 330, 200) },
         { fn: () => play_tone_default(this, 294, 300, { startTime: now + 0.21 }) },
         { fn: () => play_tone_default(this, 262, 500, { startTime: now + 0.52 }) }
+      ]);
+    };
+    /**
+     * ## 垃圾行预警音效
+     *
+     * 降调警示音，三声递减（900→700→500Hz），营造紧迫危机感。
+     *
+     * @returns {void}
+     */
+    GARBAGE_WARNING = () => {
+      const { Context, Scheduler: Scheduler2 } = this;
+      const now = Context.currentTime;
+      Scheduler2.sequence([
+        { fn: () => play_tone_default(this, 900, 100, { volume: 0.3, wave: "square" }) },
+        {
+          fn: () => play_tone_default(this, 700, 100, {
+            volume: 0.3,
+            wave: "square",
+            startTime: now + 0.1
+          })
+        },
+        {
+          fn: () => play_tone_default(this, 500, 120, {
+            volume: 0.25,
+            wave: "square",
+            startTime: now + 0.2
+          })
+        }
+      ]);
+    };
+    /**
+     * ## 垃圾行插入音效
+     *
+     * 两段式低沉下行音效，模拟垃圾行从底部推入的沉重感。 第一段 250Hz 80ms，第二段 150Hz 120ms。
+     *
+     * @returns {void}
+     */
+    GARBAGE_RECEIVED = () => {
+      const { Context, Scheduler: Scheduler2 } = this;
+      const now = Context.currentTime;
+      Scheduler2.sequence([
+        { fn: () => play_tone_default(this, 250, 80, { volume: 0.22, wave: "square" }) },
+        {
+          fn: () => play_tone_default(this, 150, 120, {
+            volume: 0.18,
+            wave: "square",
+            startTime: now + 0.08
+          })
+        }
       ]);
     };
     /**
@@ -11985,7 +12034,8 @@ var tetris = (() => {
     });
     curr._lastAction = null;
     if (runtime.isVersus()) {
-      runtime.emit("battle:flush:garbage", { from: runtime });
+      const events = BattleEvents();
+      runtime.emit(events.FLUSH_GARBAGE, { from: runtime });
     }
   };
   var lock_default = lock;
@@ -13824,6 +13874,8 @@ var tetris = (() => {
       const remaining = store.offsetGarbage(from, attack);
       if (remaining > 0) {
         store.addGarbage(to, remaining);
+        const events = AudioEvents();
+        this.emit(events.PLAY_SOUND, { sound: "GARBAGE_WARNING" });
       }
       return remaining;
     }
@@ -13864,16 +13916,18 @@ var tetris = (() => {
      *   // 棋盘底部出现垃圾行，pendingGarbage 清零
      *
      * @param {object} game - 要应用垃圾行的玩家 Game 实例
-     * @param {object} game.Store - 游戏状态存储
-     * @param {Function} game.Store.getState - 获取当前状态
-     * @param {Function} game.Store.setState - 更新状态
      * @returns {void}
      */
     flushGarbage(game) {
+      const { Scheduler: Scheduler2 } = game;
       const amount = this.store.getPendingGarbage(game);
       if (amount <= 0) {
         return;
       }
+      Scheduler2.delay(() => {
+        const events = AudioEvents();
+        this.emit(events.PLAY_SOUND, { sound: "GARBAGE_RECEIVED" });
+      }, 150);
       const { Store } = game;
       const { board, difficulty } = Store.getState();
       const next = applyGarbage(board, amount, difficulty);
