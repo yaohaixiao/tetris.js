@@ -29,6 +29,7 @@ jest.mock('@/lib/battle/battle-store.js', () => {
       winner: null,
       scores: {},
       pendingGarbage: {},
+      roundId: 0,
     };
 
     if (options && options.games) {
@@ -39,33 +40,21 @@ jest.mock('@/lib/battle/battle-store.js', () => {
       }
     }
 
-    this.setRunning = jest.fn(function (running) {
-      this.state.running = running;
-    });
-    this.isRunning = jest.fn(function () {
-      return this.state.running;
-    });
-    this.setWinner = jest.fn(function (winner) {
-      this.state.winner = winner;
-    });
-    this.getWinner = jest.fn(function () {
-      return this.state.winner;
-    });
-    this.getScore = jest.fn(function (id) {
-      return this.state.scores[id] || 0;
-    });
-    this.getPlayerId = jest.fn(function (game) {
-      return `${game.Player.name}-${game.Player.index}`;
-    });
+    this.setRunning = jest.fn(function (running) { this.state.running = running; });
+    this.isRunning = jest.fn(function () { return this.state.running; });
+    this.setWinner = jest.fn(function (winner) { this.state.winner = winner; });
+    this.getWinner = jest.fn(function () { return this.state.winner; });
+    this.getScore = jest.fn(function (id) { return this.state.scores[id] || 0; });
+    this.getPlayerId = jest.fn(function (game) { return `${game.Player.name}-${game.Player.index}`; });
     this.updateScores = jest.fn();
     this.addGarbage = jest.fn();
     this.offsetGarbage = jest.fn();
-    this.getPendingGarbage = jest.fn(function () {
-      return 0;
-    });
+    this.getPendingGarbage = jest.fn(function () { return 0; });
     this.clearGarbage = jest.fn();
     this.reset = jest.fn();
     this.initialize = jest.fn();
+    this.increaseRound = jest.fn(function () { this.state.roundId += 1; });
+    this.getRoundId = jest.fn(function () { return this.state.roundId; });
   });
 });
 
@@ -117,8 +106,12 @@ describe('BattleController', () => {
         tasks.forEach((task) => task.fn && task.fn());
         return [];
       }),
+      delay: jest.fn((fn) => { fn(); return 1; }),
     },
     emit: jest.fn(),
+    Animations: {
+      clear: jest.fn(),
+    },
     pause: jest.fn(),
     resume: jest.fn(),
   });
@@ -137,6 +130,8 @@ describe('BattleController', () => {
     controller.store.updateScores.mockClear();
     controller.store.clearGarbage.mockClear();
     controller.store.getPendingGarbage.mockClear();
+    controller.store.increaseRound.mockClear();
+    controller.store.getRoundId.mockClear();
     controller.hud.updateScores.mockClear();
     controller.router.subscribe.mockClear();
     controller.router.unsubscribe.mockClear();
@@ -191,10 +186,7 @@ describe('BattleController', () => {
     test('应该创建 BattleHUD 实例并传入 games 和 store', () => {
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const controller = createController({ games });
-      expect(BattleHUD).toHaveBeenCalledWith({
-        games,
-        store: controller.store,
-      });
+      expect(BattleHUD).toHaveBeenCalledWith({ games, store: controller.store });
       expect(controller.hud).toBeDefined();
     });
 
@@ -219,18 +211,9 @@ describe('BattleController', () => {
         callOrder.push('store');
         return { setRunning: jest.fn(), isRunning: jest.fn(() => false) };
       });
-      BattleHUD.mockImplementationOnce(() => {
-        callOrder.push('hud');
-        return {};
-      });
-      BattleRouter.mockImplementationOnce(() => {
-        callOrder.push('router');
-        return {};
-      });
-      BattleUI.mockImplementationOnce(() => {
-        callOrder.push('ui');
-        return {};
-      });
+      BattleHUD.mockImplementationOnce(() => { callOrder.push('hud'); return {}; });
+      BattleRouter.mockImplementationOnce(() => { callOrder.push('router'); return {}; });
+      BattleUI.mockImplementationOnce(() => { callOrder.push('ui'); return {}; });
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       createController({ games });
@@ -353,10 +336,7 @@ describe('BattleController', () => {
     test('未达到 victoryScore 时应该调用 restart 继续下一局', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({
-        games: [alice, bob],
-        victoryScore: 5,
-      });
+      const controller = createCleanController({ games: [alice, bob], victoryScore: 5 });
 
       controller.store.getScore.mockReturnValue(1);
       GameEvents.mockReturnValue({ RESTART: 'restart-event' });
@@ -376,10 +356,7 @@ describe('BattleController', () => {
     test('达到 victoryScore 时应该调用 over 结束整场对战', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({
-        games: [alice, bob],
-        victoryScore: 20,
-      });
+      const controller = createCleanController({ games: [alice, bob], victoryScore: 20 });
 
       controller.store.getScore.mockReturnValue(20);
       GameEvents.mockReturnValue({ RESTART: 'restart-event' });
@@ -399,10 +376,7 @@ describe('BattleController', () => {
     test('应该先 stop、设置胜者、更新分数、更新 HUD，再做赛制判定', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({
-        games: [alice, bob],
-        victoryScore: 20,
-      });
+      const controller = createCleanController({ games: [alice, bob], victoryScore: 20 });
 
       controller.store.getScore.mockReturnValue(1);
       GameEvents.mockReturnValue({ RESTART: 'restart' });
@@ -528,11 +502,33 @@ describe('BattleController', () => {
   // ==================== restart 测试 ====================
 
   describe('restart', () => {
+    test('应该增加 roundId', () => {
+      const bob = createMockGame('Bob', 1, 'bob-id');
+      const controller = createCleanController({ games: [createMockGame('Alice', 0), bob] });
+
+      GameEvents.mockReturnValue({ RESTART: 'restart-event' });
+
+      controller.restart(bob);
+
+      expect(controller.store.increaseRound).toHaveBeenCalled();
+    });
+
+    test('应该清除双方动画', () => {
+      const alice = createMockGame('Alice', 0, 'alice-id');
+      const bob = createMockGame('Bob', 1, 'bob-id');
+      const controller = createCleanController({ games: [alice, bob] });
+
+      GameEvents.mockReturnValue({ RESTART: 'restart-event' });
+
+      controller.restart(bob);
+
+      expect(alice.Animations.clear).toHaveBeenCalled();
+      expect(bob.Animations.clear).toHaveBeenCalled();
+    });
+
     test('应该通知败者重新开始并启动对战', () => {
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({
-        games: [createMockGame('Alice', 0), bob],
-      });
+      const controller = createCleanController({ games: [createMockGame('Alice', 0), bob] });
 
       GameEvents.mockReturnValue({ RESTART: 'restart-event' });
 
@@ -895,10 +891,7 @@ describe('BattleController', () => {
     test('完整的对战生命周期（未达 victoryScore）', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({
-        games: [alice, bob],
-        victoryScore: 5,
-      });
+      const controller = createCleanController({ games: [alice, bob], victoryScore: 5 });
 
       controller.start();
 
@@ -929,10 +922,7 @@ describe('BattleController', () => {
     test('完整的对战生命周期（达到 victoryScore）', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({
-        games: [alice, bob],
-        victoryScore: 20,
-      });
+      const controller = createCleanController({ games: [alice, bob], victoryScore: 20 });
 
       controller.store.getScore.mockReturnValue(20);
       GameEvents.mockReturnValue({ UPDATE_MODE: 'update:mode' });

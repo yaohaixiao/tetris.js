@@ -23,6 +23,7 @@ describe('GarbagePushAnimation', () => {
   let mockGame;
   let mockScheduler;
   let mockRows;
+  let mockBattle;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,6 +32,9 @@ describe('GarbagePushAnimation', () => {
     mockScheduler = {
       sequence: jest.fn(() => [1, 2, 3, 4, 5]),
       cancel: jest.fn(),
+    };
+    mockBattle = {
+      getRoundId: jest.fn(() => 1),
     };
 
     mockRows = [
@@ -43,9 +47,12 @@ describe('GarbagePushAnimation', () => {
       Game: mockGame,
       Scheduler: mockScheduler,
       rows: mockRows,
+      roundId: 1,
+      Battle: mockBattle,
     });
   });
 
+  // ==================== 构造函数 ====================
   describe('构造函数', () => {
     test('应该正确创建实例', () => {
       expect(anim).toBeDefined();
@@ -57,6 +64,7 @@ describe('GarbagePushAnimation', () => {
     });
   });
 
+  // ==================== initialize ====================
   describe('initialize', () => {
     test('应该设置正确的动画属性', () => {
       expect(anim.layer).toBe(100);
@@ -92,6 +100,7 @@ describe('GarbagePushAnimation', () => {
     });
   });
 
+  // ==================== 闪烁逻辑 ====================
   describe('闪烁逻辑', () => {
     test('每次 toggle 应该切换 visible 状态', () => {
       const tasks = mockScheduler.sequence.mock.calls[0][0];
@@ -134,31 +143,43 @@ describe('GarbagePushAnimation', () => {
     });
   });
 
+  // ==================== render ====================
   describe('render', () => {
     test('visible=true 时应该发送事件', () => {
       anim._visible = true;
       anim.render();
+
       expect(anim.emit).toHaveBeenCalledWith('ui:test:render:garbage:push', {
         rows: mockRows,
         visible: true,
       });
     });
 
-    test('visible=false 时应该发送事件', () => {
+    test('visible=false 时不应该发送事件', () => {
       anim._visible = false;
       anim.render();
-      expect(anim.emit).toHaveBeenCalledWith('ui:test:render:garbage:push', {
-        rows: mockRows,
-        visible: false,
-      });
+
+      expect(anim.emit).not.toHaveBeenCalled();
     });
 
     test('应该使用正确的 Game id 获取事件', () => {
+      anim._visible = true;
       anim.render();
+
       expect(UIEvents).toHaveBeenCalledWith('test-uuid');
+    });
+
+    test('roundId 不匹配时应该标记 _finished 并跳过渲染', () => {
+      mockBattle.getRoundId.mockReturnValue(2);
+      anim._visible = true;
+      anim.render();
+
+      expect(anim._finished).toBe(true);
+      expect(anim.emit).not.toHaveBeenCalled();
     });
   });
 
+  // ==================== dispose ====================
   describe('dispose', () => {
     test('应该取消所有 Scheduler 任务', () => {
       anim.dispose();
@@ -172,15 +193,19 @@ describe('GarbagePushAnimation', () => {
     });
   });
 
+  // ==================== 边界情况 ====================
   describe('边界情况', () => {
     test('空垃圾行数据', () => {
       const emptyAnim = new GarbagePushAnimation({
         Game: mockGame,
         Scheduler: mockScheduler,
         rows: [],
+        roundId: 1,
+        Battle: mockBattle,
       });
 
       expect(emptyAnim._rows).toEqual([]);
+      emptyAnim._visible = true;
       emptyAnim.render();
       expect(emptyAnim.emit).toHaveBeenCalledWith(
         'ui:test:render:garbage:push',
@@ -193,12 +218,15 @@ describe('GarbagePushAnimation', () => {
         Game: mockGame,
         Scheduler: mockScheduler,
         rows: [[1, 0, 1]],
+        roundId: 1,
+        Battle: mockBattle,
       });
 
       expect(singleRowAnim._rows).toEqual([[1, 0, 1]]);
     });
   });
 
+  // ==================== 集成测试 ====================
   describe('集成测试', () => {
     test('完整生命周期', () => {
       const tasks = mockScheduler.sequence.mock.calls[0][0];
@@ -231,10 +259,7 @@ describe('GarbagePushAnimation', () => {
       tasks[0].fn();
       anim.emit.mockClear();
       anim.render();
-      expect(anim.emit).toHaveBeenCalledWith('ui:test:render:garbage:push', {
-        rows: mockRows,
-        visible: false,
-      });
+      expect(anim.emit).not.toHaveBeenCalled();
 
       // toggle → flash 3: visible=true
       tasks[1].fn();
@@ -244,6 +269,13 @@ describe('GarbagePushAnimation', () => {
         rows: mockRows,
         visible: true,
       });
+    });
+
+    test('roundId 不匹配时动画自动过期', () => {
+      mockBattle.getRoundId.mockReturnValue(2);
+      anim.render();
+
+      expect(anim._finished).toBe(true);
     });
   });
 });

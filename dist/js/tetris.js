@@ -4092,9 +4092,10 @@ var tetris = (() => {
      * @private
      * @returns {void}
      */
-    _onStartGarbageWarning = () => {
+    _onStartGarbageWarning = (payload) => {
       const { Game: Game2 } = this;
-      Game2.startGarbageWarning();
+      const { roundId, Battle } = payload;
+      Game2.startGarbageWarning(roundId, Battle);
     };
     /**
      * ## 开始垃圾行闪烁动画
@@ -4109,8 +4110,8 @@ var tetris = (() => {
      */
     _onStartGarbagePush = (payload) => {
       const { Game: Game2 } = this;
-      const { rows } = payload;
-      Game2.startGarbagePush(rows);
+      const { rows, roundId, Battle } = payload;
+      Game2.startGarbagePush(rows, roundId, Battle);
     };
   };
   var game_router_default = GameRouter;
@@ -4514,8 +4515,8 @@ var tetris = (() => {
         hard: 6,
         expert: 9
       };
-      const { board, difficulty } = this.state;
-      const cols = board[0].length;
+      const { cols, state } = this;
+      const { board, difficulty } = state;
       const garbageRows = DIFFICULTY_GARBAGE_ROWS[difficulty] || 0;
       place_garbage_on_board_default(board, garbageRows, cols);
       return board;
@@ -11735,7 +11736,14 @@ var tetris = (() => {
      * @returns {void}
      */
     render() {
-      if (!this._visible) return;
+      const { roundId, Battle, _visible } = this;
+      if (roundId !== Battle.getRoundId()) {
+        this._finished = true;
+        return;
+      }
+      if (!_visible) {
+        return;
+      }
       const { Game: Game2 } = this;
       const events = UIEvents(Game2.id);
       this.emit(events.RENDER_GARBAGE_WARNING);
@@ -11803,6 +11811,8 @@ var tetris = (() => {
       for (const id of this._schedulerIds) {
         Scheduler2.cancel(id);
       }
+      this._rows = [];
+      this._finished = true;
     }
     /**
      * ## 渲染动画
@@ -11817,8 +11827,12 @@ var tetris = (() => {
      * @returns {void}
      */
     render() {
-      const { Game: Game2, _rows, _visible } = this;
+      const { Game: Game2, Battle, _rows, _visible, roundId } = this;
       const events = UIEvents(Game2.id);
+      if (roundId !== Battle.getRoundId()) {
+        this._finished = true;
+        return;
+      }
       this.emit(events.RENDER_GARBAGE_PUSH, { rows: _rows, visible: _visible });
     }
   };
@@ -13083,12 +13097,14 @@ var tetris = (() => {
      *
      * @returns {void}
      */
-    startGarbageWarning() {
+    startGarbageWarning(roundId, Battle) {
       const { Scheduler: Scheduler2 } = this;
       this.Animations.register(
         new garbage_warning_animation_default({
           Game: this,
-          Scheduler: Scheduler2
+          Scheduler: Scheduler2,
+          Battle,
+          roundId
         })
       );
     }
@@ -13102,13 +13118,15 @@ var tetris = (() => {
      * @param {number[][]} rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
      * @returns {void}
      */
-    startGarbagePush(rows) {
+    startGarbagePush(rows, roundId, Battle) {
       const { Scheduler: Scheduler2 } = this;
       this.Animations.register(
         new garbage_push_animation_default({
           Game: this,
           Scheduler: Scheduler2,
-          rows
+          rows,
+          roundId,
+          Battle
         })
       );
     }
@@ -13170,6 +13188,7 @@ var tetris = (() => {
     winner: null,
     /** 双方胜场数，key: playerId, value: 胜场数 */
     scores: {},
+    roundId: 0,
     /**
      * 双方待处理垃圾行数 key: playerId（将要接收垃圾行的玩家） value: 累积的垃圾行数量
      *
@@ -13524,6 +13543,12 @@ var tetris = (() => {
     clearGarbage(game) {
       const playerId = this.getPlayerId(game);
       this.state.pendingGarbage[playerId] = 0;
+    }
+    increaseRound() {
+      this.state.roundId += 1;
+    }
+    getRoundId() {
+      return this.state.roundId;
     }
     /**
      * ## 重置状态
@@ -14184,14 +14209,12 @@ var tetris = (() => {
      * 胜者的游戏状态没有变化，不需要重置。 败者需要重新初始化棋盘准备下一局。
      *
      * @param {object} loser - 本局失败的玩家 Game 实例
-     * @param {string} loser.id - 失败者的唯一标识
-     * @param {Function} loser.emit - 事件触发方法
-     * @param {object} loser.Animations - 动画系统
      * @returns {void}
      */
     restart(loser) {
       const events = GameEvents(loser.id);
       const winner = this.getOpponent(loser);
+      this.store.increaseRound();
       winner.Animations?.clear?.();
       loser.Animations?.clear?.();
       loser.emit(events.RESTART);
@@ -14258,6 +14281,9 @@ var tetris = (() => {
       const { games } = this;
       return games.find((game) => game.id !== yourself.id);
     }
+    getRoundId() {
+      return this.store.getRoundId();
+    }
     /**
      * ## 处理消行攻击
      *
@@ -14317,21 +14343,13 @@ var tetris = (() => {
       if (remaining > 0) {
         store.addGarbage(to, remaining);
         const { Scheduler: Scheduler2 } = to;
-        Scheduler2.sequence([
-          {
-            fn: () => {
-              const events = GameEvents(to.id);
-              to.emit(events.START_GARBAGE_WARNING);
-            }
-          },
-          {
-            fn: () => {
-              const events = AudioEvents();
-              this.emit(events.PLAY_SOUND, { sound: "GARBAGE_WARNING" });
-            },
-            delay: 120
-          }
-        ]);
+        const events = GameEvents(to.id);
+        const roundId = this.getRoundId();
+        to.emit(events.START_GARBAGE_WARNING, { roundId, Battle: this });
+        Scheduler2.delay(() => {
+          const events2 = AudioEvents();
+          this.emit(events2.PLAY_SOUND, { sound: "GARBAGE_WARNING" });
+        }, 120);
       }
       return remaining;
     }
@@ -14387,21 +14405,17 @@ var tetris = (() => {
       Store.setState({ board: next });
       this.store.clearGarbage(game);
       const garbageRows = next.slice(-amount);
-      Scheduler2.sequence([
-        {
-          fn: () => {
-            const events = GameEvents(game.id);
-            game.emit(events.START_GARBAGE_PUSH, { rows: garbageRows });
-          }
-        },
-        {
-          fn: () => {
-            const events = AudioEvents();
-            this.emit(events.PLAY_SOUND, { sound: "GARBAGE_RECEIVED" });
-          },
-          delay: 120
-        }
-      ]);
+      const events = GameEvents(game.id);
+      const roundId = this.getRoundId();
+      game.emit(events.START_GARBAGE_PUSH, {
+        rows: garbageRows,
+        roundId,
+        Battle: this
+      });
+      Scheduler2.delay(() => {
+        const events2 = AudioEvents();
+        this.emit(events2.PLAY_SOUND, { sound: "GARBAGE_RECEIVED" });
+      }, 120);
     }
     /**
      * ## 订阅对战事件
