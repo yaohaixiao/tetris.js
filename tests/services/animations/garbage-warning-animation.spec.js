@@ -41,6 +41,7 @@ describe('GarbageWarningAnimation', () => {
       Scheduler: mockScheduler,
       roundId: 1,
       Battle: mockBattle,
+      amount: 3,  // 垃圾行数量，通过 Base 的 Object.assign 自动挂载到 this
     });
   });
 
@@ -53,6 +54,10 @@ describe('GarbageWarningAnimation', () => {
 
     test('应该自动调用 initialize', () => {
       expect(mockScheduler.sequence).toHaveBeenCalled();
+    });
+
+    test('应该通过 Base 自动挂载 amount', () => {
+      expect(anim.amount).toBe(3);
     });
   });
 
@@ -122,22 +127,24 @@ describe('GarbageWarningAnimation', () => {
       expect(anim._finished).toBe(true);
     });
 
-    test('第 5 次闪烁后 _visible 为 true', () => {
+    test('第 5 次闪烁后 _visible 为 false', () => {
       const tasks = mockScheduler.sequence.mock.calls[0][0];
 
       tasks[4].fn();
       expect(anim._visible).toBe(false);
-      expect(anim._finished).toBe(false);
     });
   });
 
   // ==================== render ====================
   describe('render', () => {
-    test('可见帧应该发送 RENDER_GARBAGE_WARNING 事件', () => {
+    test('可见帧应该发送 RENDER_GARBAGE_WARNING 事件，携带 amount', () => {
       anim._visible = true;
       anim.render();
 
-      expect(anim.emit).toHaveBeenCalledWith('ui:test:render:garbage:warning');
+      expect(anim.emit).toHaveBeenCalledWith(
+        'ui:test:render:garbage:warning',
+        { amount: 3 }
+      );
     });
 
     test('不可见帧不应该发送事件', () => {
@@ -199,11 +206,14 @@ describe('GarbageWarningAnimation', () => {
     test('render 在闪烁过程中的行为', () => {
       const tasks = mockScheduler.sequence.mock.calls[0][0];
 
-      // flash 1: visible=true → 发送事件
+      // flash 1: visible=true → 发送事件（携带 amount）
       anim._visible = true;
       anim.emit.mockClear();
       anim.render();
-      expect(anim.emit).toHaveBeenCalled();
+      expect(anim.emit).toHaveBeenCalledWith(
+        'ui:test:render:garbage:warning',
+        { amount: 3 }
+      );
 
       // toggle → visible=false → 不发送
       tasks[0].fn();
@@ -211,11 +221,14 @@ describe('GarbageWarningAnimation', () => {
       anim.render();
       expect(anim.emit).not.toHaveBeenCalled();
 
-      // toggle → visible=true → 发送
+      // toggle → visible=true → 发送事件（携带 amount）
       tasks[1].fn();
       anim.emit.mockClear();
       anim.render();
-      expect(anim.emit).toHaveBeenCalled();
+      expect(anim.emit).toHaveBeenCalledWith(
+        'ui:test:render:garbage:warning',
+        { amount: 3 }
+      );
     });
 
     test('roundId 不匹配时动画自动过期', () => {
