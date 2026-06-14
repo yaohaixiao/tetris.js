@@ -1,3 +1,18 @@
+# [1.17.0](https://github.com/yaohaixiao/tetris.js/compare/1.16.0...1.17.0) (2026-06-14)
+
+
+### Bug Fixes
+
+* 修复 m 键无法停止背景音乐的问题； ([4590af1](https://github.com/yaohaixiao/tetris.js/commit/4590af1a6a99f6cb185e07ebebee700b05e993e0))
+* 修复等级选择后的 baseLines 设置问题导致的消除行数不足就显示升级动画的问题； ([f1d9ac9](https://github.com/yaohaixiao/tetris.js/commit/f1d9ac9afb97e1acb9284e123e1a7120b05d64a6))
+
+
+### Features
+
+* 添加对战模式，发送垃圾方块和显示垃圾方块的音效； ([9b3f47e](https://github.com/yaohaixiao/tetris.js/commit/9b3f47e71d67b45efbea908b148e3760d2e2a3fa))
+* 完成对战模式垃圾行音效和动画特效 ([8267774](https://github.com/yaohaixiao/tetris.js/commit/8267774a3910f56356c78f5cf9087e711baf0ecb))
+
+
 # [1.16.0](https://github.com/yaohaixiao/tetris.js/compare/1.15.0...1.16.0) (2026-06-12)
 
 ### Features
