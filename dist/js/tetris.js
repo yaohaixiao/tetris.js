@@ -13,7 +13,7 @@ var tetris = (() => {
      *
      * 人机对战：['human', 'ai'] 双人对战：['human', 'human']
      */
-    Players: ["human", "human"],
+    Players: ["human", "ai"],
     // 先得 15 分者获胜
     victoryScore: 15,
     /*
@@ -3470,7 +3470,8 @@ var tetris = (() => {
      * @returns {void}
      */
     _onToggleBGM = ({ level }) => {
-      this.emit("audio:resume:sound", { sound: "BGM_TOGGLED" });
+      const events = AudioEvents();
+      this.emit(events.PLAY_SOUND, { sound: "BGM_TOGGLED" });
       this.toggleBGM(level);
     };
     /**
@@ -8283,7 +8284,7 @@ var tetris = (() => {
       const action = resolveKeyboardAction(key);
       const mode = Store.getMode();
       const controller = Store.getController();
-      return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (key === "r" || Player.name === "ai" && (key === "p" || key === "c") || Player.name === "human" && (key === "s" || key === "p" && Player.index === 1 || mode === "playing" && Player.index === 1));
+      return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (key === "r" || Player.name === "ai" && (key === "m" || key === "p" || key === "c") || Player.name === "human" && (key === "s" || key === "p" && Player.index === 1 || mode === "playing" && Player.index === 1));
     }
     /**
      * ## resize 事件处理
@@ -11873,18 +11874,19 @@ var tetris = (() => {
 
   // lib/game/core/over.js
   var over = (runtime) => {
-    const { id, Store, Animations } = runtime;
+    const { id, Store } = runtime;
     const mode = Store.getMode();
-    if (mode === "game-over" || mode === "replay" || Animations.hasBlocking()) {
+    if (mode === "game-over" || mode === "replay") {
       return;
     }
     const AE = AudioEvents();
     const RE = ReplayEvents(id);
+    const BE = BattleEvents();
     runtime.emit(RE.STOP_RECORD);
     runtime.emit(AE.STOP_BGM);
     runtime.emit(AE.PLAY_SOUND, { sound: "GAME_OVER" });
     if (runtime.isVersus()) {
-      runtime.emit("battle:update:winner", {
+      runtime.emit(BE.UPDATE_WINNER, {
         loser: runtime
       });
     } else {
@@ -12023,15 +12025,16 @@ var tetris = (() => {
     if (mode === "main-menu" || mode === "replay" || mode === "game-over") {
       return;
     }
+    const events = BattleEvents();
     if (mode === "playing") {
       pause_default(runtime);
       if (runtime.isVersus()) {
-        runtime.emit("battle:sync:pause", { from: runtime });
+        runtime.emit(events.SYNC_PAUSE, { from: runtime });
       }
     } else {
       resume_default(runtime);
       if (runtime.isVersus()) {
-        runtime.emit("battle:sync:resume", { from: runtime });
+        runtime.emit(events.SYNC_RESUME, { from: runtime });
       }
     }
   };
@@ -14183,10 +14186,14 @@ var tetris = (() => {
      * @param {object} loser - 本局失败的玩家 Game 实例
      * @param {string} loser.id - 失败者的唯一标识
      * @param {Function} loser.emit - 事件触发方法
+     * @param {object} loser.Animations - 动画系统
      * @returns {void}
      */
     restart(loser) {
       const events = GameEvents(loser.id);
+      const winner = this.getOpponent(loser);
+      winner.Animations?.clear?.();
+      loser.Animations?.clear?.();
       loser.emit(events.RESTART);
       this.start();
     }

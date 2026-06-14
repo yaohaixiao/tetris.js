@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "live-server --port=13000 --open=./dist/tetris.html",
+    "dev": "live-server --port=13000 --open=./dist/index.html",
     "cypress": "npx cypress open",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "compat": "npx js-compat-check \"lib/**/*.js\" -- --report",

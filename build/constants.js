@@ -7,7 +7,7 @@ const BASE_PATH = './';
 const BASE_NAME = 'tetris';
 
 /* ========== 页面相关变量 ========== */
-const HTML_FILE_PATH = resolve(BASE_PATH, `dist/${BASE_NAME}.html`);
+const HTML_FILE_PATH = resolve(BASE_PATH, `dist/index.html`);
 
 /* ========== 样式相关变量  ========== */
 const LESS_FILE_PATH = resolve(BASE_PATH, `theme/${BASE_NAME}.less`);
