@@ -3655,8 +3655,7 @@ var tetris = (() => {
      *
      * @private
      * @param {object} options - 参数对象
-     * @param {string} options.mode - 游戏模式（main-menu / difficulty / playing /
-     *   paused / game-over / replay）
+     * @param {string} options.mode - 游戏模式
      * @returns {void}
      */
     _onUpdateMode = (options) => {
@@ -4089,12 +4088,21 @@ var tetris = (() => {
      * 注册垃圾行预警动画（橙色网格 + "INCOMING ATTACK" 文字闪烁）到 AnimationSystem。 动画层 150，不阻塞操作，5
      * 次闪烁共 500ms。
      *
+     * ### roundId 和 Battle 参数
+     *
+     * 动画初始化时记录当前 roundId 和 Battle 引用。 每帧渲染时检查 roundId 是否匹配，不匹配则自动标记为 `_finished`，
+     * 防止上一局残留的动画在新一局中继续渲染。
+     *
      * @private
+     * @param {object} payload - 参数对象
+     * @param {number} payload.roundId - 当前对局编号
+     * @param {object} payload.Battle - BattleController 实例引用
      * @returns {void}
      */
-    _onStartGarbageWarning = () => {
+    _onStartGarbageWarning = (payload) => {
       const { Game: Game2 } = this;
-      Game2.startGarbageWarning();
+      const { roundId, Battle } = payload;
+      Game2.startGarbageWarning(roundId, Battle);
     };
     /**
      * ## 开始垃圾行闪烁动画
@@ -4102,15 +4110,21 @@ var tetris = (() => {
      * 注册垃圾行闪烁动画（垃圾方块灰/白交替闪烁）到 AnimationSystem。 动画层 100，阻塞操作（blocking=true），5 次闪烁共
      * 500ms。
      *
+     * ### roundId 和 Battle 参数
+     *
+     * 同预警动画，用于动画过期检测。新一局开始时 roundId 递增， 旧动画渲染时发现不匹配自动标记结束。
+     *
      * @private
      * @param {object} payload - 参数对象
      * @param {number[][]} payload.rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
+     * @param {number} payload.roundId - 当前对局编号
+     * @param {object} payload.Battle - BattleController 实例引用
      * @returns {void}
      */
     _onStartGarbagePush = (payload) => {
       const { Game: Game2 } = this;
-      const { rows } = payload;
-      Game2.startGarbagePush(rows);
+      const { rows, roundId, Battle } = payload;
+      Game2.startGarbagePush(rows, roundId, Battle);
     };
   };
   var game_router_default = GameRouter;
@@ -4418,6 +4432,9 @@ var tetris = (() => {
      * 初始化内部状态，使用深拷贝保证与外部状态隔离。
      *
      * @param {object} options - 配置选项
+     * @param {object} options.GameState - 游戏初始状态模板对象
+     * @param {number} options.cols - 棋盘列数（宽度）
+     * @param {number} options.rows - 棋盘行数（高度）
      */
     constructor(options) {
       this.initialize(options);
@@ -4425,9 +4442,13 @@ var tetris = (() => {
     /**
      * ## 初始化 Store
      *
-     * 保存默认状态（用于重置）和棋盘尺寸配置。
+     * 保存默认状态（用于 resetState 恢复）和棋盘尺寸配置。 使用 `structuredClone` 深拷贝
+     * GameState，确保与外部状态完全隔离。
      *
      * @param {object} options - 配置选项
+     * @param {object} options.GameState - 游戏初始状态模板对象
+     * @param {number} options.cols - 棋盘列数
+     * @param {number} options.rows - 棋盘行数
      * @returns {void}
      */
     initialize(options) {
@@ -4439,6 +4460,8 @@ var tetris = (() => {
     /**
      * ## 获取完整 state
      *
+     * 返回当前游戏状态对象的引用。 注意：返回的是引用，外部可直接修改（不推荐），应使用 setState 更新。
+     *
      * @returns {object} 当前游戏状态对象
      */
     getState() {
@@ -4449,10 +4472,19 @@ var tetris = (() => {
      *
      * 支持两种更新模式：
      *
-     * 1. **对象 patch**：`setState({ score: 100 })`
-     * 2. **函数式更新**：`setState((prev) => ({ score: prev.score + 50 }))`
+     * 1. **对象 patch**：`setState({ score: 100 })` — 浅合并到当前 state
+     * 2. **函数式更新**：`setState((prev) => ({ score: prev.score + 50 }))` — 基于前值计算新值
+     *
+     * ### 为什么用浅合并而不是深合并？
+     *
+     * State 中的嵌套对象（如 board 二维数组）通过引用共享， 浅合并足够且性能更好。需要独立副本时（如回放场景）， 使用
+     * structuredClone 显式深拷贝。
      *
      * @param {object | Function} patch - 状态更新内容或函数
+     *
+     *   - 对象：直接浅合并到当前 state
+     *   - 函数：接收当前 state 作为参数，返回 patch 对象
+     *
      * @returns {void}
      */
     setState(patch) {
@@ -4464,7 +4496,7 @@ var tetris = (() => {
     /**
      * ## 重置状态为初始值
      *
-     * 使用深拷贝恢复，确保与原默认状态完全隔离。
+     * 使用 `structuredClone` 深拷贝 defaults，确保与原默认状态完全隔离。 通常在游戏重新开始或模式切换时调用。
      *
      * @returns {void}
      */
@@ -4474,7 +4506,7 @@ var tetris = (() => {
     /**
      * ## 获取当前棋盘
      *
-     * @returns {string[][]} 棋盘二维数组
+     * @returns {string[][]} 棋盘二维数组，每个元素为颜色值或 0（空格）
      */
     getBoard() {
       return this.state.board;
@@ -4482,7 +4514,7 @@ var tetris = (() => {
     /**
      * ## 重置棋盘
      *
-     * 根据配置的 rows 和 cols 生成全空的棋盘。
+     * 根据 options 中配置的 rows 和 cols 生成全空棋盘。 所有格子初始值为 0（空格）。
      *
      * @returns {void}
      */
@@ -4496,16 +4528,24 @@ var tetris = (() => {
     /**
      * ## 生成游戏初始化的 board 数据
      *
-     * 根据当前难度（difficulty）在棋盘底部生成对应数量的垃圾行。
+     * 根据当前难度（difficulty）在棋盘底部生成对应数量的垃圾行。 难度越高，初始垃圾行越多，游戏难度越大。
      *
-     * | 难度   | 垃圾行数 |
-     * | ------ | -------- |
-     * | easy   | 0        |
-     * | normal | 3        |
-     * | hard   | 6        |
-     * | expert | 9        |
+     * ### 难度与垃圾行映射
      *
-     * @returns {string[][]} 生成的棋盘数据
+     * | 难度   | 垃圾行数 | 说明                    |
+     * | ------ | -------- | ----------------------- |
+     * | easy   | 0        | 空棋盘，适合新手        |
+     * | normal | 3        | 底部 3 行垃圾，中等挑战 |
+     * | hard   | 6        | 底部 6 行垃圾，较难     |
+     * | expert | 9        | 底部 9 行垃圾，极限挑战 |
+     * | 其他   | 0        | 未知难度默认为 0        |
+     *
+     * ### 为什么在 generateBoard 中处理？
+     *
+     * 垃圾行生成需要知道棋盘尺寸（cols），而 cols 存储在 this.options 中。 将生成逻辑放在 Store
+     * 方法中，避免外部调用时需要额外传递 cols 参数。
+     *
+     * @returns {string[][]} 生成的棋盘数据（含垃圾行）
      */
     generateBoard() {
       const DIFFICULTY_GARBAGE_ROWS = {
@@ -4514,16 +4554,16 @@ var tetris = (() => {
         hard: 6,
         expert: 9
       };
-      const { board, difficulty } = this.state;
-      const cols = board[0].length;
+      const { options, state } = this;
+      const { board, difficulty } = state;
       const garbageRows = DIFFICULTY_GARBAGE_ROWS[difficulty] || 0;
-      place_garbage_on_board_default(board, garbageRows, cols);
+      place_garbage_on_board_default(board, garbageRows, options.cols);
       return board;
     }
     /**
      * ## 设置初始棋盘（深拷贝）
      *
-     * 用于保存游戏开始时的棋盘状态，供回放使用。
+     * 保存游戏开始时的棋盘状态，供回放系统使用。 使用 `structuredClone` 确保与运行时棋盘完全隔离。
      *
      * @param {string[][]} board - 游戏棋盘数据
      * @returns {void}
@@ -4533,6 +4573,8 @@ var tetris = (() => {
     }
     /**
      * ## 获取初始棋盘（深拷贝副本）
+     *
+     * 返回游戏开始时保存的棋盘数据的深拷贝。 回放系统通过此方法获取初始棋盘进行恢复。
      *
      * @returns {string[][]} 初始棋盘数据的深拷贝
      */
@@ -4549,6 +4591,8 @@ var tetris = (() => {
     }
     /**
      * ## 设置当前控制者身份
+     *
+     * 切换玩家控制 ↔ AI 控制时调用。
      *
      * @param {string} controller - 控制者身份：`human` 或 `ai`
      * @returns {void}
@@ -4584,8 +4628,10 @@ var tetris = (() => {
     /**
      * ## 设置游戏难度等级
      *
-     * @param {string} [difficulty='easy'] - 难度等级（easy / normal / hard / expert）.
-     *   Default is `'easy'`
+     * 难度影响初始棋盘垃圾行数、AI 行为等。
+     *
+     * @param {string} [difficulty='easy'] - 难度等级（easy / normal / hard /
+     *   expert）。默认值为 `'easy'`. Default is `'easy'`
      * @returns {void}
      */
     setDifficulty(difficulty = "easy") {
@@ -4594,7 +4640,8 @@ var tetris = (() => {
     /**
      * ## 获取基准行数
      *
-     * 基准行数用于计算等级提升：(baseLines + lines) / 10 + 1 = level
+     * 基准行数用于计算等级提升： `totalLines = baseLines + lines` 然后通过
+     * `calculateLevel(totalLines, maxLevel)` 计算当前等级。
      *
      * @returns {number} 基准行数
      */
@@ -4603,6 +4650,8 @@ var tetris = (() => {
     }
     /**
      * ## 设置基准行数
+     *
+     * 在 selectLevel 时重置为 0，确保等级计算从当前选择开始。
      *
      * @param {number} lines - 基准行数值
      * @returns {void}
@@ -4621,7 +4670,9 @@ var tetris = (() => {
     /**
      * ## 设置当前待消除的行号
      *
-     * @param {number[]} lines - 消除行号数组
+     * 在消行检测阶段写入，消行动画阶段读取。
+     *
+     * @param {number[]} lines - 消除行号数组（从底部到顶部排序）
      * @returns {void}
      */
     setClearLines(lines) {
@@ -4630,9 +4681,9 @@ var tetris = (() => {
     /**
      * ## 获取 HUD 数据
      *
-     * 返回 UI 渲染所需的核心显示数据。
+     * 返回 UI 渲染所需的核心显示数据。 从 state 中提取 score、lines、level、combo、comboScore 等字段。
      *
-     * @returns {object} HUD 数据
+     * @returns {object} HUD 数据对象
      */
     getHub() {
       const { source, lines, level, combo, comboScore } = this.state;
@@ -4641,7 +4692,14 @@ var tetris = (() => {
     /**
      * ## 设置 HUD 数据
      *
+     * 批量更新 HUD 相关的多个状态字段。
+     *
      * @param {object} hud - HUD 数据对象
+     * @param {number} hud.score - 当前得分
+     * @param {number} hud.lines - 累计消除行数
+     * @param {number} hud.level - 当前等级
+     * @param {number} hud.combo - 当前连击次数
+     * @param {number} hud.comboScore - 连击额外加分
      * @returns {void}
      */
     setHud(hud) {
@@ -4680,7 +4738,7 @@ var tetris = (() => {
     /**
      * ## 获取当前等级
      *
-     * @returns {number} 游戏等级
+     * @returns {number} 游戏等级（1-256）
      */
     getLevel() {
       return this.state.level;
@@ -4697,8 +4755,14 @@ var tetris = (() => {
     /**
      * ## 获取游戏模式
      *
-     * @returns {string} 当前模式：main-menu / difficulty / playing / paused /
-     *   game-over / replay
+     * @returns {string} 当前模式：
+     *
+     *   - `main-menu`：主菜单
+     *   - `difficulty`：难度选择
+     *   - `playing`：游戏中
+     *   - `paused`：暂停
+     *   - `game-over`：游戏结束
+     *   - `replay`：回放
      */
     getMode() {
       return this.state.mode;
@@ -11673,9 +11737,11 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
+     * 调用父类构造函数并初始化动画。父类构造函数会完成基础的依赖注入 （如 Game、Scheduler、Battle 等实例的挂载）。
+     *
      * @param {object} options - 配置对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Scheduler - 调度器实例
+     * @param {object} options.Game - 游戏主实例，提供游戏全局状态和 ID
+     * @param {object} options.Scheduler - 调度器实例，用于管理定时任务
      */
     constructor(options) {
       super(options);
@@ -11684,7 +11750,8 @@ var tetris = (() => {
     /**
      * ## 初始化动画
      *
-     * 设置动画属性，启动闪烁序列。
+     * 设置动画的核心属性（层级、阻塞状态、名称等），并启动一个由 Scheduler 管理的闪烁序列。闪烁序列包含 5 次可见性切换， 每次间隔
+     * 120ms，总时长 600ms。
      *
      * @returns {void}
      */
@@ -11707,17 +11774,23 @@ var tetris = (() => {
       };
       const ids = Scheduler2.sequence([
         { fn: toggle, delay: 120 },
+        // 第 1 次闪烁：120ms 后执行
         { fn: toggle, delay: 120 },
+        // 第 2 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 },
+        // 第 3 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 },
+        // 第 4 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 }
+        // 第 5 次闪烁：再等 120ms 后执行
       ]);
       this._schedulerIds = ids;
     }
     /**
      * ## 清理资源
      *
-     * 由 AnimationSystem 在移除动画时自动调用。 取消所有 Scheduler 定时器。
+     * 由 AnimationSystem 在检测到 _finished 为 true 后自动调用。 遍历所有 Scheduler 任务 ID
+     * 并逐一取消，防止内存泄漏和 已销毁动画继续执行回调。
      *
      * @returns {void}
      */
@@ -11730,12 +11803,23 @@ var tetris = (() => {
     /**
      * ## 渲染动画
      *
-     * 仅在可见帧发送渲染事件给 UI 层。 UI 层收到事件后在棋盘上绘制红色半透明覆盖。
+     * 在每一帧由 AnimationSystem 调用。负责：
+     *
+     * 1. 检查当前回合是否仍然有效（防止跨回合残留）
+     * 2. 检查当前帧是否应该显示（_visible 状态）
+     * 3. 向 UI 层发送渲染事件，触发红色覆盖层绘制
      *
      * @returns {void}
      */
     render() {
-      if (!this._visible) return;
+      const { roundId, Battle, _visible } = this;
+      if (roundId !== Battle.getRoundId()) {
+        this._finished = true;
+        return;
+      }
+      if (!_visible) {
+        return;
+      }
       const { Game: Game2 } = this;
       const events = UIEvents(Game2.id);
       this.emit(events.RENDER_GARBAGE_WARNING);
@@ -11748,9 +11832,30 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
+     * 接收垃圾行数据和游戏依赖，立即启动闪烁动画。
+     *
+     * ### 参数说明
+     *
+     * `rows` 是从新棋盘底部截取的垃圾行二维数组：
+     *
+     * - 外层数组长度 = 垃圾行数量
+     * - 内层数组长度 = 棋盘宽度
+     * - 值为 0 表示空洞（不需要闪烁）
+     * - 值为非 0 表示垃圾方块（需要闪烁）
+     *
+     * @example
+     *   const anim = new GarbagePushAnimation({
+     *     Game: gameInstance,
+     *     Scheduler: gameInstance.Scheduler,
+     *     rows: [
+     *       [0, 1, 1, 0, 1, 1, 1, 0, 1, 1], // 第 1 行垃圾（有空隙）
+     *       [1, 1, 0, 1, 1, 1, 0, 1, 1, 1], // 第 2 行垃圾
+     *     ],
+     *   });
+     *
      * @param {object} options - 配置对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Scheduler - 调度器实例
+     * @param {object} options.Game - 游戏主实例，提供游戏 ID 和状态
+     * @param {object} options.Scheduler - 调度器实例，用于管理闪烁定时器
      * @param {number[][]} options.rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
      */
     constructor(options) {
@@ -11760,7 +11865,21 @@ var tetris = (() => {
     /**
      * ## 初始化动画
      *
-     * 设置动画属性，启动闪烁序列。 每 120ms 切换一次 visible 状态，共 5 次（总时长 600ms）。
+     * 设置动画的核心属性（层级、阻塞状态、名称等）， 并启动一个由 Scheduler 管理的闪烁序列。 闪烁序列包含 5 次可见性切换，每次间隔
+     * 120ms，总时长 600ms。
+     *
+     * ### 闪烁逻辑
+     *
+     * 初始状态 `_visible = true`（显示灰色）， 每次 toggle 切换一次状态，共 5 次：
+     *
+     *     初始：true（灰色）
+     *     toggle 1：false（白色）
+     *     toggle 2：true（灰色）
+     *     toggle 3：false（白色）
+     *     toggle 4：true（灰色）
+     *     toggle 5：false（白色）→ 动画结束
+     *
+     * 动画结束时 `_visible` 为 false（白色）， 与棋盘底色一致，视觉上自然过渡回正常状态。
      *
      * @returns {void}
      */
@@ -11784,17 +11903,34 @@ var tetris = (() => {
       };
       const ids = Scheduler2.sequence([
         { fn: toggle, delay: 120 },
+        // 第 1 次闪烁：120ms 后执行
         { fn: toggle, delay: 120 },
+        // 第 2 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 },
+        // 第 3 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 },
+        // 第 4 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 }
+        // 第 5 次闪烁：再等 120ms 后执行
       ]);
       this._schedulerIds = ids;
     }
     /**
      * ## 清理资源
      *
-     * 由 AnimationSystem 在动画标记为 _finished 后自动调用。 取消所有 Scheduler 定时器，释放资源。
+     * 由 AnimationSystem 在检测到 `_finished === true` 后自动调用。 执行以下清理操作：
+     *
+     * 1. 取消所有尚未执行的 Scheduler 定时器
+     * 2. 清空垃圾行数据引用（帮助 GC 回收）
+     * 3. 确保 _finished 标记为 true（防御性设置）
+     *
+     * ### 为什么需要取消定时器？
+     *
+     * 如果动画在闪烁序列执行完之前就被移除（如回合切换）， 必须取消剩余定时器，否则：
+     *
+     * - 定时器回调继续执行（访问已销毁的动画实例）
+     * - 造成内存泄漏（定时器持有回调引用）
+     * - 可能引发错误（访问 undefined 的属性）
      *
      * @returns {void}
      */
@@ -11803,22 +11939,49 @@ var tetris = (() => {
       for (const id of this._schedulerIds) {
         Scheduler2.cancel(id);
       }
+      this._rows = [];
+      this._finished = true;
     }
     /**
      * ## 渲染动画
      *
-     * 每帧由 AnimationSystem 调用。 发送 RENDER_GARBAGE_PUSH 事件给 UI 层，携带：
+     * 每帧由 AnimationSystem 调用（通常 60fps）。 负责向 UI 层发送渲染事件，携带垃圾行数据和当前可见状态。
      *
-     * - Rows：垃圾行数据（用于确定哪些格子需要绘制）
-     * - Visible：当前可见状态（决定绘制灰色还是白色）
+     * ### 渲染流程
      *
-     * UI 层收到事件后调用 renderGarbagePush(rows, visible) 执行实际绘制。
+     * 1. 检查当前回合是否有效（防止跨回合残留）
+     * 2. 检查当前帧是否应该显示（_visible 状态）
+     * 3. 向 UI 层发送 RENDER_GARBAGE_PUSH 事件
+     *
+     * ### 事件数据
+     *
+     * 发送给 UI 层的数据包含：
+     *
+     * - `rows`：垃圾行二维数组（用于确定哪些格子需要绘制）
+     * - `visible`：当前可见状态（决定绘制颜色）
+     *
+     *   - True → 灰色（GRAY）
+     *   - False → 白色（WHITE）
+     *
+     * ### UI 层处理
+     *
+     * UI 层收到事件后会遍历 rows 数组：
+     *
+     * - 对于值非 0 的格子：根据 visible 绘制灰色或白色
+     * - 对于值为 0 的格子：不绘制（保持棋盘背景色）
      *
      * @returns {void}
      */
     render() {
-      const { Game: Game2, _rows, _visible } = this;
+      const { Game: Game2, Battle, _rows, _visible, roundId } = this;
       const events = UIEvents(Game2.id);
+      if (roundId !== Battle.getRoundId()) {
+        this._finished = true;
+        return;
+      }
+      if (!_visible) {
+        return;
+      }
       this.emit(events.RENDER_GARBAGE_PUSH, { rows: _rows, visible: _visible });
     }
   };
@@ -12603,10 +12766,16 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收依赖配置，调用 `initialize()` 创建所有子系统。 构造函数本身不进行复杂初始化，所有子系统的创建都在 `initialize()`
-     * 中完成。
+     * 接收依赖配置，调用 `initialize()` 创建所有子系统。
+     * 构造函数本身不进行复杂初始化，所有子系统的创建都在
+     * `initialize()` 中完成，便于子类覆盖定制初始化行为。
      *
      * @param {object} options - 配置（依赖的执行上下文）对象
+     * @param {object} options.Elements - DOM 元素引用集合
+     * @param {object} options.Block - 方块数据模块
+     * @param {object} options.Scheduler - 全局调度器实例
+     * @param {object} options.Player - 玩家信息对象
+     * @param {string} options.Mode - 游戏模式（如 "single"、"versus"）
      */
     constructor(options) {
       super(options);
@@ -12615,10 +12784,10 @@ var tetris = (() => {
     /**
      * ## 初始化所有子系统
      *
-     * 创建 Store、Animations、UI、输入设备、AI、回放等模块， 并注入它们之间的依赖关系。
-     * 这是整个游戏系统的"组装工厂"，将所有模块组合成一个完整的游戏实例。
+     * 创建 Store、Animations、UI、输入设备、AI、回放等模块，
+     * 并注入它们之间的依赖关系。这是整个游戏系统的"组装工厂"。
      *
-     * ### 初始化顺序
+     * ### 初始化顺序（严格依赖关系）
      *
      * 1. 创建 Store（状态存储）— 最基础的模块，其他模块依赖它
      * 2. 设置游戏 ID — 用于事件命名空间隔离
@@ -12626,9 +12795,9 @@ var tetris = (() => {
      * 4. 创建 AI（AI 控制器）— 依赖 Store、Scheduler、Animations
      * 5. 创建 CommandQueue（命令队列）— 依赖 Game 实例
      * 6. 创建 UI（界面渲染）— 依赖 Store、Elements
-     * 7. 创建输入设备（键盘、手柄）— 依赖 Game、Store
+     * 7. 创建输入设备（键盘、手柄、触屏）— 依赖 Game、Store
      * 8. 创建 Replay（回放系统）— 依赖 Game、Store、Scheduler
-     * 9. 创建 Router（事件路由器）— 依赖所有子系统
+     * 9. 创建 Router（事件路由器）— 依赖所有子系统，最后创建
      *
      * @returns {void}
      */
@@ -12687,6 +12856,21 @@ var tetris = (() => {
         this.AI.start();
       }
     }
+    /**
+     * ## 初始化 Gamepad 游戏手柄控制器
+     *
+     * 根据游戏模式和连接的设备数量，智能分配手柄设备。
+     *
+     * ### 分配策略
+     *
+     * - **单人模式**：直接创建 GamepadController
+     * - **对战模式 P1（index 0）**：键盘为主，有 2 个手柄时也接入手柄 0
+     * - **对战模式 P2（index 1）**：有 2 个手柄时用手柄 1，否则用手柄 0
+     * - **AI 玩家**：不创建手柄控制器
+     *
+     * @private
+     * @returns {Game} 返回 this 以支持链式调用
+     */
     _initializeGamepadController() {
       const { Store, Player } = this;
       const isHumanPlayer = Player.name !== "ai";
@@ -12715,6 +12899,13 @@ var tetris = (() => {
         this.Gamepad = new gamepad_controller_default({ Game: this, Store, Player });
       }
     }
+    /**
+     * ## 判断是否为对战模式
+     *
+     * 检查当前游戏模式是否为 "versus"（对战模式）。
+     *
+     * @returns {boolean} true 表示对战模式
+     */
     isVersus() {
       const { Mode } = this;
       return Mode === "versus";
@@ -12723,7 +12914,8 @@ var tetris = (() => {
     /**
      * ## 选择等级
      *
-     * 设置游戏等级，等级越高方块下落速度越快。 等级变更时会播放音效反馈。
+     * 设置游戏等级并重置相关状态（baseLines、lines 归零），
+     * 等级越高方块下落速度越快。播放等级变更音效。
      *
      * @param {number} level - 等级数值
      * @returns {void}
@@ -12743,7 +12935,7 @@ var tetris = (() => {
     /**
      * ## 切换到难度选择界面
      *
-     * 将游戏模式切换为难度选择界面，并播放场景切换音效。
+     * 将游戏模式切换为 difficulty，播放场景切换音效。
      *
      * @returns {void}
      */
@@ -12755,9 +12947,10 @@ var tetris = (() => {
     /**
      * ## 选择难度
      *
-     * 设置游戏难度等级，难度影响初始棋盘和 AI 行为等。
+     * 设置游戏难度等级（easy / normal / hard / expert），
+     * 难度影响初始棋盘垃圾行和 AI 行为等。播放难度变更音效。
      *
-     * @param {string} difficulty - 难度等级（`easy` / `normal` / `hard` / `expert`）
+     * @param {string} difficulty - 难度等级
      * @returns {void}
      */
     selectDifficulty(difficulty) {
@@ -12768,7 +12961,8 @@ var tetris = (() => {
     /**
      * ## 切换到主菜单
      *
-     * 将游戏模式切换回主菜单界面。
+     * 发送 UI 模式更新事件、设置 Store 模式为 main-menu、
+     * 播放场景切换音效。
      *
      * @returns {void}
      */
@@ -12783,7 +12977,8 @@ var tetris = (() => {
     /**
      * ## 加载最高分
      *
-     * 从 localStorage 读取历史最高分并写入 Store。
+     * 从 localStorage 读取键名为 `tetris-high-score` 的历史最高分，
+     * 解析失败或不存在时默认为 0，写入 Store。
      *
      * @returns {void}
      */
@@ -12794,7 +12989,7 @@ var tetris = (() => {
     /**
      * ## 保存最高分
      *
-     * 仅当当前得分超过历史最高分时才执行保存。
+     * 仅当当前得分超过历史最高分时才更新 Store 并持久化到 localStorage。
      *
      * @param {number} score - 当前得分
      * @returns {void}
@@ -12810,6 +13005,8 @@ var tetris = (() => {
     /**
      * ## 开始游戏准备
      *
+     * 委托给 begin() 纯函数，设置游戏初始准备状态。
+     *
      * @returns {void}
      */
     begin() {
@@ -12817,6 +13014,8 @@ var tetris = (() => {
     }
     /**
      * ## 启动游戏（进入倒计时）
+     *
+     * 委托给 start() 纯函数，启动倒计时后开始游戏循环。
      *
      * @returns {void}
      */
@@ -12826,6 +13025,8 @@ var tetris = (() => {
     /**
      * ## 暂停游戏
      *
+     * 委托给 pause() 纯函数，停止游戏计时器并显示暂停动画。
+     *
      * @returns {void}
      */
     pause() {
@@ -12833,6 +13034,8 @@ var tetris = (() => {
     }
     /**
      * ## 恢复游戏
+     *
+     * 委托给 resume() 纯函数，从暂停状态恢复游戏。
      *
      * @returns {void}
      */
@@ -12842,6 +13045,8 @@ var tetris = (() => {
     /**
      * ## 切换暂停状态
      *
+     * 委托给 togglePause() 纯函数，在暂停/运行之间切换。
+     *
      * @returns {void}
      */
     togglePause() {
@@ -12849,6 +13054,8 @@ var tetris = (() => {
     }
     /**
      * ## 重置游戏
+     *
+     * 委托给 reset() 纯函数，完全重置游戏状态回到主菜单。
      *
      * @returns {void}
      */
@@ -12858,6 +13065,8 @@ var tetris = (() => {
     /**
      * ## 重新开始游戏
      *
+     * 委托给 restart() 纯函数，重新开始当前模式的游戏。
+     *
      * @returns {void}
      */
     restart() {
@@ -12866,16 +13075,22 @@ var tetris = (() => {
     /**
      * ## 游戏结束
      *
+     * 委托给 over() 纯函数，处理游戏结束流程。
+     *
      * @returns {void}
      */
     over() {
       over_default(this);
     }
     /**
-     * ## 游戏结束
+     * ## 获取 Ghost Piece 位置
      *
-     * @param {object} payload - 参数对象
-     * @returns {object} - 返回 ghost 定位数据
+     * 计算当前方块的预览落点位置，如果 Y 坐标有变化则发送渲染事件。
+     * Ghost piece 帮助玩家判断方块硬降后的最终落点。
+     *
+     * @param {object} payload - 当前方块的位置信息
+     * @param {number} payload.cx - 当前方块 X 坐标
+     * @param {number} payload.cy - 当前方块 Y 坐标
      */
     getGhostPosition(payload) {
       const position = get_ghost_position_default(this);
@@ -12892,13 +13107,18 @@ var tetris = (() => {
     /**
      * ## 生成新方块
      *
+     * 委托给 spawn() 纯函数，在棋盘顶部生成下一个方块。
+     *
      * @returns {void}
      */
     spawn() {
       spawn_default(this);
     }
     /**
-     * ## 缓存方块
+     * ## 缓存方块（Hold）
+     *
+     * 委托给 hold() 纯函数，将当前方块存入 hold 槽，
+     * 如果 hold 槽已有方块则取出使用。
      *
      * @returns {void}
      */
@@ -12909,8 +13129,11 @@ var tetris = (() => {
     /**
      * ## 移动当前方块
      *
+     * 委托给 move() 纯函数，在指定方向移动方块，
+     * 移动前进行碰撞检测。
+     *
      * @param {number} x - X 轴偏移（负数左移，正数右移）
-     * @param {number} y - Y 轴偏移（负数上移，正数下移）
+     * @param {number} y - Y 轴偏移（负数上移，正数下移/软降）
      * @returns {boolean} 是否移动成功
      */
     move(x, y) {
@@ -12919,13 +13142,18 @@ var tetris = (() => {
     /**
      * ## 旋转当前方块
      *
+     * 委托给 rotate() 纯函数，使用 SRS 墙踢标准尝试旋转。
+     *
      * @returns {void}
      */
     rotate() {
       rotate_default(this);
     }
     /**
-     * ## 游戏逻辑帧
+     * ## 游戏逻辑帧（Tick）
+     *
+     * 委托给 tick() 纯函数，处理重力下落。
+     * 如果 isBlocked 为 true（动画阻塞中），跳过重力下落。
      *
      * @param {boolean} isBlocked - 是否被动画阻塞
      * @returns {void}
@@ -12934,7 +13162,9 @@ var tetris = (() => {
       tick_default(this, isBlocked);
     }
     /**
-     * ## 方块快速落底（硬降）
+     * ## 方块快速落底（硬降 / Hard Drop）
+     *
+     * 委托给 drop() 纯函数，将方块瞬间移动到 ghost piece 位置并锁定。
      *
      * @returns {void}
      */
@@ -12945,6 +13175,9 @@ var tetris = (() => {
     /**
      * ## 执行消行逻辑
      *
+     * 委托给 applyClearLines() 纯函数，检查填满的行并消除，
+     * 返回消行数据供后续处理。
+     *
      * @returns {object} 消行后的更新数据
      */
     applyClearLines() {
@@ -12953,8 +13186,11 @@ var tetris = (() => {
     /**
      * ## 设置游戏初始状态
      *
+     * 委托给 setBeginningState() 纯函数，
+     * 根据模式和等级初始化棋盘、方块队列等。
+     *
      * @param {string} mode - 游戏模式
-     * @param {number} [level=1] - 初始等级。默认值为 `1`. Default is `1`
+     * @param {number} [level=1] - 初始等级，默认值为 1
      * @returns {void}
      */
     setBeginningState(mode, level = 1) {
@@ -12962,6 +13198,8 @@ var tetris = (() => {
     }
     /**
      * ## 获取当前等级的下落速度
+     *
+     * 委托给 getSpeed() 纯函数，根据当前等级计算下落间隔。
      *
      * @returns {number} 下落间隔（毫秒）
      */
@@ -12972,6 +13210,9 @@ var tetris = (() => {
     /**
      * ## 开始倒计时动画
      *
+     * 注册 CountdownAnimation 到 AnimationSystem，
+     * 显示 3、2、1 倒计时数字。
+     *
      * @returns {void}
      */
     startCountdown() {
@@ -12980,6 +13221,9 @@ var tetris = (() => {
     }
     /**
      * ## 开始暂停动画
+     *
+     * 注册 PausedAnimation 到 AnimationSystem，
+     * 保存引用到 this.effect 用于后续停止。
      *
      * @returns {void}
      */
@@ -12992,6 +13236,8 @@ var tetris = (() => {
     /**
      * ## 停止暂停动画
      *
+     * 停止当前暂停动画并清空引用。
+     *
      * @returns {void}
      */
     stopPaused() {
@@ -13001,6 +13247,9 @@ var tetris = (() => {
     }
     /**
      * ## 开始消行闪烁动画
+     *
+     * 注册 ClearLinesAnimation 到 AnimationSystem。
+     * 对战模式下会先发送 PROCESS_ATTACK 事件触发攻击处理。
      *
      * @param {number[]} linesToClear - 待消除的行号数组
      * @returns {void}
@@ -13023,6 +13272,9 @@ var tetris = (() => {
     /**
      * ## 开始消除得分动画
      *
+     * 注册 ClearScoreAnimation 到 AnimationSystem，
+     * 在消行位置显示得分数字飘出动画。
+     *
      * @param {object} scoreData - 得分数据
      * @param {number} scoreData.score - 本次消除得分
      * @param {number[]} scoreData.lines - 消除的行号数组
@@ -13041,6 +13293,9 @@ var tetris = (() => {
     /**
      * ## 开始升级烟花动画
      *
+     * 注册 LevelUpAnimation 到 AnimationSystem，
+     * 升级时在棋盘上显示烟花/粒子特效。
+     *
      * @param {number} level - 新等级
      * @returns {void}
      */
@@ -13057,6 +13312,9 @@ var tetris = (() => {
     }
     /**
      * ## 开始落地高亮动画
+     *
+     * 注册 LandingFlashAnimation 到 AnimationSystem，
+     * 方块落地时在落点位置显示短暂高亮闪烁。
      *
      * @param {object} piece - 刚落地的方块信息
      * @param {number[][]} piece.shape - 方块形状矩阵
@@ -13077,38 +13335,46 @@ var tetris = (() => {
     /**
      * ## 开始垃圾行预警动画
      *
-     * 注册 `GarbageWarningAnimation` 到 AnimationSystem。 在棋盘上显示橙色网格覆盖 + "INCOMING
-     * ATTACK" 警告文字， 动画层 150，不阻塞操作，5 次闪烁共 500ms。 由
-     * `GameRouter._onStartGarbageWarning` 调用。
+     * 注册 GarbageWarningAnimation 到 AnimationSystem。
+     * 棋盘红色闪烁，动画层 150，blocking=true，5 次闪烁共 600ms。
+     * 由 GameRouter._onStartGarbageWarning 调用。
      *
+     * @param {number} roundId - 当前回合 ID
+     * @param {object} Battle - BattleController 实例
      * @returns {void}
      */
-    startGarbageWarning() {
+    startGarbageWarning(roundId, Battle) {
       const { Scheduler: Scheduler2 } = this;
       this.Animations.register(
         new garbage_warning_animation_default({
           Game: this,
-          Scheduler: Scheduler2
+          Scheduler: Scheduler2,
+          Battle,
+          roundId
         })
       );
     }
     /**
      * ## 开始垃圾行闪烁动画
      *
-     * 注册 `GarbagePushAnimation` 到 AnimationSystem。 垃圾行中非空洞的方块在灰色和白色之间交替闪烁， 动画层
-     * 100，阻塞操作（blocking=true），5 次闪烁共 500ms。 由 `GameRouter._onStartGarbagePush`
-     * 调用。
+     * 注册 GarbagePushAnimation 到 AnimationSystem。
+     * 垃圾方块灰色/白色交替闪烁，动画层 100，blocking=true，5 次闪烁共 600ms。
+     * 由 GameRouter._onStartGarbagePush 调用。
      *
-     * @param {number[][]} rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
+     * @param {number[][]} rows - 垃圾行数据（0=空洞，非0=垃圾方块）
+     * @param {number} roundId - 当前回合 ID
+     * @param {object} Battle - BattleController 实例
      * @returns {void}
      */
-    startGarbagePush(rows) {
+    startGarbagePush(rows, roundId, Battle) {
       const { Scheduler: Scheduler2 } = this;
       this.Animations.register(
         new garbage_push_animation_default({
           Game: this,
           Scheduler: Scheduler2,
-          rows
+          rows,
+          roundId,
+          Battle
         })
       );
     }
@@ -13116,7 +13382,8 @@ var tetris = (() => {
     /**
      * ## 添加输入设备事件监听
      *
-     * 启动键盘和手柄的输入事件监听。
+     * 启动键盘、手柄、触屏和 AI 的输入事件监听。
+     * 使用可选链安全调用，设备不存在时跳过。
      *
      * @returns {void}
      */
@@ -13129,7 +13396,8 @@ var tetris = (() => {
     /**
      * ## 移除输入设备事件监听
      *
-     * 停止键盘和手柄的输入事件监听。
+     * 停止键盘、手柄、触屏和 AI 的输入事件监听。
+     * 在游戏暂停、结束或销毁时调用。
      *
      * @returns {void}
      */
@@ -13142,7 +13410,7 @@ var tetris = (() => {
     /**
      * ## 订阅所有游戏事件
      *
-     * 绑定核心流程、方块操作、动画特效、输入设备等所有事件。 同时触发各子模块的 subscribe 方法。
+     * 委托给 GameRouter 绑定所有事件的监听器。
      *
      * @returns {void}
      */
@@ -13152,7 +13420,8 @@ var tetris = (() => {
     /**
      * ## 取消订阅所有游戏事件
      *
-     * 移除所有事件监听器。 在游戏销毁或需要完全停止时调用。
+     * 委托给 GameRouter 移除所有事件监听器，
+     * 防止内存泄漏和误触发。
      *
      * @returns {void}
      */
@@ -13170,6 +13439,8 @@ var tetris = (() => {
     winner: null,
     /** 双方胜场数，key: playerId, value: 胜场数 */
     scores: {},
+    /** 当前局号 每局递增，垃圾行动画通过此值判断是否过期。 reset() 不会重置此值（由 _initialize 重新初始化）。 */
+    roundId: 0,
     /**
      * 双方待处理垃圾行数 key: playerId（将要接收垃圾行的玩家） value: 累积的垃圾行数量
      *
@@ -13186,6 +13457,12 @@ var tetris = (() => {
      *
      * 初始化对战状态管理器，接收 Game 实例数组。 构造完成后立即调用 initialize() 初始化所有状态字段。
      *
+     * ### 执行顺序
+     *
+     * 1. 调用父类 Base 构造函数，将配置注入实例（this.games 可用）
+     * 2. 调用 initialize() → _initialize() 深拷贝状态模板
+     * 3. 遍历 games 数组，为每个玩家初始化分数和垃圾行
+     *
      * @example
      *   const store = new BattleStore({
      *     games: [
@@ -13195,22 +13472,28 @@ var tetris = (() => {
      *   });
      *
      * @param {object} options - 配置选项
-     * @param {object[]} options.games - Game 实例数组，用于初始化玩家状态
+     * @param {object[]} options.games - Game 实例数组，用于初始化玩家状态 每个 Game 实例需要包含
+     *   Player.name 和 Player.index
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化状态
+     * ## 初始化状态（公共接口）
      *
-     * 公共初始化接口，内部委托给 `_initialize()` 私有方法。
+     * 公共初始化接口，内部委托给 `_initialize()` 私有方法执行实际逻辑。
      *
-     * 这样设计的目的是：
+     * ### 为什么分两层？
      *
-     * - 提供清晰的公共 API（`initialize`）
-     * - 内部实现细节封装在 `_initialize` 中
-     * - `reset()` 可以复用 `_initialize` 逻辑
+     * - `initialize()`：清晰的公共 API，语义明确
+     * - `_initialize()`：内部实现细节封装，可被 `reset()` 复用
+     * - 遵循"接口与实现分离"原则
+     *
+     * ### 命名约定
+     *
+     * - 前缀 `_` 表示私有方法（JavaScript 无真正私有，这是约定俗成的）
+     * - 外部调用者应使用 `initialize()` 或 `reset()`
      *
      * @returns {void}
      */
@@ -13220,22 +13503,23 @@ var tetris = (() => {
     /**
      * ## 内部初始化实现
      *
-     * 执行以下步骤：
+     * 执行以下步骤完成状态初始化：
      *
      * 1. 通过 `structuredClone(BattleState)` 深拷贝初始状态模板
      * 2. 遍历所有 Game 实例，为每个玩家初始化分数和垃圾行数为 0
      *
      * ### 为什么用 structuredClone？
      *
-     * - 深拷贝保证每次初始化都是全新的独立对象
-     * - 避免多个 BattleStore 实例共享同一份数据
-     * - 比 JSON.parse(JSON.stringify()) 性能更好，且支持更多类型
+     * - **深拷贝保证独立性**：每次初始化都创建全新的独立对象， 避免多个 BattleStore 实例共享同一份数据
+     * - **性能优于 JSON**：比 `JSON.parse(JSON.stringify())` 性能更好， 且支持更多数据类型（如
+     *   Date、Map、Set 等）
+     * - **浏览器原生支持**：现代浏览器内置，无需额外 polyfill
      *
      * ### 为什么要为每个玩家初始化？
      *
-     * - 确保所有玩家在 scores 和 pendingGarbage 中都有条目
-     * - 避免后续访问时出现 `undefined`
-     * - 保证数据结构的一致性
+     * - **确保条目存在**：所有玩家在 scores 和 pendingGarbage 中都有初始条目
+     * - **避免 undefined**：后续访问如 `scores[playerId]` 不会返回 `undefined`
+     * - **数据一致性**：初始化后数据结构完整，减少后续防御性检查
      *
      * @private
      * @returns {void}
@@ -13253,13 +13537,24 @@ var tetris = (() => {
     /**
      * ## 设置对战运行状态
      *
-     * 控制对战的开始和结束。
+     * 控制对战的开始和结束。这是对战生命周期的核心开关。
+     *
+     * ### 状态影响
+     *
+     * - `true`：游戏循环运行，玩家可以操作
+     * - `false`：游戏逻辑暂停，等待 restart 或 reset
+     *
+     * ### 调用时机
+     *
+     * - `start()` 中调用 `setRunning(true)`
+     * - `stop()` 中调用 `setRunning(false)`
+     * - `reset()` 中间接调用（通过 `_initialize()` 重置为 false）
      *
      * @example
      *   store.setRunning(true); // 开始对战
-     *   store.setRunning(false); // 结束对战
+     *   store.setRunning(false); // 暂停/结束对战
      *
-     * @param {boolean} running - True 表示对战进行中，false 表示已结束
+     * @param {boolean} running - True 表示对战进行中，false 表示已结束或暂停
      */
     setRunning(running) {
       this.state.running = running;
@@ -13267,11 +13562,17 @@ var tetris = (() => {
     /**
      * ## 获取对战运行状态
      *
-     * 查询对战是否正在进行中。
+     * 查询对战是否正在进行中。这是一个纯查询方法，不产生副作用。
+     *
+     * ### 使用场景
+     *
+     * - 在 start() 中做幂等性检查（已在运行则不重复启动）
+     * - 在 stop() 中做幂等性检查（已停止则不重复停止）
+     * - 外部判断是否可以处理游戏输入
      *
      * @example
      *   if (store.isRunning()) {
-     *     // 处理游戏逻辑
+     *     // 对战进行中，处理游戏逻辑
      *   }
      *
      * @returns {boolean} True 表示对战进行中，false 表示已结束或未开始
@@ -13282,10 +13583,21 @@ var tetris = (() => {
     /**
      * ## 设置单局胜者
      *
-     * 在单局游戏结束时调用，记录获胜的玩家。
+     * 在单局游戏结束时调用，记录本局获胜的玩家。
+     *
+     * ### 与 updateScores 的区别
+     *
+     * - `setWinner`：记录"这一局谁赢了"（即时状态）
+     * - `updateScores`：更新"总共赢了多少局"（累计数据）
+     *
+     * ### 重置时机
+     *
+     * - 每次 `update()` 调用前会被覆盖
+     * - `reset()` 时被清空为 null
      *
      * @example
      *   store.setWinner(gameInstance);
+     *   // 后续可通过 getWinner() 获取胜者信息
      *
      * @param {object} winner - 胜者的 Game 实例
      */
@@ -13295,12 +13607,17 @@ var tetris = (() => {
     /**
      * ## 获取单局胜者
      *
-     * 查询当前单局的胜者。
+     * 查询当前单局的胜者。如果本局尚未结束或已重置，返回 null。
+     *
+     * ### 返回值说明
+     *
+     * - 返回 Game 实例：有确定的胜者
+     * - 返回 null：本局尚未决出胜者，或状态已被重置
      *
      * @example
      *   const winner = store.getWinner();
      *   if (winner) {
-     *     console.log('胜者是：', winner.Player.name);
+     *     console.log('本局胜者是：', winner.Player.name);
      *   }
      *
      * @returns {object | null} 胜者的 Game 实例，未决出胜者时返回 null
@@ -13311,14 +13628,20 @@ var tetris = (() => {
     /**
      * ## 获取指定玩家的分数
      *
-     * 查询某位玩家的胜场数。
+     * 查询某位玩家的累计胜场数。
+     *
+     * ### 分数含义
+     *
+     * - 每赢一局 +1
+     * - 整场对战中累积
+     * - 先达到 victoryScore 的玩家赢得整场对战
      *
      * @example
      *   const score = store.getScore('human-0');
-     *   console.log(score); // 例如：3
+     *   console.log(score); // 例如：3（表示赢了 3 局）
      *
-     * @param {string} id - 玩家唯一标识，格式为 `{name}-{index}`
-     * @returns {number} 玩家的胜场数
+     * @param {string} id - 玩家唯一标识，格式为 `{name}-{index}`，如 "human-0"
+     * @returns {number} 玩家的胜场数，未初始化时可能为 undefined
      */
     getScore(id) {
       return this.state.scores[id];
@@ -13332,7 +13655,7 @@ var tetris = (() => {
      *
      *     {Player.name}-{Player.index}
      *
-     * - `Player.name`：玩家名称（如 "human"、"ai"）
+     * - `Player.name`：玩家名称（如 "human"、"ai"、"Alice"）
      * - `Player.index`：玩家索引（如 0 或 1）
      * - 连接符：`-`
      *
@@ -13344,15 +13667,21 @@ var tetris = (() => {
      * | ai          | 1            | `ai-1`    |
      * | Alice       | 0            | `Alice-0` |
      *
+     * ### 为什么需要统一方法？
+     *
+     * - **一致性**：所有地方使用相同的规则生成 ID
+     * - **可维护性**：如果 ID 规则变化，只需修改一处
+     * - **避免硬编码**：防止各处手动拼接导致的格式不一致
+     *
      * @example
      *   const id = store.getPlayerId(game);
      *   console.log(id); // "human-0"
      *
      * @param {object} game - Game 实例
-     * @param {object} game.Player - 玩家信息
+     * @param {object} game.Player - 玩家信息对象
      * @param {string} game.Player.name - 玩家名称
      * @param {number} game.Player.index - 玩家索引
-     * @returns {string} 玩家唯一标识
+     * @returns {string} 玩家唯一标识字符串
      */
     getPlayerId(game) {
       const { Player } = game;
@@ -13366,21 +13695,26 @@ var tetris = (() => {
      * ### 更新规则
      *
      * - **胜者**：胜场数 +1
-     * - **败者**：胜场数不变（但如果 ≤ 0，重置为 0）
+     * - **败者**：胜场数不变，但如果当前值 ≤ 0，重置为 0
      *
-     * ### 为什么败者分数可能为负？
+     * ### 为什么败者分数要检查 ≤ 0？
      *
      * 理论上败者分数不会为负，这是一个**防御性检查**：
      *
-     * - 防止外部错误调用导致分数异常
-     * - 确保数据完整性
+     * - 防止外部错误调用或状态异常导致分数为负
+     * - 确保数据完整性——胜场数永远是非负整数
+     * - 在 reset() 后分数为 0，败者保持 0 是合理的
+     *
+     * ### 副作用
+     *
+     * 此方法会直接修改 `this.state.scores` 对象中的值。 调用后需要通过 `hud.updateScores()` 同步 UI。
      *
      * @example
      *   store.updateScores({
      *     winner: game1, // human 获胜
      *     loser: game2, // ai 落败
      *   });
-     *   // human 胜场 +1，ai 胜场不变
+     *   // human 胜场 +1，ai 胜场不变（如果 ≤ 0 则为 0）
      *
      * @param {object} options - 更新选项
      * @param {object} options.winner - 胜者的 Game 实例
@@ -13403,20 +13737,26 @@ var tetris = (() => {
     /**
      * ## 累加待处理垃圾行
      *
-     * 当玩家受到攻击时，将攻击产生的垃圾行累加到该玩家的 `pendingGarbage` 中。这些垃圾行不会立即生效，而是等待
-     * 该玩家消行时尝试用攻击力抵消。
+     * 当玩家受到攻击时，将攻击产生的垃圾行累加到该玩家的 `pendingGarbage` 中。这些垃圾行不会立即生效，而是等待 消行动画结束后通过
+     * `flushGarbage` 实际应用到棋盘。
      *
      * ### 处理流程
      *
      *     对手消行产生攻击 → addGarbage(受攻击玩家, 垃圾行数)
      *       → pendingGarbage[受攻击玩家] += 垃圾行数
-     *       → 等待受攻击玩家消行时通过 offsetGarbage 抵消
+     *       → 等待受攻击玩家消行时可通过 offsetGarbage 抵消
      *
      * ### 为什么延迟处理？
      *
-     * - **公平性**：给被攻击者一个反击的机会
+     * - **公平性**：给被攻击者一个反击/抵消的机会
      * - **策略性**：玩家可以通过快速消行来抵消即将到来的垃圾行
-     * - **视觉流畅**：垃圾行在消行动画结束后才出现
+     * - **视觉流畅**：垃圾行在消行动画结束后才出现，不会视觉重叠
+     *
+     * ### 与其他方法的关系
+     *
+     * - 数据流入：`processAttack()` → `addGarbage()`
+     * - 数据抵消：`offsetGarbage()` 减少 pending
+     * - 数据流出：`flushGarbage()` 后调用 `clearGarbage()` 清零
      *
      * @example
      *   // human 受到 3 行垃圾攻击
@@ -13424,7 +13764,7 @@ var tetris = (() => {
      *   // pendingGarbage['human-0'] 现在增加了 3
      *
      * @param {object} game - 受到攻击的玩家 Game 实例
-     * @param {number} amount - 要添加的垃圾行数量
+     * @param {number} amount - 要添加的垃圾行数量（正整数）
      */
     addGarbage(game, amount) {
       const { pendingGarbage } = this.state;
@@ -13456,17 +13796,24 @@ var tetris = (() => {
      *
      * ### 举例说明
      *
-     * | pending | attackLines | 抵消后 pending | 返回值（发给对手） |
-     * | ------- | ----------- | -------------- | ------------------ |
-     * | 5       | 3           | 2              | 0（攻击力不足）    |
-     * | 3       | 5           | 0              | 2（剩余攻击力）    |
-     * | 0       | 4           | 0              | 4（全部攻击）      |
-     * | 2       | 2           | 0              | 0（刚好抵消）      |
+     * | pending | attackLines | 抵消后 pending | 返回值（发给对手） | 说明                 |
+     * | ------- | ----------- | -------------- | ------------------ | -------------------- |
+     * | 5       | 3           | 2              | 0                  | 攻击力不足，无法反击 |
+     * | 3       | 5           | 0              | 2                  | 抵消后有剩余攻击力   |
+     * | 0       | 4           | 0              | 4                  | 全部转为攻击         |
+     * | 2       | 2           | 0              | 0                  | 刚好抵消             |
+     *
+     * ### 战术意义
+     *
+     * 这个机制赋予了消行**双重价值**：
+     *
+     * - **攻击**：没有 pending 时，消行直接产生攻击力
+     * - **防御**：有 pending 时，消行优先用于抵消即将到来的伤害
      *
      * @example
      *   // ai 有 5 行待处理垃圾，消了 2 行（攻击力 1）
      *   const actualGarbage = store.offsetGarbage(aiGame, 1);
-     *   // actualGarbage = 0（攻击力不足以抵消）
+     *   // actualGarbage = 0（攻击力不足以完全抵消）
      *   // pendingGarbage['ai-1'] 现在 = 4
      *
      * @example
@@ -13492,6 +13839,12 @@ var tetris = (() => {
      *
      * 查询某位玩家当前累积的待处理垃圾行数量。
      *
+     * ### 使用场景
+     *
+     * - `flushGarbage()` 中判断是否有垃圾行需要应用到棋盘
+     * - UI 层显示垃圾行预警（如"即将受到 X 行攻击"）
+     * - 调试和测试
+     *
      * @example
      *   const pending = store.getPendingGarbage(game);
      *   console.log(`你有 ${pending} 行垃圾待处理`);
@@ -13510,9 +13863,15 @@ var tetris = (() => {
      *
      * ### 使用场景
      *
-     * - 游戏结束/重置时，清除所有待处理状态
-     * - 特殊道具效果（如清除全部垃圾行）
-     * - 调试和测试
+     * - **垃圾行已应用**：`flushGarbage()` 将垃圾行写入棋盘后清零
+     * - **游戏结束/重置**：清除所有待处理状态
+     * - **特殊道具效果**：如"清除全部垃圾行"道具
+     * - **调试和测试**：手动清理状态
+     *
+     * ### 注意事项
+     *
+     * - 此方法只清零 pending 计数器，不影响已经应用到棋盘的垃圾行
+     * - 如果垃圾行尚未 flush 就调用此方法，攻击会被"吞掉"
      *
      * @example
      *   // 清除 human 的所有待处理垃圾
@@ -13526,20 +13885,73 @@ var tetris = (() => {
       this.state.pendingGarbage[playerId] = 0;
     }
     /**
+     * ## 递增回合编号
+     *
+     * 每局对战结束后调用，将回合编号 +1。
+     *
+     * ### 用途
+     *
+     * - 动画系统使用 roundId 判断动画是否属于当前回合
+     * - 如果动画的 roundId 与当前回合不一致，说明动画已过期
+     * - 避免跨回合的动画残留
+     *
+     * ### 调用时机
+     *
+     * 在 `restart()` 中，清除双方动画之前调用。
+     *
+     * @returns {void}
+     */
+    increaseRound() {
+      this.state.roundId += 1;
+    }
+    /**
+     * ## 获取当前回合编号
+     *
+     * 返回当前对战的回合编号。
+     *
+     * ### 用途
+     *
+     * - 动画创建时记录当前 roundId
+     * - 动画渲染时比对 roundId 判断是否过期
+     * - 日志和调试
+     *
+     * @returns {number} 当前回合的唯一标识编号
+     */
+    getRoundId() {
+      return this.state.roundId;
+    }
+    /**
      * ## 重置状态
      *
      * 将所有状态恢复到初始值。内部委托给 `_initialize()` 方法， 确保重置逻辑与初始化逻辑完全一致。
      *
      * ### 重置内容
      *
-     * - `running` → false
-     * - `winner` → null
-     * - `scores` → 所有玩家归零
-     * - `pendingGarbage` → 所有玩家归零
+     * | 字段             | 重置后的值   |
+     * | ---------------- | ------------ |
+     * | `running`        | `false`      |
+     * | `winner`         | `null`       |
+     * | `roundId`        | `0`          |
+     * | `scores`         | 所有玩家归零 |
+     * | `pendingGarbage` | 所有玩家归零 |
+     *
+     * ### 设计优势
+     *
+     * 通过复用 `_initialize()` 实现重置：
+     *
+     * - **DRY 原则**：初始化逻辑只写一次
+     * - **一致性保证**：重置后的状态与初始状态完全相同
+     * - **维护性**：新增状态字段时只需修改一处
+     *
+     * ### 调用时机
+     *
+     * - 整场对战结束后，用户按 Enter 重赛
+     * - 外部强制重置
      *
      * @example
      *   // 整场对战结束后，重置状态准备下一场
      *   store.reset();
+     *   // 所有数据回到初始值，可以开始新的对战
      *
      * @returns {void}
      */
@@ -14184,9 +14596,6 @@ var tetris = (() => {
      * 胜者的游戏状态没有变化，不需要重置。 败者需要重新初始化棋盘准备下一局。
      *
      * @param {object} loser - 本局失败的玩家 Game 实例
-     * @param {string} loser.id - 失败者的唯一标识
-     * @param {Function} loser.emit - 事件触发方法
-     * @param {object} loser.Animations - 动画系统
      * @returns {void}
      */
     restart(loser) {
@@ -14194,6 +14603,7 @@ var tetris = (() => {
       const winner = this.getOpponent(loser);
       winner.Animations?.clear?.();
       loser.Animations?.clear?.();
+      this.store.increaseRound();
       loser.emit(events.RESTART);
       this.start();
     }
@@ -14258,6 +14668,9 @@ var tetris = (() => {
       const { games } = this;
       return games.find((game) => game.id !== yourself.id);
     }
+    getRoundId() {
+      return this.store.getRoundId();
+    }
     /**
      * ## 处理消行攻击
      *
@@ -14317,21 +14730,13 @@ var tetris = (() => {
       if (remaining > 0) {
         store.addGarbage(to, remaining);
         const { Scheduler: Scheduler2 } = to;
-        Scheduler2.sequence([
-          {
-            fn: () => {
-              const events = GameEvents(to.id);
-              to.emit(events.START_GARBAGE_WARNING);
-            }
-          },
-          {
-            fn: () => {
-              const events = AudioEvents();
-              this.emit(events.PLAY_SOUND, { sound: "GARBAGE_WARNING" });
-            },
-            delay: 120
-          }
-        ]);
+        const events = GameEvents(to.id);
+        const roundId = this.getRoundId();
+        to.emit(events.START_GARBAGE_WARNING, { roundId, Battle: this });
+        Scheduler2.delay(() => {
+          const events2 = AudioEvents();
+          this.emit(events2.PLAY_SOUND, { sound: "GARBAGE_WARNING" });
+        }, 120);
       }
       return remaining;
     }
@@ -14387,21 +14792,17 @@ var tetris = (() => {
       Store.setState({ board: next });
       this.store.clearGarbage(game);
       const garbageRows = next.slice(-amount);
-      Scheduler2.sequence([
-        {
-          fn: () => {
-            const events = GameEvents(game.id);
-            game.emit(events.START_GARBAGE_PUSH, { rows: garbageRows });
-          }
-        },
-        {
-          fn: () => {
-            const events = AudioEvents();
-            this.emit(events.PLAY_SOUND, { sound: "GARBAGE_RECEIVED" });
-          },
-          delay: 120
-        }
-      ]);
+      const events = GameEvents(game.id);
+      const roundId = this.getRoundId();
+      game.emit(events.START_GARBAGE_PUSH, {
+        rows: garbageRows,
+        roundId,
+        Battle: this
+      });
+      Scheduler2.delay(() => {
+        const events2 = AudioEvents();
+        this.emit(events2.PLAY_SOUND, { sound: "GARBAGE_RECEIVED" });
+      }, 120);
     }
     /**
      * ## 订阅对战事件

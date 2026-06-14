@@ -22,6 +22,7 @@ describe('GarbageWarningAnimation', () => {
   let anim;
   let mockGame;
   let mockScheduler;
+  let mockBattle;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,13 +32,19 @@ describe('GarbageWarningAnimation', () => {
       sequence: jest.fn(() => [1, 2, 3, 4, 5]),
       cancel: jest.fn(),
     };
+    mockBattle = {
+      getRoundId: jest.fn(() => 1),
+    };
 
     anim = new GarbageWarningAnimation({
       Game: mockGame,
       Scheduler: mockScheduler,
+      roundId: 1,
+      Battle: mockBattle,
     });
   });
 
+  // ==================== 构造函数 ====================
   describe('构造函数', () => {
     test('应该正确创建实例', () => {
       expect(anim).toBeDefined();
@@ -49,6 +56,7 @@ describe('GarbageWarningAnimation', () => {
     });
   });
 
+  // ==================== initialize ====================
   describe('initialize', () => {
     test('应该设置正确的动画属性', () => {
       expect(anim.layer).toBe(150);
@@ -80,6 +88,7 @@ describe('GarbageWarningAnimation', () => {
     });
   });
 
+  // ==================== 闪烁逻辑 ====================
   describe('闪烁逻辑', () => {
     test('每次 toggle 应该切换 visible 状态', () => {
       const tasks = mockScheduler.sequence.mock.calls[0][0];
@@ -113,7 +122,7 @@ describe('GarbageWarningAnimation', () => {
       expect(anim._finished).toBe(true);
     });
 
-    test('第 5 次闪烁后 _visible 为 false', () => {
+    test('第 5 次闪烁后 _visible 为 true', () => {
       const tasks = mockScheduler.sequence.mock.calls[0][0];
 
       tasks[4].fn();
@@ -122,26 +131,40 @@ describe('GarbageWarningAnimation', () => {
     });
   });
 
+  // ==================== render ====================
   describe('render', () => {
     test('可见帧应该发送 RENDER_GARBAGE_WARNING 事件', () => {
       anim._visible = true;
       anim.render();
+
       expect(anim.emit).toHaveBeenCalledWith('ui:test:render:garbage:warning');
     });
 
     test('不可见帧不应该发送事件', () => {
       anim._visible = false;
       anim.render();
+
       expect(anim.emit).not.toHaveBeenCalled();
     });
 
     test('应该使用正确的 Game id 获取事件', () => {
       anim._visible = true;
       anim.render();
+
       expect(UIEvents).toHaveBeenCalledWith('test-uuid');
+    });
+
+    test('roundId 不匹配时应该标记 _finished 并跳过渲染', () => {
+      mockBattle.getRoundId.mockReturnValue(2); // 与 anim.roundId=1 不匹配
+      anim._visible = true;
+      anim.render();
+
+      expect(anim._finished).toBe(true);
+      expect(anim.emit).not.toHaveBeenCalled();
     });
   });
 
+  // ==================== dispose ====================
   describe('dispose', () => {
     test('应该取消所有 Scheduler 任务', () => {
       anim.dispose();
@@ -155,6 +178,7 @@ describe('GarbageWarningAnimation', () => {
     });
   });
 
+  // ==================== 集成测试 ====================
   describe('集成测试', () => {
     test('完整生命周期', () => {
       const tasks = mockScheduler.sequence.mock.calls[0][0];
@@ -175,20 +199,30 @@ describe('GarbageWarningAnimation', () => {
     test('render 在闪烁过程中的行为', () => {
       const tasks = mockScheduler.sequence.mock.calls[0][0];
 
+      // flash 1: visible=true → 发送事件
       anim._visible = true;
       anim.emit.mockClear();
       anim.render();
       expect(anim.emit).toHaveBeenCalled();
 
+      // toggle → visible=false → 不发送
       tasks[0].fn();
       anim.emit.mockClear();
       anim.render();
       expect(anim.emit).not.toHaveBeenCalled();
 
+      // toggle → visible=true → 发送
       tasks[1].fn();
       anim.emit.mockClear();
       anim.render();
       expect(anim.emit).toHaveBeenCalled();
+    });
+
+    test('roundId 不匹配时动画自动过期', () => {
+      mockBattle.getRoundId.mockReturnValue(2);
+      anim.render();
+
+      expect(anim._finished).toBe(true);
     });
   });
 });

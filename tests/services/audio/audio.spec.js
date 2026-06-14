@@ -216,7 +216,7 @@ describe('Audio', () => {
 
       audio._onToggleBGM({ level: 4 });
 
-      expect(audio.emit).toHaveBeenCalledWith('audio:resume:sound', {
+      expect(audio.emit).toHaveBeenCalledWith('audio:play:sound', {
         sound: 'BGM_TOGGLED',
       });
       expect(audio.toggleBGM).toHaveBeenCalledWith(4);
