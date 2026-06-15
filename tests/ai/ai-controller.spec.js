@@ -233,7 +233,7 @@ describe('AIController', () => {
       ai.actions = ['DROP'];
       ai.enabled = true;
       ai.loop();
-      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 480);
     });
 
     it('调度延迟应该使用 Game.getSpeed()', () => {
@@ -241,7 +241,7 @@ describe('AIController', () => {
       ai.actions = ['DROP'];
       ai.enabled = true;
       ai.loop();
-      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 480);
     });
 
     it('已存在的 actions 不会再次调用 think', () => {
@@ -423,7 +423,7 @@ describe('AIController', () => {
       ai.workerBusy = true;
       ai.actions = [];
       ai.loop();
-      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 480);
     });
   });
 
@@ -765,7 +765,7 @@ describe('AIController', () => {
 
       ai.loop();
 
-      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 480);
       expect(emitSpy).not.toHaveBeenCalled();
       ai.worker = null;
     });
@@ -1005,7 +1005,7 @@ describe('AIController', () => {
       emitSpy.mockClear();
       ai.loop();
       expect(emitSpy).not.toHaveBeenCalled(); // 无 action 可执行
-      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 580);
+      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 480);
 
       // 3. Worker 返回结果
       ai._onWorkerMessage({

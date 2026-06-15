@@ -88,6 +88,7 @@ jest.mock('@/lib/battle/battle-ui.js', () => {
     Object.assign(this, options);
     this.show = jest.fn();
     this.hide = jest.fn();
+    this.$flies = {};
   });
 });
 
@@ -107,11 +108,28 @@ jest.mock('@/lib/battle/garbage-system.js', () => ({
 jest.mock('@/lib/events/event-catalog.js', () => ({
   GameEvents: jest.fn(),
   AudioEvents: jest.fn(() => ({ PLAY_SOUND: 'audio:play:sound' })),
+  BattleEvents: jest.fn(() => ({
+    PROCESS_ATTACK: 'battle:process:attack',
+    START_GARBAGE_FLY: 'battle:start:garbage:fly',
+    FLUSH_GARBAGE: 'battle:flush:garbage',
+    UPDATE_WINNER: 'battle:update:winner',
+    SYNC_PAUSE: 'battle:sync:pause',
+    SYNC_RESUME: 'battle:sync:resume',
+    RESET: 'battle:reset',
+  })),
 }));
 
 describe('BattleController', () => {
   // ==================== 辅助函数 ====================
 
+  /**
+   * 创建模拟的 Game 实例。
+   *
+   * @param {string} name - 玩家名称
+   * @param {number} index - 玩家索引
+   * @param {string} [id] - 玩家唯一标识
+   * @returns {object} 模拟的 Game 实例
+   */
   const createMockGame = (name, index, id) => ({
     id: id || `${name}-${index}`,
     Player: { name, index },
@@ -137,11 +155,26 @@ describe('BattleController', () => {
     resume: jest.fn(),
   });
 
+  /**
+   * 创建 BattleController 实例。
+   *
+   * @param {object} [options={}] - 配置选项
+   * @param {object[]} [options.games=[]] - Game 实例数组
+   * @param {number} [options.victoryScore=20] - 目标分数
+   * @param {object} [options.elements={}] - DOM 元素 ID 配置
+   * @returns {BattleController} 控制器实例
+   */
   const createController = (options = {}) => {
     const { games = [], victoryScore = 20, elements = {} } = options;
     return new BattleController({ games, victoryScore, elements });
   };
 
+  /**
+   * 创建 BattleController 实例并清除所有 mock 调用记录。
+   *
+   * @param {object} [options={}] - 配置选项
+   * @returns {BattleController} 控制器实例
+   */
   const createCleanController = (options = {}) => {
     const controller = createController(options);
     controller.store.setRunning.mockClear();
@@ -224,7 +257,7 @@ describe('BattleController', () => {
       expect(controller.router).toBeDefined();
     });
 
-    test('应该创建 BattleUI 实例并传入 elements', () => {
+    test('应该创建 BattleUI 实例并传入 elements 和 players', () => {
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const elements = { overlay: 'battle-overlay', winner: 'battle-winner' };
       const controller = createController({ games, elements });
@@ -512,7 +545,7 @@ describe('BattleController', () => {
       });
     });
 
-    test('应该显示胜者名称（转为大写）', () => {
+    test('应该显示胜者信息（传入 Player 对象）', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
       const controller = createCleanController({ games: [alice, bob] });
@@ -521,10 +554,12 @@ describe('BattleController', () => {
 
       controller.over(alice, bob);
 
-      expect(controller.ui.show).toHaveBeenCalledWith('ALICE');
+      expect(controller.ui.show).toHaveBeenCalledWith({
+        winner: { name: 'Alice', index: 0 },
+      });
     });
 
-    test('胜者名称为空时应该显示默认 HUMAN', () => {
+    test('胜者名称为空时应该传入空字符串的 Player', () => {
       const unknown = createMockGame('', 0, 'unknown-id');
       unknown.Player = { name: '', index: 0 };
       const bob = createMockGame('Bob', 1, 'bob-id');
@@ -534,10 +569,12 @@ describe('BattleController', () => {
 
       controller.over(unknown, bob);
 
-      expect(controller.ui.show).toHaveBeenCalledWith('HUMAN');
+      expect(controller.ui.show).toHaveBeenCalledWith({
+        winner: { name: '', index: 0 },
+      });
     });
 
-    test('胜者没有 Player 属性时应该显示默认 HUMAN', () => {
+    test('胜者没有 Player 属性时应该传入 undefined', () => {
       const unknown = createMockGame('NoPlayer', 0, 'noplayer-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
       const controller = createCleanController({ games: [unknown, bob] });
@@ -548,7 +585,9 @@ describe('BattleController', () => {
 
       controller.over(unknown, bob);
 
-      expect(controller.ui.show).toHaveBeenCalledWith('HUMAN');
+      expect(controller.ui.show).toHaveBeenCalledWith({
+        winner: undefined,
+      });
     });
   });
 
@@ -620,7 +659,7 @@ describe('BattleController', () => {
 
       expect(controller.store.reset).toHaveBeenCalled();
       expect(controller.hud.updateScores).toHaveBeenCalledWith(alice, bob);
-      expect(controller.ui.hide).toHaveBeenCalled();
+      expect(controller.ui.hide).toHaveBeenCalledWith({ over: true });
       expect(alice.emit).toHaveBeenCalledWith('from:reset');
       expect(bob.emit).toHaveBeenCalledWith('opponent:reset');
     });
@@ -1036,7 +1075,9 @@ describe('BattleController', () => {
       controller.update(bob);
 
       expect(overSpy).toHaveBeenCalledWith(alice, bob);
-      expect(controller.ui.show).toHaveBeenCalledWith('ALICE');
+      expect(controller.ui.show).toHaveBeenCalledWith({
+        winner: { name: 'Alice', index: 0 },
+      });
 
       overSpy.mockRestore();
     });
@@ -1052,7 +1093,7 @@ describe('BattleController', () => {
 
       expect(controller.store.reset).toHaveBeenCalled();
       expect(controller.hud.updateScores).toHaveBeenCalledWith(alice, bob);
-      expect(controller.ui.hide).toHaveBeenCalled();
+      expect(controller.ui.hide).toHaveBeenCalledWith({ over: true });
       expect(alice.emit).toHaveBeenCalledWith('reset-event');
       expect(bob.emit).toHaveBeenCalledWith('reset-event');
     });

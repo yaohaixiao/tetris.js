@@ -238,7 +238,7 @@ describe('Engine Core - 完整测试', () => {
       });
     });
 
-    test('versus 模式创建 Battle（含 elements 和 victoryScore）', () => {
+    test('versus 模式创建 Battle（含 elements、victoryScore 和 players）', () => {
       Configuration.Mode = 'versus';
       const battleElements = {
         overlay: 'battle-overlay',
@@ -255,11 +255,12 @@ describe('Engine Core - 完整测试', () => {
         games: Engine.Games,
         victoryScore: 20,
         elements: battleElements,
+        players: ['P1', 'P2'],
       });
       expect(Engine.Battle).toBeDefined();
     });
 
-    test('versus 模式创建 Battle（无 victoryScore 时为 undefined）', () => {
+    test('versus 模式创建 Battle（无 victoryScore 时为 undefined，含 players）', () => {
       Configuration.Mode = 'versus';
       const battleElements = { overlay: 'test-overlay' };
 
@@ -272,6 +273,7 @@ describe('Engine Core - 完整测试', () => {
         games: Engine.Games,
         victoryScore: undefined,
         elements: battleElements,
+        players: ['P1', 'P2'],
       });
     });
 
@@ -382,7 +384,6 @@ describe('Engine Core - 完整测试', () => {
       Engine.tick(1000);
       expect(Engine.lastTickTime).toBe(1000);
       expect(Engine.fixedAccumulator).toBe(1000);
-      // 累积器应该被初始化
       expect(Engine.gameAccumulators.get(game)).toBe(1000);
     });
 
@@ -460,7 +461,6 @@ describe('Engine Core - 完整测试', () => {
         Engine.gameAccumulators.set(game, 1000);
         Engine.tick(1200);
         expect(game.tick).toHaveBeenCalled();
-        // 累积器应该更新
         expect(Engine.gameAccumulators.get(game)).toBe(1200);
       });
 
@@ -472,7 +472,6 @@ describe('Engine Core - 完整测试', () => {
         Engine.gameAccumulators.set(game, 1000);
         Engine.tick(1016);
         expect(game.tick).not.toHaveBeenCalled();
-        // 累积器不应该更新
         expect(Engine.gameAccumulators.get(game)).toBe(1000);
       });
 
@@ -493,24 +492,18 @@ describe('Engine Core - 完整测试', () => {
       const game0 = Engine.Games[0];
       const game1 = Engine.Games[1];
 
-      // 首次 tick 初始化
       Engine.lastTickTime = 0;
       Engine.tick(1000);
 
-      // 设置不同速度
       game0.getSpeed.mockReturnValue(100);
       game1.getSpeed.mockReturnValue(1000);
 
-      // ★ 清除首次 tick 的调用记录
       game0.tick.mockClear();
       game1.tick.mockClear();
 
-      // stepDelta = 1101 - 1000 = 101 > 100
       Engine.tick(1101);
 
-      // P1 速度 100，101ms 后应该 tick
       expect(game0.tick).toHaveBeenCalled();
-      // P2 速度 1000，101ms 后不应该 tick
       expect(game1.tick).not.toHaveBeenCalled();
     });
 
@@ -676,7 +669,6 @@ describe('Engine Core - 完整测试', () => {
       expect(cancelAnimationFrame).toHaveBeenCalledWith(456);
       expect(Engine.rafId).toBe(0);
       expect(Engine.lastTickTime).toBe(0);
-      // gameAccumulators 应该被清空
       expect(Engine.gameAccumulators.size).toBe(0);
     });
 
@@ -762,7 +754,6 @@ describe('Engine Core - 完整测试', () => {
       expect(Engine.Games).toHaveLength(2);
       expect(Engine.Battle).toBeDefined();
 
-      // 首次 tick 初始化累积器
       Engine.lastTickTime = 0;
       Engine.tick(1000);
 
@@ -771,7 +762,6 @@ describe('Engine Core - 完整测试', () => {
       expect(Engine.gameAccumulators.get(game0)).toBe(1000);
       expect(Engine.gameAccumulators.get(game1)).toBe(1000);
 
-      // 两个 Game 都应该正常渲染
       expect(game0.UI.render).toHaveBeenCalled();
       expect(game1.UI.render).toHaveBeenCalled();
 
