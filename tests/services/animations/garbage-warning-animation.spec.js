@@ -1,6 +1,4 @@
-/**
- * @file GarbageWarningAnimation 单元测试
- */
+/** @file GarbageWarningAnimation 单元测试 */
 
 import GarbageWarningAnimation from '@/lib/services/animations/garbage-warning-animation.js';
 import { UIEvents } from '@/lib/events/event-catalog.js';
@@ -41,7 +39,7 @@ describe('GarbageWarningAnimation', () => {
       Scheduler: mockScheduler,
       roundId: 1,
       Battle: mockBattle,
-      amount: 3,  // 垃圾行数量，通过 Base 的 Object.assign 自动挂载到 this
+      amount: 3, // 垃圾行数量，通过 Base 的 Object.assign 自动挂载到 this
     });
   });
 
@@ -141,10 +139,9 @@ describe('GarbageWarningAnimation', () => {
       anim._visible = true;
       anim.render();
 
-      expect(anim.emit).toHaveBeenCalledWith(
-        'ui:test:render:garbage:warning',
-        { amount: 3 }
-      );
+      expect(anim.emit).toHaveBeenCalledWith('ui:test:render:garbage:warning', {
+        amount: 3,
+      });
     });
 
     test('不可见帧不应该发送事件', () => {
@@ -210,10 +207,9 @@ describe('GarbageWarningAnimation', () => {
       anim._visible = true;
       anim.emit.mockClear();
       anim.render();
-      expect(anim.emit).toHaveBeenCalledWith(
-        'ui:test:render:garbage:warning',
-        { amount: 3 }
-      );
+      expect(anim.emit).toHaveBeenCalledWith('ui:test:render:garbage:warning', {
+        amount: 3,
+      });
 
       // toggle → visible=false → 不发送
       tasks[0].fn();
@@ -225,10 +221,9 @@ describe('GarbageWarningAnimation', () => {
       tasks[1].fn();
       anim.emit.mockClear();
       anim.render();
-      expect(anim.emit).toHaveBeenCalledWith(
-        'ui:test:render:garbage:warning',
-        { amount: 3 }
-      );
+      expect(anim.emit).toHaveBeenCalledWith('ui:test:render:garbage:warning', {
+        amount: 3,
+      });
     });
 
     test('roundId 不匹配时动画自动过期', () => {

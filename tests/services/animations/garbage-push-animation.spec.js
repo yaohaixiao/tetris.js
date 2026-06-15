@@ -1,6 +1,4 @@
-/**
- * @file GarbagePushAnimation 单元测试
- */
+/** @file GarbagePushAnimation 单元测试 */
 
 import GarbagePushAnimation from '@/lib/services/animations/garbage-push-animation.js';
 import { UIEvents } from '@/lib/events/event-catalog.js';

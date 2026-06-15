@@ -143,7 +143,18 @@ body {
   border: 3px solid #3498db;
   overflow: hidden;
 }
-.tetris-battle-overlay:after {
+.tetris-battle-over,
+.tetris-battle-fly {
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.tetris-battle-over {
+  position: relative;
+  z-index: 1;
+}
+.tetris-battle-over:after {
   content: '';
   position: absolute;
   z-index: 1;
@@ -189,8 +200,13 @@ body {
   color: #0afa04;
   overflow: hidden;
 }
-.tetris-hidden {
-  display: none;
+.tetris-battle-fly {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.tetris-battle-fly:last-child {
+  z-index: 2;
 }
 /* ====== 游戏界面：主体画布区域样式 ====== */
 .tetris-screen-main {
@@ -458,6 +474,9 @@ body {
 .tetris-button-b:active,
 .tetris-button-y:active {
   color: #e74c3c;
+}
+.tetris-hidden {
+  display: none;
 }
 @media screen and (max-width: 320px) {
   .tetris-container {

@@ -15,7 +15,7 @@ var tetris = (() => {
      */
     Players: ["human", "ai"],
     // 先得 15 分者获胜
-    victoryScore: 15,
+    victoryScore: 3,
     /*
      * ==================== 方块渲染配置 ====================
      */
@@ -49,7 +49,9 @@ var tetris = (() => {
     Elements: {
       Battle: {
         overlay: "tetris-battle-overlay",
-        winner: "tetris-battle-winner"
+        over: "tetris-battle-over",
+        winner: "tetris-battle-winner",
+        fly: "tetris-battle-fly"
       },
       Container: "tetris-container",
       /*
@@ -3264,6 +3266,7 @@ var tetris = (() => {
   });
   var BattleEvents = () => ({
     PROCESS_ATTACK: "battle:process:attack",
+    START_GARBAGE_FLY: "battle:start:garbage:fly",
     FLUSH_GARBAGE: "battle:flush:garbage",
     UPDATE_WINNER: "battle:update:winner",
     SYNC_PAUSE: "battle:sync:pause",
@@ -5143,6 +5146,9 @@ var tetris = (() => {
       this.fontSize = 0;
       this.blockSize = 0;
     }
+    getCanvas(isNext = false) {
+      return isNext ? this.nextPiece : this.gameBoard;
+    }
   };
   var canvas_manager_default = CanvasManager;
 
@@ -6058,7 +6064,7 @@ var tetris = (() => {
   var darken_default = darken;
 
   // lib/utils/hex-to-rgba.js
-  var hexToRgba = (hex, alpha) => {
+  var hexToRgba = (hex, alpha = 1) => {
     let fullHex = hex;
     if (hex.length === 4) {
       fullHex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
@@ -7297,6 +7303,9 @@ var tetris = (() => {
         ...Player
       });
     }
+    getCanvas(isNext = false) {
+      return this.Canvas.getCanvas(isNext);
+    }
     // ==================== 状态更新方法 ====================
     /**
      * ## 更新游戏模式标识
@@ -7907,6 +7916,9 @@ var tetris = (() => {
         UI: this,
         Game: Game2
       });
+    }
+    getCanvas(isNext = false) {
+      return this.Renderer.getCanvas(isNext);
     }
     // ==================== 状态更新方法 ====================
     /**
@@ -9259,13 +9271,13 @@ var tetris = (() => {
      *
      * - 多看一步（lookahead=2），有基本前瞻
      * - 15% 概率随机选择非最优解，模拟人类失误
-     * - 决策延迟 580ms，给玩家充足的操作时间
+     * - 决策延迟 480ms，给玩家充足的操作时间
      */
     EASY: {
       lookahead: 2,
       noise: 0.15,
       weights: AI_WEIGHTS,
-      delay: 580
+      delay: 480
     },
     /**
      * ## 普通难度（NORMAL）
@@ -9273,14 +9285,14 @@ var tetris = (() => {
      * - 多看两步（lookahead=3），深度推演
      * - Beam Search 剪枝宽度 2，保证流畅
      * - 8% 概率随机选择，偶尔失误
-     * - 决策延迟 480ms，中等响应速度
+     * - 决策延迟 380ms，中等响应速度
      */
     NORMAL: {
       lookahead: 3,
       beam: 2,
       noise: 0.08,
       weights: AI_WEIGHTS,
-      delay: 480
+      delay: 380
     },
     /**
      * ## 困难难度（HARD）
@@ -9288,14 +9300,14 @@ var tetris = (() => {
      * - 多看三步（lookahead=4），极限推演
      * - Beam Search 剪枝宽度 4，保留更多候选
      * - 4% 概率随机选择，很少失误
-     * - 决策延迟 280ms，较快响应
+     * - 决策延迟 200ms，较快响应
      */
     HARD: {
       lookahead: 4,
       beam: 4,
       noise: 0.04,
       weights: AI_WEIGHTS,
-      delay: 280
+      delay: 200
     },
     /**
      * ## 专家难度（EXPERT）
@@ -9303,14 +9315,14 @@ var tetris = (() => {
      * - 多看三步（lookahead=4），极限推演
      * - Beam Search 剪枝宽度 5，最宽搜索
      * - 0% 噪声，始终选择最优解，不犯错
-     * - 决策延迟仅为 150ms，给玩家极短的反应窗口
+     * - 决策延迟仅为 130ms，给玩家极短的反应窗口
      */
     EXPERT: {
       lookahead: 4,
       noise: 0,
       beam: 5,
       weights: AI_WEIGHTS,
-      delay: 150
+      delay: 130
     }
   };
   var ai_difficulty_default = AIDifficulty;
@@ -12934,6 +12946,9 @@ var tetris = (() => {
       const { Mode } = this;
       return Mode === "versus";
     }
+    getCanvas(isNext = false) {
+      return this.UI.getCanvas(isNext);
+    }
     // ==================== 场景控制 ====================
     /**
      * ## 选择等级
@@ -14100,6 +14115,7 @@ var tetris = (() => {
   var battle_hud_default = BattleHUD;
 
   // lib/battle/battle-ui.js
+  var CLS_HIDDEN = "tetris-hidden";
   var BattleUI = class extends core_default {
     /**
      * ## 构造函数
@@ -14107,9 +14123,6 @@ var tetris = (() => {
      * 接收 DOM 元素的 ID 配置，缓存元素引用。
      *
      * @param {object} options - 配置选项
-     * @param {object} options.elements - DOM 元素 ID 配置
-     * @param {string} options.elements.overlay - 覆盖层元素 ID
-     * @param {string} options.elements.winner - 胜者名称显示元素 ID
      */
     constructor(options) {
       super(options);
@@ -14128,9 +14141,23 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize() {
-      const { overlay, winner } = this.elements;
+      const { elements, players } = this;
+      const { overlay, over: over2, winner, fly } = elements;
       this.$overlay = document.querySelector(`#${overlay}`);
+      this.$over = document.querySelector(`#${over2}`);
       this.$winner = document.querySelector(`#${winner}`);
+      this.$flies = {};
+      for (const [index, player] of players.entries()) {
+        const id = `${player}-${index}`;
+        this.$flies[id] = document.querySelector(`#${id}-${fly}`);
+      }
+    }
+    isOverlayShouldHide(options) {
+      const { $over, $flies } = this;
+      const { over: over2 } = options;
+      return over2 ? $over.classList.contains(CLS_HIDDEN) : Object.values($flies).every(
+        ($fly) => $fly.classList.contains(CLS_HIDDEN)
+      );
     }
     /**
      * ## 显示对战结果
@@ -14152,11 +14179,20 @@ var tetris = (() => {
      *   battleUI.show('Alice');
      *   // → 覆盖层显示，内容为 "Alice"
      *
-     * @param {string} winner - 胜者名称（如 "Alice"、"Player1"）
+     * @param {object} options - 显示的配置信息
      */
-    show(winner) {
-      this.$winner.textContent = winner;
-      this.$overlay.classList.remove("tetris-hidden");
+    show(options) {
+      const { winner, fly } = options;
+      const { $over, $winner, $flies, $overlay } = this;
+      if (winner) {
+        const name = winner.name?.toUpperCase?.() || "HUMAN";
+        const index = winner.index + 1 || 1;
+        $winner.textContent = `${name} (${index}P)`;
+        $over.classList.remove(CLS_HIDDEN);
+      } else {
+        $flies[fly].classList.remove(CLS_HIDDEN);
+      }
+      $overlay.classList.remove(CLS_HIDDEN);
     }
     /**
      * ## 隐藏对战结果
@@ -14177,13 +14213,154 @@ var tetris = (() => {
      * @example
      *   battleUI.hide();
      *   // → 覆盖层隐藏，胜者名称清空
+     *
+     * @param {object} options - 参数对象
      */
-    hide() {
-      this.$winner.textContent = "";
-      this.$overlay.classList.add("tetris-hidden");
+    hide(options) {
+      const { over: over2, fly } = options;
+      const { $over, $winner, $flies, $overlay } = this;
+      if (over2) {
+        $over.classList.add(CLS_HIDDEN);
+        $winner.textContent = "";
+      } else {
+        $flies[fly].classList.add(CLS_HIDDEN);
+      }
+      if (this.isOverlayShouldHide(options)) {
+        $overlay.classList.add(CLS_HIDDEN);
+      }
     }
   };
   var battle_ui_default = BattleUI;
+
+  // lib/services/animations/garbage-fly-animation.js
+  var FlyAnimation = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * 调用父类构造函数并初始化动画。
+     *
+     * @param {object} options - 配置对象
+     * @param {object} options.Scheduler - 调度器实例
+     * @param {object} options.Battle - BattleController 实例
+     * @param {number} options.roundId - 当前回合 ID
+     * @param {object} options.from - 攻击方的 Game 实例
+     * @param {object} options.to - 受攻击方的 Game 实例
+     * @param {number} [options.amount=0] - 垃圾行数量，影响粒子总数. Default is `0`
+     */
+    constructor(options) {
+      super(options);
+      this.initialize();
+    }
+    /**
+     * ## 初始化动画
+     *
+     * 获取双方棋盘位置，初始化粒子，启动帧更新循环。
+     *
+     * @returns {void}
+     */
+    initialize() {
+      const { Battle, from, to, amount = 0, fly = 0 } = this;
+      const { Scheduler: Scheduler2 } = to;
+      this.layer = 160;
+      this.blocking = true;
+      this.name = "garbage-fly";
+      this._finished = false;
+      this._schedulerId = null;
+      this.$fly = Battle.getOverlayFly(fly);
+      this.ctx = this.$fly.getContext("2d");
+      const fromCanvas = from.getCanvas();
+      const toCanvas = to.getCanvas();
+      const fromRect = fromCanvas.getBoundingClientRect();
+      const toRect = toCanvas.getBoundingClientRect();
+      const overlayRect = this.$fly.parentElement.getBoundingClientRect();
+      this.$fly.width = overlayRect.width;
+      this.$fly.height = overlayRect.height;
+      this._offsetX = overlayRect.left;
+      this._offsetY = overlayRect.top;
+      this._toX = toRect.left + toRect.width / 2;
+      this._toY = toRect.top + toRect.height / 2;
+      this._progress = 0;
+      this._step = 0.04;
+      this._particles = [];
+      const count = 12 + amount;
+      const fromCenterX = fromRect.left + fromRect.width / 2;
+      for (let i = 0; i < count; i++) {
+        const fromY = fromRect.top + fromRect.height / (count - 1 || 1) * i;
+        const fromX = fromCenterX + (Math.random() - 0.5) * fromRect.width * 0.6;
+        this._particles.push({
+          // 粒子起始 X：攻击方棋盘中心左右散开
+          fromX,
+          // 粒子起始 Y：攻击方棋盘内均匀分布的高度
+          fromY,
+          // 速度系数：0.6-1.4，快慢差异明显
+          speed: 0.6 + Math.random() * 0.8,
+          // 粒子半径：3-5px
+          size: 3 + Math.random() * 2,
+          // 颜色：白色
+          color: colors_default.WHITE
+        });
+      }
+      const update = () => {
+        this._progress = Math.min(this._progress + this._step, 1);
+        if (this._progress >= 1) {
+          this._finished = true;
+          return;
+        }
+        this._schedulerId = Scheduler2.delay(update, 16);
+      };
+      this._schedulerId = Scheduler2.delay(update, 16);
+    }
+    /**
+     * ## 清理资源
+     *
+     * 由 AnimationSystem 在动画结束后自动调用。 取消 Scheduler 定时器，清空 canvas。
+     *
+     * @returns {void}
+     */
+    dispose() {
+      const { to } = this;
+      const { Scheduler: Scheduler2 } = to;
+      if (this._schedulerId) {
+        Scheduler2.cancel(this._schedulerId);
+        this._schedulerId = null;
+      }
+      if (this.ctx && this.$fly) {
+        this.ctx.clearRect(0, 0, this.$fly.width, this.$fly.height);
+      }
+    }
+    /**
+     * ## 渲染动画
+     *
+     * 每帧由 AnimationSystem 调用。 在 fly canvas 上绘制所有粒子的当前位置。
+     *
+     * @returns {void}
+     */
+    render() {
+      const { roundId, Battle, ctx } = this;
+      if (roundId !== Battle.getRoundId()) {
+        this._finished = true;
+        return;
+      }
+      ctx.clearRect(0, 0, this.$fly.width, this.$fly.height);
+      for (const particle of this._particles) {
+        const p = Math.min(this._progress * particle.speed, 1);
+        const fromCanvasX = particle.fromX - this._offsetX;
+        const fromCanvasY = particle.fromY - this._offsetY;
+        const toCanvasX = this._toX - this._offsetX;
+        const toCanvasY = this._toY - this._offsetY;
+        const x = fromCanvasX + (toCanvasX - fromCanvasX) * p;
+        const y = fromCanvasY + (toCanvasY - fromCanvasY) * p;
+        const alpha = (1 - p) * 0.8;
+        ctx.save();
+        ctx.fillStyle = hex_to_rgba_default(particle.color, alpha);
+        ctx.beginPath();
+        ctx.arc(x, y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+  };
+  var garbage_fly_animation_default = FlyAnimation;
 
   // lib/events/router/battle-router.js
   var BattleRouter = class extends core_default {
@@ -14216,6 +14393,7 @@ var tetris = (() => {
     subscribe() {
       const events = BattleEvents();
       this.on(events.PROCESS_ATTACK, this._onBattleProcessAttack);
+      this.on(events.START_GARBAGE_FLY, this._onBattleStartGarbageFly);
       this.on(events.FLUSH_GARBAGE, this._onBattleFlushGarbage);
       this.on(events.UPDATE_WINNER, this._onBattleUpdateWinner);
       this.on(events.SYNC_PAUSE, this._onBattleSyncPause);
@@ -14232,6 +14410,7 @@ var tetris = (() => {
     unsubscribe() {
       const events = BattleEvents();
       this.off(events.PROCESS_ATTACK, this._onBattleProcessAttack);
+      this.off(events.START_GARBAGE_FLY, this._onBattleStartGarbageFly);
       this.off(events.FLUSH_GARBAGE, this._onBattleFlushGarbage);
       this.off(events.UPDATE_WINNER, this._onBattleUpdateWinner);
       this.off(events.SYNC_PAUSE, this._onBattleSyncPause);
@@ -14259,6 +14438,10 @@ var tetris = (() => {
       const { battle } = this;
       const { from, lines } = payload;
       battle.processAttack(from, lines);
+    };
+    _onBattleStartGarbageFly = (payload) => {
+      const { Animations } = payload.to;
+      Animations.register(new garbage_fly_animation_default(payload));
     };
     /**
      * ## 处理垃圾行刷新事件
@@ -14462,12 +14645,12 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize() {
-      const { games, elements } = this;
+      const { games, elements, players } = this;
       const store = new battle_store_default({ games });
       this.store = store;
       this.hud = new battle_hud_default({ games, store });
       this.router = new battle_router_default({ battle: this });
-      this.ui = new battle_ui_default({ elements });
+      this.ui = new battle_ui_default({ elements, players });
       this.start();
     }
     /**
@@ -14585,7 +14768,8 @@ var tetris = (() => {
       const payload = { mode: "battle-over" };
       winner.emit(WE.UPDATE_MODE, payload);
       loser.emit(LE.UPDATE_MODE, payload);
-      this.ui.show(winner.Player?.name?.toUpperCase() || "HUMAN");
+      const { Player } = winner;
+      this.ui.show({ winner: Player });
     }
     /**
      * ## 重新开始一局对战
@@ -14640,7 +14824,7 @@ var tetris = (() => {
       const opponent = this.getOpponent(from);
       this.store.reset();
       this.hud.updateScores(from, opponent);
-      this.ui.hide();
+      this.ui.hide({ over: true });
       const FE = GameEvents(from.id);
       const OE = GameEvents(opponent.id);
       from.emit(FE.RESET);
@@ -14676,6 +14860,9 @@ var tetris = (() => {
     }
     getRoundId() {
       return this.store.getRoundId();
+    }
+    getOverlayFly(index) {
+      return this.ui.$flies[index];
     }
     /**
      * ## 处理消行攻击
@@ -14736,16 +14923,48 @@ var tetris = (() => {
       if (remaining > 0) {
         store.addGarbage(to, remaining);
         const { Scheduler: Scheduler2 } = to;
-        const events = GameEvents(to.id);
         const roundId = this.getRoundId();
-        to.emit(events.START_GARBAGE_WARNING, {
-          roundId,
-          amount: attack,
-          Battle: this
-        });
+        const playerId = store.getPlayerId(to);
+        Scheduler2.sequence([
+          {
+            fn: () => {
+              this.ui.show({ fly: playerId });
+            }
+          },
+          {
+            fn: () => {
+              const events = BattleEvents();
+              to.emit(events.START_GARBAGE_FLY, {
+                from,
+                to,
+                roundId,
+                amount: attack,
+                fly: playerId,
+                Battle: this
+              });
+            }
+          },
+          {
+            fn: () => {
+              const events = GameEvents(to.id);
+              to.emit(events.START_GARBAGE_WARNING, {
+                roundId,
+                amount: attack,
+                Battle: this
+              });
+            },
+            delay: 400
+          },
+          {
+            fn: () => {
+              this.ui.hide({ fly: playerId });
+            },
+            delay: 600
+          }
+        ]);
         Scheduler2.delay(() => {
-          const events2 = AudioEvents();
-          this.emit(events2.PLAY_SOUND, { sound: "GARBAGE_WARNING" });
+          const events = AudioEvents();
+          this.emit(events.PLAY_SOUND, { sound: "GARBAGE_WARNING" });
         }, 120);
       }
       return remaining;
@@ -14845,91 +15064,118 @@ var tetris = (() => {
   };
   var battle_controller_default = BattleController;
 
+  // lib/engine/utils/get-battle-overlay-template.js
+  var getBattleOverlayTemplate = (elements, players) => {
+    const { Battle } = elements;
+    const templates = [`
+    <section id="${Battle.over}" class="tetris-battle-over tetris-hidden">
+      <h2 class="tetris-battle-title">BATTLE OVER</h2>
+      <div class="tetris-battle-winner">WINNER IS <span id="${Battle.winner}" class="tetris-highlight">HUMAN</span></div>
+      <footer class="tetris-battle-actions">
+        <div class="tetris-battle-rematch">ENTER TO REMATCH</div>
+      </footer>
+    </section>
+  `];
+    for (const [index, player] of players.entries()) {
+      templates.push(`
+      <canvas id="${player}-${index}-${Battle.fly}" class="tetris-battle-fly tetris-hidden"></canvas>
+    `);
+    }
+    return `
+    <section id="${Battle.overlay}" class="tetris-battle-overlay tetris-hidden">
+      ${templates.join("")}
+    </section>
+  `;
+  };
+  var get_battle_overlay_template_default = getBattleOverlayTemplate;
+
+  // lib/engine/utils/get-game-interface-template.js
+  var getGameInterfaceTemplate = (elements, player, index) => {
+    const { Canvas, Hud, Controls } = elements;
+    return `
+    <div id="${player}-${index}-tetris-player" class="tetris-player">
+      <section class="tetris-screen">
+        <section id="${player}-${index}-tetris-screen-main" class="tetris-screen-main">
+          <canvas id="${player}-${index}-${Canvas.board}" data-mode="main-menu"></canvas>
+        </section>
+        <aside class="tetris-screen-aside">
+          <section class="tetris-panel next">
+            <h3 class="tetris-next-title">NEXT</h3>
+            <canvas id="${player}-${index}-${Canvas.next}" class="tetris-next-piece"></canvas>
+          </section>
+          <section class="tetris-panel controller">
+            <p class="tetris-panel-text tetris-highlight"><span id="${player}-${index}-${Hud.controller}">Human</span></p>
+          </section>
+          <section class="tetris-panel data">
+            <p class="tetris-panel-text">SCORE:<br><span id="${player}-${index}-${Hud.score}">00000</span></p>
+            <p class="tetris-panel-text">LINE:<br><span id="${player}-${index}-${Hud.lines}">00</span></p>
+            <p class="tetris-panel-text">LEVEL:<br><span id="${player}-${index}-${Hud.level}">01</span></p>
+            <p class="tetris-panel-text">COMBO:<br><span id="${player}-${index}-${Hud.combo}">00</span></p>
+            <p class="tetris-panel-text tetris-highlight">HI-SCORE:<br><span id="${player}-${index}-${Hud.highScore}">00000</span></p>
+          </section>
+          <section class="tetris-panel hold">
+            <h3 class="tetris-hold-title">HOLD</h3>
+            <canvas id="${player}-${index}-${Canvas.hold}" class="tetris-hold-piece"></canvas>
+          </section>
+        </aside>
+      </section>
+      <footer class="tetris-controls">
+        <!-- START / SELECT \u7CFB\u7EDF\u6309\u94AE -->
+        <section class="tetris-system-controls">
+          <div id="${player}-${index}-${Controls.back}" data-key="back" class="tetris-system-button tetris-btn-back">BACK</div>
+          <div id="${player}-${index}-${Controls.hold}" data-key="hold" class="tetris-system-button tetris-btn-hold">HOLD</div>
+          <div id="${player}-${index}-${Controls.start}" data-key="start" class="tetris-system-button tetris-btn-start">START</div>
+        </section>
+        <section class="tetris-main-controls">
+          <!-- D-PAD \u65B9\u5411\u952E\uFF08GAME BOY \u7ECF\u5178\u5341\u5B57\u952E\u5E03\u5C40\uFF09 -->
+          <div class="tetris-dpad">
+            <div id="${player}-${index}-${Controls.up}" data-key="dpad_up" class="tetris-dpad-up">\u2191</div>
+            <div class="tetris-dpad-mid">
+              <div id="${player}-${index}-${Controls.left}" data-key="dpad_left" class="tetris-dpad-left">\u2190</div>
+              <div class="tetris-dpad-center"></div>
+              <div id="${player}-${index}-${Controls.right}" data-key="dpad_right" class="tetris-dpad-right">\u2192</div>
+            </div>
+            <div id="${player}-${index}-${Controls.down}" data-key="dpad_down" class="tetris-dpad-down">\u2193</div>
+          </div>
+          <!-- ABXY \u52A8\u4F5C\u6309\u94AE\uFF08GAME BOY \u7ECF\u5178\u83F1\u5F62\u5E03\u5C40\uFF09 -->
+          <div class="tetris-buttons">
+            <div id="${player}-${index}-${Controls.x}" data-key="x" class="tetris-action-button tetris-button-x">X</div>
+            <div id="${player}-${index}-${Controls.y}" data-key="y" class="tetris-action-button tetris-button-y">Y</div>
+            <div id="${player}-${index}-${Controls.b}" data-key="b" class="tetris-action-button tetris-button-b">B</div>
+            <div id="${player}-${index}-${Controls.a}" data-key="a" class="tetris-action-button tetris-button-a">A</div>
+          </div>
+        </section>
+      </footer>
+    </div>
+  `;
+  };
+  var get_game_interface_template_default = getGameInterfaceTemplate;
+
+  // lib/engine/utils/get-battle-score-template.js
+  var getBattleScoreTemplate = (player, index) => `
+  <div class="tetris-battle-score">
+    <h3 class="tetris-battle-player">${index + 1}P</h3>
+    <span id="${player}-${index}-tetris-battle-score" >0</span>
+  </div>
+`;
+  var get_battle_score_template_default = getBattleScoreTemplate;
+
   // lib/engine/draw-interface.js
   var drawInterface = (config) => {
     const { Elements, Mode, Players } = config;
-    const { Canvas, Hud, Controls, Container } = Elements;
+    const { Container } = Elements;
     const templates = [];
     const finalPlayers = [...Players];
     const $container = document.querySelector(`#${Container}`);
     if (Mode === "single") {
       finalPlayers.pop();
     } else {
-      templates.push(`
-      <section id="tetris-battle-overlay" class="tetris-battle-overlay tetris-hidden">
-        <h2 class="tetris-battle-title">BATTLE OVER</h2>
-        <div class="tetris-battle-winner">WINNER IS <span id="tetris-battle-winner" class="tetris-highlight">HUMAN</span></div>
-        <footer class="tetris-battle-actions">
-          <div id="tetris-battle-rematch">ENTER TO REMATCH</div>
-        </footer>
-      </section>
-    `);
+      templates.push(get_battle_overlay_template_default(Elements, finalPlayers));
     }
     for (const [index, player] of finalPlayers.entries()) {
-      const html = `
-      <div id="${player}-${index}-tetris-player" class="tetris-player">
-        <section class="tetris-screen">
-          <section id="${player}-${index}-tetris-screen-main" class="tetris-screen-main">
-            <canvas id="${player}-${index}-${Canvas.board}" data-mode="main-menu"></canvas>
-          </section>
-          <aside class="tetris-screen-aside">
-            <section class="tetris-panel next">
-              <h3 class="tetris-next-title">NEXT</h3>
-              <canvas id="${player}-${index}-${Canvas.next}" class="tetris-next-piece"></canvas>
-            </section>
-            <section class="tetris-panel controller">
-              <p class="tetris-panel-text tetris-highlight"><span id="${player}-${index}-${Hud.controller}">Human</span></p>
-            </section>
-            <section class="tetris-panel data">
-              <p class="tetris-panel-text">SCORE:<br><span id="${player}-${index}-${Hud.score}">00000</span></p>
-              <p class="tetris-panel-text">LINE:<br><span id="${player}-${index}-${Hud.lines}">00</span></p>
-              <p class="tetris-panel-text">LEVEL:<br><span id="${player}-${index}-${Hud.level}">01</span></p>
-              <p class="tetris-panel-text">COMBO:<br><span id="${player}-${index}-${Hud.combo}">00</span></p>
-              <p class="tetris-panel-text tetris-highlight">HI-SCORE:<br><span id="${player}-${index}-${Hud.highScore}">00000</span></p>
-            </section>
-            <section class="tetris-panel hold">
-              <h3 class="tetris-hold-title">HOLD</h3>
-              <canvas id="${player}-${index}-${Canvas.hold}" class="tetris-hold-piece"></canvas>
-            </section>
-          </aside>
-        </section>
-        <footer class="tetris-controls">
-          <!-- START / SELECT \u7CFB\u7EDF\u6309\u94AE -->
-          <section class="tetris-system-controls">
-            <div id="${player}-${index}-${Controls.back}" data-key="back" class="tetris-system-button tetris-btn-back">BACK</div>
-            <div id="${player}-${index}-${Controls.hold}" data-key="hold" class="tetris-system-button tetris-btn-hold">HOLD</div>
-            <div id="${player}-${index}-${Controls.start}" data-key="start" class="tetris-system-button tetris-btn-start">START</div>
-          </section>
-          <section class="tetris-main-controls">
-            <!-- D-PAD \u65B9\u5411\u952E\uFF08GAME BOY \u7ECF\u5178\u5341\u5B57\u952E\u5E03\u5C40\uFF09 -->
-            <div class="tetris-dpad">
-              <div id="${player}-${index}-${Controls.up}" data-key="dpad_up" class="tetris-dpad-up">\u2191</div>
-              <div class="tetris-dpad-mid">
-                <div id="${player}-${index}-${Controls.left}" data-key="dpad_left" class="tetris-dpad-left">\u2190</div>
-                <div class="tetris-dpad-center"></div>
-                <div id="${player}-${index}-${Controls.right}" data-key="dpad_right" class="tetris-dpad-right">\u2192</div>
-              </div>
-              <div id="${player}-${index}-${Controls.down}" data-key="dpad_down" class="tetris-dpad-down">\u2193</div>
-            </div>
-            <!-- ABXY \u52A8\u4F5C\u6309\u94AE\uFF08GAME BOY \u7ECF\u5178\u83F1\u5F62\u5E03\u5C40\uFF09 -->
-            <div class="tetris-buttons">
-              <div id="${player}-${index}-${Controls.x}" data-key="x" class="tetris-action-button tetris-button-x">X</div>
-              <div id="${player}-${index}-${Controls.y}" data-key="y" class="tetris-action-button tetris-button-y">Y</div>
-              <div id="${player}-${index}-${Controls.b}" data-key="b" class="tetris-action-button tetris-button-b">B</div>
-              <div id="${player}-${index}-${Controls.a}" data-key="a" class="tetris-action-button tetris-button-a">A</div>
-            </div>
-          </section>
-        </footer>
-      </div>
-    `;
-      templates.push(html);
+      templates.push(get_game_interface_template_default(Elements, player, index));
       if (Mode === "versus") {
-        templates.push(`
-        <div class="tetris-battle-score">
-          <h3 class="tetris-battle-player">${index + 1}P</h3>
-          <span id="${player}-${index}-tetris-battle-score" >0</span>
-        </div>
-      `);
+        templates.push(get_battle_score_template_default(player, index));
       }
     }
     $container.innerHTML = templates.join("");
@@ -15689,10 +15935,10 @@ var tetris = (() => {
      *
      * 管理游戏状态、输入、UI、回放等所有子系统。
      *
-     * @default [ ]
+     * @default null
      * @type {object}
      */
-    Battle: [],
+    Battle: null,
     isVersus: () => Engine.Configuration.Mode === "versus",
     gameAccumulators: /* @__PURE__ */ new Map(),
     /**
@@ -15734,7 +15980,8 @@ var tetris = (() => {
         Engine.Battle = new battle_controller_default({
           games: Engine.Games,
           victoryScore,
-          elements: Elements.Battle
+          elements: Elements.Battle,
+          players: finalPlayers
         });
       }
     },

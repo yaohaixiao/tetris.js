@@ -40,21 +40,39 @@ jest.mock('@/lib/battle/battle-store.js', () => {
       }
     }
 
-    this.setRunning = jest.fn(function (running) { this.state.running = running; });
-    this.isRunning = jest.fn(function () { return this.state.running; });
-    this.setWinner = jest.fn(function (winner) { this.state.winner = winner; });
-    this.getWinner = jest.fn(function () { return this.state.winner; });
-    this.getScore = jest.fn(function (id) { return this.state.scores[id] || 0; });
-    this.getPlayerId = jest.fn(function (game) { return `${game.Player.name}-${game.Player.index}`; });
+    this.setRunning = jest.fn(function (running) {
+      this.state.running = running;
+    });
+    this.isRunning = jest.fn(function () {
+      return this.state.running;
+    });
+    this.setWinner = jest.fn(function (winner) {
+      this.state.winner = winner;
+    });
+    this.getWinner = jest.fn(function () {
+      return this.state.winner;
+    });
+    this.getScore = jest.fn(function (id) {
+      return this.state.scores[id] || 0;
+    });
+    this.getPlayerId = jest.fn(function (game) {
+      return `${game.Player.name}-${game.Player.index}`;
+    });
     this.updateScores = jest.fn();
     this.addGarbage = jest.fn();
     this.offsetGarbage = jest.fn();
-    this.getPendingGarbage = jest.fn(function () { return 0; });
+    this.getPendingGarbage = jest.fn(function () {
+      return 0;
+    });
     this.clearGarbage = jest.fn();
     this.reset = jest.fn();
     this.initialize = jest.fn();
-    this.increaseRound = jest.fn(function () { this.state.roundId += 1; });
-    this.getRoundId = jest.fn(function () { return this.state.roundId; });
+    this.increaseRound = jest.fn(function () {
+      this.state.roundId += 1;
+    });
+    this.getRoundId = jest.fn(function () {
+      return this.state.roundId;
+    });
   });
 });
 
@@ -106,7 +124,10 @@ describe('BattleController', () => {
         tasks.forEach((task) => task.fn && task.fn());
         return [];
       }),
-      delay: jest.fn((fn) => { fn(); return 1; }),
+      delay: jest.fn((fn) => {
+        fn();
+        return 1;
+      }),
     },
     emit: jest.fn(),
     Animations: {
@@ -148,7 +169,10 @@ describe('BattleController', () => {
     });
 
     test('应该自动调用 initialize 方法', () => {
-      const initializeSpy = jest.spyOn(BattleController.prototype, 'initialize');
+      const initializeSpy = jest.spyOn(
+        BattleController.prototype,
+        'initialize',
+      );
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       new BattleController({ games });
       expect(initializeSpy).toHaveBeenCalledTimes(1);
@@ -186,7 +210,10 @@ describe('BattleController', () => {
     test('应该创建 BattleHUD 实例并传入 games 和 store', () => {
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const controller = createController({ games });
-      expect(BattleHUD).toHaveBeenCalledWith({ games, store: controller.store });
+      expect(BattleHUD).toHaveBeenCalledWith({
+        games,
+        store: controller.store,
+      });
       expect(controller.hud).toBeDefined();
     });
 
@@ -211,15 +238,26 @@ describe('BattleController', () => {
         callOrder.push('store');
         return { setRunning: jest.fn(), isRunning: jest.fn(() => false) };
       });
-      BattleHUD.mockImplementationOnce(() => { callOrder.push('hud'); return {}; });
-      BattleRouter.mockImplementationOnce(() => { callOrder.push('router'); return {}; });
-      BattleUI.mockImplementationOnce(() => { callOrder.push('ui'); return {}; });
+      BattleHUD.mockImplementationOnce(() => {
+        callOrder.push('hud');
+        return {};
+      });
+      BattleRouter.mockImplementationOnce(() => {
+        callOrder.push('router');
+        return {};
+      });
+      BattleUI.mockImplementationOnce(() => {
+        callOrder.push('ui');
+        return {};
+      });
 
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       createController({ games });
 
       expect(callOrder.indexOf('store')).toBeLessThan(callOrder.indexOf('hud'));
-      expect(callOrder.indexOf('hud')).toBeLessThan(callOrder.indexOf('router'));
+      expect(callOrder.indexOf('hud')).toBeLessThan(
+        callOrder.indexOf('router'),
+      );
       expect(callOrder.indexOf('router')).toBeLessThan(callOrder.indexOf('ui'));
     });
 
@@ -336,7 +374,10 @@ describe('BattleController', () => {
     test('未达到 victoryScore 时应该调用 restart 继续下一局', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({ games: [alice, bob], victoryScore: 5 });
+      const controller = createCleanController({
+        games: [alice, bob],
+        victoryScore: 5,
+      });
 
       controller.store.getScore.mockReturnValue(1);
       GameEvents.mockReturnValue({ RESTART: 'restart-event' });
@@ -356,7 +397,10 @@ describe('BattleController', () => {
     test('达到 victoryScore 时应该调用 over 结束整场对战', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({ games: [alice, bob], victoryScore: 20 });
+      const controller = createCleanController({
+        games: [alice, bob],
+        victoryScore: 20,
+      });
 
       controller.store.getScore.mockReturnValue(20);
       GameEvents.mockReturnValue({ RESTART: 'restart-event' });
@@ -376,7 +420,10 @@ describe('BattleController', () => {
     test('应该先 stop、设置胜者、更新分数、更新 HUD，再做赛制判定', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({ games: [alice, bob], victoryScore: 20 });
+      const controller = createCleanController({
+        games: [alice, bob],
+        victoryScore: 20,
+      });
 
       controller.store.getScore.mockReturnValue(1);
       GameEvents.mockReturnValue({ RESTART: 'restart' });
@@ -389,12 +436,12 @@ describe('BattleController', () => {
       expect(stopSpy.mock.invocationCallOrder[0]).toBeLessThan(
         controller.store.setWinner.mock.invocationCallOrder[0],
       );
-      expect(controller.store.setWinner.mock.invocationCallOrder[0]).toBeLessThan(
+      expect(
+        controller.store.setWinner.mock.invocationCallOrder[0],
+      ).toBeLessThan(controller.store.updateScores.mock.invocationCallOrder[0]);
+      expect(
         controller.store.updateScores.mock.invocationCallOrder[0],
-      );
-      expect(controller.store.updateScores.mock.invocationCallOrder[0]).toBeLessThan(
-        controller.hud.updateScores.mock.invocationCallOrder[0],
-      );
+      ).toBeLessThan(controller.hud.updateScores.mock.invocationCallOrder[0]);
 
       stopSpy.mockRestore();
       restartSpy.mockRestore();
@@ -451,12 +498,18 @@ describe('BattleController', () => {
       const winnerEvents = { UPDATE_MODE: 'winner:update:mode' };
       const loserEvents = { UPDATE_MODE: 'loser:update:mode' };
 
-      GameEvents.mockReturnValueOnce(winnerEvents).mockReturnValueOnce(loserEvents);
+      GameEvents.mockReturnValueOnce(winnerEvents).mockReturnValueOnce(
+        loserEvents,
+      );
 
       controller.over(alice, bob);
 
-      expect(alice.emit).toHaveBeenCalledWith('winner:update:mode', { mode: 'battle-over' });
-      expect(bob.emit).toHaveBeenCalledWith('loser:update:mode', { mode: 'battle-over' });
+      expect(alice.emit).toHaveBeenCalledWith('winner:update:mode', {
+        mode: 'battle-over',
+      });
+      expect(bob.emit).toHaveBeenCalledWith('loser:update:mode', {
+        mode: 'battle-over',
+      });
     });
 
     test('应该显示胜者名称（转为大写）', () => {
@@ -504,7 +557,9 @@ describe('BattleController', () => {
   describe('restart', () => {
     test('应该增加 roundId', () => {
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({ games: [createMockGame('Alice', 0), bob] });
+      const controller = createCleanController({
+        games: [createMockGame('Alice', 0), bob],
+      });
 
       GameEvents.mockReturnValue({ RESTART: 'restart-event' });
 
@@ -528,7 +583,9 @@ describe('BattleController', () => {
 
     test('应该通知败者重新开始并启动对战', () => {
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({ games: [createMockGame('Alice', 0), bob] });
+      const controller = createCleanController({
+        games: [createMockGame('Alice', 0), bob],
+      });
 
       GameEvents.mockReturnValue({ RESTART: 'restart-event' });
 
@@ -555,7 +612,9 @@ describe('BattleController', () => {
       const fromEvents = { RESET: 'from:reset' };
       const opponentEvents = { RESET: 'opponent:reset' };
 
-      GameEvents.mockReturnValueOnce(fromEvents).mockReturnValueOnce(opponentEvents);
+      GameEvents.mockReturnValueOnce(fromEvents).mockReturnValueOnce(
+        opponentEvents,
+      );
 
       controller.reset(alice);
 
@@ -702,7 +761,9 @@ describe('BattleController', () => {
 
       controller.processAttack(alice, [{}, {}, {}]);
 
-      expect(callOrder.indexOf('offset')).toBeLessThan(callOrder.indexOf('add'));
+      expect(callOrder.indexOf('offset')).toBeLessThan(
+        callOrder.indexOf('add'),
+      );
     });
   });
 
@@ -713,18 +774,31 @@ describe('BattleController', () => {
       const game = createMockGame('Alice', 0, 'alice-id');
       const controller = createCleanController({ games: [game] });
 
-      const mockBoard = [[0, 0], [0, 0]];
-      const mockNewBoard = [[1, 1], [1, 1]];
+      const mockBoard = [
+        [0, 0],
+        [0, 0],
+      ];
+      const mockNewBoard = [
+        [1, 1],
+        [1, 1],
+      ];
 
       controller.store.getPendingGarbage.mockReturnValue(3);
-      game.Store.getState.mockReturnValue({ board: mockBoard, difficulty: 'normal' });
+      game.Store.getState.mockReturnValue({
+        board: mockBoard,
+        difficulty: 'normal',
+      });
       garbageSystem.applyGarbage.mockReturnValue(mockNewBoard);
 
       controller.flushGarbage(game);
 
       expect(controller.store.getPendingGarbage).toHaveBeenCalledWith(game);
       expect(game.Store.getState).toHaveBeenCalled();
-      expect(garbageSystem.applyGarbage).toHaveBeenCalledWith(mockBoard, 3, 'normal');
+      expect(garbageSystem.applyGarbage).toHaveBeenCalledWith(
+        mockBoard,
+        3,
+        'normal',
+      );
       expect(game.Store.setState).toHaveBeenCalledWith({ board: mockNewBoard });
       expect(controller.store.clearGarbage).toHaveBeenCalledWith(game);
     });
@@ -772,7 +846,11 @@ describe('BattleController', () => {
 
         controller.flushGarbage(game);
 
-        expect(garbageSystem.applyGarbage).toHaveBeenCalledWith([], 2, difficulty);
+        expect(garbageSystem.applyGarbage).toHaveBeenCalledWith(
+          [],
+          2,
+          difficulty,
+        );
       });
     });
 
@@ -780,11 +858,20 @@ describe('BattleController', () => {
       const game = createMockGame('Alice', 0, 'alice-id');
       const controller = createCleanController({ games: [game] });
 
-      const originalBoard = [[1, 2], [3, 4]];
-      const newBoard = [[5, 6], [7, 8]];
+      const originalBoard = [
+        [1, 2],
+        [3, 4],
+      ];
+      const newBoard = [
+        [5, 6],
+        [7, 8],
+      ];
 
       controller.store.getPendingGarbage.mockReturnValue(1);
-      game.Store.getState.mockReturnValue({ board: originalBoard, difficulty: 'easy' });
+      game.Store.getState.mockReturnValue({
+        board: originalBoard,
+        difficulty: 'easy',
+      });
       garbageSystem.applyGarbage.mockReturnValue(newBoard);
 
       controller.flushGarbage(game);
@@ -891,7 +978,10 @@ describe('BattleController', () => {
     test('完整的对战生命周期（未达 victoryScore）', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({ games: [alice, bob], victoryScore: 5 });
+      const controller = createCleanController({
+        games: [alice, bob],
+        victoryScore: 5,
+      });
 
       controller.start();
 
@@ -903,8 +993,17 @@ describe('BattleController', () => {
       expect(controller.store.addGarbage).toHaveBeenCalledWith(bob, 3);
 
       controller.store.getPendingGarbage.mockReturnValue(3);
-      bob.Store.getState.mockReturnValue({ board: [[0, 0], [0, 0]], difficulty: 'normal' });
-      garbageSystem.applyGarbage.mockReturnValue([[1, 1], [1, 1]]);
+      bob.Store.getState.mockReturnValue({
+        board: [
+          [0, 0],
+          [0, 0],
+        ],
+        difficulty: 'normal',
+      });
+      garbageSystem.applyGarbage.mockReturnValue([
+        [1, 1],
+        [1, 1],
+      ]);
       controller.flushGarbage(bob);
 
       controller.store.getScore.mockReturnValue(1);
@@ -914,7 +1013,10 @@ describe('BattleController', () => {
       controller.update(bob);
 
       expect(restartSpy).toHaveBeenCalledWith(bob);
-      expect(controller.store.updateScores).toHaveBeenCalledWith({ winner: alice, loser: bob });
+      expect(controller.store.updateScores).toHaveBeenCalledWith({
+        winner: alice,
+        loser: bob,
+      });
 
       restartSpy.mockRestore();
     });
@@ -922,7 +1024,10 @@ describe('BattleController', () => {
     test('完整的对战生命周期（达到 victoryScore）', () => {
       const alice = createMockGame('Alice', 0, 'alice-id');
       const bob = createMockGame('Bob', 1, 'bob-id');
-      const controller = createCleanController({ games: [alice, bob], victoryScore: 20 });
+      const controller = createCleanController({
+        games: [alice, bob],
+        victoryScore: 20,
+      });
 
       controller.store.getScore.mockReturnValue(20);
       GameEvents.mockReturnValue({ UPDATE_MODE: 'update:mode' });
