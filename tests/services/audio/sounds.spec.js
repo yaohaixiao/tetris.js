@@ -427,4 +427,124 @@ describe('Sounds', () => {
       expect(callOrder).toEqual(['tone', 'tone']);
     });
   });
+
+  // ==================== GAMEPAD_NOTIFY ====================
+  describe('GAMEPAD_NOTIFY — 手柄连接提示音', () => {
+    test('应该使用 Scheduler.sequence 播放 6 段音效', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GAMEPAD_NOTIFY();
+
+      expect(scheduler.sequence).toHaveBeenCalledTimes(1);
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      expect(tasks.length).toBe(6);
+    });
+
+    test('所有音效都使用 square 波，音量 0.2，时长 60ms', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GAMEPAD_NOTIFY();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+
+      tasks.forEach((task) => {
+        task.fn();
+      });
+
+      expect(playTone).toHaveBeenCalledTimes(6);
+
+      playTone.mock.calls.forEach((call) => {
+        expect(call[0]).toBe(sounds);
+        expect(call[2]).toBe(60);
+        expect(call[3]).toMatchObject({
+          volume: 0.2,
+          wave: 'square',
+        });
+      });
+    });
+
+    test('音符频率交替为 523Hz 和 587Hz', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GAMEPAD_NOTIFY();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+
+      tasks.forEach((task) => task.fn());
+
+      const freqs = playTone.mock.calls.map((call) => call[1]);
+
+      expect(freqs).toEqual([523, 587, 523, 587, 523, 587]);
+    });
+
+    test('startTime 依次递增：0, 0.2, 0.4, 0.6, 0.8, 1.0 秒', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GAMEPAD_NOTIFY();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+
+      tasks.forEach((task) => task.fn());
+
+      const startTimes = playTone.mock.calls.map(
+        (call) => call[3]?.startTime
+      );
+
+      expect(startTimes).toEqual([
+        undefined,
+        100.2,
+        100.4,
+        100.6,
+        100.8,
+        101,
+      ]);
+    });
+
+    test('第一个音符没有 startTime，后续音符有 startTime', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GAMEPAD_NOTIFY();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+
+      tasks[0].fn();
+      expect(playTone).toHaveBeenCalledWith(sounds, 523, 60, {
+        volume: 0.2,
+        wave: 'square',
+      });
+
+      tasks[1].fn();
+      expect(playTone).toHaveBeenCalledWith(sounds, 587, 60, {
+        volume: 0.2,
+        wave: 'square',
+        startTime: 100.2,
+      });
+    });
+
+    test('所有音符按顺序执行', () => {
+      jest.spyOn(scheduler, 'sequence');
+      sounds.GAMEPAD_NOTIFY();
+
+      const tasks = scheduler.sequence.mock.calls[0][0];
+      const executionOrder = [];
+
+      playTone.mockImplementation(() => {
+        executionOrder.push('playTone');
+      });
+
+      tasks.forEach((task) => task.fn());
+
+      expect(executionOrder).toHaveLength(6);
+      expect(executionOrder).toEqual(Array(6).fill('playTone'));
+    });
+
+    test('多次调用 GAMEPAD_NOTIFY 应该创建多个 sequence', () => {
+      jest.spyOn(scheduler, 'sequence');
+
+      sounds.GAMEPAD_NOTIFY();
+      sounds.GAMEPAD_NOTIFY();
+      sounds.GAMEPAD_NOTIFY();
+
+      expect(scheduler.sequence).toHaveBeenCalledTimes(3);
+
+      scheduler.sequence.mock.calls.forEach((call) => {
+        expect(call[0].length).toBe(6);
+      });
+    });
+  });
 });
