@@ -1178,6 +1178,75 @@ var tetris = (() => {
       ]);
     };
     /**
+     * ## 手柄连接通知音效
+     *
+     * 六段短音，C5 和 D5 交替，与闪烁动画的 6 帧完全同步。 每 200ms 一声，总时长 1.2s，与
+     * GamepadNotificationAnimation 对齐。
+     *
+     * ### 时间线
+     *
+     * | 时间   | 音高 | 动画帧   |
+     * | ------ | ---- | -------- |
+     * | 0ms    | C5   | 显       |
+     * | 200ms  | D5   | 隐       |
+     * | 400ms  | C5   | 显       |
+     * | 600ms  | D5   | 隐       |
+     * | 800ms  | C5   | 显       |
+     * | 1000ms | D5   | 隐       |
+     * | 1200ms | —    | 动画结束 |
+     *
+     * C5(523) 和 D5(587) 交替，三角波，与动画帧同步。 两个音高接近，有轻微起伏感但不突兀。
+     *
+     * @returns {void}
+     */
+    GAMEPAD_NOTIFY = () => {
+      const { Context, Scheduler: Scheduler2 } = this;
+      const now = Context.currentTime;
+      Scheduler2.sequence([
+        {
+          fn: () => play_tone_default(this, 523, 60, {
+            volume: 0.2,
+            wave: "square"
+          })
+        },
+        {
+          fn: () => play_tone_default(this, 587, 60, {
+            volume: 0.2,
+            wave: "square",
+            startTime: now + 0.2
+          })
+        },
+        {
+          fn: () => play_tone_default(this, 523, 60, {
+            volume: 0.2,
+            wave: "square",
+            startTime: now + 0.4
+          })
+        },
+        {
+          fn: () => play_tone_default(this, 587, 60, {
+            volume: 0.2,
+            wave: "square",
+            startTime: now + 0.6
+          })
+        },
+        {
+          fn: () => play_tone_default(this, 523, 60, {
+            volume: 0.2,
+            wave: "square",
+            startTime: now + 0.8
+          })
+        },
+        {
+          fn: () => play_tone_default(this, 587, 60, {
+            volume: 0.2,
+            wave: "square",
+            startTime: now + 1
+          })
+        }
+      ]);
+    };
+    /**
      * ## 背景音乐开关音效
      *
      * 440Hz，100ms。
@@ -3355,7 +3424,8 @@ var tetris = (() => {
     RENDER_LEVEL_UP: `ui:${uuid}:render:level:up`,
     RENDER_LANDING_FLASH: `ui:${uuid}:render:landing:flash`,
     RENDER_GARBAGE_WARNING: `ui:${uuid}:render:garbage:warning`,
-    RENDER_GARBAGE_PUSH: `ui:${uuid}:render:garbage:push`
+    RENDER_GARBAGE_PUSH: `ui:${uuid}:render:garbage:push`,
+    RENDER_GAMEPAD_NOTIFICATION: `ui:${uuid}:render:gamepad:notification`
   });
 
   // lib/services/audio/index.js
@@ -3981,9 +4051,12 @@ var tetris = (() => {
      * @returns {void}
      */
     _onUpdateGamepadConnected = (options) => {
-      const { Store } = this;
+      const { Game: Game2, Store } = this;
       const { connected } = options;
       Store.setGamepadConnected(connected);
+      if (Store.getMode() === "playing") {
+        Game2.startGamepadConnectedNotify(connected);
+      }
     };
     // ==================== 动画特效处理器 ====================
     /**
@@ -4436,9 +4509,6 @@ var tetris = (() => {
      * 初始化内部状态，使用深拷贝保证与外部状态隔离。
      *
      * @param {object} options - 配置选项
-     * @param {object} options.GameState - 游戏初始状态模板对象
-     * @param {number} options.cols - 棋盘列数（宽度）
-     * @param {number} options.rows - 棋盘行数（高度）
      */
     constructor(options) {
       this.initialize(options);
@@ -7274,6 +7344,30 @@ var tetris = (() => {
   };
   var render_garbage_push_default = renderGarbagePush;
 
+  // lib/services/ui/effects/render-gamepad-notification.js
+  var renderGamepadNotification = (canvas, connected) => {
+    const { gameBoard, fontSize } = canvas;
+    const { width, height } = gameBoard;
+    const size = Math.floor(width * 0.54);
+    const x = width / 2;
+    const y = height / 2 - size * 1.2 + size + fontSize * 1.1;
+    const text = connected ? "CONNECTED" : "DISCONNECTED";
+    const color = connected ? colors_default.GREEN : colors_default.ORANGE;
+    render_overlay_default(canvas);
+    render_gamepad_default(canvas);
+    render_text_default(canvas, {
+      text,
+      x,
+      y,
+      color,
+      size: 1.56,
+      center: true,
+      baseline: "middle",
+      alpha: 0.95
+    });
+  };
+  var render_gamepad_notification_default = renderGamepadNotification;
+
   // lib/services/ui/core/canvas-renderer.js
   var CanvasRenderer = class extends core_default {
     /**
@@ -7539,6 +7633,9 @@ var tetris = (() => {
     renderGarbagePush(rows, visible) {
       render_garbage_push_default(this.Canvas, rows, visible);
     }
+    renderGamepadNotification(connected) {
+      render_gamepad_notification_default(this.Canvas, connected);
+    }
   };
   var canvas_renderer_default = CanvasRenderer;
 
@@ -7588,6 +7685,10 @@ var tetris = (() => {
       this.on(events.RENDER_LANDING_FLASH, this._onRenderLandingFlash);
       this.on(events.RENDER_GARBAGE_WARNING, this._onRenderGarbageWarning);
       this.on(events.RENDER_GARBAGE_PUSH, this._onRenderGarbagePush);
+      this.on(
+        events.RENDER_GAMEPAD_NOTIFICATION,
+        this._onRenderGamepadNotification
+      );
     }
     /**
      * ## 取消订阅 UI 事件
@@ -7615,6 +7716,10 @@ var tetris = (() => {
       this.off(events.RENDER_LANDING_FLASH, this._onRenderLandingFlash);
       this.off(events.RENDER_GARBAGE_WARNING, this._onRenderGarbageWarning);
       this.off(events.RENDER_GARBAGE_PUSH, this._onRenderGarbagePush);
+      this.off(
+        events.RENDER_GAMEPAD_NOTIFICATION,
+        this._onRenderGamepadNotification
+      );
     }
     // ==================== 事件处理器（私有） ====================
     /**
@@ -7882,6 +7987,11 @@ var tetris = (() => {
       const { rows, visible } = payload;
       const { UI: UI2 } = this;
       UI2.renderGarbagePush(rows, visible);
+    };
+    _onRenderGamepadNotification = (payload) => {
+      const { connected } = payload;
+      const { UI: UI2 } = this;
+      UI2.renderGamepadNotification(connected);
     };
   };
   var ui_router_default = UIRouter;
@@ -8162,6 +8272,9 @@ var tetris = (() => {
      */
     renderGarbagePush(rows, visible) {
       this.Renderer.renderGarbagePush(rows, visible);
+    }
+    renderGamepadNotification(connected) {
+      this.Renderer.renderGamepadNotification(connected);
     }
     // ==================== 事件订阅管理 ====================
     /**
@@ -12025,6 +12138,58 @@ var tetris = (() => {
   };
   var garbage_push_animation_default = GarbagePushAnimation;
 
+  // lib/services/animations/gamepad-notification-animation.js
+  var GamepadNotificationAnimation = class extends core_default {
+    constructor(options) {
+      super(options);
+      this.initialize();
+    }
+    initialize() {
+      const { Scheduler: Scheduler2 } = this;
+      this.layer = 160;
+      this.blocking = true;
+      this.name = "gamepad-notification";
+      this._finished = false;
+      this._visible = true;
+      this._flashes = 0;
+      this._maxFlashes = 6;
+      this._schedulerIds = [];
+      const toggle = () => {
+        this._visible = !this._visible;
+        this._flashes++;
+        if (this._flashes >= this._maxFlashes) {
+          this._finished = true;
+        }
+      };
+      const ids = Scheduler2.sequence([
+        { fn: toggle, delay: 200 },
+        { fn: toggle, delay: 200 },
+        { fn: toggle, delay: 200 },
+        { fn: toggle, delay: 200 },
+        { fn: toggle, delay: 200 },
+        { fn: toggle, delay: 200 }
+      ]);
+      this._schedulerIds = ids;
+      const events = AudioEvents();
+      this.emit(events.PLAY_SOUND, { sound: "GAMEPAD_NOTIFY" });
+    }
+    dispose() {
+      const { Scheduler: Scheduler2 } = this;
+      for (const id of this._schedulerIds) {
+        Scheduler2.cancel(id);
+      }
+    }
+    render() {
+      const { Game: Game2, _visible, connected } = this;
+      if (!_visible) {
+        return;
+      }
+      const events = UIEvents(Game2.id);
+      this.emit(events.RENDER_GAMEPAD_NOTIFICATION, { connected });
+    }
+  };
+  var gamepad_notification_animation_default = GamepadNotificationAnimation;
+
   // lib/game/utils/get-next-piece.js
   var getNextPiece = (runtime) => {
     const { Replay, Store } = runtime;
@@ -13394,6 +13559,16 @@ var tetris = (() => {
           rows,
           roundId,
           Battle
+        })
+      );
+    }
+    startGamepadConnectedNotify(connected) {
+      const { Scheduler: Scheduler2 } = this;
+      this.Animations.register(
+        new gamepad_notification_animation_default({
+          Game: this,
+          Scheduler: Scheduler2,
+          connected
         })
       );
     }
@@ -15982,8 +16157,7 @@ var tetris = (() => {
     /**
      * ## 时间累积器（逻辑时间基准）
      *
-     * 用于固定时间步长（fixed update / tick），
-     * 累积每帧的 delta time，当超过阈值时执行一次游戏逻辑更新。
+     * 用于固定时间步长（fixed update / tick）， 累积每帧的 delta time，当超过阈值时执行一次游戏逻辑更新。
      *
      * @default 0
      * @type {number}
@@ -16001,8 +16175,7 @@ var tetris = (() => {
     /**
      * ## 游戏配置
      *
-     * 从 configuration.js 导入的全局配置对象。
-     * 包含 Mode、Players、Elements、victoryScore 等配置项。
+     * 从 configuration.js 导入的全局配置对象。 包含 Mode、Players、Elements、victoryScore 等配置项。
      *
      * @type {object}
      */
@@ -16010,8 +16183,7 @@ var tetris = (() => {
     /**
      * ## 任务调度器实例
      *
-     * 管理 delay / interval / sequence 等定时任务。
-     * 是所有时间驱动逻辑的核心。
+     * 管理 delay / interval / sequence 等定时任务。 是所有时间驱动逻辑的核心。
      *
      * @default null
      * @type {Scheduler | null}
@@ -16029,8 +16201,7 @@ var tetris = (() => {
     /**
      * ## 游戏主控实例数组
      *
-     * 单人模式包含 1 个 Game 实例，对战模式包含 2 个。
-     * 每个 Game 管理独立的状态、输入、UI、回放等子系统。
+     * 单人模式包含 1 个 Game 实例，对战模式包含 2 个。 每个 Game 管理独立的状态、输入、UI、回放等子系统。
      *
      * @default [ ]
      * @type {Game[]}
@@ -16039,8 +16210,7 @@ var tetris = (() => {
     /**
      * ## 对战控制器实例
      *
-     * 仅在对战模式（versus）下创建。
-     * 管理双方的攻击计算、垃圾行发送、计分和胜负判定。
+     * 仅在对战模式（versus）下创建。 管理双方的攻击计算、垃圾行发送、计分和胜负判定。
      *
      * @default null
      * @type {BattleController | null}
@@ -16051,14 +16221,13 @@ var tetris = (() => {
      *
      * 快捷方法，检查 Configuration.Mode 是否为 "versus"。
      *
-     * @returns {boolean} true 表示对战模式
+     * @returns {boolean} True 表示对战模式
      */
     isVersus: () => Engine.Configuration.Mode === "versus",
     /**
      * ## 每个 Game 实例的时间累积器
      *
-     * Map<Game, timestamp>，用于独立控制每个 Game 的下落速度。
-     * 双人对战时两个 Game 可能有不同的速度和状态。
+     * Map<Game, timestamp>，用于独立控制每个 Game 的下落速度。 双人对战时两个 Game 可能有不同的速度和状态。
      *
      * @type {Map<Game, number>}
      */
@@ -16066,9 +16235,8 @@ var tetris = (() => {
     /**
      * ## 初始化引擎
      *
-     * 创建 Scheduler、Audio、Game 等核心实例，并注入相互依赖关系。
-     * 这是游戏启动的第一步——在所有子系统创建完成后，
-     * 由 launch() 继续执行游戏状态的初始化。
+     * 创建 Scheduler、Audio、Game 等核心实例，并注入相互依赖关系。 这是游戏启动的第一步——在所有子系统创建完成后， 由
+     * launch() 继续执行游戏状态的初始化。
      *
      * ### 初始化顺序
      *
@@ -16126,6 +16294,7 @@ var tetris = (() => {
      *
      * 1. 调用 initialize 创建所有子系统
      * 2. 对每个 Game 实例：
+     *
      *    - 初始化棋盘数据
      *    - 加载最高分存档
      *    - 设置初始模式为 main-menu
@@ -16152,6 +16321,9 @@ var tetris = (() => {
         UI2.updateController(Store.getController());
         UI2.lazyRender();
         Game2.addEventListeners();
+        setTimeout(() => {
+          Game2.startGamepadConnectedNotify(true);
+        }, 3e3);
       }
       Engine.subscribe();
       Engine.start();
@@ -16159,44 +16331,41 @@ var tetris = (() => {
     /**
      * # 带速度控制的游戏主循环（Game Loop）
      *
-     * 使用 `requestAnimationFrame` 驱动的核心渲染循环，
-     * 控制游戏的下落节奏、输入处理、渲染和动画更新。
+     * 使用 `requestAnimationFrame` 驱动的核心渲染循环， 控制游戏的下落节奏、输入处理、渲染和动画更新。
      *
      * ## 帧循环流程（每个 Game 实例）
      *
-     * | 步骤 | 操作                     | 说明                                         |
-     * | ---- | ------------------------ | -------------------------------------------- |
-     * | 1    | Scheduler.tick()         | 驱动调度器，执行到期的定时任务               |
-     * | 2    | Replay.syncPlayElapsed() | 同步回放逻辑时钟                             |
-     * | 3    | Replay.update()          | 更新回放系统，注入待重放的命令               |
-     * | 4    | Gamepad.update()         | 更新手柄输入状态                             |
-     * | 5    | Keyboard.update()        | 更新键盘输入状态                             |
-     * | 6    | CommandQueue.flush()     | 执行命令队列中的所有待执行命令               |
-     * | 7    | Game.tick()              | 执行游戏逻辑（下落/碰撞/消行）               |
-     * | 8    | Animations.flush()       | 合并/清理动画队列                            |
-     * | 9    | UI.tickHud()             | 更新 HUD 动画                                |
-     * | 10   | UI.render()              | 渲染游戏界面                                 |
-     * | 11   | Animations.render()      | 叠加渲染动画特效                             |
-     * | 12   | requestAnimationFrame()  | 请求下一帧                                   |
+     * | 步骤 | 操作                     | 说明                           |
+     * | ---- | ------------------------ | ------------------------------ |
+     * | 1    | Scheduler.tick()         | 驱动调度器，执行到期的定时任务 |
+     * | 2    | Replay.syncPlayElapsed() | 同步回放逻辑时钟               |
+     * | 3    | Replay.update()          | 更新回放系统，注入待重放的命令 |
+     * | 4    | Gamepad.update()         | 更新手柄输入状态               |
+     * | 5    | Keyboard.update()        | 更新键盘输入状态               |
+     * | 6    | CommandQueue.flush()     | 执行命令队列中的所有待执行命令 |
+     * | 7    | Game.tick()              | 执行游戏逻辑（下落/碰撞/消行） |
+     * | 8    | Animations.flush()       | 合并/清理动画队列              |
+     * | 9    | UI.tickHud()             | 更新 HUD 动画                  |
+     * | 10   | UI.render()              | 渲染游戏界面                   |
+     * | 11   | Animations.render()      | 叠加渲染动画特效               |
+     * | 12   | requestAnimationFrame()  | 请求下一帧                     |
      *
      * ## 固定时间步长
      *
-     * 游戏逻辑（下落）不是每帧都执行，而是根据当前等级的速度
-     * （`Game.getSpeed()`）来控制执行频率：
+     * 游戏逻辑（下落）不是每帧都执行，而是根据当前等级的速度 （`Game.getSpeed()`）来控制执行频率：
+     *
      * - 低等级时速度慢，下落间隔大（约 1000ms）
      * - 高等级时速度快，下落间隔小（最低 120ms）
      *
      * ## 回放特殊处理
      *
-     * 当 `Replay.playing` 为 true 时，跳过游戏逻辑 tick，
-     * 因为回放系统会通过注入 command 来驱动游戏状态。
+     * 当 `Replay.playing` 为 true 时，跳过游戏逻辑 tick， 因为回放系统会通过注入 command 来驱动游戏状态。
      *
      * ## 双人对战
      *
-     * 每个 Game 使用独立的时间累积器（gameAccumulators Map），
-     * 两个 Game 各自独立计算下落时机，互不影响。
+     * 每个 Game 使用独立的时间累积器（gameAccumulators Map）， 两个 Game 各自独立计算下落时机，互不影响。
      *
-     * @param {number} timestamp - requestAnimationFrame 传入的当前时间戳（毫秒）
+     * @param {number} timestamp - RequestAnimationFrame 传入的当前时间戳（毫秒）
      * @returns {void}
      */
     tick: (timestamp) => {
@@ -16240,9 +16409,7 @@ var tetris = (() => {
     /**
      * ## 订阅各模块事件
      *
-     * 依次订阅 Engine 自身、Audio 音频系统、
-     * 所有 Game 实例、BattleController 的事件。
-     * 在 launch 时调用一次。
+     * 依次订阅 Engine 自身、Audio 音频系统、 所有 Game 实例、BattleController 的事件。 在 launch 时调用一次。
      *
      * @returns {void}
      */
@@ -16260,8 +16427,7 @@ var tetris = (() => {
     /**
      * ## 取消订阅各模块事件
      *
-     * 取消所有已订阅的事件，在 destroy 时调用。
-     * 防止内存泄漏和误触发。
+     * 取消所有已订阅的事件，在 destroy 时调用。 防止内存泄漏和误触发。
      *
      * @returns {void}
      */
@@ -16279,8 +16445,7 @@ var tetris = (() => {
     /**
      * ## Engine 内部事件订阅
      *
-     * 为每个 Game 实例订阅 `dispatch:command` 和 `dispatch:input`
-     * 两个核心事件，它们是整个输入系统的入口。
+     * 为每个 Game 实例订阅 `dispatch:command` 和 `dispatch:input` 两个核心事件，它们是整个输入系统的入口。
      *
      * @private
      * @returns {void}
@@ -16310,14 +16475,13 @@ var tetris = (() => {
     /**
      * ## 命令分发处理器
      *
-     * 处理回放系统的命令执行。
-     * 检查当前是否有阻塞动画，注入阻塞状态后交由 dispatchCommand 处理。
+     * 处理回放系统的命令执行。 检查当前是否有阻塞动画，注入阻塞状态后交由 dispatchCommand 处理。
      *
      * ### 阻塞动画列表
      *
-     * - clear-lines：消行动画播放中
-     * - countdown：倒计时动画播放中
-     * - level-up：升级特效播放中
+     * - Clear-lines：消行动画播放中
+     * - Countdown：倒计时动画播放中
+     * - Level-up：升级特效播放中
      *
      * @private
      * @param {object} cmd - 命令对象
@@ -16340,14 +16504,13 @@ var tetris = (() => {
     /**
      * ## 输入分发处理器
      *
-     * 处理键盘、手柄、AI 等实时输入。
-     * 检查阻塞动画状态，计算回放时间戳，交由 dispatchInput 处理。
+     * 处理键盘、手柄、AI 等实时输入。 检查阻塞动画状态，计算回放时间戳，交由 dispatchInput 处理。
      *
      * ### 阻塞动画列表
      *
-     * - clear-lines：消行动画播放中
-     * - countdown：倒计时动画播放中
-     * - level-up：升级特效播放中
+     * - Clear-lines：消行动画播放中
+     * - Countdown：倒计时动画播放中
+     * - Level-up：升级特效播放中
      *
      * @private
      * @param {object} input - 输入对象
@@ -16370,8 +16533,7 @@ var tetris = (() => {
     /**
      * ## 启动游戏主循环
      *
-     * 使用 requestAnimationFrame 启动渲染循环。
-     * 第一帧会初始化时间基准。
+     * 使用 requestAnimationFrame 启动渲染循环。 第一帧会初始化时间基准。
      *
      * @returns {void}
      */
@@ -16381,8 +16543,7 @@ var tetris = (() => {
     /**
      * ## 停止游戏循环
      *
-     * 取消 requestAnimationFrame 回调，重置时间状态。
-     * 从暂停恢复时调用 restart() 重新启动。
+     * 取消 requestAnimationFrame 回调，重置时间状态。 从暂停恢复时调用 restart() 重新启动。
      *
      * @returns {void}
      */
@@ -16398,8 +16559,7 @@ var tetris = (() => {
     /**
      * ## 重启游戏循环
      *
-     * 停止当前循环后重新启动。
-     * 用于从暂停恢复或标签页切回。
+     * 停止当前循环后重新启动。 用于从暂停恢复或标签页切回。
      *
      * @returns {void}
      */
@@ -16411,6 +16571,7 @@ var tetris = (() => {
      * ## 销毁引擎
      *
      * 清理所有资源：
+     *
      * 1. 停止游戏循环
      * 2. 取消所有事件订阅
      * 3. 移除所有输入设备事件监听
