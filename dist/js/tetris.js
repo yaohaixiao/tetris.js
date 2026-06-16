@@ -1,6 +1,6 @@
 var tetris = (() => {
-  // lib/configuration.js
-  var Configuration = {
+  // lib/engine/state/engine-state.js
+  var EngineState = {
     /**
      * ## 游戏模式
      *
@@ -115,7 +115,438 @@ var tetris = (() => {
       }
     }
   };
-  var configuration_default = Configuration;
+  var engine_state_default = EngineState;
+
+  // lib/utils/types/is-string.js
+  var isString = (str) => typeof str === "string";
+  var is_string_default = isString;
+
+  // lib/utils/types/is-symbol.js
+  var isSymbol = (val) => typeof val === "symbol";
+  var is_symbol_default = isSymbol;
+
+  // lib/utils/oop/has-own.js
+  var hasOwn = (obj, prop) => {
+    if (obj === null || obj === void 0) {
+      return false;
+    }
+    if (!is_string_default(prop) && !is_symbol_default(prop)) {
+      return false;
+    }
+    const { hasOwnProperty } = Object.prototype;
+    return hasOwnProperty.call(obj, prop);
+  };
+  var has_own_default = hasOwn;
+
+  // lib/utils/oop/extend.js
+  var extend = (origin, source) => {
+    for (const prop in source) {
+      if (has_own_default(source, prop)) {
+        origin[prop] = source[prop];
+      }
+    }
+    return origin;
+  };
+  var extend_default = extend;
+
+  // lib/engine/state/engine-store.js
+  var EngineStore = class {
+    constructor(options = {}) {
+      this.initialize(options);
+    }
+    initialize(options) {
+      const normalizedOptions = extend_default(engine_state_default, options);
+      this.state = structuredClone(normalizedOptions);
+    }
+    getState() {
+      return this.state;
+    }
+    isVersus() {
+      return this.state.Mode === "versus";
+    }
+    getMode() {
+      return this.state.Mode;
+    }
+    setMode(mode) {
+      this.state.Mode = mode;
+    }
+    getVictoryScore() {
+      return this.state.victoryScore;
+    }
+    setVictoryScore(score) {
+      this.state.victoryScore = score;
+    }
+    getBlockStyle() {
+      return this.state.Block.style;
+    }
+    setBlockStyle(style) {
+      this.state.Block.style = style;
+    }
+    getBlockPattern() {
+      return this.state.Block.pattern;
+    }
+    setBlockPattern(pattern) {
+      this.state.Block.pattern = pattern;
+    }
+  };
+  var engine_store_default = EngineStore;
+
+  // lib/utils/types/is-function.js
+  var isFunction = (val) => {
+    if (val == null || typeof val !== "function" && typeof val !== "object") {
+      return false;
+    }
+    return (
+      // 处理某些特殊环境下 typeof 误判为 object 的函数（极少数情况）
+      typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]"
+    );
+  };
+  var is_function_default = isFunction;
+
+  // lib/core/event-bus/index.js
+  var EventBus = {
+    /**
+     * ## 事件订阅映射表
+     *
+     * Key 为事件名称，Value 为该事件对应的处理函数集合。
+     *
+     * @type {Map<string, Set<Function>>}
+     */
+    events: /* @__PURE__ */ new Map(),
+    /**
+     * ## 订阅事件
+     *
+     * 注册一个处理函数，每当事件触发时都会调用。 如果事件不存在，会自动创建。 相同的 handler 不会重复注册（Set 去重）。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
+     * @returns {void}
+     */
+    on(event, handler) {
+      if (!is_string_default(event) || !is_function_default(handler)) {
+        return;
+      }
+      if (!this.events.has(event)) {
+        this.events.set(event, /* @__PURE__ */ new Set());
+      }
+      this.events.get(event).add(handler);
+    },
+    /**
+     * ## 订阅事件，仅触发一次
+     *
+     * 注册的处理函数在第一次触发后自动取消订阅。 内部通过创建包装函数实现，触发后在 `finally` 中调用 `off`。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
+     * @returns {void}
+     */
+    once(event, handler) {
+      if (!is_string_default(event) || !is_function_default(handler)) {
+        return;
+      }
+      const wrapper = (payload) => {
+        try {
+          handler(payload);
+        } finally {
+          this.off(event, wrapper);
+        }
+      };
+      this.on(event, wrapper);
+    },
+    /**
+     * ## 取消订阅
+     *
+     * 从指定事件的订阅列表中移除处理函数。 如果移除后该事件没有订阅者，会清理该事件条目。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 要移除的处理函数
+     * @returns {void}
+     */
+    off(event, handler) {
+      if (!is_string_default(event) || !is_function_default(handler)) {
+        return;
+      }
+      const set = this.events.get(event);
+      if (!set) {
+        return;
+      }
+      set.delete(handler);
+      if (set.size === 0) {
+        this.events.delete(event);
+      }
+    },
+    /**
+     * ## 触发事件
+     *
+     * 通知指定事件的所有订阅者，依次调用它们的处理函数。 如果事件没有订阅者，不做任何操作。
+     *
+     * @param {string} event - 事件名称
+     * @param {object} [payload] - 传递给处理函数的参数对象
+     * @returns {void}
+     */
+    emit(event, payload) {
+      const set = this.events.get(event);
+      if (!set) {
+        return;
+      }
+      for (const handler of set) {
+        if (!is_function_default(handler)) {
+          continue;
+        }
+        handler(payload);
+      }
+    },
+    /**
+     * ## 清空所有事件
+     *
+     * 移除所有事件和订阅者。 用于游戏重启、单元测试 reset、或完全重置状态时调用。
+     *
+     * @returns {void}
+     */
+    clear() {
+      this.events.clear();
+    }
+  };
+  var event_bus_default = EventBus;
+
+  // lib/core/index.js
+  var Base = class {
+    /**
+     * ## 构造函数
+     *
+     * 接收依赖对象并注入到实例上。
+     *
+     * @example
+     *   const controller = new MyController({
+     *     Game: gameInstance,
+     *     Store: gameStore,
+     *     Scheduler: schedulerInstance,
+     *   });
+     *   // controller.Game === gameInstance
+     *
+     * @param {object} [deps={}] - 依赖对象，其属性会被复制到当前实例。默认值为 `{}`. Default is `{}`
+     */
+    constructor(deps = {}) {
+      this.inject(deps);
+    }
+    /**
+     * ## 依赖注入
+     *
+     * 将传入对象的属性复制到当前实例上。 使用 `Object.assign` 进行浅拷贝。
+     *
+     * @param {object} [deps={}] - 依赖对象。默认值为 `{}`. Default is `{}`
+     * @returns {void}
+     */
+    inject(deps = {}) {
+      Object.assign(this, deps);
+    }
+    /**
+     * ## 触发事件（EventBus 代理）
+     *
+     * 通知所有订阅了该事件的处理函数。
+     *
+     * @param {string} event - 事件名称
+     * @param {object} [payload] - 传递给处理函数的参数对象
+     * @returns {void}
+     */
+    emit(event, payload) {
+      event_bus_default.emit(event, payload);
+    }
+    /**
+     * ## 订阅事件（EventBus 代理）
+     *
+     * 注册一个持续监听的处理函数。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数
+     * @returns {void}
+     */
+    on(event, handler) {
+      event_bus_default.on(event, handler);
+    }
+    /**
+     * ## 一次性订阅事件（EventBus 代理）
+     *
+     * 注册的处理函数在首次触发后自动取消订阅。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数
+     * @returns {void}
+     */
+    once(event, handler) {
+      event_bus_default.once(event, handler);
+    }
+    /**
+     * ## 取消订阅事件（EventBus 代理）
+     *
+     * 从指定事件的订阅列表中移除处理函数。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 要移除的处理函数
+     * @returns {void}
+     */
+    off(event, handler) {
+      event_bus_default.off(event, handler);
+    }
+    /**
+     * ## 清空所有事件（EventBus 代理）
+     *
+     * 移除全局 EventBus 中的所有事件订阅。 注意：这是全局操作，会影响所有继承 Base 的实例。 通常用于游戏重启或单元测试 teardown。
+     *
+     * @returns {void}
+     */
+    clear() {
+      event_bus_default.clear();
+    }
+  };
+  var core_default = Base;
+
+  // lib/engine/core/utils/get-battle-overlay-template.js
+  var getBattleOverlayTemplate = (elements, players) => {
+    const { Battle } = elements;
+    const templates = [
+      /**
+       * ======== 胜者展示面板 ========
+       *
+       * 整场对战结束时显示，包含：
+       *
+       * - 标题 "BATTLE OVER"
+       * - 胜者名称（由 BattleUI 动态填充）
+       * - 重赛提示 "ENTER TO REMATCH"
+       *
+       * 默认添加 tetris-hidden 类隐藏。
+       */
+      `
+    <section id="${Battle.over}" class="tetris-battle-over tetris-hidden">
+      <h2 class="tetris-battle-title">BATTLE OVER</h2>
+      <div class="tetris-battle-winner">WINNER IS <span id="${Battle.winner}" class="tetris-highlight">HUMAN</span></div>
+      <footer class="tetris-battle-actions">
+        <div class="tetris-battle-rematch">ENTER TO REMATCH</div>
+      </footer>
+    </section>
+  `
+    ];
+    for (const [index, player] of players.entries()) {
+      templates.push(`
+      <canvas id="${player}-${index}-${Battle.fly}" class="tetris-battle-fly tetris-hidden"></canvas>
+    `);
+    }
+    return `
+    <section id="${Battle.overlay}" class="tetris-battle-overlay tetris-hidden">
+      ${templates.join("")}
+    </section>
+  `;
+  };
+  var get_battle_overlay_template_default = getBattleOverlayTemplate;
+
+  // lib/engine/core/utils/get-game-interface-template.js
+  var getGameInterfaceTemplate = (elements, player, index) => {
+    const { Canvas, Hud, Controls } = elements;
+    return `
+    <div id="${player}-${index}-tetris-player" class="tetris-player">
+      <section class="tetris-screen">
+        <section id="${player}-${index}-tetris-screen-main" class="tetris-screen-main">
+          <canvas id="${player}-${index}-${Canvas.board}" data-mode="main-menu"></canvas>
+        </section>
+        <aside class="tetris-screen-aside">
+          <section class="tetris-panel next">
+            <h3 class="tetris-next-title">NEXT</h3>
+            <canvas id="${player}-${index}-${Canvas.next}" class="tetris-next-piece"></canvas>
+          </section>
+          <section class="tetris-panel controller">
+            <p class="tetris-panel-text tetris-highlight"><span id="${player}-${index}-${Hud.controller}">Human</span></p>
+          </section>
+          <section class="tetris-panel data">
+            <p class="tetris-panel-text">SCORE:<br><span id="${player}-${index}-${Hud.score}">00000</span></p>
+            <p class="tetris-panel-text">LINE:<br><span id="${player}-${index}-${Hud.lines}">00</span></p>
+            <p class="tetris-panel-text">LEVEL:<br><span id="${player}-${index}-${Hud.level}">01</span></p>
+            <p class="tetris-panel-text">COMBO:<br><span id="${player}-${index}-${Hud.combo}">00</span></p>
+            <p class="tetris-panel-text tetris-highlight">HI-SCORE:<br><span id="${player}-${index}-${Hud.highScore}">00000</span></p>
+          </section>
+          <section class="tetris-panel hold">
+            <h3 class="tetris-hold-title">HOLD</h3>
+            <canvas id="${player}-${index}-${Canvas.hold}" class="tetris-hold-piece"></canvas>
+          </section>
+        </aside>
+      </section>
+      <footer class="tetris-controls">
+        <!-- START / SELECT \u7CFB\u7EDF\u6309\u94AE -->
+        <section class="tetris-system-controls">
+          <div id="${player}-${index}-${Controls.back}" data-key="back" class="tetris-system-button tetris-btn-back">BACK</div>
+          <div id="${player}-${index}-${Controls.hold}" data-key="hold" class="tetris-system-button tetris-btn-hold">HOLD</div>
+          <div id="${player}-${index}-${Controls.start}" data-key="start" class="tetris-system-button tetris-btn-start">START</div>
+        </section>
+        <section class="tetris-main-controls">
+          <!-- D-PAD \u65B9\u5411\u952E\uFF08GAME BOY \u7ECF\u5178\u5341\u5B57\u952E\u5E03\u5C40\uFF09 -->
+          <div class="tetris-dpad">
+            <div id="${player}-${index}-${Controls.up}" data-key="dpad_up" class="tetris-dpad-up">\u2191</div>
+            <div class="tetris-dpad-mid">
+              <div id="${player}-${index}-${Controls.left}" data-key="dpad_left" class="tetris-dpad-left">\u2190</div>
+              <div class="tetris-dpad-center"></div>
+              <div id="${player}-${index}-${Controls.right}" data-key="dpad_right" class="tetris-dpad-right">\u2192</div>
+            </div>
+            <div id="${player}-${index}-${Controls.down}" data-key="dpad_down" class="tetris-dpad-down">\u2193</div>
+          </div>
+          <!-- ABXY \u52A8\u4F5C\u6309\u94AE\uFF08GAME BOY \u7ECF\u5178\u83F1\u5F62\u5E03\u5C40\uFF09 -->
+          <div class="tetris-buttons">
+            <div id="${player}-${index}-${Controls.x}" data-key="x" class="tetris-action-button tetris-button-x">X</div>
+            <div id="${player}-${index}-${Controls.y}" data-key="y" class="tetris-action-button tetris-button-y">Y</div>
+            <div id="${player}-${index}-${Controls.b}" data-key="b" class="tetris-action-button tetris-button-b">B</div>
+            <div id="${player}-${index}-${Controls.a}" data-key="a" class="tetris-action-button tetris-button-a">A</div>
+          </div>
+        </section>
+      </footer>
+    </div>
+  `;
+  };
+  var get_game_interface_template_default = getGameInterfaceTemplate;
+
+  // lib/engine/core/utils/get-battle-score-template.js
+  var getBattleScoreTemplate = (player, index) => `
+  <div class="tetris-battle-score">
+    <h3 class="tetris-battle-player">${index + 1}P</h3>
+    <span id="${player}-${index}-tetris-battle-score" >0</span>
+  </div>
+`;
+  var get_battle_score_template_default = getBattleScoreTemplate;
+
+  // lib/engine/core/engine-renderer.js
+  var EngineRenderer = class extends core_default {
+    constructor(options) {
+      super(options);
+      this.initialize();
+    }
+    initialize() {
+      const { Store } = this;
+      const state = Store.getState();
+      const { Container } = state.Elements;
+      this.$container = document.querySelector(`#${Container}`);
+      this._initializeTemplates();
+    }
+    _initializeTemplates() {
+      const { Store } = this;
+      const isVersus = Store.isVersus();
+      this.templates = [];
+      const { Elements, Players } = Store.getState();
+      const finalPlayers = [...Players];
+      if (isVersus) {
+        this.templates.push(get_battle_overlay_template_default(Elements, finalPlayers));
+      } else {
+        finalPlayers.pop();
+      }
+      for (const [index, player] of finalPlayers.entries()) {
+        this.templates.push(get_game_interface_template_default(Elements, player, index));
+        if (isVersus) {
+          this.templates.push(get_battle_score_template_default(player, index));
+        }
+      }
+    }
+    render() {
+      const { $container, templates } = this;
+      $container.innerHTML = templates.join("");
+    }
+  };
+  var engine_renderer_default = EngineRenderer;
 
   // lib/engine/scheduler.js
   var Scheduler = class {
@@ -360,220 +791,6 @@ var tetris = (() => {
     }
   };
   var scheduler_default = Scheduler;
-
-  // lib/utils/types/is-function.js
-  var isFunction = (val) => {
-    if (val == null || typeof val !== "function" && typeof val !== "object") {
-      return false;
-    }
-    return (
-      // 处理某些特殊环境下 typeof 误判为 object 的函数（极少数情况）
-      typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]"
-    );
-  };
-  var is_function_default = isFunction;
-
-  // lib/utils/types/is-string.js
-  var isString = (str) => typeof str === "string";
-  var is_string_default = isString;
-
-  // lib/core/event-bus/index.js
-  var EventBus = {
-    /**
-     * ## 事件订阅映射表
-     *
-     * Key 为事件名称，Value 为该事件对应的处理函数集合。
-     *
-     * @type {Map<string, Set<Function>>}
-     */
-    events: /* @__PURE__ */ new Map(),
-    /**
-     * ## 订阅事件
-     *
-     * 注册一个处理函数，每当事件触发时都会调用。 如果事件不存在，会自动创建。 相同的 handler 不会重复注册（Set 去重）。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
-     * @returns {void}
-     */
-    on(event, handler) {
-      if (!is_string_default(event) || !is_function_default(handler)) {
-        return;
-      }
-      if (!this.events.has(event)) {
-        this.events.set(event, /* @__PURE__ */ new Set());
-      }
-      this.events.get(event).add(handler);
-    },
-    /**
-     * ## 订阅事件，仅触发一次
-     *
-     * 注册的处理函数在第一次触发后自动取消订阅。 内部通过创建包装函数实现，触发后在 `finally` 中调用 `off`。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
-     * @returns {void}
-     */
-    once(event, handler) {
-      if (!is_string_default(event) || !is_function_default(handler)) {
-        return;
-      }
-      const wrapper = (payload) => {
-        try {
-          handler(payload);
-        } finally {
-          this.off(event, wrapper);
-        }
-      };
-      this.on(event, wrapper);
-    },
-    /**
-     * ## 取消订阅
-     *
-     * 从指定事件的订阅列表中移除处理函数。 如果移除后该事件没有订阅者，会清理该事件条目。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 要移除的处理函数
-     * @returns {void}
-     */
-    off(event, handler) {
-      if (!is_string_default(event) || !is_function_default(handler)) {
-        return;
-      }
-      const set = this.events.get(event);
-      if (!set) {
-        return;
-      }
-      set.delete(handler);
-      if (set.size === 0) {
-        this.events.delete(event);
-      }
-    },
-    /**
-     * ## 触发事件
-     *
-     * 通知指定事件的所有订阅者，依次调用它们的处理函数。 如果事件没有订阅者，不做任何操作。
-     *
-     * @param {string} event - 事件名称
-     * @param {object} [payload] - 传递给处理函数的参数对象
-     * @returns {void}
-     */
-    emit(event, payload) {
-      const set = this.events.get(event);
-      if (!set) {
-        return;
-      }
-      for (const handler of set) {
-        if (!is_function_default(handler)) {
-          continue;
-        }
-        handler(payload);
-      }
-    },
-    /**
-     * ## 清空所有事件
-     *
-     * 移除所有事件和订阅者。 用于游戏重启、单元测试 reset、或完全重置状态时调用。
-     *
-     * @returns {void}
-     */
-    clear() {
-      this.events.clear();
-    }
-  };
-  var event_bus_default = EventBus;
-
-  // lib/core/index.js
-  var Base = class {
-    /**
-     * ## 构造函数
-     *
-     * 接收依赖对象并注入到实例上。
-     *
-     * @example
-     *   const controller = new MyController({
-     *     Game: gameInstance,
-     *     Store: gameStore,
-     *     Scheduler: schedulerInstance,
-     *   });
-     *   // controller.Game === gameInstance
-     *
-     * @param {object} [deps={}] - 依赖对象，其属性会被复制到当前实例。默认值为 `{}`. Default is `{}`
-     */
-    constructor(deps = {}) {
-      this.inject(deps);
-    }
-    /**
-     * ## 依赖注入
-     *
-     * 将传入对象的属性复制到当前实例上。 使用 `Object.assign` 进行浅拷贝。
-     *
-     * @param {object} [deps={}] - 依赖对象。默认值为 `{}`. Default is `{}`
-     * @returns {void}
-     */
-    inject(deps = {}) {
-      Object.assign(this, deps);
-    }
-    /**
-     * ## 触发事件（EventBus 代理）
-     *
-     * 通知所有订阅了该事件的处理函数。
-     *
-     * @param {string} event - 事件名称
-     * @param {object} [payload] - 传递给处理函数的参数对象
-     * @returns {void}
-     */
-    emit(event, payload) {
-      event_bus_default.emit(event, payload);
-    }
-    /**
-     * ## 订阅事件（EventBus 代理）
-     *
-     * 注册一个持续监听的处理函数。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数
-     * @returns {void}
-     */
-    on(event, handler) {
-      event_bus_default.on(event, handler);
-    }
-    /**
-     * ## 一次性订阅事件（EventBus 代理）
-     *
-     * 注册的处理函数在首次触发后自动取消订阅。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数
-     * @returns {void}
-     */
-    once(event, handler) {
-      event_bus_default.once(event, handler);
-    }
-    /**
-     * ## 取消订阅事件（EventBus 代理）
-     *
-     * 从指定事件的订阅列表中移除处理函数。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 要移除的处理函数
-     * @returns {void}
-     */
-    off(event, handler) {
-      event_bus_default.off(event, handler);
-    }
-    /**
-     * ## 清空所有事件（EventBus 代理）
-     *
-     * 移除全局 EventBus 中的所有事件订阅。 注意：这是全局操作，会影响所有继承 Base 的实例。 通常用于游戏重启或单元测试 teardown。
-     *
-     * @returns {void}
-     */
-    clear() {
-      event_bus_default.clear();
-    }
-  };
-  var core_default = Base;
 
   // lib/services/audio/constants/motifs.js
   var MOTIFS = {
@@ -13100,11 +13317,6 @@ var tetris = (() => {
      * 中完成，便于子类覆盖定制初始化行为。
      *
      * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Elements - DOM 元素引用集合
-     * @param {object} options.Block - 方块数据模块
-     * @param {object} options.Scheduler - 全局调度器实例
-     * @param {object} options.Player - 玩家信息对象
-     * @param {string} options.Mode - 游戏模式（如 "single"、"versus"）
      */
     constructor(options) {
       super(options);
@@ -15478,137 +15690,6 @@ var tetris = (() => {
   };
   var battle_controller_default = BattleController;
 
-  // lib/engine/utils/get-battle-overlay-template.js
-  var getBattleOverlayTemplate = (elements, players) => {
-    const { Battle } = elements;
-    const templates = [
-      /**
-       * ======== 胜者展示面板 ========
-       *
-       * 整场对战结束时显示，包含：
-       *
-       * - 标题 "BATTLE OVER"
-       * - 胜者名称（由 BattleUI 动态填充）
-       * - 重赛提示 "ENTER TO REMATCH"
-       *
-       * 默认添加 tetris-hidden 类隐藏。
-       */
-      `
-    <section id="${Battle.over}" class="tetris-battle-over tetris-hidden">
-      <h2 class="tetris-battle-title">BATTLE OVER</h2>
-      <div class="tetris-battle-winner">WINNER IS <span id="${Battle.winner}" class="tetris-highlight">HUMAN</span></div>
-      <footer class="tetris-battle-actions">
-        <div class="tetris-battle-rematch">ENTER TO REMATCH</div>
-      </footer>
-    </section>
-  `
-    ];
-    for (const [index, player] of players.entries()) {
-      templates.push(`
-      <canvas id="${player}-${index}-${Battle.fly}" class="tetris-battle-fly tetris-hidden"></canvas>
-    `);
-    }
-    return `
-    <section id="${Battle.overlay}" class="tetris-battle-overlay tetris-hidden">
-      ${templates.join("")}
-    </section>
-  `;
-  };
-  var get_battle_overlay_template_default = getBattleOverlayTemplate;
-
-  // lib/engine/utils/get-game-interface-template.js
-  var getGameInterfaceTemplate = (elements, player, index) => {
-    const { Canvas, Hud, Controls } = elements;
-    return `
-    <div id="${player}-${index}-tetris-player" class="tetris-player">
-      <section class="tetris-screen">
-        <section id="${player}-${index}-tetris-screen-main" class="tetris-screen-main">
-          <canvas id="${player}-${index}-${Canvas.board}" data-mode="main-menu"></canvas>
-        </section>
-        <aside class="tetris-screen-aside">
-          <section class="tetris-panel next">
-            <h3 class="tetris-next-title">NEXT</h3>
-            <canvas id="${player}-${index}-${Canvas.next}" class="tetris-next-piece"></canvas>
-          </section>
-          <section class="tetris-panel controller">
-            <p class="tetris-panel-text tetris-highlight"><span id="${player}-${index}-${Hud.controller}">Human</span></p>
-          </section>
-          <section class="tetris-panel data">
-            <p class="tetris-panel-text">SCORE:<br><span id="${player}-${index}-${Hud.score}">00000</span></p>
-            <p class="tetris-panel-text">LINE:<br><span id="${player}-${index}-${Hud.lines}">00</span></p>
-            <p class="tetris-panel-text">LEVEL:<br><span id="${player}-${index}-${Hud.level}">01</span></p>
-            <p class="tetris-panel-text">COMBO:<br><span id="${player}-${index}-${Hud.combo}">00</span></p>
-            <p class="tetris-panel-text tetris-highlight">HI-SCORE:<br><span id="${player}-${index}-${Hud.highScore}">00000</span></p>
-          </section>
-          <section class="tetris-panel hold">
-            <h3 class="tetris-hold-title">HOLD</h3>
-            <canvas id="${player}-${index}-${Canvas.hold}" class="tetris-hold-piece"></canvas>
-          </section>
-        </aside>
-      </section>
-      <footer class="tetris-controls">
-        <!-- START / SELECT \u7CFB\u7EDF\u6309\u94AE -->
-        <section class="tetris-system-controls">
-          <div id="${player}-${index}-${Controls.back}" data-key="back" class="tetris-system-button tetris-btn-back">BACK</div>
-          <div id="${player}-${index}-${Controls.hold}" data-key="hold" class="tetris-system-button tetris-btn-hold">HOLD</div>
-          <div id="${player}-${index}-${Controls.start}" data-key="start" class="tetris-system-button tetris-btn-start">START</div>
-        </section>
-        <section class="tetris-main-controls">
-          <!-- D-PAD \u65B9\u5411\u952E\uFF08GAME BOY \u7ECF\u5178\u5341\u5B57\u952E\u5E03\u5C40\uFF09 -->
-          <div class="tetris-dpad">
-            <div id="${player}-${index}-${Controls.up}" data-key="dpad_up" class="tetris-dpad-up">\u2191</div>
-            <div class="tetris-dpad-mid">
-              <div id="${player}-${index}-${Controls.left}" data-key="dpad_left" class="tetris-dpad-left">\u2190</div>
-              <div class="tetris-dpad-center"></div>
-              <div id="${player}-${index}-${Controls.right}" data-key="dpad_right" class="tetris-dpad-right">\u2192</div>
-            </div>
-            <div id="${player}-${index}-${Controls.down}" data-key="dpad_down" class="tetris-dpad-down">\u2193</div>
-          </div>
-          <!-- ABXY \u52A8\u4F5C\u6309\u94AE\uFF08GAME BOY \u7ECF\u5178\u83F1\u5F62\u5E03\u5C40\uFF09 -->
-          <div class="tetris-buttons">
-            <div id="${player}-${index}-${Controls.x}" data-key="x" class="tetris-action-button tetris-button-x">X</div>
-            <div id="${player}-${index}-${Controls.y}" data-key="y" class="tetris-action-button tetris-button-y">Y</div>
-            <div id="${player}-${index}-${Controls.b}" data-key="b" class="tetris-action-button tetris-button-b">B</div>
-            <div id="${player}-${index}-${Controls.a}" data-key="a" class="tetris-action-button tetris-button-a">A</div>
-          </div>
-        </section>
-      </footer>
-    </div>
-  `;
-  };
-  var get_game_interface_template_default = getGameInterfaceTemplate;
-
-  // lib/engine/utils/get-battle-score-template.js
-  var getBattleScoreTemplate = (player, index) => `
-  <div class="tetris-battle-score">
-    <h3 class="tetris-battle-player">${index + 1}P</h3>
-    <span id="${player}-${index}-tetris-battle-score" >0</span>
-  </div>
-`;
-  var get_battle_score_template_default = getBattleScoreTemplate;
-
-  // lib/engine/draw-interface.js
-  var drawInterface = (config) => {
-    const { Elements, Mode, Players } = config;
-    const { Container } = Elements;
-    const templates = [];
-    const finalPlayers = [...Players];
-    const $container = document.querySelector(`#${Container}`);
-    if (Mode === "single") {
-      finalPlayers.pop();
-    } else {
-      templates.push(get_battle_overlay_template_default(Elements, finalPlayers));
-    }
-    for (const [index, player] of finalPlayers.entries()) {
-      templates.push(get_game_interface_template_default(Elements, player, index));
-      if (Mode === "versus") {
-        templates.push(get_battle_score_template_default(player, index));
-      }
-    }
-    $container.innerHTML = templates.join("");
-  };
-  var draw_interface_default = drawInterface;
-
   // lib/core/command/command.js
   var Command = class extends core_default {
     /**
@@ -16327,9 +16408,10 @@ var tetris = (() => {
      *
      * 从 configuration.js 导入的全局配置对象。 包含 Mode、Players、Elements、victoryScore 等配置项。
      *
-     * @type {object}
+     * @type {EngineStore | null}
      */
-    Configuration: configuration_default,
+    Store: null,
+    Renderer: null,
     /**
      * ## 任务调度器实例
      *
@@ -16367,14 +16449,6 @@ var tetris = (() => {
      */
     Battle: null,
     /**
-     * ## 判断是否为对战模式
-     *
-     * 快捷方法，检查 Configuration.Mode 是否为 "versus"。
-     *
-     * @returns {boolean} True 表示对战模式
-     */
-    isVersus: () => Engine.Configuration.Mode === "versus",
-    /**
      * ## 每个 Game 实例的时间累积器
      *
      * Map<Game, timestamp>，用于独立控制每个 Game 的下落速度。 双人对战时两个 Game 可能有不同的速度和状态。
@@ -16396,19 +16470,21 @@ var tetris = (() => {
      * 4. 根据 Players 配置创建 Game 实例（single 模式 1 个，versus 模式 2 个）
      * 5. 对战模式下创建 BattleController
      *
-     * @param {object} options - 初始化配置选项
-     * @param {object} options.Elements - UI 元素配置
-     * @param {string[]} options.Players - 玩家名称数组
-     * @param {string} options.Mode - 游戏模式（"single" | "versus"）
-     * @param {number} options.victoryScore - 对战目标分数
+     * @param {object} options - 配置参数对象
      * @returns {void}
      */
-    initialize: (options) => {
-      const { Players, Mode, victoryScore, Elements } = options;
-      draw_interface_default(options);
+    initialize: (options = {}) => {
+      const Store = new engine_store_default(options);
+      Engine.Store = Store;
+      Engine.Renderer = new engine_renderer_default({
+        Store
+      });
+      Engine.Renderer.render();
+      const state = Store.getState();
+      const { Players, Mode, victoryScore, Elements } = state;
       Engine.Scheduler = new scheduler_default();
       const normalizedOptions = {
-        ...options,
+        ...state,
         Scheduler: Engine.Scheduler,
         isAIPlayer: true
       };
@@ -16428,7 +16504,7 @@ var tetris = (() => {
           })
         );
       }
-      if (Engine.isVersus()) {
+      if (Engine.Store.isVersus()) {
         Engine.Battle = new battle_controller_default({
           games: Engine.Games,
           victoryScore,
@@ -16456,10 +16532,11 @@ var tetris = (() => {
      * 3. 订阅各模块事件
      * 4. 启动游戏主循环
      *
+     * @param {object} options - 配置参数对象
      * @returns {void}
      */
-    launch: () => {
-      Engine.initialize(Engine.Configuration);
+    launch: (options = {}) => {
+      Engine.initialize(options);
       for (const Game2 of Engine.Games) {
         const { Store, UI: UI2 } = Game2;
         Store.resetBoard();
@@ -16567,7 +16644,7 @@ var tetris = (() => {
       for (const Game2 of Games) {
         Game2?.subscribe?.();
       }
-      if (Engine.isVersus()) {
+      if (Engine.Store.isVersus()) {
         Battle?.subscribe?.();
       }
     },
@@ -16585,7 +16662,7 @@ var tetris = (() => {
       for (const Game2 of Games) {
         Game2?.unsubscribe?.();
       }
-      if (Engine.isVersus()) {
+      if (Engine.Store.isVersus()) {
         Battle?.unsubscribe?.();
       }
     },

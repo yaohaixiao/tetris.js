@@ -1,7 +1,7 @@
-import Configuration from '../../lib/configuration.js';
+import EngineState from '../../lib/engine/state/engine-state.js';
 
 const getHtmlTemplate = (args) => {
-  const { Mode } = Configuration;
+  const { Mode } = EngineState;
   const minify = args.action === 'minify';
   const stylePath = minify ? 'css/tetris.min.css' : 'css/tetris.css';
   const scriptPath = minify ? 'js/tetris.min.js' : 'js/tetris.js';

@@ -18,7 +18,6 @@ describe('pause', () => {
       id: 'test-game-uuid',
       Store: mockStore,
       emit: jest.fn(),
-      isVersus: jest.fn(() => false),
     };
   });
 
@@ -39,18 +38,10 @@ describe('pause', () => {
       expect(mockStore.setMode).toHaveBeenCalledWith('paused');
     });
 
-    it('单人模式应该停止背景音乐', () => {
-      mockContext.isVersus.mockReturnValue(false);
+    it('应该停止背景音乐（所有模式）', () => {
       pause(mockContext);
 
       expect(mockContext.emit).toHaveBeenCalledWith('audio:stop:bgm');
-    });
-
-    it('对战模式不应该停止背景音乐', () => {
-      mockContext.isVersus.mockReturnValue(true);
-      pause(mockContext);
-
-      expect(mockContext.emit).not.toHaveBeenCalledWith('audio:stop:bgm');
     });
 
     it('应该播放暂停音效', () => {
