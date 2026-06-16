@@ -1,4 +1,4 @@
-import toString from '@/lib/utils/to-string.js';
+import toString from '@/lib/utils/types/to-string.js';
 
 describe('toString', () => {
   it('应该返回 "[object String]" 对于字符串', () => {

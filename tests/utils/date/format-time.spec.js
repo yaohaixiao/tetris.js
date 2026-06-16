@@ -1,4 +1,4 @@
-import formatTime from '@/lib/utils/format-time.js';
+import formatTime from '@/lib/utils/date/format-time.js';
 
 describe('formatTime', () => {
   const date = new Date(2026, 0, 15, 9, 5, 3); // 2026-01-15 09:05:03

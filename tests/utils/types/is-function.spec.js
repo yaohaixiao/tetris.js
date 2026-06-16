@@ -1,4 +1,4 @@
-import isFunction from '@/lib/utils/is-function.js';
+import isFunction from '@/lib/utils/types/is-function.js';
 
 describe('isFunction', () => {
   test('普通函数', () => {

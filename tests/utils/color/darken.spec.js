@@ -1,4 +1,4 @@
-import darken from '@/lib/utils/darken.js';
+import darken from '@/lib/utils/color/darken.js';
 
 describe('darken', () => {
   // ==================== 基本变暗 ====================

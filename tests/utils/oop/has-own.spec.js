@@ -1,4 +1,4 @@
-import hasOwn from '@/lib/utils/has-own.js';
+import hasOwn from '@/lib/utils/oop/has-own.js';
 
 describe('hasOwn', () => {
   describe('应该返回 true', () => {

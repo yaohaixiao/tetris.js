@@ -1,4 +1,4 @@
-import padStart from '@/lib/utils/pad-start.js';
+import padStart from '@/lib/utils/string/pad-start.js';
 
 describe('padStart', () => {
   test('数字小于目标长度时补零', () => {

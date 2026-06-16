@@ -1,8 +1,8 @@
-import extend from '@/lib/utils/extend.js';
-import hasOwn from '@/lib/utils/has-own.js';
+import extend from '@/lib/utils/oop/extend.js';
+import hasOwn from '@/lib/utils/oop/has-own.js';
 
 // Mock hasOwn
-jest.mock('@/lib/utils/has-own.js', () => ({
+jest.mock('@/lib/utils/oop/has-own.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));

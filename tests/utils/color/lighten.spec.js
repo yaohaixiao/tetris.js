@@ -1,4 +1,4 @@
-import lighten from '@/lib/utils/lighten.js';
+import lighten from '@/lib/utils/color/lighten.js';
 
 describe('lighten', () => {
   // ==================== 基本变亮 ====================

@@ -7,7 +7,7 @@ jest.mock('@/lib/state/utils/place-garbage-on-board.js', () => ({
   default: jest.fn(),
 }));
 
-jest.mock('@/lib/utils/is-function.js', () => ({
+jest.mock('@/lib/utils/types/is-function.js', () => ({
   __esModule: true,
   default: jest.fn((val) => typeof val === 'function'),
 }));

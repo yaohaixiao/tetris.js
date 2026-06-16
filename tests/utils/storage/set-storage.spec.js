@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import setStorage from '@/lib/utils/set-storage';
+import setStorage from '@/lib/utils/storage/set-storage.js';
 
 describe('setStorage', () => {
   beforeEach(() => {

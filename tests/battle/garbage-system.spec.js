@@ -2,13 +2,13 @@
 
 import { calculateGarbage, applyGarbage } from '@/lib/battle/garbage-system.js';
 import COLORS from '@/lib/constants/colors.js';
-import lighten from '@/lib/utils/lighten.js';
+import lighten from '@/lib/utils/color/lighten.js';
 
 jest.mock('@/lib/constants/colors.js', () => ({
   BLACK: '#000000',
 }));
 
-jest.mock('@/lib/utils/lighten.js', () => {
+jest.mock('../../lib/utils/color/lighten.js', () => {
   return jest.fn((color, amount) => `lightened(${color}, ${amount})`);
 });
 

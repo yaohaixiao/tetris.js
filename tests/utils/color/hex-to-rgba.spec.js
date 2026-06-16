@@ -1,4 +1,4 @@
-import hexToRgba from '@/lib/utils/hex-to-rgba.js';
+import hexToRgba from '@/lib/utils/color/hex-to-rgba.js';
 
 describe('hexToRgba', () => {
   /*

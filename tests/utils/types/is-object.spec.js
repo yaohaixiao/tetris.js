@@ -1,4 +1,4 @@
-import isObject from '@/lib/utils/is-object.js';
+import isObject from '@/lib/utils/types/is-object.js';
 
 describe('isObject', () => {
   describe('应该返回 true', () => {

@@ -15,7 +15,7 @@ var tetris = (() => {
      */
     Players: ["human", "ai"],
     // 先得 15 分者获胜
-    victoryScore: 3,
+    victoryScore: 15,
     /*
      * ==================== 方块渲染配置 ====================
      */
@@ -361,7 +361,7 @@ var tetris = (() => {
   };
   var scheduler_default = Scheduler;
 
-  // lib/utils/is-function.js
+  // lib/utils/types/is-function.js
   var isFunction = (val) => {
     if (val == null || typeof val !== "function" && typeof val !== "object") {
       return false;
@@ -373,7 +373,7 @@ var tetris = (() => {
   };
   var is_function_default = isFunction;
 
-  // lib/utils/is-string.js
+  // lib/utils/types/is-string.js
   var isString = (str) => typeof str === "string";
   var is_string_default = isString;
 
@@ -5152,7 +5152,7 @@ var tetris = (() => {
   };
   var canvas_manager_default = CanvasManager;
 
-  // lib/utils/pad-start.js
+  // lib/utils/string/pad-start.js
   var padStart = (n, len) => {
     const num = Number(n);
     if (!Number.isFinite(num)) {
@@ -5737,7 +5737,7 @@ var tetris = (() => {
   };
   var clock_themes_default = ClockThemes;
 
-  // lib/utils/format-time.js
+  // lib/utils/date/format-time.js
   var formatTime = (date, format = "yyyy-MM-dd HH:mm:ss") => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
@@ -6050,7 +6050,7 @@ var tetris = (() => {
   };
   var render_classic_block_default = renderClassicBlock;
 
-  // lib/utils/darken.js
+  // lib/utils/color/darken.js
   var darken = (hex, factor) => {
     const fullHex = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
     const r = Number.parseInt(fullHex.slice(1, 3), 16);
@@ -6063,7 +6063,7 @@ var tetris = (() => {
   };
   var darken_default = darken;
 
-  // lib/utils/hex-to-rgba.js
+  // lib/utils/color/hex-to-rgba.js
   var hexToRgba = (hex, alpha = 1) => {
     let fullHex = hex;
     if (hex.length === 4) {
@@ -6138,7 +6138,7 @@ var tetris = (() => {
   };
   var render_glass_block_default = renderGlassBlock;
 
-  // lib/utils/lighten.js
+  // lib/utils/color/lighten.js
   var lighten = (hex, factor) => {
     const fullHex = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
     const r = Number.parseInt(fullHex.slice(1, 3), 16);
@@ -12789,11 +12789,11 @@ var tetris = (() => {
   };
   var get_speed_default = getSpeed;
 
-  // lib/utils/get-storage.js
+  // lib/utils/storage/get-storage.js
   var getStorage = (key) => localStorage.getItem(key);
   var get_storage_default = getStorage;
 
-  // lib/utils/set-storage.js
+  // lib/utils/storage/set-storage.js
   var setStorage = (key, value) => {
     localStorage.setItem(key, value);
   };
@@ -12808,11 +12808,6 @@ var tetris = (() => {
      * 中完成，便于子类覆盖定制初始化行为。
      *
      * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Elements - DOM 元素引用集合
-     * @param {object} options.Block - 方块数据模块
-     * @param {object} options.Scheduler - 全局调度器实例
-     * @param {object} options.Player - 玩家信息对象
-     * @param {string} options.Mode - 游戏模式（如 "single"、"versus"）
      */
     constructor(options) {
       super(options);
@@ -14120,9 +14115,15 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收 DOM 元素的 ID 配置，缓存元素引用。
+     * 接收 DOM 元素的 ID 配置和玩家列表，缓存元素引用。
      *
      * @param {object} options - 配置选项
+     * @param {object} options.elements - DOM 元素 ID 配置
+     * @param {string} options.elements.overlay - 覆盖层容器元素 ID
+     * @param {string} options.elements.over - 胜者面板元素 ID
+     * @param {string} options.elements.winner - 胜者名称显示元素 ID
+     * @param {string} options.elements.fly - Fly canvas 元素 ID 前缀
+     * @param {string[]} options.players - 玩家名称数组（如 ['human', 'human']）
      */
     constructor(options) {
       super(options);
@@ -14131,12 +14132,14 @@ var tetris = (() => {
     /**
      * ## 初始化
      *
-     * 根据配置中的元素 ID，通过 `document.querySelector` 查找并缓存 DOM 元素引用。
+     * 根据配置中的元素 ID，通过 `document.querySelector` 查找并缓存所有 DOM 元素引用。
      *
      * ### 缓存内容
      *
-     * - `$overlay`：覆盖层元素，控制整个结果界面的显示/隐藏
+     * - `$overlay`：覆盖层容器元素，控制整个结果界面的显示/隐藏
+     * - `$over`：胜者面板元素，显示 BATTLE OVER 和胜者名称
      * - `$winner`：胜者名称显示元素，用于展示赢家名称
+     * - `$flies`：fly canvas 映射表，key 为 `{player}-{index}`，value 为对应 canvas 元素
      *
      * @returns {void}
      */
@@ -14152,34 +14155,64 @@ var tetris = (() => {
         this.$flies[id] = document.querySelector(`#${id}-${fly}`);
       }
     }
+    /**
+     * ## 判断覆盖层是否应该隐藏
+     *
+     * 覆盖层同时包含胜者面板和 fly canvas 两种内容。 只有当需要隐藏的内容（over 或 fly）已经处于隐藏状态，
+     * 且另一方（如果存在）也已隐藏时，才允许隐藏整个覆盖层。
+     *
+     * ### 判断逻辑
+     *
+     * - 隐藏 over：检查 over 是否已含 CLS_HIDDEN
+     * - 隐藏 fly：检查所有 fly canvas 是否都已含 CLS_HIDDEN
+     *
+     * @param {object} options - 参数对象
+     * @param {boolean} [options.over] - 是否隐藏胜者面板
+     * @param {string} [options.fly] - 要隐藏的 fly canvas 的 key
+     * @returns {boolean} True 表示覆盖层应该隐藏
+     */
     isOverlayShouldHide(options) {
       const { $over, $flies } = this;
       const { over: over2 } = options;
-      return over2 ? $over.classList.contains(CLS_HIDDEN) : Object.values($flies).every(
-        ($fly) => $fly.classList.contains(CLS_HIDDEN)
+      return over2 ? (
+        // 如果要隐藏 over，检查 over 是否已经隐藏
+        $over.classList.contains(CLS_HIDDEN)
+      ) : (
+        // 如果要隐藏 fly，检查所有 fly 是否都已经隐藏
+        Object.values($flies).every(
+          ($fly) => $fly.classList.contains(CLS_HIDDEN)
+        )
       );
     }
     /**
-     * ## 显示对战结果
+     * ## 显示对战结果或 fly canvas
      *
-     * 在覆盖层中展示胜者名称，并显示覆盖层。
+     * 根据 options 中的参数决定显示胜者面板还是某个 fly canvas。 两者互斥：显示胜者时所有 fly 隐藏，显示 fly
+     * 时胜者面板保持隐藏。
      *
-     * ### 操作步骤
+     * ### 显示胜者
      *
-     * 1. 将胜者名称写入 `$winner` 元素的 textContent
-     * 2. 移除 `$overlay` 的 `tetris-hidden` 类，使覆盖层可见
+     * - 将胜者名称（含 1P/2P 标识）写入 $winner 元素
+     * - 显示胜者面板（$over 移除 tetris-hidden）
+     * - 显示覆盖层容器（$overlay 移除 tetris-hidden）
      *
-     * ### 为什么用 class 控制显示？
+     * ### 显示 fly
      *
-     * - `tetris-hidden` 类设置 `display: none`
-     * - 移除该类后覆盖层恢复默认显示状态
-     * - 比直接操作 `style.display` 更易维护，样式集中在 CSS 中
+     * - 显示指定玩家的 fly canvas（移除 tetris-hidden）
+     * - 显示覆盖层容器（$overlay 移除 tetris-hidden）
      *
      * @example
-     *   battleUI.show('Alice');
-     *   // → 覆盖层显示，内容为 "Alice"
+     *   // 显示胜者
+     *   battleUI.show({ winner: { name: 'Alice', index: 0 } });
+     *
+     *   // 显示 P2 的 fly canvas
+     *   battleUI.show({ fly: 'human-1' });
      *
      * @param {object} options - 显示的配置信息
+     * @param {object} [options.winner] - 胜者信息
+     * @param {string} options.winner.name - 胜者名称
+     * @param {number} options.winner.index - 胜者索引（0=1P, 1=2P）
+     * @param {string} [options.fly] - 要显示的 fly canvas 的 key
      */
     show(options) {
       const { winner, fly } = options;
@@ -14195,26 +14228,31 @@ var tetris = (() => {
       $overlay.classList.remove(CLS_HIDDEN);
     }
     /**
-     * ## 隐藏对战结果
+     * ## 隐藏对战结果或 fly canvas
      *
-     * 清空胜者名称并隐藏覆盖层。
+     * 根据 options 决定隐藏胜者面板还是某个 fly canvas。 如果所有子元素都已隐藏，则同时隐藏覆盖层容器。
      *
-     * ### 操作步骤
+     * ### 隐藏胜者面板
      *
-     * 1. 清空 `$winner` 元素的 textContent
-     * 2. 添加 `tetris-hidden` 类，隐藏覆盖层
+     * - 清空 $winner 文本
+     * - 隐藏胜者面板（$over 添加 tetris-hidden）
+     * - 如果所有 fly 也已隐藏 → 隐藏覆盖层
      *
-     * ### 为什么清空 textContent？
+     * ### 隐藏 fly
      *
-     * - 防止下次 show 时短暂闪现旧内容
-     * - 保持 DOM 清洁
-     * - 避免屏幕阅读器读到过时的内容
+     * - 隐藏指定 fly canvas（添加 tetris-hidden）
+     * - 如果所有 fly 和 over 都已隐藏 → 隐藏覆盖层
      *
      * @example
-     *   battleUI.hide();
-     *   // → 覆盖层隐藏，胜者名称清空
+     *   // 隐藏胜者面板
+     *   battleUI.hide({ over: true });
+     *
+     *   // 隐藏 P2 的 fly canvas
+     *   battleUI.hide({ fly: 'human-1' });
      *
      * @param {object} options - 参数对象
+     * @param {boolean} [options.over] - 是否隐藏胜者面板
+     * @param {string} [options.fly] - 要隐藏的 fly canvas 的 key
      */
     hide(options) {
       const { over: over2, fly } = options;
@@ -14233,7 +14271,7 @@ var tetris = (() => {
   var battle_ui_default = BattleUI;
 
   // lib/services/animations/garbage-fly-animation.js
-  var FlyAnimation = class extends core_default {
+  var GarbageFlyAnimation = class extends core_default {
     /**
      * ## 构造函数
      *
@@ -14360,7 +14398,7 @@ var tetris = (() => {
       }
     }
   };
-  var garbage_fly_animation_default = FlyAnimation;
+  var garbage_fly_animation_default = GarbageFlyAnimation;
 
   // lib/events/router/battle-router.js
   var BattleRouter = class extends core_default {
@@ -14599,23 +14637,32 @@ var tetris = (() => {
      *
      * ### 初始化步骤
      *
-     * 1. 调用父类构造函数传递配置（games、victoryScore、elements）
+     * 1. 调用父类构造函数传递配置（games、victoryScore、elements、players）
      * 2. 调用 `initialize()` 创建所有子系统并自动开始
      *
      * @example
      *   const battle = new BattleController({
      *     games: [game1, game2],
      *     victoryScore: 20,
-     *     elements: { overlay: 'battle-overlay', winner: 'battle-winner' },
+     *     elements: {
+     *       overlay: 'tetris-battle-overlay',
+     *       over: 'tetris-battle-over',
+     *       winner: 'tetris-battle-winner',
+     *       fly: 'tetris-battle-fly',
+     *     },
+     *     players: ['human', 'human'],
      *   });
      *
      * @param {object} options - 配置选项
      * @param {object[]} options.games - Game 实例数组（长度为 2）
-     * @param {number} [options.victoryScore=20] - 目标分数，先达到者赢得整场对战。默认值为 `20`.
+     * @param {number} [options.victoryScore=20] - 目标分数，先达到者赢得整场对战。默认值为 20.
      *   Default is `20`
      * @param {object} options.elements - BattleUI 所需的 DOM 元素 ID 配置
-     * @param {string} options.elements.overlay - 结果覆盖层元素 ID
+     * @param {string} options.elements.overlay - 覆盖层容器元素 ID
+     * @param {string} options.elements.over - 胜者面板元素 ID
      * @param {string} options.elements.winner - 胜者名称显示元素 ID
+     * @param {string} options.elements.fly - Fly canvas 元素 ID 后缀
+     * @param {string[]} options.players - 玩家名称数组
      */
     constructor(options) {
       super(options);
@@ -14629,7 +14676,7 @@ var tetris = (() => {
      * 1. **BattleStore**：状态管理（无依赖，最先创建）
      * 2. **BattleHUD**：实时分数更新（依赖 store）
      * 3. **BattleRouter**：事件路由（依赖 battle 实例自身）
-     * 4. **BattleUI**：结果展示界面（依赖 elements 配置）
+     * 4. **BattleUI**：结果展示界面 + fly canvas 管理（依赖 elements 和 players）
      *
      * 完成后自动调用 `start()` 开始对战。
      *
@@ -14662,6 +14709,12 @@ var tetris = (() => {
      *
      * 通过检查 `store.isRunning()` 确保多次调用不会产生副作用。 这是一个**幂等操作**——多次调用与一次调用效果相同。
      *
+     * ### 何时调用
+     *
+     * - 构造函数中自动调用（初始化完成后）
+     * - Restart() 中调用（开始新一局）
+     * - 外部手动恢复对战
+     *
      * @returns {void}
      */
     start() {
@@ -14678,13 +14731,13 @@ var tetris = (() => {
      *
      * ### 使用场景
      *
-     * - 单局游戏结束时（有玩家失败）
-     * - 整场对战结束时
-     * - 手动停止对战
+     * - 单局游戏结束时（有玩家失败）→ update() 中调用
+     * - 整场对战结束时 → over() 调用前
+     * - 手动暂停对战
      *
      * ### 幂等性保证
      *
-     * 与 start() 对称，通过检查确保不会重复停止。
+     * 与 start() 对称，通过检查确保不会重复停止。 使用 `!store.isRunning()` 判断是否已经停止。
      *
      * @returns {void}
      */
@@ -14712,21 +14765,21 @@ var tetris = (() => {
      *
      * ### 为什么先 stop 再处理？
      *
-     * - 在计分期间暂停游戏逻辑
-     * - 防止计分过程中新的输入干扰
+     * - 在计分期间暂停游戏逻辑，防止新的输入干扰计分过程
+     * - 确保胜负判定的原子性——不会在计分过程中产生新的游戏事件
      *
      * @example
-     *   // Bob 游戏结束（方块堆满）
+     *   // Bob 游戏结束（方块堆满到顶）
      *   battle.update(bobGame);
      *   // → Alice 得分 +1
      *   // → 检查 Alice 分数 >= 20？
-     *   //   → 是：显示结果界面
+     *   //   → 是：显示结果界面，Alice 赢得整场对战
      *   //   → 否：通知 Bob 重新开始下一局
      *
      * @param {object} loser - 失败的玩家 Game 实例
-     * @param {string | number} loser.id - 失败的玩家唯一标识
-     * @param {object} loser.Player - 失败的玩家信息
-     * @param {Function} loser.emit - 事件触发方法
+     * @param {string | number} loser.id - 失败的玩家唯一标识，用于查找对手
+     * @param {object} loser.Player - 失败的玩家信息对象
+     * @param {Function} loser.emit - 事件触发方法，用于发送游戏事件
      * @returns {void}
      */
     update(loser) {
@@ -14747,16 +14800,22 @@ var tetris = (() => {
     /**
      * ## 整场对战结束
      *
-     * 当有人达到 victoryScore 时调用。
+     * 当有玩家达到 victoryScore 时调用，标志着整场对战（Match）的终结。
      *
      * ### 执行流程
      *
-     * 1. 通知双方切换到 `battle-over` 模式（停止游戏逻辑）
-     * 2. 通过 BattleUI 显示胜者名称
+     * 1. 通知双方切换到 `battle-over` 模式（停止游戏逻辑，冻结游戏状态）
+     * 2. 通过 BattleUI 显示胜者名称覆盖层
      *
      * ### 覆盖层显示
      *
-     * BattleUI 会移除覆盖层的 `tetris-hidden` 类，展示胜者名称。 用户按 Enter 后触发 `reset()` 重新开始。
+     * BattleUI.show({ winner: Player }) 会：
+     *
+     * - 将胜者名称（含 1P/2P 标识）写入 $winner 元素
+     * - 显示胜者面板（$over 移除 tetris-hidden）
+     * - 显示覆盖层容器（$overlay 移除 tetris-hidden）
+     *
+     * 用户按 Enter 键后会触发 `reset()` 重新开始整场对战。
      *
      * @param {object} winner - 整场对战的胜者 Game 实例
      * @param {object} loser - 整场对战的败者 Game 实例
@@ -14774,16 +14833,18 @@ var tetris = (() => {
     /**
      * ## 重新开始一局对战
      *
-     * 当前单局结束但整场未结束时调用。
+     * 当前单局结束但整场未结束时调用（有人赢了一局但未达到 victoryScore）。
      *
      * ### 执行流程
      *
-     * 1. 通知败者重新初始化棋盘（RESTART 事件）
-     * 2. 重新开始对战（start）
+     * 1. 清除双方动画（清空残留的消行、垃圾行动画）
+     * 2. 递增回合数
+     * 3. 通知败者重新初始化棋盘（RESTART 事件）
+     * 4. 重新开始对战（start）
      *
-     * ### 为什么只通知败者？
+     * ### 为什么清除双方动画？
      *
-     * 胜者的游戏状态没有变化，不需要重置。 败者需要重新初始化棋盘准备下一局。
+     * 在判定胜负的瞬间，可能还有消行动画或垃圾行动画在播放。 如果不清理，这些动画会残留到下一局，导致视觉异常。
      *
      * @param {object} loser - 本局失败的玩家 Game 实例
      * @returns {void}
@@ -14800,7 +14861,7 @@ var tetris = (() => {
     /**
      * ## 重置整场对战
      *
-     * 清空所有分数和状态，重新开始一场全新的对战。
+     * 清空所有分数和状态，重新开始一场全新的对战。 这是最高级别的重置——整场对战（Match）重新开始。
      *
      * ### 触发场景
      *
@@ -14810,13 +14871,13 @@ var tetris = (() => {
      * ### 执行流程
      *
      * 1. 找到对手
-     * 2. 重置状态管理器（清空所有分数和垃圾行）
+     * 2. 重置状态管理器（清空所有分数和垃圾行数据）
      * 3. 重置 HUD 分数显示为 0
      * 4. 隐藏结果覆盖层
      * 5. 通知双方重置到 main-menu 模式
      *
      * @param {object} from - 发起重置的玩家 Game 实例
-     * @param {string} from.id - 发起者的唯一标识
+     * @param {string | number} from.id - 发起者的唯一标识
      * @param {Function} from.emit - 事件触发方法
      * @returns {void}
      */
@@ -14837,30 +14898,41 @@ var tetris = (() => {
      *
      * ### 查找逻辑
      *
-     * 使用 `Array.find()` 在 games 数组中查找第一个 `id` 不等于 `yourself.id` 的 Game 实例。
-     *
-     * 在标准的 1v1 对战中，games 数组长度为 2， 返回的就是唯一的对手。
-     *
-     * ### 适用场景
-     *
-     * - 游戏结束时找胜者
-     * - 攻击时找目标对手
-     * - 暂停/恢复时找需要同步的对象
+     * 使用 `Array.find()` 在 games 数组中查找第一个 `id` 不等于 `yourself.id` 的 Game 实例。在标准的
+     * 1v1 对战中，games 数组长度为 2， 返回的就是唯一的对手。
      *
      * @example
      *   const opponent = battle.getOpponent(game1);
-     *   console.log(opponent.Player.name); // 对手的名称
+     *   console.log(opponent.Player.name); // 输出对手的显示名称
      *
      * @param {object} yourself - 当前玩家 Game 实例
+     * @param {string | number} yourself.id - 当前玩家的唯一标识
      * @returns {object} 对手的 Game 实例
      */
     getOpponent(yourself) {
       const { games } = this;
       return games.find((game) => game.id !== yourself.id);
     }
+    /**
+     * ## 获取当前回合 ID
+     *
+     * 返回当前对战的回合编号，用于动画的 roundId 校验。 动画系统通过比对 roundId 来判断动画是否属于当前回合。
+     *
+     * @returns {number} 当前回合的唯一标识
+     */
     getRoundId() {
       return this.store.getRoundId();
     }
+    /**
+     * ## 获取指定玩家的 fly canvas
+     *
+     * 通过 playerId（格式 `{player}-{index}`）从 BattleUI 中查找 对应玩家的 fly canvas DOM 元素。
+     *
+     * FlyAnimation 调用此方法获取其专属的 canvas 进行粒子绘制。
+     *
+     * @param {string} index - 玩家标识（如 "human-0"）
+     * @returns {HTMLCanvasElement} 对应玩家的 fly canvas 元素
+     */
     getOverlayFly(index) {
       return this.ui.$flies[index];
     }
@@ -14876,7 +14948,12 @@ var tetris = (() => {
      * 3. 如果攻击力 ≤ 0，直接返回（无攻击）
      * 4. 用攻击力抵消自己的待处理垃圾行（store.offsetGarbage）
      * 5. 如果有剩余攻击力，发送给对手（store.addGarbage）
-     * 6. 触发预警动画 + 预警音效（Scheduler.sequence 延时 120ms）
+     * 6. 通过 Scheduler.sequence 编排完整的动画时序：
+     *
+     *    - 立即：显示 fly canvas → 触发 START_GARBAGE_FLY（FlyAnimation 400ms）
+     *    - 400ms：触发 START_GARBAGE_WARNING（WarningAnimation 600ms）
+     *    - 600ms：隐藏 fly canvas
+     *    - 120ms：播放 GARBAGE_WARNING 音效
      * 7. 返回实际发出的垃圾行数
      *
      * ### 为什么先抵消自己的垃圾行？
@@ -14888,29 +14965,30 @@ var tetris = (() => {
      * - 只有抵消后还有剩余，才会攻击对手
      * - 这鼓励玩家在受攻击时积极消行来自保
      *
-     * ### 攻击计算说明
+     * ### 攻击力计算说明
      *
      * 使用 `calculateGarbage` 函数根据消行数查询 `GARBAGE_MAP`：
      *
-     * - 1 行 → 0 攻击力（单消不给攻击）
-     * - 2 行 → 1 攻击力
-     * - 3 行 → 2 攻击力
-     * - 4 行 → 3 攻击力（Tetris）
+     * | 消行数 | 攻击力 | 说明         |
+     * | ------ | ------ | ------------ |
+     * | 1 行   | 0      | 单消不给攻击 |
+     * | 2 行   | 1      | Double       |
+     * | 3 行   | 2      | Triple       |
+     * | 4 行   | 3      | Tetris       |
      *
      * @example
      *   // 玩家完成 Tetris（4行），没有待处理垃圾
      *   const sent = battle.processAttack(playerGame, clearedLines);
-     *   // sent = 3（给对手发送 3 行垃圾）
+     *   // sent = 3（给对手发送 3 行垃圾行）
      *
      * @example
      *   // 玩家消 2 行，但有 5 行待处理垃圾
      *   const sent = battle.processAttack(playerGame, clearedLines);
      *   // sent = 0（攻击力全部用于抵消自己的垃圾行）
-     *   // pendingGarbage 从 5 减少到 4
      *
      * @param {object} from - 发起攻击的玩家 Game 实例（消行的一方）
      * @param {Array} lines - 消除的行数组，使用 `lines.length` 计算攻击力
-     * @returns {number} 实际发送给对手的垃圾行数，0 表示无攻击
+     * @returns {number} 实际发送给对手的垃圾行数（剩余攻击力），0 表示无攻击
      */
     processAttack(from, lines) {
       const to = this.getOpponent(from);
@@ -14926,11 +15004,20 @@ var tetris = (() => {
         const roundId = this.getRoundId();
         const playerId = store.getPlayerId(to);
         Scheduler2.sequence([
+          /**
+           * 第 1 步：显示 fly canvas。 通过 BattleUI.show({ fly: playerId }) 移除对应 fly
+           * canvas 的 tetris-hidden 类并显示覆盖层。
+           */
           {
             fn: () => {
               this.ui.show({ fly: playerId });
             }
           },
+          /**
+           * 第 2 步：触发垃圾行飞行动画。 发送 START_GARBAGE_FLY 事件，携带
+           * from、to、roundId、amount、fly、Battle。 GameRouter 收到事件后注册 FlyAnimation
+           * 到对手的 Animations。 FlyAnimation 持续 400ms。
+           */
           {
             fn: () => {
               const events = BattleEvents();
@@ -14944,6 +15031,10 @@ var tetris = (() => {
               });
             }
           },
+          /**
+           * 第 3 步（400ms 后）：触发垃圾行预警动画。 发送 START_GARBAGE_WARNING 事件。 GameRouter
+           * 收到事件后注册 GarbageWarningAnimation。 WarningAnimation 持续 600ms，5 次红色闪烁。
+           */
           {
             fn: () => {
               const events = GameEvents(to.id);
@@ -14955,6 +15046,10 @@ var tetris = (() => {
             },
             delay: 400
           },
+          /**
+           * 第 4 步（600ms 后）：隐藏 fly canvas。 通过 BattleUI.hide({ fly: playerId }) 添加
+           * tetris-hidden 类。 如果所有 fly 都已隐藏，同步隐藏覆盖层容器。
+           */
           {
             fn: () => {
               this.ui.hide({ fly: playerId });
@@ -14996,16 +15091,6 @@ var tetris = (() => {
      *    - 将 pendingGarbage 实际写入棋盘
      *    - 此时消行动画已播放完毕，视觉效果流畅
      *
-     * 这种**延迟应用**策略确保了：
-     *
-     * - 攻击计算和抵消是即时的（游戏逻辑层面）
-     * - 垃圾行的出现配合动画时机（视觉层面）
-     *
-     * @example
-     *   // 对手的消行动画结束后，将垃圾行应用到玩家棋盘
-     *   battle.flushGarbage(playerGame);
-     *   // 棋盘底部出现垃圾行，pendingGarbage 清零
-     *
      * @param {object} game - 要应用垃圾行的玩家 Game 实例
      * @returns {void}
      */
@@ -15040,11 +15125,15 @@ var tetris = (() => {
      *
      * ### 订阅的事件
      *
-     * - PROCESS_ATTACK：处理消行攻击
-     * - FLUSH_GARBAGE：处理垃圾行刷新
-     * - UPDATE_WINNER：处理单局游戏结束
-     * - SYNC_PAUSE：处理暂停同步
-     * - SYNC_RESUME：处理恢复同步
+     * | 事件名            | 处理方法                  | 触发时机         |
+     * | ----------------- | ------------------------- | ---------------- |
+     * | PROCESS_ATTACK    | processAttack()           | 玩家消行时       |
+     * | START_GARBAGE_FLY | \_onBattleStartGarbageFly | 垃圾行攻击时     |
+     * | FLUSH_GARBAGE     | flushGarbage()            | 消行动画结束时   |
+     * | UPDATE_WINNER     | update()                  | 有玩家游戏结束时 |
+     * | SYNC_PAUSE        | stop()                    | 对战暂停时       |
+     * | SYNC_RESUME       | start()                   | 对战恢复时       |
+     * | RESET             | reset()                   | 重赛时           |
      *
      * @returns {void}
      */
@@ -15067,7 +15156,19 @@ var tetris = (() => {
   // lib/engine/utils/get-battle-overlay-template.js
   var getBattleOverlayTemplate = (elements, players) => {
     const { Battle } = elements;
-    const templates = [`
+    const templates = [
+      /**
+       * ======== 胜者展示面板 ========
+       *
+       * 整场对战结束时显示，包含：
+       *
+       * - 标题 "BATTLE OVER"
+       * - 胜者名称（由 BattleUI 动态填充）
+       * - 重赛提示 "ENTER TO REMATCH"
+       *
+       * 默认添加 tetris-hidden 类隐藏。
+       */
+      `
     <section id="${Battle.over}" class="tetris-battle-over tetris-hidden">
       <h2 class="tetris-battle-title">BATTLE OVER</h2>
       <div class="tetris-battle-winner">WINNER IS <span id="${Battle.winner}" class="tetris-highlight">HUMAN</span></div>
@@ -15075,7 +15176,8 @@ var tetris = (() => {
         <div class="tetris-battle-rematch">ENTER TO REMATCH</div>
       </footer>
     </section>
-  `];
+  `
+    ];
     for (const [index, player] of players.entries()) {
       templates.push(`
       <canvas id="${player}-${index}-${Battle.fly}" class="tetris-battle-fly tetris-hidden"></canvas>
@@ -15872,15 +15974,16 @@ var tetris = (() => {
     /**
      * ## requestAnimationFrame 的 ID
      *
-     * 用于取消游戏循环。
+     * 用于取消游戏循环。当值为 0 或 null 时表示循环已停止。
      *
      * @type {number | null}
      */
     rafId: null,
     /**
-     * ## 时间累积器
+     * ## 时间累积器（逻辑时间基准）
      *
-     * 用于固定时间步长（fixed update / tick）， 累积每帧的 delta time，当超过阈值时执行一次游戏逻辑更新。
+     * 用于固定时间步长（fixed update / tick），
+     * 累积每帧的 delta time，当超过阈值时执行一次游戏逻辑更新。
      *
      * @default 0
      * @type {number}
@@ -15899,6 +16002,7 @@ var tetris = (() => {
      * ## 游戏配置
      *
      * 从 configuration.js 导入的全局配置对象。
+     * 包含 Mode、Players、Elements、victoryScore 等配置项。
      *
      * @type {object}
      */
@@ -15906,7 +16010,8 @@ var tetris = (() => {
     /**
      * ## 任务调度器实例
      *
-     * 管理 delay / interval 等定时任务。
+     * 管理 delay / interval / sequence 等定时任务。
+     * 是所有时间驱动逻辑的核心。
      *
      * @default null
      * @type {Scheduler | null}
@@ -15915,40 +16020,69 @@ var tetris = (() => {
     /**
      * ## 音频系统实例
      *
-     * 管理背景音乐和音效的播放。
+     * 管理背景音乐和音效的播放、切换。
      *
      * @default null
      * @type {Audio | null}
      */
     Audio: null,
     /**
-     * ## 游戏主控实例
+     * ## 游戏主控实例数组
      *
-     * 管理游戏状态、输入、UI、回放等所有子系统。
+     * 单人模式包含 1 个 Game 实例，对战模式包含 2 个。
+     * 每个 Game 管理独立的状态、输入、UI、回放等子系统。
      *
      * @default [ ]
      * @type {Game[]}
      */
     Games: [],
     /**
-     * ## 游戏对战实例
+     * ## 对战控制器实例
      *
-     * 管理游戏状态、输入、UI、回放等所有子系统。
+     * 仅在对战模式（versus）下创建。
+     * 管理双方的攻击计算、垃圾行发送、计分和胜负判定。
      *
      * @default null
-     * @type {object}
+     * @type {BattleController | null}
      */
     Battle: null,
+    /**
+     * ## 判断是否为对战模式
+     *
+     * 快捷方法，检查 Configuration.Mode 是否为 "versus"。
+     *
+     * @returns {boolean} true 表示对战模式
+     */
     isVersus: () => Engine.Configuration.Mode === "versus",
+    /**
+     * ## 每个 Game 实例的时间累积器
+     *
+     * Map<Game, timestamp>，用于独立控制每个 Game 的下落速度。
+     * 双人对战时两个 Game 可能有不同的速度和状态。
+     *
+     * @type {Map<Game, number>}
+     */
     gameAccumulators: /* @__PURE__ */ new Map(),
     /**
      * ## 初始化引擎
      *
-     * 创建 Scheduler、Audio、Game 等核心实例， 并注入相互依赖关系。
+     * 创建 Scheduler、Audio、Game 等核心实例，并注入相互依赖关系。
+     * 这是游戏启动的第一步——在所有子系统创建完成后，
+     * 由 launch() 继续执行游戏状态的初始化。
+     *
+     * ### 初始化顺序
+     *
+     * 1. 绘制游戏界面 DOM
+     * 2. 创建全局调度器 Scheduler
+     * 3. 创建音频系统 Audio
+     * 4. 根据 Players 配置创建 Game 实例（single 模式 1 个，versus 模式 2 个）
+     * 5. 对战模式下创建 BattleController
      *
      * @param {object} options - 初始化配置选项
      * @param {object} options.Elements - UI 元素配置
-     * @param {object} options.Level - 等级配置
+     * @param {string[]} options.Players - 玩家名称数组
+     * @param {string} options.Mode - 游戏模式（"single" | "versus"）
+     * @param {number} options.victoryScore - 对战目标分数
      * @returns {void}
      */
     initialize: (options) => {
@@ -15986,20 +16120,22 @@ var tetris = (() => {
       }
     },
     /**
-     * ## 初始化游戏
+     * ## 启动游戏（完整初始化流程）
      *
-     * 执行完整的游戏初始化流程：
+     * 执行完整的游戏启动流程：
      *
-     * 1. 初始化棋盘数据
-     * 2. 加载最高分存档
-     * 3. 设置初始模式为 main-menu
-     * 4. 更新 DOM 节点 data-mode 属性
-     * 5. 适配画布尺寸
-     * 6. 初始化 HUD 显示
-     * 7. 延迟渲染主菜单 UI（等待字体加载等）
-     * 8. 订阅各模块事件
-     * 9. 绑定输入设备（Keyboard/Gamepad）的事件处理器
-     * 10. 启动游戏主循环
+     * 1. 调用 initialize 创建所有子系统
+     * 2. 对每个 Game 实例：
+     *    - 初始化棋盘数据
+     *    - 加载最高分存档
+     *    - 设置初始模式为 main-menu
+     *    - 更新 DOM 节点 data-mode 属性
+     *    - 适配画布尺寸
+     *    - 初始化 HUD 显示
+     *    - 延迟渲染主菜单 UI
+     *    - 绑定输入设备事件处理器
+     * 3. 订阅各模块事件
+     * 4. 启动游戏主循环
      *
      * @returns {void}
      */
@@ -16023,19 +16159,18 @@ var tetris = (() => {
     /**
      * # 带速度控制的游戏主循环（Game Loop）
      *
-     * 使用 `requestAnimationFrame` 驱动的核心渲染循环， 控制游戏的下落节奏、输入处理、渲染和动画更新。
+     * 使用 `requestAnimationFrame` 驱动的核心渲染循环，
+     * 控制游戏的下落节奏、输入处理、渲染和动画更新。
      *
-     * ## 帧循环流程
-     *
-     * 每一帧按以下顺序执行：
+     * ## 帧循环流程（每个 Game 实例）
      *
      * | 步骤 | 操作                     | 说明                                         |
      * | ---- | ------------------------ | -------------------------------------------- |
-     * | 1    | 防止死亡螺旋             | 限制 delta 上限为 1000ms，防止切后台回来卡死 |
-     * | 2    | Scheduler.tick()         | 驱动调度器，执行到期的定时任务               |
-     * | 3    | Replay.syncPlayElapsed() | 同步回放逻辑时钟                             |
-     * | 4    | Replay.update()          | 更新回放系统，注入待重放的命令               |
-     * | 5    | Gamepad.update()         | 更新手柄输入状态                             |
+     * | 1    | Scheduler.tick()         | 驱动调度器，执行到期的定时任务               |
+     * | 2    | Replay.syncPlayElapsed() | 同步回放逻辑时钟                             |
+     * | 3    | Replay.update()          | 更新回放系统，注入待重放的命令               |
+     * | 4    | Gamepad.update()         | 更新手柄输入状态                             |
+     * | 5    | Keyboard.update()        | 更新键盘输入状态                             |
      * | 6    | CommandQueue.flush()     | 执行命令队列中的所有待执行命令               |
      * | 7    | Game.tick()              | 执行游戏逻辑（下落/碰撞/消行）               |
      * | 8    | Animations.flush()       | 合并/清理动画队列                            |
@@ -16046,18 +16181,22 @@ var tetris = (() => {
      *
      * ## 固定时间步长
      *
-     * 游戏逻辑（下落）不是每帧都执行，而是根据当前等级的速度 （`Game.getSpeed()`）来控制执行频率：
-     *
+     * 游戏逻辑（下落）不是每帧都执行，而是根据当前等级的速度
+     * （`Game.getSpeed()`）来控制执行频率：
      * - 低等级时速度慢，下落间隔大（约 1000ms）
      * - 高等级时速度快，下落间隔小（最低 120ms）
      *
-     * 这确保了游戏难度与等级挂钩，同时避免了帧率波动对游戏速度的影响。
-     *
      * ## 回放特殊处理
      *
-     * 当 `Replay.playing` 为 true 时，跳过游戏逻辑 tick， 因为回放系统会通过注入 command 来驱动游戏状态。
+     * 当 `Replay.playing` 为 true 时，跳过游戏逻辑 tick，
+     * 因为回放系统会通过注入 command 来驱动游戏状态。
      *
-     * @param {number} timestamp - RequestAnimationFrame 传入的当前时间戳（毫秒）
+     * ## 双人对战
+     *
+     * 每个 Game 使用独立的时间累积器（gameAccumulators Map），
+     * 两个 Game 各自独立计算下落时机，互不影响。
+     *
+     * @param {number} timestamp - requestAnimationFrame 传入的当前时间戳（毫秒）
      * @returns {void}
      */
     tick: (timestamp) => {
@@ -16101,7 +16240,9 @@ var tetris = (() => {
     /**
      * ## 订阅各模块事件
      *
-     * 依次订阅 Engine 自身、Audio 音频系统、Game 游戏主控的事件。 在 launch 时调用一次。
+     * 依次订阅 Engine 自身、Audio 音频系统、
+     * 所有 Game 实例、BattleController 的事件。
+     * 在 launch 时调用一次。
      *
      * @returns {void}
      */
@@ -16120,6 +16261,7 @@ var tetris = (() => {
      * ## 取消订阅各模块事件
      *
      * 取消所有已订阅的事件，在 destroy 时调用。
+     * 防止内存泄漏和误触发。
      *
      * @returns {void}
      */
@@ -16137,7 +16279,8 @@ var tetris = (() => {
     /**
      * ## Engine 内部事件订阅
      *
-     * 订阅 `dispatch:command` 和 `dispatch:input` 两个核心事件， 它们是整个输入系统的入口。
+     * 为每个 Game 实例订阅 `dispatch:command` 和 `dispatch:input`
+     * 两个核心事件，它们是整个输入系统的入口。
      *
      * @private
      * @returns {void}
@@ -16167,11 +16310,19 @@ var tetris = (() => {
     /**
      * ## 命令分发处理器
      *
-     * 处理回放系统的命令执行，注入动画阻塞状态后交由 dispatchCommand 处理。
+     * 处理回放系统的命令执行。
+     * 检查当前是否有阻塞动画，注入阻塞状态后交由 dispatchCommand 处理。
+     *
+     * ### 阻塞动画列表
+     *
+     * - clear-lines：消行动画播放中
+     * - countdown：倒计时动画播放中
+     * - level-up：升级特效播放中
      *
      * @private
      * @param {object} cmd - 命令对象
      * @param {object} cmd.payload - 命令负载
+     * @param {object} cmd.payload.Game - 目标 Game 实例
      * @returns {void}
      */
     _onDispatchCommand: (cmd) => {
@@ -16179,21 +16330,29 @@ var tetris = (() => {
       const { Game: Game2 } = payload;
       const { Animations, Store } = Game2;
       const mode = Store.getMode();
-      const isBlocked = Animations.hasBlocking([
+      payload.isBlocked = Animations.hasBlocking([
         "clear-lines",
         "countdown",
         "level-up"
       ]);
-      payload.isBlocked = isBlocked;
       dispatch_command_default(cmd, { mode });
     },
     /**
      * ## 输入分发处理器
      *
-     * 处理键盘、手柄、AI 等实时输入，注入动画阻塞状态和回放时间戳后交由 dispatchInput 处理。
+     * 处理键盘、手柄、AI 等实时输入。
+     * 检查阻塞动画状态，计算回放时间戳，交由 dispatchInput 处理。
+     *
+     * ### 阻塞动画列表
+     *
+     * - clear-lines：消行动画播放中
+     * - countdown：倒计时动画播放中
+     * - level-up：升级特效播放中
      *
      * @private
      * @param {object} input - 输入对象
+     * @param {object} input.payload - 输入负载
+     * @param {object} input.payload.Game - 目标 Game 实例
      * @returns {void}
      */
     _onDispatchInput: (input) => {
@@ -16212,6 +16371,7 @@ var tetris = (() => {
      * ## 启动游戏主循环
      *
      * 使用 requestAnimationFrame 启动渲染循环。
+     * 第一帧会初始化时间基准。
      *
      * @returns {void}
      */
@@ -16221,7 +16381,8 @@ var tetris = (() => {
     /**
      * ## 停止游戏循环
      *
-     * 取消 requestAnimationFrame 回调。
+     * 取消 requestAnimationFrame 回调，重置时间状态。
+     * 从暂停恢复时调用 restart() 重新启动。
      *
      * @returns {void}
      */
@@ -16237,7 +16398,8 @@ var tetris = (() => {
     /**
      * ## 重启游戏循环
      *
-     * 停止当前循环后重新启动，用于从暂停恢复或标签页切回。
+     * 停止当前循环后重新启动。
+     * 用于从暂停恢复或标签页切回。
      *
      * @returns {void}
      */
@@ -16248,7 +16410,12 @@ var tetris = (() => {
     /**
      * ## 销毁引擎
      *
-     * 清理所有资源，停止循环，取消订阅，移除事件监听，清空子模块引用。
+     * 清理所有资源：
+     * 1. 停止游戏循环
+     * 2. 取消所有事件订阅
+     * 3. 移除所有输入设备事件监听
+     * 4. 销毁所有 Game 实例
+     * 5. 重置子模块引用
      *
      * @returns {void}
      */

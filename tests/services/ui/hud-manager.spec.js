@@ -3,7 +3,7 @@
 import HudManager from '@/lib/services/ui/hud/hud-manager.js';
 
 // Mock padStart 工具函数
-jest.mock('@/lib/utils/pad-start.js', () => ({
+jest.mock('@/lib/utils/string/pad-start.js', () => ({
   __esModule: true,
   default: jest.fn((value, pad) => {
     const str = String(value);

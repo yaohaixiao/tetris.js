@@ -4,7 +4,7 @@ import Audio from '@/lib/services/audio';
 import playBGM from '@/lib/services/audio/play-bgm';
 import stopBGM from '@/lib/services/audio/stop-bgm';
 import toggleBGM from '@/lib/services/audio/toggle-bgm';
-import isFunction from '@/lib/utils/is-function';
+import isFunction from '@/lib/utils/types/is-function.js';
 
 // Mock AudioContext
 const mockAudioContext = {
@@ -41,7 +41,7 @@ jest.mock('@/lib/services/audio/stop-bgm', () => jest.fn());
 jest.mock('@/lib/services/audio/toggle-bgm', () => jest.fn());
 
 // Mock isFunction
-jest.mock('@/lib/utils/is-function', () => jest.fn());
+jest.mock('@/lib/utils/types/is-function.js', () => jest.fn());
 
 describe('Audio', () => {
   let audio;

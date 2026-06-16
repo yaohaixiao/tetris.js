@@ -1,4 +1,4 @@
-import isSymbol from '@/lib/utils/is-symbol.js';
+import isSymbol from '@/lib/utils/types/is-symbol.js';
 
 describe('isSymbol', () => {
   describe('应该返回 true', () => {

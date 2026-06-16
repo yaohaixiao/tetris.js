@@ -1,4 +1,4 @@
-import isString from '@/lib/utils/is-string.js';
+import isString from '@/lib/utils/types/is-string.js';
 
 describe('isString', () => {
   describe('应该返回 true', () => {

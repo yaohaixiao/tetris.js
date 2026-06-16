@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import getStorage from '@/lib/utils/get-storage';
+import getStorage from '@/lib/utils/storage/get-storage.js';
 
 describe('getStorage', () => {
   beforeEach(() => {
