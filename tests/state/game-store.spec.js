@@ -472,4 +472,38 @@ describe('GameStore', () => {
       expect(state.controller).toBe('ai');
     });
   });
+
+  // ==================== modeIndex / battleIndex ====================
+  describe('modeIndex 和 battleIndex', () => {
+    beforeEach(() => {
+      // 直接用 GameState 和尺寸初始化
+      store = new GameStore({
+        GameState: require('@/lib/state/game-state.js').default,
+        cols: 10,
+        rows: 20,
+      });
+    });
+
+    describe('getModeIndex / setModeIndex', () => {
+      test('初始值应该为 0', () => {
+        expect(store.getModeIndex()).toBe(0);
+      });
+
+      test('setModeIndex 应该正确更新', () => {
+        store.setModeIndex(1);
+        expect(store.getModeIndex()).toBe(1);
+      });
+    });
+
+    describe('getBattleIndex / setBattleIndex', () => {
+      test('初始值应该为 0', () => {
+        expect(store.getBattleIndex()).toBe(0);
+      });
+
+      test('setBattleIndex 应该正确更新', () => {
+        store.setBattleIndex(1);
+        expect(store.getBattleIndex()).toBe(1);
+      });
+    });
+  });
 });
