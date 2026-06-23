@@ -1,3 +1,20 @@
+# [1.18.0](https://github.com/yaohaixiao/tetris.js/compare/1.17.0...1.18.0) (2026-06-23)
+
+
+### Bug Fixes
+
+* 修复 gamepad 断连时动画文字显示不全的问题； ([1c1b5d9](https://github.com/yaohaixiao/tetris.js/commit/1c1b5d916f803360744ca172fdee5517db62ad6a))
+
+
+### Features
+
+* 对战也暂停可以关闭背景音乐； ([548817f](https://github.com/yaohaixiao/tetris.js/commit/548817f50918a22c2f5c0a417e3f5b2ee12c8408))
+* 垃圾行攻击新增 FlyAnimation 粒子飞行动画 ([a34601b](https://github.com/yaohaixiao/tetris.js/commit/a34601be097dafa392b955d4cd18873cbeb156fa))
+* 垃圾行预警动画新增数量显示和颜色分级 ([f8f6131](https://github.com/yaohaixiao/tetris.js/commit/f8f6131e3537326c405a8dd98f0a26ddba80f8dd))
+* 手柄连接/断开时显示通知动画和音效 ([0655afb](https://github.com/yaohaixiao/tetris.js/commit/0655afb6ae7697da57e50bba36e6000b0840b432))
+* 添加游戏模式和对战模式的选择和返回模式选着界面； ([173054a](https://github.com/yaohaixiao/tetris.js/commit/173054af0dce12577daa2d8e0320b38b37428194))
+
+
 # [1.17.0](https://github.com/yaohaixiao/tetris.js/compare/1.16.0...1.17.0) (2026-06-14)
 
 ### Bug Fixes
