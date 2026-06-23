@@ -1,4 +1,126 @@
 var tetris = (() => {
+  // lib/utils/types/is-function.js
+  var isFunction = (val) => {
+    if (val == null || typeof val !== "function" && typeof val !== "object") {
+      return false;
+    }
+    return (
+      // 处理某些特殊环境下 typeof 误判为 object 的函数（极少数情况）
+      typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]"
+    );
+  };
+  var is_function_default = isFunction;
+
+  // lib/utils/types/is-string.js
+  var isString = (str) => typeof str === "string";
+  var is_string_default = isString;
+
+  // lib/core/event-bus/index.js
+  var EventBus = {
+    /**
+     * ## 事件订阅映射表
+     *
+     * Key 为事件名称，Value 为该事件对应的处理函数集合。
+     *
+     * @type {Map<string, Set<Function>>}
+     */
+    events: /* @__PURE__ */ new Map(),
+    /**
+     * ## 订阅事件
+     *
+     * 注册一个处理函数，每当事件触发时都会调用。 如果事件不存在，会自动创建。 相同的 handler 不会重复注册（Set 去重）。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
+     * @returns {void}
+     */
+    on(event, handler) {
+      if (!is_string_default(event) || !is_function_default(handler)) {
+        return;
+      }
+      if (!this.events.has(event)) {
+        this.events.set(event, /* @__PURE__ */ new Set());
+      }
+      this.events.get(event).add(handler);
+    },
+    /**
+     * ## 订阅事件，仅触发一次
+     *
+     * 注册的处理函数在第一次触发后自动取消订阅。 内部通过创建包装函数实现，触发后在 `finally` 中调用 `off`。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
+     * @returns {void}
+     */
+    once(event, handler) {
+      if (!is_string_default(event) || !is_function_default(handler)) {
+        return;
+      }
+      const wrapper = (payload) => {
+        try {
+          handler(payload);
+        } finally {
+          this.off(event, wrapper);
+        }
+      };
+      this.on(event, wrapper);
+    },
+    /**
+     * ## 取消订阅
+     *
+     * 从指定事件的订阅列表中移除处理函数。 如果移除后该事件没有订阅者，会清理该事件条目。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 要移除的处理函数
+     * @returns {void}
+     */
+    off(event, handler) {
+      if (!is_string_default(event) || !is_function_default(handler)) {
+        return;
+      }
+      const set = this.events.get(event);
+      if (!set) {
+        return;
+      }
+      set.delete(handler);
+      if (set.size === 0) {
+        this.events.delete(event);
+      }
+    },
+    /**
+     * ## 触发事件
+     *
+     * 通知指定事件的所有订阅者，依次调用它们的处理函数。 如果事件没有订阅者，不做任何操作。
+     *
+     * @param {string} event - 事件名称
+     * @param {object} [payload] - 传递给处理函数的参数对象
+     * @returns {void}
+     */
+    emit(event, payload) {
+      const set = this.events.get(event);
+      if (!set) {
+        return;
+      }
+      for (const handler of set) {
+        if (!is_function_default(handler)) {
+          continue;
+        }
+        handler(payload);
+      }
+    },
+    /**
+     * ## 清空所有事件
+     *
+     * 移除所有事件和订阅者。 用于游戏重启、单元测试 reset、或完全重置状态时调用。
+     *
+     * @returns {void}
+     */
+    clear() {
+      this.events.clear();
+    }
+  };
+  var event_bus_default = EventBus;
+
   // lib/engine/state/engine-state.js
   var EngineState = {
     /**
@@ -7,7 +129,7 @@ var tetris = (() => {
      * - 'single'：单人模式；
      * - 'versus'：对战模式；
      */
-    Mode: "versus",
+    Mode: "single",
     /**
      * ## 对战玩家列表：
      *
@@ -117,10 +239,6 @@ var tetris = (() => {
   };
   var engine_state_default = EngineState;
 
-  // lib/utils/types/is-string.js
-  var isString = (str) => typeof str === "string";
-  var is_string_default = isString;
-
   // lib/utils/types/is-symbol.js
   var isSymbol = (val) => typeof val === "symbol";
   var is_symbol_default = isSymbol;
@@ -151,163 +269,140 @@ var tetris = (() => {
 
   // lib/engine/state/engine-store.js
   var EngineStore = class {
+    /**
+     * ## 构造函数
+     *
+     * 接收可选的配置覆盖项，与默认 EngineState 合并后深拷贝存储。
+     *
+     * @param {object} [options={}] - 配置覆盖项. Default is `{}`
+     * @param {string} [options.Mode] - 游戏模式（"single" | "versus"）
+     * @param {string[]} [options.Players] - 玩家名称数组
+     * @param {number} [options.victoryScore] - 对战目标分数
+     * @param {object} [options.Block] - 方块渲染配置
+     * @param {string} [options.Block.style] - 方块渲染风格
+     * @param {string} [options.Block.pattern] - 方块图案
+     */
     constructor(options = {}) {
       this.initialize(options);
     }
+    /**
+     * ## 初始化状态
+     *
+     * 将传入的配置与默认 EngineState 合并，然后通过 structuredClone 深拷贝， 确保每次创建 EngineStore
+     * 都拥有独立的状态副本。
+     *
+     * @param {object} [options={}] - 配置覆盖项. Default is `{}`
+     * @returns {void}
+     */
     initialize(options) {
       const normalizedOptions = extend_default(engine_state_default, options);
       this.state = structuredClone(normalizedOptions);
     }
+    /**
+     * ## 获取完整状态对象
+     *
+     * 返回当前存储的完整配置状态。
+     *
+     * @returns {object} 完整的引擎状态对象
+     */
     getState() {
       return this.state;
     }
+    /**
+     * ## 判断是否为对战模式
+     *
+     * 检查当前游戏模式是否为 "versus"。
+     *
+     * @returns {boolean} True 表示对战模式
+     */
     isVersus() {
       return this.state.Mode === "versus";
     }
+    /**
+     * ## 获取当前游戏模式
+     *
+     * @returns {string} 游戏模式（"single" | "versus"）
+     */
     getMode() {
       return this.state.Mode;
     }
+    /**
+     * ## 设置游戏模式
+     *
+     * 切换 single ↔ versus 模式。
+     *
+     * @param {string} mode - 游戏模式（"single" | "versus"）
+     * @returns {void}
+     */
     setMode(mode) {
       this.state.Mode = mode;
     }
+    /**
+     * ## 获取对战目标分数
+     *
+     * @returns {number} 先达到此分数者赢得整场对战
+     */
     getVictoryScore() {
       return this.state.victoryScore;
     }
+    /**
+     * ## 设置对战目标分数
+     *
+     * @param {number} score - 目标分数
+     * @returns {void}
+     */
     setVictoryScore(score) {
       this.state.victoryScore = score;
     }
+    /**
+     * ## 获取方块渲染风格
+     *
+     * @returns {string} 渲染风格（classic / frosted / glass / gradient / inset / pixel
+     *   / shaded）
+     */
     getBlockStyle() {
       return this.state.Block.style;
     }
+    /**
+     * ## 设置方块渲染风格
+     *
+     * @param {string} style - 渲染风格
+     * @returns {void}
+     */
     setBlockStyle(style) {
       this.state.Block.style = style;
     }
+    /**
+     * ## 获取方块图案
+     *
+     * @returns {string} 方块图案（square / jay / ell / tee）
+     */
     getBlockPattern() {
       return this.state.Block.pattern;
     }
+    /**
+     * ## 设置方块图案
+     *
+     * @param {string} pattern - 方块图案
+     * @returns {void}
+     */
     setBlockPattern(pattern) {
       this.state.Block.pattern = pattern;
     }
+    /**
+     * ## 设置玩家列表
+     *
+     * @param {string[]} players - 玩家名称数组
+     * @returns {void}
+     */
+    setPlayers(players) {
+      this.state.Players = players;
+    }
+    reset() {
+      this.state = structuredClone(engine_state_default);
+    }
   };
   var engine_store_default = EngineStore;
-
-  // lib/utils/types/is-function.js
-  var isFunction = (val) => {
-    if (val == null || typeof val !== "function" && typeof val !== "object") {
-      return false;
-    }
-    return (
-      // 处理某些特殊环境下 typeof 误判为 object 的函数（极少数情况）
-      typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]"
-    );
-  };
-  var is_function_default = isFunction;
-
-  // lib/core/event-bus/index.js
-  var EventBus = {
-    /**
-     * ## 事件订阅映射表
-     *
-     * Key 为事件名称，Value 为该事件对应的处理函数集合。
-     *
-     * @type {Map<string, Set<Function>>}
-     */
-    events: /* @__PURE__ */ new Map(),
-    /**
-     * ## 订阅事件
-     *
-     * 注册一个处理函数，每当事件触发时都会调用。 如果事件不存在，会自动创建。 相同的 handler 不会重复注册（Set 去重）。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
-     * @returns {void}
-     */
-    on(event, handler) {
-      if (!is_string_default(event) || !is_function_default(handler)) {
-        return;
-      }
-      if (!this.events.has(event)) {
-        this.events.set(event, /* @__PURE__ */ new Set());
-      }
-      this.events.get(event).add(handler);
-    },
-    /**
-     * ## 订阅事件，仅触发一次
-     *
-     * 注册的处理函数在第一次触发后自动取消订阅。 内部通过创建包装函数实现，触发后在 `finally` 中调用 `off`。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
-     * @returns {void}
-     */
-    once(event, handler) {
-      if (!is_string_default(event) || !is_function_default(handler)) {
-        return;
-      }
-      const wrapper = (payload) => {
-        try {
-          handler(payload);
-        } finally {
-          this.off(event, wrapper);
-        }
-      };
-      this.on(event, wrapper);
-    },
-    /**
-     * ## 取消订阅
-     *
-     * 从指定事件的订阅列表中移除处理函数。 如果移除后该事件没有订阅者，会清理该事件条目。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 要移除的处理函数
-     * @returns {void}
-     */
-    off(event, handler) {
-      if (!is_string_default(event) || !is_function_default(handler)) {
-        return;
-      }
-      const set = this.events.get(event);
-      if (!set) {
-        return;
-      }
-      set.delete(handler);
-      if (set.size === 0) {
-        this.events.delete(event);
-      }
-    },
-    /**
-     * ## 触发事件
-     *
-     * 通知指定事件的所有订阅者，依次调用它们的处理函数。 如果事件没有订阅者，不做任何操作。
-     *
-     * @param {string} event - 事件名称
-     * @param {object} [payload] - 传递给处理函数的参数对象
-     * @returns {void}
-     */
-    emit(event, payload) {
-      const set = this.events.get(event);
-      if (!set) {
-        return;
-      }
-      for (const handler of set) {
-        if (!is_function_default(handler)) {
-          continue;
-        }
-        handler(payload);
-      }
-    },
-    /**
-     * ## 清空所有事件
-     *
-     * 移除所有事件和订阅者。 用于游戏重启、单元测试 reset、或完全重置状态时调用。
-     *
-     * @returns {void}
-     */
-    clear() {
-      this.events.clear();
-    }
-  };
-  var event_bus_default = EventBus;
 
   // lib/core/index.js
   var Base = class {
@@ -512,10 +607,24 @@ var tetris = (() => {
 
   // lib/engine/core/engine-renderer.js
   var EngineRenderer = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * 接收 Store 依赖，缓存根容器引用，初始化模板数组。
+     *
+     * @param {object} options - 配置对象
+     */
     constructor(options) {
       super(options);
       this.initialize();
     }
+    /**
+     * ## 初始化
+     *
+     * 缓存根容器 DOM 元素引用，并生成所有 HTML 模板。
+     *
+     * @returns {void}
+     */
     initialize() {
       const { Store } = this;
       const state = Store.getState();
@@ -523,6 +632,27 @@ var tetris = (() => {
       this.$container = document.querySelector(`#${Container}`);
       this._initializeTemplates();
     }
+    /**
+     * ## 初始化 HTML 模板
+     *
+     * 根据 Store 中的 Mode 和 Players 配置，生成对应数量和结构的 HTML 模板。 收集到 `this.templates`
+     * 数组中，供 `render()` 方法统一注入。
+     *
+     * ### 生成规则
+     *
+     * - **versus 模式**：
+     *
+     *   1. 生成对战覆盖层（胜者面板 + fly canvas）
+     *   2. 为每个玩家生成完整的游戏界面
+     *   3. 为每个玩家生成记分牌
+     * - **single 模式**：
+     *
+     *   1. 移除多余玩家（pop）
+     *   2. 为剩余玩家生成完整的游戏界面
+     *
+     * @private
+     * @returns {void}
+     */
     _initializeTemplates() {
       const { Store } = this;
       const isVersus = Store.isVersus();
@@ -541,9 +671,25 @@ var tetris = (() => {
         }
       }
     }
+    /**
+     * ## 渲染界面
+     *
+     * 一次性将所有 HTML 模板注入根容器。
+     *
+     * 使用 innerHTML 直接替换容器内容。 这是游戏初始化时的一次性操作，不需要考虑增量更新。 所有后续的 UI 更新都通过 DOM
+     * 选择器定位具体元素进行。
+     *
+     * @returns {void}
+     */
     render() {
-      const { $container, templates } = this;
+      const { $container, templates, Store } = this;
+      $container.dataset.mode = Store.getMode();
       $container.innerHTML = templates.join("");
+    }
+    destroy() {
+      this.$container.innerHTML = "";
+      this.$container.dataset.mode = "single";
+      this.templates = [];
     }
   };
   var engine_renderer_default = EngineRenderer;
@@ -3563,9 +3709,17 @@ var tetris = (() => {
     CLEAR: `command:queue:${uuid}:clear`,
     ENQUEUE: `command:queue:${uuid}:enqueue`
   });
+  var EngineEvents = () => ({
+    EXIT: `engine:exit`,
+    UPDATE_MODE: `engine:update:mode`,
+    UPDATE_PLAYERS: `engine:update:players`,
+    START: `engine:start`
+  });
   var GameEvents = (uuid) => ({
     /* ---------- 状态更新 ---------- */
     UPDATE_STATE: `game:${uuid}:update:state`,
+    UPDATE_MODE_INDEX: `game:${uuid}:update:mode:index`,
+    UPDATE_BATTLE_INDEX: `game:${uuid}:update:battle:index`,
     UPDATE_MODE: `game:${uuid}:update:mode`,
     UPDATE_LEVEL: `game:${uuid}:update:level`,
     UPDATE_GAMEPAD_CONNECTED: `game:${uuid}:update:gamepad:connected`,
@@ -3574,10 +3728,12 @@ var tetris = (() => {
     UPDATE_HUD: `game:${uuid}:update:hud`,
     SAVE_HIGH_SCORE: `game:${uuid}:save:high:score`,
     /* ---------- 场景更新 ---------- */
+    SWITCH_TO_GAME_MODE: `game:${uuid}:switch:to:game:mode`,
+    SWITCH_TO_BATTLE_MODE: `game:${uuid}:switch:to:battle:mode`,
+    SWITCH_TO_MAIN_MENU: `game:${uuid}:switch:to:main:menu`,
     SELECT_LEVEL: `game:${uuid}:select:level`,
     SWITCH_TO_DIFFICULTY: `game:${uuid}:switch:difficulty`,
     SELECT_DIFFICULTY: `game:${uuid}:select:difficulty`,
-    SWITCH_TO_MAIN_MENU: `game:${uuid}:switch:to:main:menu`,
     /* ---------- 核心流程 ---------- */
     BEGIN: `game:${uuid}:begin`,
     START: `game:${uuid}:start`,
@@ -3786,6 +3942,24 @@ var tetris = (() => {
   };
   var audio_default = Audio;
 
+  // lib/constants/options.js
+  var OPTIONS = {
+    MODE_OPTIONS: [
+      { key: "S", label: "SINGLE", mode: "single", players: ["human"] },
+      {
+        key: "B",
+        label: "BATTLE",
+        mode: "versus",
+        players: ["human", "ai"]
+      }
+    ],
+    BATTLE_OPTIONS: [
+      { key: "A", label: "VS AI   ", players: ["human", "ai"] },
+      { key: "H", label: "VS HUMAN", players: ["human", "human"] }
+    ]
+  };
+  var options_default = OPTIONS;
+
   // lib/events/router/game-router.js
   var GameRouter = class extends core_default {
     /**
@@ -3816,16 +3990,20 @@ var tetris = (() => {
       const { Animations, AI, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
       const events = GameEvents(Game2.id);
       this.on(events.UPDATE_STATE, this._onUpdateState);
+      this.on(events.UPDATE_MODE_INDEX, this._onUpdateModeIndex);
+      this.on(events.UPDATE_BATTLE_INDEX, this._onUpdateBattleIndex);
       this.on(events.UPDATE_MODE, this._onUpdateMode);
       this.on(events.UPDATE_LEVEL, this._onUpdateLevel);
       this.on(events.UPDATE_GAMEPAD_CONNECTED, this._onUpdateGamepadConnected);
       this.on(events.SWITCH_CONTROLLER, this._onSwitchController);
       this.on(events.UPDATE_HUD, this._onUpdateHud);
       this.on(events.SAVE_HIGH_SCORE, this._onSaveHighScore);
+      this.on(events.SWITCH_TO_GAME_MODE, this._onSwitchToGameMode);
+      this.on(events.SWITCH_TO_BATTLE_MODE, this._onSwitchToBattleMode);
+      this.on(events.SWITCH_TO_MAIN_MENU, this._onSwitchToMainMenu);
       this.on(events.SELECT_LEVEL, this._onSelectLevel);
       this.on(events.SWITCH_TO_DIFFICULTY, this._onSwitchToDifficulty);
       this.on(events.SELECT_DIFFICULTY, this._onSelectDifficulty);
-      this.on(events.SWITCH_TO_MAIN_MENU, this._onSwitchToMainMenu);
       this.on(events.BEGIN, this._onGameBegin);
       this.on(events.START, this._onGameStart);
       this.on(events.TOGGLE_PAUSED, this._onTogglePaused);
@@ -3867,16 +4045,20 @@ var tetris = (() => {
       const { Animations, AI, CommandQueue: CommandQueue2, Game: Game2, Replay, UI: UI2 } = this;
       const events = GameEvents(Game2.id);
       this.off(events.UPDATE_STATE, this._onUpdateState);
+      this.off(events.UPDATE_MODE_INDEX, this._onUpdateModeIndex);
+      this.off(events.UPDATE_BATTLE_INDEX, this._onUpdateBattleIndex);
       this.off(events.UPDATE_MODE, this._onUpdateMode);
       this.off(events.UPDATE_LEVEL, this._onUpdateLevel);
       this.off(events.UPDATE_GAMEPAD_CONNECTED, this._onUpdateGamepadConnected);
       this.off(events.SWITCH_CONTROLLER, this._onSwitchController);
       this.off(events.UPDATE_HUD, this._onUpdateHud);
       this.off(events.SAVE_HIGH_SCORE, this._onSaveHighScore);
+      this.off(events.SWITCH_TO_GAME_MODE, this._onSwitchToGameMode);
+      this.off(events.SWITCH_TO_BATTLE_MODE, this._onSwitchToBattleMode);
+      this.off(events.SWITCH_TO_MAIN_MENU, this._onSwitchToMainMenu);
       this.off(events.SELECT_LEVEL, this._onSelectLevel);
       this.off(events.SWITCH_TO_DIFFICULTY, this._onSwitchToDifficulty);
       this.off(events.SELECT_DIFFICULTY, this._onSelectDifficulty);
-      this.off(events.SWITCH_TO_MAIN_MENU, this._onSwitchToMainMenu);
       this.off(events.BEGIN, this._onGameBegin);
       this.off(events.START, this._onGameStart);
       this.off(events.TOGGLE_PAUSED, this._onTogglePaused);
@@ -3944,6 +4126,43 @@ var tetris = (() => {
       const { Store } = this;
       const { stateHandler } = options;
       Store.setState(stateHandler);
+    };
+    _onUpdateModeIndex = (payload) => {
+      const { Store } = this;
+      const { action } = payload;
+      let index = Store.getModeIndex();
+      if (action === "UP") {
+        index -= 1;
+      } else {
+        index += 1;
+      }
+      if (index <= 0) {
+        index = 0;
+      } else if (index >= 1) {
+        index = 1;
+      }
+      Store.setModeIndex(index);
+      const events = AudioEvents();
+      this.emit(events.PLAY_SOUND, { sound: "SWITCH_SCENE" });
+      this.emit("UPDATE_MODE_INDEX", { index });
+    };
+    _onUpdateBattleIndex = (payload) => {
+      const { Store } = this;
+      const { action } = payload;
+      let index = Store.getBattleIndex();
+      if (action === "UP") {
+        index -= 1;
+      } else {
+        index += 1;
+      }
+      if (index <= 0) {
+        index = 0;
+      } else if (index >= 1) {
+        index = 1;
+      }
+      Store.setBattleIndex(index);
+      const events = AudioEvents();
+      this.emit(events.PLAY_SOUND, { sound: "SWITCH_SCENE" });
     };
     /**
      * ## 更新游戏模式
@@ -4060,6 +4279,14 @@ var tetris = (() => {
       const { Game: Game2 } = this;
       const { difficulty } = options;
       Game2.selectDifficulty(difficulty);
+    };
+    _onSwitchToGameMode = () => {
+      const { Store } = this;
+      Store.setMode("game-mode");
+    };
+    _onSwitchToBattleMode = () => {
+      const { Store } = this;
+      Store.setMode("battle-mode");
     };
     /**
      * ## 切换到主菜单
@@ -4435,6 +4662,8 @@ var tetris = (() => {
 
   // lib/state/game-state.js
   var GameState = {
+    modeIndex: 0,
+    battleIndex: 0,
     /*
      * ==================== 控制者 ====================
      */
@@ -4499,8 +4728,19 @@ var tetris = (() => {
      */
     /** 游戏难度：'easy' | 'normal' | 'hard' | 'expert' */
     difficulty: "easy",
-    /** 游戏模式：'main-menu' | 'playing' | 'paused' | 'game-over' */
-    mode: "main-menu",
+    /**
+     * 游戏模式：
+     *
+     * - 'game-mode'：游戏模式
+     * - 'battle-mode'：对战模式
+     * - 'main-menu'：等级选择
+     * - 'difficulty': 难度选择
+     * - 'playing'：游戏中
+     * - 'paused'：游戏暂停
+     * - 'game-over'：游戏结束
+     * - 'replay'：游戏回放
+     */
+    mode: "game-mode",
     /*
      * ==================== 外设状态 ====================
      */
@@ -4803,6 +5043,18 @@ var tetris = (() => {
      */
     resetState() {
       this.state = structuredClone(this.defaults);
+    }
+    getModeIndex() {
+      return this.state.modeIndex;
+    }
+    setModeIndex(index) {
+      this.state.modeIndex = index;
+    }
+    getBattleIndex() {
+      return this.state.battleIndex;
+    }
+    setBattleIndex(index) {
+      this.state.battleIndex = index;
     }
     /**
      * ## 获取当前棋盘
@@ -5601,6 +5853,18 @@ var tetris = (() => {
   }
   var clear_board_default = clearBoard;
 
+  // lib/services/ui/overlay/render-overlay.js
+  var renderOverlay = (canvas, color) => {
+    const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
+    const { gameBoard, gameBoardContext: ctx } = canvas;
+    const { width, height } = gameBoard;
+    ctx.save();
+    ctx.fillStyle = color || RGBA_BLACK2;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  };
+  var render_overlay_default = renderOverlay;
+
   // lib/services/ui/text/render-text.js
   var renderText = (canvas, options) => {
     const {
@@ -5655,84 +5919,6 @@ var tetris = (() => {
     });
   };
   var render_tetris_text_default = renderTetrisText;
-
-  // lib/services/ui/text/render-level-text.js
-  var renderLevelText = (canvas) => {
-    const { GREEN: GREEN4 } = colors_default;
-    const { gameBoard } = canvas;
-    const { width, height } = gameBoard;
-    render_text_default(canvas, {
-      text: "LEVEL",
-      x: width / 2,
-      y: height * 0.35,
-      color: GREEN4,
-      size: 1,
-      center: true
-    });
-  };
-  var render_level_text_default = renderLevelText;
-
-  // lib/services/ui/text/render-level-number.js
-  var renderLevelNumber = (canvas, level, y) => {
-    const { GREEN: GREEN4 } = colors_default;
-    const { gameBoard } = canvas;
-    const { width } = gameBoard;
-    render_text_default(canvas, {
-      text: String(level),
-      x: width / 2,
-      y,
-      color: GREEN4,
-      size: 3,
-      center: true
-    });
-  };
-  var render_level_number_default = renderLevelNumber;
-
-  // lib/services/ui/text/render-level-shortcut.js
-  var renderLevelShortcut = (canvas) => {
-    const { WHITE: WHITE3 } = colors_default;
-    const { gameBoard } = canvas;
-    const { width, height } = gameBoard;
-    render_text_default(canvas, {
-      text: "1-9 or T KEY",
-      x: width / 2,
-      y: height * 0.58,
-      color: WHITE3,
-      size: 1,
-      center: true
-    });
-  };
-  var render_level_shortcut_default = renderLevelShortcut;
-
-  // lib/services/ui/text/render-enter-continue-text.js
-  var renderEnterContinueText = (canvas) => {
-    const { TEAL: TEAL4, BLACK: BLACK2 } = colors_default;
-    const { gameBoard } = canvas;
-    const { width, height } = gameBoard;
-    render_text_default(canvas, {
-      text: "ENTER CONTINUE",
-      x: width / 2,
-      y: height * 0.74,
-      color: TEAL4,
-      strokeColor: BLACK2,
-      size: 1,
-      center: true,
-      stroke: true
-    });
-  };
-  var render_enter_continue_text_default = renderEnterContinueText;
-
-  // lib/services/ui/overlay/render-overlay.js
-  var renderOverlay = (canvas, color) => {
-    const { RGBA_BLACK: RGBA_BLACK2 } = colors_default;
-    const { gameBoard, gameBoardContext: ctx } = canvas;
-    const { width, height } = gameBoard;
-    ctx.save();
-    ctx.fillStyle = color || RGBA_BLACK2;
-    ctx.fillRect(0, 0, width, height);
-    ctx.restore();
-  };
-  var render_overlay_default = renderOverlay;
 
   // lib/services/ui/constants/scenes-background.js
   var { RGBA_WHITE: RGBA_WHITE2 } = colors_default;
@@ -5803,6 +5989,8 @@ var tetris = (() => {
     let y;
     switch (scene) {
       /** 主菜单 / 倒计时场景：使用 Tetris 图标 */
+      case "game-mode":
+      case "battle-mode":
       case "main-menu":
       case "countdown": {
         img = getImage(scenes_background_default.tetris);
@@ -5848,6 +6036,185 @@ var tetris = (() => {
     render_image_default(canvas, { img, x, y, size });
   };
   var render_scene_background_default = renderSceneBackground;
+
+  // lib/services/ui/text/render-enter-continue-text.js
+  var renderEnterContinueText = (canvas) => {
+    const { TEAL: TEAL4, BLACK: BLACK2 } = colors_default;
+    const { gameBoard } = canvas;
+    const { width, height } = gameBoard;
+    render_text_default(canvas, {
+      text: "ENTER CONTINUE",
+      x: width / 2,
+      y: height * 0.74,
+      color: TEAL4,
+      strokeColor: BLACK2,
+      size: 1,
+      center: true,
+      stroke: true
+    });
+  };
+  var render_enter_continue_text_default = renderEnterContinueText;
+
+  // lib/services/ui/scenes/game-mode-scene/render-game-mode-scene.js
+  var renderGameModeScene = (canvas, state) => {
+    const { gameBoard, fontSize } = canvas;
+    const { width, height } = gameBoard;
+    clear_board_default(canvas);
+    render_overlay_default(canvas);
+    render_tetris_text_default(canvas);
+    render_scene_background_default(canvas, state.mode);
+    render_text_default(canvas, {
+      text: "GAME",
+      color: colors_default.GREEN,
+      size: 2.6,
+      x: width / 2,
+      y: height * 0.3
+    });
+    render_text_default(canvas, {
+      text: "MODE",
+      color: colors_default.GREEN,
+      size: 2.6,
+      x: width / 2,
+      y: height * 0.39
+    });
+    const options = options_default.MODE_OPTIONS;
+    const yStart = height * 0.5;
+    const spacing = Math.min(fontSize * 2.5, 80);
+    for (const [index, option] of options.entries()) {
+      const y = yStart + index * spacing;
+      const isSelected = index === state.modeIndex;
+      const checked = isSelected ? ">" : " ";
+      render_text_default(canvas, {
+        text: `[${checked}] ${option.label}`,
+        x: width * 0.5,
+        y,
+        size: 1.2,
+        color: isSelected ? colors_default.GREEN : colors_default.WHITE
+      });
+    }
+    render_text_default(canvas, {
+      text: "\u2191 \u2193 SELECT",
+      size: 1,
+      color: colors_default.TEAL,
+      x: width / 2,
+      y: height * 0.68,
+      strokeColor: colors_default.BLACK,
+      center: true,
+      stroke: true
+    });
+    render_enter_continue_text_default(canvas);
+  };
+  var render_game_mode_scene_default = renderGameModeScene;
+
+  // lib/services/ui/scenes/game-mode-scene/index.js
+  var gameModeScene = (canvas, state) => {
+    render_game_mode_scene_default(canvas, state);
+  };
+  var game_mode_scene_default = gameModeScene;
+
+  // lib/services/ui/scenes/battle-mode-scene/render-battle-mode-scene.js
+  var renderBattleModeScene = (canvas, state) => {
+    const { gameBoard, fontSize } = canvas;
+    const { width, height } = gameBoard;
+    clear_board_default(canvas);
+    render_overlay_default(canvas);
+    render_tetris_text_default(canvas);
+    render_scene_background_default(canvas, state.mode);
+    render_text_default(canvas, {
+      text: "BATTLE",
+      size: 2.46,
+      color: colors_default.GREEN,
+      x: width / 2,
+      y: height * 0.3
+    });
+    render_text_default(canvas, {
+      text: "MODE",
+      size: 2.46,
+      color: colors_default.GREEN,
+      x: width / 2,
+      y: height * 0.39
+    });
+    const options = options_default.BATTLE_OPTIONS;
+    const yStart = height * 0.5;
+    const spacing = Math.min(fontSize * 2.5, 80);
+    for (const [index, option] of options.entries()) {
+      const y = yStart + index * spacing;
+      const isSelected = index === state.battleIndex;
+      const checked = isSelected ? ">" : " ";
+      render_text_default(canvas, {
+        text: `[${checked}] ${option.label}`,
+        x: width * 0.5,
+        y,
+        color: isSelected ? colors_default.GREEN : colors_default.WHITE
+      });
+    }
+    render_text_default(canvas, {
+      text: "\u2191 \u2193 SELECT",
+      size: 1,
+      color: colors_default.TEAL,
+      x: width / 2,
+      y: height * 0.68,
+      strokeColor: colors_default.BLACK,
+      center: true,
+      stroke: true
+    });
+    render_enter_continue_text_default(canvas);
+  };
+  var render_battle_mode_scene_default = renderBattleModeScene;
+
+  // lib/services/ui/scenes/battle-mode-scene/index.js
+  var battleModeScene = (canvas, state) => {
+    render_battle_mode_scene_default(canvas, state);
+  };
+  var battle_mode_scene_default = battleModeScene;
+
+  // lib/services/ui/text/render-level-text.js
+  var renderLevelText = (canvas) => {
+    const { GREEN: GREEN4 } = colors_default;
+    const { gameBoard } = canvas;
+    const { width, height } = gameBoard;
+    render_text_default(canvas, {
+      text: "LEVEL",
+      x: width / 2,
+      y: height * 0.35,
+      color: GREEN4,
+      size: 1,
+      center: true
+    });
+  };
+  var render_level_text_default = renderLevelText;
+
+  // lib/services/ui/text/render-level-number.js
+  var renderLevelNumber = (canvas, level, y) => {
+    const { GREEN: GREEN4 } = colors_default;
+    const { gameBoard } = canvas;
+    const { width } = gameBoard;
+    render_text_default(canvas, {
+      text: String(level),
+      x: width / 2,
+      y,
+      color: GREEN4,
+      size: 3,
+      center: true
+    });
+  };
+  var render_level_number_default = renderLevelNumber;
+
+  // lib/services/ui/text/render-level-shortcut.js
+  var renderLevelShortcut = (canvas) => {
+    const { WHITE: WHITE3 } = colors_default;
+    const { gameBoard } = canvas;
+    const { width, height } = gameBoard;
+    render_text_default(canvas, {
+      text: "1-9 or T KEY",
+      x: width / 2,
+      y: height * 0.58,
+      color: WHITE3,
+      size: 1,
+      center: true
+    });
+  };
+  var render_level_shortcut_default = renderLevelShortcut;
 
   // lib/services/ui/scenes/main-menu-scene/render-main-menu.js
   var renderMainMenu = (canvas, level) => {
@@ -7142,6 +7509,12 @@ var tetris = (() => {
 
   // lib/services/ui/scenes/index.js
   var Scenes = {
+    "game-mode": (canvas, state) => {
+      game_mode_scene_default(canvas, state);
+    },
+    "battle-mode": (canvas, state) => {
+      battle_mode_scene_default(canvas, state);
+    },
     /**
      * ## 主菜单场景
      *
@@ -8613,6 +8986,7 @@ var tetris = (() => {
     // 之后每 2 帧（≈33ms）移动一次
   };
   var KEYBOARDS_ACTION_MAP = {
+    escape: "EXIT",
     // ========== 方块操作 ==========
     arrowleft: "MOVE_LEFT",
     // 向左移动方块
@@ -8673,11 +9047,16 @@ var tetris = (() => {
     enter: "CONFIRM"
     // 确认操作
   };
-  var resolveKeyboardAction = (key) => {
+  var resolveKeyboardAction = (key, mode) => {
     if (!key) {
       return;
     }
     const normalizedKey = key.toLowerCase();
+    if (mode === "game-mode" || mode === "battle-mode") {
+      KEYBOARDS_ACTION_MAP.arrowup = "MOVE_UP";
+    } else if (mode === "playing") {
+      KEYBOARDS_ACTION_MAP.arrowup = "ROTATE";
+    }
     return KEYBOARDS_ACTION_MAP[normalizedKey];
   };
   var KeyboardController = class extends core_default {
@@ -8801,8 +9180,8 @@ var tetris = (() => {
     _isBlocked(key) {
       const { Store, Game: Game2 } = this;
       const { Player } = Game2;
-      const action = resolveKeyboardAction(key);
       const mode = Store.getMode();
+      const action = resolveKeyboardAction(key, mode);
       const controller = Store.getController();
       return !action || mode === "replay" && key !== "enter" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (key === "r" || Player.name === "ai" && (key === "m" || key === "p" || key === "c") || Player.name === "human" && (key === "s" || key === "p" && Player.index === 1 || mode === "playing" && Player.index === 1));
     }
@@ -9206,6 +9585,12 @@ var tetris = (() => {
      */
     _updateActionMap(mode) {
       switch (mode) {
+        case "game-mode":
+        case "battle-mode": {
+          GAMEPAD_ACTION_MAP.DPAD_UP = "MOVE_UP";
+          GAMEPAD_ACTION_MAP.BACK = "EXIT";
+          break;
+        }
         case "difficulty": {
           GAMEPAD_ACTION_MAP.A = "EASY";
           GAMEPAD_ACTION_MAP.B = "NORMAL";
@@ -9220,6 +9605,7 @@ var tetris = (() => {
           GAMEPAD_ACTION_MAP.X = "RESTART";
           GAMEPAD_ACTION_MAP.Y = "TOGGLE_PAUSE";
           GAMEPAD_ACTION_MAP.BACK = "QUIT";
+          GAMEPAD_ACTION_MAP.DPAD_UP = "ROTATE";
           break;
         }
       }
@@ -15772,8 +16158,155 @@ var tetris = (() => {
   };
   var dispatch_input_default = dispatchInput;
 
+  // lib/game/actions/game-mode-actions.js
+  var GAME_MODE_ACTIONS = {
+    /**
+     * ## 向下移动（软降）
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     */
+    MOVE_DOWN: (payload) => {
+      const Game2 = payload?.Game;
+      if (!Game2) {
+        return;
+      }
+      const events = GameEvents(Game2.id);
+      Game2.emit(events.UPDATE_MODE_INDEX, {
+        action: "DOWN"
+      });
+    },
+    /**
+     * ## 旋转方块
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     */
+    MOVE_UP: (payload) => {
+      const Game2 = payload?.Game;
+      if (!Game2) {
+        return;
+      }
+      const events = GameEvents(Game2.id);
+      Game2.emit(events.UPDATE_MODE_INDEX, {
+        action: "UP"
+      });
+    },
+    /**
+     * 确认操作（例如：Enter / Space / OK）
+     *
+     * 作用：
+     *
+     * - 重置游戏状态
+     * - 返回主菜单
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     */
+    CONFIRM: (payload) => {
+      const { Game: Game2 } = payload;
+      if (!Game2) {
+        return;
+      }
+      const { MODE_OPTIONS, BATTLE_OPTIONS } = options_default;
+      const { Store, id } = Game2;
+      const { mode } = MODE_OPTIONS[Store.getModeIndex()];
+      const { players } = BATTLE_OPTIONS[Store.getBattleIndex()];
+      const AE = AudioEvents();
+      const GE = GameEvents(id);
+      const EE = EngineEvents();
+      Game2.emit(EE.UPDATE_MODE, { mode });
+      if (mode === "versus") {
+        Game2.emit(GE.SWITCH_TO_BATTLE_MODE);
+      } else {
+        Game2.emit(EE.UPDATE_PLAYERS, { players });
+        Game2.emit(EE.START);
+        Game2.emit(AE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
+      }
+    }
+  };
+  var game_mode_actions_default = GAME_MODE_ACTIONS;
+
+  // lib/game/actions/battle-mode-actions.js
+  var BATTLE_MODE_ACTIONS = {
+    /**
+     * ## 向下移动（软降）
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     */
+    MOVE_DOWN: (payload) => {
+      const Game2 = payload?.Game;
+      if (!Game2) {
+        return;
+      }
+      const events = GameEvents(Game2.id);
+      Game2.emit(events.UPDATE_BATTLE_INDEX, {
+        action: "DOWN"
+      });
+    },
+    /**
+     * ## 旋转方块
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     */
+    MOVE_UP: (payload) => {
+      const Game2 = payload?.Game;
+      if (!Game2) {
+        return;
+      }
+      const events = GameEvents(Game2.id);
+      Game2.emit(events.UPDATE_BATTLE_INDEX, {
+        action: "UP"
+      });
+    },
+    /**
+     * ## 旋转方块
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     */
+    BACK: (payload) => {
+      const Game2 = payload?.Game;
+      if (!Game2) {
+        return;
+      }
+      const events = GameEvents(Game2.id);
+      Game2.emit(events.SWITCH_TO_GAME_MODE);
+    },
+    /**
+     * 确认操作（例如：Enter / Space / OK）
+     *
+     * 作用：
+     *
+     * - 重置游戏状态
+     * - 返回主菜单
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     */
+    CONFIRM: (payload) => {
+      const { Game: Game2 } = payload;
+      if (!Game2) {
+        return;
+      }
+      const { Store } = Game2;
+      const { players } = options_default.BATTLE_OPTIONS[Store.getBattleIndex()];
+      const AE = AudioEvents();
+      const EE = EngineEvents();
+      Game2.emit(EE.UPDATE_PLAYERS, { players });
+      Game2.emit(EE.START);
+      Game2.emit(AE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
+    }
+  };
+  var battle_mode_actions_default = BATTLE_MODE_ACTIONS;
+
   // lib/game/actions/main-menu-actions.js
   var MAIN_MENU_ACTIONS = {
+    EXIT: (payload) => {
+      const Game2 = payload?.Game;
+      if (!Game2) {
+        return;
+      }
+      const AE = AudioEvents();
+      const EE = EngineEvents();
+      Game2.emit(EE.EXIT);
+      Game2.emit(AE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
+    },
     /**
      * ## 选择难度 1
      *
@@ -16355,6 +16888,8 @@ var tetris = (() => {
 
   // lib/engine/dispatch-command.js
   var ACTIONS_MAP = {
+    "game-mode": game_mode_actions_default,
+    "battle-mode": battle_mode_actions_default,
     "main-menu": main_menu_actions_default,
     difficulty: difficulty_actions_default,
     playing: game_playing_actions_default,
@@ -16404,13 +16939,21 @@ var tetris = (() => {
      */
     lastTickTime: 0,
     /**
-     * ## 游戏配置
+     * ## 引擎全局状态管理器
      *
-     * 从 configuration.js 导入的全局配置对象。 包含 Mode、Players、Elements、victoryScore 等配置项。
+     * 管理游戏模式（single / versus）、玩家列表、对战目标分数、 方块渲染风格等全局配置。替代原来的静态 Configuration 对象，
+     * 支持运行时动态修改配置。
      *
      * @type {EngineStore | null}
      */
     Store: null,
+    /**
+     * ## 引擎界面渲染器
+     *
+     * 根据 EngineStore 中的配置动态生成完整的游戏 DOM 界面。
+     *
+     * @type {EngineRenderer | null}
+     */
     Renderer: null,
     /**
      * ## 任务调度器实例
@@ -16459,18 +17002,19 @@ var tetris = (() => {
     /**
      * ## 初始化引擎
      *
-     * 创建 Scheduler、Audio、Game 等核心实例，并注入相互依赖关系。 这是游戏启动的第一步——在所有子系统创建完成后， 由
-     * launch() 继续执行游戏状态的初始化。
+     * 创建 EngineStore、EngineRenderer、Scheduler、Audio、Game 等核心实例，
+     * 并注入相互依赖关系。这是游戏启动的第一步——在所有子系统创建完成后， 由 launch() 继续执行游戏状态的初始化。
      *
      * ### 初始化顺序
      *
-     * 1. 绘制游戏界面 DOM
-     * 2. 创建全局调度器 Scheduler
-     * 3. 创建音频系统 Audio
-     * 4. 根据 Players 配置创建 Game 实例（single 模式 1 个，versus 模式 2 个）
-     * 5. 对战模式下创建 BattleController
+     * 1. 创建 EngineStore（全局状态管理）
+     * 2. 创建 EngineRenderer 并渲染 DOM 界面
+     * 3. 创建全局调度器 Scheduler
+     * 4. 创建音频系统 Audio
+     * 5. 根据 Players 配置创建 Game 实例（single 模式 1 个，versus 模式 2 个）
+     * 6. 对战模式下创建 BattleController
      *
-     * @param {object} options - 配置参数对象
+     * @param {object} [options={}] - 配置参数对象，用于覆盖默认的 EngineState. Default is `{}`
      * @returns {void}
      */
     initialize: (options = {}) => {
@@ -16527,22 +17071,25 @@ var tetris = (() => {
      *    - 更新 DOM 节点 data-mode 属性
      *    - 适配画布尺寸
      *    - 初始化 HUD 显示
+     *    - 更新控制者标识显示
      *    - 延迟渲染主菜单 UI
      *    - 绑定输入设备事件处理器
      * 3. 订阅各模块事件
      * 4. 启动游戏主循环
      *
-     * @param {object} options - 配置参数对象
+     * @param {object} [options={}] - 配置参数对象. Default is `{}`
      * @returns {void}
      */
     launch: (options = {}) => {
+      const { isRelaunch = false } = options;
       Engine.initialize(options);
       for (const Game2 of Engine.Games) {
         const { Store, UI: UI2 } = Game2;
+        const mode = isRelaunch ? "main-menu" : Store.getMode();
         Store.resetBoard();
         Game2.loadHighScore();
-        Game2.setBeginningState("main-menu");
-        UI2.updateMode("main-menu");
+        Game2.setBeginningState(mode);
+        UI2.updateMode(mode);
         UI2.resize();
         UI2.updateHud();
         UI2.updateController(Store.getController());
@@ -16680,6 +17227,10 @@ var tetris = (() => {
         Game2.on(`dispatch:command`, Engine._onDispatchCommand);
         Game2.on(`dispatch:input`, Engine._onDispatchInput);
       }
+      event_bus_default.on("engine:update:mode", Engine._onUpdateMode);
+      event_bus_default.on("engine:update:players", Engine._onUpdatePlayers);
+      event_bus_default.on("engine:start", Engine._onStart);
+      event_bus_default.on("engine:exit", Engine._onExit);
     },
     /**
      * ## Engine 内部事件取消订阅
@@ -16695,6 +17246,10 @@ var tetris = (() => {
         Game2.off(`dispatch:command`, Engine._onDispatchCommand);
         Game2.off(`dispatch:input`, Engine._onDispatchInput);
       }
+      event_bus_default.off("engine:update:mode", Engine._onUpdateMode);
+      event_bus_default.off("engine:update:players", Engine._onUpdatePlayers);
+      event_bus_default.off("engine:start", Engine._onStart);
+      event_bus_default.off("engine:exit", Engine._onExit);
     },
     /**
      * ## 命令分发处理器
@@ -16718,11 +17273,12 @@ var tetris = (() => {
       const { Game: Game2 } = payload;
       const { Animations, Store } = Game2;
       const mode = Store.getMode();
-      payload.isBlocked = Animations.hasBlocking([
+      const isBlocked = Animations.hasBlocking([
         "clear-lines",
         "countdown",
         "level-up"
       ]);
+      payload.isBlocked = isBlocked;
       dispatch_command_default(cmd, { mode });
     },
     /**
@@ -16753,6 +17309,31 @@ var tetris = (() => {
       ]);
       const ms = Engine.lastTickTime - Replay.startTime;
       dispatch_input_default(input, { isBlocked, ms });
+    },
+    _onUpdateMode: (payload) => {
+      const { mode } = payload;
+      Engine.Store.setMode(mode);
+    },
+    _onUpdatePlayers: (payload) => {
+      const { players } = payload;
+      Engine.Store.setPlayers(players);
+    },
+    _onStart: (options = {}) => {
+      const { isRelaunch = true } = options;
+      const cloned = structuredClone({
+        ...Engine.Store.getState(),
+        isRelaunch
+      });
+      if (!isRelaunch) {
+        cloned.Mode = "single";
+      }
+      Engine.destroy();
+      Engine.launch(cloned);
+    },
+    _onExit: () => {
+      const { Store } = Engine;
+      Store.reset();
+      Engine._onStart({ isRelaunch: false, Mode: "single" });
     },
     /**
      * ## 启动游戏主循环
@@ -16815,6 +17396,9 @@ var tetris = (() => {
       Engine.Audio = null;
       Engine.Scheduler = null;
       Engine.Games = [];
+      Engine.Store = null;
+      Engine.Renderer.destroy();
+      Engine.Renderer = null;
     }
   };
   var engine_default = Engine;
