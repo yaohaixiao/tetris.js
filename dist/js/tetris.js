@@ -3864,7 +3864,8 @@ var tetris = (() => {
     UPDATE_WINNER: "battle:update:winner",
     SYNC_PAUSE: "battle:sync:pause",
     SYNC_RESUME: "battle:sync:resume",
-    RESET: "battle:reset"
+    RESET: "battle:reset",
+    PLAYER_SURRENDER: "battle:player:surrender"
   });
   var CommandEvents = (uuid) => ({
     CLEAR: `command:queue:${uuid}:clear`,
@@ -3924,7 +3925,9 @@ var tetris = (() => {
     /* ---------- 背景音乐 ---------- */
     TOGGLE_BGM: `game:${uuid}:toggle:bgm`,
     /* ---------- 回放准备 ---------- */
-    REPLAY_PREPARE: `game:${uuid}:replay:prepare`
+    REPLAY_PREPARE: `game:${uuid}:replay:prepare`,
+    /* ---------- 对战认输 ---------- */
+    SURRENDER: `game:${uuid}:surrender`
   });
   var ReplayEvents = (uuid) => ({
     /* ---------- 记录操作 ---------- */
@@ -4189,6 +4192,7 @@ var tetris = (() => {
       this.on(events.START_GARBAGE_PUSH, this._onStartGarbagePush);
       this.on(events.TOGGLE_BGM, this._onToggleBGM);
       this.on(events.REPLAY_PREPARE, this._onReplayPrepare);
+      this.on(events.SURRENDER, this._onSurrender);
       AI?.subscribe?.();
       Animations.subscribe();
       CommandQueue2.subscribe();
@@ -4244,6 +4248,7 @@ var tetris = (() => {
       this.off(events.START_GARBAGE_PUSH, this._onStartGarbagePush);
       this.off(events.TOGGLE_BGM, this._onToggleBGM);
       this.off(events.REPLAY_PREPARE, this._onReplayPrepare);
+      this.off(events.SURRENDER, this._onSurrender);
       AI?.unsubscribe?.();
       Animations.unsubscribe();
       CommandQueue2.unsubscribe();
@@ -4817,6 +4822,10 @@ var tetris = (() => {
       const { Game: Game2 } = this;
       const { rows, roundId, Battle } = payload;
       Game2.startGarbagePush(rows, roundId, Battle);
+    };
+    _onSurrender = () => {
+      const { Game: Game2 } = this;
+      Game2.surrender();
     };
   };
   var game_router_default = GameRouter;
@@ -14818,6 +14827,13 @@ var tetris = (() => {
         })
       );
     }
+    surrender() {
+      if (!this.isVersus()) {
+        return;
+      }
+      const events = BattleEvents();
+      this.emit(events.PLAYER_SURRENDER, { loser: this });
+    }
     // ==================== 事件订阅 / 取消订阅 ====================
     /**
      * ## 添加输入设备事件监听
@@ -15082,6 +15098,9 @@ var tetris = (() => {
      */
     getScore(id) {
       return this.state.scores[id];
+    }
+    setScore(id, score) {
+      this.state.scores[id] = score;
     }
     /**
      * ## 获取玩家唯一标识
@@ -15858,6 +15877,7 @@ var tetris = (() => {
       this.on(events.SYNC_PAUSE, this._onBattleSyncPause);
       this.on(events.SYNC_RESUME, this._onBattleSyncResume);
       this.on(events.RESET, this._onBattleReset);
+      this.on(events.PLAYER_SURRENDER, this._onBattlePlayerSurrender);
     }
     /**
      * ## 取消订阅对战事件
@@ -15875,6 +15895,7 @@ var tetris = (() => {
       this.off(events.SYNC_PAUSE, this._onBattleSyncPause);
       this.off(events.SYNC_RESUME, this._onBattleSyncResume);
       this.off(events.SYNC_RESUME, this._onBattleReset);
+      this.off(events.PLAYER_SURRENDER, this._onBattlePlayerSurrender);
     }
     /**
      * ## 处理攻击事件
@@ -16000,6 +16021,11 @@ var tetris = (() => {
       const { from } = payload;
       battle.reset(from);
     };
+    _onBattlePlayerSurrender = (payload) => {
+      const { battle } = this;
+      const { loser } = payload;
+      battle.surrender(loser);
+    };
   };
   var battle_router_default = BattleRouter;
 
@@ -16113,8 +16139,8 @@ var tetris = (() => {
      * @returns {void}
      */
     initialize() {
-      const { games, elements, players } = this;
-      const store = new battle_store_default({ games });
+      const { games, elements, players, victoryScore } = this;
+      const store = new battle_store_default({ games, victoryScore });
       this.store = store;
       this.hud = new battle_hud_default({ games, store });
       this.router = new battle_router_default({ battle: this });
@@ -16245,10 +16271,12 @@ var tetris = (() => {
     over(winner, loser) {
       const WE = GameEvents(winner.id);
       const LE = GameEvents(loser.id);
+      const AE = AudioEvents();
       const payload = { mode: "battle-over" };
       winner.emit(WE.UPDATE_MODE, payload);
       loser.emit(LE.UPDATE_MODE, payload);
       const { Player } = winner;
+      winner.emit(AE.STOP_BGM);
       this.ui.show({ winner: Player });
     }
     /**
@@ -16538,6 +16566,16 @@ var tetris = (() => {
         const events2 = AudioEvents();
         this.emit(events2.PLAY_SOUND, { sound: "GARBAGE_RECEIVED" });
       }, 120);
+    }
+    surrender(loser) {
+      const { store, victoryScore } = this;
+      const winner = this.getOpponent(loser);
+      const winnerId = store.getPlayerId(winner);
+      this.stop();
+      store.setScore(winnerId, victoryScore);
+      store.setWinner(winner);
+      this.hud.updateScores(winner, loser);
+      this.over(winner, loser);
     }
     /**
      * ## 订阅对战事件
@@ -17156,6 +17194,21 @@ var tetris = (() => {
 
   // lib/game/actions/game-playing-actions.js
   var GAME_PLAYING_ACTIONS = {
+    /**
+     * ## 放弃比赛
+     *
+     * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
+     */
+    EXIT: (payload) => {
+      const Game2 = payload?.Game;
+      if (!Game2) {
+        return;
+      }
+      const events = GameEvents(Game2.id);
+      Game2.emit(events.SURRENDER);
+    },
     /**
      * ## 向左移动
      *
