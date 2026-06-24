@@ -1,4 +1,4 @@
-import addRotateActions from '@/lib/ai/utils/add-rotate-actions.js';
+import addRotateActions from '@/lib/ai/planner/utils/add-rotate-actions.js';
 
 describe('addRotateActions', () => {
   it('count 为 0 时不应添加任何动作', () => {

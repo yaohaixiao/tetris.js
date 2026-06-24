@@ -11,7 +11,7 @@
  * 6. 无效输入边界情况
  */
 
-import getShapeByRotation from '@/lib/ai/utils/get-shape-by-rotation.js';
+import getShapeByRotation from '@/lib/ai/planner/utils/get-shape-by-rotation.js';
 
 /* 预期填充数量：每个方块类型在单个旋转状态下的 1 的总数 */
 const EXPECTED_CELL_COUNT = {

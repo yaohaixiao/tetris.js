@@ -1,4 +1,4 @@
-import getColumnHeight from '@/lib/ai/utils/get-column-height.js';
+import getColumnHeight from '@/lib/ai/simulator/utils/get-column-height.js';
 
 describe('getColumnHeight', () => {
   const ROWS = 20;

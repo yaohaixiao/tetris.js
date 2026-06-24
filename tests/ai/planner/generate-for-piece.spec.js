@@ -5,7 +5,7 @@ jest.mock('@/lib/ai/simulator/rotate-matrix.js', () => ({
   default: jest.fn(),
 }));
 
-jest.mock('@/lib/ai/utils/get-valid-x-positions.js', () => ({
+jest.mock('@/lib/ai/planner/utils/get-valid-x-positions.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));
@@ -16,7 +16,7 @@ jest.mock('@/lib/ai/planner/create-candidate.js', () => ({
 }));
 
 import rotateMatrix from '@/lib/ai/simulator/rotate-matrix.js';
-import getValidXPositions from '@/lib/ai/utils/get-valid-x-positions.js';
+import getValidXPositions from '../../../lib/ai/planner/utils/get-valid-x-positions.js';
 import createCandidate from '@/lib/ai/planner/create-candidate.js';
 
 describe('generateForPiece', () => {

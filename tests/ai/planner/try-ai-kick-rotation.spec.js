@@ -15,13 +15,13 @@
 import tryAiKickRotation from '@/lib/ai/planner/try-ai-kick-rotation.js';
 
 /* Mock 依赖 */
+jest.mock('@/lib/ai/planner/utils/get-shape-by-rotation.js');
 jest.mock('@/lib/ai/utils/collision.js');
 jest.mock('@/lib/game/logic/rotate/get-kick-data.js');
-jest.mock('@/lib/ai/utils/get-shape-by-rotation.js');
 
 import collision from '@/lib/ai/utils/collision.js';
 import getKickData from '@/lib/game/logic/rotate/get-kick-data.js';
-import getShapeByRotation from '@/lib/ai/utils/get-shape-by-rotation.js';
+import getShapeByRotation from '../../../lib/ai/planner/utils/get-shape-by-rotation.js';
 
 /* 辅助：创建一个标准的方块对象 */
 const makePiece = (overrides = {}) => ({

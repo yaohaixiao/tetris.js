@@ -1,4 +1,4 @@
-import countHoles from '@/lib/ai/utils/count-holes.js';
+import countHoles from '@/lib/ai/simulator/utils/count-holes.js';
 
 describe('countHoles', () => {
   const COLS = 10;

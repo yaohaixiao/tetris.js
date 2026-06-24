@@ -10987,7 +10987,7 @@ var tetris = (() => {
   };
   var rotate_matrix_default = rotateMatrix;
 
-  // lib/ai/utils/get-valid-x-positions.js
+  // lib/ai/planner/utils/get-valid-x-positions.js
   var getValidXPositions = (board, shape) => {
     const boardWidth = board[0].length;
     const shapeWidth = shape[0].length;
@@ -11049,7 +11049,7 @@ var tetris = (() => {
   };
   var simulate_drop_default = simulateDrop;
 
-  // lib/ai/utils/add-rotate-actions.js
+  // lib/ai/planner/utils/add-rotate-actions.js
   var addRotateActions = (actions, count) => {
     for (let i = 0; i < count; i++) {
       actions.push("ROTATE");
@@ -11057,7 +11057,7 @@ var tetris = (() => {
   };
   var add_rotate_actions_default = addRotateActions;
 
-  // lib/ai/utils/add-move-actions.js
+  // lib/ai/planner/utils/add-move-actions.js
   var addMoveActions = (actions, delta) => {
     if (delta === 0) return;
     const moveDirection = delta > 0 ? "MOVE_RIGHT" : "MOVE_LEFT";
@@ -11154,7 +11154,7 @@ var tetris = (() => {
   };
   var generate_moves_default = generateMoves;
 
-  // lib/ai/utils/get-column-height.js
+  // lib/ai/simulator/utils/get-column-height.js
   var getColumnHeight = (board, x) => {
     for (let y = 0; y < board.length; y++) {
       if (board[y][x]) {
@@ -11165,7 +11165,7 @@ var tetris = (() => {
   };
   var get_column_height_default = getColumnHeight;
 
-  // lib/ai/utils/count-holes.js
+  // lib/ai/simulator/utils/count-holes.js
   var countHoles = (board) => {
     let holes = 0;
     for (let x = 0; x < board[0].length; x++) {
@@ -11251,16 +11251,6 @@ var tetris = (() => {
   };
   var simulate_placement_default = simulatePlacement;
 
-  // lib/ai/utils/clear-full-lines.js
-  var clearFullLines = (board) => {
-    const result = board.filter((row) => !row.every((cell) => cell !== 0));
-    while (result.length < board.length) {
-      result.unshift(Array.from({ length: board[0].length }).fill(0));
-    }
-    return result;
-  };
-  var clear_full_lines_default = clearFullLines;
-
   // lib/game/utils/get-t-spin-score.js
   var getTSpinScore = (cleared, isTSpin, isTSpinMini) => {
     if (isTSpin) {
@@ -11317,6 +11307,16 @@ var tetris = (() => {
     };
   };
   var simulate_clear_result_default = simulateClearResult;
+
+  // lib/ai/utils/clear-full-lines.js
+  var clearFullLines = (board) => {
+    const result = board.filter((row) => !row.every((cell) => cell !== 0));
+    while (result.length < board.length) {
+      result.unshift(Array.from({ length: board[0].length }).fill(0));
+    }
+    return result;
+  };
+  var clear_full_lines_default = clearFullLines;
 
   // lib/ai/simulator/advance-snapshot.js
   var advanceSnapshot = (snapshot, move2) => {

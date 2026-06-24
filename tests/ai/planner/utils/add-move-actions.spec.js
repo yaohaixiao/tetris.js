@@ -1,4 +1,4 @@
-import addMoveActions from '@/lib/ai/utils/add-move-actions.js';
+import addMoveActions from '@/lib/ai/planner/utils/add-move-actions.js';
 
 describe('addMoveActions', () => {
   it('delta 为 0 时不应添加任何动作', () => {

@@ -1,4 +1,4 @@
-import getValidXPositions from '@/lib/ai/utils/get-valid-x-positions.js';
+import getValidXPositions from '@/lib/ai/planner/utils/get-valid-x-positions.js';
 
 describe('getValidXPositions', () => {
   const createBoard = (cols = 10) =>
