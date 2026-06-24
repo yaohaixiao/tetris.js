@@ -1,3 +1,16 @@
+# [1.19.0](https://github.com/yaohaixiao/tetris.js/compare/1.18.0...1.19.0) (2026-06-24)
+
+
+### Bug Fixes
+
+* 修复对战结束，未停止播放背景音乐的问题 ([1d26f6c](https://github.com/yaohaixiao/tetris.js/commit/1d26f6c65a4a20e67b6776bc57cd951a07eba7ee))
+
+
+### Features
+
+* 对战模式添加按 ESC 键认输功能； ([77c252d](https://github.com/yaohaixiao/tetris.js/commit/77c252d27bb697e4446c3e29ec38115baad860d7))
+
+
 # [1.18.0](https://github.com/yaohaixiao/tetris.js/compare/1.17.0...1.18.0) (2026-06-23)
 
 
