@@ -214,10 +214,13 @@ var count_holes_default = countHoles;
 var evaluateBoard = (board, weights, clearResult) => {
   const heights = [];
   const w = {
-    height: -0.3,
-    holes: -5,
-    bumpiness: -0.2,
+    height: -0.45,
+    // ↓ 降低高度惩罚
+    holes: -8,
+    // ↓ 不再碾压一切
+    bumpiness: -0.35,
     completeLines: 20,
+    // ↑ 关键：提高消行权重
     ...weights
   };
   for (let x = 0; x < board[0].length; x++) {
@@ -231,28 +234,28 @@ var evaluateBoard = (board, weights, clearResult) => {
   }
   const holes = count_holes_default(board);
   let maxHeightPenalty = 0;
-  if (maxHeight > 10) {
-    maxHeightPenalty = -Math.pow(maxHeight - 10, 2) * 1;
+  if (maxHeight > 12) {
+    maxHeightPenalty = -Math.pow(maxHeight - 12, 2) * 0.5;
   }
-  const lineRewards = [0, 1, 4, 8, 20, 30];
+  const lineRewards = [0, 2, 6, 12, 40, 80];
   const linesCleared = clearResult ? clearResult.cleared : 0;
   const lineReward = lineRewards[linesCleared] || 0;
-  const staticScore = aggregateHeight * w.height + maxHeightPenalty + holes * w.holes + bumpiness * w.bumpiness + lineReward * (w.completeLines / 5);
+  const staticScore = aggregateHeight * w.height + maxHeightPenalty + holes * w.holes + bumpiness * w.bumpiness + lineReward * (w.completeLines / 4);
   let scoreBonus = 0;
   if (clearResult) {
-    scoreBonus += clearResult.clearScore * 0.01;
+    scoreBonus += clearResult.clearScore * 0.03;
     if (clearResult.isTSpin) {
-      scoreBonus += 5;
+      scoreBonus += 8;
     } else if (clearResult.isTSpinMini) {
-      scoreBonus += 2;
-    }
-    if (clearResult.isBackToBack) {
       scoreBonus += 3;
     }
-    if (clearResult.isAllClear) {
-      scoreBonus += 10;
+    if (clearResult.isBackToBack) {
+      scoreBonus += 5;
     }
-    scoreBonus += clearResult.combo * 0.5;
+    if (clearResult.isAllClear) {
+      scoreBonus += 20;
+    }
+    scoreBonus += clearResult.combo * 0.8;
   }
   return staticScore + scoreBonus;
 };
@@ -313,11 +316,13 @@ var getTSpinScore = (cleared, isTSpin, isTSpinMini) => {
 var get_t_spin_score_default = getTSpinScore;
 
 // lib/ai/simulator/simulate-clear-result.js
-var simulateClearResult = (board, snapshot) => {
+var simulateClearResult = (board, snapshot, actualCleared) => {
   const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
-  const cleared = board.filter((row) => row.every((cell) => cell !== 0)).length;
+  const cleared = actualCleared ?? board.filter((row) => row.every((cell) => cell !== 0)).length;
   const { isTSpin = false, isTSpinMini = false } = snapshot.tSpin || {};
-  if (cleared === 0 && !isTSpin && !isTSpinMini) return null;
+  if (cleared === 0 && !isTSpin && !isTSpinMini) {
+    return null;
+  }
   const tSpinScore = get_t_spin_score_default(cleared, isTSpin, isTSpinMini);
   const baseScore = tSpinScore || CLEAR_LINE_SCORES2[cleared] || 0;
   const isBigMove = cleared >= 4 || isTSpin || isTSpinMini;
@@ -325,31 +330,20 @@ var simulateClearResult = (board, snapshot) => {
   const multiplier = isBackToBack ? 1.5 : 1;
   const combo = (snapshot.combo || 0) + 1;
   const comboScore = combo > 1 ? (combo - 1) * 50 : 0;
-  const isAllClear = cleared > 0 && board.every((row) => row.every((cell) => cell === 0));
+  const isAllClear = cleared > 0 && board.every((row) => row.every((c) => c === 0));
   const allClearScore = isAllClear ? 2e3 : 0;
   const clearScore = Math.floor(baseScore * multiplier) + comboScore + allClearScore;
   return {
-    /** 消除行数 */
     cleared,
-    /** 基础分（乘倍率前） */
     baseScore,
-    /** 最终得分 */
     clearScore,
-    /** 是否为 T-Spin */
     isTSpin,
-    /** 是否为 T-Spin Mini */
     isTSpinMini,
-    /** 是否为大招（用于更新 Back-to-Back 状态） */
     isBigMove,
-    /** 是否触发了 Back-to-Back 奖励 */
     isBackToBack,
-    /** 是否触发了 All Clear */
     isAllClear,
-    /** 更新后的连击次数 */
     combo,
-    /** 本次 Combo 额外加分 */
     comboScore,
-    /** 本次 All Clear 加分 */
     allClearScore
   };
 };
@@ -416,13 +410,20 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
   if (moves.length === 0) {
     return null;
   }
+  const baseCleared = snapshot.board.filter(
+    (row) => row.every((c) => c !== 0)
+  ).length;
   if (depth > 1 && moves.length > beam) {
     const scored = moves.map((move) => {
-      const branchBoard = clone_board_default(snapshot.board);
-      move.placeOn(branchBoard);
-      const clearedBoard = clear_full_lines_default(branchBoard);
-      const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
-      let score = evaluate_board_default(clearedBoard, weights, afterClearResult);
+      const board = clone_board_default(snapshot.board);
+      move.placeOn(board);
+      const afterTotal = board.filter(
+        (row) => row.every((c) => c !== 0)
+      ).length;
+      const newCleared = afterTotal - baseCleared;
+      const afterBoard = clear_full_lines_default(board);
+      const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
+      let score = evaluate_board_default(afterBoard, weights, result);
       if (move.actions.includes("HOLD")) {
         score += 2;
       }
@@ -435,24 +436,30 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
   let best = null;
   let bestScore = -Infinity;
   for (const move of moves) {
-    const branchBoard = clone_board_default(snapshot.board);
-    move.placeOn(branchBoard);
-    const clearedBoard = clear_full_lines_default(branchBoard);
-    const afterClearResult = simulate_clear_result_default(clearedBoard, snapshot);
+    const board = clone_board_default(snapshot.board);
+    move.placeOn(board);
+    const afterTotal = board.filter((row) => row.every((c) => c !== 0)).length;
+    const newCleared = afterTotal - baseCleared;
+    const afterBoard = clear_full_lines_default(board);
+    const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
     let score;
     if (depth <= 1) {
-      score = evaluate_board_default(clearedBoard, weights, afterClearResult);
+      score = evaluate_board_default(afterBoard, weights, result);
     } else {
       const nextSnapshot = advance_snapshot_default(snapshot, move);
       const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam);
       if (nextBest) {
-        const nextClearResult = simulate_clear_result_default(
+        const nextCleared = nextSnapshot.board.filter(
+          (r) => r.every((c) => c !== 0)
+        ).length;
+        const nextResult = simulate_clear_result_default(
           nextSnapshot.board,
-          nextSnapshot
+          nextSnapshot,
+          nextCleared
         );
-        score = evaluate_board_default(nextSnapshot.board, weights, nextClearResult);
+        score = evaluate_board_default(nextSnapshot.board, weights, nextResult);
       } else {
-        score = evaluate_board_default(clearedBoard, weights, afterClearResult);
+        score = evaluate_board_default(afterBoard, weights, result);
       }
     }
     if (move.actions.includes("HOLD")) {
