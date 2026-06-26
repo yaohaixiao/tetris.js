@@ -18,11 +18,9 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       for (let y = 15; y < 20; y++) board[y][0] = 1;
-
+      // agg=5 × -0.45 = -2.25, bump=5 × -0.35 = -1.75 → -4
       const score = evaluateBoard(board);
-      // agg=5 × -0.3 = -1.5, bump=5 × -0.2 = -1.0
-      // -1.5 - 1.0 = -2.5
-      expect(score).toBeCloseTo(-2.5, 2);
+      expect(score).toBeCloseTo(-4, 2);
     });
 
     it('均匀堆叠比集中堆叠得分高', () => {
@@ -32,12 +30,10 @@ describe('evaluateBoard', () => {
       for (let x = 0; x < 5; x++) {
         for (let y = 16; y < 20; y++) boardA[y][x] = 1;
       }
-
       const boardB = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
       for (let y = 0; y < 20; y++) boardB[y][0] = 1;
-
       expect(evaluateBoard(boardA)).toBeGreaterThan(evaluateBoard(boardB));
     });
   });
@@ -51,11 +47,9 @@ describe('evaluateBoard', () => {
       board[19][0] = 1;
       board[18][0] = 0;
       board[17][0] = 1;
-
+      // agg=3×-0.45=-1.35, bump=3×-0.35=-1.05, holes=1×-8=-8 → -10.4
       const score = evaluateBoard(board);
-      // agg=3 × -0.3 = -0.9, bump=3 × -0.2 = -0.6, holes=1 × -5 = -5
-      // -0.9 - 0.6 - 5 = -6.5
-      expect(score).toBeCloseTo(-6.5, 2);
+      expect(score).toBeCloseTo(-10.4, 2);
     });
 
     it('没有空洞的满列不受空洞惩罚', () => {
@@ -63,11 +57,9 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       for (let y = 17; y < 20; y++) board[y][0] = 1;
-
+      // agg=3×-0.45=-1.35, bump=3×-0.35=-1.05 → -2.4
       const score = evaluateBoard(board);
-      // agg=3 × -0.3 = -0.9, bump=3 × -0.2 = -0.6
-      // -0.9 - 0.6 = -1.5
-      expect(score).toBeCloseTo(-1.5, 2);
+      expect(score).toBeCloseTo(-2.4, 2);
     });
   });
 
@@ -80,10 +72,9 @@ describe('evaluateBoard', () => {
       for (let x = 0; x < 10; x++) {
         for (let y = 17; y < 20; y++) board[y][x] = 1;
       }
-
+      // agg=30×-0.45=-13.5
       const score = evaluateBoard(board);
-      // agg=30 × -0.3 = -9, bump=0
-      expect(score).toBeCloseTo(-9, 2);
+      expect(score).toBeCloseTo(-13.5, 2);
     });
 
     it('相邻列高度差应受惩罚', () => {
@@ -92,35 +83,30 @@ describe('evaluateBoard', () => {
       );
       for (let y = 15; y < 20; y++) board[y][0] = 1;
       board[19][1] = 1;
-
+      // agg=6×-0.45=-2.7, bump=5×-0.35=-1.75 → -4.45
       const score = evaluateBoard(board);
-      // agg=6 × -0.3 = -1.8, bump=5 × -0.2 = -1.0
-      // -1.8 - 1.0 = -2.8
-      expect(score).toBeCloseTo(-2.8, 2);
+      expect(score).toBeCloseTo(-4.45, 2);
     });
   });
 
   // ==================== 危险区惩罚 ====================
   describe('危险区惩罚', () => {
-    it('超过 10 行触发指数惩罚', () => {
+    it('超过 12 行触发指数惩罚', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      for (let y = 6; y < 20; y++) board[y][0] = 1; // max=14
+      // 危险区: -(14-12)²×0.5 = -2
+      const score = evaluateBoard(board);
+      expect(score).toBeLessThan(-2);
+    });
+
+    it('12 行以内不触发', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
       for (let y = 8; y < 20; y++) board[y][0] = 1; // max=12
-
       const score = evaluateBoard(board);
-      // 危险区: -(12-10)² × 1 = -4
-      expect(score).toBeLessThan(-4);
-    });
-
-    it('10 行以内不触发', () => {
-      const board = Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => 0),
-      );
-      for (let y = 10; y < 20; y++) board[y][0] = 1; // max=10
-
-      const score = evaluateBoard(board);
-      // 危险区不触发
       expect(score).toBeGreaterThan(-20);
     });
   });
@@ -132,11 +118,9 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       const clearResult = { cleared: 4, clearScore: 800, combo: 1 };
-
+      // lineReward=40×(20/4)=200, clearScore×0.03=24, combo×0.8=0.8 → 224.8
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=8, combo×0.5=0.5
-      // 80 + 8 + 0.5 = 88.5
-      expect(score).toBeCloseTo(88.5, 2);
+      expect(score).toBeCloseTo(224.8, 2);
     });
 
     it('消 1 行奖励', () => {
@@ -144,11 +128,9 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       const clearResult = { cleared: 1, clearScore: 100, combo: 1 };
-
+      // lineReward=2×(20/4)=10, clearScore×0.03=3, combo×0.8=0.8 → 13.8
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=1 × 4=4, clearScore×0.01=1, combo×0.5=0.5
-      // 4 + 1 + 0.5 = 5.5
-      expect(score).toBeCloseTo(5.5, 2);
+      expect(score).toBeCloseTo(13.8, 2);
     });
 
     it('无 clearResult 时无消行奖励', () => {
@@ -156,11 +138,9 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       for (let x = 0; x < 10; x++) board[19][x] = 1;
-
+      // agg=10×-0.45=-4.5
       const score = evaluateBoard(board);
-      // 没有 clearResult，lineReward=0
-      // agg=10 × -0.3 = -3
-      expect(score).toBeCloseTo(-3, 2);
+      expect(score).toBeCloseTo(-4.5, 2);
     });
   });
 
@@ -176,11 +156,9 @@ describe('evaluateBoard', () => {
         isTSpin: true,
         combo: 1,
       };
-
+      // lineReward=6×(20/4)=30, clearScore×0.03=36, TSpin=8, combo×0.8=0.8 → 74.8
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=4 × 4=16, clearScore×0.01=12, TSpin=5, combo×0.5=0.5
-      // 16 + 12 + 5 + 0.5 = 33.5
-      expect(score).toBeCloseTo(33.5, 2);
+      expect(score).toBeCloseTo(74.8, 2);
     });
   });
 
@@ -190,11 +168,9 @@ describe('evaluateBoard', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 1),
       );
-
+      // agg=200×-0.45=-90, maxPenalty=-(20-12)²×0.5=-32 → -122
       const score = evaluateBoard(board);
-      // agg=200×-0.3=-60, maxPenalty=-(20-10)²×1=-100
-      // -60 - 100 = -160
-      expect(score).toBeLessThan(-150);
+      expect(score).toBeLessThan(-120);
     });
 
     it('颜色字符串也应正确处理', () => {
@@ -202,17 +178,15 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       board[19][0] = '#00c8ff';
-
+      // agg=1×-0.45=-0.45, bump=1×-0.35=-0.35 → -0.8
       const score = evaluateBoard(board);
-      // agg=1×-0.3=-0.3, bump=1×-0.2=-0.2
-      // -0.3 - 0.2 = -0.5
-      expect(score).toBeCloseTo(-0.5, 2);
+      expect(score).toBeCloseTo(-0.8, 2);
     });
   });
 
-  // ==================== 补充覆盖 124: T-Spin Mini ====================
+  // ==================== T-Spin Mini 奖励 ====================
   describe('T-Spin Mini 奖励', () => {
-    it('T-Spin Mini 应该获得 +2 奖励', () => {
+    it('T-Spin Mini 应该获得 +3 奖励', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
@@ -223,30 +197,25 @@ describe('evaluateBoard', () => {
         isTSpinMini: true,
         combo: 1,
       };
-
+      // lineReward=6×(20/4)=30, clearScore×0.03=18, TSpinMini=3, combo×0.8=0.8 → 51.8
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=4 × 4=16, clearScore×0.01=6, TSpinMini=2, combo×0.5=0.5
-      // 16 + 6 + 2 + 0.5 = 24.5
-      expect(score).toBeCloseTo(24.5, 2);
+      expect(score).toBeCloseTo(51.8, 2);
     });
 
     it('T-Spin Mini 优先级低于 T-Spin（互斥）', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
-      // T-Spin 和 T-Spin Mini 同时为 true 时，走 T-Spin 分支（+5）
       const clearResult = {
         cleared: 3,
         clearScore: 1600,
         isTSpin: true,
-        isTSpinMini: true, // 同时为 true
+        isTSpinMini: true,
         combo: 2,
       };
-
+      // lineReward=12×(20/4)=60, clearScore×0.03=48, TSpin=8, combo×0.8=1.6 → 117.6
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=8 × 4=32, clearScore×0.01=16, TSpin=5, combo×0.5=1
-      // 32 + 16 + 5 + 1 = 54
-      expect(score).toBeCloseTo(54, 2);
+      expect(score).toBeCloseTo(117.6, 2);
     });
 
     it('T-Spin Mini 在 Tetris 中不生效（isTSpinMini 独立）', () => {
@@ -260,17 +229,15 @@ describe('evaluateBoard', () => {
         isTSpinMini: true,
         combo: 0,
       };
-
+      // lineReward=40×(20/4)=200, clearScore×0.03=36, TSpinMini=3 → 239
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=12, TSpinMini=2
-      // 80 + 12 + 2 = 94
-      expect(score).toBeCloseTo(94, 2);
+      expect(score).toBeCloseTo(239, 2);
     });
   });
 
-  // ==================== 补充覆盖 128: Back-to-Back ====================
+  // ==================== Back-to-Back 奖励 ====================
   describe('Back-to-Back 奖励', () => {
-    it('Back-to-Back 应该获得 +3 奖励', () => {
+    it('Back-to-Back 应该获得 +5 奖励', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
@@ -280,11 +247,9 @@ describe('evaluateBoard', () => {
         isBackToBack: true,
         combo: 0,
       };
-
+      // lineReward=40×(20/4)=200, clearScore×0.03=36, B2B=5 → 241
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=12, backToBack=3
-      // 80 + 12 + 3 = 95
-      expect(score).toBeCloseTo(95, 2);
+      expect(score).toBeCloseTo(241, 2);
     });
 
     it('Back-to-Back 配合 T-Spin', () => {
@@ -298,18 +263,15 @@ describe('evaluateBoard', () => {
         isBackToBack: true,
         combo: 1,
       };
-
+      // lineReward=6×5=30, clearScore×0.03=54, TSpin=8, B2B=5, combo×0.8=0.8 → 97.8
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=4 × 4=16, clearScore×0.01=18, TSpin=5, backToBack=3, combo×0.5=0.5
-      // 16 + 18 + 5 + 3 + 0.5 = 42.5
-      expect(score).toBeCloseTo(42.5, 2);
+      expect(score).toBeCloseTo(97.8, 2);
     });
 
     it('Back-to-Back 独立于其他奖励', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
-      // 仅 Back-to-Back，无 T-Spin、无 All Clear
       const clearResult = {
         cleared: 1,
         clearScore: 200,
@@ -319,35 +281,30 @@ describe('evaluateBoard', () => {
         isAllClear: false,
         combo: 0,
       };
-
+      // lineReward=2×5=10, clearScore×0.03=6, B2B=5 → 21
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=1 × 4=4, clearScore×0.01=2, backToBack=3
-      // 4 + 2 + 3 = 9
-      expect(score).toBeCloseTo(9, 2);
+      expect(score).toBeCloseTo(21, 2);
     });
 
     it('多次 Back-to-Back 不叠加', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
-      // combo 是连击，Back-to-Back 是独立标志
       const clearResult = {
         cleared: 4,
         clearScore: 1200,
         isBackToBack: true,
-        combo: 5, // 高 combo
+        combo: 5,
       };
-
+      // lineReward=40×5=200, clearScore×0.03=36, B2B=5, combo×0.8=4 → 245
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=12, backToBack=3, combo×0.5=2.5
-      // 80 + 12 + 3 + 2.5 = 97.5
-      expect(score).toBeCloseTo(97.5, 2);
+      expect(score).toBeCloseTo(245, 2);
     });
   });
 
-  // ==================== 补充覆盖 132: All Clear ====================
+  // ==================== All Clear 奖励 ====================
   describe('All Clear 奖励', () => {
-    it('All Clear 应该获得 +10 重奖', () => {
+    it('All Clear 应该获得 +20 重奖', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
@@ -357,11 +314,9 @@ describe('evaluateBoard', () => {
         isAllClear: true,
         combo: 0,
       };
-
+      // lineReward=40×5=200, clearScore×0.03=60, AllClear=20 → 280
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=20, allClear=10
-      // 80 + 20 + 10 = 110
-      expect(score).toBeCloseTo(110, 2);
+      expect(score).toBeCloseTo(280, 2);
     });
 
     it('All Clear 配合 T-Spin（完美操作）', () => {
@@ -375,11 +330,9 @@ describe('evaluateBoard', () => {
         isAllClear: true,
         combo: 0,
       };
-
+      // lineReward=40×5=200, clearScore×0.03=96, TSpin=8, AllClear=20 → 324
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=32, TSpin=5, allClear=10
-      // 80 + 32 + 5 + 10 = 127
-      expect(score).toBeCloseTo(127, 2);
+      expect(score).toBeCloseTo(324, 2);
     });
 
     it('All Clear 配合 Back-to-Back', () => {
@@ -393,11 +346,9 @@ describe('evaluateBoard', () => {
         isAllClear: true,
         combo: 0,
       };
-
+      // lineReward=40×5=200, clearScore×0.03=72, B2B=5, AllClear=20 → 297
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=24, backToBack=3, allClear=10
-      // 80 + 24 + 3 + 10 = 117
-      expect(score).toBeCloseTo(117, 2);
+      expect(score).toBeCloseTo(297, 2);
     });
 
     it('All Clear 全部奖励叠加', () => {
@@ -412,11 +363,9 @@ describe('evaluateBoard', () => {
         isAllClear: true,
         combo: 4,
       };
-
+      // lineReward=40×5=200, clearScore×0.03=150, TSpin=8, B2B=5, AllClear=20, combo×0.8=3.2 → 386.2
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=50, TSpin=5, backToBack=3, allClear=10, combo×0.5=2
-      // 80 + 50 + 5 + 3 + 10 + 2 = 150
-      expect(score).toBeCloseTo(150, 2);
+      expect(score).toBeCloseTo(386.2, 2);
     });
 
     it('非 All Clear 不得分', () => {
@@ -429,11 +378,9 @@ describe('evaluateBoard', () => {
         isAllClear: false,
         combo: 0,
       };
-
+      // lineReward=40×5=200, clearScore×0.03=60 → 260
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=20
-      // 80 + 20 = 100（无 allClear 奖励）
-      expect(score).toBeCloseTo(100, 2);
+      expect(score).toBeCloseTo(260, 2);
     });
 
     it('All Clear 优先级测试（无 T-Spin 时仍有重奖）', () => {
@@ -449,32 +396,26 @@ describe('evaluateBoard', () => {
         isAllClear: true,
         combo: 0,
       };
-
+      // lineReward=2×5=10, clearScore×0.03=24, AllClear=20 → 54
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=1 × 4=4, clearScore×0.01=8, allClear=10
-      // 4 + 8 + 10 = 22
-      expect(score).toBeCloseTo(22, 2);
+      expect(score).toBeCloseTo(54, 2);
     });
   });
 
-  // ==================== 权重覆盖测试 ====================
+  // ==================== 自定义权重 ====================
   describe('自定义权重', () => {
     it('应支持自定义权重覆盖默认值', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
       );
       for (let y = 17; y < 20; y++) board[y][0] = 1;
-
-      const customWeights = {
+      // agg=3×-0.5=-1.5, bump=3×-0.1=-0.3 → -1.8
+      const score = evaluateBoard(board, {
         height: -0.5,
         holes: -10,
         bumpiness: -0.1,
         completeLines: 10,
-      };
-
-      const score = evaluateBoard(board, customWeights);
-      // agg=3 × -0.5 = -1.5, bump=3 × -0.1 = -0.3
-      // -1.5 - 0.3 = -1.8
+      });
       expect(score).toBeCloseTo(-1.8, 2);
     });
 
@@ -485,12 +426,9 @@ describe('evaluateBoard', () => {
       board[19][0] = 1;
       board[18][0] = 0;
       board[17][0] = 1;
-
-      // 只覆盖 holes 权重
+      // agg=3×-0.45=-1.35, bump=3×-0.35=-1.05, holes=1×-10=-10 → -12.4
       const score = evaluateBoard(board, { holes: -10 });
-      // agg=3 × -0.3 = -0.9, bump=3 × -0.2 = -0.6, holes=1 × -10 = -10
-      // -0.9 - 0.6 - 10 = -11.5
-      expect(score).toBeCloseTo(-11.5, 2);
+      expect(score).toBeCloseTo(-12.4, 2);
     });
   });
 
@@ -506,12 +444,11 @@ describe('evaluateBoard', () => {
         isAllClear: true,
         combo: 0,
       };
-
       const score = evaluateBoard(board, undefined, clearResult);
-      expect(score).toBeGreaterThan(100);
+      expect(score).toBeGreaterThan(250);
     });
 
-    it('满棋盘即使有 Tetris 也应负分', () => {
+    it('满棋盘即使有 Tetris 也应正分（所有奖励远超惩罚）', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 1),
       );
@@ -523,10 +460,9 @@ describe('evaluateBoard', () => {
         isAllClear: false,
         combo: 10,
       };
-
+      // 奖励足够大，即使结构差也是正分
       const score = evaluateBoard(board, undefined, clearResult);
-      // 危险区惩罚极重，即使所有奖励加满也应该是负分
-      expect(score).toBeLessThan(0);
+      expect(score).toBeGreaterThan(0);
     });
 
     it('所有奖励标志都为 false 时应仅得消行基础分', () => {
@@ -542,11 +478,9 @@ describe('evaluateBoard', () => {
         isAllClear: false,
         combo: 0,
       };
-
+      // lineReward=6×5=30, clearScore×0.03=9 → 39
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=4 × 4=16, clearScore×0.01=3
-      // 16 + 3 = 19
-      expect(score).toBeCloseTo(19, 2);
+      expect(score).toBeCloseTo(39, 2);
     });
 
     it('combo 累加应有上限', () => {
@@ -556,13 +490,11 @@ describe('evaluateBoard', () => {
       const clearResult = {
         cleared: 4,
         clearScore: 800,
-        combo: 20, // 极高 combo
+        combo: 20,
       };
-
+      // lineReward=40×5=200, clearScore×0.03=24, combo×0.8=16 → 240
       const score = evaluateBoard(board, undefined, clearResult);
-      // lineReward=20 × 4=80, clearScore×0.01=8, combo×0.5=10
-      // 80 + 8 + 10 = 98
-      expect(score).toBeCloseTo(98, 2);
+      expect(score).toBeCloseTo(240, 2);
     });
   });
 });

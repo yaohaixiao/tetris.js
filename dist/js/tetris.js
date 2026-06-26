@@ -10629,7 +10629,8 @@ var tetris = (() => {
     /**
      * ## 简单难度（EASY）
      *
-     * - 多看一步（lookahead=2），有基本前瞻
+     * - 多看一步（lookahead=2），有基本前瞻能力
+     * - Beam Search 剪枝宽度 2，保留最优 2 个候选
      * - 15% 概率随机选择非最优解，模拟人类失误
      * - 决策延迟 480ms，给玩家充足的操作时间
      */
@@ -10644,7 +10645,7 @@ var tetris = (() => {
      * ## 普通难度（NORMAL）
      *
      * - 多看两步（lookahead=3），深度推演
-     * - Beam Search 剪枝宽度 2，保证流畅
+     * - Beam Search 剪枝宽度 3，保留更多候选
      * - 8% 概率随机选择，偶尔失误
      * - 决策延迟 380ms，中等响应速度
      */
@@ -10659,7 +10660,7 @@ var tetris = (() => {
      * ## 困难难度（HARD）
      *
      * - 多看三步（lookahead=4），极限推演
-     * - Beam Search 剪枝宽度 4，保留更多候选
+     * - Beam Search 剪枝宽度 4，保留更多候选进入深层搜索
      * - 4% 概率随机选择，很少失误
      * - 决策延迟 200ms，较快响应
      */
@@ -10674,7 +10675,7 @@ var tetris = (() => {
      * ## 专家难度（EXPERT）
      *
      * - 多看三步（lookahead=4），极限推演
-     * - Beam Search 剪枝宽度 5，最宽搜索
+     * - Beam Search 剪枝宽度 5，最宽搜索，不遗漏最优解
      * - 0% 噪声，始终选择最优解，不犯错
      * - 决策延迟仅为 130ms，给玩家极短的反应窗口
      */
@@ -11188,12 +11189,13 @@ var tetris = (() => {
     const heights = [];
     const w = {
       height: -0.45,
-      // ↓ 降低高度惩罚
+      // 背景压力：适中恐高
       holes: -8,
-      // ↓ 不再碾压一切
+      // 空洞惩罚：一个洞 ≈ 10 分
       bumpiness: -0.35,
+      // 不平整度：引导平整表面
       completeLines: 20,
-      // ↑ 关键：提高消行权重
+      // 消行奖励缩放因子
       ...weights
     };
     for (let x = 0; x < board[0].length; x++) {
@@ -11288,16 +11290,27 @@ var tetris = (() => {
     const allClearScore = isAllClear ? 2e3 : 0;
     const clearScore = Math.floor(baseScore * multiplier) + comboScore + allClearScore;
     return {
+      /** 消除行数 */
       cleared,
+      /** 基础分（乘倍率前） */
       baseScore,
+      /** 最终得分 */
       clearScore,
+      /** 是否为 T-Spin */
       isTSpin,
+      /** 是否为 T-Spin Mini */
       isTSpinMini,
+      /** 是否为大招（用于更新 Back-to-Back 状态） */
       isBigMove,
+      /** 是否触发了 Back-to-Back 奖励 */
       isBackToBack,
+      /** 是否触发了 All Clear */
       isAllClear,
+      /** 更新后的连击次数 */
       combo,
+      /** 本次 Combo 额外加分 */
       comboScore,
+      /** 本次 All Clear 加分 */
       allClearScore
     };
   };
@@ -11601,7 +11614,7 @@ var tetris = (() => {
         });
       } else {
         const snapshot = create_snapshot_default(state);
-        return self_play_default(snapshot, weights, 1, beam);
+        return self_play_default(snapshot, weights, lookahead, beam);
       }
     }
     /**

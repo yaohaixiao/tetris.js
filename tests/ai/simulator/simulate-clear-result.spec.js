@@ -40,6 +40,46 @@ describe('simulateClearResult', () => {
     });
   });
 
+  // ==================== actualCleared 参数 ====================
+  describe('actualCleared 参数', () => {
+    it('传入 actualCleared 时应该使用传入值而非棋盘检测', () => {
+      const board = createBoard(); // 空棋盘，自动检测 cleared=0
+      const snapshot = createSnapshot();
+      board[19] = Array(10).fill(1); // 1 行满
+
+      // 不传 actualCleared：自动检测到 1 行
+      const autoResult = simulateClearResult(board, snapshot);
+      expect(autoResult.cleared).toBe(1);
+
+      // 传 actualCleared=4：使用传入值
+      const manualResult = simulateClearResult(board, snapshot, 4);
+      expect(manualResult.cleared).toBe(4);
+      expect(manualResult.baseScore).toBe(800); // Tetris
+    });
+
+    it('actualCleared=0 且非 T-Spin 时返回 null', () => {
+      const board = createBoard();
+      const snapshot = createSnapshot();
+
+      const result = simulateClearResult(board, snapshot, 0);
+
+      expect(result).toBeNull();
+    });
+
+    it('actualCleared=0 但 T-Spin 时不应返回 null', () => {
+      const board = createBoard();
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: true, isTSpinMini: false },
+      });
+
+      const result = simulateClearResult(board, snapshot, 0);
+
+      expect(result).not.toBeNull();
+      expect(result.cleared).toBe(0);
+      expect(result.baseScore).toBe(400);
+    });
+  });
+
   // ==================== 普通消行 ====================
   describe('普通消行', () => {
     it('消 1 行应该返回 cleared=1', () => {
@@ -259,9 +299,7 @@ describe('simulateClearResult', () => {
       board1[17] = Array(10).fill(1);
       board1[18] = Array(10).fill(1);
       board1[19] = Array(10).fill(1);
-      expect(simulateClearResult(board1, createSnapshot()).isBigMove).toBe(
-        true,
-      );
+      expect(simulateClearResult(board1, createSnapshot()).isBigMove).toBe(true);
 
       // T-Spin
       const board2 = createBoard();
@@ -275,9 +313,7 @@ describe('simulateClearResult', () => {
       // 普通消行
       const board3 = createBoard();
       board3[19] = Array(10).fill(1);
-      expect(simulateClearResult(board3, createSnapshot()).isBigMove).toBe(
-        false,
-      );
+      expect(simulateClearResult(board3, createSnapshot()).isBigMove).toBe(false);
     });
   });
 
@@ -308,6 +344,18 @@ describe('simulateClearResult', () => {
 
       expect(result.cleared).toBe(5);
       expect(result.baseScore).toBe(1200);
+    });
+
+    it('actualCleared 为 0 时使用 ?? 而不是 ||', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1); // 棋盘有 1 行满
+      const snapshot = createSnapshot();
+
+      // 传入 actualCleared=0，应使用 0 而非自动检测的 1
+      const result = simulateClearResult(board, snapshot, 0);
+
+      // 0 且非 T-Spin → 返回 null
+      expect(result).toBeNull();
     });
   });
 });

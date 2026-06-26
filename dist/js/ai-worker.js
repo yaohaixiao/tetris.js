@@ -215,12 +215,13 @@ var evaluateBoard = (board, weights, clearResult) => {
   const heights = [];
   const w = {
     height: -0.45,
-    // ↓ 降低高度惩罚
+    // 背景压力：适中恐高
     holes: -8,
-    // ↓ 不再碾压一切
+    // 空洞惩罚：一个洞 ≈ 10 分
     bumpiness: -0.35,
+    // 不平整度：引导平整表面
     completeLines: 20,
-    // ↑ 关键：提高消行权重
+    // 消行奖励缩放因子
     ...weights
   };
   for (let x = 0; x < board[0].length; x++) {
@@ -334,16 +335,27 @@ var simulateClearResult = (board, snapshot, actualCleared) => {
   const allClearScore = isAllClear ? 2e3 : 0;
   const clearScore = Math.floor(baseScore * multiplier) + comboScore + allClearScore;
   return {
+    /** 消除行数 */
     cleared,
+    /** 基础分（乘倍率前） */
     baseScore,
+    /** 最终得分 */
     clearScore,
+    /** 是否为 T-Spin */
     isTSpin,
+    /** 是否为 T-Spin Mini */
     isTSpinMini,
+    /** 是否为大招（用于更新 Back-to-Back 状态） */
     isBigMove,
+    /** 是否触发了 Back-to-Back 奖励 */
     isBackToBack,
+    /** 是否触发了 All Clear */
     isAllClear,
+    /** 更新后的连击次数 */
     combo,
+    /** 本次 Combo 额外加分 */
     comboScore,
+    /** 本次 All Clear 加分 */
     allClearScore
   };
 };
