@@ -5384,9 +5384,6 @@ var tetris = (() => {
      * 初始化内部状态，使用深拷贝保证与外部状态隔离。
      *
      * @param {object} options - 配置选项
-     * @param {object} options.GameState - 游戏初始状态模板对象
-     * @param {number} options.cols - 棋盘列数
-     * @param {number} options.rows - 棋盘行数
      */
     constructor(options) {
       this.initialize(options);
@@ -5684,11 +5681,6 @@ var tetris = (() => {
      * 返回 UI 渲染所需的核心显示数据。 从 state 中提取 score、lines、level、combo、comboScore 等字段。
      *
      * @returns {object} HUD 数据对象
-     * @returns {number} Return.score - 当前得分
-     * @returns {number} Return.lines - 累计消除行数
-     * @returns {number} Return.level - 当前等级
-     * @returns {number} Return.combo - 当前连击次数
-     * @returns {number} Return.comboScore - 连击额外加分
      */
     getHub() {
       const { source, lines, level, combo, comboScore } = this.state;

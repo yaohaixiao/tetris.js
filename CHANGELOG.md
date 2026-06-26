@@ -1,3 +1,11 @@
+## [1.19.1](https://github.com/yaohaixiao/tetris.js/compare/1.19.0...1.19.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* **ai:** 修复 AI 评分系统，使用新增满行数替代全部满行数 ([75750d3](https://github.com/yaohaixiao/tetris.js/commit/75750d39a4ec7f6235b75dd2fc15a3ea849edbb8))
+
+
 # [1.19.0](https://github.com/yaohaixiao/tetris.js/compare/1.18.0...1.19.0) (2026-06-24)
 
 ### Bug Fixes
