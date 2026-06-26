@@ -10637,7 +10637,7 @@ var tetris = (() => {
     EASY: {
       lookahead: 2,
       beam: 2,
-      noise: 0.15,
+      noise: 0.08,
       weights: AI_WEIGHTS,
       delay: 480
     },
@@ -10646,13 +10646,13 @@ var tetris = (() => {
      *
      * - 多看两步（lookahead=3），深度推演
      * - Beam Search 剪枝宽度 3，保留更多候选
-     * - 8% 概率随机选择，偶尔失误
+     * - 5% 概率随机选择，偶尔失误
      * - 决策延迟 380ms，中等响应速度
      */
     NORMAL: {
       lookahead: 3,
       beam: 3,
-      noise: 0.08,
+      noise: 0.05,
       weights: AI_WEIGHTS,
       delay: 380
     },
@@ -10667,7 +10667,7 @@ var tetris = (() => {
     HARD: {
       lookahead: 4,
       beam: 4,
-      noise: 0.04,
+      noise: 0,
       weights: AI_WEIGHTS,
       delay: 200
     },
@@ -11095,6 +11095,8 @@ var tetris = (() => {
       originalX: originalPiece.position.x
     });
     return {
+      /** 硬降终点 X 坐标（用于 advanceSnapshot 正确模拟放置位置） */
+      x: targetX,
       /** 硬降终点 Y 坐标 */
       y,
       /** 放置函数：在分支棋盘上写入方块 */
@@ -11331,11 +11333,16 @@ var tetris = (() => {
     const board = simulate_placement_default(
       snapshot.board,
       snapshot.piece.shape,
-      snapshot.piece.position.x,
+      move2.x ?? snapshot.piece.position.x,
       move2.y
     );
+    const beforeCleared = snapshot.board.filter(
+      (row) => row.every((c) => c !== 0)
+    ).length;
+    const afterTotal = board.filter((row) => row.every((c) => c !== 0)).length;
+    const newCleared = afterTotal - beforeCleared;
     const clearedBoard = clear_full_lines_default(board);
-    const clearResult = simulate_clear_result_default(clearedBoard, snapshot);
+    const clearResult = simulate_clear_result_default(clearedBoard, snapshot, newCleared);
     const bag2 = snapshot.bag ? [...snapshot.bag] : [];
     const nextPiece = bag2.length > 0 ? bag2.shift() : snapshot.next || {
       shape: [[1, 1, 1, 1]],
@@ -11361,9 +11368,11 @@ var tetris = (() => {
       cur: nextPiece,
       next: nextNext,
       bag: bag2,
-      // 更新计分状态
+      // 更新计分状态：combo 递增（如果有消行），否则清零
       combo: clearResult ? clearResult.combo : 0,
+      // 更新 Back-to-Back：本次是大招则保留标记，否则继承原值
       backToBack: clearResult ? clearResult.isBigMove : snapshot.backToBack,
+      // 清空 T-Spin 标记（每次锁定时重新检测）
       tSpin: null,
       // 传递消行结果到下一层，确保深层搜索能看到消行价值
       clearResult: clearResult || null
@@ -11374,9 +11383,7 @@ var tetris = (() => {
   // lib/ai/planner/self-play.js
   var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
     const moves = generate_moves_default(snapshot);
-    if (moves.length === 0) {
-      return null;
-    }
+    if (moves.length === 0) return null;
     const baseCleared = snapshot.board.filter(
       (row) => row.every((c) => c !== 0)
     ).length;
@@ -11391,9 +11398,7 @@ var tetris = (() => {
         const afterBoard = clear_full_lines_default(board);
         const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
         let score = evaluate_board_default(afterBoard, weights, result);
-        if (move2.actions.includes("HOLD")) {
-          score += 2;
-        }
+        if (move2.actions.includes("HOLD")) score += 2;
         return { move: move2, score };
       });
       scored.sort((a, b) => b.score - a.score);
@@ -11429,9 +11434,7 @@ var tetris = (() => {
           score = evaluate_board_default(afterBoard, weights, result);
         }
       }
-      if (move2.actions.includes("HOLD")) {
-        score += 2;
-      }
+      if (move2.actions.includes("HOLD")) score += 2;
       if (score > bestScore) {
         bestScore = score;
         best = move2;
@@ -11446,7 +11449,7 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收依赖配置，通过 Base.inject() 自动注入依赖， 然后调用 initialize() 初始化内部状态。
+     * 接收依赖配置，通过 Base.inject() 自动注入依赖，然后调用 initialize() 初始化内部状态。
      *
      * @param {object} options - 依赖配置对象
      */
@@ -11457,8 +11460,7 @@ var tetris = (() => {
     /**
      * ## 初始化内部状态
      *
-     * 设置所有实例属性的默认值，并尝试创建 Web Worker。 依赖（Game/Store/Scheduler/Animations）已由 Base
-     * 构造函数注入， 此方法中可直接通过 this 访问。
+     * 设置所有实例属性的默认值，并尝试创建 Web Worker。
      *
      * @returns {void}
      */
@@ -11473,10 +11475,8 @@ var tetris = (() => {
     /**
      * ## 初始化 Web Worker
      *
-     * 创建独立线程运行 selfPlay 决策。如果浏览器不支持 Worker 或创建过程中抛出异常，自动将 this.worker 设为 null， 后续
-     * `think()` 会降级为主线程同步模式。
-     *
-     * Worker 创建成功后，绑定 message 和 error 事件监听器。
+     * 创建独立线程运行 selfPlay 决策。如果浏览器不支持 Worker， 将 this.worker 设为 null，后续 think()
+     * 降级为主线程同步模式。
      *
      * @private
      * @returns {void}
@@ -11498,7 +11498,7 @@ var tetris = (() => {
     /**
      * ## 停止 AI
      *
-     * 清除 enabled 标志、清空待执行动作、重置 Worker 忙碌状态、 取消当前调度任务。
+     * 清除 enabled 标志、清空待执行动作、重置 Worker 忙碌状态、取消当前调度任务。
      *
      * @returns {void}
      */
@@ -11513,15 +11513,13 @@ var tetris = (() => {
     /**
      * ## AI 主循环
      *
-     * 每帧（由 Scheduler 按难度 delay 触发）执行以下步骤：
+     * 每帧（由 Scheduler 按难度 delay 触发）执行：
      *
      * 1. 检查 enabled 标志
      * 2. 检查游戏状态（必须为 'playing' 且无动画阻塞），否则 100ms 后重试
-     * 3. 如果动作队列为空且 Worker 空闲，调用 `think()` 发起决策
-     * 4. 从队列头部取出一个动作，通过 `dispatch:input` 事件发送给 Game
-     * 5. 调度下一次循环（延迟 = 难度配置的 delay）
-     *
-     * 每个决策周期只执行一个动作，保证动作节奏与游戏下落速度同步。
+     * 3. 如果动作队列为空且 Worker 空闲，调用 think() 发起决策
+     * 4. 从队列头部取出一个动作执行
+     * 5. 调度下一次循环
      *
      * @returns {void}
      */
@@ -11562,38 +11560,11 @@ var tetris = (() => {
      *
      * 根据运行模式选择决策方式：
      *
-     * - **Worker 模式**（this.worker 存在）：发送 `{ type: 'think', ... }` 消息给 Worker
-     *   线程。Worker 完成后通过 `_onWorkerMessage` 回调将结果写入 `this.actions`。 此方法在 Worker
-     *   模式下不返回任何值（返回 undefined）。
-     * - **主线程模式**（this.worker 为 null）：同步调用 selfPlay， 直接返回最佳移动对象 `{ placeOn,
-     *   actions, y }`。 其中 `placeOn` 是函数，仅在主线程降级时可用，不会被序列化传递。
+     * - **Worker 模式**：异步发送消息给 Worker 线程
+     * - **主线程模式**：同步调用 selfPlay，直接返回最佳移动对象
      *
-     * ## 返回值结构（主线程模式）
-     *
-     * | 字段      | 类型     | 说明                                            |
-     * | --------- | -------- | ----------------------------------------------- |
-     * | `placeOn` | Function | 放置函数，接收目标棋盘，原地写入方块            |
-     * | `actions` | string[] | 动作序列，如 `['ROTATE', 'MOVE_RIGHT', 'DROP']` |
-     * | `y`       | number   | 硬降终点的 Y 坐标                               |
-     *
-     * ## Worker 模式下的数据流
-     *
-     *     think() → postMessage({ state, weights, depth, beam })
-     *       → Worker: createSnapshot → selfPlay → { placeOn, actions, y }
-     *       → postMessage({ actions, y })  // placeOn 是函数，不可序列化
-     *       → _onWorkerMessage: this.actions = [...best.actions]
-     *
-     * 主线程只需要 `actions` 来驱动游戏，`placeOn` 和 `y` 仅在 AI 内部评分阶段使用，不需要传递到执行层。
-     *
-     * @param {object} state - 游戏状态对象（Store.getState() 的返回值）
-     * @param {string[][]} state.board - 棋盘二维数组（颜色字符串格式）
-     * @param {object} state.curr - 当前活动方块对象（含 shape、color）
-     * @param {number} state.cx - 当前方块的 X 坐标（列索引）
-     * @param {number} state.cy - 当前方块的 Y 坐标（行索引）
-     * @param {object} difficulty - 难度配置对象（由 getDifficultyConfig() 返回）
-     * @param {number} difficulty.lookahead - 前瞻深度
-     * @param {object} difficulty.weights - 评估权重
-     * @param {number} difficulty.beam - Beam Search 剪枝宽度
+     * @param {object} state - 游戏状态对象
+     * @param {object} difficulty - 难度配置对象
      * @returns {object | void} 主线程模式返回 { placeOn, actions, y }，Worker 模式返回
      *   undefined
      */
@@ -11622,7 +11593,7 @@ var tetris = (() => {
      *
      * 从 Store 读取当前选择的难度等级，映射到对应的 AIDifficulty 配置对象。 未知难度降级为 NORMAL。
      *
-     * @returns {object} 难度配置对象，包含 lookahead、noise、weights、delay、beam 等字段
+     * @returns {object} 难度配置对象，包含 lookahead、noise、weights、delay、beam
      */
     getDifficultyConfig() {
       const { Game: Game2 } = this;
@@ -11638,8 +11609,6 @@ var tetris = (() => {
     /**
      * ## 绑定 Worker 事件监听器
      *
-     * 在 Worker 创建成功后调用，绑定 message 和 error 事件。
-     *
      * @returns {void}
      */
     addEventListeners() {
@@ -11651,8 +11620,6 @@ var tetris = (() => {
     }
     /**
      * ## 移除 Worker 事件监听器
-     *
-     * 在销毁 Worker 或停止 AI 时调用。
      *
      * @returns {void}
      */
@@ -11666,8 +11633,7 @@ var tetris = (() => {
     /**
      * ## 处理 Worker 返回的消息
      *
-     * Worker 完成 selfPlay 决策后，通过 postMessage 发送结果。 此回调将结果写入 this.actions 队列，并解除
-     * workerBusy 锁。
+     * Worker 完成决策后，将结果写入 this.actions 队列，解除 workerBusy 锁。
      *
      * @private
      * @param {MessageEvent} e - Worker 消息事件
@@ -11689,7 +11655,7 @@ var tetris = (() => {
     /**
      * ## 处理 Worker 自身错误
      *
-     * Worker 线程崩溃或无法响应时触发。 解除忙碌锁并将 worker 设为 null，后续决策降级为主线程模式。
+     * Worker 线程崩溃时解除忙碌锁并降级为主线程模式。
      *
      * @private
      * @param {ErrorEvent} err - Worker 错误事件
@@ -14276,9 +14242,8 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收依赖配置，调用 `initialize()` 创建所有子系统。
-     * 构造函数本身不进行复杂初始化，所有子系统的创建都在
-     * `initialize()` 中完成，便于子类覆盖定制初始化行为。
+     * 接收依赖配置，调用 `initialize()` 创建所有子系统。 构造函数本身不进行复杂初始化，所有子系统的创建都在 `initialize()`
+     * 中完成，便于子类覆盖定制初始化行为。
      *
      * @param {object} options - 配置（依赖的执行上下文）对象
      * @param {object} options.Elements - DOM 元素引用集合
@@ -14294,8 +14259,7 @@ var tetris = (() => {
     /**
      * ## 初始化所有子系统
      *
-     * 创建 Store、Animations、UI、输入设备、AI、回放等模块，
-     * 并注入它们之间的依赖关系。这是整个游戏系统的"组装工厂"。
+     * 创建 Store、Animations、UI、输入设备、AI、回放等模块， 并注入它们之间的依赖关系。这是整个游戏系统的"组装工厂"。
      *
      * ### 初始化顺序（严格依赖关系）
      *
@@ -14425,7 +14389,8 @@ var tetris = (() => {
      *
      * 供外部模块（如 FlyAnimation）获取棋盘的 DOM 元素引用。
      *
-     * @param {boolean} [isNext=false] - 是否获取预览方块 Canvas。默认值为 `false`
+     * @param {boolean} [isNext=false] - 是否获取预览方块 Canvas。默认值为 `false`. Default is
+     *   `false`
      * @returns {HTMLCanvasElement} Canvas DOM 元素
      */
     getCanvas(isNext = false) {
@@ -14435,8 +14400,7 @@ var tetris = (() => {
     /**
      * ## 选择等级
      *
-     * 设置游戏等级并重置相关状态（baseLines、lines 归零），
-     * 等级越高方块下落速度越快。播放等级变更音效。
+     * 设置游戏等级并重置相关状态（baseLines、lines 归零）， 等级越高方块下落速度越快。播放等级变更音效。
      *
      * @param {number} level - 等级数值
      * @returns {void}
@@ -14468,8 +14432,7 @@ var tetris = (() => {
     /**
      * ## 选择难度
      *
-     * 设置游戏难度等级（easy / normal / hard / expert），
-     * 难度影响初始棋盘垃圾行和 AI 行为等。播放难度变更音效。
+     * 设置游戏难度等级（easy / normal / hard / expert）， 难度影响初始棋盘垃圾行和 AI 行为等。播放难度变更音效。
      *
      * @param {string} difficulty - 难度等级
      * @returns {void}
@@ -14482,8 +14445,7 @@ var tetris = (() => {
     /**
      * ## 切换到主菜单
      *
-     * 发送 UI 模式更新事件、设置 Store 模式为 main-menu、
-     * 播放场景切换音效。
+     * 发送 UI 模式更新事件、设置 Store 模式为 main-menu、 播放场景切换音效。
      *
      * @returns {void}
      */
@@ -14498,8 +14460,7 @@ var tetris = (() => {
     /**
      * ## 加载最高分
      *
-     * 从 localStorage 读取键名为 `tetris-high-score` 的历史最高分，
-     * 解析失败或不存在时默认为 0，写入 Store。
+     * 从 localStorage 读取键名为 `tetris-high-score` 的历史最高分， 解析失败或不存在时默认为 0，写入 Store。
      *
      * @returns {void}
      */
@@ -14606,8 +14567,7 @@ var tetris = (() => {
     /**
      * ## 获取 Ghost Piece 位置
      *
-     * 计算当前方块的预览落点位置，如果 Y 坐标有变化则发送渲染事件。
-     * Ghost piece 帮助玩家判断方块硬降后的最终落点。
+     * 计算当前方块的预览落点位置，如果 Y 坐标有变化则发送渲染事件。 Ghost piece 帮助玩家判断方块硬降后的最终落点。
      *
      * @param {object} payload - 当前方块的位置信息
      * @param {number} payload.cx - 当前方块 X 坐标
@@ -14638,8 +14598,7 @@ var tetris = (() => {
     /**
      * ## 缓存方块（Hold）
      *
-     * 委托给 hold() 纯函数，将当前方块存入 hold 槽，
-     * 如果 hold 槽已有方块则取出使用。
+     * 委托给 hold() 纯函数，将当前方块存入 hold 槽， 如果 hold 槽已有方块则取出使用。
      *
      * @returns {void}
      */
@@ -14650,8 +14609,7 @@ var tetris = (() => {
     /**
      * ## 移动当前方块
      *
-     * 委托给 move() 纯函数，在指定方向移动方块，
-     * 移动前进行碰撞检测。
+     * 委托给 move() 纯函数，在指定方向移动方块， 移动前进行碰撞检测。
      *
      * @param {number} x - X 轴偏移（负数左移，正数右移）
      * @param {number} y - Y 轴偏移（负数上移，正数下移/软降）
@@ -14673,8 +14631,7 @@ var tetris = (() => {
     /**
      * ## 游戏逻辑帧（Tick）
      *
-     * 委托给 tick() 纯函数，处理重力下落。
-     * 如果 isBlocked 为 true（动画阻塞中），跳过重力下落。
+     * 委托给 tick() 纯函数，处理重力下落。 如果 isBlocked 为 true（动画阻塞中），跳过重力下落。
      *
      * @param {boolean} isBlocked - 是否被动画阻塞
      * @returns {void}
@@ -14696,8 +14653,7 @@ var tetris = (() => {
     /**
      * ## 执行消行逻辑
      *
-     * 委托给 applyClearLines() 纯函数，检查填满的行并消除，
-     * 返回消行数据供后续处理。
+     * 委托给 applyClearLines() 纯函数，检查填满的行并消除， 返回消行数据供后续处理。
      *
      * @returns {object} 消行后的更新数据
      */
@@ -14707,11 +14663,10 @@ var tetris = (() => {
     /**
      * ## 设置游戏初始状态
      *
-     * 委托给 setBeginningState() 纯函数，
-     * 根据模式和等级初始化棋盘、方块队列等。
+     * 委托给 setBeginningState() 纯函数， 根据模式和等级初始化棋盘、方块队列等。
      *
      * @param {string} mode - 游戏模式
-     * @param {number} [level=1] - 初始等级，默认值为 1
+     * @param {number} [level=1] - 初始等级，默认值为 1. Default is `1`
      * @returns {void}
      */
     setBeginningState(mode, level = 1) {
@@ -14731,8 +14686,7 @@ var tetris = (() => {
     /**
      * ## 开始倒计时动画
      *
-     * 注册 CountdownAnimation 到 AnimationSystem，
-     * 显示 3、2、1 倒计时数字。
+     * 注册 CountdownAnimation 到 AnimationSystem， 显示 3、2、1 倒计时数字。
      *
      * @returns {void}
      */
@@ -14743,8 +14697,7 @@ var tetris = (() => {
     /**
      * ## 开始暂停动画
      *
-     * 注册 PausedAnimation 到 AnimationSystem，
-     * 保存引用到 this.effect 用于后续停止。
+     * 注册 PausedAnimation 到 AnimationSystem， 保存引用到 this.effect 用于后续停止。
      *
      * @returns {void}
      */
@@ -14769,8 +14722,8 @@ var tetris = (() => {
     /**
      * ## 开始消行闪烁动画
      *
-     * 注册 ClearLinesAnimation 到 AnimationSystem。
-     * 对战模式下会先发送 PROCESS_ATTACK 事件触发攻击处理。
+     * 注册 ClearLinesAnimation 到 AnimationSystem。 对战模式下会先发送 PROCESS_ATTACK
+     * 事件触发攻击处理。
      *
      * @param {number[]} linesToClear - 待消除的行号数组
      * @returns {void}
@@ -14793,8 +14746,7 @@ var tetris = (() => {
     /**
      * ## 开始消除得分动画
      *
-     * 注册 ClearScoreAnimation 到 AnimationSystem，
-     * 在消行位置显示得分数字飘出动画。
+     * 注册 ClearScoreAnimation 到 AnimationSystem， 在消行位置显示得分数字飘出动画。
      *
      * @param {object} scoreData - 得分数据
      * @param {number} scoreData.score - 本次消除得分
@@ -14814,8 +14766,7 @@ var tetris = (() => {
     /**
      * ## 开始升级烟花动画
      *
-     * 注册 LevelUpAnimation 到 AnimationSystem，
-     * 升级时在棋盘上显示烟花/粒子特效。
+     * 注册 LevelUpAnimation 到 AnimationSystem， 升级时在棋盘上显示烟花/粒子特效。
      *
      * @param {number} level - 新等级
      * @returns {void}
@@ -14834,8 +14785,7 @@ var tetris = (() => {
     /**
      * ## 开始落地高亮动画
      *
-     * 注册 LandingFlashAnimation 到 AnimationSystem，
-     * 方块落地时在落点位置显示短暂高亮闪烁。
+     * 注册 LandingFlashAnimation 到 AnimationSystem， 方块落地时在落点位置显示短暂高亮闪烁。
      *
      * @param {object} piece - 刚落地的方块信息
      * @param {number[][]} piece.shape - 方块形状矩阵
@@ -14856,9 +14806,8 @@ var tetris = (() => {
     /**
      * ## 开始垃圾行预警动画
      *
-     * 注册 GarbageWarningAnimation 到 AnimationSystem。
-     * 棋盘红色闪烁，动画层 150，blocking=true，5 次闪烁共 600ms。
-     * 由 GameRouter._onStartGarbageWarning 调用。
+     * 注册 GarbageWarningAnimation 到 AnimationSystem。 棋盘红色闪烁，动画层
+     * 150，blocking=true，5 次闪烁共 600ms。 由 GameRouter._onStartGarbageWarning 调用。
      *
      * @param {number} roundId - 当前回合
      * @param {number} amount - 即将到来的垃圾行数量
@@ -14880,9 +14829,8 @@ var tetris = (() => {
     /**
      * ## 开始垃圾行闪烁动画
      *
-     * 注册 GarbagePushAnimation 到 AnimationSystem。
-     * 垃圾方块灰色/白色交替闪烁，动画层 100，blocking=true，5 次闪烁共 600ms。
-     * 由 GameRouter._onStartGarbagePush 调用。
+     * 注册 GarbagePushAnimation 到 AnimationSystem。 垃圾方块灰色/白色交替闪烁，动画层
+     * 100，blocking=true，5 次闪烁共 600ms。 由 GameRouter._onStartGarbagePush 调用。
      *
      * @param {number[][]} rows - 垃圾行数据（0=空洞，非0=垃圾方块）
      * @param {number} roundId - 当前回合 ID
@@ -14904,10 +14852,9 @@ var tetris = (() => {
     /**
      * ## 开始手柄连接通知动画
      *
-     * 注册 GamepadNotificationAnimation 到 AnimationSystem。
-     * 显示手柄图标 + "CONNECTED" / "DISCONNECTED" 文字闪烁，
-     * 动画层 160，blocking=true，6 次闪烁共 1200ms。
-     * 由 GameRouter._onUpdateGamepadConnected 调用。
+     * 注册 GamepadNotificationAnimation 到 AnimationSystem。 显示手柄图标 + "CONNECTED" /
+     * "DISCONNECTED" 文字闪烁， 动画层 160，blocking=true，6 次闪烁共 1200ms。 由
+     * GameRouter._onUpdateGamepadConnected 调用。
      *
      * @param {boolean} connected - 手柄是否已连接（true=连接，false=断开）
      * @returns {void}
@@ -14925,9 +14872,8 @@ var tetris = (() => {
     /**
      * ## 认输（对战模式专用）
      *
-     * 仅在对战模式下有效。发送 PLAYER_SURRENDER 事件，
-     * BattleController 收到后将对手分数直接设为 victoryScore（15 分），
-     * 触发 BATTLE OVER 界面。
+     * 仅在对战模式下有效。发送 PLAYER_SURRENDER 事件， BattleController 收到后将对手分数直接设为
+     * victoryScore（15 分）， 触发 BATTLE OVER 界面。
      *
      * ### 使用场景
      *
@@ -14952,8 +14898,7 @@ var tetris = (() => {
     /**
      * ## 添加输入设备事件监听
      *
-     * 启动键盘、手柄、触屏和 AI 的输入事件监听。
-     * 使用可选链安全调用，设备不存在时跳过。
+     * 启动键盘、手柄、触屏和 AI 的输入事件监听。 使用可选链安全调用，设备不存在时跳过。
      *
      * @returns {void}
      */
@@ -14966,8 +14911,7 @@ var tetris = (() => {
     /**
      * ## 移除输入设备事件监听
      *
-     * 停止键盘、手柄、触屏和 AI 的输入事件监听。
-     * 在游戏暂停、结束或销毁时调用。
+     * 停止键盘、手柄、触屏和 AI 的输入事件监听。 在游戏暂停、结束或销毁时调用。
      *
      * @returns {void}
      */
@@ -14990,8 +14934,7 @@ var tetris = (() => {
     /**
      * ## 取消订阅所有游戏事件
      *
-     * 委托给 GameRouter 移除所有事件监听器，
-     * 防止内存泄漏和误触发。
+     * 委托给 GameRouter 移除所有事件监听器， 防止内存泄漏和误触发。
      *
      * @returns {void}
      */

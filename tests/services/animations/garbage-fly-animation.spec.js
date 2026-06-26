@@ -1,6 +1,4 @@
-/**
- * @file GarbageFlyAnimation 单元测试
- */
+/** @file GarbageFlyAnimation 单元测试 */
 
 import GarbageFlyAnimation from '@/lib/services/animations/garbage-fly-animation.js';
 import COLORS from '@/lib/constants/colors.js';
@@ -47,10 +45,7 @@ describe('GarbageFlyAnimation', () => {
     height,
   });
 
-  /**
-   * 执行所有待处理的 Scheduler.delay 回调。
-   * 模拟时间推进一帧。
-   */
+  /** 执行所有待处理的 Scheduler.delay 回调。 模拟时间推进一帧。 */
   const flushDelay = () => {
     const callbacks = [...mockScheduler._pendingCallbacks];
     mockScheduler._pendingCallbacks = [];
@@ -93,10 +88,7 @@ describe('GarbageFlyAnimation', () => {
       })),
     };
 
-    /**
-     * 模拟 Scheduler。
-     * delay 不立即执行回调，而是保存起来供测试手动触发。
-     */
+    /** 模拟 Scheduler。 delay 不立即执行回调，而是保存起来供测试手动触发。 */
     mockScheduler = {
       delay: jest.fn((fn) => {
         mockScheduler._pendingCallbacks.push(fn);

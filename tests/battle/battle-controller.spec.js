@@ -110,7 +110,10 @@ jest.mock('@/lib/battle/garbage-system.js', () => ({
 
 jest.mock('@/lib/events/event-catalog.js', () => ({
   GameEvents: jest.fn(),
-  AudioEvents: jest.fn(() => ({ PLAY_SOUND: 'audio:play:sound', STOP_BGM: 'audio:stop:bgm' })),
+  AudioEvents: jest.fn(() => ({
+    PLAY_SOUND: 'audio:play:sound',
+    STOP_BGM: 'audio:stop:bgm',
+  })),
   BattleEvents: jest.fn(() => ({
     PROCESS_ATTACK: 'battle:process:attack',
     START_GARBAGE_FLY: 'battle:start:garbage:fly',
@@ -126,9 +129,7 @@ jest.mock('@/lib/events/event-catalog.js', () => ({
 describe('BattleController', () => {
   // ==================== 辅助函数 ====================
 
-  /**
-   * 创建模拟的 Game 实例。
-   */
+  /** 创建模拟的 Game 实例。 */
   const createMockGame = (name, index, id) => ({
     id: id || `${name}-${index}`,
     Player: { name, index },
@@ -154,17 +155,13 @@ describe('BattleController', () => {
     resume: jest.fn(),
   });
 
-  /**
-   * 创建 BattleController 实例。
-   */
+  /** 创建 BattleController 实例。 */
   const createController = (options = {}) => {
     const { games = [], victoryScore = 20, elements = {} } = options;
     return new BattleController({ games, victoryScore, elements });
   };
 
-  /**
-   * 创建 BattleController 实例并清除所有 mock 调用记录。
-   */
+  /** 创建 BattleController 实例并清除所有 mock 调用记录。 */
   const createCleanController = (options = {}) => {
     const controller = createController(options);
     controller.store.setRunning.mockClear();
@@ -193,7 +190,10 @@ describe('BattleController', () => {
     });
 
     test('应该自动调用 initialize 方法', () => {
-      const initializeSpy = jest.spyOn(BattleController.prototype, 'initialize');
+      const initializeSpy = jest.spyOn(
+        BattleController.prototype,
+        'initialize',
+      );
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       new BattleController({ games });
       expect(initializeSpy).toHaveBeenCalledTimes(1);
@@ -276,7 +276,9 @@ describe('BattleController', () => {
       createController({ games });
 
       expect(callOrder.indexOf('store')).toBeLessThan(callOrder.indexOf('hud'));
-      expect(callOrder.indexOf('hud')).toBeLessThan(callOrder.indexOf('router'));
+      expect(callOrder.indexOf('hud')).toBeLessThan(
+        callOrder.indexOf('router'),
+      );
       expect(callOrder.indexOf('router')).toBeLessThan(callOrder.indexOf('ui'));
     });
 
@@ -455,12 +457,12 @@ describe('BattleController', () => {
       expect(stopSpy.mock.invocationCallOrder[0]).toBeLessThan(
         controller.store.setWinner.mock.invocationCallOrder[0],
       );
-      expect(controller.store.setWinner.mock.invocationCallOrder[0]).toBeLessThan(
+      expect(
+        controller.store.setWinner.mock.invocationCallOrder[0],
+      ).toBeLessThan(controller.store.updateScores.mock.invocationCallOrder[0]);
+      expect(
         controller.store.updateScores.mock.invocationCallOrder[0],
-      );
-      expect(controller.store.updateScores.mock.invocationCallOrder[0]).toBeLessThan(
-        controller.hud.updateScores.mock.invocationCallOrder[0],
-      );
+      ).toBeLessThan(controller.hud.updateScores.mock.invocationCallOrder[0]);
 
       stopSpy.mockRestore();
       restartSpy.mockRestore();
@@ -517,12 +519,18 @@ describe('BattleController', () => {
       const winnerEvents = { UPDATE_MODE: 'winner:update:mode' };
       const loserEvents = { UPDATE_MODE: 'loser:update:mode' };
 
-      GameEvents.mockReturnValueOnce(winnerEvents).mockReturnValueOnce(loserEvents);
+      GameEvents.mockReturnValueOnce(winnerEvents).mockReturnValueOnce(
+        loserEvents,
+      );
 
       controller.over(alice, bob);
 
-      expect(alice.emit).toHaveBeenCalledWith('winner:update:mode', { mode: 'battle-over' });
-      expect(bob.emit).toHaveBeenCalledWith('loser:update:mode', { mode: 'battle-over' });
+      expect(alice.emit).toHaveBeenCalledWith('winner:update:mode', {
+        mode: 'battle-over',
+      });
+      expect(bob.emit).toHaveBeenCalledWith('loser:update:mode', {
+        mode: 'battle-over',
+      });
       expect(alice.emit).toHaveBeenCalledWith('audio:stop:bgm');
     });
 
@@ -632,7 +640,9 @@ describe('BattleController', () => {
       const fromEvents = { RESET: 'from:reset' };
       const opponentEvents = { RESET: 'opponent:reset' };
 
-      GameEvents.mockReturnValueOnce(fromEvents).mockReturnValueOnce(opponentEvents);
+      GameEvents.mockReturnValueOnce(fromEvents).mockReturnValueOnce(
+        opponentEvents,
+      );
 
       controller.reset(alice);
 
@@ -816,7 +826,9 @@ describe('BattleController', () => {
 
       controller.processAttack(alice, [{}, {}, {}]);
 
-      expect(callOrder.indexOf('offset')).toBeLessThan(callOrder.indexOf('add'));
+      expect(callOrder.indexOf('offset')).toBeLessThan(
+        callOrder.indexOf('add'),
+      );
     });
   });
 
@@ -837,14 +849,21 @@ describe('BattleController', () => {
       ];
 
       controller.store.getPendingGarbage.mockReturnValue(3);
-      game.Store.getState.mockReturnValue({ board: mockBoard, difficulty: 'normal' });
+      game.Store.getState.mockReturnValue({
+        board: mockBoard,
+        difficulty: 'normal',
+      });
       garbageSystem.applyGarbage.mockReturnValue(mockNewBoard);
 
       controller.flushGarbage(game);
 
       expect(controller.store.getPendingGarbage).toHaveBeenCalledWith(game);
       expect(game.Store.getState).toHaveBeenCalled();
-      expect(garbageSystem.applyGarbage).toHaveBeenCalledWith(mockBoard, 3, 'normal');
+      expect(garbageSystem.applyGarbage).toHaveBeenCalledWith(
+        mockBoard,
+        3,
+        'normal',
+      );
       expect(game.Store.setState).toHaveBeenCalledWith({ board: mockNewBoard });
       expect(controller.store.clearGarbage).toHaveBeenCalledWith(game);
     });
@@ -892,7 +911,11 @@ describe('BattleController', () => {
 
         controller.flushGarbage(game);
 
-        expect(garbageSystem.applyGarbage).toHaveBeenCalledWith([], 2, difficulty);
+        expect(garbageSystem.applyGarbage).toHaveBeenCalledWith(
+          [],
+          2,
+          difficulty,
+        );
       });
     });
 
@@ -910,7 +933,10 @@ describe('BattleController', () => {
       ];
 
       controller.store.getPendingGarbage.mockReturnValue(1);
-      game.Store.getState.mockReturnValue({ board: originalBoard, difficulty: 'easy' });
+      game.Store.getState.mockReturnValue({
+        board: originalBoard,
+        difficulty: 'easy',
+      });
       garbageSystem.applyGarbage.mockReturnValue(newBoard);
 
       controller.flushGarbage(game);

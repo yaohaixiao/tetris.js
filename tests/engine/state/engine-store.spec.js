@@ -1,6 +1,4 @@
-/**
- * @file EngineStore 单元测试
- */
+/** @file EngineStore 单元测试 */
 
 import EngineStore from '@/lib/engine/state/engine-store.js';
 import EngineState from '@/lib/engine/state/engine-state.js';
@@ -341,11 +339,13 @@ describe('EngineStore', () => {
 
       // 所有值都应该回到默认
       const state = store.getState();
-      expect(state).toEqual(expect.objectContaining({
-        Mode: EngineState.Mode,
-        Players: EngineState.Players,
-        victoryScore: EngineState.victoryScore,
-      }));
+      expect(state).toEqual(
+        expect.objectContaining({
+          Mode: EngineState.Mode,
+          Players: EngineState.Players,
+          victoryScore: EngineState.victoryScore,
+        }),
+      );
       expect(state.Block.style).toBe(EngineState.Block.style);
       expect(state.Block.pattern).toBe(EngineState.Block.pattern);
     });
@@ -450,7 +450,11 @@ describe('EngineStore', () => {
 
     test('setPlayers 可以设置为任意字符串数组', () => {
       store.setPlayers(['player1', 'player2', 'player3']);
-      expect(store.getState().Players).toEqual(['player1', 'player2', 'player3']);
+      expect(store.getState().Players).toEqual([
+        'player1',
+        'player2',
+        'player3',
+      ]);
     });
 
     test('setPlayers 传入空数组应该正常工作', () => {

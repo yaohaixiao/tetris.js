@@ -19,19 +19,52 @@ jest.mock('@/lib/engine/state/engine-store.js', () => ({
           fly: 'tetris-battle-fly',
         },
         Container: 'tetris-container',
-        Canvas: { cols: 10, rows: 20, board: 'board', next: 'next', hold: 'hold' },
-        Hud: { controller: 'ctrl', score: 'score', lines: 'lines', level: 'level', combo: 'combo', highScore: 'hi' },
-        Controls: { back: 'back', hold: 'hold', start: 'start', up: 'up', down: 'down', left: 'left', right: 'right', a: 'a', b: 'b', x: 'x', y: 'y' },
+        Canvas: {
+          cols: 10,
+          rows: 20,
+          board: 'board',
+          next: 'next',
+          hold: 'hold',
+        },
+        Hud: {
+          controller: 'ctrl',
+          score: 'score',
+          lines: 'lines',
+          level: 'level',
+          combo: 'combo',
+          highScore: 'hi',
+        },
+        Controls: {
+          back: 'back',
+          hold: 'hold',
+          start: 'start',
+          up: 'up',
+          down: 'down',
+          left: 'left',
+          right: 'right',
+          a: 'a',
+          b: 'b',
+          x: 'x',
+          y: 'y',
+        },
       },
     };
     this.getState = jest.fn(() => this.state);
     this.isVersus = jest.fn(() => this.state.Mode === 'versus');
     this.getMode = jest.fn(() => this.state.Mode);
-    this.setMode = jest.fn(function (mode) { this.state.Mode = mode; });
-    this.setPlayers = jest.fn(function (players) { this.state.Players = players; });
-    this.reset = jest.fn(function () { this.state.Mode = 'single'; });
+    this.setMode = jest.fn(function (mode) {
+      this.state.Mode = mode;
+    });
+    this.setPlayers = jest.fn(function (players) {
+      this.state.Players = players;
+    });
+    this.reset = jest.fn(function () {
+      this.state.Mode = 'single';
+    });
     this.getVictoryScore = jest.fn(() => this.state.victoryScore);
-    this.setVictoryScore = jest.fn(function (score) { this.state.victoryScore = score; });
+    this.setVictoryScore = jest.fn(function (score) {
+      this.state.victoryScore = score;
+    });
     this.getBlockStyle = jest.fn(() => this.state.Block?.style);
     this.getBlockPattern = jest.fn(() => this.state.Block?.pattern);
   }),
@@ -145,7 +178,8 @@ describe('Engine Core - 完整测试', () => {
     jest.clearAllMocks();
 
     EngineStoreMock = require('@/lib/engine/state/engine-store.js').default;
-    EngineRendererMock = require('@/lib/engine/core/engine-renderer.js').default;
+    EngineRendererMock =
+      require('@/lib/engine/core/engine-renderer.js').default;
     GameMock = require('@/lib/game').default;
     SchedulerMock = require('@/lib/engine/scheduler.js').default;
     AudioMock = require('@/lib/services/audio').default;
@@ -182,7 +216,17 @@ describe('Engine Core - 完整测试', () => {
     });
 
     test('所有核心方法应该存在', () => {
-      ['initialize','launch','tick','start','stop','restart','destroy','subscribe','unsubscribe'].forEach((m) => {
+      [
+        'initialize',
+        'launch',
+        'tick',
+        'start',
+        'stop',
+        'restart',
+        'destroy',
+        'subscribe',
+        'unsubscribe',
+      ].forEach((m) => {
         expect(typeof Engine[m]).toBe('function');
       });
     });
@@ -227,8 +271,14 @@ describe('Engine Core - 完整测试', () => {
 
     test('Game 应该接收正确 Player 配置', () => {
       Engine.initialize({ Mode: 'versus', Players: ['Alice', 'Bob'] });
-      expect(GameMock.mock.calls[0][0].Player).toEqual({ index: 0, name: 'Alice' });
-      expect(GameMock.mock.calls[1][0].Player).toEqual({ index: 1, name: 'Bob' });
+      expect(GameMock.mock.calls[0][0].Player).toEqual({
+        index: 0,
+        name: 'Alice',
+      });
+      expect(GameMock.mock.calls[1][0].Player).toEqual({
+        index: 1,
+        name: 'Bob',
+      });
     });
 
     test('single 模式应该只创建一个 Game', () => {
@@ -242,7 +292,9 @@ describe('Engine Core - 完整测试', () => {
       Engine.initialize({
         Mode: 'versus',
         Players: ['P1', 'P2'],
-        Elements: { Battle: { overlay: 'battle-overlay', winner: 'battle-winner' } },
+        Elements: {
+          Battle: { overlay: 'battle-overlay', winner: 'battle-winner' },
+        },
         victoryScore: 20,
       });
       expect(BattleMock).toHaveBeenCalledWith({
@@ -282,13 +334,21 @@ describe('Engine Core - 完整测试', () => {
 
     test('isRelaunch 为 false 时应该使用 Store.getMode() 作为初始模式', () => {
       Engine.launch({ Mode: 'single', Players: ['P1', 'P2'] });
-      expect(Engine.Games[0].setBeginningState).toHaveBeenCalledWith('game-mode');
+      expect(Engine.Games[0].setBeginningState).toHaveBeenCalledWith(
+        'game-mode',
+      );
       expect(Engine.Games[0].UI.updateMode).toHaveBeenCalledWith('game-mode');
     });
 
     test('isRelaunch 为 true 时应该使用 main-menu 作为初始模式', () => {
-      Engine.launch({ Mode: 'single', Players: ['P1', 'P2'], isRelaunch: true });
-      expect(Engine.Games[0].setBeginningState).toHaveBeenCalledWith('main-menu');
+      Engine.launch({
+        Mode: 'single',
+        Players: ['P1', 'P2'],
+        isRelaunch: true,
+      });
+      expect(Engine.Games[0].setBeginningState).toHaveBeenCalledWith(
+        'main-menu',
+      );
       expect(Engine.Games[0].UI.updateMode).toHaveBeenCalledWith('main-menu');
     });
 
@@ -313,7 +373,11 @@ describe('Engine Core - 完整测试', () => {
     });
 
     test('versus 模式 launch', () => {
-      Engine.launch({ Mode: 'versus', Players: ['P1', 'P2'], Elements: { Battle: { overlay: 'battle-overlay' } } });
+      Engine.launch({
+        Mode: 'versus',
+        Players: ['P1', 'P2'],
+        Elements: { Battle: { overlay: 'battle-overlay' } },
+      });
       expect(Engine.Games).toHaveLength(2);
       expect(Engine.Battle).toBeDefined();
       Engine.Games.forEach((game) => {
@@ -361,13 +425,19 @@ describe('Engine Core - 完整测试', () => {
     test('应该同步回放时钟', () => {
       game.Animations.hasBlocking.mockReturnValue(true);
       Engine.tick(2000);
-      expect(game.Replay.syncPlayElapsed).toHaveBeenCalledWith({ timestamp: 2000, isBlocked: true });
+      expect(game.Replay.syncPlayElapsed).toHaveBeenCalledWith({
+        timestamp: 2000,
+        isBlocked: true,
+      });
     });
 
     test('应该更新回放系统', () => {
       game.getSpeed.mockReturnValue(500);
       Engine.tick(3000);
-      expect(game.Replay.update).toHaveBeenCalledWith({ speed: 500, timestamp: 3000 });
+      expect(game.Replay.update).toHaveBeenCalledWith({
+        speed: 500,
+        timestamp: 3000,
+      });
     });
 
     test('应该更新输入设备', () => {
@@ -459,15 +529,29 @@ describe('Engine Core - 完整测试', () => {
       const callOrder = [];
       const scheduler = Engine.Scheduler;
       scheduler.tick.mockImplementation(() => callOrder.push('scheduler'));
-      game.Replay.syncPlayElapsed.mockImplementation(() => callOrder.push('syncPlayElapsed'));
-      game.Replay.update.mockImplementation(() => callOrder.push('replayUpdate'));
-      game.CommandQueue.flush.mockImplementation(() => callOrder.push('commandQueue'));
+      game.Replay.syncPlayElapsed.mockImplementation(() =>
+        callOrder.push('syncPlayElapsed'),
+      );
+      game.Replay.update.mockImplementation(() =>
+        callOrder.push('replayUpdate'),
+      );
+      game.CommandQueue.flush.mockImplementation(() =>
+        callOrder.push('commandQueue'),
+      );
       game.UI.render.mockImplementation(() => callOrder.push('render'));
-      game.Animations.render.mockImplementation(() => callOrder.push('animationsRender'));
+      game.Animations.render.mockImplementation(() =>
+        callOrder.push('animationsRender'),
+      );
       Engine.tick(1000);
-      expect(callOrder.indexOf('scheduler')).toBeLessThan(callOrder.indexOf('syncPlayElapsed'));
-      expect(callOrder.indexOf('commandQueue')).toBeLessThan(callOrder.indexOf('render'));
-      expect(callOrder.indexOf('render')).toBeLessThan(callOrder.indexOf('animationsRender'));
+      expect(callOrder.indexOf('scheduler')).toBeLessThan(
+        callOrder.indexOf('syncPlayElapsed'),
+      );
+      expect(callOrder.indexOf('commandQueue')).toBeLessThan(
+        callOrder.indexOf('render'),
+      );
+      expect(callOrder.indexOf('render')).toBeLessThan(
+        callOrder.indexOf('animationsRender'),
+      );
     });
   });
 
@@ -480,8 +564,14 @@ describe('Engine Core - 完整测试', () => {
     test('subscribe 应该订阅所有模块', () => {
       const game = Engine.Games[0];
       Engine.subscribe();
-      expect(game.on).toHaveBeenCalledWith('dispatch:command', Engine._onDispatchCommand);
-      expect(game.on).toHaveBeenCalledWith('dispatch:input', Engine._onDispatchInput);
+      expect(game.on).toHaveBeenCalledWith(
+        'dispatch:command',
+        Engine._onDispatchCommand,
+      );
+      expect(game.on).toHaveBeenCalledWith(
+        'dispatch:input',
+        Engine._onDispatchInput,
+      );
       expect(game.subscribe).toHaveBeenCalled();
       expect(Engine.Audio.subscribe).toHaveBeenCalled();
     });
@@ -494,8 +584,14 @@ describe('Engine Core - 完整测试', () => {
     test('unsubscribe 取消所有订阅', () => {
       const game = Engine.Games[0];
       Engine.unsubscribe();
-      expect(game.off).toHaveBeenCalledWith('dispatch:command', Engine._onDispatchCommand);
-      expect(game.off).toHaveBeenCalledWith('dispatch:input', Engine._onDispatchInput);
+      expect(game.off).toHaveBeenCalledWith(
+        'dispatch:command',
+        Engine._onDispatchCommand,
+      );
+      expect(game.off).toHaveBeenCalledWith(
+        'dispatch:input',
+        Engine._onDispatchInput,
+      );
       expect(game.unsubscribe).toHaveBeenCalled();
       expect(Engine.Audio.unsubscribe).toHaveBeenCalled();
     });
@@ -520,7 +616,9 @@ describe('Engine Core - 完整测试', () => {
       const cmd = { payload: { Game: game, action: 'move-left' } };
       Engine._onDispatchCommand(cmd);
       expect(cmd.payload.isBlocked).toBe(true);
-      expect(dispatchCommandMock).toHaveBeenCalledWith(cmd, { mode: 'playing' });
+      expect(dispatchCommandMock).toHaveBeenCalledWith(cmd, {
+        mode: 'playing',
+      });
     });
   });
 
@@ -534,7 +632,10 @@ describe('Engine Core - 完整测试', () => {
       game.Animations.hasBlocking.mockReturnValue(true);
       const input = { payload: { Game: game, key: 'ArrowLeft' } };
       Engine._onDispatchInput(input);
-      expect(dispatchInputMock).toHaveBeenCalledWith(input, { isBlocked: true, ms: 2000 });
+      expect(dispatchInputMock).toHaveBeenCalledWith(input, {
+        isBlocked: true,
+        ms: 2000,
+      });
     });
   });
 
@@ -566,7 +667,9 @@ describe('Engine Core - 完整测试', () => {
       const a = jest.spyOn(Engine, 'stop');
       const b = jest.spyOn(Engine, 'start');
       Engine.restart();
-      expect(a.mock.invocationCallOrder[0]).toBeLessThan(b.mock.invocationCallOrder[0]);
+      expect(a.mock.invocationCallOrder[0]).toBeLessThan(
+        b.mock.invocationCallOrder[0],
+      );
       a.mockRestore();
       b.mockRestore();
     });
@@ -617,7 +720,11 @@ describe('Engine Core - 完整测试', () => {
     });
 
     test('versus 模式', () => {
-      Engine.launch({ Mode: 'versus', Players: ['P1', 'P2'], Elements: { Battle: { overlay: 'battle-overlay' } } });
+      Engine.launch({
+        Mode: 'versus',
+        Players: ['P1', 'P2'],
+        Elements: { Battle: { overlay: 'battle-overlay' } },
+      });
       expect(Engine.Games).toHaveLength(2);
       expect(Engine.Battle).toBeDefined();
       Engine.lastTickTime = 0;
@@ -697,10 +804,15 @@ describe('Engine Core - 完整测试', () => {
     describe('_onExit', () => {
       test('应该重置 Store 并以单人模式重新启动', () => {
         // 用 mockImplementation 阻止 _onStart 真正执行，避免 destroy 干扰
-        const startSpy = jest.spyOn(Engine, '_onStart').mockImplementation(() => {});
+        const startSpy = jest
+          .spyOn(Engine, '_onStart')
+          .mockImplementation(() => {});
         Engine._onExit();
         expect(Engine.Store.reset).toHaveBeenCalled();
-        expect(startSpy).toHaveBeenCalledWith({ isRelaunch: false, Mode: 'single' });
+        expect(startSpy).toHaveBeenCalledWith({
+          isRelaunch: false,
+          Mode: 'single',
+        });
         startSpy.mockRestore();
       });
     });

@@ -482,18 +482,9 @@ describe('Sounds', () => {
 
       tasks.forEach((task) => task.fn());
 
-      const startTimes = playTone.mock.calls.map(
-        (call) => call[3]?.startTime
-      );
+      const startTimes = playTone.mock.calls.map((call) => call[3]?.startTime);
 
-      expect(startTimes).toEqual([
-        undefined,
-        100.2,
-        100.4,
-        100.6,
-        100.8,
-        101,
-      ]);
+      expect(startTimes).toEqual([undefined, 100.2, 100.4, 100.6, 100.8, 101]);
     });
 
     test('第一个音符没有 startTime，后续音符有 startTime', () => {

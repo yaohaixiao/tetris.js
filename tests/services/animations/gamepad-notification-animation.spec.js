@@ -1,6 +1,4 @@
-/**
- * @file GamepadNotificationAnimation 单元测试
- */
+/** @file GamepadNotificationAnimation 单元测试 */
 
 import GamepadNotificationAnimation from '@/lib/services/animations/gamepad-notification-animation.js';
 import { UIEvents } from '@/lib/events/event-catalog.js';
@@ -53,10 +51,7 @@ describe('GamepadNotificationAnimation', () => {
     });
   });
 
-  /**
-   * 执行 Scheduler 队列中的下一个待处理回调。
-   * 每次只执行一个，模拟真实的时间推进。
-   */
+  /** 执行 Scheduler 队列中的下一个待处理回调。 每次只执行一个，模拟真实的时间推进。 */
   const flushOneStep = () => {
     const fn = mockScheduler._pendingCallbacks.shift();
     if (fn) fn();

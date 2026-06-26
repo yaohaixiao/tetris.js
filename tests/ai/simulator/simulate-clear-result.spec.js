@@ -299,7 +299,9 @@ describe('simulateClearResult', () => {
       board1[17] = Array(10).fill(1);
       board1[18] = Array(10).fill(1);
       board1[19] = Array(10).fill(1);
-      expect(simulateClearResult(board1, createSnapshot()).isBigMove).toBe(true);
+      expect(simulateClearResult(board1, createSnapshot()).isBigMove).toBe(
+        true,
+      );
 
       // T-Spin
       const board2 = createBoard();
@@ -313,7 +315,9 @@ describe('simulateClearResult', () => {
       // 普通消行
       const board3 = createBoard();
       board3[19] = Array(10).fill(1);
-      expect(simulateClearResult(board3, createSnapshot()).isBigMove).toBe(false);
+      expect(simulateClearResult(board3, createSnapshot()).isBigMove).toBe(
+        false,
+      );
     });
   });
 

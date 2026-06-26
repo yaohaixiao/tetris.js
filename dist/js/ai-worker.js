@@ -121,6 +121,8 @@ var createCandidate = ({
     originalX: originalPiece.position.x
   });
   return {
+    /** 硬降终点 X 坐标（用于 advanceSnapshot 正确模拟放置位置） */
+    x: targetX,
     /** 硬降终点 Y 坐标 */
     y,
     /** 放置函数：在分支棋盘上写入方块 */
@@ -376,11 +378,16 @@ var advanceSnapshot = (snapshot, move) => {
   const board = simulate_placement_default(
     snapshot.board,
     snapshot.piece.shape,
-    snapshot.piece.position.x,
+    move.x ?? snapshot.piece.position.x,
     move.y
   );
+  const beforeCleared = snapshot.board.filter(
+    (row) => row.every((c) => c !== 0)
+  ).length;
+  const afterTotal = board.filter((row) => row.every((c) => c !== 0)).length;
+  const newCleared = afterTotal - beforeCleared;
   const clearedBoard = clear_full_lines_default(board);
-  const clearResult = simulate_clear_result_default(clearedBoard, snapshot);
+  const clearResult = simulate_clear_result_default(clearedBoard, snapshot, newCleared);
   const bag2 = snapshot.bag ? [...snapshot.bag] : [];
   const nextPiece = bag2.length > 0 ? bag2.shift() : snapshot.next || {
     shape: [[1, 1, 1, 1]],
@@ -406,9 +413,11 @@ var advanceSnapshot = (snapshot, move) => {
     cur: nextPiece,
     next: nextNext,
     bag: bag2,
-    // 更新计分状态
+    // 更新计分状态：combo 递增（如果有消行），否则清零
     combo: clearResult ? clearResult.combo : 0,
+    // 更新 Back-to-Back：本次是大招则保留标记，否则继承原值
     backToBack: clearResult ? clearResult.isBigMove : snapshot.backToBack,
+    // 清空 T-Spin 标记（每次锁定时重新检测）
     tSpin: null,
     // 传递消行结果到下一层，确保深层搜索能看到消行价值
     clearResult: clearResult || null
@@ -419,9 +428,7 @@ var advance_snapshot_default = advanceSnapshot;
 // lib/ai/planner/self-play.js
 var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
   const moves = generate_moves_default(snapshot);
-  if (moves.length === 0) {
-    return null;
-  }
+  if (moves.length === 0) return null;
   const baseCleared = snapshot.board.filter(
     (row) => row.every((c) => c !== 0)
   ).length;
@@ -436,9 +443,7 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
       const afterBoard = clear_full_lines_default(board);
       const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
       let score = evaluate_board_default(afterBoard, weights, result);
-      if (move.actions.includes("HOLD")) {
-        score += 2;
-      }
+      if (move.actions.includes("HOLD")) score += 2;
       return { move, score };
     });
     scored.sort((a, b) => b.score - a.score);
@@ -474,9 +479,7 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
         score = evaluate_board_default(afterBoard, weights, result);
       }
     }
-    if (move.actions.includes("HOLD")) {
-      score += 2;
-    }
+    if (move.actions.includes("HOLD")) score += 2;
     if (score > bestScore) {
       bestScore = score;
       best = move;
@@ -930,7 +933,9 @@ var create_snapshot_default = createSnapshot;
 // lib/worker/ai-worker.js
 globalThis.addEventListener("message", (e) => {
   const { type, state, weights, depth, beam } = e.data;
-  if (type !== "think") return;
+  if (type !== "think") {
+    return;
+  }
   try {
     const snapshot = create_snapshot_default(state);
     const best = self_play_default(snapshot, weights, depth, beam);

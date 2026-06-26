@@ -1,6 +1,4 @@
-/**
- * @file EngineRenderer 单元测试
- */
+/** @file EngineRenderer 单元测试 */
 
 /** @jest-environment jsdom */
 
@@ -16,17 +14,25 @@ jest.mock('@/lib/core', () => {
 // Mock HTML 模板生成函数
 jest.mock('@/lib/engine/core/utils/get-battle-overlay-template.js', () => ({
   __esModule: true,
-  default: jest.fn((elements, players) => `<section id="battle-overlay-mock" data-players="${players.join(',')}"></section>`),
+  default: jest.fn(
+    (elements, players) =>
+      `<section id="battle-overlay-mock" data-players="${players.join(',')}"></section>`,
+  ),
 }));
 
 jest.mock('@/lib/engine/core/utils/get-game-interface-template.js', () => ({
   __esModule: true,
-  default: jest.fn((elements, player, index) => `<div id="${player}-${index}-player-mock"></div>`),
+  default: jest.fn(
+    (elements, player, index) =>
+      `<div id="${player}-${index}-player-mock"></div>`,
+  ),
 }));
 
 jest.mock('@/lib/engine/core/utils/get-battle-score-template.js', () => ({
   __esModule: true,
-  default: jest.fn((player, index) => `<div id="${player}-${index}-score-mock">0</div>`),
+  default: jest.fn(
+    (player, index) => `<div id="${player}-${index}-score-mock">0</div>`,
+  ),
 }));
 
 describe('EngineRenderer', () => {
@@ -36,7 +42,7 @@ describe('EngineRenderer', () => {
   /**
    * 创建模拟的 EngineStore。
    *
-   * @param {object} [overrides={}] - 覆盖默认 state 的配置
+   * @param {object} [overrides={}] - 覆盖默认 state 的配置. Default is `{}`
    * @param {string} [overrides.Mode] - 游戏模式（'single' | 'versus' | null）
    * @param {string[]} [overrides.Players] - 玩家名称数组
    * @returns {object} 模拟的 EngineStore 实例
@@ -53,9 +59,34 @@ describe('EngineRenderer', () => {
           fly: 'tetris-battle-fly',
         },
         Container: 'tetris-container',
-        Canvas: { cols: 10, rows: 20, board: 'board', next: 'next', hold: 'hold' },
-        Hud: { controller: 'ctrl', score: 'score', lines: 'lines', level: 'level', combo: 'combo', highScore: 'hi' },
-        Controls: { back: 'back', hold: 'hold', start: 'start', up: 'up', down: 'down', left: 'left', right: 'right', a: 'a', b: 'b', x: 'x', y: 'y' },
+        Canvas: {
+          cols: 10,
+          rows: 20,
+          board: 'board',
+          next: 'next',
+          hold: 'hold',
+        },
+        Hud: {
+          controller: 'ctrl',
+          score: 'score',
+          lines: 'lines',
+          level: 'level',
+          combo: 'combo',
+          highScore: 'hi',
+        },
+        Controls: {
+          back: 'back',
+          hold: 'hold',
+          start: 'start',
+          up: 'up',
+          down: 'down',
+          left: 'left',
+          right: 'right',
+          a: 'a',
+          b: 'b',
+          x: 'x',
+          y: 'y',
+        },
       },
     })),
     isVersus: jest.fn(function () {
@@ -151,7 +182,10 @@ describe('EngineRenderer', () => {
   // ==================== 模板生成（versus 模式） ====================
   describe('versus 模式模板生成', () => {
     beforeEach(() => {
-      mockStore = createMockStore({ Mode: 'versus', Players: ['human', 'human'] });
+      mockStore = createMockStore({
+        Mode: 'versus',
+        Players: ['human', 'human'],
+      });
       renderer = new EngineRenderer({ Store: mockStore });
     });
 
@@ -259,7 +293,10 @@ describe('EngineRenderer', () => {
     });
 
     test('versus 模式应该设置 data-mode 为 versus', () => {
-      mockStore = createMockStore({ Mode: 'versus', Players: ['human', 'human'] });
+      mockStore = createMockStore({
+        Mode: 'versus',
+        Players: ['human', 'human'],
+      });
       renderer = new EngineRenderer({ Store: mockStore });
       renderer.render();
       const container = document.querySelector('#tetris-container');
@@ -297,7 +334,10 @@ describe('EngineRenderer', () => {
     });
 
     test('应该重置 data-mode 为 single', () => {
-      mockStore = createMockStore({ Mode: 'versus', Players: ['human', 'human'] });
+      mockStore = createMockStore({
+        Mode: 'versus',
+        Players: ['human', 'human'],
+      });
       renderer = new EngineRenderer({ Store: mockStore });
       renderer.render();
       renderer.destroy();
@@ -320,7 +360,10 @@ describe('EngineRenderer', () => {
   // ==================== 集成测试 ====================
   describe('集成测试', () => {
     test('single 模式完整渲染流程', () => {
-      mockStore = createMockStore({ Mode: 'single', Players: ['Alice', 'Extra'] });
+      mockStore = createMockStore({
+        Mode: 'single',
+        Players: ['Alice', 'Extra'],
+      });
       renderer = new EngineRenderer({ Store: mockStore });
       renderer.render();
 
