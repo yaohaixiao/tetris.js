@@ -10613,7 +10613,7 @@ var tetris = (() => {
   // lib/ai/core/ai-difficulty.js
   var AI_WEIGHTS = {
     holes: -8,
-    height: -0.45,
+    height: -0.6,
     bumpiness: -0.35,
     completeLines: 20
   };
@@ -11182,7 +11182,7 @@ var tetris = (() => {
   var evaluateBoard = (board, weights, clearResult) => {
     const heights = [];
     const w = {
-      height: -0.45,
+      height: -0.6,
       // 背景压力：适中恐高
       holes: -8,
       // 空洞惩罚：一个洞 ≈ 10 分

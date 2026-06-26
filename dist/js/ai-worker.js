@@ -216,7 +216,7 @@ var count_holes_default = countHoles;
 var evaluateBoard = (board, weights, clearResult) => {
   const heights = [];
   const w = {
-    height: -0.45,
+    height: -0.6,
     // 背景压力：适中恐高
     holes: -8,
     // 空洞惩罚：一个洞 ≈ 10 分
