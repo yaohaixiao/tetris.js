@@ -1,3 +1,4 @@
+
 ## [1.19.1](https://github.com/yaohaixiao/tetris.js/compare/1.19.0...1.19.1) (2026-06-26)
 
 
