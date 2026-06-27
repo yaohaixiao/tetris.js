@@ -30,6 +30,7 @@ jest.mock('@/lib/events/event-catalog.js', () => ({
   }),
   GameEvents: (uuid) => ({
     START_LANDING_FLASH: `game:${uuid}:start:landing:flash`,
+    DISPATCH_INPUT: `game:${uuid}:dispatch:input`,
   }),
 }));
 
@@ -126,7 +127,7 @@ describe('tick', () => {
 
       tick(mockContext, false);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(mockContext.emit).toHaveBeenCalledWith('game:test-uuid:dispatch:input', {
         device: 'replay',
         action: 'AUTO_TICK',
         payload: { Game: mockContext },
@@ -140,7 +141,7 @@ describe('tick', () => {
       tick(mockContext, false);
 
       const autoTickCalls = mockContext.emit.mock.calls.filter(
-        ([event]) => event === 'dispatch:input',
+        ([event]) => event === 'game:test-uuid:dispatch:input',
       );
       expect(autoTickCalls).toHaveLength(0);
     });

@@ -75,13 +75,16 @@ jest.mock('@/lib/game/constants/color-palettes.js', () => [
 ]);
 
 describe('randomShape', () => {
+  // 模拟 runtime 对象，每个 Game 实例维护独立的 bag
+  const makeRuntime = () => ({ bag: [] });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('返回值结构', () => {
     it('应返回 shape、color、type、rotation、colorIndex', () => {
-      const piece = randomShape(1);
+      const piece = randomShape(makeRuntime(), 1);
       expect(piece).toHaveProperty('shape');
       expect(piece).toHaveProperty('color');
       expect(piece).toHaveProperty('type');
@@ -92,36 +95,50 @@ describe('randomShape', () => {
 
   describe('shape 深拷贝', () => {
     it('shape 不是原引用', () => {
-      const piece1 = randomShape(1);
-      const piece2 = randomShape(1);
+      const piece1 = randomShape(makeRuntime(), 1);
+      const piece2 = randomShape(makeRuntime(), 1);
       expect(piece1.shape).not.toBe(piece2.shape);
     });
   });
 
   describe('等级配色', () => {
     it('level 1 → palette 0', () => {
-      const piece = randomShape(1);
+      const piece = randomShape(makeRuntime(), 1);
       expect(piece.color).toBe(`#P0_${piece.colorIndex}`);
     });
 
     it('level 33 → palette 1', () => {
-      const piece = randomShape(33);
+      const piece = randomShape(makeRuntime(), 33);
       expect(piece.color).toBe(`#P1_${piece.colorIndex}`);
     });
 
     it('level 225 → palette 7', () => {
-      const piece = randomShape(225);
+      const piece = randomShape(makeRuntime(), 225);
       expect(piece.color).toBe(`#P7_${piece.colorIndex}`);
     });
 
     it('level 256 → palette 7', () => {
-      const piece = randomShape(256);
+      const piece = randomShape(makeRuntime(), 256);
       expect(piece.color).toBe(`#P7_${piece.colorIndex}`);
     });
 
     it('level 999 → palette 7（不越界）', () => {
-      const piece = randomShape(999);
+      const piece = randomShape(makeRuntime(), 999);
       expect(piece.color).toBe(`#P7_${piece.colorIndex}`);
+    });
+  });
+
+  describe('bag 独立', () => {
+    it('每个 runtime 使用独立的 bag', () => {
+      const rt1 = makeRuntime();
+      const rt2 = makeRuntime();
+
+      // 只从 rt1 取方块，rt2 不动
+      randomShape(rt1, 1);
+
+      // rt1 的 bag 被消费了，rt2 的 bag 仍然是初始空数组
+      expect(rt1.bag.length).toBe(7);
+      expect(rt2.bag.length).toBe(0);
     });
   });
 });

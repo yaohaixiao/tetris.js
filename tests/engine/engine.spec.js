@@ -2,6 +2,9 @@
 
 import Engine from '@/lib/engine';
 
+const DISPATCH_COMMAND = 'game:test-game-uuid:dispatch:command';
+const DISPATCH_INPUT = 'game:test-game-uuid:dispatch:input';
+
 // ==================== Mock 模块 ====================
 
 jest.mock('@/lib/engine/state/engine-store.js', () => ({
@@ -92,6 +95,7 @@ jest.mock('@/lib/services/audio', () => ({
 jest.mock('@/lib/game', () => ({
   __esModule: true,
   default: jest.fn((config) => ({
+    id: 'test-game-uuid',
     Store: {
       resetBoard: jest.fn(),
       getMode: jest.fn(() => 'game-mode'),
@@ -565,11 +569,11 @@ describe('Engine Core - 完整测试', () => {
       const game = Engine.Games[0];
       Engine.subscribe();
       expect(game.on).toHaveBeenCalledWith(
-        'dispatch:command',
+        'game:test-game-uuid:dispatch:command',
         Engine._onDispatchCommand,
       );
       expect(game.on).toHaveBeenCalledWith(
-        'dispatch:input',
+        'game:test-game-uuid:dispatch:input',
         Engine._onDispatchInput,
       );
       expect(game.subscribe).toHaveBeenCalled();
@@ -585,11 +589,11 @@ describe('Engine Core - 完整测试', () => {
       const game = Engine.Games[0];
       Engine.unsubscribe();
       expect(game.off).toHaveBeenCalledWith(
-        'dispatch:command',
+        'game:test-game-uuid:dispatch:command',
         Engine._onDispatchCommand,
       );
       expect(game.off).toHaveBeenCalledWith(
-        'dispatch:input',
+        'game:test-game-uuid:dispatch:input',
         Engine._onDispatchInput,
       );
       expect(game.unsubscribe).toHaveBeenCalled();

@@ -4,6 +4,9 @@ import GAME from '@/lib/game/constants/game.js';
 import KeyboardController from '@/lib/services/input/keyboard-controller.js';
 import { UIEvents } from '@/lib/events/event-catalog.js';
 
+// 事件名常量：与 GameEvents('test-game-uuid').DISPATCH_INPUT 保持一致
+const DISPATCH_INPUT = 'game:test-game-uuid:dispatch:input';
+
 // Mock Base class
 jest.mock('@/lib/core', () => {
   return class Base {
@@ -177,7 +180,7 @@ describe('KeyboardController', () => {
     it('应该将有效的键盘输入转换为 dispatch:input 事件', () => {
       keyboard._onKeydown({ key: 'ArrowLeft' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -187,7 +190,7 @@ describe('KeyboardController', () => {
     it('应该支持空格键', () => {
       keyboard._onKeydown({ key: ' ' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'DROP',
         payload: { Game: mockGame },
@@ -197,7 +200,7 @@ describe('KeyboardController', () => {
     it('应该支持 s 键（切换控制者）', () => {
       keyboard._onKeydown({ key: 's' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'SWITCH_CONTROLLER',
         payload: { Game: mockGame },
@@ -207,7 +210,7 @@ describe('KeyboardController', () => {
     it('应该支持字母键 m（切换音乐）', () => {
       keyboard._onKeydown({ key: 'm' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'TOGGLE_MUSIC',
         payload: { Game: mockGame },
@@ -217,7 +220,7 @@ describe('KeyboardController', () => {
     it('应该支持字母键 p（暂停）', () => {
       keyboard._onKeydown({ key: 'p' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'TOGGLE_PAUSED',
         payload: { Game: mockGame },
@@ -227,7 +230,7 @@ describe('KeyboardController', () => {
     it('应该支持字母键 r（重启）', () => {
       keyboard._onKeydown({ key: 'r' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'RESTART',
         payload: { Game: mockGame },
@@ -237,7 +240,7 @@ describe('KeyboardController', () => {
     it('应该支持回车键（确认）', () => {
       keyboard._onKeydown({ key: 'Enter' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'CONFIRM',
         payload: { Game: mockGame },
@@ -247,7 +250,7 @@ describe('KeyboardController', () => {
     it('应该支持 c 键（HOLD）', () => {
       keyboard._onKeydown({ key: 'c' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'HOLD',
         payload: { Game: mockGame },
@@ -257,7 +260,7 @@ describe('KeyboardController', () => {
     it('应该支持 q 键（QUIT）', () => {
       keyboard._onKeydown({ key: 'q' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'QUIT',
         payload: { Game: mockGame },
@@ -285,7 +288,7 @@ describe('KeyboardController', () => {
     it('应该处理大写字母', () => {
       keyboard._onKeydown({ key: 'R' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'RESTART',
         payload: { Game: mockGame },
@@ -359,7 +362,7 @@ describe('KeyboardController', () => {
 
       keyboard._onKeydown({ key: 'ArrowLeft' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -392,7 +395,7 @@ describe('KeyboardController', () => {
     it('replay 模式下回车键仍然可以发送事件', () => {
       keyboard._onKeydown({ key: 'Enter' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'CONFIRM',
         payload: { Game: mockGame },
@@ -505,7 +508,7 @@ describe('KeyboardController', () => {
       it(`按键 "${key}" 应该映射为 "${expected}"`, () => {
         keyboard._onKeydown({ key });
 
-        expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+        expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
           device: 'keyboard',
           action: expected,
           payload: { Game: mockGame },
@@ -612,7 +615,7 @@ describe('KeyboardController', () => {
 
       keyboard.update();
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -628,7 +631,7 @@ describe('KeyboardController', () => {
 
       keyboard.update();
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'MOVE_RIGHT',
         payload: { Game: mockGame },
@@ -833,7 +836,7 @@ describe('KeyboardController', () => {
       mockStore.getMode.mockReturnValue('main-menu');
       keyboard._onKeydown({ key: 'ArrowLeft' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -844,7 +847,7 @@ describe('KeyboardController', () => {
       mockStore.getMode.mockReturnValue('difficulty');
       keyboard._onKeydown({ key: 'Enter' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'CONFIRM',
         payload: { Game: mockGame },
@@ -856,7 +859,7 @@ describe('KeyboardController', () => {
       keyboard.Player = mockPlayer;
       keyboard._onKeydown({ key: 'ArrowLeft' });
 
-      expect(keyboard.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(keyboard.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'keyboard',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },

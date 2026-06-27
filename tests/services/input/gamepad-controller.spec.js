@@ -4,6 +4,9 @@ import GamepadController from '@/lib/services/input/gamepad-controller.js';
 import GAME from '@/lib/game/constants/game.js';
 import { GameEvents } from '@/lib/events/event-catalog.js';
 
+// 事件名常量：与 GameEvents('test-game-uuid').DISPATCH_INPUT 保持一致
+const DISPATCH_INPUT = 'game:test-game-uuid:dispatch:input';
+
 describe('GamepadController', () => {
   let gamepad;
   let mockGame;
@@ -427,7 +430,7 @@ describe('GamepadController', () => {
     it('_startAxisAction 首次触发应该发送事件', () => {
       gamepad._startAxisAction('MOVE_LEFT');
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -461,7 +464,7 @@ describe('GamepadController', () => {
     it('向上推应该触发 ROTATE', () => {
       gamepad._handleStickMove(0, -0.8);
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'ROTATE',
         payload: { Game: mockGame },
@@ -471,7 +474,7 @@ describe('GamepadController', () => {
     it('向下推应该触发 MOVE_DOWN', () => {
       gamepad._handleStickMove(0, 0.8);
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_DOWN',
         payload: { Game: mockGame },
@@ -481,7 +484,7 @@ describe('GamepadController', () => {
     it('向左推应该触发 MOVE_LEFT', () => {
       gamepad._handleStickMove(-0.8, 0);
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -491,7 +494,7 @@ describe('GamepadController', () => {
     it('向右推应该触发 MOVE_RIGHT', () => {
       gamepad._handleStickMove(0.8, 0);
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_RIGHT',
         payload: { Game: mockGame },
@@ -589,7 +592,7 @@ describe('GamepadController', () => {
     it('值为 -1.00000 时应该触发上方向', () => {
       gamepad._handleBetopDpad(-1, mockState);
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'ROTATE',
         payload: { Game: mockGame },
@@ -599,7 +602,7 @@ describe('GamepadController', () => {
     it('值为 0.14286 时应该触发下方向', () => {
       gamepad._handleBetopDpad(0.14286, mockState);
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_DOWN',
         payload: { Game: mockGame },
@@ -609,7 +612,7 @@ describe('GamepadController', () => {
     it('值为 0.71429 时应该触发左方向', () => {
       gamepad._handleBetopDpad(0.71429, mockState);
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -619,7 +622,7 @@ describe('GamepadController', () => {
     it('值为 -0.42857 时应该触发右方向', () => {
       gamepad._handleBetopDpad(-0.42857, mockState);
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_RIGHT',
         payload: { Game: mockGame },
@@ -785,7 +788,7 @@ describe('GamepadController', () => {
       mockPad.buttons[5] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'SWITCH_CONTROLLER',
         payload: { Game: mockGame },
@@ -796,7 +799,7 @@ describe('GamepadController', () => {
       mockPad.buttons[0] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'TOGGLE_MUSIC',
         payload: { Game: mockGame },
@@ -808,7 +811,7 @@ describe('GamepadController', () => {
       gamepad._collectCommands(Date.now());
 
       const calls = gamepad.emit.mock.calls.filter(
-        (call) => call[0] === 'dispatch:input',
+        (call) => call[0] === DISPATCH_INPUT,
       );
       expect(calls.length).toBe(0);
     });
@@ -817,7 +820,7 @@ describe('GamepadController', () => {
       mockPad.buttons[2] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'RESTART',
         payload: { Game: mockGame },
@@ -829,7 +832,7 @@ describe('GamepadController', () => {
       gamepad._collectCommands(Date.now());
 
       const calls = gamepad.emit.mock.calls.filter(
-        (call) => call[0] === 'dispatch:input',
+        (call) => call[0] === DISPATCH_INPUT,
       );
       expect(calls.length).toBe(0);
     });
@@ -948,7 +951,7 @@ describe('GamepadController', () => {
       mockPad.buttons[0] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'TOGGLE_MUSIC',
         payload: { Game: mockGame },
@@ -1187,7 +1190,7 @@ describe('GamepadController', () => {
       mockPad.buttons[0] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'EASY',
         payload: { Game: mockGame },
@@ -1199,7 +1202,7 @@ describe('GamepadController', () => {
       mockPad.buttons[1] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'NORMAL',
         payload: { Game: mockGame },
@@ -1211,7 +1214,7 @@ describe('GamepadController', () => {
       mockPad.buttons[3] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'HARD',
         payload: { Game: mockGame },
@@ -1223,7 +1226,7 @@ describe('GamepadController', () => {
       mockPad.buttons[2] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'EXPERT',
         payload: { Game: mockGame },
@@ -1235,7 +1238,7 @@ describe('GamepadController', () => {
       mockPad.buttons[8] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'BACK',
         payload: { Game: mockGame },
@@ -1248,7 +1251,7 @@ describe('GamepadController', () => {
       mockPad.buttons[1] = { value: 1, pressed: true };
       gamepad.buttonStates = {}; // 重置防抖
       gamepad._collectCommands(Date.now());
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'NORMAL',
         payload: { Game: mockGame },
@@ -1261,7 +1264,7 @@ describe('GamepadController', () => {
       gamepad.emit.mockClear();
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'DROP',
         payload: { Game: mockGame },
@@ -1274,7 +1277,7 @@ describe('GamepadController', () => {
       mockPad.buttons[0] = { value: 1, pressed: true };
       gamepad.buttonStates = {};
       gamepad._collectCommands(Date.now());
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'EASY',
         payload: { Game: mockGame },
@@ -1287,7 +1290,7 @@ describe('GamepadController', () => {
       gamepad.emit.mockClear();
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'TOGGLE_MUSIC',
         payload: { Game: mockGame },
@@ -1302,7 +1305,7 @@ describe('GamepadController', () => {
       gamepad._collectCommands(Date.now());
 
       // B 的默认映射是 DROP
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'DROP',
         payload: { Game: mockGame },
@@ -1346,7 +1349,7 @@ describe('GamepadController', () => {
       mockPad.buttons[0] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'EASY',
         payload: { Game: mockGame },
@@ -1357,7 +1360,7 @@ describe('GamepadController', () => {
       mockPad.buttons[1] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'NORMAL',
         payload: { Game: mockGame },
@@ -1368,7 +1371,7 @@ describe('GamepadController', () => {
       mockPad.buttons[3] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'HARD',
         payload: { Game: mockGame },
@@ -1379,7 +1382,7 @@ describe('GamepadController', () => {
       mockPad.buttons[2] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'EXPERT',
         payload: { Game: mockGame },
@@ -1390,7 +1393,7 @@ describe('GamepadController', () => {
       mockPad.buttons[8] = { value: 1, pressed: true };
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'BACK',
         payload: { Game: mockGame },
@@ -1418,7 +1421,7 @@ describe('GamepadController', () => {
 
         gamepad._collectCommands(Date.now());
 
-        expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+        expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
           device: 'gamepad',
           action: expectedAction,
           payload: { Game: mockGame },
@@ -1536,7 +1539,7 @@ describe('GamepadController', () => {
 
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'CONFIRM',
         payload: { Game: mockGame },
@@ -1558,7 +1561,7 @@ describe('GamepadController', () => {
 
       gamepad._collectCommands(Date.now());
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'CONFIRM',
         payload: { Game: mockGame },
@@ -1576,7 +1579,7 @@ describe('GamepadController', () => {
       // BETOP DPAD 不走按钮方式，应该没有触发 MOVE_LEFT
       const moveLeftCalls = gamepad.emit.mock.calls.filter(
         (call) =>
-          call[0] === 'dispatch:input' && call[1]?.action === 'MOVE_LEFT',
+          call[0] === DISPATCH_INPUT && call[1]?.action === 'MOVE_LEFT',
       );
       expect(moveLeftCalls.length).toBe(0);
     });
@@ -1953,7 +1956,7 @@ describe('GamepadController', () => {
       gamepad.emit.mockClear();
       gamepad._handleBetopDpad(-1, { mode: 'playing', level: 1 });
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'ROTATE',
         payload: { Game: mockGame },
@@ -1968,7 +1971,7 @@ describe('GamepadController', () => {
       gamepad.emit.mockClear();
       gamepad._handleBetopDpad(0.14286, { mode: 'playing', level: 1 });
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_DOWN',
         payload: { Game: mockGame },
@@ -1979,7 +1982,7 @@ describe('GamepadController', () => {
       gamepad.emit.mockClear();
       gamepad._handleBetopDpad(0.71429, { mode: 'playing', level: 1 });
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -1990,7 +1993,7 @@ describe('GamepadController', () => {
       gamepad.emit.mockClear();
       gamepad._handleBetopDpad(-0.42857, { mode: 'playing', level: 1 });
 
-      expect(gamepad.emit).toHaveBeenCalledWith('dispatch:input', {
+      expect(gamepad.emit).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'gamepad',
         action: 'MOVE_RIGHT',
         payload: { Game: mockGame },

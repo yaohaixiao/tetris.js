@@ -2,10 +2,11 @@ import EventBus from '@/lib/core/event-bus/index.js';
 import CommandQueue from '@/lib/core/command/command-queue.js';
 import Command from '@/lib/core/command/command.js';
 
+// 事件名常量
+const DISPATCH_COMMAND = 'game:test-game-uuid-123:dispatch:command';
+
 describe('CommandQueue', () => {
   let commandQueue;
-
-  const cmd = new Command('MOVE');
 
   beforeEach(() => {
     EventBus.clear();
@@ -35,7 +36,10 @@ describe('CommandQueue', () => {
   // ==================== enqueue 方法 ====================
   describe('enqueue 方法', () => {
     it('应该将命令添加到队列末尾', () => {
-      const cmd = new Command('MOVE', { direction: 'left' });
+      const cmd = new Command('MOVE', {
+        direction: 'left',
+        Game: { id: 'test-game-uuid-123' },
+      });
 
       commandQueue.enqueue(cmd);
 
@@ -44,9 +48,17 @@ describe('CommandQueue', () => {
     });
 
     it('应该支持连续入队多个命令', () => {
-      const cmd1 = new Command('MOVE', { direction: 'left' });
-      const cmd2 = new Command('ROTATE', { direction: 'cw' });
-      const cmd3 = new Command('DROP');
+      const cmd1 = new Command('MOVE', {
+        direction: 'left',
+        Game: { id: 'test-game-uuid-123' },
+      });
+      const cmd2 = new Command('ROTATE', {
+        direction: 'cw',
+        Game: { id: 'test-game-uuid-123' },
+      });
+      const cmd3 = new Command('DROP', {
+        Game: { id: 'test-game-uuid-123' },
+      });
 
       commandQueue.enqueue(cmd1);
       commandQueue.enqueue(cmd2);
@@ -60,18 +72,27 @@ describe('CommandQueue', () => {
 
     it('入队时不应该立即执行命令', () => {
       const handler = jest.fn();
-      EventBus.on('dispatch:command', handler);
+      EventBus.on(DISPATCH_COMMAND, handler);
 
-      const cmd = new Command('MOVE', { direction: 'left' });
+      const cmd = new Command('MOVE', {
+        direction: 'left',
+        Game: { id: 'test-game-uuid-123' },
+      });
       commandQueue.enqueue(cmd);
 
       expect(handler).not.toHaveBeenCalled();
     });
 
     it('应该保持 FIFO（先进先出）的顺序', () => {
-      const cmd1 = new Command('FIRST');
-      const cmd2 = new Command('SECOND');
-      const cmd3 = new Command('THIRD');
+      const cmd1 = new Command('FIRST', {
+        Game: { id: 'test-game-uuid-123' },
+      });
+      const cmd2 = new Command('SECOND', {
+        Game: { id: 'test-game-uuid-123' },
+      });
+      const cmd3 = new Command('THIRD', {
+        Game: { id: 'test-game-uuid-123' },
+      });
 
       commandQueue.enqueue(cmd1);
       commandQueue.enqueue(cmd2);
@@ -85,7 +106,7 @@ describe('CommandQueue', () => {
     it('应该支持传入任意实现了 execute 方法的命令对象', () => {
       const customCmd = {
         action: 'CUSTOM',
-        payload: { key: 'value' },
+        payload: { key: 'value', Game: { id: 'test-game-uuid-123' } },
         execute: jest.fn(),
       };
 
@@ -98,13 +119,16 @@ describe('CommandQueue', () => {
 
   // ==================== flush 方法 ====================
   describe('flush 方法', () => {
+    const makeCmd = (action) =>
+      new Command(action, { Game: { id: 'test-game-uuid-123' } });
+
     it('应该按顺序执行队列中的所有命令', () => {
       const handler = jest.fn();
-      EventBus.on('dispatch:command', handler);
+      EventBus.on(DISPATCH_COMMAND, handler);
 
-      const cmd1 = new Command('MOVE');
-      const cmd2 = new Command('ROTATE');
-      const cmd3 = new Command('DROP');
+      const cmd1 = makeCmd('MOVE');
+      const cmd2 = makeCmd('ROTATE');
+      const cmd3 = makeCmd('DROP');
 
       commandQueue.enqueue(cmd1);
       commandQueue.enqueue(cmd2);
@@ -114,27 +138,27 @@ describe('CommandQueue', () => {
       expect(handler).toHaveBeenCalledTimes(3);
       expect(handler).toHaveBeenNthCalledWith(1, {
         action: 'MOVE',
-        payload: {},
+        payload: { Game: { id: 'test-game-uuid-123' } },
       });
       expect(handler).toHaveBeenNthCalledWith(2, {
         action: 'ROTATE',
-        payload: {},
+        payload: { Game: { id: 'test-game-uuid-123' } },
       });
       expect(handler).toHaveBeenNthCalledWith(3, {
         action: 'DROP',
-        payload: {},
+        payload: { Game: { id: 'test-game-uuid-123' } },
       });
     });
 
     it('应该按照 FIFO 顺序依次执行命令', () => {
       const executionOrder = [];
-      EventBus.on('dispatch:command', (data) => {
+      EventBus.on(DISPATCH_COMMAND, (data) => {
         executionOrder.push(data.action);
       });
 
-      const cmd1 = new Command('FIRST');
-      const cmd2 = new Command('SECOND');
-      const cmd3 = new Command('THIRD');
+      const cmd1 = makeCmd('FIRST');
+      const cmd2 = makeCmd('SECOND');
+      const cmd3 = makeCmd('THIRD');
 
       commandQueue.enqueue(cmd1);
       commandQueue.enqueue(cmd2);
@@ -145,7 +169,7 @@ describe('CommandQueue', () => {
     });
 
     it('flush 完成后队列应该被清空', () => {
-      const cmd = new Command('MOVE');
+      const cmd = makeCmd('MOVE');
 
       commandQueue.enqueue(cmd);
       expect(commandQueue.queue).toHaveLength(1);
@@ -165,16 +189,16 @@ describe('CommandQueue', () => {
 
     it('flush 过程中新入队的命令也会被执行（当前实现行为）', () => {
       const executedCommands = [];
-      EventBus.on('dispatch:command', (data) => {
+      EventBus.on(DISPATCH_COMMAND, (data) => {
         executedCommands.push(data.action);
       });
 
-      const cmd1 = new Command('FIRST');
-      const cmd2 = new Command('SECOND');
-      const cmd3 = new Command('THIRD');
+      const cmd1 = makeCmd('FIRST');
+      const cmd2 = makeCmd('SECOND');
+      const cmd3 = makeCmd('THIRD');
 
       // 在 FIRST 的处理逻辑中入队 THIRD
-      EventBus.on('dispatch:command', (data) => {
+      EventBus.on(DISPATCH_COMMAND, (data) => {
         if (data.action === 'FIRST') {
           commandQueue.enqueue(cmd3);
         }
@@ -191,17 +215,17 @@ describe('CommandQueue', () => {
 
     it('某个命令执行报错时不应该影响后续命令的执行', () => {
       const handler = jest.fn();
-      EventBus.on('dispatch:command', handler);
+      EventBus.on(DISPATCH_COMMAND, handler);
 
       // 模拟第一个命令的 listener 抛错
-      EventBus.on('dispatch:command', (data) => {
+      EventBus.on(DISPATCH_COMMAND, (data) => {
         if (data.action === 'FIRST') {
           throw new Error('命令执行失败');
         }
       });
 
-      const cmd1 = new Command('FIRST');
-      const cmd2 = new Command('SECOND');
+      const cmd1 = makeCmd('FIRST');
+      const cmd2 = makeCmd('SECOND');
 
       commandQueue.enqueue(cmd1);
       commandQueue.enqueue(cmd2);
@@ -216,11 +240,11 @@ describe('CommandQueue', () => {
 
     it('应该一次性执行所有命令，不做分帧控制', () => {
       const handler = jest.fn();
-      EventBus.on('dispatch:command', handler);
+      EventBus.on(DISPATCH_COMMAND, handler);
 
       const commands = Array.from(
         { length: 100 },
-        (_, i) => new Command(`CMD_${i}`),
+        (_, i) => new Command(`CMD_${i}`, { Game: { id: 'test-game-uuid-123' } }),
       );
 
       commands.forEach((cmd) => commandQueue.enqueue(cmd));
@@ -232,9 +256,12 @@ describe('CommandQueue', () => {
 
   // ==================== clear 方法 ====================
   describe('clear 方法', () => {
+    const makeCmd = (action) =>
+      new Command(action, { Game: { id: 'test-game-uuid-123' } });
+
     it('应该清空队列中的所有命令', () => {
-      const cmd1 = new Command('MOVE');
-      const cmd2 = new Command('ROTATE');
+      const cmd1 = makeCmd('MOVE');
+      const cmd2 = makeCmd('ROTATE');
 
       commandQueue.enqueue(cmd1);
       commandQueue.enqueue(cmd2);
@@ -248,9 +275,9 @@ describe('CommandQueue', () => {
 
     it('清空后不应该执行任何命令', () => {
       const handler = jest.fn();
-      EventBus.on('dispatch:command', handler);
+      EventBus.on(DISPATCH_COMMAND, handler);
 
-      const cmd = new Command('MOVE');
+      const cmd = makeCmd('MOVE');
       commandQueue.enqueue(cmd);
       commandQueue.clear();
 
@@ -267,10 +294,10 @@ describe('CommandQueue', () => {
 
     it('clear 后再次入队应该能正常工作', () => {
       const handler = jest.fn();
-      EventBus.on('dispatch:command', handler);
+      EventBus.on(DISPATCH_COMMAND, handler);
 
-      const cmd1 = new Command('FIRST');
-      const cmd2 = new Command('SECOND');
+      const cmd1 = makeCmd('FIRST');
+      const cmd2 = makeCmd('SECOND');
 
       commandQueue.enqueue(cmd1);
       commandQueue.clear();
@@ -280,7 +307,7 @@ describe('CommandQueue', () => {
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledWith({
         action: 'SECOND',
-        payload: {},
+        payload: { Game: { id: 'test-game-uuid-123' } },
       });
     });
   });
@@ -291,7 +318,10 @@ describe('CommandQueue', () => {
       commandQueue.subscribe();
 
       const uuid = commandQueue.Game.id;
-      const cmd = new Command('MOVE', { direction: 'left' });
+      const cmd = new Command('MOVE', {
+        direction: 'left',
+        Game: { id: 'test-game-uuid-123' },
+      });
 
       EventBus.emit(`command:queue:${uuid}:enqueue`, { cmd });
 
@@ -303,7 +333,9 @@ describe('CommandQueue', () => {
       commandQueue.subscribe();
 
       const uuid = commandQueue.Game.id;
-      const cmd = new Command('MOVE');
+      const cmd = new Command('MOVE', {
+        Game: { id: 'test-game-uuid-123' },
+      });
 
       commandQueue.enqueue(cmd);
       expect(commandQueue.queue).toHaveLength(1);
@@ -318,7 +350,10 @@ describe('CommandQueue', () => {
       commandQueue.unsubscribe();
 
       const uuid = commandQueue.Game.id;
-      const cmd = new Command('MOVE', { direction: 'left' });
+      const cmd = new Command('MOVE', {
+        direction: 'left',
+        Game: { id: 'test-game-uuid-123' },
+      });
 
       EventBus.emit(`command:queue:${uuid}:enqueue`, { cmd });
 
@@ -326,7 +361,9 @@ describe('CommandQueue', () => {
     });
 
     it('unsubscribe 后不应该再响应清空事件', () => {
-      const cmd = new Command('MOVE');
+      const cmd = new Command('MOVE', {
+        Game: { id: 'test-game-uuid-123' },
+      });
       commandQueue.enqueue(cmd);
 
       commandQueue.subscribe();
@@ -345,7 +382,9 @@ describe('CommandQueue', () => {
       commandQueue.subscribe();
 
       const uuid = commandQueue.Game.id;
-      const cmd = new Command('MOVE');
+      const cmd = new Command('MOVE', {
+        Game: { id: 'test-game-uuid-123' },
+      });
 
       EventBus.emit(`command:queue:${uuid}:enqueue`, { cmd });
 
@@ -355,14 +394,16 @@ describe('CommandQueue', () => {
 
   // ==================== 边界情况 ====================
   describe('边界情况', () => {
+    const makeCmd = (action) =>
+      new Command(action, { Game: { id: 'test-game-uuid-123' } });
+
     it('应该支持大量命令入队和刷新', () => {
       const handler = jest.fn();
-      EventBus.on('dispatch:command', handler);
+      EventBus.on(DISPATCH_COMMAND, handler);
 
       const count = 1000;
-      const commands = Array.from(
-        { length: count },
-        (_, i) => new Command(`CMD_${i}`),
+      const commands = Array.from({ length: count }, (_, i) =>
+        new Command(`CMD_${i}`, { Game: { id: 'test-game-uuid-123' } }),
       );
 
       commands.forEach((cmd) => commandQueue.enqueue(cmd));
@@ -376,10 +417,10 @@ describe('CommandQueue', () => {
 
     it('enqueue、clear、enqueue 的交替操作应该正确', () => {
       const handler = jest.fn();
-      EventBus.on('dispatch:command', handler);
+      EventBus.on(DISPATCH_COMMAND, handler);
 
-      const cmd1 = new Command('FIRST');
-      const cmd2 = new Command('SECOND');
+      const cmd1 = makeCmd('FIRST');
+      const cmd2 = makeCmd('SECOND');
 
       commandQueue.enqueue(cmd1);
       commandQueue.clear();
@@ -389,15 +430,15 @@ describe('CommandQueue', () => {
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledWith({
         action: 'SECOND',
-        payload: {},
+        payload: { Game: { id: 'test-game-uuid-123' } },
       });
     });
 
     it('同一个命令对象可以被多次入队并多次执行', () => {
       const handler = jest.fn();
-      EventBus.on('dispatch:command', handler);
+      EventBus.on(DISPATCH_COMMAND, handler);
 
-      const cmd = new Command('REPEAT');
+      const cmd = makeCmd('REPEAT');
 
       commandQueue.enqueue(cmd);
       commandQueue.enqueue(cmd);

@@ -171,6 +171,7 @@ describe('selfPlay', () => {
         expect.any(Array),
         weights,
         null,
+        'survival',
       );
     });
   });
@@ -226,6 +227,7 @@ describe('selfPlay', () => {
         expect.any(Array),
         undefined,
         null,
+        'survival',
       );
     });
 
@@ -252,6 +254,7 @@ describe('selfPlay', () => {
         expect.any(Array),
         weights,
         null,
+        'survival',
       );
     });
   });
@@ -345,6 +348,59 @@ describe('selfPlay', () => {
       selfPlay(snapshot, undefined, 2, 5);
 
       expect(evaluateBoard).toHaveBeenCalled();
+    });
+  });
+
+  // ==================== mode 参数传递 ====================
+  describe('mode 参数', () => {
+    it('默认 mode 应为 survival', () => {
+      const snapshot = createSnapshot();
+      generateMoves.mockReturnValue([createMove()]);
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot);
+
+      expect(evaluateBoard).toHaveBeenCalledWith(
+        expect.any(Array),
+        undefined,
+        null,
+        'survival',
+      );
+    });
+
+    it('versus 模式应传递到 evaluateBoard', () => {
+      const snapshot = createSnapshot();
+      generateMoves.mockReturnValue([createMove()]);
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot, undefined, 1, 5, 'versus');
+
+      expect(evaluateBoard).toHaveBeenCalledWith(
+        expect.any(Array),
+        undefined,
+        null,
+        'versus',
+      );
+    });
+
+    it('versus 模式递归时应保持 mode', () => {
+      const snapshot = createSnapshot();
+      const move = createMove();
+      generateMoves
+        .mockReturnValueOnce([move])
+        .mockReturnValueOnce([createMove()]);
+      advanceSnapshot.mockReturnValue({ ...snapshot, board: [] });
+      evaluateBoard.mockReturnValue(0);
+
+      selfPlay(snapshot, undefined, 2, 5, 'versus');
+
+      // 递归调用 evaluateBoard 时也应该传递 'versus'
+      expect(evaluateBoard).toHaveBeenCalledWith(
+        expect.any(Array),
+        undefined,
+        null,
+        'versus',
+      );
     });
   });
 });

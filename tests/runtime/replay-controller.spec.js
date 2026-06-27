@@ -2,10 +2,11 @@
 
 import ReplayController from '@/lib/runtime/replay-controller.js';
 
-// Mock GameEvents
+// Mock GameEvents — 添加 DISPATCH_COMMAND 字段
 jest.mock('@/lib/events/event-catalog.js', () => ({
   GameEvents: jest.fn((id) => ({
     UPDATE_MODE: `game:${id}:update:mode`,
+    DISPATCH_COMMAND: `game:${id}:dispatch:command`,
   })),
   ReplayEvents: jest.fn((id) => ({
     START_RECORD: `replay:${id}:start:record`,
@@ -27,6 +28,9 @@ jest.mock('@/lib/events/event-catalog.js', () => ({
     STOP_BGM: 'audio:stop:bgm',
   })),
 }));
+
+// 事件名常量
+const DISPATCH_COMMAND = 'game:test-uuid-123:dispatch:command';
 
 describe('ReplayController', () => {
   let replay;
@@ -226,7 +230,7 @@ describe('ReplayController', () => {
 
       replay.update({ speed: 1000, timestamp: 500 });
 
-      expect(spyEmit).toHaveBeenCalledWith('dispatch:command', {
+      expect(spyEmit).toHaveBeenCalledWith(DISPATCH_COMMAND, {
         action: 'MOVE_LEFT',
       });
       expect(replay.cursor).toBe(1);

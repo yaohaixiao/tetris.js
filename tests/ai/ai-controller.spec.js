@@ -9,6 +9,9 @@ jest.mock('@/lib/ai/planner/self-play.js', () => ({
 
 import selfPlay from '@/lib/ai/planner/self-play.js';
 
+// 事件名常量：与 GameEvents('test-ai-uuid').DISPATCH_INPUT 保持一致
+const DISPATCH_INPUT = 'game:test-ai-uuid:dispatch:input';
+
 describe('AIController', () => {
   let ai;
   let mockGame;
@@ -59,6 +62,8 @@ describe('AIController', () => {
       Animations: mockAnimations,
       getSpeed: jest.fn().mockReturnValue(200),
       emit: jest.fn(),
+      isVersus: jest.fn().mockReturnValue(false),
+      getBagSnapshot: jest.fn().mockReturnValue([]),
     };
 
     const mockOn = jest.fn();
@@ -192,7 +197,7 @@ describe('AIController', () => {
       ai.enabled = true;
       ai.loop();
       // 第一个 action 已被 shift 执行
-      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'ai',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -213,7 +218,7 @@ describe('AIController', () => {
       ai.enabled = true;
 
       ai.loop();
-      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'ai',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -221,7 +226,7 @@ describe('AIController', () => {
       expect(ai.actions).toEqual(['ROTATE', 'DROP']);
 
       ai.loop();
-      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'ai',
         action: 'ROTATE',
         payload: { Game: mockGame },
@@ -485,10 +490,12 @@ describe('AIController', () => {
       expect(mockWorker.postMessage).toHaveBeenCalledWith({
         type: 'think',
         state,
+        bag: [],
         weights: difficulty.weights,
         depth: difficulty.lookahead,
         beam: difficulty.beam,
-        algorithm: 'selfPlay', // easy/normal/hard 用 selfPlay
+        algorithm: 'selfPlay',
+        mode: 'survival',
       });
 
       ai.worker = null;
@@ -562,10 +569,12 @@ describe('AIController', () => {
       expect(callArgs).toEqual({
         type: 'think',
         state,
+        bag: [],
         weights: difficulty.weights,
         depth: 4,
         beam: 8,
         algorithm: 'selfPlay',
+        mode: 'survival',
       });
 
       ai.worker = null;
@@ -620,6 +629,7 @@ describe('AIController', () => {
         difficulty.weights,
         difficulty.lookahead,
         difficulty.beam,
+        'survival',
       );
     });
 
@@ -778,7 +788,7 @@ describe('AIController', () => {
 
       ai.loop();
 
-      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'ai',
         action: 'DROP',
         payload: { Game: mockGame },
@@ -961,7 +971,7 @@ describe('AIController', () => {
 
       // 第一帧：决策 + 执行第一个动作
       ai.loop();
-      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'ai',
         action: 'ROTATE',
         payload: { Game: mockGame },
@@ -971,7 +981,7 @@ describe('AIController', () => {
       // 第二帧：执行第二个动作
       emitSpy.mockClear();
       ai.loop();
-      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'ai',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -1020,7 +1030,7 @@ describe('AIController', () => {
       // 4. 下一帧执行 action
       emitSpy.mockClear();
       ai.loop();
-      expect(emitSpy).toHaveBeenCalledWith('dispatch:input', {
+      expect(emitSpy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'ai',
         action: 'ROTATE',
         payload: { Game: mockGame },

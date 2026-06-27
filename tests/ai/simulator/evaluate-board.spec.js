@@ -18,9 +18,9 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       for (let y = 15; y < 20; y++) board[y][0] = 1;
-      // agg=5 × -0.45 = -2.25, bump=5 × -0.35 = -1.75 → -4
+      // agg=5 × -0.6 = -3.0, bump=5 × -0.35 = -1.75 → -4.75
       const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-4, 2);
+      expect(score).toBeCloseTo(-4.75, 2);
     });
 
     it('均匀堆叠比集中堆叠得分高', () => {
@@ -47,9 +47,9 @@ describe('evaluateBoard', () => {
       board[19][0] = 1;
       board[18][0] = 0;
       board[17][0] = 1;
-      // agg=3×-0.45=-1.35, bump=3×-0.35=-1.05, holes=1×-8=-8 → -10.4
+      // agg=3×-0.6=-1.8, bump=3×-0.35=-1.05, holes=1×-8=-8 → -10.85
       const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-10.4, 2);
+      expect(score).toBeCloseTo(-10.85, 2);
     });
 
     it('没有空洞的满列不受空洞惩罚', () => {
@@ -57,9 +57,9 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       for (let y = 17; y < 20; y++) board[y][0] = 1;
-      // agg=3×-0.45=-1.35, bump=3×-0.35=-1.05 → -2.4
+      // agg=3×-0.6=-1.8, bump=3×-0.35=-1.05 → -2.85
       const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-2.4, 2);
+      expect(score).toBeCloseTo(-2.85, 2);
     });
   });
 
@@ -72,9 +72,9 @@ describe('evaluateBoard', () => {
       for (let x = 0; x < 10; x++) {
         for (let y = 17; y < 20; y++) board[y][x] = 1;
       }
-      // agg=30×-0.45=-13.5
+      // agg=30×-0.6=-18
       const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-13.5, 2);
+      expect(score).toBeCloseTo(-18, 2);
     });
 
     it('相邻列高度差应受惩罚', () => {
@@ -83,9 +83,9 @@ describe('evaluateBoard', () => {
       );
       for (let y = 15; y < 20; y++) board[y][0] = 1;
       board[19][1] = 1;
-      // agg=6×-0.45=-2.7, bump=5×-0.35=-1.75 → -4.45
+      // agg=6×-0.6=-3.6, bump=5×-0.35=-1.75 → -5.35
       const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-4.45, 2);
+      expect(score).toBeCloseTo(-5.35, 2);
     });
   });
 
@@ -138,9 +138,9 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       for (let x = 0; x < 10; x++) board[19][x] = 1;
-      // agg=10×-0.45=-4.5
+      // agg=10×-0.6=-6
       const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-4.5, 2);
+      expect(score).toBeCloseTo(-6, 2);
     });
   });
 
@@ -168,7 +168,7 @@ describe('evaluateBoard', () => {
       const board = Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 1),
       );
-      // agg=200×-0.45=-90, maxPenalty=-(20-12)²×0.5=-32 → -122
+      // agg=200×-0.6=-120, maxPenalty=-(20-12)²×0.5=-32 → -152
       const score = evaluateBoard(board);
       expect(score).toBeLessThan(-120);
     });
@@ -178,9 +178,9 @@ describe('evaluateBoard', () => {
         Array.from({ length: 10 }, () => 0),
       );
       board[19][0] = '#00c8ff';
-      // agg=1×-0.45=-0.45, bump=1×-0.35=-0.35 → -0.8
+      // agg=1×-0.6=-0.6, bump=1×-0.35=-0.35 → -0.95
       const score = evaluateBoard(board);
-      expect(score).toBeCloseTo(-0.8, 2);
+      expect(score).toBeCloseTo(-0.95, 2);
     });
   });
 
@@ -426,9 +426,9 @@ describe('evaluateBoard', () => {
       board[19][0] = 1;
       board[18][0] = 0;
       board[17][0] = 1;
-      // agg=3×-0.45=-1.35, bump=3×-0.35=-1.05, holes=1×-10=-10 → -12.4
+      // agg=3×-0.6=-1.8, bump=3×-0.35=-1.05, holes=1×-10=-10 → -12.85
       const score = evaluateBoard(board, { holes: -10 });
-      expect(score).toBeCloseTo(-12.4, 2);
+      expect(score).toBeCloseTo(-12.85, 2);
     });
   });
 
@@ -495,6 +495,89 @@ describe('evaluateBoard', () => {
       // lineReward=40×5=200, clearScore×0.03=24, combo×0.8=16 → 240
       const score = evaluateBoard(board, undefined, clearResult);
       expect(score).toBeCloseTo(240, 2);
+    });
+  });
+
+  // ==================== 对战模式 (versus) ====================
+  describe('对战模式 (versus)', () => {
+    it('versus 模式应使用更严格的权重', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      for (let y = 15; y < 20; y++) board[y][0] = 1;
+      // survival: agg=5×-0.6=-3.0, bump=5×-0.35=-1.75 → -4.75
+      // versus:   agg=5×-0.7=-3.5, bump=5×-0.4=-2.0 → -5.5
+      const survivalScore = evaluateBoard(board, undefined, undefined, 'survival');
+      const versusScore = evaluateBoard(board, undefined, undefined, 'versus');
+      expect(versusScore).toBeLessThan(survivalScore);
+      expect(versusScore).toBeCloseTo(-5.5, 2);
+    });
+
+    it('versus 模式消行奖励缩放因子更大', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      const clearResult = { cleared: 4, clearScore: 800, combo: 0 };
+      // survival: lineReward=40×(20/4)=200, clearScore×0.03=24 → 224
+      // versus:   lineReward=40×(25/4)=250, clearScore×0.03=24 → 299
+      const survivalScore = evaluateBoard(board, undefined, clearResult, 'survival');
+      const versusScore = evaluateBoard(board, undefined, clearResult, 'versus');
+      expect(versusScore).toBeGreaterThan(survivalScore);
+      expect(versusScore).toBeCloseTo(299, 2);
+    });
+
+    it('versus 模式攻击力奖励 - 消 2 行', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      const clearResult = { cleared: 2, clearScore: 300, combo: 0 };
+      // survival: lineReward=6×(20/4)=30, clearScore×0.03=9 → 39
+      // versus:   lineReward=6×(25/4)=37.5, clearScore×0.03=9, attack=10 → 46.5
+      const survivalScore = evaluateBoard(board, undefined, clearResult, 'survival');
+      const versusScore = evaluateBoard(board, undefined, clearResult, 'versus');
+      expect(versusScore).toBeGreaterThan(survivalScore);
+      expect(versusScore).toBeCloseTo(46.5, 2);
+    });
+
+    it('versus 模式攻击力奖励 - 消 4 行 (Tetris)', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      const clearResult = { cleared: 4, clearScore: 800, combo: 0 };
+      // survival: lineReward=40×(20/4)=200, clearScore×0.03=24 → 224
+      // versus:   lineReward=40×(25/4)=250, clearScore×0.03=24, attack=50 → 299
+      const survivalScore = evaluateBoard(board, undefined, clearResult, 'survival');
+      const versusScore = evaluateBoard(board, undefined, clearResult, 'versus');
+      expect(versusScore).toBeGreaterThan(survivalScore);
+      expect(versusScore).toBeCloseTo(299, 2);
+    });
+
+    it('versus 模式消 1 行无攻击力奖励', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      const clearResult = { cleared: 1, clearScore: 100, combo: 0 };
+      // survival: lineReward=2×(20/4)=10, clearScore×0.03=3 → 13
+      // versus:   lineReward=2×(25/4)=12.5, clearScore×0.03=3, attack=0 → 15.5
+      const survivalScore = evaluateBoard(board, undefined, clearResult, 'survival');
+      const versusScore = evaluateBoard(board, undefined, clearResult, 'versus');
+      expect(versusScore).toBeGreaterThan(survivalScore);
+      expect(versusScore).toBeCloseTo(15.5, 2);
+    });
+
+    it('versus 模式空洞惩罚更严格', () => {
+      const board = Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => 0),
+      );
+      board[19][0] = 1;
+      board[18][0] = 0;
+      board[17][0] = 1;
+      // survival: agg=3×-0.6=-1.8, bump=3×-0.35=-1.05, holes=1×-8=-8 → -10.85
+      // versus:   agg=3×-0.7=-2.1, bump=3×-0.4=-1.2, holes=1×-9=-9 → -12.3
+      const survivalScore = evaluateBoard(board, undefined, undefined, 'survival');
+      const versusScore = evaluateBoard(board, undefined, undefined, 'versus');
+      expect(versusScore).toBeLessThan(survivalScore);
+      expect(versusScore).toBeCloseTo(-12.3, 2);
     });
   });
 });

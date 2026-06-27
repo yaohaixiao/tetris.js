@@ -1,5 +1,8 @@
 import TouchController from '@/lib/services/input/touch-controller';
 
+// 事件名常量
+const DISPATCH_INPUT = 'game:test-uuid:dispatch:input';
+
 describe('TouchController', () => {
   let mockStore;
   let mockGame;
@@ -86,7 +89,7 @@ describe('TouchController', () => {
     it('A 键发射 TOGGLE_MUSIC', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('A');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'TOGGLE_MUSIC',
         payload: { Game: mockGame },
@@ -96,7 +99,7 @@ describe('TouchController', () => {
     it('B 键发射 DROP', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('B');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'DROP',
         payload: { Game: mockGame },
@@ -106,7 +109,7 @@ describe('TouchController', () => {
     it('X 键发射 RESTART', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('X');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'RESTART',
         payload: { Game: mockGame },
@@ -116,7 +119,7 @@ describe('TouchController', () => {
     it('Y 键发射 TOGGLE_PAUSED', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('Y');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'TOGGLE_PAUSED',
         payload: { Game: mockGame },
@@ -126,7 +129,7 @@ describe('TouchController', () => {
     it('HOLD 键发射 HOLD', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('HOLD');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'HOLD',
         payload: { Game: mockGame },
@@ -136,7 +139,7 @@ describe('TouchController', () => {
     it('BACK 键发射 QUIT', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('BACK');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'QUIT',
         payload: { Game: mockGame },
@@ -146,7 +149,7 @@ describe('TouchController', () => {
     it('DPAD_UP 发射 ROTATE', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('DPAD_UP');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'ROTATE',
         payload: { Game: mockGame },
@@ -156,7 +159,7 @@ describe('TouchController', () => {
     it('DPAD_DOWN 发射 MOVE_DOWN', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('DPAD_DOWN');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'MOVE_DOWN',
         payload: { Game: mockGame },
@@ -166,7 +169,7 @@ describe('TouchController', () => {
     it('DPAD_LEFT 发射 MOVE_LEFT', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('DPAD_LEFT');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'MOVE_LEFT',
         payload: { Game: mockGame },
@@ -176,7 +179,7 @@ describe('TouchController', () => {
     it('DPAD_RIGHT 发射 MOVE_RIGHT', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('DPAD_RIGHT');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'MOVE_RIGHT',
         payload: { Game: mockGame },
@@ -193,7 +196,7 @@ describe('TouchController', () => {
     it('START 键发射 CONFIRM', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('START');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'CONFIRM',
         payload: { Game: mockGame },
@@ -205,7 +208,7 @@ describe('TouchController', () => {
       controller.level = 0;
       controller.dispatchTouch('DPAD_UP');
       expect(controller.level).toBe(1);
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'LEVEL_TWO',
         payload: { Game: mockGame },
@@ -217,7 +220,7 @@ describe('TouchController', () => {
       controller.level = 2;
       controller.dispatchTouch('DPAD_DOWN');
       expect(controller.level).toBe(1);
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'LEVEL_TWO',
         payload: { Game: mockGame },
@@ -246,7 +249,7 @@ describe('TouchController', () => {
     it('A 键发射 EASY', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('A');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'EASY',
         payload: { Game: mockGame },
@@ -256,7 +259,7 @@ describe('TouchController', () => {
     it('B 键发射 NORMAL', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('B');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'NORMAL',
         payload: { Game: mockGame },
@@ -266,7 +269,7 @@ describe('TouchController', () => {
     it('Y 键发射 HARD', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('Y');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'HARD',
         payload: { Game: mockGame },
@@ -276,7 +279,7 @@ describe('TouchController', () => {
     it('X 键发射 EXPERT', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('X');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'EXPERT',
         payload: { Game: mockGame },
@@ -286,7 +289,7 @@ describe('TouchController', () => {
     it('BACK 键发射 BACK', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('BACK');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'BACK',
         payload: { Game: mockGame },
@@ -296,7 +299,7 @@ describe('TouchController', () => {
     it('START 键发射 CONFIRM', () => {
       const spy = jest.spyOn(controller, 'emit');
       controller.dispatchTouch('START');
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'CONFIRM',
         payload: { Game: mockGame },
@@ -312,7 +315,7 @@ describe('TouchController', () => {
 
       controller.$a.click();
 
-      expect(spy).toHaveBeenCalledWith('dispatch:input', {
+      expect(spy).toHaveBeenCalledWith(DISPATCH_INPUT, {
         device: 'touch',
         action: 'TOGGLE_MUSIC',
         payload: { Game: mockGame },
