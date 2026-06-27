@@ -10950,18 +10950,22 @@ var tetris = (() => {
   // lib/ai/core/ai-difficulty.js
   var AI_WEIGHTS = {
     holes: -8,
-    height: -0.6,
+    // 空洞惩罚：一个洞 ≈ 10 分
+    height: -0.7,
+    // 背景压力：适中恐高
     bumpiness: -0.35,
+    // 不平整度：引导平整表面
     completeLines: 20
+    // 消行奖励缩放因子
   };
   var AIDifficulty = {
     /**
      * ## 简单难度（EASY）
      *
-     * - 多看一步（lookahead=2），有基本前瞻能力
-     * - Beam Search 剪枝宽度 2，保留最优 2 个候选
-     * - 15% 概率随机选择非最优解，模拟人类失误
-     * - 决策延迟 480ms，给玩家充足的操作时间
+     * - 前瞻 2 步，有基本规划能力
+     * - Beam 宽度 2，只保留最优 2 个候选
+     * - 8% 噪声，偶尔随机选择非最优解
+     * - 决策延迟 480ms，给玩家充足的反应时间
      */
     EASY: {
       lookahead: 2,
@@ -10973,9 +10977,9 @@ var tetris = (() => {
     /**
      * ## 普通难度（NORMAL）
      *
-     * - 多看两步（lookahead=3），深度推演
-     * - Beam Search 剪枝宽度 3，保留更多候选
-     * - 5% 概率随机选择，偶尔失误
+     * - 前瞻 3 步，中等深度推演
+     * - Beam 宽度 3，保留更多候选路径
+     * - 5% 噪声，偶尔失误
      * - 决策延迟 380ms，中等响应速度
      */
     NORMAL: {
@@ -10988,14 +10992,14 @@ var tetris = (() => {
     /**
      * ## 困难难度（HARD）
      *
-     * - 多看三步（lookahead=4），极限推演
-     * - Beam Search 剪枝宽度 4，保留更多候选进入深层搜索
-     * - 4% 概率随机选择，很少失误
+     * - 前瞻 4 步，达到评估函数有效预测上限
+     * - Beam 宽度 3，聚焦搜索
+     * - 0% 噪声，始终选择最优解
      * - 决策延迟 200ms，较快响应
      */
     HARD: {
       lookahead: 4,
-      beam: 4,
+      beam: 3,
       noise: 0,
       weights: AI_WEIGHTS,
       delay: 200
@@ -11003,14 +11007,14 @@ var tetris = (() => {
     /**
      * ## 专家难度（EXPERT）
      *
-     * - 多看三步（lookahead=4），极限推演
-     * - Beam Search 剪枝宽度 5，最宽搜索，不遗漏最优解
-     * - 0% 噪声，始终选择最优解，不犯错
-     * - 决策延迟仅为 130ms，给玩家极短的反应窗口
+     * - 前瞻 4 步，与 HARD 相同深度
+     * - Beam 宽度 4，比 HARD 更宽的搜索
+     * - 0% 噪声，始终选择最优解
+     * - 决策延迟 130ms，极速响应
      */
     EXPERT: {
       lookahead: 4,
-      beam: 5,
+      beam: 4,
       noise: 0,
       weights: AI_WEIGHTS,
       delay: 130
@@ -11333,10 +11337,10 @@ var tetris = (() => {
   var evaluateBoard = (board, weights, clearResult, mode = "survival") => {
     const heights = [];
     const w = {
-      height: -0.6,
-      // 背景压力：适中恐高
       holes: -8,
       // 空洞惩罚：一个洞 ≈ 10 分
+      height: -0.7,
+      // 背景压力：适中恐高
       bumpiness: -0.35,
       // 不平整度：引导平整表面
       completeLines: 20,
@@ -11344,7 +11348,7 @@ var tetris = (() => {
       ...weights
     };
     if (mode === "versus") {
-      w.height = -0.7;
+      w.height = -0.8;
       w.holes = -9;
       w.bumpiness = -0.4;
       w.completeLines = 25;

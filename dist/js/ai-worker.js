@@ -216,10 +216,10 @@ var count_holes_default = countHoles;
 var evaluateBoard = (board, weights, clearResult, mode = "survival") => {
   const heights = [];
   const w = {
-    height: -0.6,
-    // 背景压力：适中恐高
     holes: -8,
     // 空洞惩罚：一个洞 ≈ 10 分
+    height: -0.7,
+    // 背景压力：适中恐高
     bumpiness: -0.35,
     // 不平整度：引导平整表面
     completeLines: 20,
@@ -227,7 +227,7 @@ var evaluateBoard = (board, weights, clearResult, mode = "survival") => {
     ...weights
   };
   if (mode === "versus") {
-    w.height = -0.7;
+    w.height = -0.8;
     w.holes = -9;
     w.bumpiness = -0.4;
     w.completeLines = 25;
