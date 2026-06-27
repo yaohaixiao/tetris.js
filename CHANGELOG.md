@@ -1,4 +1,11 @@
 # [1.21.0](https://github.com/yaohaixiao/tetris.js/compare/1.20.0...1.21.0) (2026-06-27)
+
+
+### Features
+
+* 调优 AI，single 和 battle 得决策参数和逻辑调整得更像普通玩家，但速度和前瞻性更好； ([d99bdeb](https://github.com/yaohaixiao/tetris.js/commit/d99bdebf1470f5aa16f4897354716dff0dad3a37))
+
+
 # [1.20.0](https://github.com/yaohaixiao/tetris.js/compare/1.19.1...1.20.0) (2026-06-27)
 
 
