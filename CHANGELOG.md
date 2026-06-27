@@ -1,3 +1,4 @@
+# [1.21.0](https://github.com/yaohaixiao/tetris.js/compare/1.20.0...1.21.0) (2026-06-27)
 # [1.20.0](https://github.com/yaohaixiao/tetris.js/compare/1.19.1...1.20.0) (2026-06-27)
 
 
