@@ -15,6 +15,7 @@ const mockGainNode = {
     setValueAtTime: jest.fn(),
     linearRampToValueAtTime: jest.fn(),
     exponentialRampToValueAtTime: jest.fn(),
+    cancelScheduledValues: jest.fn(),
   },
   connect: jest.fn(),
   disconnect: jest.fn(),
@@ -64,6 +65,43 @@ describe('playTone', () => {
       playTone(createAudio(), 440, -100);
 
       expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+    });
+
+    test('freq 为 Infinity 时应提前返回', () => {
+      // Infinity 在 !freq 检查时被认为是有效值（!Infinity = false）
+      // 所以会创建节点，但在 Number.isFinite(freq) 时会返回
+      // 但由于代码执行顺序：先创建节点，再检查频率有效性
+      playTone(createAudio(), Infinity, 200);
+
+      // 节点被创建了
+      expect(mockAudioContext.createOscillator).toHaveBeenCalled();
+      expect(mockAudioContext.createGain).toHaveBeenCalled();
+
+      // 频率被设置了（因为 setValueAtTime 在频率校验之前）
+      expect(mockOscillator.frequency.setValueAtTime).toHaveBeenCalledWith(
+        Infinity,
+        100,
+      );
+
+      // 但后续的增益操作不会执行（因为在校验后直接 return）
+      expect(mockGainNode.gain.setValueAtTime).not.toHaveBeenCalled();
+      expect(mockGainNode.gain.linearRampToValueAtTime).not.toHaveBeenCalled();
+      expect(mockGainNode.gain.exponentialRampToValueAtTime).not.toHaveBeenCalled();
+
+      // 连接不会执行
+      expect(mockOscillator.connect).not.toHaveBeenCalled();
+      expect(mockGainNode.connect).not.toHaveBeenCalled();
+
+      // start 不会执行
+      expect(mockOscillator.start).not.toHaveBeenCalled();
+    });
+
+    test('freq 为 NaN 时应提前返回', () => {
+      // NaN 在 !freq 检查时被认为是无效值（!NaN = true）
+      playTone(createAudio(), NaN, 200);
+
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+      expect(mockAudioContext.createGain).not.toHaveBeenCalled();
     });
   });
 
@@ -142,7 +180,8 @@ describe('playTone', () => {
 
       // noteLen = 0.2 * 0.5 = 0.1
       // t3 = 100.1
-      // stop = 100.15 → 浮点数为 100.14999999999999
+      // stop = 100.15
+      // 浮点数精度问题：100.15 实际为 100.14999999999999
       expect(mockOscillator.stop).toHaveBeenCalledWith(100.14999999999999);
     });
 
@@ -150,14 +189,14 @@ describe('playTone', () => {
       playTone(createAudio(), 440, 500, { gate: 0.2 });
 
       // noteLen = 0.5 * 0.2 = 0.1
-      // stop = 100.15 → 浮点数为 100.14999999999999
+      // stop = 100.15
       expect(mockOscillator.stop).toHaveBeenCalledWith(100.14999999999999);
     });
   });
 
   describe('AD 包络 — 默认参数', () => {
     test('attackTime 默认 0.003s', () => {
-      playTone(createAudio(), 440, 300, { volume: 0.15 });
+      playTone(createAudio(), 440, 300);
 
       const t0 = 100;
       const t1 = t0 + 0.003;
@@ -170,7 +209,7 @@ describe('playTone', () => {
     });
 
     test('sustainRatio 默认 0.9', () => {
-      playTone(createAudio(), 440, 300, { volume: 0.15 });
+      playTone(createAudio(), 440, 300);
 
       // noteLen = 0.3
       // t2 = 100 + max(0.3 - 0.02, 0.003) = 100.28
@@ -183,13 +222,20 @@ describe('playTone', () => {
     });
 
     test('releaseTime 默认 0.02s', () => {
-      playTone(createAudio(), 440, 300, { volume: 0.15 });
+      playTone(createAudio(), 440, 300);
 
       const t3 = 100.3;
 
       expect(
         mockGainNode.gain.exponentialRampToValueAtTime,
       ).toHaveBeenCalledWith(0.0001, t3);
+    });
+
+    test('应调用 cancelScheduledValues 清除冲突调度', () => {
+      playTone(createAudio(), 440, 300);
+
+      const t2 = 100.28;
+      expect(mockGainNode.gain.cancelScheduledValues).toHaveBeenCalledWith(t2);
     });
   });
 
@@ -200,8 +246,10 @@ describe('playTone', () => {
         articulation: { attackTime: 0.01 },
       });
 
+      const t0 = 100;
       const t1 = 100.01;
 
+      expect(mockGainNode.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, t0);
       expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
         0.2,
         t1,
@@ -215,9 +263,11 @@ describe('playTone', () => {
       });
 
       // t2 = 100 + max(0.3 - 0.02, 0.003) = 100.28
+      const t2 = 100.28;
+
       expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
         0.2 * 0.5,
-        100.28,
+        t2,
       );
     });
 
@@ -227,10 +277,11 @@ describe('playTone', () => {
         articulation: { releaseTime: 0.05 },
       });
 
-      // t3 = 100.3
+      const t3 = 100.3;
+
       expect(
         mockGainNode.gain.exponentialRampToValueAtTime,
-      ).toHaveBeenCalledWith(0.0001, 100.3);
+      ).toHaveBeenCalledWith(0.0001, t3);
     });
 
     test('完整自定义 articulation', () => {
@@ -274,6 +325,67 @@ describe('playTone', () => {
       const t2Call = calls.find((call) => call[1] === 100.005);
 
       expect(t2Call).toBeTruthy();
+      expect(t2Call[0]).toBe(0.15); // 默认 volume * default sustainRatio
+    });
+  });
+
+  describe('指数衰减降级', () => {
+    test('exponentialRampToValueAtTime 失败时降级为线性衰减', () => {
+      // 模拟 exponentialRampToValueAtTime 抛出异常
+      mockGainNode.gain.exponentialRampToValueAtTime.mockImplementationOnce(
+        () => {
+          throw new Error('Invalid value');
+        },
+      );
+
+      playTone(createAudio(), 440, 300);
+
+      // 应该调用线性衰减作为降级方案
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.0001,
+        100.3,
+      );
+    });
+  });
+
+  describe('参数安全校验', () => {
+    test('volume 为负数时使用默认值 0.15', () => {
+      playTone(createAudio(), 440, 200, { volume: -0.1 });
+
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.15,
+        expect.any(Number),
+      );
+    });
+
+    test('volume 为 NaN 时使用默认值 0.15', () => {
+      playTone(createAudio(), 440, 200, { volume: NaN });
+
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.15,
+        expect.any(Number),
+      );
+    });
+
+    test('sustainRatio 为负数时使用默认值 0.9', () => {
+      playTone(createAudio(), 440, 200, {
+        articulation: { sustainRatio: -0.5 },
+      });
+
+      // 应该使用默认的 0.9
+      const calls = mockGainNode.gain.linearRampToValueAtTime.mock.calls;
+      const sustainCall = calls.find((call) => call[1] === 100.18);
+      expect(sustainCall[0]).toBe(0.15 * 0.9);
+    });
+
+    test('sustainRatio 为 NaN 时使用默认值 0.9', () => {
+      playTone(createAudio(), 440, 200, {
+        articulation: { sustainRatio: NaN },
+      });
+
+      const calls = mockGainNode.gain.linearRampToValueAtTime.mock.calls;
+      const sustainCall = calls.find((call) => call[1] === 100.18);
+      expect(sustainCall[0]).toBe(0.15 * 0.9);
     });
   });
 
@@ -283,6 +395,13 @@ describe('playTone', () => {
 
       // dur=200ms, gate=1, noteLen=0.2, t3=100.2, stop=100.25
       expect(mockOscillator.stop).toHaveBeenCalledWith(100.25);
+    });
+
+    test('stop 缓冲适用于不同时长的音符', () => {
+      playTone(createAudio(), 440, 500, { gate: 0.5 });
+
+      // noteLen = 0.5 * 0.5 = 0.25, t3 = 100.25, stop = 100.3
+      expect(mockOscillator.stop).toHaveBeenCalledWith(100.3);
     });
   });
 
@@ -302,6 +421,15 @@ describe('playTone', () => {
       expect(mockOscillator.disconnect).toHaveBeenCalled();
       expect(mockGainNode.disconnect).toHaveBeenCalled();
     });
+
+    test('ended 事件监听器正确注册', () => {
+      playTone(createAudio(), 440, 200);
+
+      expect(mockOscillator.addEventListener).toHaveBeenCalledWith(
+        'ended',
+        expect.any(Function),
+      );
+    });
   });
 
   describe('默认音量', () => {
@@ -312,6 +440,76 @@ describe('playTone', () => {
         0.15,
         expect.any(Number),
       );
+    });
+
+    test('volume 为 0 时使用默认值 0.15', () => {
+      playTone(createAudio(), 440, 200, { volume: 0 });
+
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.15,
+        expect.any(Number),
+      );
+    });
+
+    test('volume 为 undefined 时使用默认值 0.15', () => {
+      playTone(createAudio(), 440, 200, { volume: undefined });
+
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.15,
+        expect.any(Number),
+      );
+    });
+  });
+
+  describe('完整的包络流程', () => {
+    test('默认参数下包络调用顺序正确', () => {
+      playTone(createAudio(), 440, 300);
+
+      // 验证调用顺序
+      const setValueCalls = mockGainNode.gain.setValueAtTime.mock.calls;
+      const linearRampCalls = mockGainNode.gain.linearRampToValueAtTime.mock.calls;
+      const expRampCalls = mockGainNode.gain.exponentialRampToValueAtTime.mock.calls;
+
+      // setValueAtTime 在 t0
+      expect(setValueCalls[0]).toEqual([0.0001, 100]);
+
+      // linearRampToValueAtTime 到 t1 (Attack)
+      expect(linearRampCalls[0]).toEqual([0.15, 100.003]);
+
+      // linearRampToValueAtTime 到 t2 (Hold)
+      expect(linearRampCalls[1]).toEqual([0.135, 100.28]);
+
+      // exponentialRampToValueAtTime 到 t3 (Decay)
+      expect(expRampCalls[0]).toEqual([0.0001, 100.3]);
+    });
+
+    test('自定义参数下包络调用顺序正确', () => {
+      playTone(createAudio(), 440, 200, {
+        volume: 0.3,
+        gate: 0.8,
+        articulation: {
+          attackTime: 0.002,
+          releaseTime: 0.015,
+          sustainRatio: 0.7,
+        },
+      });
+
+      // noteLen = 0.2 * 0.8 = 0.16
+      // t2 = 100 + max(0.16 - 0.015, 0.002) = 100.145
+      // t3 = 100.16
+
+      expect(mockGainNode.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, 100);
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.3,
+        100.002,
+      );
+      expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
+        0.3 * 0.7,
+        100.145,
+      );
+      expect(
+        mockGainNode.gain.exponentialRampToValueAtTime,
+      ).toHaveBeenCalledWith(0.0001, 100.16);
     });
   });
 });

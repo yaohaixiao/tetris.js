@@ -1,4 +1,4 @@
-import isNumber from '@/lib/utils/is-number.js';
+import isNumber from '@/lib/utils/types/is-number.js';
 
 describe('isNumber', () => {
   /* ========== 基础数字类型测试 ========== */
