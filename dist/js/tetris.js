@@ -3927,7 +3927,10 @@ var tetris = (() => {
     /* ---------- 回放准备 ---------- */
     REPLAY_PREPARE: `game:${uuid}:replay:prepare`,
     /* ---------- 对战认输 ---------- */
-    SURRENDER: `game:${uuid}:surrender`
+    SURRENDER: `game:${uuid}:surrender`,
+    /* ---------- input 和 command 映射 ---------- */
+    DISPATCH_INPUT: `game:${uuid}:dispatch:input`,
+    DISPATCH_COMMAND: `game:${uuid}:dispatch:command`
   });
   var ReplayEvents = (uuid) => ({
     /* ---------- 记录操作 ---------- */
@@ -4105,24 +4108,6 @@ var tetris = (() => {
     };
   };
   var audio_default = Audio;
-
-  // lib/constants/options.js
-  var OPTIONS = {
-    MODE_OPTIONS: [
-      { key: "S", label: "SINGLE", mode: "single", players: ["human"] },
-      {
-        key: "B",
-        label: "BATTLE",
-        mode: "versus",
-        players: ["human", "ai"]
-      }
-    ],
-    BATTLE_OPTIONS: [
-      { key: "A", label: "VS AI   ", players: ["human", "ai"] },
-      { key: "H", label: "VS HUMAN", players: ["human", "human"] }
-    ]
-  };
-  var options_default = OPTIONS;
 
   // lib/events/router/game-router.js
   var GameRouter = class extends core_default {
@@ -4307,17 +4292,7 @@ var tetris = (() => {
     _onUpdateModeIndex = (payload) => {
       const { Store } = this;
       const { action } = payload;
-      let index = Store.getModeIndex();
-      if (action === "UP") {
-        index -= 1;
-      } else {
-        index += 1;
-      }
-      if (index <= 0) {
-        index = 0;
-      } else if (index >= 1) {
-        index = 1;
-      }
+      const index = action === "UP" ? 0 : 1;
       Store.setModeIndex(index);
       const events = AudioEvents();
       this.emit(events.PLAY_SOUND, { sound: "SWITCH_SCENE" });
@@ -4337,17 +4312,7 @@ var tetris = (() => {
     _onUpdateBattleIndex = (payload) => {
       const { Store } = this;
       const { action } = payload;
-      let index = Store.getBattleIndex();
-      if (action === "UP") {
-        index -= 1;
-      } else {
-        index += 1;
-      }
-      if (index <= 0) {
-        index = 0;
-      } else if (index >= 1) {
-        index = 1;
-      }
+      const index = action === "UP" ? 0 : 1;
       Store.setBattleIndex(index);
       const events = AudioEvents();
       this.emit(events.PLAY_SOUND, { sound: "SWITCH_SCENE" });
@@ -6294,6 +6259,24 @@ var tetris = (() => {
     }
   };
   var hud_manager_default = HudManager;
+
+  // lib/constants/options.js
+  var OPTIONS = {
+    MODE_OPTIONS: [
+      { key: "S", label: "SINGLE", mode: "single", players: ["human"] },
+      {
+        key: "B",
+        label: "BATTLE",
+        mode: "versus",
+        players: ["human", "ai"]
+      }
+    ],
+    BATTLE_OPTIONS: [
+      { key: "A", label: "VS AI   ", players: ["human", "ai"] },
+      { key: "H", label: "VS HUMAN", players: ["human", "human"] }
+    ]
+  };
+  var options_default = OPTIONS;
 
   // lib/services/ui/board/clear-board.js
   function clearBoard(canvas) {
@@ -9589,7 +9572,8 @@ var tetris = (() => {
       }
       if (dasState.arrTimer >= DAS_CONFIG.ARR) {
         dasState.arrTimer = 0;
-        this.emit("dispatch:input", {
+        const events = GameEvents(Game2.id);
+        this.emit(events.DISPATCH_INPUT, {
           device: "keyboard",
           action: dasState.direction === -1 ? "MOVE_LEFT" : "MOVE_RIGHT",
           payload: { Game: Game2 }
@@ -9724,7 +9708,8 @@ var tetris = (() => {
         this.dasState.arrTimer = 0;
         this.dasState.active = true;
       }
-      this.emit("dispatch:input", {
+      const events = GameEvents(Game2.id);
+      this.emit(events.DISPATCH_INPUT, {
         device: "keyboard",
         action,
         payload: { Game: Game2 }
@@ -10206,7 +10191,8 @@ var tetris = (() => {
         if (!finalAction) {
           continue;
         }
-        this.emit(`dispatch:input`, {
+        const events = GameEvents(Game2.id);
+        this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
           action: finalAction,
           payload: { Game: Game2 }
@@ -10266,7 +10252,8 @@ var tetris = (() => {
       }
       const { Game: Game2 } = this;
       this.axisStates[action] = true;
-      this.emit(`dispatch:input`, {
+      const events = GameEvents(Game2.id);
+      this.emit(events.DISPATCH_INPUT, {
         device: "gamepad",
         action,
         payload: { Game: Game2 }
@@ -10426,8 +10413,9 @@ var tetris = (() => {
       const action = this._getMoveUpAction(mode, level);
       const { Game: Game2 } = this;
       if (!st.up) {
+        const events = GameEvents(Game2.id);
         st.up = true;
-        this.emit(`dispatch:input`, {
+        this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
           action,
           payload: { Game: Game2 }
@@ -10449,8 +10437,9 @@ var tetris = (() => {
       const action = this._getMoveDownAction(mode, level);
       const { Game: Game2 } = this;
       if (!st.down) {
+        const events = GameEvents(Game2.id);
         st.down = true;
-        this.emit(`dispatch:input`, {
+        this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
           action,
           payload: { Game: Game2 }
@@ -10469,8 +10458,9 @@ var tetris = (() => {
     _handleBetopDpadLeft(st) {
       const { Game: Game2 } = this;
       if (!st.left) {
+        const events = GameEvents(Game2.id);
         st.left = true;
-        this.emit(`dispatch:input`, {
+        this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
           action: "MOVE_LEFT",
           payload: { Game: Game2 }
@@ -10489,8 +10479,9 @@ var tetris = (() => {
     _handleBetopDpadRight(st) {
       const { Game: Game2 } = this;
       if (!st.right) {
+        const events = GameEvents(Game2.id);
         st.right = true;
-        this.emit(`dispatch:input`, {
+        this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
           action: "MOVE_RIGHT",
           payload: { Game: Game2 }
@@ -10681,274 +10672,63 @@ var tetris = (() => {
   };
   var ai_difficulty_default = AIDifficulty;
 
-  // lib/game/constants/color-palettes.js
-  var PALETTES = [
-    /*
-     * ==================== 方案 0：基础经典（关卡 0-31） ====================
-     */
-    [
-      colors_default.TEAL,
-      colors_default.GREEN,
-      colors_default.ORANGE,
-      colors_default.YELLOW,
-      colors_default.BLUE,
-      colors_default.PINK,
-      colors_default.RED,
-      colors_default.VIOLET
-    ],
-    /*
-     * ==================== 方案 1：暖色系（关卡 32-63） ====================
-     */
-    [
-      colors_default.WARM_TEAL,
-      colors_default.WARM_GREEN,
-      colors_default.WARM_ORANGE,
-      colors_default.WARM_YELLOW,
-      colors_default.WARM_BLUE,
-      colors_default.WARM_PINK,
-      colors_default.WARM_RED,
-      colors_default.WARM_VIOLET
-    ],
-    /*
-     * ==================== 方案 2：冷色系（关卡 64-95） ====================
-     */
-    [
-      colors_default.COOL_TEAL,
-      colors_default.COOL_GREEN,
-      colors_default.COOL_ORANGE,
-      colors_default.COOL_YELLOW,
-      colors_default.COOL_BLUE,
-      colors_default.COOL_PINK,
-      colors_default.COOL_RED,
-      colors_default.COOL_VIOLET
-    ],
-    /*
-     * ==================== 方案 3：糖果色（关卡 96-127） ====================
-     */
-    [
-      colors_default.CANDY_TEAL,
-      colors_default.CANDY_GREEN,
-      colors_default.CANDY_ORANGE,
-      colors_default.CANDY_YELLOW,
-      colors_default.CANDY_BLUE,
-      colors_default.CANDY_PINK,
-      colors_default.CANDY_RED,
-      colors_default.CANDY_VIOLET
-    ],
-    /*
-     * ==================== 方案 4：森林色（关卡 128-159） ====================
-     */
-    [
-      colors_default.FOREST_TEAL,
-      colors_default.FOREST_GREEN,
-      colors_default.FOREST_ORANGE,
-      colors_default.FOREST_YELLOW,
-      colors_default.FOREST_BLUE,
-      colors_default.FOREST_PINK,
-      colors_default.FOREST_RED,
-      colors_default.FOREST_VIOLET
-    ],
-    /*
-     * ==================== 方案 5：日落色（关卡 160-191） ====================
-     */
-    [
-      colors_default.SUNSET_TEAL,
-      colors_default.SUNSET_GREEN,
-      colors_default.SUNSET_ORANGE,
-      colors_default.SUNSET_YELLOW,
-      colors_default.SUNSET_BLUE,
-      colors_default.SUNSET_PINK,
-      colors_default.SUNSET_RED,
-      colors_default.SUNSET_VIOLET
-    ],
-    /*
-     * ==================== 方案 6：霓虹色（关卡 192-223） ====================
-     */
-    [
-      colors_default.NEON_TEAL,
-      colors_default.NEON_GREEN,
-      colors_default.NEON_ORANGE,
-      colors_default.NEON_YELLOW,
-      colors_default.NEON_BLUE,
-      colors_default.NEON_PINK,
-      colors_default.NEON_RED,
-      colors_default.NEON_VIOLET
-    ],
-    /*
-     * ==================== 方案 7：宝石色（关卡 224-255） ====================
-     */
-    [
-      colors_default.JEWEL_TEAL,
-      colors_default.JEWEL_GREEN,
-      colors_default.JEWEL_ORANGE,
-      colors_default.JEWEL_YELLOW,
-      colors_default.JEWEL_BLUE,
-      colors_default.JEWEL_PINK,
-      colors_default.JEWEL_RED,
-      colors_default.JEWEL_VIOLET
-    ]
-  ];
-  var color_palettes_default = PALETTES;
-
-  // lib/game/constants/shapes.js
-  var SHAPES = [
-    /**
-     * ## I 型方块（标准长条）
-     *
-     * 形状：1 行 4 列 colorIndex: 0（TEAL 系）
-     */
-    { shape: [[1, 1, 1, 1]], colorIndex: 0, type: "I", rotation: 0 },
-    /**
-     * ## I 型方块（加长版）
-     *
-     * 形状：1 行 5 列 colorIndex: 1（GREEN 系）
-     */
-    { shape: [[1, 1, 1, 1, 1]], colorIndex: 1, type: "I5", rotation: 0 },
-    /**
-     * ## O 型方块（正方形）
-     *
-     * 形状：2×2 实心方块，旋转后形状不变 colorIndex: 2（ORANGE 系）
-     */
-    {
-      shape: [
-        [1, 1],
-        [1, 1]
-      ],
-      colorIndex: 2,
-      type: "O",
-      rotation: 0
-    },
-    /**
-     * ## T 型方块
-     *
-     * 形状：第一行中间一个，第二行三个 colorIndex: 3（YELLOW 系）
-     */
-    {
-      shape: [
-        [0, 1, 0],
-        [1, 1, 1]
-      ],
-      colorIndex: 3,
-      type: "T",
-      rotation: 0
-    },
-    /**
-     * ## L 型方块
-     *
-     * 形状：第一行左侧一个，第二行三个 colorIndex: 4（BLUE 系）
-     */
-    {
-      shape: [
-        [1, 0, 0],
-        [1, 1, 1]
-      ],
-      colorIndex: 4,
-      type: "L",
-      rotation: 0
-    },
-    /**
-     * ## J 型方块（反 L 型）
-     *
-     * 形状：第一行右侧一个，第二行三个 colorIndex: 5（PINK 系）
-     */
-    {
-      shape: [
-        [0, 0, 1],
-        [1, 1, 1]
-      ],
-      colorIndex: 5,
-      type: "J",
-      rotation: 0
-    },
-    /**
-     * ## S 型方块（右斜）
-     *
-     * 形状：第一行右侧两个，第二行左侧两个 colorIndex: 6（RED 系）
-     */
-    {
-      shape: [
-        [0, 1, 1],
-        [1, 1, 0]
-      ],
-      colorIndex: 6,
-      type: "S",
-      rotation: 0
-    },
-    /**
-     * ## Z 型方块（左斜）
-     *
-     * 形状：第一行左侧两个，第二行右侧两个 colorIndex: 7（VIOLET 系）
-     */
-    {
-      shape: [
-        [1, 1, 0],
-        [0, 1, 1]
-      ],
-      colorIndex: 7,
-      type: "Z",
-      rotation: 0
-    }
-  ];
-  var shapes_default = SHAPES;
-
-  // lib/game/utils/refill-bag.js
-  var isFirstBag = true;
-  var refillBag = () => {
-    let bag2 = [...shapes_default].toSorted(() => Math.random() - 0.5);
-    if (isFirstBag) {
-      while ([3, 6, 7].includes(bag2[0].colorIndex)) {
-        bag2 = [...shapes_default].toSorted(() => Math.random() - 0.5);
-      }
-    }
-    isFirstBag = false;
-    return bag2;
-  };
-  refillBag._reset = () => {
-    isFirstBag = true;
-  };
-  var refill_bag_default = refillBag;
-
-  // lib/game/utils/random-shape.js
-  var bag = [];
-  var randomShape = (level = 1) => {
-    if (bag.length === 0) {
-      bag = refill_bag_default();
-    }
-    const piece = bag.pop();
-    const paletteIndex = Math.min(
-      Math.floor((level - 1) / 32),
-      color_palettes_default.length - 1
-    );
-    const palette = color_palettes_default[paletteIndex];
-    return {
-      shape: piece.shape.map((row) => [...row]),
-      color: palette[piece.colorIndex],
-      type: piece.type,
-      rotation: piece.rotation ?? 0,
-      colorIndex: piece.colorIndex
-    };
-  };
-  var getBagSnapshot = () => [...bag];
-  var random_shape_default = randomShape;
-
   // lib/ai/snapshot/create-snapshot.js
-  var createSnapshot = (state) => structuredClone({
-    // 控制者身份
+  var createSnapshot = (state, bag) => structuredClone({
+    /*
+     * ==================== 控制者身份 ====================
+     *
+     * 标识当前由谁控制：'human' 或 'ai'。
+     * 保留此字段方便后续扩展（如根据控制者调整 AI 策略）。
+     */
     controller: state.controller,
-    // 棋盘状态
+    /*
+     * ==================== 棋盘状态 ====================
+     *
+     * 20 行 × 10 列的二维数组。
+     * 每个格子的值为 0（空格）或颜色字符串（如 "#00c8ff"）。
+     * 这是 AI 决策的核心数据——所有候选移动都在此棋盘上模拟。
+     */
     board: state.board,
-    // 游戏进度
+    /*
+     * ==================== 游戏进度 ====================
+     *
+     * 保留 level、score、lines 供 AI 参考。
+     * level 影响下落速度和配色方案，score 和 lines 可用于评估游戏进程。
+     */
     level: state.level,
     score: state.score,
     lines: state.lines,
-    // 计分状态（供 AI 评估 T-Spin / Combo / Back-to-Back）
+    /*
+     * ==================== 计分状态 ====================
+     *
+     * 这些状态沿前瞻链传递，供 AI 评估 T-Spin / Combo / Back-to-Back。
+     * 使用 || 运算符提供默认值，防止 undefined 导致计算错误。
+     */
     combo: state.combo || 0,
     backToBack: state.backToBack || false,
     tSpin: state.tSpin || null,
-    // 原始方块对象（保留完整信息，方便后续扩展）
+    /*
+     * ==================== 原始方块对象 ====================
+     *
+     * cur：当前正在下落的活动方块，包含 shape、type、color、rotation 等完整信息
+     * next：下一个预览方块，用于 Hold 槽为空时作为备选
+     *
+     * 保留原始对象方便后续扩展（如根据方块类型调整策略）。
+     */
     cur: state.curr,
     next: state.next,
-    // AI 决策专用的方块信息：从 state.curr 和 state.cx/cy 中提取并结构化
+    /*
+     * ==================== AI 决策专用的方块位置信息 ====================
+     *
+     * 从 state.curr 和 state.cx/cy 中提取并结构化。
+     *
+     * piece.shape：当前方块的形状矩阵（如 [[1,1],[1,1]] 表示 O 块）
+     * piece.position.x：方块左上角在棋盘上的列坐标（0-9）
+     * piece.position.y：方块左上角在棋盘上的行坐标（0 为顶部）
+     *
+     * 这是 generateMoves 的输入——AI 基于此位置生成所有旋转和平移候选。
+     * 如果 curr 为 null（无活动方块），piece 也为 null。
+     */
     piece: state.curr ? {
       shape: state.curr.shape,
       position: {
@@ -10956,10 +10736,35 @@ var tetris = (() => {
         y: state.cy
       }
     } : null,
-    // 游戏模式
+    /*
+     * ==================== 游戏模式 ====================
+     *
+     * 标识游戏当前所处的阶段：'playing'、'paused'、'game-over' 等。
+     * AI 只在 'playing' 模式下进行决策。
+     */
     mode: state.mode,
-    // 7-bag 状态（供 AI 确定性前瞻）
-    bag: getBagSnapshot(),
+    /*
+     * ==================== 7-bag 状态 ====================
+     *
+     * 当前 Game 实例专属的 7-bag 快照。
+     *
+     * Battle 模式修复：
+     * 之前使用模块级全局变量 `getBagSnapshot()`，导致两个 Game 实例
+     * 共享同一个 bag。现在每个 Game 实例维护独立的 `this.bag`，
+     * 通过 `Game.getBagSnapshot()` 获取深拷贝快照。
+     *
+     * 此数组在 advanceSnapshot 中被 shift 消费，用于确定性前瞻——
+     * AI 可以精确知道接下来会拿到哪些方块。
+     */
+    bag,
+    /*
+     * ==================== Hold 槽状态 ====================
+     *
+     * 暂存区中的方块对象。null 表示暂存区为空。
+     * generateMoves 使用此字段生成 Hold 候选——
+     * 如果 hold 有方块，AI 可以评估"换出来是否更好"。
+     * 如果 hold 为空，AI 使用 next 作为备选评估"Hold 一下值不值得"。
+     */
     hold: state.hold || null
   });
   var create_snapshot_default = createSnapshot;
@@ -11179,7 +10984,7 @@ var tetris = (() => {
   var count_holes_default = countHoles;
 
   // lib/ai/simulator/evaluate-board.js
-  var evaluateBoard = (board, weights, clearResult) => {
+  var evaluateBoard = (board, weights, clearResult, mode = "survival") => {
     const heights = [];
     const w = {
       height: -0.6,
@@ -11192,6 +10997,12 @@ var tetris = (() => {
       // 消行奖励缩放因子
       ...weights
     };
+    if (mode === "versus") {
+      w.height = -0.7;
+      w.holes = -9;
+      w.bumpiness = -0.4;
+      w.completeLines = 25;
+    }
     for (let x = 0; x < board[0].length; x++) {
       heights.push(get_column_height_default(board, x));
     }
@@ -11225,6 +11036,13 @@ var tetris = (() => {
         scoreBonus += 20;
       }
       scoreBonus += clearResult.combo * 0.8;
+    }
+    if (mode === "versus") {
+      const garbageMap = [0, 0, 1, 2, 3, 4];
+      const attackLines = garbageMap[linesCleared] || 0;
+      const attackScores = [0, 0, 10, 25, 50, 80];
+      const attackScore = attackScores[attackLines] || 0;
+      scoreBonus += attackScore;
     }
     return staticScore + scoreBonus;
   };
@@ -11335,16 +11153,16 @@ var tetris = (() => {
     const newCleared = afterTotal - beforeCleared;
     const clearedBoard = clear_full_lines_default(board);
     const clearResult = simulate_clear_result_default(clearedBoard, snapshot, newCleared);
-    const bag2 = snapshot.bag ? [...snapshot.bag] : [];
-    const nextPiece = bag2.length > 0 ? bag2.shift() : snapshot.next || {
+    const bag = snapshot.bag ? [...snapshot.bag] : [];
+    const nextPiece = bag.length > 0 ? bag.shift() : snapshot.next || {
       shape: [[1, 1, 1, 1]],
       type: "I",
       rotation: 0,
       colorIndex: 0
     };
     let nextNext = null;
-    if (bag2.length > 0) {
-      nextNext = bag2.shift();
+    if (bag.length > 0) {
+      nextNext = bag.shift();
     }
     const newPiece = {
       shape: nextPiece.shape,
@@ -11359,7 +11177,7 @@ var tetris = (() => {
       piece: newPiece,
       cur: nextPiece,
       next: nextNext,
-      bag: bag2,
+      bag,
       // 更新计分状态：combo 递增（如果有消行），否则清零
       combo: clearResult ? clearResult.combo : 0,
       // 更新 Back-to-Back：本次是大招则保留标记，否则继承原值
@@ -11373,9 +11191,11 @@ var tetris = (() => {
   var advance_snapshot_default = advanceSnapshot;
 
   // lib/ai/planner/self-play.js
-  var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
+  var selfPlay = (snapshot, weights, depth = 1, beam = 5, mode = "survival") => {
     const moves = generate_moves_default(snapshot);
-    if (moves.length === 0) return null;
+    if (moves.length === 0) {
+      return null;
+    }
     const baseCleared = snapshot.board.filter(
       (row) => row.every((c) => c !== 0)
     ).length;
@@ -11389,8 +11209,10 @@ var tetris = (() => {
         const newCleared = afterTotal - baseCleared;
         const afterBoard = clear_full_lines_default(board);
         const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
-        let score = evaluate_board_default(afterBoard, weights, result);
-        if (move2.actions.includes("HOLD")) score += 2;
+        let score = evaluate_board_default(afterBoard, weights, result, mode);
+        if (move2.actions.includes("HOLD")) {
+          score += 2;
+        }
         return { move: move2, score };
       });
       scored.sort((a, b) => b.score - a.score);
@@ -11408,10 +11230,10 @@ var tetris = (() => {
       const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
       let score;
       if (depth <= 1) {
-        score = evaluate_board_default(afterBoard, weights, result);
+        score = evaluate_board_default(afterBoard, weights, result, mode);
       } else {
         const nextSnapshot = advance_snapshot_default(snapshot, move2);
-        const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam);
+        const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam, mode);
         if (nextBest) {
           const nextCleared = nextSnapshot.board.filter(
             (r) => r.every((c) => c !== 0)
@@ -11421,12 +11243,14 @@ var tetris = (() => {
             nextSnapshot,
             nextCleared
           );
-          score = evaluate_board_default(nextSnapshot.board, weights, nextResult);
+          score = evaluate_board_default(nextSnapshot.board, weights, nextResult, mode);
         } else {
-          score = evaluate_board_default(afterBoard, weights, result);
+          score = evaluate_board_default(afterBoard, weights, result, mode);
         }
       }
-      if (move2.actions.includes("HOLD")) score += 2;
+      if (move2.actions.includes("HOLD")) {
+        score += 2;
+      }
       if (score > bestScore) {
         bestScore = score;
         best = move2;
@@ -11444,6 +11268,11 @@ var tetris = (() => {
      * 接收依赖配置，通过 Base.inject() 自动注入依赖，然后调用 initialize() 初始化内部状态。
      *
      * @param {object} options - 依赖配置对象
+     * @param {object} options.Game - 游戏主实例
+     * @param {object} options.Store - 游戏状态存储
+     * @param {object} options.Scheduler - 任务调度器
+     * @param {object} options.Animations - 动画系统
+     * @param {object} options.Player - 玩家信息对象
      */
     constructor(options) {
       super(options);
@@ -11452,7 +11281,7 @@ var tetris = (() => {
     /**
      * ## 初始化内部状态
      *
-     * 设置所有实例属性的默认值，并尝试创建 Web Worker。
+     * 设置所有实例属性的默认值，并尝试创建 Web Worker。 当前 Worker 创建后暂未使用，think() 走同步路径。
      *
      * @returns {void}
      */
@@ -11470,6 +11299,8 @@ var tetris = (() => {
      * 创建独立线程运行 selfPlay 决策。如果浏览器不支持 Worker， 将 this.worker 设为 null，后续 think()
      * 降级为主线程同步模式。
      *
+     * 当前版本统一使用主线程同步模式，Worker 代码保留备用。
+     *
      * @private
      * @returns {void}
      */
@@ -11481,16 +11312,24 @@ var tetris = (() => {
      *
      * 设置 enabled 标志并立即开始第一次循环。
      *
+     * ### 防重入保护
+     *
+     * 如果 `this.enabled` 已经是 true，说明 AI 已经在运行中， 直接返回不重复启动。这修复了 Battle 模式下 AI
+     * 被启动两次的问题—— `Game.initialize()` 和 `_onGameStart` 各调用了一次 `start()`。
+     *
      * @returns {void}
      */
     start() {
+      if (this.enabled) {
+        return;
+      }
       this.enabled = true;
       this.loop();
     }
     /**
      * ## 停止 AI
      *
-     * 清除 enabled 标志、清空待执行动作、重置 Worker 忙碌状态、取消当前调度任务。
+     * 清除 enabled 标志、清空待执行动作、重置 Worker 忙碌状态、 取消当前 Scheduler 中的调度任务。
      *
      * @returns {void}
      */
@@ -11513,6 +11352,16 @@ var tetris = (() => {
      * 4. 从队列头部取出一个动作执行
      * 5. 调度下一次循环
      *
+     * ### 动作执行时序
+     *
+     * 每帧只执行一个动作（this.actions.shift()）。 一个完整的动作序列（如 HOLD → ROTATE → MOVE →
+     * DROP）需要多帧才能执行完毕。 序列执行期间不会发起新的 think()，因为 this.actions.length > 0。
+     *
+     * ### Battle 模式事件隔离
+     *
+     * 使用 `GameEvents(Game.id).DISPATCH_INPUT` 发送事件， 事件名包含 Game 的 UUID，确保 Battle
+     * 模式下两个 Game 实例的事件不会互相干扰。
+     *
      * @returns {void}
      */
     loop = () => {
@@ -11528,8 +11377,8 @@ var tetris = (() => {
       const difficulty = this.getDifficultyConfig();
       if (this.actions.length === 0 && !this.workerBusy) {
         const best = this.think(state, difficulty);
-        if (best) {
-          this.actions = [...best.actions];
+        if (!this.worker) {
+          this.actions = best ? [...best.actions] : [];
         }
       }
       const action = this.actions.shift();
@@ -11540,7 +11389,8 @@ var tetris = (() => {
       if (!action) {
         return;
       }
-      this.emit("dispatch:input", {
+      const events = GameEvents(Game2.id);
+      this.emit(events.DISPATCH_INPUT, {
         device: "ai",
         action,
         payload: { Game: Game2 }
@@ -11553,37 +11403,67 @@ var tetris = (() => {
      * 根据运行模式选择决策方式：
      *
      * - **Worker 模式**：异步发送消息给 Worker 线程
-     * - **主线程模式**：同步调用 selfPlay，直接返回最佳移动对象
+     * - **主线程模式**（当前使用）：同步调用 selfPlay，直接返回最佳移动对象
      *
-     * @param {object} state - 游戏状态对象
-     * @param {object} difficulty - 难度配置对象
-     * @returns {object | void} 主线程模式返回 { placeOn, actions, y }，Worker 模式返回
+     * ### mode 参数
+     *
+     * 根据当前游戏模式传递不同的 mode 给 selfPlay：
+     *
+     * - Single 模式：'survival'（生存模式，只关心自己棋盘的存活）
+     * - Battle 模式：'versus'（对战模式，额外考虑攻击力奖励）
+     *
+     * Mode 参数贯穿整个决策链：selfPlay → evaluateBoard， 在 evaluateBoard 中根据 mode
+     * 使用不同的权重和奖励策略。
+     *
+     * ### bag 参数
+     *
+     * 从 Game.getBagSnapshot() 获取当前 Game 实例专属的 7-bag 快照。 每个 Game 实例维护独立的
+     * this.bag，Battle 模式下不会互相干扰。
+     *
+     * @param {object} state - 游戏状态对象（Game.Store.getState() 的返回值）
+     * @param {object} difficulty - 难度配置对象，包含 lookahead、weights、beam、delay
+     * @returns {object | void} 主线程模式返回 { x, y, placeOn, actions }，Worker 模式返回
      *   undefined
      */
     think(state, difficulty) {
-      const { Store } = this;
+      const { Store, Game: Game2 } = this;
       const { lookahead, weights, beam } = difficulty;
       const difficultyLevel = Store.getDifficulty();
       const algorithm = difficultyLevel === "expert" ? "mcts" : "selfPlay";
+      const mode = Game2.isVersus() ? "versus" : "survival";
+      const bag = Game2.getBagSnapshot();
       if (this.worker) {
         this.workerBusy = true;
         this.worker.postMessage({
           type: "think",
           state,
+          bag,
           weights,
           depth: lookahead,
           beam,
-          algorithm
+          algorithm,
+          mode
         });
       } else {
-        const snapshot = create_snapshot_default(state);
-        return self_play_default(snapshot, weights, lookahead, beam);
+        const snapshot2 = create_snapshot_default(state, bag);
+        return self_play_default(snapshot2, weights, lookahead, beam, mode);
       }
+      const snapshot = create_snapshot_default(state, bag);
+      return self_play_default(snapshot, weights, lookahead, beam, mode);
     }
     /**
      * ## 获取当前难度的完整配置
      *
      * 从 Store 读取当前选择的难度等级，映射到对应的 AIDifficulty 配置对象。 未知难度降级为 NORMAL。
+     *
+     * ### 配置内容
+     *
+     * | 难度   | lookahead | beam | noise | delay | 特点                         |
+     * | ------ | --------- | ---- | ----- | ----- | ---------------------------- |
+     * | EASY   | 2         | 2    | 0.08  | 480ms | 多看一步，偶尔犯错，反应慢   |
+     * | NORMAL | 3         | 3    | 0.05  | 380ms | 多看两步，偶尔失误，中等速度 |
+     * | HARD   | 4         | 4    | 0     | 200ms | 多看三步，从不犯错，较快     |
+     * | EXPERT | 4         | 5    | 0     | 130ms | 多看三步，最宽搜索，极快     |
      *
      * @returns {object} 难度配置对象，包含 lookahead、noise、weights、delay、beam
      */
@@ -11601,6 +11481,8 @@ var tetris = (() => {
     /**
      * ## 绑定 Worker 事件监听器
      *
+     * 注册 Worker 的 message 和 error 事件处理函数。 当前 Worker 未使用，此方法保留备用。
+     *
      * @returns {void}
      */
     addEventListeners() {
@@ -11612,6 +11494,8 @@ var tetris = (() => {
     }
     /**
      * ## 移除 Worker 事件监听器
+     *
+     * 在 Game 销毁或模式切换时调用，防止内存泄漏。
      *
      * @returns {void}
      */
@@ -11625,7 +11509,7 @@ var tetris = (() => {
     /**
      * ## 处理 Worker 返回的消息
      *
-     * Worker 完成决策后，将结果写入 this.actions 队列，解除 workerBusy 锁。
+     * Worker 完成决策后，将结果写入 this.actions 队列，解除 workerBusy 锁。 当前 Worker 未使用，此方法保留备用。
      *
      * @private
      * @param {MessageEvent} e - Worker 消息事件
@@ -11647,7 +11531,7 @@ var tetris = (() => {
     /**
      * ## 处理 Worker 自身错误
      *
-     * Worker 线程崩溃时解除忙碌锁并降级为主线程模式。
+     * Worker 线程崩溃时解除忙碌锁并降级为主线程模式。 当前 Worker 未使用，此方法保留备用。
      *
      * @private
      * @param {ErrorEvent} err - Worker 错误事件
@@ -11661,7 +11545,8 @@ var tetris = (() => {
     /**
      * ## 订阅 AI 事件
      *
-     * 监听 `ai:<uuid>:start` 和 `ai:<uuid>:stop` 事件。
+     * 监听 `ai:<uuid>:start` 和 `ai:<uuid>:stop` 事件。 事件名包含 Game 的 UUID，确保 Battle
+     * 模式下两个 Game 实例的事件隔离。
      *
      * @returns {void}
      */
@@ -11674,6 +11559,8 @@ var tetris = (() => {
     /**
      * ## 取消订阅 AI 事件
      *
+     * 在 Game 销毁或模式切换时调用，防止内存泄漏。
+     *
      * @returns {void}
      */
     unsubscribe() {
@@ -11682,11 +11569,25 @@ var tetris = (() => {
       this.off(events.START, this._onStart);
       this.off(events.STOP, this._onStop);
     }
-    /** @private */
+    /**
+     * ## 处理 AI 启动事件
+     *
+     * 当收到 `ai:<uuid>:start` 事件时调用 start()。 start() 包含防重入检查，重复调用安全。
+     *
+     * @private
+     * @returns {void}
+     */
     _onStart = () => {
       this.start();
     };
-    /** @private */
+    /**
+     * ## 处理 AI 停止事件
+     *
+     * 当收到 `ai:<uuid>:stop` 事件时调用 stop()。
+     *
+     * @private
+     * @returns {void}
+     */
     _onStop = () => {
       this.stop();
     };
@@ -11861,7 +11762,8 @@ var tetris = (() => {
       const actionMap = getActionMap(mode, this.level);
       const action = actionMap[key];
       if (action) {
-        this.emit("dispatch:input", {
+        const events = GameEvents(Game2.id);
+        this.emit(events.DISPATCH_INPUT, {
           /** 输入设备类型：触摸屏 */
           device: "touch",
           /** 游戏动作指令 */
@@ -12270,7 +12172,7 @@ var tetris = (() => {
         if (cmd.action === "HOLD_SYNC") {
           return;
         }
-        this.emit(`dispatch:command`, cmd);
+        this.emit(events.DISPATCH_COMMAND, cmd);
         this.cursor++;
       }
     }
@@ -13457,6 +13359,254 @@ var tetris = (() => {
   };
   var gamepad_notification_animation_default = GamepadNotificationAnimation;
 
+  // lib/game/constants/color-palettes.js
+  var PALETTES = [
+    /*
+     * ==================== 方案 0：基础经典（关卡 0-31） ====================
+     */
+    [
+      colors_default.TEAL,
+      colors_default.GREEN,
+      colors_default.ORANGE,
+      colors_default.YELLOW,
+      colors_default.BLUE,
+      colors_default.PINK,
+      colors_default.RED,
+      colors_default.VIOLET
+    ],
+    /*
+     * ==================== 方案 1：暖色系（关卡 32-63） ====================
+     */
+    [
+      colors_default.WARM_TEAL,
+      colors_default.WARM_GREEN,
+      colors_default.WARM_ORANGE,
+      colors_default.WARM_YELLOW,
+      colors_default.WARM_BLUE,
+      colors_default.WARM_PINK,
+      colors_default.WARM_RED,
+      colors_default.WARM_VIOLET
+    ],
+    /*
+     * ==================== 方案 2：冷色系（关卡 64-95） ====================
+     */
+    [
+      colors_default.COOL_TEAL,
+      colors_default.COOL_GREEN,
+      colors_default.COOL_ORANGE,
+      colors_default.COOL_YELLOW,
+      colors_default.COOL_BLUE,
+      colors_default.COOL_PINK,
+      colors_default.COOL_RED,
+      colors_default.COOL_VIOLET
+    ],
+    /*
+     * ==================== 方案 3：糖果色（关卡 96-127） ====================
+     */
+    [
+      colors_default.CANDY_TEAL,
+      colors_default.CANDY_GREEN,
+      colors_default.CANDY_ORANGE,
+      colors_default.CANDY_YELLOW,
+      colors_default.CANDY_BLUE,
+      colors_default.CANDY_PINK,
+      colors_default.CANDY_RED,
+      colors_default.CANDY_VIOLET
+    ],
+    /*
+     * ==================== 方案 4：森林色（关卡 128-159） ====================
+     */
+    [
+      colors_default.FOREST_TEAL,
+      colors_default.FOREST_GREEN,
+      colors_default.FOREST_ORANGE,
+      colors_default.FOREST_YELLOW,
+      colors_default.FOREST_BLUE,
+      colors_default.FOREST_PINK,
+      colors_default.FOREST_RED,
+      colors_default.FOREST_VIOLET
+    ],
+    /*
+     * ==================== 方案 5：日落色（关卡 160-191） ====================
+     */
+    [
+      colors_default.SUNSET_TEAL,
+      colors_default.SUNSET_GREEN,
+      colors_default.SUNSET_ORANGE,
+      colors_default.SUNSET_YELLOW,
+      colors_default.SUNSET_BLUE,
+      colors_default.SUNSET_PINK,
+      colors_default.SUNSET_RED,
+      colors_default.SUNSET_VIOLET
+    ],
+    /*
+     * ==================== 方案 6：霓虹色（关卡 192-223） ====================
+     */
+    [
+      colors_default.NEON_TEAL,
+      colors_default.NEON_GREEN,
+      colors_default.NEON_ORANGE,
+      colors_default.NEON_YELLOW,
+      colors_default.NEON_BLUE,
+      colors_default.NEON_PINK,
+      colors_default.NEON_RED,
+      colors_default.NEON_VIOLET
+    ],
+    /*
+     * ==================== 方案 7：宝石色（关卡 224-255） ====================
+     */
+    [
+      colors_default.JEWEL_TEAL,
+      colors_default.JEWEL_GREEN,
+      colors_default.JEWEL_ORANGE,
+      colors_default.JEWEL_YELLOW,
+      colors_default.JEWEL_BLUE,
+      colors_default.JEWEL_PINK,
+      colors_default.JEWEL_RED,
+      colors_default.JEWEL_VIOLET
+    ]
+  ];
+  var color_palettes_default = PALETTES;
+
+  // lib/game/constants/shapes.js
+  var SHAPES = [
+    /**
+     * ## I 型方块（标准长条）
+     *
+     * 形状：1 行 4 列 colorIndex: 0（TEAL 系）
+     */
+    { shape: [[1, 1, 1, 1]], colorIndex: 0, type: "I", rotation: 0 },
+    /**
+     * ## I 型方块（加长版）
+     *
+     * 形状：1 行 5 列 colorIndex: 1（GREEN 系）
+     */
+    { shape: [[1, 1, 1, 1, 1]], colorIndex: 1, type: "I5", rotation: 0 },
+    /**
+     * ## O 型方块（正方形）
+     *
+     * 形状：2×2 实心方块，旋转后形状不变 colorIndex: 2（ORANGE 系）
+     */
+    {
+      shape: [
+        [1, 1],
+        [1, 1]
+      ],
+      colorIndex: 2,
+      type: "O",
+      rotation: 0
+    },
+    /**
+     * ## T 型方块
+     *
+     * 形状：第一行中间一个，第二行三个 colorIndex: 3（YELLOW 系）
+     */
+    {
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1]
+      ],
+      colorIndex: 3,
+      type: "T",
+      rotation: 0
+    },
+    /**
+     * ## L 型方块
+     *
+     * 形状：第一行左侧一个，第二行三个 colorIndex: 4（BLUE 系）
+     */
+    {
+      shape: [
+        [1, 0, 0],
+        [1, 1, 1]
+      ],
+      colorIndex: 4,
+      type: "L",
+      rotation: 0
+    },
+    /**
+     * ## J 型方块（反 L 型）
+     *
+     * 形状：第一行右侧一个，第二行三个 colorIndex: 5（PINK 系）
+     */
+    {
+      shape: [
+        [0, 0, 1],
+        [1, 1, 1]
+      ],
+      colorIndex: 5,
+      type: "J",
+      rotation: 0
+    },
+    /**
+     * ## S 型方块（右斜）
+     *
+     * 形状：第一行右侧两个，第二行左侧两个 colorIndex: 6（RED 系）
+     */
+    {
+      shape: [
+        [0, 1, 1],
+        [1, 1, 0]
+      ],
+      colorIndex: 6,
+      type: "S",
+      rotation: 0
+    },
+    /**
+     * ## Z 型方块（左斜）
+     *
+     * 形状：第一行左侧两个，第二行右侧两个 colorIndex: 7（VIOLET 系）
+     */
+    {
+      shape: [
+        [1, 1, 0],
+        [0, 1, 1]
+      ],
+      colorIndex: 7,
+      type: "Z",
+      rotation: 0
+    }
+  ];
+  var shapes_default = SHAPES;
+
+  // lib/game/utils/refill-bag.js
+  var isFirstBag = true;
+  var refillBag = () => {
+    let bag = [...shapes_default].toSorted(() => Math.random() - 0.5);
+    if (isFirstBag) {
+      while ([3, 6, 7].includes(bag[0].colorIndex)) {
+        bag = [...shapes_default].toSorted(() => Math.random() - 0.5);
+      }
+    }
+    isFirstBag = false;
+    return bag;
+  };
+  refillBag._reset = () => {
+    isFirstBag = true;
+  };
+  var refill_bag_default = refillBag;
+
+  // lib/game/utils/random-shape.js
+  var randomShape = (runtime, level = 1) => {
+    if (runtime.bag.length === 0) {
+      runtime.bag = refill_bag_default();
+    }
+    const piece = runtime.bag.pop();
+    const paletteIndex = Math.min(
+      Math.floor((level - 1) / 32),
+      color_palettes_default.length - 1
+    );
+    const palette = color_palettes_default[paletteIndex];
+    return {
+      shape: piece.shape.map((row) => [...row]),
+      color: palette[piece.colorIndex],
+      type: piece.type,
+      rotation: piece.rotation ?? 0,
+      colorIndex: piece.colorIndex
+    };
+  };
+  var random_shape_default = randomShape;
+
   // lib/game/utils/get-next-piece.js
   var getNextPiece = (runtime) => {
     const { Replay, Store } = runtime;
@@ -13469,11 +13619,11 @@ var tetris = (() => {
       ...next,
       // 深拷贝形状矩阵，避免旋转时污染预览方块
       shape: next.shape.map((row) => [...row])
-    } : random_shape_default(level);
+    } : random_shape_default(runtime, level);
     return {
       curr,
       // 随机生成新的预览方块（根据等级匹配配色方案）
-      next: random_shape_default(level)
+      next: random_shape_default(runtime, level)
     };
   };
   var get_next_piece_default = getNextPiece;
@@ -14116,15 +14266,15 @@ var tetris = (() => {
     if (mode !== "playing" && mode !== "replay" || isBlocked) {
       return;
     }
+    const AE = AudioEvents();
+    const GE = GameEvents(runtime.id);
     if (mode === "playing") {
-      runtime.emit("dispatch:input", {
+      runtime.emit(GE.DISPATCH_INPUT, {
         device: "replay",
         action: "AUTO_TICK",
         payload: { Game: runtime }
       });
     }
-    const AE = AudioEvents();
-    const GE = GameEvents(runtime.id);
     const { curr, cx, cy } = runtime.Store.getState();
     if (move_default(runtime, 0, 1)) {
       if (curr._lockTimer) {
@@ -14277,6 +14427,7 @@ var tetris = (() => {
       });
       this.id = crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
       this.effect = null;
+      this.bag = [];
       this.Store = Store;
       this.Animations = new animation_system_default({ Game: this, Player });
       this.CommandQueue = new command_queue_default({ Game: this, Player });
@@ -14317,10 +14468,6 @@ var tetris = (() => {
         UI: this.UI,
         Player
       });
-      if (this.isVersus() && Player.name === "ai") {
-        this.Store.setController("ai");
-        this.AI.start();
-      }
     }
     /**
      * ## 初始化 Gamepad 游戏手柄控制器
@@ -14434,6 +14581,19 @@ var tetris = (() => {
       this.Store.setDifficulty(difficulty);
       this.emit(AE.PLAY_SOUND, { sound: "DIFFICULTY_CHANGED" });
     }
+    updateBag(bag) {
+      this.bag = bag;
+    }
+    /**
+     * ## 获取当前袋子快照
+     *
+     * 返回当前袋子中剩余方块的浅拷贝，供 AI 快照使用。 AI 需要知道袋子里还剩哪些方块来做更精准的决策。
+     *
+     * @returns {object[]} 当前袋子中剩余方块的数组
+     */
+    getBagSnapshot() {
+      return structuredClone(this.bag);
+    }
     /**
      * ## 切换到主菜单
      *
@@ -14484,7 +14644,12 @@ var tetris = (() => {
      * @returns {void}
      */
     begin() {
+      const { AI, Store, Player } = this;
       begin_default(this);
+      if (this.isVersus() && Player.name === "ai") {
+        Store.setController("ai");
+        AI.start();
+      }
     }
     /**
      * ## 启动游戏（进入倒计时）
@@ -16200,7 +16365,9 @@ var tetris = (() => {
      */
     execute() {
       const { action, payload } = this;
-      this.emit("dispatch:command", {
+      const { Game: Game2 } = payload;
+      const events = GameEvents(Game2.id);
+      this.emit(events.DISPATCH_COMMAND, {
         action,
         payload
       });
@@ -17236,7 +17403,7 @@ var tetris = (() => {
     /**
      * ## 任务调度器实例
      *
-     * 管理 delay / interval / sequence 等定时任务。 是所有时间驱动逻辑的核心。
+     * 管理 delay / interval / sequence 等定时任务。 是所有时间驱动逻辑的核心，包括 AI 的决策循环。
      *
      * @default null
      * @type {Scheduler | null}
@@ -17292,7 +17459,8 @@ var tetris = (() => {
      * 5. 根据 Players 配置创建 Game 实例（single 模式 1 个，versus 模式 2 个）
      * 6. 对战模式下创建 BattleController
      *
-     * @param {object} [options={}] - 配置参数对象，用于覆盖默认的 EngineState. Default is `{}`
+     * @param {object} [options={}] - 配置参数对象，用于覆盖默认的 EngineState。默认 `{}`. Default
+     *   is `{}`
      * @returns {void}
      */
     initialize: (options = {}) => {
@@ -17360,9 +17528,9 @@ var tetris = (() => {
      * - `true`：模式切换后重新启动，进入 main-menu（等级选择界面）
      * - `false`：首次启动或退出对战模式，进入 game-mode（模式选择界面）
      *
-     * @param {object} [options={}] - 配置参数对象. Default is `{}`
-     * @param {boolean} [options.isRelaunch=false] - 是否为模式切换重启动. Default is
-     *   `false`
+     * @param {object} [options={}] - 配置参数对象。默认 `{}`. Default is `{}`
+     * @param {boolean} [options.isRelaunch=false] - 是否为模式切换重启动。默认 `false`.
+     *   Default is `false`
      * @returns {void}
      */
     launch: (options = {}) => {
@@ -17413,10 +17581,6 @@ var tetris = (() => {
      * - 低等级时速度慢，下落间隔大（约 1000ms）
      * - 高等级时速度快，下落间隔小（最低 120ms）
      *
-     * ## 回放特殊处理
-     *
-     * 当 `Replay.playing` 为 true 时，跳过游戏逻辑 tick， 因为回放系统会通过注入 command 来驱动游戏状态。
-     *
      * ## 双人对战
      *
      * 每个 Game 使用独立的时间累积器（gameAccumulators Map）， 两个 Game 各自独立计算下落时机，互不影响。
@@ -17465,7 +17629,7 @@ var tetris = (() => {
     /**
      * ## 订阅各模块事件
      *
-     * 依次订阅 Engine 自身、Audio 音频系统、 所有 Game 实例、BattleController 的事件。 在 launch 时调用一次。
+     * 依次订阅 Engine 自身、Audio 音频系统、所有 Game 实例、 BattleController 的事件。在 launch 时调用一次。
      *
      * @returns {void}
      */
@@ -17483,7 +17647,7 @@ var tetris = (() => {
     /**
      * ## 取消订阅各模块事件
      *
-     * 取消所有已订阅的事件，在 destroy 时调用。 防止内存泄漏和误触发。
+     * 取消所有已订阅的事件，在 destroy 时调用。防止内存泄漏和误触发。
      *
      * @returns {void}
      */
@@ -17501,9 +17665,17 @@ var tetris = (() => {
     /**
      * ## Engine 内部事件订阅
      *
-     * 为每个 Game 实例订阅 `dispatch:command` 和 `dispatch:input` 两个核心事件，它们是整个输入系统的入口。
+     * 为每个 Game 实例订阅 `dispatch:command` 和 `dispatch:input` 两个核心事件， 它们是整个输入系统的入口。
      *
-     * 同时订阅全局 `engine:*` 事件（通过 EventBus）， 用于模式切换和玩家配置更新。
+     * ### Battle 模式事件隔离
+     *
+     * 事件名使用 `GameEvents(Game.id)` 生成，包含 Game 的 UUID：
+     *
+     * - `game:<uuid>:dispatch:command`
+     * - `game:<uuid>:dispatch:input`
+     *
+     * 这确保 Battle 模式下两个 Game 实例的输入事件不会互相干扰。 AI 的 AIController.loop() 使用
+     * `GameEvents(Game.id).DISPATCH_INPUT` 发送事件。
      *
      * @private
      * @returns {void}
@@ -17511,8 +17683,9 @@ var tetris = (() => {
     _subscribe: () => {
       const { Games } = Engine;
       for (const Game2 of Games) {
-        Game2.on(`dispatch:command`, Engine._onDispatchCommand);
-        Game2.on(`dispatch:input`, Engine._onDispatchInput);
+        const events = GameEvents(Game2.id);
+        Game2.on(events.DISPATCH_COMMAND, Engine._onDispatchCommand);
+        Game2.on(events.DISPATCH_INPUT, Engine._onDispatchInput);
       }
       event_bus_default.on("engine:update:mode", Engine._onUpdateMode);
       event_bus_default.on("engine:update:players", Engine._onUpdatePlayers);
@@ -17530,8 +17703,9 @@ var tetris = (() => {
     _unsubscribe: () => {
       const { Games } = Engine;
       for (const Game2 of Games) {
-        Game2.off(`dispatch:command`, Engine._onDispatchCommand);
-        Game2.off(`dispatch:input`, Engine._onDispatchInput);
+        const events = GameEvents(Game2.id);
+        Game2.off(events.DISPATCH_COMMAND, Engine._onDispatchCommand);
+        Game2.off(events.DISPATCH_INPUT, Engine._onDispatchInput);
       }
       event_bus_default.off("engine:update:mode", Engine._onUpdateMode);
       event_bus_default.off("engine:update:players", Engine._onUpdatePlayers);
@@ -17541,7 +17715,7 @@ var tetris = (() => {
     /**
      * ## 命令分发处理器
      *
-     * 处理回放系统的命令执行。 检查当前是否有阻塞动画，注入阻塞状态后交由 dispatchCommand 处理。
+     * 处理命令的执行。检查当前是否有阻塞动画， 注入阻塞状态后交由 dispatchCommand 处理。
      *
      * ### 阻塞动画列表
      *
@@ -17638,8 +17812,9 @@ var tetris = (() => {
      * 4. 使用新配置重新 launch
      *
      * @private
-     * @param {object} [options={}] - 事件参数. Default is `{}`
-     * @param {boolean} [options.isRelaunch=true] - 是否为模式切换重启动. Default is `true`
+     * @param {object} [options={}] - 事件参数。默认 `{}`. Default is `{}`
+     * @param {boolean} [options.isRelaunch=true] - 是否为模式切换重启动。默认 `true`. Default
+     *   is `true`
      * @returns {void}
      */
     _onStart: (options = {}) => {
@@ -17659,11 +17834,6 @@ var tetris = (() => {
      *
      * 从对战模式退出到单人模式选择界面。 重置 Store 状态并重新启动。
      *
-     * ### 执行流程
-     *
-     * 1. 重置 EngineStore 到默认状态
-     * 2. 调用 _onStart 以单人模式重新启动
-     *
      * @private
      * @returns {void}
      */
@@ -17675,7 +17845,7 @@ var tetris = (() => {
     /**
      * ## 启动游戏主循环
      *
-     * 使用 requestAnimationFrame 启动渲染循环。 第一帧会初始化时间基准。
+     * 使用 requestAnimationFrame 启动渲染循环。第一帧会初始化时间基准。
      *
      * @returns {void}
      */
@@ -17685,7 +17855,7 @@ var tetris = (() => {
     /**
      * ## 停止游戏循环
      *
-     * 取消 requestAnimationFrame 回调，重置时间状态。 从暂停恢复时调用 restart() 重新启动。
+     * 取消 requestAnimationFrame 回调，重置时间状态。
      *
      * @returns {void}
      */
@@ -17701,7 +17871,7 @@ var tetris = (() => {
     /**
      * ## 重启游戏循环
      *
-     * 停止当前循环后重新启动。 用于从暂停恢复或标签页切回。
+     * 停止当前循环后重新启动。用于从暂停恢复或标签页切回。
      *
      * @returns {void}
      */

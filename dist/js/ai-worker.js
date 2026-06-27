@@ -213,7 +213,7 @@ var countHoles = (board) => {
 var count_holes_default = countHoles;
 
 // lib/ai/simulator/evaluate-board.js
-var evaluateBoard = (board, weights, clearResult) => {
+var evaluateBoard = (board, weights, clearResult, mode = "survival") => {
   const heights = [];
   const w = {
     height: -0.6,
@@ -226,6 +226,12 @@ var evaluateBoard = (board, weights, clearResult) => {
     // 消行奖励缩放因子
     ...weights
   };
+  if (mode === "versus") {
+    w.height = -0.7;
+    w.holes = -9;
+    w.bumpiness = -0.4;
+    w.completeLines = 25;
+  }
   for (let x = 0; x < board[0].length; x++) {
     heights.push(get_column_height_default(board, x));
   }
@@ -259,6 +265,13 @@ var evaluateBoard = (board, weights, clearResult) => {
       scoreBonus += 20;
     }
     scoreBonus += clearResult.combo * 0.8;
+  }
+  if (mode === "versus") {
+    const garbageMap = [0, 0, 1, 2, 3, 4];
+    const attackLines = garbageMap[linesCleared] || 0;
+    const attackScores = [0, 0, 10, 25, 50, 80];
+    const attackScore = attackScores[attackLines] || 0;
+    scoreBonus += attackScore;
   }
   return staticScore + scoreBonus;
 };
@@ -388,16 +401,16 @@ var advanceSnapshot = (snapshot, move) => {
   const newCleared = afterTotal - beforeCleared;
   const clearedBoard = clear_full_lines_default(board);
   const clearResult = simulate_clear_result_default(clearedBoard, snapshot, newCleared);
-  const bag2 = snapshot.bag ? [...snapshot.bag] : [];
-  const nextPiece = bag2.length > 0 ? bag2.shift() : snapshot.next || {
+  const bag = snapshot.bag ? [...snapshot.bag] : [];
+  const nextPiece = bag.length > 0 ? bag.shift() : snapshot.next || {
     shape: [[1, 1, 1, 1]],
     type: "I",
     rotation: 0,
     colorIndex: 0
   };
   let nextNext = null;
-  if (bag2.length > 0) {
-    nextNext = bag2.shift();
+  if (bag.length > 0) {
+    nextNext = bag.shift();
   }
   const newPiece = {
     shape: nextPiece.shape,
@@ -412,7 +425,7 @@ var advanceSnapshot = (snapshot, move) => {
     piece: newPiece,
     cur: nextPiece,
     next: nextNext,
-    bag: bag2,
+    bag,
     // 更新计分状态：combo 递增（如果有消行），否则清零
     combo: clearResult ? clearResult.combo : 0,
     // 更新 Back-to-Back：本次是大招则保留标记，否则继承原值
@@ -426,9 +439,11 @@ var advanceSnapshot = (snapshot, move) => {
 var advance_snapshot_default = advanceSnapshot;
 
 // lib/ai/planner/self-play.js
-var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
+var selfPlay = (snapshot, weights, depth = 1, beam = 5, mode = "survival") => {
   const moves = generate_moves_default(snapshot);
-  if (moves.length === 0) return null;
+  if (moves.length === 0) {
+    return null;
+  }
   const baseCleared = snapshot.board.filter(
     (row) => row.every((c) => c !== 0)
   ).length;
@@ -442,8 +457,10 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
       const newCleared = afterTotal - baseCleared;
       const afterBoard = clear_full_lines_default(board);
       const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
-      let score = evaluate_board_default(afterBoard, weights, result);
-      if (move.actions.includes("HOLD")) score += 2;
+      let score = evaluate_board_default(afterBoard, weights, result, mode);
+      if (move.actions.includes("HOLD")) {
+        score += 2;
+      }
       return { move, score };
     });
     scored.sort((a, b) => b.score - a.score);
@@ -461,10 +478,10 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
     const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
     let score;
     if (depth <= 1) {
-      score = evaluate_board_default(afterBoard, weights, result);
+      score = evaluate_board_default(afterBoard, weights, result, mode);
     } else {
       const nextSnapshot = advance_snapshot_default(snapshot, move);
-      const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam);
+      const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam, mode);
       if (nextBest) {
         const nextCleared = nextSnapshot.board.filter(
           (r) => r.every((c) => c !== 0)
@@ -474,12 +491,14 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
           nextSnapshot,
           nextCleared
         );
-        score = evaluate_board_default(nextSnapshot.board, weights, nextResult);
+        score = evaluate_board_default(nextSnapshot.board, weights, nextResult, mode);
       } else {
-        score = evaluate_board_default(afterBoard, weights, result);
+        score = evaluate_board_default(afterBoard, weights, result, mode);
       }
     }
-    if (move.actions.includes("HOLD")) score += 2;
+    if (move.actions.includes("HOLD")) {
+      score += 2;
+    }
     if (score > bestScore) {
       bestScore = score;
       best = move;
@@ -489,432 +508,63 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
 };
 var self_play_default = selfPlay;
 
-// lib/constants/colors.js
-var TEAL = "#00c8ff";
-var RGBA_TEAL = "rgba(0, 200, 255, 0.3)";
-var YELLOW = "#f1fa04";
-var RGBA_YELLOW = "rgba(255, 255, 0, 0.3)";
-var PURPLE = "#d31ac1";
-var RGBA_PURPLE = "rgba(211, 26, 193, 0.3)";
-var BLUE = "#5050ff";
-var RGBA_BLUE = "rgba(80, 80, 255, 0.3)";
-var ORANGE = "#ffa500";
-var RGBA_ORANGE = "rgba(255, 127, 0, 0.3)";
-var GREEN = "#0afa04";
-var DARK_GREEN = "#5c9d31";
-var RGBA_GREEN = "rgba(0, 255, 0, 0.3)";
-var RED = "#ff3b30";
-var RGBA_RED = "rgba(255, 59, 48, 0.3)";
-var CORAL = "#e64a19";
-var RGBA_CORAL = "rgba(230, 74, 25, 0.3)";
-var BLACK = "#444";
-var RGBA_BLACK = "rgba(0, 0, 0, 0.3)";
-var WHITE = "#fff";
-var RGBA_WHITE = "rgba(255, 255, 255, 0.3)";
-var PINK = "#ff4fa3";
-var RGBA_PINK = "rgba(255, 79, 163, 0.3)";
-var VIOLET = "#7b34eb";
-var RGBA_VIOLET = "rgba(123, 52, 235, 0.3)";
-var CYAN = "#0cc0df";
-var RGBA_CYAN = "rgba(12, 192, 223, 0.3)";
-var WARM_TEAL = "#ff6b6b";
-var WARM_GREEN = "#ffa502";
-var WARM_ORANGE = "#ffd700";
-var WARM_YELLOW = "#ff7f50";
-var WARM_BLUE = "#ff4757";
-var WARM_PINK = "#ff6348";
-var WARM_RED = "#e74c3c";
-var WARM_VIOLET = "#f39c12";
-var COOL_TEAL = "#00d2d3";
-var COOL_GREEN = "#1dd1a1";
-var COOL_ORANGE = "#54a0ff";
-var COOL_YELLOW = "#5f27cd";
-var COOL_BLUE = "#01a3a4";
-var COOL_PINK = "#0abde3";
-var COOL_RED = "#48dbfb";
-var COOL_VIOLET = "#2e86de";
-var CANDY_TEAL = "#f368e0";
-var CANDY_GREEN = "#ff9ff3";
-var CANDY_ORANGE = "#feca57";
-var CANDY_YELLOW = "#ff9f43";
-var CANDY_BLUE = "#ee5a24";
-var CANDY_PINK = "#f78fb3";
-var CANDY_RED = "#cf6a87";
-var CANDY_VIOLET = "#e056a0";
-var FOREST_TEAL = "#26de81";
-var FOREST_GREEN = "#20bf6b";
-var FOREST_ORANGE = "#2bcbba";
-var FOREST_YELLOW = "#0fb9b1";
-var FOREST_BLUE = "#45aaf2";
-var FOREST_PINK = "#4b7bec";
-var FOREST_RED = "#a55eea";
-var FOREST_VIOLET = "#8854d0";
-var SUNSET_TEAL = "#ff6b35";
-var SUNSET_GREEN = "#f7c59f";
-var SUNSET_ORANGE = "#e08e45";
-var SUNSET_YELLOW = "#d4a373";
-var SUNSET_BLUE = "#cc8b5c";
-var SUNSET_PINK = "#b56576";
-var SUNSET_RED = "#a45c5c";
-var SUNSET_VIOLET = "#8b5e3c";
-var NEON_TEAL = "#ff00ff";
-var NEON_GREEN = "#00ffff";
-var NEON_ORANGE = "#ffff00";
-var NEON_YELLOW = "#ff0080";
-var NEON_BLUE = "#00ff80";
-var NEON_PINK = "#8000ff";
-var NEON_RED = "#ff8000";
-var NEON_VIOLET = "#0080ff";
-var JEWEL_TEAL = "#00d2d3";
-var JEWEL_GREEN = "#2ed573";
-var JEWEL_ORANGE = "#ffa502";
-var JEWEL_YELLOW = "#ff6348";
-var JEWEL_BLUE = "#1e90ff";
-var JEWEL_PINK = "#ff6b81";
-var JEWEL_RED = "#ff4757";
-var JEWEL_VIOLET = "#7b68ee";
-var COLORS = {
-  // 基础
-  TEAL,
-  RGBA_TEAL,
-  YELLOW,
-  RGBA_YELLOW,
-  PURPLE,
-  RGBA_PURPLE,
-  BLUE,
-  RGBA_BLUE,
-  ORANGE,
-  RGBA_ORANGE,
-  GREEN,
-  DARK_GREEN,
-  RGBA_GREEN,
-  RED,
-  RGBA_RED,
-  CORAL,
-  RGBA_CORAL,
-  BLACK,
-  RGBA_BLACK,
-  WHITE,
-  RGBA_WHITE,
-  PINK,
-  RGBA_PINK,
-  VIOLET,
-  RGBA_VIOLET,
-  CYAN,
-  RGBA_CYAN,
-  // WARM
-  WARM_TEAL,
-  WARM_GREEN,
-  WARM_ORANGE,
-  WARM_YELLOW,
-  WARM_BLUE,
-  WARM_PINK,
-  WARM_RED,
-  WARM_VIOLET,
-  // COOL
-  COOL_TEAL,
-  COOL_GREEN,
-  COOL_ORANGE,
-  COOL_YELLOW,
-  COOL_BLUE,
-  COOL_PINK,
-  COOL_RED,
-  COOL_VIOLET,
-  // CANDY
-  CANDY_TEAL,
-  CANDY_GREEN,
-  CANDY_ORANGE,
-  CANDY_YELLOW,
-  CANDY_BLUE,
-  CANDY_PINK,
-  CANDY_RED,
-  CANDY_VIOLET,
-  // FOREST
-  FOREST_TEAL,
-  FOREST_GREEN,
-  FOREST_ORANGE,
-  FOREST_YELLOW,
-  FOREST_BLUE,
-  FOREST_PINK,
-  FOREST_RED,
-  FOREST_VIOLET,
-  // SUNSET
-  SUNSET_TEAL,
-  SUNSET_GREEN,
-  SUNSET_ORANGE,
-  SUNSET_YELLOW,
-  SUNSET_BLUE,
-  SUNSET_PINK,
-  SUNSET_RED,
-  SUNSET_VIOLET,
-  // NEON
-  NEON_TEAL,
-  NEON_GREEN,
-  NEON_ORANGE,
-  NEON_YELLOW,
-  NEON_BLUE,
-  NEON_PINK,
-  NEON_RED,
-  NEON_VIOLET,
-  // JEWEL
-  JEWEL_TEAL,
-  JEWEL_GREEN,
-  JEWEL_ORANGE,
-  JEWEL_YELLOW,
-  JEWEL_BLUE,
-  JEWEL_PINK,
-  JEWEL_RED,
-  JEWEL_VIOLET
-};
-var colors_default = COLORS;
-
-// lib/game/constants/color-palettes.js
-var PALETTES = [
-  /*
-   * ==================== 方案 0：基础经典（关卡 0-31） ====================
-   */
-  [
-    colors_default.TEAL,
-    colors_default.GREEN,
-    colors_default.ORANGE,
-    colors_default.YELLOW,
-    colors_default.BLUE,
-    colors_default.PINK,
-    colors_default.RED,
-    colors_default.VIOLET
-  ],
-  /*
-   * ==================== 方案 1：暖色系（关卡 32-63） ====================
-   */
-  [
-    colors_default.WARM_TEAL,
-    colors_default.WARM_GREEN,
-    colors_default.WARM_ORANGE,
-    colors_default.WARM_YELLOW,
-    colors_default.WARM_BLUE,
-    colors_default.WARM_PINK,
-    colors_default.WARM_RED,
-    colors_default.WARM_VIOLET
-  ],
-  /*
-   * ==================== 方案 2：冷色系（关卡 64-95） ====================
-   */
-  [
-    colors_default.COOL_TEAL,
-    colors_default.COOL_GREEN,
-    colors_default.COOL_ORANGE,
-    colors_default.COOL_YELLOW,
-    colors_default.COOL_BLUE,
-    colors_default.COOL_PINK,
-    colors_default.COOL_RED,
-    colors_default.COOL_VIOLET
-  ],
-  /*
-   * ==================== 方案 3：糖果色（关卡 96-127） ====================
-   */
-  [
-    colors_default.CANDY_TEAL,
-    colors_default.CANDY_GREEN,
-    colors_default.CANDY_ORANGE,
-    colors_default.CANDY_YELLOW,
-    colors_default.CANDY_BLUE,
-    colors_default.CANDY_PINK,
-    colors_default.CANDY_RED,
-    colors_default.CANDY_VIOLET
-  ],
-  /*
-   * ==================== 方案 4：森林色（关卡 128-159） ====================
-   */
-  [
-    colors_default.FOREST_TEAL,
-    colors_default.FOREST_GREEN,
-    colors_default.FOREST_ORANGE,
-    colors_default.FOREST_YELLOW,
-    colors_default.FOREST_BLUE,
-    colors_default.FOREST_PINK,
-    colors_default.FOREST_RED,
-    colors_default.FOREST_VIOLET
-  ],
-  /*
-   * ==================== 方案 5：日落色（关卡 160-191） ====================
-   */
-  [
-    colors_default.SUNSET_TEAL,
-    colors_default.SUNSET_GREEN,
-    colors_default.SUNSET_ORANGE,
-    colors_default.SUNSET_YELLOW,
-    colors_default.SUNSET_BLUE,
-    colors_default.SUNSET_PINK,
-    colors_default.SUNSET_RED,
-    colors_default.SUNSET_VIOLET
-  ],
-  /*
-   * ==================== 方案 6：霓虹色（关卡 192-223） ====================
-   */
-  [
-    colors_default.NEON_TEAL,
-    colors_default.NEON_GREEN,
-    colors_default.NEON_ORANGE,
-    colors_default.NEON_YELLOW,
-    colors_default.NEON_BLUE,
-    colors_default.NEON_PINK,
-    colors_default.NEON_RED,
-    colors_default.NEON_VIOLET
-  ],
-  /*
-   * ==================== 方案 7：宝石色（关卡 224-255） ====================
-   */
-  [
-    colors_default.JEWEL_TEAL,
-    colors_default.JEWEL_GREEN,
-    colors_default.JEWEL_ORANGE,
-    colors_default.JEWEL_YELLOW,
-    colors_default.JEWEL_BLUE,
-    colors_default.JEWEL_PINK,
-    colors_default.JEWEL_RED,
-    colors_default.JEWEL_VIOLET
-  ]
-];
-
-// lib/game/constants/shapes.js
-var SHAPES = [
-  /**
-   * ## I 型方块（标准长条）
-   *
-   * 形状：1 行 4 列 colorIndex: 0（TEAL 系）
-   */
-  { shape: [[1, 1, 1, 1]], colorIndex: 0, type: "I", rotation: 0 },
-  /**
-   * ## I 型方块（加长版）
-   *
-   * 形状：1 行 5 列 colorIndex: 1（GREEN 系）
-   */
-  { shape: [[1, 1, 1, 1, 1]], colorIndex: 1, type: "I5", rotation: 0 },
-  /**
-   * ## O 型方块（正方形）
-   *
-   * 形状：2×2 实心方块，旋转后形状不变 colorIndex: 2（ORANGE 系）
-   */
-  {
-    shape: [
-      [1, 1],
-      [1, 1]
-    ],
-    colorIndex: 2,
-    type: "O",
-    rotation: 0
-  },
-  /**
-   * ## T 型方块
-   *
-   * 形状：第一行中间一个，第二行三个 colorIndex: 3（YELLOW 系）
-   */
-  {
-    shape: [
-      [0, 1, 0],
-      [1, 1, 1]
-    ],
-    colorIndex: 3,
-    type: "T",
-    rotation: 0
-  },
-  /**
-   * ## L 型方块
-   *
-   * 形状：第一行左侧一个，第二行三个 colorIndex: 4（BLUE 系）
-   */
-  {
-    shape: [
-      [1, 0, 0],
-      [1, 1, 1]
-    ],
-    colorIndex: 4,
-    type: "L",
-    rotation: 0
-  },
-  /**
-   * ## J 型方块（反 L 型）
-   *
-   * 形状：第一行右侧一个，第二行三个 colorIndex: 5（PINK 系）
-   */
-  {
-    shape: [
-      [0, 0, 1],
-      [1, 1, 1]
-    ],
-    colorIndex: 5,
-    type: "J",
-    rotation: 0
-  },
-  /**
-   * ## S 型方块（右斜）
-   *
-   * 形状：第一行右侧两个，第二行左侧两个 colorIndex: 6（RED 系）
-   */
-  {
-    shape: [
-      [0, 1, 1],
-      [1, 1, 0]
-    ],
-    colorIndex: 6,
-    type: "S",
-    rotation: 0
-  },
-  /**
-   * ## Z 型方块（左斜）
-   *
-   * 形状：第一行左侧两个，第二行右侧两个 colorIndex: 7（VIOLET 系）
-   */
-  {
-    shape: [
-      [1, 1, 0],
-      [0, 1, 1]
-    ],
-    colorIndex: 7,
-    type: "Z",
-    rotation: 0
-  }
-];
-var shapes_default = SHAPES;
-
-// lib/game/utils/refill-bag.js
-var isFirstBag = true;
-var refillBag = () => {
-  let bag2 = [...shapes_default].toSorted(() => Math.random() - 0.5);
-  if (isFirstBag) {
-    while ([3, 6, 7].includes(bag2[0].colorIndex)) {
-      bag2 = [...shapes_default].toSorted(() => Math.random() - 0.5);
-    }
-  }
-  isFirstBag = false;
-  return bag2;
-};
-refillBag._reset = () => {
-  isFirstBag = true;
-};
-
-// lib/game/utils/random-shape.js
-var bag = [];
-var getBagSnapshot = () => [...bag];
-
 // lib/ai/snapshot/create-snapshot.js
-var createSnapshot = (state) => structuredClone({
-  // 控制者身份
+var createSnapshot = (state, bag) => structuredClone({
+  /*
+   * ==================== 控制者身份 ====================
+   *
+   * 标识当前由谁控制：'human' 或 'ai'。
+   * 保留此字段方便后续扩展（如根据控制者调整 AI 策略）。
+   */
   controller: state.controller,
-  // 棋盘状态
+  /*
+   * ==================== 棋盘状态 ====================
+   *
+   * 20 行 × 10 列的二维数组。
+   * 每个格子的值为 0（空格）或颜色字符串（如 "#00c8ff"）。
+   * 这是 AI 决策的核心数据——所有候选移动都在此棋盘上模拟。
+   */
   board: state.board,
-  // 游戏进度
+  /*
+   * ==================== 游戏进度 ====================
+   *
+   * 保留 level、score、lines 供 AI 参考。
+   * level 影响下落速度和配色方案，score 和 lines 可用于评估游戏进程。
+   */
   level: state.level,
   score: state.score,
   lines: state.lines,
-  // 计分状态（供 AI 评估 T-Spin / Combo / Back-to-Back）
+  /*
+   * ==================== 计分状态 ====================
+   *
+   * 这些状态沿前瞻链传递，供 AI 评估 T-Spin / Combo / Back-to-Back。
+   * 使用 || 运算符提供默认值，防止 undefined 导致计算错误。
+   */
   combo: state.combo || 0,
   backToBack: state.backToBack || false,
   tSpin: state.tSpin || null,
-  // 原始方块对象（保留完整信息，方便后续扩展）
+  /*
+   * ==================== 原始方块对象 ====================
+   *
+   * cur：当前正在下落的活动方块，包含 shape、type、color、rotation 等完整信息
+   * next：下一个预览方块，用于 Hold 槽为空时作为备选
+   *
+   * 保留原始对象方便后续扩展（如根据方块类型调整策略）。
+   */
   cur: state.curr,
   next: state.next,
-  // AI 决策专用的方块信息：从 state.curr 和 state.cx/cy 中提取并结构化
+  /*
+   * ==================== AI 决策专用的方块位置信息 ====================
+   *
+   * 从 state.curr 和 state.cx/cy 中提取并结构化。
+   *
+   * piece.shape：当前方块的形状矩阵（如 [[1,1],[1,1]] 表示 O 块）
+   * piece.position.x：方块左上角在棋盘上的列坐标（0-9）
+   * piece.position.y：方块左上角在棋盘上的行坐标（0 为顶部）
+   *
+   * 这是 generateMoves 的输入——AI 基于此位置生成所有旋转和平移候选。
+   * 如果 curr 为 null（无活动方块），piece 也为 null。
+   */
   piece: state.curr ? {
     shape: state.curr.shape,
     position: {
@@ -922,22 +572,47 @@ var createSnapshot = (state) => structuredClone({
       y: state.cy
     }
   } : null,
-  // 游戏模式
+  /*
+   * ==================== 游戏模式 ====================
+   *
+   * 标识游戏当前所处的阶段：'playing'、'paused'、'game-over' 等。
+   * AI 只在 'playing' 模式下进行决策。
+   */
   mode: state.mode,
-  // 7-bag 状态（供 AI 确定性前瞻）
-  bag: getBagSnapshot(),
+  /*
+   * ==================== 7-bag 状态 ====================
+   *
+   * 当前 Game 实例专属的 7-bag 快照。
+   *
+   * Battle 模式修复：
+   * 之前使用模块级全局变量 `getBagSnapshot()`，导致两个 Game 实例
+   * 共享同一个 bag。现在每个 Game 实例维护独立的 `this.bag`，
+   * 通过 `Game.getBagSnapshot()` 获取深拷贝快照。
+   *
+   * 此数组在 advanceSnapshot 中被 shift 消费，用于确定性前瞻——
+   * AI 可以精确知道接下来会拿到哪些方块。
+   */
+  bag,
+  /*
+   * ==================== Hold 槽状态 ====================
+   *
+   * 暂存区中的方块对象。null 表示暂存区为空。
+   * generateMoves 使用此字段生成 Hold 候选——
+   * 如果 hold 有方块，AI 可以评估"换出来是否更好"。
+   * 如果 hold 为空，AI 使用 next 作为备选评估"Hold 一下值不值得"。
+   */
   hold: state.hold || null
 });
 var create_snapshot_default = createSnapshot;
 
 // lib/worker/ai-worker.js
 globalThis.addEventListener("message", (e) => {
-  const { type, state, weights, depth, beam } = e.data;
+  const { type, bag, state, weights, depth, beam } = e.data;
   if (type !== "think") {
     return;
   }
   try {
-    const snapshot = create_snapshot_default(state);
+    const snapshot = create_snapshot_default(state, bag);
     const best = self_play_default(snapshot, weights, depth, beam);
     globalThis.postMessage({
       type: "result",
