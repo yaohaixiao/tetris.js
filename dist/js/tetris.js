@@ -8128,6 +8128,7 @@ var tetris = (() => {
     const { gameBoard, fontSize } = canvas;
     const { width, height } = gameBoard;
     clear_board_default(canvas);
+    render_active_only_default(canvas, state);
     render_overlay_default(canvas);
     render_tetris_text_default(canvas);
     render_text_default(canvas, {
@@ -8155,6 +8156,7 @@ var tetris = (() => {
         text: `[${checked}] ${option.label}`,
         x: width * 0.5,
         y,
+        // 选中项用绿色高亮，未选中用白色
         color: isSelected ? colors_default.GREEN : colors_default.WHITE
       });
     }
@@ -8180,29 +8182,57 @@ var tetris = (() => {
 
   // lib/services/ui/scenes/index.js
   var Scenes = {
+    /**
+     * ## 游戏模式选择场景
+     *
+     * 启动后首次进入的界面，选择 SINGLE 或 BATTLE 模式。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
+     */
     "game-mode": (canvas, state) => {
       game_mode_scene_default(canvas, state);
     },
+    /**
+     * ## 对战模式选择场景
+     *
+     * 选择对战类型：VS AI（人机对战）或 VS HUMAN（双人对战）。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
+     */
     "battle-mode": (canvas, state) => {
       battle_mode_scene_default(canvas, state);
     },
+    /**
+     * ## 退出游戏菜单场景
+     *
+     * Single 模式下按 ESC 键触发，显示 RESUME GAME / EXIT GAME 选项。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
+     */
     "exit-game": (canvas, state) => {
       exit_game_scene_default(canvas, state);
     },
     /**
      * ## 主菜单场景
      *
-     * @param {object} canvas - 游戏 canvas 信息对象
-     * @param {object} state 游戏状态
+     * 选择游戏等级（1-10），按 Enter 进入难度选择。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
      */
     "main-menu": (canvas, state) => {
       main_menu_scene_default(canvas, state);
     },
     /**
-     * ## 难度选择
+     * ## 难度选择场景
      *
-     * @param {object} canvas - 游戏 canvas 信息对象
-     * @param {object} state 游戏状态
+     * 选择游戏难度：EASY / NORMAL / HARD / EXPERT。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
      */
     difficulty: (canvas, state) => {
       difficulty_scene_default(canvas, state);
@@ -8210,8 +8240,10 @@ var tetris = (() => {
     /**
      * ## 游戏进行中场景
      *
-     * @param {object} canvas - 游戏 canvas 信息对象
-     * @param {object} state 游戏状态
+     * 渲染棋盘、当前方块、Ghost 方块、预览方块和 Hold 方块。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
      */
     playing: (canvas, state) => {
       playing_scene_default(canvas, state);
@@ -8219,8 +8251,10 @@ var tetris = (() => {
     /**
      * ## 暂停场景
      *
-     * @param {object} canvas - 游戏 canvas 信息对象
-     * @param {object} state 游戏状态
+     * 在棋盘上叠加半透明遮罩 + 时钟 + "PAUSED" 文字。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
      */
     paused: (canvas, state) => {
       paused_scene_default(canvas, state);
@@ -8228,17 +8262,21 @@ var tetris = (() => {
     /**
      * ## 游戏结束场景
      *
-     * @param {object} canvas - 游戏 canvas 信息对象
-     * @param {object} state 游戏状态
+     * 显示 "GAME OVER" 文字和重新开始提示。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
      */
     "game-over": (canvas, state) => {
       game_over_scene_default(canvas, state);
     },
     /**
-     * ## 游戏回放场景
+     * ## 回放场景
      *
-     * @param {object} canvas - 游戏 canvas 信息对象
-     * @param {object} state 游戏状态
+     * 重新播放录制的游戏过程。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
      */
     replay: (canvas, state) => {
       replay_scene_default(canvas, state);
@@ -8246,8 +8284,10 @@ var tetris = (() => {
     /**
      * ## 对战结束场景
      *
-     * @param {object} canvas - 游戏 canvas 信息对象
-     * @param {object} state 游戏状态
+     * 显示胜者名称，按 Enter 重新开始对战。 复用主菜单场景的渲染逻辑。
+     *
+     * @param {object} canvas - Canvas 画布管理器
+     * @param {object} state - 当前游戏状态
      */
     "battle-over": (canvas, state) => {
       main_menu_scene_default(canvas, state);
@@ -9998,7 +10038,7 @@ var tetris = (() => {
     BACK: "QUIT",
     // 退出游戏
     RB: "SWITCH_CONTROLLER",
-    // 切换 AI/HUMAN
+    // 切换 AI/HUMAN 控制器
     RT: "HOLD",
     // 缓存方块
     // 方向键（DPad）
@@ -10035,33 +10075,33 @@ var tetris = (() => {
   ];
   var STANDARD_BTN_MAP = {
     A: 0,
-    // A 键 / 交叉键
+    // A 键 / 交叉键 → buttons[0]
     B: 1,
-    // B 键 / 圆圈键
+    // B 键 / 圆圈键 → buttons[1]
     X: 2,
-    // X 键 / 方块键
+    // X 键 / 方块键 → buttons[2]
     Y: 3,
-    // Y 键 / 三角键
+    // Y 键 / 三角键 → buttons[3]
     LB: 4,
-    // 左肩键
+    // 左肩键 → buttons[4]
     RB: 5,
-    // 右肩键
+    // 右肩键 → buttons[5]
     LT: 6,
-    // 左扳机
+    // 左扳机 → buttons[6]
     RT: 7,
-    // 右扳机
+    // 右扳机 → buttons[7]
     BACK: 8,
-    // 返回键
+    // 返回键 → buttons[8]
     START: 9,
-    // 开始键
+    // 开始键 → buttons[9]
     DPAD_UP: 12,
-    // 方向键上
+    // 方向键上 → buttons[12]
     DPAD_DOWN: 13,
-    // 方向键下
+    // 方向键下 → buttons[13]
     DPAD_LEFT: 14,
-    // 方向键左
+    // 方向键左 → buttons[14]
     DPAD_RIGHT: 15
-    // 方向键右
+    // 方向键右 → buttons[15]
   };
   var BETOP_20BC_1263_BTN_MAP = {
     A: 2,
@@ -10084,6 +10124,7 @@ var tetris = (() => {
     // 返回键
     START: 9
     // 开始键
+    // 注意：北通手柄的 DPAD 不走 buttons，而是通过 axis[9] 的值来判断
   };
   var GamepadController = class extends core_default {
     /**
@@ -10103,7 +10144,12 @@ var tetris = (() => {
     /**
      * ## 初始化手柄控制器内部状态
      *
-     * 设置所有内部状态变量的初始值，包括激活手柄索引、防抖状态、 摇杆阈值、按钮映射表等。
+     * 设置所有内部状态变量的初始值，包括：
+     *
+     * - 激活手柄索引
+     * - 防抖状态
+     * - 摇杆阈值
+     * - 按钮映射表
      *
      * @returns {void}
      */
@@ -10119,15 +10165,19 @@ var tetris = (() => {
       this.curBtnMap = STANDARD_BTN_MAP;
       this.dpadAxisState = {
         up: false,
+        // 上方向是否激活
         down: false,
+        // 下方向是否激活
         left: false,
+        // 左方向是否激活
         right: false
+        // 右方向是否激活
       };
       this.AXIS_MAP = {
         LEFT_STICK_X: 0,
-        // 左摇杆 X 轴
+        // 左摇杆 X 轴 → axes[0]
         LEFT_STICK_Y: 1
-        // 左摇杆 Y 轴
+        // 左摇杆 Y 轴 → axes[1]
       };
       this.boundGamepadIndex = null;
     }
@@ -10136,7 +10186,7 @@ var tetris = (() => {
      *
      * 对战模式下，P2 调用此方法绑定到 index=1 的手柄。 同时设置 activeGamepadIndex，跳过自动选择逻辑。
      *
-     * @param {number} index - 手柄索引
+     * @param {number} index - 手柄索引（通常是 0 或 1）
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     setBoundIndex(index) {
@@ -10147,10 +10197,15 @@ var tetris = (() => {
     /**
      * ## 每帧调用
      *
+     * 这是主要的更新循环，每帧调用一次。
+     *
      * 执行流程：
      *
      * 1. 刷新 Gamepad snapshot（获取最新的手柄状态）
-     * 2. 检查模式限制（对战 P2 只在 playing 响应、AI 不响应）
+     * 2. 检查模式限制：
+     *
+     *    - 对战 P2 只在 playing 响应
+     *    - AI 不响应手柄输入
      * 3. 如果有激活的手柄，收集所有输入并派发指令
      *
      * @param {number} now - 当前时间的时间戳（毫秒）
@@ -10160,7 +10215,9 @@ var tetris = (() => {
       const { Store, Player } = this;
       const mode = Store.getMode();
       this._refreshGamepadState();
-      if (this.boundGamepadIndex !== null && this.boundGamepadIndex > 0 && mode !== "playing") {
+      if (this.boundGamepadIndex !== null && // 如果有绑定的手柄索引
+      this.boundGamepadIndex > 0 && // 且绑定的不是第一个手柄（即 P2）
+      mode !== "playing") {
         return this;
       }
       if (mode === "playing" && Player.name === "ai") {
@@ -10175,7 +10232,7 @@ var tetris = (() => {
     /**
      * ## 绑定 Gamepad 连接事件
      *
-     * 注册游戏手柄的连接和断开事件监听器。 支持链式调用，可多次调用但只会绑定一次。
+     * 注册游戏手柄的连接和断开事件监听器。 支持链式调用，可多次调用但只会绑定一次（通过 _eventsBound 标记）。
      *
      * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
      */
@@ -10203,6 +10260,8 @@ var tetris = (() => {
     }
     /**
      * ## 手柄连接事件处理
+     *
+     * 当检测到新的手柄连接时触发。
      *
      * 处理流程：
      *
@@ -10244,6 +10303,10 @@ var tetris = (() => {
     /**
      * ## 手柄断开事件处理
      *
+     * 当激活的手柄断开连接时触发。
+     *
+     * 处理步骤：
+     *
      * - 清空激活手柄的状态
      * - 重置所有防抖状态
      * - 发送断开状态更新事件
@@ -10270,9 +10333,9 @@ var tetris = (() => {
     /**
      * ## 判断是否为 BETOP（北通）手柄
      *
-     * 通过手柄 ID 字符串进行识别。 北通特定型号 20bc:1263 需要特殊处理。
+     * 通过手柄 ID 字符串进行识别。 北通特定型号 20bc:1263 需要特殊处理。 因为它的按键映射和 DPAD 实现与标准手柄不同。
      *
-     * @param {string} id - 手柄 id 字符串（如 'Xbox 360 Controller'）
+     * @param {string} id - 手柄 id 字符串（如 'Xbox 360 Controller' 或 '20bc:1263'）
      * @returns {boolean} 是北通手柄返回 true，否则返回 false
      */
     _isBetop(id) {
@@ -10281,8 +10344,11 @@ var tetris = (() => {
     /**
      * ## 刷新 Gamepad 状态
      *
-     * - 必须每帧调用 navigator.getGamepads()
-     * - 因为 Gamepad 对象是 snapshot，不是实时引用
+     * 必须每帧调用 navigator.getGamepads()，因为 Gamepad 对象是 snapshot，不是实时引用。
+     * 如果不在每帧刷新，获取到的永远是同一个状态快照。
+     *
+     * 处理逻辑：
+     *
      * - 如果绑定了指定索引，优先使用绑定索引
      * - 如果没有激活手柄，自动选择第一个可用的手柄
      *
@@ -10311,7 +10377,7 @@ var tetris = (() => {
     /**
      * ## 根据游戏当前模式更新按键的响应动作
      *
-     * 不同游戏模式下，同一个手柄按键可以有不同的功能。
+     * 不同游戏模式下，同一个手柄按键可以有不同的功能。 这是手柄控制器的核心功能之一，实现了按键的上下文感知。
      *
      * ### 模式映射
      *
@@ -10320,13 +10386,14 @@ var tetris = (() => {
      * - `playing`：标准游戏操作，DPAD_UP 用于旋转方块
      *
      * @private
-     * @param {string} mode - 游戏模式
+     * @param {string} mode - 游戏模式（'game-mode', 'battle-mode', 'difficulty',
+     *   'playing' 等）
      * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
      */
     _updateActionMap(mode) {
       switch (mode) {
         case "game-mode":
-        case "exit-mode": {
+        case "exit-game": {
           GAMEPAD_ACTION_MAP.DPAD_UP = "MOVE_UP";
           break;
         }
@@ -10390,7 +10457,7 @@ var tetris = (() => {
      *
      * 遍历所有按钮映射，检查哪些按钮被按下，并派发相应的指令。
      *
-     * ### 屏蔽条件
+     * ### 屏蔽条件（哪些情况下不处理按钮输入）
      *
      * 1. 无法获取 action 指令名称
      * 2. 回放或游戏结束状态，按了非 START 键（只有确认键可用）
@@ -10414,7 +10481,17 @@ var tetris = (() => {
       const { Player } = Game2;
       const controller = Store.getController();
       for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
-        const isBlocked = !action || (mode === "replay" || mode === "game-over") && btnName !== "START" && btnName !== "BACK" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (btnName === "X" || Player.name === "ai" && (btnName === "Y" || btnName === "RT") || Player.name === "human" && btnName === "RB");
+        const isBlocked = !action || // 没有对应的动作
+        (mode === "replay" || mode === "game-over") && // 回放或游戏结束
+        btnName !== "START" && // 且不是 START 键
+        btnName !== "BACK" || // 且不是 BACK 键（允许返回）
+        controller === "ai" && // AI 控制时
+        mode === "playing" && // 在游戏中
+        !game_default.AI_ALLOWED_ACTIONS.includes(action) || // 且不是 AI 允许的动作
+        Game2.isVersus() && // 对战模式
+        (btnName === "X" || // X 键始终禁用（不能重新开始）
+        Player.name === "ai" && (btnName === "Y" || btnName === "RT") || // AI 禁用暂停和缓存
+        Player.name === "human" && btnName === "RB");
         const isDPad = btnName.startsWith("DPAD_");
         if (!this._isPressed(btnName)) {
           continue;
@@ -10439,8 +10516,11 @@ var tetris = (() => {
         const events = GameEvents(Game2.id);
         this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
+          // 输入设备类型：手柄
           action: finalAction,
+          // 具体动作
           payload: { Game: Game2 }
+          // 附带游戏实例
         });
       }
       return this;
@@ -10453,7 +10533,7 @@ var tetris = (() => {
      * ### 处理流程
      *
      * 1. 根据当前游戏模式更新按键映射
-     * 2. 处理标准按钮输入
+     * 2. 处理标准按钮输入（ABXY、START、BACK 等）
      * 3. 非回放/非结束时处理摇杆和 DPAD
      * 4. 北通手柄特殊处理（DPAD 通过 axis9 传递）
      *
@@ -10488,6 +10568,8 @@ var tetris = (() => {
      *
      * 仅在未触发时触发 dispatch，防止重复触发。 用于摇杆移动等连续输入场景。
      *
+     * 例如：用户持续推左摇杆，只会在第一次超过阈值时触发一次 MOVE_LEFT， 后续持续推动不会重复触发。
+     *
      * @param {string} action - 动作名称（如 'MOVE_LEFT'）
      * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
      */
@@ -10508,7 +10590,7 @@ var tetris = (() => {
     /**
      * ## 停止轴动作（重置状态）
      *
-     * 当摇杆回到死区范围内时调用。
+     * 当摇杆回到死区范围内时调用。 重置轴状态，下次推动摇杆时可以再次触发动作。
      *
      * @param {string} action - 动作名称
      * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
@@ -10520,8 +10602,10 @@ var tetris = (() => {
     /**
      * ## 处理摇杆向上移动
      *
+     * Y 轴负值表示向上推动摇杆。
+     *
      * @private
-     * @param {number} y - Y轴偏移值（-1 到 1）
+     * @param {number} y - Y轴偏移值（-1 到 1，-1 表示推到底部）
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStickUp(y) {
@@ -10535,8 +10619,10 @@ var tetris = (() => {
     /**
      * ## 处理摇杆向下移动
      *
+     * Y 轴正值表示向下推动摇杆。
+     *
      * @private
-     * @param {number} y - Y轴偏移值（-1 到 1）
+     * @param {number} y - Y轴偏移值（-1 到 1，1 表示推到底部）
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStickDown(y) {
@@ -10550,8 +10636,10 @@ var tetris = (() => {
     /**
      * ## 处理摇杆向左移动
      *
+     * X 轴负值表示向左推动摇杆。
+     *
      * @private
-     * @param {number} x - X轴偏移值（-1 到 1）
+     * @param {number} x - X轴偏移值（-1 到 1，-1 表示推到底部）
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStickLeft(x) {
@@ -10565,8 +10653,10 @@ var tetris = (() => {
     /**
      * ## 处理摇杆向右移动
      *
+     * X 轴正值表示向右推动摇杆。
+     *
      * @private
-     * @param {number} x - X轴偏移值（-1 到 1）
+     * @param {number} x - X轴偏移值（-1 到 1，1 表示推到底部）
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStickRight(x) {
@@ -10580,7 +10670,7 @@ var tetris = (() => {
     /**
      * ## 摇杆移动处理（带防抖）
      *
-     * 处理左摇杆的四个方向移动，并触发相应的游戏动作。
+     * 处理左摇杆的四个方向移动，并触发相应的游戏动作。 四个方向独立处理，互不影响。
      *
      * @param {number} x - X轴偏移值（-1 到 1），负值为左，正值为右
      * @param {number} y - Y轴偏移值（-1 到 1），负值为上，正值为下
@@ -10596,12 +10686,12 @@ var tetris = (() => {
     /**
      * ## 获取向上移动的动作
      *
-     * 在主菜单模式下用于增加关卡等级，在游戏模式下用于旋转方块。
+     * 在主菜单模式下用于增加关卡等级，在游戏模式下用于旋转方块。 实现了按键的上下文感知功能。
      *
      * @private
      * @param {string} mode - 游戏模式
      * @param {string | number} level - 当前关卡等级
-     * @returns {string} 动作名称
+     * @returns {string} 动作名称（如 'LEVEL_TWO' 或 'ROTATE'）
      */
     _getMoveUpAction(mode, level) {
       const { Game: Game2 } = this;
@@ -10622,12 +10712,12 @@ var tetris = (() => {
     /**
      * ## 获取向下移动的动作
      *
-     * 在主菜单模式下用于减少关卡等级，在游戏模式下用于加速下落。
+     * 在主菜单模式下用于减少关卡等级，在游戏模式下用于加速下落。 实现了按键的上下文感知功能。
      *
      * @private
      * @param {string} mode - 游戏模式
      * @param {string | number} level - 当前关卡等级
-     * @returns {string} 动作名称
+     * @returns {string} 动作名称（如 'LEVEL_ONE' 或 'MOVE_DOWN'）
      */
     _getMoveDownAction(mode, level) {
       let action;
@@ -10648,10 +10738,12 @@ var tetris = (() => {
     /**
      * ## 处理北通手柄方向键上
      *
+     * 北通手柄的 DPAD 通过 axis[9] 传递，需要特殊处理。 使用防抖状态避免重复触发。
+     *
      * @private
      * @param {string} mode - 游戏模式
      * @param {string | number} level - 当前等级
-     * @param {object} st - 方向键状态对象
+     * @param {object} st - 方向键状态对象（dpadAxisState）
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleBetopDpadUp(mode, level, st) {
@@ -10708,6 +10800,7 @@ var tetris = (() => {
         this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
           action: "MOVE_LEFT",
+          // 左移方块
           payload: { Game: Game2 }
         });
       }
@@ -10729,6 +10822,7 @@ var tetris = (() => {
         this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
           action: "MOVE_RIGHT",
+          // 右移方块
           payload: { Game: Game2 }
         });
       }
@@ -10742,13 +10836,13 @@ var tetris = (() => {
      *
      * ### 方向对应值
      *
-     * | 方向 | axis[9] 值 |
-     * | ---- | ---------- |
-     * | 上   | -1.00000   |
-     * | 下   | 0.14286    |
-     * | 左   | 0.71429    |
-     * | 右   | -0.42857   |
-     * | 松开 | 其他值     |
+     * | 方向 | axis[9] 值 | 说明             |
+     * | ---- | ---------- | ---------------- |
+     * | 上   | -1.00000   | 方向键上被按下   |
+     * | 下   | 0.14286    | 方向键下被按下   |
+     * | 左   | 0.71429    | 方向键左被按下   |
+     * | 右   | -0.42857   | 方向键右被按下   |
+     * | 松开 | 其他值     | 没有方向键被按下 |
      *
      * @param {number} val - Axis[9] 的原始值
      * @param {object} state - 游戏状态信息（包含 mode 和 level）
@@ -10788,6 +10882,7 @@ var tetris = (() => {
           break;
         }
         // 松开手柄，重置所有方向状态
+        // axis[9] 为其他值表示没有方向键被按下
         default: {
           st.up = st.down = st.left = st.right = false;
           break;
@@ -10798,10 +10893,12 @@ var tetris = (() => {
     /**
      * ## 获取轴值（带 dead zone）
      *
-     * 读取指定轴的数值，并应用死区过滤。 小于死区的值视为 0，避免摇杆漂移。
+     * 读取指定轴的数值，并应用死区过滤。 小于死区的值视为 0，避免摇杆漂移导致的误操作。
+     *
+     * 死区的作用：摇杆在中心位置时，由于硬件精度问题， 可能会有非常小的非零值，死区过滤可以忽略这些微小抖动。
      *
      * @param {number} index - 轴在 axes 数组中的索引
-     * @returns {number} 经过死区过滤后的轴值（范围 -1 到 1）
+     * @returns {number} 经过死区过滤后的轴值（范围 -1 到 1，死区范围内返回 0）
      */
     _getAxis(index) {
       if (!this.activeGamepad) {
@@ -10820,6 +10917,10 @@ var tetris = (() => {
      * 1. 按钮按下（value > 0.5）且之前未触发 → 返回 true，标记已触发
      * 2. 按钮按下但之前已触发 → 返回 false（长按中，忽略）
      * 3. 按钮松开（value <= 0.5）→ 重置状态，下次按下可再次触发
+     *
+     * ### 为什么使用 0.5 作为阈值？
+     *
+     * 手柄按钮的 value 通常是 0.0（未按下）到 1.0（完全按下）的模拟值， 0.5 是一个合理的中间值，可以判断按钮是否被按下。
      *
      * @param {string} btnName - 按钮名称（如 'A'、'START'）
      * @returns {boolean} 按钮刚被按下返回 true，否则返回 false
@@ -11886,14 +11987,31 @@ var tetris = (() => {
   ];
   var getActionMap = (mode, level) => {
     switch (mode) {
+      /*
+       * ==================== 简单选择界面 ====================
+       *
+       * game-mode（游戏模式选择）和 exit-game（退出菜单）共用同一套映射：
+       * - DPAD 上下键：移动选择光标
+       * - START 键：确认当前选项
+       *
+       * 这两个界面都只有两个选项，通过 ↑↓ 切换，Enter/Start 确认。
+       */
       case "game-mode":
-      case "exit-mode": {
+      case "exit-game": {
         return {
           DPAD_UP: `MOVE_UP`,
           DPAD_DOWN: `MOVE_DOWN`,
           START: "CONFIRM"
         };
       }
+      /*
+       * ==================== 对战模式选择界面 ====================
+       *
+       * battle-mode 比简单选择界面多一个 BACK 键用于返回上一级。
+       * - DPAD 上下键：移动选择光标
+       * - START 键：确认当前选项
+       * - BACK 键：返回到游戏模式选择界面
+       */
       case "battle-mode": {
         return {
           DPAD_UP: `MOVE_UP`,
@@ -11903,10 +12021,11 @@ var tetris = (() => {
         };
       }
       /**
-       * 主菜单模式：
+       * ==================== 主菜单模式（等级选择） ====================
        *
-       * - DPAD 上下键切换等级
-       * - Start 键确认并进入难度选择
+       * DPAD 上下键切换等级（1-10），Start 键确认并进入难度选择。 按键映射使用 LEVEL_ + 等级名称的动态 action。
+       *
+       * 例如 level=0 时 DPAD_UP 映射为 LEVEL_ONE，level=1 时映射为 LEVEL_TWO。
        */
       case "main-menu": {
         return {
@@ -11916,11 +12035,16 @@ var tetris = (() => {
         };
       }
       /**
-       * 难度选择模式：
+       * ==================== 难度选择模式 ====================
        *
-       * - A/B/Y/X 分别对应 Easy/Normal/Hard/Expert
-       * - Back 返回主菜单
-       * - Start 确认难度并开始游戏
+       * ABXY 四个按钮分别对应四种难度等级：
+       *
+       * - A → EASY
+       * - B → NORMAL
+       * - Y → HARD
+       * - X → EXPERT
+       * - BACK → 返回主菜单
+       * - START → 确认难度并开始游戏
        */
       case "difficulty": {
         return {
@@ -11933,15 +12057,17 @@ var tetris = (() => {
         };
       }
       /**
-       * 游戏进行中模式：
+       * ==================== 游戏进行中模式 ====================
        *
-       * - A：切换音乐
+       * 完整的游戏操作映射：
+       *
+       * - A：切换背景音乐
        * - B：硬降
        * - X：重新开始
        * - Y：暂停/继续
-       * - Back：退出游戏
-       * - Hold：缓存方块
-       * - DPAD：移动和旋转
+       * - BACK：退出游戏（对战模式认输 / 单人模式退出菜单）
+       * - HOLD：缓存方块
+       * - DPAD 上下左右：移动和旋转方块
        */
       case "playing": {
         return {
@@ -11957,7 +12083,11 @@ var tetris = (() => {
           DPAD_RIGHT: "MOVE_RIGHT"
         };
       }
-      /** 其他模式（replay、game-over 等）使用默认映射 */
+      /**
+       * ==================== 其他模式 ====================
+       *
+       * Replay、game-over、battle-over 等模式使用默认映射。
+       */
       default: {
         return TOUCH_ACTION_MAP;
       }
@@ -11971,6 +12101,7 @@ var tetris = (() => {
      * @param {object} options.Controls - DOM 元素 ID 配置
      * @param {object} options.Store - 游戏状态存储
      * @param {object} options.Game - 游戏主实例
+     * @param {object} options.Player - 玩家信息对象（name + index）
      */
     constructor(options) {
       super(options);
@@ -11979,7 +12110,8 @@ var tetris = (() => {
     /**
      * ## 初始化触摸控制器
      *
-     * 获取所有按钮 DOM 元素的引用，绑定事件监听器。
+     * 获取所有按钮 DOM 元素的引用，绑定事件监听器。 使用 Player 的 name 和 index 构建 DOM 元素的选择器， 确保 Battle
+     * 模式下两个玩家的按钮互不干扰。
      *
      * @returns {void}
      */
@@ -12003,7 +12135,14 @@ var tetris = (() => {
     /**
      * ## 分发触摸事件为游戏输入
      *
-     * 根据当前游戏模式获取按键映射，将触摸按键转换为游戏 action， 通过 `dispatch:input` 事件注入到命令队列中。
+     * 根据当前游戏模式获取按键映射，将触摸按键转换为游戏 action， 通过带 Game ID scope 的 dispatch:input
+     * 事件注入到命令队列中。
+     *
+     * ### 特殊处理
+     *
+     * - **main-menu 模式**：DPAD 上下键在分发前先调整 this.level（等级索引）
+     * - **exit-game 模式**：DPAD 上下键直接映射为 MOVE_UP / MOVE_DOWN， 光标切换逻辑由
+     *   GameRouter._onUpdateExitIndex 处理
      *
      * @param {string} key - 触摸按键标识（如 'A', 'DPAD_UP' 等）
      * @returns {void}
@@ -12025,9 +12164,9 @@ var tetris = (() => {
         this.emit(events.DISPATCH_INPUT, {
           /** 输入设备类型：触摸屏 */
           device: "touch",
-          /** 游戏动作指令 */
+          /** 游戏动作指令（如 MOVE_LEFT、ROTATE、CONFIRM 等） */
           action,
-          /** 传递给命令处理器的参数 */
+          /** 传递给命令处理器的参数，包含 Game 实例引用 */
           payload: { Game: Game2 }
         });
       }
@@ -12035,7 +12174,7 @@ var tetris = (() => {
     /**
      * ## 绑定所有按钮的点击事件
      *
-     * 为 DPAD（4 个方向）、ABXY（4 个按钮）、Start、Back 共 10 个按钮 绑定 click 事件监听器。
+     * 为 DPAD（4 个方向）、ABXY（4 个按钮）、Start、Back、Hold 共 11 个按钮绑定 click 事件监听器。
      *
      * @returns {void}
      */
@@ -12076,6 +12215,14 @@ var tetris = (() => {
      * ## 处理按钮点击事件
      *
      * 从被点击元素的 `data-key` 属性中读取按键标识， 转为大写后调用 `dispatchTouch()` 分发。
+     *
+     * ### data-key 属性
+     *
+     * 每个按钮 DOM 元素通过 `data-key` 属性标识自己的按键名称：
+     *
+     * - DPAD 方向键：`data-key="dpad_up"` / `"dpad_down"` 等
+     * - ABXY 按钮：`data-key="a"` / `"b"` 等
+     * - 系统按钮：`data-key="start"` / `"back"` / `"hold"`
      *
      * @private
      * @param {Event} evt - 点击事件对象
@@ -17207,7 +17354,14 @@ var tetris = (() => {
   // lib/game/actions/game-playing-actions.js
   var GAME_PLAYING_ACTIONS = {
     /**
-     * ## 放弃比赛
+     * ## 退出 / 认输
+     *
+     * 对战模式下发送 SURRENDER 事件触发认输流程， 单人模式下发送 EXIT 事件显示退出菜单。
+     *
+     * ### 触发按键
+     *
+     * - 键盘：ESC
+     * - 手柄：Back
      *
      * @param {object} payload - 按键事件传递的参数对象
      * @param {object} payload.Game - 游戏主实例
@@ -17226,9 +17380,11 @@ var tetris = (() => {
       }
     },
     /**
-     * ## 向左移动
+     * ## 向左移动方块
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     MOVE_LEFT: (payload) => {
       const Game2 = payload?.Game;
@@ -17242,9 +17398,11 @@ var tetris = (() => {
       });
     },
     /**
-     * ## 向右移动
+     * ## 向右移动方块
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     MOVE_RIGHT: (payload) => {
       const Game2 = payload?.Game;
@@ -17258,9 +17416,11 @@ var tetris = (() => {
       });
     },
     /**
-     * ## 向下移动（软降）
+     * ## 向下加速下落（软降）
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     MOVE_DOWN: (payload) => {
       const Game2 = payload?.Game;
@@ -17276,7 +17436,11 @@ var tetris = (() => {
     /**
      * ## 旋转方块
      *
+     * 尝试顺时针旋转当前方块，包含 SRS 墙踢检测。 O 块（正方形）旋转后形状不变，跳过旋转。
+     *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     ROTATE: (payload) => {
       const Game2 = payload?.Game;
@@ -17287,9 +17451,13 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_ROTATE);
     },
     /**
-     * ## 硬降（直接落地）
+     * ## 硬降（Hard Drop）
+     *
+     * 将方块瞬间落到底部，触发锁定、消行检测和新方块生成。
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     DROP: (payload) => {
       const Game2 = payload?.Game;
@@ -17300,9 +17468,13 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_DROP);
     },
     /**
-     * ## 缓存方块
+     * ## 缓存方块（Hold）
+     *
+     * 将当前活动方块存入 Hold 区，或与 Hold 区方块交换。 每个方块在一局游戏中只能被 Hold 一次。
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     HOLD: (payload) => {
       const Game2 = payload?.Game;
@@ -17316,6 +17488,8 @@ var tetris = (() => {
      * ## 暂停 / 继续切换
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     TOGGLE_PAUSED: (payload) => {
       const Game2 = payload?.Game;
@@ -17329,6 +17503,8 @@ var tetris = (() => {
      * ## 重新开始游戏
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     RESTART: (payload) => {
       const Game2 = payload?.Game;
@@ -17341,9 +17517,11 @@ var tetris = (() => {
     /**
      * ## 强制结束游戏
      *
-     * 注意：直接调用 over 属于“全局副作用”
+     * 直接触发游戏结束流程，跳过正常消行/得分逻辑。
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     QUIT: (payload) => {
       const Game2 = payload?.Game;
@@ -17357,6 +17535,8 @@ var tetris = (() => {
      * ## 背景音乐开关
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     TOGGLE_MUSIC: (payload) => {
       const Game2 = payload?.Game;
@@ -17367,9 +17547,13 @@ var tetris = (() => {
       Game2.emit(events.TOGGLE_BGM);
     },
     /**
-     * ## 切换当前游戏控制者：human/ai 相互切换
+     * ## 切换控制者（human ↔ ai）
+     *
+     * 在单人模式下切换玩家控制和 AI 控制。 GameRouter 收到事件后更新 Store 并发送 AI 启停事件。
      *
      * @param {object} payload - 按键事件传递的参数对象
+     * @param {object} payload.Game - 游戏主实例
+     * @returns {void}
      */
     SWITCH_CONTROLLER: (payload) => {
       const Game2 = payload?.Game;
