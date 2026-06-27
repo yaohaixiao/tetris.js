@@ -1,4 +1,4 @@
-# tetris.js
+# tetris.js - A Modern JavaScript Tetris Engine
 
 [![npm version](https://img.shields.io/npm/v/@yaohaixiao/tetris.js)](https://www.npmjs.com/package/@yaohaixiao/tetris.js)
 [![prettier code style](https://img.shields.io/badge/code_style-prettier-07b759.svg)](https://prettier.io)
