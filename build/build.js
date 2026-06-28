@@ -26,10 +26,10 @@ const build = async () => {
       return buildWorker(args);
     })
     .then(() => {
-      return copyFile('./assets/img/bg.jpg', './dist/img/bg.jpg');
+      return copyFile('./docs/assets/img/bg.jpg', './dist/img/bg.jpg');
     })
     .then(() => {
-      return copyDir('./assets/font', './dist/font');
+      return copyDir('./docs/assets/font', './dist/font');
     });
 };
 

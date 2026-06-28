@@ -1,16 +1,20 @@
 # tetris.js
 
+---
+
 [![npm version](https://img.shields.io/npm/v/@yaohaixiao/tetris.js)](https://www.npmjs.com/package/@yaohaixiao/tetris.js)
 [![prettier code style](https://img.shields.io/badge/code_style-prettier-07b759.svg)](https://prettier.io)
 [![npm downloads](https://img.shields.io/npm/dt/@yaohaixiao/tetris.js)](https://npmcharts.com/compare/@yaohaixiao/tetris.js?minimal=true)
 [![MIT License](https://img.shields.io/github/license/yaohaixiao/tetris.js.svg)](https://github.com/yaohaixiao/tetris.js/blob/main/LICENSE)
+
+---
 
 简体中文 | [English](./README.EN.md)
 
 > A Modern JavaScript Game Runtime & Tetris Engine
 
 <p align="center">
-    <img src="assets/img/screen-shot.gif" alt="tetris.js">
+    <img src="docs/assets/img/screen-shot.gif" alt="tetris.js">
 </p>
 
 ---
@@ -63,6 +67,10 @@ GitHub 上已经有很多优秀的俄罗斯方块项目。 它们实现了完整
 
 ---
 
+![System Architecture Diagram](docs/assets/img/architecture-poster.png)
+
+---
+
 ### ⚙️ 独立的 Game Runtime
 
 项目并没有将游戏逻辑直接写在浏览器事件中，而是建立了一套独立的运行时。
@@ -85,9 +93,7 @@ AI 与玩家共享同一套游戏逻辑。
 
 ### 🎬 Replay 回放系统
 
-Replay 并不是录制 Canvas。
-
-也不是保存每一帧画面。
+Replay 并不是录制 Canvas，也不是保存每一帧画面。
 
 它仅记录游戏过程中产生的命令（Command）。
 
@@ -97,9 +103,7 @@ Replay 并不是录制 Canvas。
 
 ### 🎯 Command 驱动架构
 
-无论输入来自键盘、手柄、触摸屏，还是 AI。
-
-最终都会被转换成统一的 Command。
+无论输入来自键盘、手柄、触摸屏，还是 AI。最终都会被转换成统一的 Command。
 
 Runtime 只处理 Command，而不关心它来自哪里。
 
@@ -137,8 +141,11 @@ Runtime 只处理 Command，而不关心它来自哪里。
 
 支持键盘、Gamepad 与移动端触摸操作。
 
-不同输入设备都会经过统一的输入抽象，最终转换为 Runtime 可识别的 Command。
+<p align="center">
+  <img src="docs/assets/img/game-boy-layout.png" alt="Tetris Game Screenshot - GAME BOY Layout">
+</p>
 
+不同输入设备都会经过统一的输入抽象，最终转换为 Runtime 可识别的 Command。
 游戏逻辑无需关心输入来源。
 
 ---
@@ -148,6 +155,30 @@ Runtime 只处理 Command，而不关心它来自哪里。
 整个项目基于现代 JavaScript 实现，不依赖 Phaser、PixiJS 等游戏框架。
 
 除了浏览器原生 API，没有引入任何游戏运行时相关依赖。
+
+> 深入阅读：[Features](./docs/01-features.md)
+
+---
+
+## 浏览器兼容
+
+| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" width="24"/>](#) Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" width="24"/>](#) Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" width="24"/>](#) Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" width="24"/>](#) Safari | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera_48x48.png" width="24"/>](#) Opera |
+| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 128 – 131                                                                                                              | 130 – 132                                                                                                                       | 109 – 131                                                                                                                    | 17.5 – 18.1                                                                                                                  | 113 – 114                                                                                                                 |
+
+**备注**：项目使用标准 ES6+、Canvas、Gamepad API，不兼容 IE 系列浏览器。
+
+---
+
+## 项目文档
+
+1. [Architecture](./docs/02-architecture.md)
+2. [Runtime](./docs/03-runtime.md)
+3. [AI](./docs/04-ai.md)
+4. [Replay](./docs/05-replay.md)
+5. [Battle](./docs/06-battle.md)
+6. [Development](./docs/07-development.md)
+7. [Game Controls and Rules](./docs/08-controls-and-rules.md)
 
 ---
 

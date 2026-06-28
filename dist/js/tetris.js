@@ -1372,6 +1372,10 @@ var tetris = (() => {
   ];
   var param_sets_default = PARAM_SETS;
 
+  // lib/utils/types/is-number.js
+  var isNumber = (value) => typeof value === "number" && Number.isFinite(value);
+  var is_number_default = isNumber;
+
   // lib/services/audio/play-tone.js
   var playTone = (audio, freq, dur, options = {}) => {
     if (!freq || dur <= 0) {
@@ -1379,16 +1383,16 @@ var tetris = (() => {
     }
     const { Context } = audio;
     const {
-      // 音量峰值
       volume = 0.15,
-      // 默认方波
+      // 音量峰值，默认 15%
       wave = "square",
-      // 默认连奏，音符唱满时值
+      // 波形类型，默认方波（音色较硬，适合游戏音效）
       gate = 1,
-      // 运音包络
+      // 时值占比，1 = 连奏（音符唱满）
       articulation = {},
-      // 默认立即开始
+      // 运音包络参数，详见下方解构
       startTime = Context.currentTime
+      // 开始时间，默认立即播放
     } = options;
     const osc = Context.createOscillator();
     const gain = Context.createGain();
@@ -1398,20 +1402,38 @@ var tetris = (() => {
     const noteLen = step * gate;
     const {
       attackTime = 3e-3,
-      // 起音时间，3ms 快速起音
+      // 起音时间：从触发到达到峰值的时间（秒）
       releaseTime = 0.02,
-      // 释音时间，20ms 平滑收尾
+      // 释音时间：从开始衰减到归零的时间（秒）
       sustainRatio = 0.9
-      // 延音比，保持 90% 峰值音量进入衰减段
+      // 延音比：峰值音量在 hold 阶段的保持比例
     } = articulation;
     const t0 = startTime;
     const t1 = t0 + attackTime;
     const t2 = t0 + Math.max(noteLen - releaseTime, attackTime);
     const t3 = t0 + noteLen;
-    gain.gain.setValueAtTime(1e-4, t0);
-    gain.gain.linearRampToValueAtTime(volume, t1);
-    gain.gain.linearRampToValueAtTime(volume * sustainRatio, t2);
-    gain.gain.exponentialRampToValueAtTime(1e-4, t3);
+    const MIN_GAIN = 1e-4;
+    const safeVolume = is_number_default(volume) && volume > 0 ? volume : 0.15;
+    const safeSustainRatio = is_number_default(sustainRatio) && sustainRatio > 0 ? sustainRatio : 0.9;
+    if (!Number.isFinite(freq) || freq <= 0) {
+      return;
+    }
+    gain.gain.setValueAtTime(MIN_GAIN, t0);
+    gain.gain.linearRampToValueAtTime(safeVolume, t1);
+    const sustainLevel = safeVolume * safeSustainRatio;
+    if (!Number.isFinite(sustainLevel) || sustainLevel <= 0) {
+      gain.gain.linearRampToValueAtTime(MIN_GAIN, t2);
+    } else {
+      gain.gain.linearRampToValueAtTime(sustainLevel, t2);
+    }
+    try {
+      gain.gain.cancelScheduledValues(t2);
+      const startGain = sustainLevel > 0 ? sustainLevel : MIN_GAIN;
+      gain.gain.setValueAtTime(startGain, t2);
+      gain.gain.exponentialRampToValueAtTime(MIN_GAIN, t3);
+    } catch {
+      gain.gain.linearRampToValueAtTime(MIN_GAIN, t3);
+    }
     osc.connect(gain);
     gain.connect(Context.destination);
     osc.start(t0);
