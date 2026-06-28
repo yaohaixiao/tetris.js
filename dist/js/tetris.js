@@ -1496,7 +1496,7 @@ var tetris = (() => {
      * @returns {void}
      */
     SWITCH_SCENE = () => {
-      play_tone_default(this, 620, 80, { volume: 0.2, wave: 'triangle' });
+      play_tone_default(this, 620, 100, { volume: 0.2, wave: 'triangle' });
     };
     /**
      * ## 难度选择音效
@@ -16838,6 +16838,7 @@ var tetris = (() => {
       loser.emit(LE.UPDATE_MODE, payload);
       const { Player } = winner;
       winner.emit(AE.STOP_BGM);
+      winner.emit(AE.PLAY_SOUND, { sound: 'SWITCH_SCENE' });
       this.ui.show({ winner: Player });
     }
     /**
