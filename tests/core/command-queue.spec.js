@@ -244,7 +244,8 @@ describe('CommandQueue', () => {
 
       const commands = Array.from(
         { length: 100 },
-        (_, i) => new Command(`CMD_${i}`, { Game: { id: 'test-game-uuid-123' } }),
+        (_, i) =>
+          new Command(`CMD_${i}`, { Game: { id: 'test-game-uuid-123' } }),
       );
 
       commands.forEach((cmd) => commandQueue.enqueue(cmd));
@@ -402,8 +403,10 @@ describe('CommandQueue', () => {
       EventBus.on(DISPATCH_COMMAND, handler);
 
       const count = 1000;
-      const commands = Array.from({ length: count }, (_, i) =>
-        new Command(`CMD_${i}`, { Game: { id: 'test-game-uuid-123' } }),
+      const commands = Array.from(
+        { length: count },
+        (_, i) =>
+          new Command(`CMD_${i}`, { Game: { id: 'test-game-uuid-123' } }),
       );
 
       commands.forEach((cmd) => commandQueue.enqueue(cmd));

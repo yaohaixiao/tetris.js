@@ -507,7 +507,12 @@ describe('evaluateBoard', () => {
       for (let y = 15; y < 20; y++) board[y][0] = 1;
       // survival: agg=5×-0.7=-3.5, bump=5×-0.35=-1.75 → -5.25
       // versus:   agg=5×-0.8=-4.0, bump=5×-0.4=-2.0 → -6.0
-      const survivalScore = evaluateBoard(board, undefined, undefined, 'survival');
+      const survivalScore = evaluateBoard(
+        board,
+        undefined,
+        undefined,
+        'survival',
+      );
       const versusScore = evaluateBoard(board, undefined, undefined, 'versus');
       expect(versusScore).toBeLessThan(survivalScore);
       expect(versusScore).toBeCloseTo(-6.0, 2);
@@ -520,8 +525,18 @@ describe('evaluateBoard', () => {
       const clearResult = { cleared: 4, clearScore: 800, combo: 0 };
       // survival: lineReward=40×(20/4)=200, clearScore×0.03=24 → 224
       // versus:   lineReward=40×(25/4)=250, clearScore×0.03=24 → 274
-      const survivalScore = evaluateBoard(board, undefined, clearResult, 'survival');
-      const versusScore = evaluateBoard(board, undefined, clearResult, 'versus');
+      const survivalScore = evaluateBoard(
+        board,
+        undefined,
+        clearResult,
+        'survival',
+      );
+      const versusScore = evaluateBoard(
+        board,
+        undefined,
+        clearResult,
+        'versus',
+      );
       expect(versusScore).toBeGreaterThan(survivalScore);
       expect(versusScore).toBeCloseTo(299, 2);
     });
@@ -533,8 +548,18 @@ describe('evaluateBoard', () => {
       const clearResult = { cleared: 2, clearScore: 300, combo: 0 };
       // survival: lineReward=6×(20/4)=30, clearScore×0.03=9 → 39
       // versus:   lineReward=6×(25/4)=37.5, clearScore×0.03=9, attack=10 → 56.5
-      const survivalScore = evaluateBoard(board, undefined, clearResult, 'survival');
-      const versusScore = evaluateBoard(board, undefined, clearResult, 'versus');
+      const survivalScore = evaluateBoard(
+        board,
+        undefined,
+        clearResult,
+        'survival',
+      );
+      const versusScore = evaluateBoard(
+        board,
+        undefined,
+        clearResult,
+        'versus',
+      );
       expect(versusScore).toBeGreaterThan(survivalScore);
       expect(versusScore).toBeCloseTo(46.5, 2);
     });
@@ -546,8 +571,18 @@ describe('evaluateBoard', () => {
       const clearResult = { cleared: 4, clearScore: 800, combo: 0 };
       // survival: lineReward=40×(20/4)=200, clearScore×0.03=24 → 224
       // versus:   lineReward=40×(25/4)=250, clearScore×0.03=24, attack=50 → 324
-      const survivalScore = evaluateBoard(board, undefined, clearResult, 'survival');
-      const versusScore = evaluateBoard(board, undefined, clearResult, 'versus');
+      const survivalScore = evaluateBoard(
+        board,
+        undefined,
+        clearResult,
+        'survival',
+      );
+      const versusScore = evaluateBoard(
+        board,
+        undefined,
+        clearResult,
+        'versus',
+      );
       expect(versusScore).toBeGreaterThan(survivalScore);
       expect(versusScore).toBeCloseTo(299, 2);
     });
@@ -559,8 +594,18 @@ describe('evaluateBoard', () => {
       const clearResult = { cleared: 1, clearScore: 100, combo: 0 };
       // survival: lineReward=2×(20/4)=10, clearScore×0.03=3 → 13
       // versus:   lineReward=2×(25/4)=12.5, clearScore×0.03=3, attack=0 → 15.5
-      const survivalScore = evaluateBoard(board, undefined, clearResult, 'survival');
-      const versusScore = evaluateBoard(board, undefined, clearResult, 'versus');
+      const survivalScore = evaluateBoard(
+        board,
+        undefined,
+        clearResult,
+        'survival',
+      );
+      const versusScore = evaluateBoard(
+        board,
+        undefined,
+        clearResult,
+        'versus',
+      );
       expect(versusScore).toBeGreaterThan(survivalScore);
       expect(versusScore).toBeCloseTo(15.5, 2);
     });
@@ -574,7 +619,12 @@ describe('evaluateBoard', () => {
       board[17][0] = 1;
       // survival: agg=3×-0.7=-2.1, bump=3×-0.35=-1.05, holes=1×-8=-8 → -11.15
       // versus:   agg=3×-0.8=-2.4, bump=3×-0.4=-1.2, holes=1×-9=-9 → -12.6
-      const survivalScore = evaluateBoard(board, undefined, undefined, 'survival');
+      const survivalScore = evaluateBoard(
+        board,
+        undefined,
+        undefined,
+        'survival',
+      );
       const versusScore = evaluateBoard(board, undefined, undefined, 'versus');
       expect(versusScore).toBeLessThan(survivalScore);
       expect(versusScore).toBeCloseTo(-12.6, 2);

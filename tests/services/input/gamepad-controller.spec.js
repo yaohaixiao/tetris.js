@@ -1578,8 +1578,7 @@ describe('GamepadController', () => {
 
       // BETOP DPAD 不走按钮方式，应该没有触发 MOVE_LEFT
       const moveLeftCalls = gamepad.emit.mock.calls.filter(
-        (call) =>
-          call[0] === DISPATCH_INPUT && call[1]?.action === 'MOVE_LEFT',
+        (call) => call[0] === DISPATCH_INPUT && call[1]?.action === 'MOVE_LEFT',
       );
       expect(moveLeftCalls.length).toBe(0);
     });

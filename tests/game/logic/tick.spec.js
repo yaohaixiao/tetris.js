@@ -127,11 +127,14 @@ describe('tick', () => {
 
       tick(mockContext, false);
 
-      expect(mockContext.emit).toHaveBeenCalledWith('game:test-uuid:dispatch:input', {
-        device: 'replay',
-        action: 'AUTO_TICK',
-        payload: { Game: mockContext },
-      });
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'game:test-uuid:dispatch:input',
+        {
+          device: 'replay',
+          action: 'AUTO_TICK',
+          payload: { Game: mockContext },
+        },
+      );
     });
 
     it('mode 为 replay 时不应该发送 AUTO_TICK', () => {
