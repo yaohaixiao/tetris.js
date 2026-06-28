@@ -86,7 +86,9 @@ describe('playTone', () => {
       // 但后续的增益操作不会执行（因为在校验后直接 return）
       expect(mockGainNode.gain.setValueAtTime).not.toHaveBeenCalled();
       expect(mockGainNode.gain.linearRampToValueAtTime).not.toHaveBeenCalled();
-      expect(mockGainNode.gain.exponentialRampToValueAtTime).not.toHaveBeenCalled();
+      expect(
+        mockGainNode.gain.exponentialRampToValueAtTime,
+      ).not.toHaveBeenCalled();
 
       // 连接不会执行
       expect(mockOscillator.connect).not.toHaveBeenCalled();
@@ -467,8 +469,10 @@ describe('playTone', () => {
 
       // 验证调用顺序
       const setValueCalls = mockGainNode.gain.setValueAtTime.mock.calls;
-      const linearRampCalls = mockGainNode.gain.linearRampToValueAtTime.mock.calls;
-      const expRampCalls = mockGainNode.gain.exponentialRampToValueAtTime.mock.calls;
+      const linearRampCalls =
+        mockGainNode.gain.linearRampToValueAtTime.mock.calls;
+      const expRampCalls =
+        mockGainNode.gain.exponentialRampToValueAtTime.mock.calls;
 
       // setValueAtTime 在 t0
       expect(setValueCalls[0]).toEqual([0.0001, 100]);
@@ -498,7 +502,10 @@ describe('playTone', () => {
       // t2 = 100 + max(0.16 - 0.015, 0.002) = 100.145
       // t3 = 100.16
 
-      expect(mockGainNode.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, 100);
+      expect(mockGainNode.gain.setValueAtTime).toHaveBeenCalledWith(
+        0.0001,
+        100,
+      );
       expect(mockGainNode.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
         0.3,
         100.002,

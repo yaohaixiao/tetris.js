@@ -1,35 +1,30 @@
 # [1.21.0](https://github.com/yaohaixiao/tetris.js/compare/1.20.0...1.21.0) (2026-06-27)
 
-
 ### Features
 
-* 调优 AI，single 和 battle 得决策参数和逻辑调整得更像普通玩家，但速度和前瞻性更好； ([d99bdeb](https://github.com/yaohaixiao/tetris.js/commit/d99bdebf1470f5aa16f4897354716dff0dad3a37))
-
+- 调优 AI，single 和 battle 得决策参数和逻辑调整得更像普通玩家，但速度和前瞻性更好； ([d99bdeb](https://github.com/yaohaixiao/tetris.js/commit/d99bdebf1470f5aa16f4897354716dff0dad3a37))
 
 # [1.20.0](https://github.com/yaohaixiao/tetris.js/compare/1.19.1...1.20.0) (2026-06-27)
 
-
 ### Bug Fixes
 
-* 调整 AI 配置，处理 AI 对高度不敏感的问题； ([66987d2](https://github.com/yaohaixiao/tetris.js/commit/66987d2a51a11a50068cd572bce94d2205a26148))
-* 修复 7 bag 生成的方块，在 battle 模式使用全局变量导致的可能的方块决策错误的问题； ([6281c4c](https://github.com/yaohaixiao/tetris.js/commit/6281c4c9425cb62286fa71e445def015c705d1be))
-* 修复 battle 模式，AI 重复 start 导致多个 Scheduler 干扰导致的决策错误问题； ([b702ac6](https://github.com/yaohaixiao/tetris.js/commit/b702ac6aa22851b00930c0098c0e9276a9cc508b))
-* 修复 dispatch:input 和 dispatch:command 全局事件名导致的 battle 模式出现的干扰错误； ([3797fbf](https://github.com/yaohaixiao/tetris.js/commit/3797fbf6dcca99582d38e73136a15bbe63c18e8e))
-
+- 调整 AI 配置，处理 AI 对高度不敏感的问题； ([66987d2](https://github.com/yaohaixiao/tetris.js/commit/66987d2a51a11a50068cd572bce94d2205a26148))
+- 修复 7
+  bag 生成的方块，在 battle 模式使用全局变量导致的可能的方块决策错误的问题； ([6281c4c](https://github.com/yaohaixiao/tetris.js/commit/6281c4c9425cb62286fa71e445def015c705d1be))
+- 修复 battle 模式，AI 重复 start 导致多个 Scheduler 干扰导致的决策错误问题； ([b702ac6](https://github.com/yaohaixiao/tetris.js/commit/b702ac6aa22851b00930c0098c0e9276a9cc508b))
+- 修复 dispatch:input 和 dispatch:command 全局事件名导致的 battle 模式出现的干扰错误； ([3797fbf](https://github.com/yaohaixiao/tetris.js/commit/3797fbf6dcca99582d38e73136a15bbe63c18e8e))
 
 ### Features
 
-* 添加 single 模式，游戏中按 ESC 放弃游戏功能； ([10e174e](https://github.com/yaohaixiao/tetris.js/commit/10e174e9db5bd06042ce5084a70e997f7170a1f5))
-* 针对 battle 模式，优化 AI 决策逻辑，让 AI 更会攻击； ([129e1c2](https://github.com/yaohaixiao/tetris.js/commit/129e1c2802ce339b2bf346522863499ae0690200))
-
+- 添加 single 模式，游戏中按 ESC 放弃游戏功能； ([10e174e](https://github.com/yaohaixiao/tetris.js/commit/10e174e9db5bd06042ce5084a70e997f7170a1f5))
+- 针对 battle 模式，优化 AI 决策逻辑，让 AI 更会攻击； ([129e1c2](https://github.com/yaohaixiao/tetris.js/commit/129e1c2802ce339b2bf346522863499ae0690200))
 
 ## [1.19.1](https://github.com/yaohaixiao/tetris.js/compare/1.19.0...1.19.1) (2026-06-26)
 
-
 ### Bug Fixes
 
-* **ai:** 修复 AI 评分系统，使用新增满行数替代全部满行数 ([75750d3](https://github.com/yaohaixiao/tetris.js/commit/75750d39a4ec7f6235b75dd2fc15a3ea849edbb8))
-
+- **ai:**
+  修复 AI 评分系统，使用新增满行数替代全部满行数 ([75750d3](https://github.com/yaohaixiao/tetris.js/commit/75750d39a4ec7f6235b75dd2fc15a3ea849edbb8))
 
 # [1.19.0](https://github.com/yaohaixiao/tetris.js/compare/1.18.0...1.19.0) (2026-06-24)
 

@@ -135,8 +135,23 @@ describe('isNumber', () => {
   describe('性能测试', () => {
     test('大数据量测试（10000 次调用）', () => {
       const values = [
-        123, -456, 3.14, NaN, Infinity, '123', true, null, undefined, {},
-        [], () => {}, Symbol('test'), 0, -0, 1e5, -1e-5,
+        123,
+        -456,
+        3.14,
+        NaN,
+        Infinity,
+        '123',
+        true,
+        null,
+        undefined,
+        {},
+        [],
+        () => {},
+        Symbol('test'),
+        0,
+        -0,
+        1e5,
+        -1e-5,
       ];
 
       const start = performance.now();
