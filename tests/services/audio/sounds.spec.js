@@ -54,10 +54,10 @@ describe('Sounds', () => {
       });
     });
 
-    test('SWITCH_SCENE — 620Hz triangle 80ms', () => {
+    test('SWITCH_SCENE — 620Hz triangle 100ms', () => {
       sounds.SWITCH_SCENE();
-      expect(playTone).toHaveBeenCalledWith(sounds, 620, 80, {
-        volume: 0.2,
+      expect(playTone).toHaveBeenCalledWith(sounds, 620, 100, {
+        volume: 0.25,
         wave: 'triangle',
       });
     });
