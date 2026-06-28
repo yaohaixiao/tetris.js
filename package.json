@@ -5,7 +5,8 @@
   "main": "lib/tetris.js",
   "files": [
     "lib",
-    "dist"
+    "dist",
+    "docs"
   ],
   "scripts": {
     "dev": "live-server --port=13000 --open=./dist/index.html",
