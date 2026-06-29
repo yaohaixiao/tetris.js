@@ -62,7 +62,8 @@ body {
   background-size: cover;
 }
 /* ====== 容器样式 ====== */
-.tetris-container {
+.tetris-container,
+.tetris-player {
   position: relative;
   z-index: 1;
   display: flex;
@@ -88,6 +89,9 @@ body {
   text-align: center;
   user-select: none;
   overflow: hidden;
+}
+.tetris-player {
+  height: 100%;
 }
 .tetris-screen {
   display: flex;

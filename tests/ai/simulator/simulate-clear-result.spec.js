@@ -13,15 +13,11 @@ jest.mock('@/lib/game/constants/game.js', () => ({
 describe('simulateClearResult', () => {
   // ==================== 辅助函数 ====================
 
-  /**
-   * 创建空棋盘（20 行 × 10 列，全部为 0）
-   */
+  /** 创建空棋盘（20 行 × 10 列，全部为 0） */
   const createBoard = () =>
     Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0));
 
-  /**
-   * 创建模拟快照，包含 combo、backToBack、tSpin 字段
-   */
+  /** 创建模拟快照，包含 combo、backToBack、tSpin 字段 */
   const createSnapshot = (overrides = {}) => ({
     combo: 0,
     backToBack: false,

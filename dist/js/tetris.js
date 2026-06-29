@@ -774,7 +774,7 @@ var tetris = (() => {
             <canvas id="${player}-${index}-${Canvas.next}" class="tetris-next-piece"></canvas>
           </section>
           <section class="tetris-panel controller">
-            <p class="tetris-panel-text tetris-highlight"><span id="${player}-${index}-${Hud.controller}">Human</span></p>
+            <p class="tetris-panel-text tetris-highlight"><span id="${player}-${index}-${Hud.controller}">${player}</span></p>
           </section>
           <section class="tetris-panel data">
             <p class="tetris-panel-text">SCORE:<br><span id="${player}-${index}-${Hud.score}">00000</span></p>
@@ -14959,6 +14959,10 @@ var tetris = (() => {
   };
   var set_storage_default = setStorage;
 
+  // lib/utils/dom/get-screen-width.js
+  var getScreenWidth = () => Math.max(screen.width, screen.availWidth);
+  var get_screen_width_default = getScreenWidth;
+
   // lib/game/index.js
   var Game = class extends core_default {
     /**
@@ -15133,8 +15137,12 @@ var tetris = (() => {
      * @returns {void}
      */
     launch() {
-      const { Store, UI: UI2, isRelaunch } = this;
-      const mode = isRelaunch ? "main-menu" : Store.getMode();
+      const { Store, UI: UI2, Player, isRelaunch } = this;
+      const screenWidth = get_screen_width_default();
+      const mode = isRelaunch || screenWidth <= 480 ? "main-menu" : Store.getMode();
+      if (this.isVersus() && Player.name === "ai") {
+        Store.setController("ai");
+      }
       Store.resetBoard();
       this.loadHighScore();
       this.setBeginningState(mode);
@@ -15381,10 +15389,9 @@ var tetris = (() => {
      * @returns {void}
      */
     begin() {
-      const { AI, Store, Player } = this;
+      const { AI, Player } = this;
       begin_default(this);
       if (this.isVersus() && Player.name === "ai") {
-        Store.setController("ai");
         AI.start();
       }
     }
