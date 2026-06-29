@@ -1,7 +1,5 @@
 # Controls and Rules
 
----
-
 简体中文 | [English](./08-controls-and-rules.en.md)
 
 > 祝玩得开心，喜欢记得 STAR 支持！
