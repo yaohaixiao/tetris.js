@@ -1,14 +1,17 @@
 @import './variable.less';
 
 /* ====== 容器样式 ====== */
-.tetris-container {
+.tetris-container,
+.tetris-player {
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
+}
 
+.tetris-container {
   &[data-mode='versus'] {
     flex-direction: row;
     gap: 14vw;
@@ -29,6 +32,10 @@
       overflow: hidden;
     }
   }
+}
+
+.tetris-player {
+  height: 100%;
 }
 
 .tetris-screen {
