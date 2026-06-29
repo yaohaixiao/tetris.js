@@ -1,3 +1,11 @@
+# [1.21.1](https://github.com/yaohaixiao/tetris.js/compare/1.21.0...1.21.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* **audio:** 修复 playTone 指数衰减报错并优化注释 ([1b47dc9](https://github.com/yaohaixiao/tetris.js/commit/1b47dc9f28935e54e3cee0d6c4e0cfb20dda101e))
+
+
 # [1.21.0](https://github.com/yaohaixiao/tetris.js/compare/1.20.0...1.21.0) (2026-06-27)
 
 ### Features

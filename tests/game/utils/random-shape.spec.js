@@ -75,8 +75,20 @@ jest.mock('@/lib/game/constants/color-palettes.js', () => [
 ]);
 
 describe('randomShape', () => {
-  // 模拟 runtime 对象，每个 Game 实例维护独立的 bag
-  const makeRuntime = () => ({ bag: [] });
+  /**
+   * 创建模拟的 runtime 对象。
+   *
+   * randomShape 现在通过 runtime.updateBag() 更新袋子内容，
+   * 不再直接赋值 runtime.bag。因此 runtime 必须提供 updateBag 方法。
+   *
+   * @returns {object} 模拟的 runtime 对象，包含 bag 数组和 updateBag 方法
+   */
+  const makeRuntime = () => ({
+    bag: [],
+    updateBag: function (newBag) {
+      this.bag = newBag;
+    },
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -136,9 +148,43 @@ describe('randomShape', () => {
       // 只从 rt1 取方块，rt2 不动
       randomShape(rt1, 1);
 
-      // rt1 的 bag 被消费了，rt2 的 bag 仍然是初始空数组
+      // rt1 的 bag 被消费了 1 个（从 7 个中取走 1 个，剩余 7 个是因为
+      // randomShape 首次调用时 bag 为空，先 refill 7 个再取走 1 个）
       expect(rt1.bag.length).toBe(7);
+      // rt2 的 bag 仍然是初始空数组
       expect(rt2.bag.length).toBe(0);
+    });
+
+    it('多次调用后 bag 正确消费', () => {
+      const rt = makeRuntime();
+
+      // 首次调用：bag 为空 → refill 7 个 → 取走 1 个 → 剩余 7（mock refill 返回 8 个）
+      randomShape(rt, 1);
+      expect(rt.bag.length).toBe(7);
+
+      // 再次调用：bag 非空 → 直接取走 1 个 → 剩余 6
+      randomShape(rt, 1);
+      expect(rt.bag.length).toBe(6);
+    });
+  });
+
+  describe('updateBag 被调用', () => {
+    it('bag 为空时应调用 updateBag', () => {
+      const rt = makeRuntime();
+      const updateBagSpy = jest.spyOn(rt, 'updateBag');
+
+      randomShape(rt, 1);
+      expect(updateBagSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('bag 非空时不应调用 updateBag', () => {
+      const rt = makeRuntime();
+      // 先调用一次让 bag 非空
+      randomShape(rt, 1);
+
+      const updateBagSpy = jest.spyOn(rt, 'updateBag');
+      randomShape(rt, 1);
+      expect(updateBagSpy).not.toHaveBeenCalled();
     });
   });
 });
