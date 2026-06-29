@@ -72,6 +72,8 @@ design of the game runtime, rather than just the gameplay itself.
 
 ![System Architecture Diagram](docs/assets/img/architecture-poster.png)
 
+> Deep Dive: [Features](./docs/01-features.en.md)
+
 ### ⚙️ Independent Game Runtime
 
 Instead of writing game logic directly into browser events, the project
@@ -81,6 +83,8 @@ All inputs, state updates, animations, audio, AI, Replay, and multiplayer
 battles all run on this unified Runtime.
 
 The Runtime is the most core component of the entire project.
+
+> Deep Dive：[Runtime](./docs/03-runtime.en.md)
 
 ### 🧠 AI Decision System
 
@@ -93,6 +97,8 @@ converts the results into standard commands for the Runtime to execute.
 Therefore, there aren't two different sets of game logic for human players and
 AI.
 
+> Deep Dive：[AI](./docs/04-ai.en.md)
+
 ### 🎬 Replay System
 
 Replay does not record Canvas output or save every frame of the screen.
@@ -101,6 +107,8 @@ It only records the **Commands** generated during the game process.
 
 With a deterministic Runtime, the same command sequence can stably reproduce the
 entire game process.
+
+> Deep Dive：[Replay](./docs/05-replay.en.md)
 
 ### 🎯 Command-Driven Architecture
 
@@ -157,7 +165,6 @@ game frameworks like Phaser or PixiJS.
 
 Apart from native browser APIs, there are no game runtime-related dependencies.
 
-> Deep Dive: [Features](./docs/01-features.en.md)
 
 ## Browser Compatibility
 

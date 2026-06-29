@@ -60,6 +60,8 @@ GitHub 上已经有很多优秀的俄罗斯方块项目。 它们实现了完整
 
 ![System Architecture Diagram](docs/assets/img/architecture-poster.png)
 
+> 深入阅读：[Features](./docs/01-features.md)
+
 ### ⚙️ 独立的 Game Runtime
 
 项目并没有将游戏逻辑直接写在浏览器事件中，而是建立了一套独立的运行时。
@@ -67,6 +69,8 @@ GitHub 上已经有很多优秀的俄罗斯方块项目。 它们实现了完整
 所有输入、状态更新、动画、音效、AI、Replay、多人对战，都围绕这一套 Runtime 运行。
 
 Runtime 是整个项目最核心的组成部分。
+
+> 深入阅读：[Runtime](./docs/03-runtime.md)
 
 ### 🧠 AI 决策系统
 
@@ -76,6 +80,8 @@ AI 与玩家共享同一套游戏逻辑。
 
 因此，人类玩家与 AI 并不存在两套不同的游戏逻辑。
 
+> 深入阅读：[AI](./docs/04-ai.md)
+
 ### 🎬 Replay 回放系统
 
 Replay 并不是录制 Canvas，也不是保存每一帧画面。
@@ -83,6 +89,8 @@ Replay 并不是录制 Canvas，也不是保存每一帧画面。
 它仅记录游戏过程中产生的命令（Command）。
 
 借助确定性的 Runtime，相同的命令序列可以稳定地重现整个游戏过程。
+
+> 深入阅读：[Replay](./docs/05-replay.md)
 
 ### 🎯 Command 驱动架构
 
@@ -128,8 +136,6 @@ Runtime 只处理 Command，而不关心它来自哪里。
 整个项目基于现代 JavaScript 实现，不依赖 Phaser、PixiJS 等游戏框架。
 
 除了浏览器原生 API，没有引入任何游戏运行时相关依赖。
-
-> 深入阅读：[Features](./docs/01-features.md)
 
 ## 浏览器兼容
 
