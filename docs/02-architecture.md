@@ -1226,6 +1226,8 @@ export default dispatchCommand;
 
 将原本在 `dispatchInupt` 中执行的 `actions`，转移到 `dispatchCommand` 这里在执行。此时 Runtime 终于拥有了一条稳定、可预测的命令执行流。
 
+![Tetris Data Flow - v0.6.0](assets/img/data-flow-v0.6.0.png)
+
 ## 第三次架构演进：Scheduler
 
 后来，越来越多异步行为出现。例如：

@@ -1229,6 +1229,8 @@ export default dispatchCommand;
 
 The `actions` originally executed in `dispatchInput` are now transferred to `dispatchCommand` for execution. At this point, Runtime finally has a stable, predictable command execution flow.
 
+![Tetris Data Flow - v0.6.0](assets/img/data-flow-v0.6.0.png)
+
 ## Third Architectural Evolution: Scheduler
 
 Later, more and more asynchronous behaviors appeared. For example:
