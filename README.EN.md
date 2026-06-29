@@ -72,7 +72,7 @@ design of the game runtime, rather than just the gameplay itself.
 
 ![System Architecture Diagram](docs/assets/img/architecture-poster.png)
 
-> Deep Dive: [Features](./docs/01-features.en.md)
+> Deep Dive: [01-features.en.md](./docs/01-features.en.md)
 
 ### ⚙️ Independent Game Runtime
 
@@ -84,7 +84,7 @@ battles all run on this unified Runtime.
 
 The Runtime is the most core component of the entire project.
 
-> Deep Dive：[Runtime](./docs/03-runtime.en.md)
+> Deep Dive：[03-runtime.en.md](./docs/03-runtime.en.md)
 
 ### 🧠 AI Decision System
 
@@ -97,7 +97,7 @@ converts the results into standard commands for the Runtime to execute.
 Therefore, there aren't two different sets of game logic for human players and
 AI.
 
-> Deep Dive：[AI](./docs/04-ai.en.md)
+> Deep Dive：[04-ai.en.md](./docs/04-ai.en.md)
 
 ### 🎬 Replay System
 
@@ -108,7 +108,7 @@ It only records the **Commands** generated during the game process.
 With a deterministic Runtime, the same command sequence can stably reproduce the
 entire game process.
 
-> Deep Dive：[Replay](./docs/05-replay.en.md)
+> Deep Dive：[05-replay.en.md](./docs/05-replay.en.md)
 
 ### 🎯 Command-Driven Architecture
 
@@ -119,6 +119,8 @@ The Runtime only processes Commands and doesn't care about their source.
 
 This design enables Replay, AI, multiplayer synchronization, and other features
 to share the same execution flow.
+
+> Deep Dive：[02-architecture.en.md](./docs/02-architecture.en.md)
 
 ### 🗂️ Centralized State Management
 
