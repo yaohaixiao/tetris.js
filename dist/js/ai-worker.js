@@ -301,38 +301,52 @@ var simulate_placement_default = simulatePlacement;
 // lib/game/constants/game.js
 var AI_ALLOWED_ACTIONS = [
   "SWITCH_CONTROLLER",
+  // 切换控制器（human ↔ ai）
   "TOGGLE_MUSIC",
+  // 切换音乐开关
   "TOGGLE_PAUSED",
+  // 暂停/继续游戏
   "RESTART",
+  // 重新开始游戏
   "QUIT"
+  // 退出游戏
 ];
 var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
 var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
 var MAX_LEVEL = 256;
 var SPEED_STEPS = {
   EASY: 0.6,
+  // Easy：前 60% 等级线性加速
   NORMAL: 0.4,
+  // Normal：前 40% 等级线性加速
   HARD: 0.2,
+  // Hard：前 20% 等级线性加速
   EXPERT: 0.1
+  // Expert：前 10% 等级线性加速
 };
+var ALL_CLEAR_SCORE = 2e3;
+var T_SPIN_SCORES = [400, 800, 1200, 1600];
+var T_SPIN_MINI_SCORES = [100, 200, 400];
 var GAME = {
   CLEAR_LINE_SCORES,
   FONT_FAMILY,
   AI_ALLOWED_ACTIONS,
   MAX_LEVEL,
-  SPEED_STEPS
+  SPEED_STEPS,
+  ALL_CLEAR_SCORE,
+  T_SPIN_SCORES,
+  T_SPIN_MINI_SCORES
 };
 var game_default = GAME;
 
 // lib/game/utils/get-t-spin-score.js
 var getTSpinScore = (cleared, isTSpin, isTSpinMini) => {
+  const { T_SPIN_SCORES: T_SPIN_SCORES2, T_SPIN_MINI_SCORES: T_SPIN_MINI_SCORES2 } = game_default;
   if (isTSpin) {
-    const scores = [400, 800, 1200, 1600];
-    return scores[cleared] || 0;
+    return T_SPIN_SCORES2[cleared] || 0;
   }
   if (isTSpinMini) {
-    const scores = [100, 200, 400];
-    return scores[cleared] || 0;
+    return T_SPIN_MINI_SCORES2[cleared] || 0;
   }
   return 0;
 };

@@ -1892,26 +1892,41 @@ var tetris = (() => {
   // lib/game/constants/game.js
   var AI_ALLOWED_ACTIONS = [
     "SWITCH_CONTROLLER",
+    // 切换控制器（human ↔ ai）
     "TOGGLE_MUSIC",
+    // 切换音乐开关
     "TOGGLE_PAUSED",
+    // 暂停/继续游戏
     "RESTART",
+    // 重新开始游戏
     "QUIT"
+    // 退出游戏
   ];
   var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
   var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
   var MAX_LEVEL = 256;
   var SPEED_STEPS = {
     EASY: 0.6,
+    // Easy：前 60% 等级线性加速
     NORMAL: 0.4,
+    // Normal：前 40% 等级线性加速
     HARD: 0.2,
+    // Hard：前 20% 等级线性加速
     EXPERT: 0.1
+    // Expert：前 10% 等级线性加速
   };
+  var ALL_CLEAR_SCORE = 2e3;
+  var T_SPIN_SCORES = [400, 800, 1200, 1600];
+  var T_SPIN_MINI_SCORES = [100, 200, 400];
   var GAME = {
     CLEAR_LINE_SCORES,
     FONT_FAMILY,
     AI_ALLOWED_ACTIONS,
     MAX_LEVEL,
-    SPEED_STEPS
+    SPEED_STEPS,
+    ALL_CLEAR_SCORE,
+    T_SPIN_SCORES,
+    T_SPIN_MINI_SCORES
   };
   var game_default = GAME;
 
@@ -11536,13 +11551,12 @@ var tetris = (() => {
 
   // lib/game/utils/get-t-spin-score.js
   var getTSpinScore = (cleared, isTSpin, isTSpinMini) => {
+    const { T_SPIN_SCORES: T_SPIN_SCORES2, T_SPIN_MINI_SCORES: T_SPIN_MINI_SCORES2 } = game_default;
     if (isTSpin) {
-      const scores = [400, 800, 1200, 1600];
-      return scores[cleared] || 0;
+      return T_SPIN_SCORES2[cleared] || 0;
     }
     if (isTSpinMini) {
-      const scores = [100, 200, 400];
-      return scores[cleared] || 0;
+      return T_SPIN_MINI_SCORES2[cleared] || 0;
     }
     return 0;
   };
@@ -13023,7 +13037,7 @@ var tetris = (() => {
   // lib/game/actions/apply-clear-lines.js
   var createEmptyRow = (cols) => Array.from({ length: cols }).fill(0);
   var applyClearLines = (runtime) => {
-    const { MAX_LEVEL: MAX_LEVEL2, CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, ALL_CLEAR_SCORE = 2e3 } = game_default;
+    const { MAX_LEVEL: MAX_LEVEL2, CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2, ALL_CLEAR_SCORE: ALL_CLEAR_SCORE2 = 2e3 } = game_default;
     const { Elements, Store } = runtime;
     const state = Store.getState();
     const { cols } = Elements.Canvas;
@@ -13050,7 +13064,7 @@ var tetris = (() => {
     const backToBackMultiplier = isBackToBack ? 1.5 : 1;
     const nextBackToBack = isBigMove;
     const isAllClear = cleared > 0 && board.every((row) => row.every((cell) => cell === 0));
-    const allClearScore = isAllClear ? ALL_CLEAR_SCORE : 0;
+    const allClearScore = isAllClear ? ALL_CLEAR_SCORE2 : 0;
     const baseScore = tSpinScore || CLEAR_LINE_SCORES2[cleared] || 0;
     const clearScore = Math.floor(baseScore * backToBackMultiplier * newLevel);
     const combo = cleared > 0 ? (state.combo || 0) + 1 : 0;
@@ -13896,6 +13910,167 @@ var tetris = (() => {
   };
   var gamepad_notification_animation_default = GamepadNotificationAnimation;
 
+  // lib/game/logic/collision.js
+  var collision2 = (runtime, ox, oy, shapeOverride) => {
+    const { Elements, Store } = runtime;
+    const { rows, cols } = Elements.Canvas;
+    const state = Store.getState();
+    const { curr, cx, cy, board } = state;
+    if (!curr) {
+      return false;
+    }
+    const s = shapeOverride || curr.shape;
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          const nx = cx + x + ox;
+          const ny = cy + y + oy;
+          const outOfBounds = nx < 0 || nx >= cols || ny >= rows;
+          const hitBlock = ny >= 0 && ny < rows && board[ny][nx];
+          if (outOfBounds || hitBlock) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+  var collision_default2 = collision2;
+
+  // lib/game/logic/move.js
+  var move = (runtime, ox, oy, isHardDrop = false) => {
+    const { Store } = runtime;
+    const state = Store.getState();
+    const AE = AudioEvents();
+    let { cx, cy } = state;
+    if (!collision_default2(runtime, ox, oy)) {
+      cx += ox;
+      cy += oy;
+      Store.setState({ cx, cy });
+      if (oy > 0 && !isHardDrop) {
+        Store.setState({ score: Store.getScore() + 1 });
+      }
+      const { curr } = Store.getState();
+      if (curr._lockTimer) {
+        curr._lockTimer = 0;
+      }
+      runtime.emit(AE.PLAY_SOUND, { sound: "MOVE" });
+      return true;
+    }
+    return false;
+  };
+  var move_default = move;
+
+  // lib/game/logic/rotate/t-spin.js
+  var detectTSpin = (runtime) => {
+    const { Store, Elements } = runtime;
+    const state = Store.getState();
+    const { curr, cx, cy, board } = state;
+    const { rows, cols } = Elements.Canvas;
+    if (curr?.colorIndex !== 3) {
+      return { isTSpin: false, isTSpinMini: false };
+    }
+    if (curr?._lastAction !== "rotate") {
+      return { isTSpin: false, isTSpinMini: false };
+    }
+    const corners = [
+      { x: cx, y: cy },
+      // A — 左上
+      { x: cx + 2, y: cy },
+      // B — 右上
+      { x: cx + 2, y: cy + 2 },
+      // C — 右下
+      { x: cx, y: cy + 2 }
+      // D — 左下
+    ];
+    let filledCorners = 0;
+    for (const { x: nx, y: ny } of corners) {
+      if (nx < 0 || nx >= cols || ny >= rows) {
+        filledCorners++;
+        continue;
+      }
+      if (ny >= 0 && board[ny][nx]) {
+        filledCorners++;
+      }
+    }
+    if (filledCorners >= 3) {
+      return { isTSpin: true, isTSpinMini: false };
+    }
+    if (filledCorners === 2) {
+      return { isTSpin: false, isTSpinMini: true };
+    }
+    return { isTSpin: false, isTSpinMini: false };
+  };
+  var t_spin_default = detectTSpin;
+
+  // lib/game/logic/lock.js
+  var lock = (runtime) => {
+    const { Store } = runtime;
+    const state = Store.getState();
+    const { curr } = state;
+    if (!curr) {
+      return;
+    }
+    const s = curr.shape;
+    const board = structuredClone(state.board);
+    for (let y = 0; y < s.length; y++) {
+      for (let x = 0; x < s[y].length; x++) {
+        if (s[y][x]) {
+          const boardY = state.cy + y;
+          const boardX = state.cx + x;
+          if (boardY < 0 || boardY >= board.length || boardX < 0 || boardX >= board[0].length) {
+            continue;
+          }
+          board[boardY][boardX] = curr.color;
+        }
+      }
+    }
+    const tSpinResult = t_spin_default(runtime);
+    Store.setState({
+      board,
+      tSpin: tSpinResult
+    });
+    curr._lastAction = null;
+    if (runtime.isVersus()) {
+      const events = BattleEvents();
+      runtime.emit(events.FLUSH_GARBAGE, { from: runtime });
+    }
+  };
+  var lock_default = lock;
+
+  // lib/game/logic/find-full-lines.js
+  var findFullLines = (runtime) => {
+    const { Elements, Store } = runtime;
+    const state = Store.getState();
+    const { rows } = Elements.Canvas;
+    const linesToClear = [];
+    for (let y = rows - 1; y >= 0; y--) {
+      const isLineFull = state.board[y].every((cell) => !!cell);
+      if (isLineFull) {
+        linesToClear.push(y);
+      }
+    }
+    return linesToClear;
+  };
+  var find_full_lines_default = findFullLines;
+
+  // lib/game/logic/clear-lines.js
+  var clearLines = (runtime) => {
+    const { id, Store } = runtime;
+    const linesToClear = find_full_lines_default(runtime);
+    if (linesToClear.length === 0) {
+      const UE = UIEvents(id);
+      const hudState = { combo: 0 };
+      Store.setState(hudState);
+      runtime.emit(UE.UPDATE_HUD, hudState);
+      return;
+    }
+    Store.setClearLines(linesToClear);
+    const GE = GameEvents(id);
+    runtime.emit(GE.START_CLEAR_LINES, { linesToClear });
+  };
+  var clear_lines_default = clearLines;
+
   // lib/game/constants/color-palettes.js
   var PALETTES = [
     /*
@@ -14165,33 +14340,6 @@ var tetris = (() => {
   };
   var get_next_piece_default = getNextPiece;
 
-  // lib/game/logic/collision.js
-  var collision2 = (runtime, ox, oy, shapeOverride) => {
-    const { Elements, Store } = runtime;
-    const { rows, cols } = Elements.Canvas;
-    const state = Store.getState();
-    const { curr, cx, cy, board } = state;
-    if (!curr) {
-      return false;
-    }
-    const s = shapeOverride || curr.shape;
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          const nx = cx + x + ox;
-          const ny = cy + y + oy;
-          const outOfBounds = nx < 0 || nx >= cols || ny >= rows;
-          const hitBlock = ny >= 0 && ny < rows && board[ny][nx];
-          if (outOfBounds || hitBlock) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  };
-  var collision_default2 = collision2;
-
   // lib/game/core/over.js
   var over = (runtime) => {
     const { id, Store } = runtime;
@@ -14240,6 +14388,74 @@ var tetris = (() => {
     runtime.emit(RE.ADD_PIECE, state.curr);
   };
   var spawn_default = spawn;
+
+  // lib/game/logic/tick.js
+  var LOCK_DELAY = 300;
+  var tick = (runtime, isBlocked) => {
+    const mode = runtime.Store.getMode();
+    if (mode !== "playing" && mode !== "replay" || isBlocked) {
+      return;
+    }
+    const AE = AudioEvents();
+    const GE = GameEvents(runtime.id);
+    if (mode === "playing") {
+      runtime.emit(GE.DISPATCH_INPUT, {
+        device: "replay",
+        action: "AUTO_TICK",
+        payload: { Game: runtime }
+      });
+    }
+    const { curr, cx, cy } = runtime.Store.getState();
+    if (move_default(runtime, 0, 1)) {
+      if (curr._lockTimer) {
+        curr._lockTimer = 0;
+      }
+      return;
+    }
+    if (!curr._lockTimer) {
+      curr._lockTimer = 0;
+    }
+    curr._lockTimer += runtime.getSpeed();
+    if (curr._lockTimer >= LOCK_DELAY) {
+      curr._lockTimer = 0;
+      lock_default(runtime);
+      runtime.emit(GE.START_LANDING_FLASH, {
+        piece: { shape: curr.shape, cx, cy }
+      });
+      runtime.emit(AE.PLAY_SOUND, { sound: "FALL" });
+      clear_lines_default(runtime);
+      spawn_default(runtime);
+    }
+  };
+  var tick_default = tick;
+
+  // lib/game/core/flush.js
+  var flush = (runtime, timestamp, lastTickTime, gameAccumulators) => {
+    const { UI: UI2, Replay, Gamepad, Keyboard, Animations, CommandQueue: CommandQueue2 } = runtime;
+    const isBlocked = Animations.hasBlocking();
+    Replay.syncPlayElapsed({
+      timestamp: lastTickTime,
+      isBlocked
+    });
+    Replay.update({
+      speed: runtime.getSpeed(),
+      timestamp: lastTickTime
+    });
+    Gamepad?.update?.(timestamp);
+    Keyboard?.update?.();
+    CommandQueue2.flush();
+    const accumulator = gameAccumulators.get(runtime) || timestamp;
+    const stepDelta = timestamp - accumulator;
+    if ((!accumulator || stepDelta > runtime.getSpeed()) && !Replay.playing) {
+      tick_default(runtime, isBlocked);
+      gameAccumulators.set(runtime, timestamp);
+    }
+    Animations.flush();
+    UI2.tickHud();
+    UI2.render();
+    Animations.render();
+  };
+  var flush_default = flush;
 
   // lib/game/actions/set-beginning-state.js
   var setBeginningState = (runtime, mode, level = 1) => {
@@ -14424,30 +14640,6 @@ var tetris = (() => {
     return { cx, cy: ghostY };
   };
   var get_ghost_position_default = getGhostPosition;
-
-  // lib/game/logic/move.js
-  var move = (runtime, ox, oy, isHardDrop = false) => {
-    const { Store } = runtime;
-    const state = Store.getState();
-    const AE = AudioEvents();
-    let { cx, cy } = state;
-    if (!collision_default2(runtime, ox, oy)) {
-      cx += ox;
-      cy += oy;
-      Store.setState({ cx, cy });
-      if (oy > 0 && !isHardDrop) {
-        Store.setState({ score: Store.getScore() + 1 });
-      }
-      const { curr } = Store.getState();
-      if (curr._lockTimer) {
-        curr._lockTimer = 0;
-      }
-      runtime.emit(AE.PLAY_SOUND, { sound: "MOVE" });
-      return true;
-    }
-    return false;
-  };
-  var move_default = move;
 
   // lib/game/constants/srs-kick-data.js
   var KICK_I = [
@@ -14685,184 +14877,6 @@ var tetris = (() => {
     }
   };
   var rotate_default = rotate;
-
-  // lib/game/logic/rotate/t-spin.js
-  var detectTSpin = (runtime) => {
-    const { Store, Elements } = runtime;
-    const state = Store.getState();
-    const { curr, cx, cy, board } = state;
-    const { rows, cols } = Elements.Canvas;
-    if (curr?.colorIndex !== 3) {
-      return { isTSpin: false, isTSpinMini: false };
-    }
-    if (curr?._lastAction !== "rotate") {
-      return { isTSpin: false, isTSpinMini: false };
-    }
-    const corners = [
-      { x: cx, y: cy },
-      // A — 左上
-      { x: cx + 2, y: cy },
-      // B — 右上
-      { x: cx + 2, y: cy + 2 },
-      // C — 右下
-      { x: cx, y: cy + 2 }
-      // D — 左下
-    ];
-    let filledCorners = 0;
-    for (const { x: nx, y: ny } of corners) {
-      if (nx < 0 || nx >= cols || ny >= rows) {
-        filledCorners++;
-        continue;
-      }
-      if (ny >= 0 && board[ny][nx]) {
-        filledCorners++;
-      }
-    }
-    if (filledCorners >= 3) {
-      return { isTSpin: true, isTSpinMini: false };
-    }
-    if (filledCorners === 2) {
-      return { isTSpin: false, isTSpinMini: true };
-    }
-    return { isTSpin: false, isTSpinMini: false };
-  };
-  var t_spin_default = detectTSpin;
-
-  // lib/game/logic/lock.js
-  var lock = (runtime) => {
-    const { Store } = runtime;
-    const state = Store.getState();
-    const { curr } = state;
-    if (!curr) {
-      return;
-    }
-    const s = curr.shape;
-    const board = structuredClone(state.board);
-    for (let y = 0; y < s.length; y++) {
-      for (let x = 0; x < s[y].length; x++) {
-        if (s[y][x]) {
-          const boardY = state.cy + y;
-          const boardX = state.cx + x;
-          if (boardY < 0 || boardY >= board.length || boardX < 0 || boardX >= board[0].length) {
-            continue;
-          }
-          board[boardY][boardX] = curr.color;
-        }
-      }
-    }
-    const tSpinResult = t_spin_default(runtime);
-    Store.setState({
-      board,
-      tSpin: tSpinResult
-    });
-    curr._lastAction = null;
-    if (runtime.isVersus()) {
-      const events = BattleEvents();
-      runtime.emit(events.FLUSH_GARBAGE, { from: runtime });
-    }
-  };
-  var lock_default = lock;
-
-  // lib/game/logic/find-full-lines.js
-  var findFullLines = (runtime) => {
-    const { Elements, Store } = runtime;
-    const state = Store.getState();
-    const { rows } = Elements.Canvas;
-    const linesToClear = [];
-    for (let y = rows - 1; y >= 0; y--) {
-      const isLineFull = state.board[y].every((cell) => !!cell);
-      if (isLineFull) {
-        linesToClear.push(y);
-      }
-    }
-    return linesToClear;
-  };
-  var find_full_lines_default = findFullLines;
-
-  // lib/game/logic/clear-lines.js
-  var clearLines = (runtime) => {
-    const { id, Store } = runtime;
-    const linesToClear = find_full_lines_default(runtime);
-    if (linesToClear.length === 0) {
-      const UE = UIEvents(id);
-      const hudState = { combo: 0 };
-      Store.setState(hudState);
-      runtime.emit(UE.UPDATE_HUD, hudState);
-      return;
-    }
-    Store.setClearLines(linesToClear);
-    const GE = GameEvents(id);
-    runtime.emit(GE.START_CLEAR_LINES, { linesToClear });
-  };
-  var clear_lines_default = clearLines;
-
-  // lib/game/logic/tick.js
-  var LOCK_DELAY = 300;
-  var tick = (runtime, isBlocked) => {
-    const mode = runtime.Store.getMode();
-    if (mode !== "playing" && mode !== "replay" || isBlocked) {
-      return;
-    }
-    const AE = AudioEvents();
-    const GE = GameEvents(runtime.id);
-    if (mode === "playing") {
-      runtime.emit(GE.DISPATCH_INPUT, {
-        device: "replay",
-        action: "AUTO_TICK",
-        payload: { Game: runtime }
-      });
-    }
-    const { curr, cx, cy } = runtime.Store.getState();
-    if (move_default(runtime, 0, 1)) {
-      if (curr._lockTimer) {
-        curr._lockTimer = 0;
-      }
-      return;
-    }
-    if (!curr._lockTimer) {
-      curr._lockTimer = 0;
-    }
-    curr._lockTimer += runtime.getSpeed();
-    if (curr._lockTimer >= LOCK_DELAY) {
-      curr._lockTimer = 0;
-      lock_default(runtime);
-      runtime.emit(GE.START_LANDING_FLASH, {
-        piece: { shape: curr.shape, cx, cy }
-      });
-      runtime.emit(AE.PLAY_SOUND, { sound: "FALL" });
-      clear_lines_default(runtime);
-      spawn_default(runtime);
-    }
-  };
-  var tick_default = tick;
-
-  // lib/game/core/flush.js
-  var flush = (runtime, timestamp, lastTickTime, gameAccumulators) => {
-    const { UI: UI2, Replay, Gamepad, Keyboard, Animations, CommandQueue: CommandQueue2 } = runtime;
-    const isBlocked = Animations.hasBlocking();
-    Replay.syncPlayElapsed({
-      timestamp: lastTickTime,
-      isBlocked
-    });
-    Replay.update({
-      speed: runtime.getSpeed(),
-      timestamp: lastTickTime
-    });
-    Gamepad?.update?.(timestamp);
-    Keyboard?.update?.();
-    CommandQueue2.flush();
-    const accumulator = gameAccumulators.get(runtime) || timestamp;
-    const stepDelta = timestamp - accumulator;
-    if ((!accumulator || stepDelta > runtime.getSpeed()) && !Replay.playing) {
-      tick_default(runtime, isBlocked);
-      gameAccumulators.set(runtime, timestamp);
-    }
-    Animations.flush();
-    UI2.tickHud();
-    UI2.render();
-    Animations.render();
-  };
-  var flush_default = flush;
 
   // lib/game/logic/drop.js
   var drop = (runtime) => {
@@ -15520,6 +15534,17 @@ var tetris = (() => {
      */
     rotate() {
       rotate_default(this);
+    }
+    /**
+     * ## 游戏逻辑帧（Tick）
+     *
+     * 委托给 tick() 纯函数，处理重力下落。 如果 isBlocked 为 true（动画阻塞中），跳过重力下落。
+     *
+     * @param {boolean} isBlocked - 是否被动画阻塞
+     * @returns {void}
+     */
+    tick(isBlocked) {
+      tick_default(this, isBlocked);
     }
     /**
      * ## 方块快速落底（硬降 / Hard Drop）
