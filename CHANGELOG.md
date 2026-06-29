@@ -1,3 +1,16 @@
+# [1.22.0](https://github.com/yaohaixiao/tetris.js/compare/1.21.1...1.22.0) (2026-06-29)
+
+
+### Bug Fixes
+
+* 修复重构 game 模块后，移除 tick 方法，导致 replay 报错的问题； ([b1cb320](https://github.com/yaohaixiao/tetris.js/commit/b1cb3209a9a322723a54fef2655d5fcf6d4c85a5))
+
+
+### Features
+
+* 方块下路速度随选择难度同步，单独越大，现在素的的间隔时间越快； ([a9dbaf1](https://github.com/yaohaixiao/tetris.js/commit/a9dbaf10ddeaf43036adb3c2fdf879f537983518))
+
+
 # [1.21.1](https://github.com/yaohaixiao/tetris.js/compare/1.21.0...1.21.1) (2026-06-29)
 
 ### Bug Fixes
