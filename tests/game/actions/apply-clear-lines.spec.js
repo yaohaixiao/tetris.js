@@ -1,10 +1,14 @@
 import applyClearLines from '@/lib/game/actions/apply-clear-lines.js';
 
+// Mock GAME 常量，包含 T_SPIN_SCORES 和 T_SPIN_MINI_SCORES
 jest.mock('@/lib/game/constants/game.js', () => ({
   __esModule: true,
   default: {
     CLEAR_LINE_SCORES: [0, 100, 300, 500, 800, 1200],
     MAX_LEVEL: 256,
+    T_SPIN_SCORES: [400, 800, 1200, 1600],
+    T_SPIN_MINI_SCORES: [100, 200, 400],
+    ALL_CLEAR_SCORE: 2000,
   },
 }));
 
@@ -90,7 +94,6 @@ describe('applyClearLines', () => {
     });
 
     it('1 级消 4 行 = 800', () => {
-      // 消 4 行后棋盘还剩第15行，不全空
       const board = structuredClone(baseBoard);
       for (let x = 0; x < 10; x++) board[15][x] = '#888888';
       mockState.board = board;
@@ -301,7 +304,6 @@ describe('applyClearLines', () => {
       expect(newState.backToBack).toBe(true);
     });
 
-    // T-Spin 触发 Back-to-Back — 消 18,19 行，加第 16 行保底
     it('T-Spin 触发 Back-to-Back', () => {
       const board = structuredClone(baseBoard);
       for (let x = 0; x < 10; x++) board[16][x] = '#888888';
@@ -313,6 +315,7 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
+      // T-Spin 消 2 行：T_SPIN_SCORES[2] = 1200, B2B ×1.5, level=1
       expect(result.isBackToBack).toBe(true);
       expect(newState.score).toBe(1800);
     });
@@ -325,6 +328,7 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
+      // T-Spin Mini 消 1 行：T_SPIN_MINI_SCORES[1] = 200, B2B ×1.5, level=1
       expect(result.isBackToBack).toBe(true);
       expect(newState.score).toBe(300);
     });
@@ -339,11 +343,11 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
+      // 消 5 行：1200, B2B ×1.5, level=1
       expect(result.isBackToBack).toBe(true);
       expect(newState.score).toBe(1800);
     });
 
-    // 消 3 行不视为大招，中断 Back-to-Back — 消 17,18,19 行，加第 15 行保底
     it('消 3 行不视为大招，中断 Back-to-Back', () => {
       const board = structuredClone(baseBoard);
       for (let x = 0; x < 10; x++) board[15][x] = '#888888';
@@ -370,6 +374,7 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
+      // 800 × 1.5 = 1200, combo(3-1) × 50 = 100, total = 1300
       expect(newState.score).toBe(1300);
     });
 
@@ -381,6 +386,7 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
+      // T-Spin Mini 消 0 行：T_SPIN_MINI_SCORES[0] = 100, B2B ×1.5 = 150
       expect(newState.score).toBe(150);
     });
   });
@@ -398,6 +404,7 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
+      // 100 × 1.0 × 1 + 2000 = 2100
       expect(result.isAllClear).toBe(true);
       expect(newState.score).toBe(2100);
     });
@@ -430,6 +437,7 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
+      // 100 + 100(combo) + 2000 = 2200
       expect(newState.score).toBe(2200);
     });
 
@@ -445,6 +453,7 @@ describe('applyClearLines', () => {
       const result = applyClearLines(mockContext);
       const newState = result.stateHandler(mockState);
 
+      // 消 1 行不是大招，所以 isBackToBack=false
       expect(result.isBackToBack).toBe(false);
       expect(newState.score).toBe(2100);
     });
@@ -466,6 +475,147 @@ describe('applyClearLines', () => {
     });
   });
 
+  // ==================== T-Spin ====================
+  describe('T-Spin', () => {
+    it('T-Spin 消 0 行 = 400', () => {
+      mockState.clearLines = [];
+      mockState.tSpin = { isTSpin: true, isTSpinMini: false };
+
+      const { stateHandler } = applyClearLines(mockContext);
+      // T_SPIN_SCORES[0] = 400, level=1
+      expect(stateHandler(mockState).score).toBe(400);
+    });
+
+    it('T-Spin 消 1 行 = 800', () => {
+      mockState.clearLines = [19];
+      mockState.tSpin = { isTSpin: true, isTSpinMini: false };
+
+      const { stateHandler } = applyClearLines(mockContext);
+      // T_SPIN_SCORES[1] = 800, level=1
+      expect(stateHandler(mockState).score).toBe(800);
+    });
+
+    it('T-Spin 消 2 行 = 1200', () => {
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[16][x] = '#888888';
+      mockState.board = board;
+      mockState.clearLines = [18, 19];
+      mockState.tSpin = { isTSpin: true, isTSpinMini: false };
+
+      const { stateHandler } = applyClearLines(mockContext);
+      // T_SPIN_SCORES[2] = 1200, level=1
+      expect(stateHandler(mockState).score).toBe(1200);
+    });
+
+    it('T-Spin Mini 消 0 行 = 100', () => {
+      mockState.clearLines = [];
+      mockState.tSpin = { isTSpin: false, isTSpinMini: true };
+
+      const { stateHandler } = applyClearLines(mockContext);
+      // T_SPIN_MINI_SCORES[0] = 100
+      expect(stateHandler(mockState).score).toBe(100);
+    });
+
+    it('T-Spin Mini 消 1 行 = 200', () => {
+      mockState.clearLines = [19];
+      mockState.tSpin = { isTSpin: false, isTSpinMini: true };
+
+      const { stateHandler } = applyClearLines(mockContext);
+      // T_SPIN_MINI_SCORES[1] = 200
+      expect(stateHandler(mockState).score).toBe(200);
+    });
+
+    it('T-Spin Mini 消 2 行 = 400', () => {
+      const board = structuredClone(baseBoard);
+      for (let x = 0; x < 10; x++) board[16][x] = '#888888';
+      mockState.board = board;
+      mockState.clearLines = [18, 19];
+      mockState.tSpin = { isTSpin: false, isTSpinMini: true };
+
+      const { stateHandler } = applyClearLines(mockContext);
+      // T_SPIN_MINI_SCORES[2] = 400
+      expect(stateHandler(mockState).score).toBe(400);
+    });
+
+    it('T-Spin 加分替代普通基础分（不叠加）', () => {
+      mockState.clearLines = [19];
+      mockState.tSpin = { isTSpin: true, isTSpinMini: false };
+
+      const { stateHandler } = applyClearLines(mockContext);
+      // T_SPIN_SCORES[1] = 800, 不是 100+800
+      expect(stateHandler(mockState).score).toBe(800);
+    });
+
+    it('T-Spin + Back-to-Back 正确叠加', () => {
+      mockState.clearLines = [19];
+      mockState.tSpin = { isTSpin: true, isTSpinMini: false };
+      mockState.backToBack = true;
+
+      const { stateHandler } = applyClearLines(mockContext);
+      // T_SPIN_SCORES[1] = 800, B2B ×1.5 = 1200
+      expect(stateHandler(mockState).score).toBe(1200);
+    });
+  });
+
+  // ==================== Combo ====================
+  describe('Combo', () => {
+    it('消行时 combo +1', () => {
+      mockState.clearLines = [19];
+      mockState.combo = 0;
+
+      const { stateHandler } = applyClearLines(mockContext);
+      expect(stateHandler(mockState).combo).toBe(1);
+    });
+
+    it('未消行时 combo 归零', () => {
+      mockState.clearLines = [];
+      mockState.combo = 5;
+
+      const { stateHandler } = applyClearLines(mockContext);
+      expect(stateHandler(mockState).combo).toBe(0);
+    });
+
+    it('combo=1 不加分', () => {
+      mockState.clearLines = [19];
+      mockState.combo = 0;
+
+      const { stateHandler } = applyClearLines(mockContext);
+      expect(stateHandler(mockState).comboScore).toBe(0);
+      expect(stateHandler(mockState).score).toBe(100);
+    });
+
+    it('combo=2 加 50 分', () => {
+      mockState.clearLines = [19];
+      mockState.combo = 1;
+
+      const { stateHandler } = applyClearLines(mockContext);
+      expect(stateHandler(mockState).comboScore).toBe(50);
+      expect(stateHandler(mockState).score).toBe(150);
+    });
+
+    it('combo=5 加 200 分', () => {
+      mockState.clearLines = [19];
+      mockState.combo = 4;
+
+      const { stateHandler } = applyClearLines(mockContext);
+      expect(stateHandler(mockState).comboScore).toBe(200);
+      expect(stateHandler(mockState).score).toBe(300);
+    });
+
+    it('连续消行 combo 递增', () => {
+      mockState.clearLines = [19];
+      mockState.combo = 0;
+      let result = applyClearLines(mockContext);
+      expect(result.stateHandler(mockState).combo).toBe(1);
+
+      mockState.combo = 1;
+      mockState.score = 100;
+      result = applyClearLines(mockContext);
+      expect(result.stateHandler(mockState).combo).toBe(2);
+      expect(result.stateHandler(mockState).score).toBe(250);
+    });
+  });
+
   // ==================== 边界 ====================
   describe('边界', () => {
     it('clearLines 不存在时使用空数组', () => {
@@ -480,6 +630,19 @@ describe('applyClearLines', () => {
       mockState.clearLines = [15, 16, 17, 18, 19];
       const { stateHandler } = applyClearLines(mockContext);
       expect(stateHandler(mockState).score).toBe(1200);
+    });
+
+    it('tSpin 为 null 时不应报错', () => {
+      mockState.tSpin = null;
+      mockState.clearLines = [19];
+      expect(() => applyClearLines(mockContext)).not.toThrow();
+    });
+
+    it('combo 不存在时默认为 0', () => {
+      delete mockState.combo;
+      mockState.clearLines = [19];
+      const { stateHandler } = applyClearLines(mockContext);
+      expect(stateHandler(mockState).combo).toBe(1);
     });
   });
 });

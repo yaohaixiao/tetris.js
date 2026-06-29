@@ -1,16 +1,27 @@
 import simulateClearResult from '@/lib/ai/simulator/simulate-clear-result.js';
 
+// Mock GAME 常量，包含 T_SPIN_SCORES 和 T_SPIN_MINI_SCORES
 jest.mock('@/lib/game/constants/game.js', () => ({
   __esModule: true,
   default: {
     CLEAR_LINE_SCORES: [0, 100, 300, 500, 800, 1200],
+    T_SPIN_SCORES: [400, 800, 1200, 1600],
+    T_SPIN_MINI_SCORES: [100, 200, 400],
   },
 }));
 
 describe('simulateClearResult', () => {
+  // ==================== 辅助函数 ====================
+
+  /**
+   * 创建空棋盘（20 行 × 10 列，全部为 0）
+   */
   const createBoard = () =>
     Array.from({ length: 20 }, () => Array.from({ length: 10 }, () => 0));
 
+  /**
+   * 创建模拟快照，包含 combo、backToBack、tSpin 字段
+   */
   const createSnapshot = (overrides = {}) => ({
     combo: 0,
     backToBack: false,
@@ -43,18 +54,18 @@ describe('simulateClearResult', () => {
   // ==================== actualCleared 参数 ====================
   describe('actualCleared 参数', () => {
     it('传入 actualCleared 时应该使用传入值而非棋盘检测', () => {
-      const board = createBoard(); // 空棋盘，自动检测 cleared=0
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
       const snapshot = createSnapshot();
-      board[19] = Array(10).fill(1); // 1 行满
 
-      // 不传 actualCleared：自动检测到 1 行
+      // 不传 actualCleared：自动检测到 1 行满
       const autoResult = simulateClearResult(board, snapshot);
       expect(autoResult.cleared).toBe(1);
 
       // 传 actualCleared=4：使用传入值
       const manualResult = simulateClearResult(board, snapshot, 4);
       expect(manualResult.cleared).toBe(4);
-      expect(manualResult.baseScore).toBe(800); // Tetris
+      expect(manualResult.baseScore).toBe(800);
     });
 
     it('actualCleared=0 且非 T-Spin 时返回 null', () => {
@@ -150,6 +161,33 @@ describe('simulateClearResult', () => {
       expect(result.baseScore).toBe(800);
     });
 
+    it('T-Spin 消 2 行应该返回 baseScore=1200', () => {
+      const board = createBoard();
+      board[18] = Array(10).fill(1);
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: true, isTSpinMini: false },
+      });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.cleared).toBe(2);
+      expect(result.baseScore).toBe(1200);
+    });
+
+    it('T-Spin Mini 消 0 行应该返回 baseScore=100', () => {
+      const board = createBoard();
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: false, isTSpinMini: true },
+      });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isTSpinMini).toBe(true);
+      expect(result.cleared).toBe(0);
+      expect(result.baseScore).toBe(100);
+    });
+
     it('T-Spin Mini 消 1 行应该返回 baseScore=200', () => {
       const board = createBoard();
       board[19] = Array(10).fill(1);
@@ -162,6 +200,21 @@ describe('simulateClearResult', () => {
       expect(result.isTSpinMini).toBe(true);
       expect(result.cleared).toBe(1);
       expect(result.baseScore).toBe(200);
+    });
+
+    it('T-Spin Mini 消 2 行应该返回 baseScore=400', () => {
+      const board = createBoard();
+      board[18] = Array(10).fill(1);
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: false, isTSpinMini: true },
+      });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isTSpinMini).toBe(true);
+      expect(result.cleared).toBe(2);
+      expect(result.baseScore).toBe(400);
     });
   });
 
@@ -205,6 +258,22 @@ describe('simulateClearResult', () => {
       expect(result.isBackToBack).toBe(false);
       expect(result.clearScore).toBe(100);
     });
+
+    it('T-Spin + Back-to-Back 正确叠加', () => {
+      const board = createBoard();
+      board[18] = Array(10).fill(1);
+      board[19] = Array(10).fill(1);
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: true, isTSpinMini: false },
+        backToBack: true,
+      });
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.isBackToBack).toBe(true);
+      // T-Spin Double: 1200 × 1.5 = 1800
+      expect(result.clearScore).toBe(1800);
+    });
   });
 
   // ==================== Combo ====================
@@ -241,21 +310,35 @@ describe('simulateClearResult', () => {
 
       expect(result.combo).toBe(4);
       expect(result.comboScore).toBe(150);
+      expect(result.clearScore).toBe(250); // 100 + 150
+    });
+
+    it('无消行时 combo 不增加', () => {
+      const board = createBoard();
+      const snapshot = createSnapshot({ combo: 5 });
+
+      // 无消行且非 T-Spin → 返回 null，不更新 combo
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result).toBeNull();
     });
   });
 
   // ==================== All Clear ====================
   describe('All Clear', () => {
-    it('消行后棋盘全空应该加 2000', () => {
+    it('消行后棋盘全空应该标记 isAllClear=true', () => {
       const board = createBoard();
       board[19] = Array(10).fill(1);
       const snapshot = createSnapshot();
 
-      const result = simulateClearResult(board, snapshot);
+      // 传入 actualCleared=1，消行后棋盘检查：实际 board 不全空（有 1 行满尚未消除）
+      // 需要模拟消行后的棋盘——这里传入空 board
+      const emptyBoard = createBoard();
+      const result = simulateClearResult(emptyBoard, snapshot, 1);
 
-      // board 有 1 行满（cleared=1），但尚未消行，棋盘不全空
-      expect(result.isAllClear).toBe(false);
-      expect(result.allClearScore).toBe(0);
+      expect(result.isAllClear).toBe(true);
+      expect(result.allClearScore).toBe(2000);
+      expect(result.clearScore).toBe(2100); // 100 + 2000
     });
 
     it('非全清时 isAllClear 为 false', () => {
@@ -264,10 +347,24 @@ describe('simulateClearResult', () => {
       board[19][0] = 1;
       const snapshot = createSnapshot();
 
-      const result = simulateClearResult(board, snapshot);
+      const result = simulateClearResult(board, snapshot, 1);
 
       expect(result.isAllClear).toBe(false);
       expect(result.allClearScore).toBe(0);
+    });
+
+    it('T-Spin 0 行即使棋盘全空也不算 All Clear', () => {
+      const board = createBoard();
+      const snapshot = createSnapshot({
+        tSpin: { isTSpin: true, isTSpinMini: false },
+      });
+
+      // actualCleared=0, cleared===0, 所以 isAllClear=false
+      const result = simulateClearResult(board, snapshot, 0);
+
+      expect(result.isAllClear).toBe(false);
+      expect(result.allClearScore).toBe(0);
+      expect(result.clearScore).toBe(400);
     });
   });
 
@@ -293,7 +390,7 @@ describe('simulateClearResult', () => {
     });
 
     it('isBigMove 判定正确', () => {
-      // Tetris
+      // Tetris（4 行消除）
       const board1 = createBoard();
       board1[16] = Array(10).fill(1);
       board1[17] = Array(10).fill(1);
@@ -303,7 +400,7 @@ describe('simulateClearResult', () => {
         true,
       );
 
-      // T-Spin
+      // T-Spin 消 0 行
       const board2 = createBoard();
       expect(
         simulateClearResult(
@@ -312,8 +409,18 @@ describe('simulateClearResult', () => {
         ).isBigMove,
       ).toBe(true);
 
-      // 普通消行
+      // T-Spin Mini
+      expect(
+        simulateClearResult(
+          board2,
+          createSnapshot({ tSpin: { isTSpin: false, isTSpinMini: true } }),
+        ).isBigMove,
+      ).toBe(true);
+
+      // 普通消行（3 行）
       const board3 = createBoard();
+      board3[17] = Array(10).fill(1);
+      board3[18] = Array(10).fill(1);
       board3[19] = Array(10).fill(1);
       expect(simulateClearResult(board3, createSnapshot()).isBigMove).toBe(
         false,
@@ -350,16 +457,46 @@ describe('simulateClearResult', () => {
       expect(result.baseScore).toBe(1200);
     });
 
-    it('actualCleared 为 0 时使用 ?? 而不是 ||', () => {
+    it('snapshot.tSpin 为 null 时不应报错', () => {
       const board = createBoard();
-      board[19] = Array(10).fill(1); // 棋盘有 1 行满
+      board[19] = Array(10).fill(1);
+      const snapshot = { tSpin: null };
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result).not.toBeNull();
+      expect(result.isTSpin).toBe(false);
+      expect(result.isTSpinMini).toBe(false);
+    });
+
+    it('snapshot.combo 为 undefined 时默认从 0 开始', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
+      const snapshot = { combo: undefined };
+
+      const result = simulateClearResult(board, snapshot);
+
+      expect(result.combo).toBe(1);
+    });
+
+    it('返回的对象应包含所有必要字段', () => {
+      const board = createBoard();
+      board[19] = Array(10).fill(1);
       const snapshot = createSnapshot();
 
-      // 传入 actualCleared=0，应使用 0 而非自动检测的 1
-      const result = simulateClearResult(board, snapshot, 0);
+      const result = simulateClearResult(board, snapshot);
 
-      // 0 且非 T-Spin → 返回 null
-      expect(result).toBeNull();
+      expect(result).toHaveProperty('cleared');
+      expect(result).toHaveProperty('baseScore');
+      expect(result).toHaveProperty('clearScore');
+      expect(result).toHaveProperty('isTSpin');
+      expect(result).toHaveProperty('isTSpinMini');
+      expect(result).toHaveProperty('isBigMove');
+      expect(result).toHaveProperty('isBackToBack');
+      expect(result).toHaveProperty('isAllClear');
+      expect(result).toHaveProperty('combo');
+      expect(result).toHaveProperty('comboScore');
+      expect(result).toHaveProperty('allClearScore');
     });
   });
 });
