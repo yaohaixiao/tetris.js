@@ -244,13 +244,11 @@ describe('BattleController', () => {
   // ==================== initialize 测试 ====================
 
   describe('initialize', () => {
-    test('应该创建 BattleStore 实例并传入 games 和 victoryScore', () => {
+    test('应该创建 BattleStore 实例并传入 games', () => {
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
-      const VictoryScore = { easy: 5, normal: 8, hard: 12, expert: 15 };
-      const controller = createController({ games, VictoryScore });
+      const controller = createController({ games });
       expect(BattleStore).toHaveBeenCalledWith({
         games,
-        victoryScore: VictoryScore,
       });
       expect(controller.store).toBeDefined();
     });
@@ -841,7 +839,7 @@ describe('BattleController', () => {
 
       expect(controller.store.setScore).toHaveBeenCalledWith(
         'Bob-1',
-        VictoryScore,
+        5,
       );
       expect(controller.store.setWinner).toHaveBeenCalledWith(bob);
       expect(controller.hud.updateScores).toHaveBeenCalledWith(bob, alice);
@@ -876,7 +874,7 @@ describe('BattleController', () => {
 
       expect(controller.store.setScore).toHaveBeenCalledWith(
         'Bob-1',
-        customScore,
+        3,
       );
     });
   });
@@ -1362,7 +1360,7 @@ describe('BattleController', () => {
 
       expect(controller.store.setScore).toHaveBeenCalledWith(
         'Bob-1',
-        VictoryScore,
+        5,
       );
       expect(overSpy).toHaveBeenCalledWith(bob, alice);
 

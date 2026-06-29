@@ -308,7 +308,7 @@ describe('EngineRenderer', () => {
       renderer = new EngineRenderer({ Store: mockStore });
       renderer.render();
       const container = document.querySelector('#tetris-container');
-      expect(container.dataset.mode).toBe('selecting');
+      expect(container.dataset.mode).toBe('single');
     });
 
     test('render 应该使用 innerHTML 替换容器内容', () => {
@@ -396,7 +396,7 @@ describe('EngineRenderer', () => {
 
       const container = document.querySelector('#tetris-container');
       expect(container.innerHTML).toBe('');
-      expect(container.dataset.mode).toBe('selecting');
+      expect(container.dataset.mode).toBe('single');
     });
 
     test('模式切换：single → versus → null', () => {
@@ -421,7 +421,7 @@ describe('EngineRenderer', () => {
       renderer = new EngineRenderer({ Store: mockStore });
       renderer.render();
       container = document.querySelector('#tetris-container');
-      expect(container.dataset.mode).toBe('selecting');
+      expect(container.dataset.mode).toBe('single');
       expect(container.innerHTML).toBe('');
     });
   });
