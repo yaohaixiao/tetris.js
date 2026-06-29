@@ -2,18 +2,34 @@
 
 import Engine from '@/lib/engine';
 
+// 事件名称常量，与 Game 实例的 UUID 绑定
 const DISPATCH_COMMAND = 'game:test-game-uuid:dispatch:command';
 const DISPATCH_INPUT = 'game:test-game-uuid:dispatch:input';
 
 // ==================== Mock 模块 ====================
 
+/**
+ * Mock EngineStore
+ *
+ * 模拟引擎全局状态管理器。构造函数接收 options 并与默认值合并，
+ * 生成包含 Mode、Players、VictoryScore、Elements 等配置的 state 对象。
+ * 所有方法均为 jest.fn()，可在测试中追踪调用和修改行为。
+ *
+ * 注意：VictoryScore 按难度分级存储（easy/normal/hard/expert），
+ * getVictoryScore 和 setVictoryScore 的签名已更新为 (difficulty, score?)。
+ */
 jest.mock('@/lib/engine/state/engine-store.js', () => ({
   __esModule: true,
   default: jest.fn(function (options = {}) {
     this.state = {
       Mode: options.Mode || 'single',
       Players: options.Players || ['Player1', 'Player1_extra'],
-      victoryScore: options.victoryScore || 20,
+      VictoryScore: options.VictoryScore || {
+        easy: 5,
+        normal: 8,
+        hard: 12,
+        expert: 15,
+      },
       Elements: options.Elements || {
         Battle: {
           overlay: 'tetris-battle-overlay',
@@ -64,15 +80,22 @@ jest.mock('@/lib/engine/state/engine-store.js', () => ({
     this.reset = jest.fn(function () {
       this.state.Mode = 'single';
     });
-    this.getVictoryScore = jest.fn(() => this.state.victoryScore);
-    this.setVictoryScore = jest.fn(function (score) {
-      this.state.victoryScore = score;
+    this.getVictoryScore = jest.fn(function (difficulty = 'easy') {
+      return this.state.VictoryScore[difficulty];
+    });
+    this.setVictoryScore = jest.fn(function (difficulty, score) {
+      this.state.VictoryScore[difficulty] = score;
     });
     this.getBlockStyle = jest.fn(() => this.state.Block?.style);
     this.getBlockPattern = jest.fn(() => this.state.Block?.pattern);
   }),
 }));
 
+/**
+ * Mock EngineRenderer
+ *
+ * 模拟引擎渲染器，提供 render、destroy 方法和 templates 数组。
+ */
 jest.mock('@/lib/engine/core/engine-renderer.js', () => ({
   __esModule: true,
   default: jest.fn(function () {
@@ -82,16 +105,35 @@ jest.mock('@/lib/engine/core/engine-renderer.js', () => ({
   }),
 }));
 
+/**
+ * Mock Scheduler
+ *
+ * 模拟游戏调度器，提供 tick 方法用于控制时间流逝。
+ */
 jest.mock('@/lib/engine/scheduler.js', () => ({
   __esModule: true,
   default: jest.fn(() => ({ tick: jest.fn() })),
 }));
 
+/**
+ * Mock Audio
+ *
+ * 模拟音频服务，提供 subscribe 和 unsubscribe 方法。
+ */
 jest.mock('@/lib/services/audio', () => ({
   __esModule: true,
   default: jest.fn(() => ({ subscribe: jest.fn(), unsubscribe: jest.fn() })),
 }));
 
+/**
+ * Mock Game
+ *
+ * 模拟单个游戏实例。包含 Store（状态）、UI（界面）、Replay（回放）、
+ * Gamepad（手柄）、Keyboard（键盘）、Animations（动画）、CommandQueue（命令队列）等子模块。
+ * 所有子模块的方法均为 jest.fn()，可追踪调用。
+ *
+ * config 参数会存储在 _config 属性中，便于测试断言。
+ */
 jest.mock('@/lib/game', () => ({
   __esModule: true,
   default: jest.fn((config) => ({
@@ -140,21 +182,41 @@ jest.mock('@/lib/game', () => ({
   })),
 }));
 
+/**
+ * Mock BattleController
+ *
+ * 模拟对战控制器，提供 subscribe 和 unsubscribe 方法。
+ */
 jest.mock('@/lib/battle/battle-controller.js', () => ({
   __esModule: true,
   default: jest.fn(() => ({ subscribe: jest.fn(), unsubscribe: jest.fn() })),
 }));
 
+/**
+ * Mock dispatchInput
+ *
+ * 模拟输入分发函数。Engine._onDispatchInput 收集输入数据后调用此函数。
+ */
 jest.mock('@/lib/engine/dispatch-input.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
+/**
+ * Mock dispatchCommand
+ *
+ * 模拟命令分发函数。Engine._onDispatchCommand 收集命令数据后调用此函数。
+ */
 jest.mock('@/lib/engine/dispatch-command.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
+/**
+ * Mock EventBus
+ *
+ * 模拟事件总线，提供 on、off、emit 方法。Engine 使用它来管理全局事件。
+ */
 jest.mock('@/lib/core/event-bus', () => ({
   __esModule: true,
   default: {
@@ -164,10 +226,27 @@ jest.mock('@/lib/core/event-bus', () => ({
   },
 }));
 
+// 全局浏览器 API 的 mock
 global.requestAnimationFrame = jest.fn(() => 123);
 global.cancelAnimationFrame = jest.fn();
 global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
 
+/**
+ * Engine Core 完整测试套件
+ *
+ * 覆盖 Engine 对象的以下功能：
+ * - 初始状态验证
+ * - initialize（初始化各个模块）
+ * - launch（完整启动流程）
+ * - tick（游戏主循环，含时间累积、输入更新、渲染等）
+ * - subscribe / unsubscribe（事件订阅管理）
+ * - _onDispatchCommand / _onDispatchInput（命令和输入分发）
+ * - start / stop / restart（生命周期控制）
+ * - destroy（资源清理）
+ * - 全局事件处理器（_onUpdateMode、_onUpdatePlayers、_onStart、_onExit）
+ * - 集成测试（完整生命周期 + versus 模式）
+ * - 边界情况（极短/极长帧间隔）
+ */
 describe('Engine Core - 完整测试', () => {
   let EngineStoreMock;
   let EngineRendererMock;
@@ -178,6 +257,12 @@ describe('Engine Core - 完整测试', () => {
   let dispatchInputMock;
   let dispatchCommandMock;
 
+  /**
+   * 每个测试用例前的准备工作：
+   * - 清除所有 mock 的调用记录
+   * - 重新引用各 mock 模块（确保每个测试拿到干净的 mock 实例）
+   * - 重置 Engine 的静态属性，避免测试间状态污染
+   */
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -299,11 +384,21 @@ describe('Engine Core - 完整测试', () => {
         Elements: {
           Battle: { overlay: 'battle-overlay', winner: 'battle-winner' },
         },
-        victoryScore: 20,
+        VictoryScore: {
+          easy: 5,
+          normal: 8,
+          hard: 12,
+          expert: 15,
+        },
       });
       expect(BattleMock).toHaveBeenCalledWith({
         games: Engine.Games,
-        victoryScore: 20,
+        VictoryScore: {
+          easy: 5,
+          normal: 8,
+          hard: 12,
+          expert: 15,
+        },
         elements: { overlay: 'battle-overlay', winner: 'battle-winner' },
         players: ['P1', 'P2'],
       });
@@ -569,11 +664,11 @@ describe('Engine Core - 完整测试', () => {
       const game = Engine.Games[0];
       Engine.subscribe();
       expect(game.on).toHaveBeenCalledWith(
-        'game:test-game-uuid:dispatch:command',
+        DISPATCH_COMMAND,
         Engine._onDispatchCommand,
       );
       expect(game.on).toHaveBeenCalledWith(
-        'game:test-game-uuid:dispatch:input',
+        DISPATCH_INPUT,
         Engine._onDispatchInput,
       );
       expect(game.subscribe).toHaveBeenCalled();
@@ -589,11 +684,11 @@ describe('Engine Core - 完整测试', () => {
       const game = Engine.Games[0];
       Engine.unsubscribe();
       expect(game.off).toHaveBeenCalledWith(
-        'game:test-game-uuid:dispatch:command',
+        DISPATCH_COMMAND,
         Engine._onDispatchCommand,
       );
       expect(game.off).toHaveBeenCalledWith(
-        'game:test-game-uuid:dispatch:input',
+        DISPATCH_INPUT,
         Engine._onDispatchInput,
       );
       expect(game.unsubscribe).toHaveBeenCalled();
@@ -807,7 +902,6 @@ describe('Engine Core - 完整测试', () => {
 
     describe('_onExit', () => {
       test('应该重置 Store 并以单人模式重新启动', () => {
-        // 用 mockImplementation 阻止 _onStart 真正执行，避免 destroy 干扰
         const startSpy = jest
           .spyOn(Engine, '_onStart')
           .mockImplementation(() => {});

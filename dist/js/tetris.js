@@ -137,7 +137,12 @@ var tetris = (() => {
      */
     Players: ["human", "ai"],
     // 先得 15 分者获胜
-    victoryScore: 15,
+    VictoryScore: {
+      easy: 5,
+      normal: 8,
+      hard: 12,
+      expert: 15
+    },
     /*
      * ==================== 方块渲染配置 ====================
      */
@@ -394,12 +399,14 @@ var tetris = (() => {
      * 对战模式下，先达到此分数的玩家赢得整场对战。
      *
      * @example
-     *   const score = store.getVictoryScore(); // 15
+     *   const score = store.getVictoryScore(); // 5
+     *   const score = store.getVictoryScore('expert'); // 15
      *
+     * @param {string} [difficulty='easy'] - 难度等级的名称. Default is `'easy'`
      * @returns {number} 目标分数（默认 15）
      */
-    getVictoryScore() {
-      return this.state.victoryScore;
+    getVictoryScore(difficulty = "easy") {
+      return this.state.VictoryScore[difficulty];
     }
     /**
      * ## 设置对战目标分数
@@ -408,13 +415,14 @@ var tetris = (() => {
      *
      * @example
      *   // 改为先得 10 分获胜
-     *   store.setVictoryScore(10);
+     *   store.setVictoryScore('normal', 10);
      *
+     * @param {string} difficulty - 难度等级的名称
      * @param {number} score - 目标分数（建议正整数）
      * @returns {void}
      */
-    setVictoryScore(score) {
-      this.state.victoryScore = score;
+    setVictoryScore(difficulty, score) {
+      this.state.VictoryScore[difficulty] = score;
     }
     /**
      * ## 获取方块渲染风格
@@ -16567,15 +16575,16 @@ var tetris = (() => {
      * @returns {void}
      */
     update(loser) {
-      const { victoryScore, store } = this;
+      const { VictoryScore, store } = this;
       const winner = this.getOpponent(loser);
+      const difficulty = winner.Store.getDifficulty();
       this.stop();
       store.setWinner(winner);
       store.updateScores({ winner, loser });
       this.hud.updateScores(winner, loser);
       const winnerId = store.getPlayerId(winner);
       const winnerScore = store.getScore(winnerId);
-      if (winnerScore >= victoryScore) {
+      if (winnerScore >= VictoryScore[difficulty]) {
         this.over(winner, loser);
       } else {
         this.restart(loser);
@@ -18091,7 +18100,7 @@ var tetris = (() => {
       });
       Engine.Renderer.render();
       const state = Store.getState();
-      const { Players, Mode, victoryScore, Elements } = state;
+      const { Players, Mode, VictoryScore, Elements } = state;
       Engine.Scheduler = new scheduler_default();
       const normalizedOptions = {
         ...state,
@@ -18117,7 +18126,7 @@ var tetris = (() => {
       if (Engine.Store.isVersus()) {
         Engine.Battle = new battle_controller_default({
           games: Engine.Games,
-          victoryScore,
+          VictoryScore,
           elements: Elements.Battle,
           players: finalPlayers
         });
