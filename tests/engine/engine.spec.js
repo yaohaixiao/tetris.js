@@ -11,12 +11,11 @@ const DISPATCH_INPUT = 'game:test-game-uuid:dispatch:input';
 /**
  * Mock EngineStore
  *
- * 模拟引擎全局状态管理器。构造函数接收 options 并与默认值合并，
- * 生成包含 Mode、Players、VictoryScore、Elements 等配置的 state 对象。
- * 所有方法均为 jest.fn()，可在测试中追踪调用和修改行为。
+ * 模拟引擎全局状态管理器。构造函数接收 options 并与默认值合并， 生成包含 Mode、Players、VictoryScore、Elements
+ * 等配置的 state 对象。 所有方法均为 jest.fn()，可在测试中追踪调用和修改行为。
  *
- * VictoryScore 按难度分级存储（easy/normal/hard/expert），
- * getVictoryScore 和 setVictoryScore 的签名已更新为 (difficulty, score?)。
+ * VictoryScore 按难度分级存储（easy/normal/hard/expert）， getVictoryScore 和
+ * setVictoryScore 的签名已更新为 (difficulty, score?)。
  */
 jest.mock('@/lib/engine/state/engine-store.js', () => ({
   __esModule: true,
@@ -129,11 +128,10 @@ jest.mock('@/lib/services/audio', () => ({
  * Mock Game
  *
  * 模拟单个游戏实例。包含 Store（状态）、UI（界面）、Replay（回放）、
- * Gamepad（手柄）、Keyboard（键盘）、Animations（动画）、CommandQueue（命令队列）、
- * flush（每帧刷新，由 Engine.tick 调用）等子模块。
- * 所有子模块的方法均为 jest.fn()，可追踪调用。
+ * Gamepad（手柄）、Keyboard（键盘）、Animations（动画）、CommandQueue（命令队列）、 flush（每帧刷新，由
+ * Engine.tick 调用）等子模块。 所有子模块的方法均为 jest.fn()，可追踪调用。
  *
- * config 参数会存储在 _config 属性中，便于测试断言。
+ * Config 参数会存储在 _config 属性中，便于测试断言。
  */
 jest.mock('@/lib/game', () => ({
   __esModule: true,
@@ -237,14 +235,15 @@ global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
  * Engine Core 完整测试套件
  *
  * 覆盖 Engine 对象的以下功能：
+ *
  * - 初始状态验证
- * - initialize（初始化各个模块，Game 实例在构造函数中自动 launch）
- * - launch（完整启动流程：initialize + subscribe + start）
- * - tick（游戏主循环，Engine 遍历 Game 调用 Game.flush）
- * - subscribe / unsubscribe（事件订阅管理）
+ * - Initialize（初始化各个模块，Game 实例在构造函数中自动 launch）
+ * - Launch（完整启动流程：initialize + subscribe + start）
+ * - Tick（游戏主循环，Engine 遍历 Game 调用 Game.flush）
+ * - Subscribe / unsubscribe（事件订阅管理）
  * - _onDispatchCommand / _onDispatchInput（命令和输入分发）
- * - start / stop / restart（生命周期控制）
- * - destroy（资源清理）
+ * - Start / stop / restart（生命周期控制）
+ * - Destroy（资源清理）
  * - 全局事件处理器（_onUpdateMode、_onUpdatePlayers、_onStart、_onExit）
  * - 集成测试（完整生命周期 + versus 模式）
  * - 边界情况（极短/极长帧间隔）
@@ -261,6 +260,7 @@ describe('Engine Core - 完整测试', () => {
 
   /**
    * 每个测试用例前的准备工作：
+   *
    * - 清除所有 mock 的调用记录
    * - 重新引用各 mock 模块（确保每个测试拿到干净的 mock 实例）
    * - 重置 Engine 的静态属性，避免测试间状态污染
@@ -414,12 +414,6 @@ describe('Engine Core - 完整测试', () => {
       });
       expect(BattleMock).toHaveBeenCalledWith({
         games: Engine.Games,
-        VictoryScore: {
-          easy: 5,
-          normal: 8,
-          hard: 12,
-          expert: 15,
-        },
         elements: { overlay: 'battle-overlay', winner: 'battle-winner' },
         players: ['P1', 'P2'],
       });

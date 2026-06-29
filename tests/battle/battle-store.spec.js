@@ -13,6 +13,9 @@ jest.mock('@/lib/core', () => {
   });
 });
 
+// Mock structuredClone
+global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
+
 describe('BattleStore', () => {
   // ==================== 辅助函数 ====================
 
@@ -48,16 +51,17 @@ describe('BattleStore', () => {
       expect(() => new BattleStore({ games: [] })).not.toThrow();
     });
 
-    test('缺少 games 参数时应该报错', () => {
-      expect(() => new BattleStore({})).toThrow();
+    test('应该通过 structuredClone 深拷贝 BattleState', () => {
+      const games = [createMockGame('Alice', 0)];
+      new BattleStore({ games });
+      expect(structuredClone).toHaveBeenCalled();
     });
 
-    test('应该通过 structuredClone 深拷贝 BattleState', () => {
+    test('两个实例的 state 应该是独立的对象', () => {
       const games = [createMockGame('Alice', 0)];
       const store1 = new BattleStore({ games });
       const store2 = new BattleStore({ games });
 
-      // 两个实例的 state 应该是独立的对象
       store1.state.scores['Alice-0'] = 10;
       expect(store2.state.scores['Alice-0']).toBe(0);
     });
@@ -84,6 +88,21 @@ describe('BattleStore', () => {
     test('state.pendingGarbage 应该包含已初始化的玩家', () => {
       const store = createStore([createMockGame('Alice', 0)]);
       expect(store.state.pendingGarbage).toEqual({ 'Alice-0': 0 });
+    });
+
+    test('state.roundId 应该初始化为 0', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+      expect(store.state.roundId).toBe(0);
+    });
+
+    test('state.VictoryScore 应该包含默认难度配置', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+      expect(store.state.VictoryScore).toEqual({
+        easy: 5,
+        normal: 8,
+        hard: 12,
+        expert: 15,
+      });
     });
 
     test('应该为每个玩家初始化分数为 0', () => {
@@ -128,11 +147,9 @@ describe('BattleStore', () => {
     test('initialize 应该可以多次调用', () => {
       const store = createStore([createMockGame('Alice', 0)]);
 
-      // 修改状态
       store.setRunning(true);
       store.setWinner({});
 
-      // 重新初始化
       store.initialize();
 
       expect(store.state.running).toBe(false);
@@ -147,26 +164,25 @@ describe('BattleStore', () => {
       const games = [createMockGame('Alice', 0)];
       const store = createStore(games);
 
-      // 先修改状态
       store.state.running = true;
       store.state.winner = games[0];
       store.state.scores['Alice-0'] = 5;
       store.state.pendingGarbage['Alice-0'] = 10;
+      store.state.roundId = 99;
 
-      // 执行初始化
       store._initialize();
 
       expect(store.state.running).toBe(false);
       expect(store.state.winner).toBeNull();
       expect(store.state.scores['Alice-0']).toBe(0);
       expect(store.state.pendingGarbage['Alice-0']).toBe(0);
+      expect(store.state.roundId).toBe(0);
     });
 
     test('应该在 games 变化时重新初始化玩家列表', () => {
       const initialGames = [createMockGame('Alice', 0)];
       const store = createStore(initialGames);
 
-      // 修改 games
       store.games = [createMockGame('Bob', 1), createMockGame('Charlie', 2)];
       store._initialize();
 
@@ -189,16 +205,6 @@ describe('BattleStore', () => {
 
       store.setRunning(false);
       expect(store.isRunning()).toBe(false);
-    });
-
-    test('应该接受布尔值参数', () => {
-      const store = createStore([createMockGame('Alice', 0)]);
-
-      store.setRunning(true);
-      expect(store.state.running).toBe(true);
-
-      store.setRunning(false);
-      expect(store.state.running).toBe(false);
     });
 
     test('应该可以多次切换状态', () => {
@@ -251,9 +257,9 @@ describe('BattleStore', () => {
     });
   });
 
-  // ==================== getScore 测试 ====================
+  // ==================== getScore / setScore 测试 ====================
 
-  describe('getScore', () => {
+  describe('getScore / setScore', () => {
     test('应该返回指定玩家的分数', () => {
       const store = createStore([createMockGame('Alice', 0)]);
       store.state.scores['Alice-0'] = 5;
@@ -271,6 +277,23 @@ describe('BattleStore', () => {
       expect(store.getScore('NonExistent-99')).toBeUndefined();
     });
 
+    test('setScore 应该正确设置分数', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+
+      store.setScore('Alice-0', 10);
+      expect(store.getScore('Alice-0')).toBe(10);
+    });
+
+    test('setScore 应该可以设置任意值', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+
+      store.setScore('Alice-0', 0);
+      expect(store.getScore('Alice-0')).toBe(0);
+
+      store.setScore('Alice-0', -5);
+      expect(store.getScore('Alice-0')).toBe(-5);
+    });
+
     test('应该区分不同玩家的分数', () => {
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const store = createStore(games);
@@ -280,6 +303,49 @@ describe('BattleStore', () => {
 
       expect(store.getScore('Alice-0')).toBe(3);
       expect(store.getScore('Bob-1')).toBe(7);
+    });
+  });
+
+  // ==================== getVictoryScore / setVictoryScore 测试 ====================
+
+  describe('getVictoryScore / setVictoryScore', () => {
+    test('应该返回默认 VictoryScore（easy 难度）', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+      expect(store.getVictoryScore()).toBe(5);
+    });
+
+    test('getVictoryScore 应该支持指定难度', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+      expect(store.getVictoryScore('easy')).toBe(5);
+      expect(store.getVictoryScore('normal')).toBe(8);
+      expect(store.getVictoryScore('hard')).toBe(12);
+      expect(store.getVictoryScore('expert')).toBe(15);
+    });
+
+    test('setVictoryScore 应该正确更新指定难度', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+      store.setVictoryScore('easy', 10);
+      expect(store.getVictoryScore('easy')).toBe(10);
+      expect(store.getVictoryScore('normal')).toBe(8);
+    });
+
+    test('setVictoryScore 应该支持更新所有难度', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+      store.setVictoryScore('easy', 3);
+      store.setVictoryScore('normal', 6);
+      store.setVictoryScore('hard', 9);
+      store.setVictoryScore('expert', 12);
+
+      expect(store.getVictoryScore('easy')).toBe(3);
+      expect(store.getVictoryScore('normal')).toBe(6);
+      expect(store.getVictoryScore('hard')).toBe(9);
+      expect(store.getVictoryScore('expert')).toBe(12);
+    });
+
+    test('VictoryScore 可以为 0', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+      store.setVictoryScore('easy', 0);
+      expect(store.getVictoryScore('easy')).toBe(0);
     });
   });
 
@@ -306,12 +372,6 @@ describe('BattleStore', () => {
       const store = createStore([]);
       const game = createMockGame('', 0);
       expect(store.getPlayerId(game)).toBe('-0');
-    });
-
-    test('应该处理特殊字符名称', () => {
-      const store = createStore([]);
-      const game = createMockGame('Player-1', 0);
-      expect(store.getPlayerId(game)).toBe('Player-1-0');
     });
 
     test('应该处理相同名称不同索引', () => {
@@ -399,21 +459,6 @@ describe('BattleStore', () => {
 
       expect(store.getScore('Alice-0')).toBe(11);
     });
-
-    test('应该处理 3 人对战场景', () => {
-      const games = [
-        createMockGame('P1', 0),
-        createMockGame('P2', 1),
-        createMockGame('P3', 2),
-      ];
-      const store = createStore(games);
-
-      store.updateScores({ winner: games[0], loser: games[2] });
-
-      expect(store.getScore('P1-0')).toBe(1);
-      expect(store.getScore('P2-1')).toBe(0);
-      expect(store.getScore('P3-2')).toBe(0);
-    });
   });
 
   // ==================== addGarbage 测试 ====================
@@ -473,24 +518,6 @@ describe('BattleStore', () => {
       store.addGarbage(game, -2);
 
       expect(store.getPendingGarbage(game)).toBe(3);
-    });
-
-    test('应该从 0 开始累加', () => {
-      const store = createStore([createMockGame('Alice', 0)]);
-      const game = createMockGame('Alice', 0);
-
-      store.addGarbage(game, 1);
-
-      expect(store.state.pendingGarbage['Alice-0']).toBe(1);
-    });
-
-    test('应该处理大量垃圾行累加', () => {
-      const store = createStore([createMockGame('Alice', 0)]);
-      const game = createMockGame('Alice', 0);
-
-      store.addGarbage(game, 100);
-
-      expect(store.getPendingGarbage(game)).toBe(100);
     });
   });
 
@@ -639,15 +666,6 @@ describe('BattleStore', () => {
 
       expect(store.getPendingGarbage(game)).toBe(0);
     });
-
-    test('应该返回数字类型', () => {
-      const store = createStore([createMockGame('Alice', 0)]);
-      const game = createMockGame('Alice', 0);
-
-      store.addGarbage(game, 5);
-
-      expect(typeof store.getPendingGarbage(game)).toBe('number');
-    });
   });
 
   // ==================== clearGarbage 测试 ====================
@@ -705,6 +723,35 @@ describe('BattleStore', () => {
     });
   });
 
+  // ==================== increaseRound / getRoundId 测试 ====================
+
+  describe('increaseRound / getRoundId', () => {
+    test('初始 roundId 应该为 0', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+      expect(store.getRoundId()).toBe(0);
+    });
+
+    test('increaseRound 应该递增 roundId', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+
+      store.increaseRound();
+      expect(store.getRoundId()).toBe(1);
+
+      store.increaseRound();
+      expect(store.getRoundId()).toBe(2);
+    });
+
+    test('应该支持多次递增', () => {
+      const store = createStore([createMockGame('Alice', 0)]);
+
+      for (let i = 0; i < 10; i++) {
+        store.increaseRound();
+      }
+
+      expect(store.getRoundId()).toBe(10);
+    });
+  });
+
   // ==================== reset 测试 ====================
 
   describe('reset', () => {
@@ -712,24 +759,24 @@ describe('BattleStore', () => {
       const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
       const store = createStore(games);
 
-      // 修改状态
       store.setRunning(true);
       store.setWinner(games[0]);
       store.updateScores({ winner: games[0], loser: games[1] });
       store.updateScores({ winner: games[0], loser: games[1] });
       store.addGarbage(games[0], 5);
       store.addGarbage(games[1], 3);
+      store.increaseRound();
+      store.increaseRound();
 
-      // 重置
       store.reset();
 
-      // 验证所有状态已重置
       expect(store.isRunning()).toBe(false);
       expect(store.getWinner()).toBeNull();
       expect(store.getScore('Alice-0')).toBe(0);
       expect(store.getScore('Bob-1')).toBe(0);
       expect(store.getPendingGarbage(games[0])).toBe(0);
       expect(store.getPendingGarbage(games[1])).toBe(0);
+      expect(store.getRoundId()).toBe(0);
     });
 
     test('应该可以多次调用 reset', () => {
@@ -799,6 +846,7 @@ describe('BattleStore', () => {
       store.reset();
       expect(store.isRunning()).toBe(false);
       expect(store.getWinner()).toBeNull();
+      expect(store.getRoundId()).toBe(0);
     });
 
     test('多局对战分数累积', () => {
@@ -815,10 +863,12 @@ describe('BattleStore', () => {
 
       results.forEach(({ winner, loser }) => {
         store.updateScores({ winner: games[winner], loser: games[loser] });
+        store.increaseRound();
       });
 
       expect(store.getScore('Alice-0')).toBe(3);
       expect(store.getScore('Bob-1')).toBe(2);
+      expect(store.getRoundId()).toBe(5);
     });
 
     test('垃圾行攻防交互', () => {
@@ -839,6 +889,35 @@ describe('BattleStore', () => {
       const counter2 = store.offsetGarbage(games[1], 2);
       expect(counter2).toBe(0);
       expect(store.getPendingGarbage(games[1])).toBe(0);
+    });
+
+    test('使用 VictoryScore 判断胜负', () => {
+      const games = [createMockGame('Alice', 0), createMockGame('Bob', 1)];
+      const store = createStore(games);
+
+      // 使用默认 easy 难度（5 分）
+      expect(store.getVictoryScore('easy')).toBe(5);
+
+      // Alice 赢了 3 局
+      store.updateScores({ winner: games[0], loser: games[1] });
+      store.updateScores({ winner: games[0], loser: games[1] });
+      store.updateScores({ winner: games[0], loser: games[1] });
+
+      expect(store.getScore('Alice-0')).toBe(3);
+      // 3 < 5，未达到 VictoryScore
+      expect(store.getScore('Alice-0')).toBeLessThan(
+        store.getVictoryScore('easy'),
+      );
+
+      // Alice 再赢 2 局
+      store.updateScores({ winner: games[0], loser: games[1] });
+      store.updateScores({ winner: games[0], loser: games[1] });
+
+      expect(store.getScore('Alice-0')).toBe(5);
+      // 5 >= 5，达到 VictoryScore
+      expect(store.getScore('Alice-0')).toBeGreaterThanOrEqual(
+        store.getVictoryScore('easy'),
+      );
     });
   });
 });

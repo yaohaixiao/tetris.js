@@ -33,18 +33,13 @@ describe('EngineStore', () => {
       const state = store.getState();
       expect(state.Mode).toBe(EngineState.Mode);
       expect(state.Players).toEqual(EngineState.Players);
-      expect(state.VictoryScore).toEqual(EngineState.VictoryScore);
       expect(state.Block).toBeDefined();
       expect(state.Elements).toBeDefined();
     });
 
     test('传入的 options 应该覆盖默认值', () => {
-      const customStore = new EngineStore({
-        Mode: 'single',
-        VictoryScore: { easy: 10, normal: 10, hard: 10, expert: 10 },
-      });
+      const customStore = new EngineStore({ Mode: 'single' });
       expect(customStore.getMode()).toBe('single');
-      expect(customStore.getVictoryScore('easy')).toBe(10);
     });
 
     test('传入空对象应该使用默认值', () => {
@@ -79,7 +74,6 @@ describe('EngineStore', () => {
       const state = store.getState();
       expect(state).toHaveProperty('Mode');
       expect(state).toHaveProperty('Players');
-      expect(state).toHaveProperty('VictoryScore');
       expect(state).toHaveProperty('Block');
       expect(state).toHaveProperty('Elements');
     });
@@ -141,43 +135,6 @@ describe('EngineStore', () => {
 
       store.setMode(null);
       expect(store.isVersus()).toBe(false);
-    });
-  });
-
-  // ==================== VictoryScore 管理 ====================
-  describe('getVictoryScore / setVictoryScore', () => {
-    test('应该返回默认 VictoryScore（easy 难度）', () => {
-      expect(store.getVictoryScore()).toBe(EngineState.VictoryScore.easy);
-    });
-
-    test('getVictoryScore 应该支持指定难度', () => {
-      expect(store.getVictoryScore('easy')).toBe(5);
-      expect(store.getVictoryScore('normal')).toBe(8);
-      expect(store.getVictoryScore('hard')).toBe(12);
-      expect(store.getVictoryScore('expert')).toBe(15);
-    });
-
-    test('setVictoryScore 应该正确更新指定难度', () => {
-      store.setVictoryScore('easy', 10);
-      expect(store.getVictoryScore('easy')).toBe(10);
-      expect(store.getVictoryScore('normal')).toBe(8);
-    });
-
-    test('setVictoryScore 应该支持更新所有难度', () => {
-      store.setVictoryScore('easy', 3);
-      store.setVictoryScore('normal', 6);
-      store.setVictoryScore('hard', 9);
-      store.setVictoryScore('expert', 12);
-
-      expect(store.getVictoryScore('easy')).toBe(3);
-      expect(store.getVictoryScore('normal')).toBe(6);
-      expect(store.getVictoryScore('hard')).toBe(9);
-      expect(store.getVictoryScore('expert')).toBe(12);
-    });
-
-    test('VictoryScore 可以为 0', () => {
-      store.setVictoryScore('easy', 0);
-      expect(store.getVictoryScore('easy')).toBe(0);
     });
   });
 
@@ -255,12 +212,10 @@ describe('EngineStore', () => {
     });
 
     test('setPlayers 应该不影响其他状态', () => {
-      const originalEasyScore = store.getVictoryScore('easy');
       const originalBlockStyle = store.getBlockStyle();
 
       store.setPlayers(['human']);
 
-      expect(store.getVictoryScore('easy')).toBe(originalEasyScore);
       expect(store.getBlockStyle()).toBe(originalBlockStyle);
     });
   });
@@ -270,7 +225,6 @@ describe('EngineStore', () => {
     test('应该将状态重置为 EngineState 默认值', () => {
       store.setMode('versus');
       store.setPlayers(['human', 'ai']);
-      store.setVictoryScore('easy', 10);
       store.setBlockStyle('pixel');
       store.setBlockPattern('jay');
 
@@ -278,7 +232,6 @@ describe('EngineStore', () => {
 
       expect(store.getMode()).toBe(EngineState.Mode);
       expect(store.getState().Players).toEqual(EngineState.Players);
-      expect(store.getVictoryScore('easy')).toBe(EngineState.VictoryScore.easy);
       expect(store.getBlockStyle()).toBe(EngineState.Block.style);
       expect(store.getBlockPattern()).toBe(EngineState.Block.pattern);
     });
@@ -293,12 +246,6 @@ describe('EngineStore', () => {
       store.setPlayers(['human', 'ai']);
       store.reset();
       expect(store.getState().Players).toEqual(EngineState.Players);
-    });
-
-    test('reset 后 VictoryScore 应该恢复默认值', () => {
-      store.setVictoryScore('easy', 99);
-      store.reset();
-      expect(store.getVictoryScore('easy')).toBe(EngineState.VictoryScore.easy);
     });
 
     test('reset 后 Block 配置应该恢复默认值', () => {
@@ -338,7 +285,6 @@ describe('EngineStore', () => {
     test('reset 后应该清除所有自定义配置', () => {
       store.setMode('versus');
       store.setPlayers(['human', 'ai']);
-      store.setVictoryScore('easy', 25);
       store.setBlockStyle('frosted');
       store.setBlockPattern('tee');
 
@@ -347,7 +293,6 @@ describe('EngineStore', () => {
       const state = store.getState();
       expect(state.Mode).toBe(EngineState.Mode);
       expect(state.Players).toEqual(EngineState.Players);
-      expect(state.VictoryScore).toEqual(EngineState.VictoryScore);
       expect(state.Block.style).toBe(EngineState.Block.style);
       expect(state.Block.pattern).toBe(EngineState.Block.pattern);
     });
@@ -376,15 +321,6 @@ describe('EngineStore', () => {
       expect(store2.getBlockStyle()).toBe(EngineState.Block.style);
     });
 
-    test('修改 VictoryScore 不影响其他实例', () => {
-      const store1 = new EngineStore();
-      const store2 = new EngineStore();
-
-      store1.setVictoryScore('easy', 100);
-      expect(store1.getVictoryScore('easy')).toBe(100);
-      expect(store2.getVictoryScore('easy')).toBe(EngineState.VictoryScore.easy);
-    });
-
     test('reset 只影响当前实例', () => {
       const store1 = new EngineStore();
       const store2 = new EngineStore();
@@ -404,12 +340,8 @@ describe('EngineStore', () => {
   // ==================== initialize 与 reset 的关系 ====================
   describe('initialize 与 reset 的关系', () => {
     test('initialize 可以用自定义配置覆盖', () => {
-      store.initialize({
-        Mode: 'versus',
-        VictoryScore: { easy: 30, normal: 30, hard: 30, expert: 30 },
-      });
+      store.initialize({ Mode: 'versus' });
       expect(store.getMode()).toBe('versus');
-      expect(store.getVictoryScore('easy')).toBe(30);
     });
 
     test('reset 后可以再次 initialize', () => {
@@ -441,14 +373,6 @@ describe('EngineStore', () => {
       expect(store.getMode()).toBe('single');
     });
 
-    test('setVictoryScore 支持任意数值', () => {
-      store.setVictoryScore('easy', -1);
-      expect(store.getVictoryScore('easy')).toBe(-1);
-
-      store.setVictoryScore('expert', 999);
-      expect(store.getVictoryScore('expert')).toBe(999);
-    });
-
     test('Block.style 可以设置为任意字符串', () => {
       store.setBlockStyle('custom-style');
       expect(store.getBlockStyle()).toBe('custom-style');
@@ -476,7 +400,6 @@ describe('EngineStore', () => {
     test('reset 后所有自定义配置消失', () => {
       store.setMode('versus');
       store.setPlayers(['human', 'ai']);
-      store.setVictoryScore('easy', 20);
       store.setBlockStyle('glass');
       store.setBlockPattern('ell');
 
@@ -484,7 +407,6 @@ describe('EngineStore', () => {
 
       expect(store.getMode()).toBe(EngineState.Mode);
       expect(store.getState().Players).toEqual(EngineState.Players);
-      expect(store.getVictoryScore('easy')).toBe(EngineState.VictoryScore.easy);
       expect(store.getBlockStyle()).toBe(EngineState.Block.style);
       expect(store.getBlockPattern()).toBe(EngineState.Block.pattern);
     });

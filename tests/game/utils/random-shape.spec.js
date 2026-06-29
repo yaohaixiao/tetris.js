@@ -78,8 +78,8 @@ describe('randomShape', () => {
   /**
    * 创建模拟的 runtime 对象。
    *
-   * randomShape 现在通过 runtime.updateBag() 更新袋子内容，
-   * 不再直接赋值 runtime.bag。因此 runtime 必须提供 updateBag 方法。
+   * RandomShape 现在通过 runtime.updateBag() 更新袋子内容， 不再直接赋值 runtime.bag。因此 runtime
+   * 必须提供 updateBag 方法。
    *
    * @returns {object} 模拟的 runtime 对象，包含 bag 数组和 updateBag 方法
    */
