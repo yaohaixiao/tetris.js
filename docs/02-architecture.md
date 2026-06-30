@@ -4089,9 +4089,11 @@ board.drop();
 - 调试时很难定位 AI 与游戏逻辑之间的问题；
 - 后续增加新的输入方式（手柄、网络对战等）需要重复实现；
 
-也就是说，**AI 直接操作棋盘，会让整个系统越来越耦合**。因此，项目重新设计了 AI 的职责。AI 不再负责"操作游戏"，而只负责"思考下一步应该做什么"，真正执行操作的始终只有 Runtime。
+也就是说，**AI 直接操作棋盘，会让整个系统越来越耦合**。因此，项目重新设计了 AI 的职责，AI 不再负责"操作游戏"，而只负责"思考下一步应该做什么"，真正执行操作的始终只有 Runtime。
 
-具体的处理方式是通过创建一个真实棋盘的快照：**`createSnapshot`**。
+### createSnapshot 创建真实棋盘的快照
+
+不能直接修改游戏棋盘的数据，我们需要“拷贝”一份棋盘数据，具体的处理方式是通过创建一个真实棋盘的快照：**`createSnapshot`**。
 
 ```js
 const createSnapshot = (state) =>
@@ -4129,7 +4131,9 @@ const createSnapshot = (state) =>
 export default createSnapshot;
 ```
 
-AI 搜索完成以后，最终输出的仍然只是：`Command`。
+### Beam Search
+
+AI 在决策工程中，需要大量的棋盘演算，我们不能将所有的数据都保留，只在"还需要继续递归"且"候选数超过 beam 限制"时执行。也就是采用 Beam Search 算法实现决策推演，保留 Beam Search 演算的最佳结果：
 
 ```js
 const selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
@@ -4218,7 +4222,7 @@ const selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
 export default selfPlay;
 ```
 
-`selfPlay` 是做决策的，`generateMoves` 就是用来创建 Command 的：
+AI 搜索完成以后，最终输出的仍然只是：`Command`。`selfPlay` 是做决策的，`generateMoves` 就是用来创建 Command 的：
 
 ```js
 import rotateMatrix from '@/lib/ai/simulator/rotate-matrix.js';
@@ -4722,9 +4726,77 @@ Game Logic
 - **调试更加简单**：AI 的行为可以完整记录，任何一次决策都可以重新回放；
 - **职责更加清晰**：AI 负责 Decision（决策），Runtime 负责 Simulation（模拟），Renderer 负责 Presentation（渲染）；
 
-整个 AI 模块遵循项目统一的设计原则：**AI 负责 Decision，Runtime 负责 Simulation**。AI 永远不会直接修改游戏状态，而是通过 Command 参与整个 Simulation。
+整个 AI 模块遵循项目统一的设计原则：**AI 负责 Decision，Runtime 负责 Simulation**。AI 永远不会直接修改游戏状态，而是通过 Command 参与整个 Simulation。因此，在 Runtime 看来玩家与 AI 并没有任何区别，它们只是不同的 Command Producer。
 
-因此，在 Runtime 看来玩家与 AI 并没有任何区别，它们只是不同的 Command Producer。
+### Web Worker 优化 AI 决策性能
+
+虽然采用了 Beam Search 算法，但 AI 演算 1 个 10 x 20 的游戏棋盘，大概也要演算 300-400 次，性能会是一个问题。因此选择了使用 Web Worker 另外开启一个进程进行演算：
+
+```js
+/**
+   * ## AI 决策入口
+   *
+   * 根据运行模式选择决策方式：
+   *
+   * - **Worker 模式**：异步发送消息给 Worker 线程
+   * - **主线程模式**（当前使用）：同步调用 selfPlay，直接返回最佳移动对象
+   *
+   * ### mode 参数
+   *
+   * 根据当前游戏模式传递不同的 mode 给 selfPlay：
+   *
+   * - Single 模式：'survival'（生存模式，只关心自己棋盘的存活）
+   * - Battle 模式：'versus'（对战模式，额外考虑攻击力奖励）
+   *
+   * Mode 参数贯穿整个决策链：selfPlay → evaluateBoard， 在 evaluateBoard 中根据 mode
+   * 使用不同的权重和奖励策略。
+   *
+   * ### bag 参数
+   *
+   * 从 Game.getBagSnapshot() 获取当前 Game 实例专属的 7-bag 快照。 每个 Game 实例维护独立的
+   * this.bag，Battle 模式下不会互相干扰。
+   *
+   * @param {object} state - 游戏状态对象（Game.Store.getState() 的返回值）
+   * @param {object} difficulty - 难度配置对象，包含 lookahead、weights、beam、delay
+   * @returns {object | void} 主线程模式返回 { x, y, placeOn, actions }，Worker 模式返回
+   *   undefined
+   */
+  think(state, difficulty) {
+    const { Store, Game } = this;
+    const { lookahead, weights, beam } = difficulty;
+    const difficultyLevel = Store.getDifficulty();
+    // Expert 难度预留 mcts 算法切换（当前统一使用 selfPlay）
+    const algorithm = difficultyLevel === 'expert' ? 'mcts' : 'selfPlay';
+    // 根据游戏模式决定 AI 策略模式
+    const mode = Game.isVersus() ? 'versus' : 'survival';
+    // 获取当前 Game 实例专属的 7-bag 快照
+    const bag = Game.getBagSnapshot();
+
+    if (this.worker) {
+      // Worker 模式（当前未使用，保留备用）
+      this.workerBusy = true;
+      this.worker.postMessage({
+        type: 'think',
+        state,
+        bag,
+        weights,
+        depth: lookahead,
+        beam,
+        algorithm,
+        mode,
+      });
+    } else {
+      /*
+       * ==================== 降级返回（Worker 不可用时） ====================
+       *
+       * 如果 Worker 分支走了但没有 return（Worker 模式下 think() 返回 undefined），
+       * 下面的代码作为降级方案，确保 AI 仍然能做出决策。
+       */
+      const snapshot = createSnapshot(state, bag);
+      return selfPlay(snapshot, weights, lookahead, beam, mode);
+    }
+  }
+```
 
 ### AI 架构图
 

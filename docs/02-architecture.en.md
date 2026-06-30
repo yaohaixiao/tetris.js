@@ -4761,6 +4761,75 @@ The entire AI module follows the project's unified design principle: **AI is res
 
 Therefore, from Runtime's perspective, there is no difference between players and AI — they are just different Command Producers.
 
+### Web Worker Optimizes AI Decision Performance
+
+Although Beam Search algorithm was adopted, AI computation on a single 10 x 20 game board still requires approximately 300-400 calculations, making performance a concern. Therefore, Web Worker was chosen to offload computation to a separate thread:
+
+```js
+/**
+   * ## AI Decision Entry Point
+   *
+   * Selects decision method based on runtime mode:
+   *
+   * - **Worker Mode**: Asynchronously sends messages to Worker thread
+   * - **Main Thread Mode** (currently used): Synchronously calls selfPlay, returns best move object directly
+   *
+   * ### mode parameter
+   *
+   * Passes different modes to selfPlay based on current game mode:
+   *
+   * - Single mode: 'survival' (survival mode, only cares about own board's survival)
+   * - Battle mode: 'versus' (versus mode, additionally considers attack power rewards)
+   *
+   * Mode parameter flows through the entire decision chain: selfPlay → evaluateBoard,
+   * where evaluateBoard uses different weights and reward strategies based on mode.
+   *
+   * ### bag parameter
+   *
+   * Gets the 7-bag snapshot specific to the current Game instance from Game.getBagSnapshot().
+   * Each Game instance maintains its own this.bag, so they don't interfere with each other in Battle mode.
+   *
+   * @param {object} state - Game state object (return value from Game.Store.getState())
+   * @param {object} difficulty - Difficulty configuration object containing lookahead, weights, beam, delay
+   * @returns {object | void} Main thread mode returns { x, y, placeOn, actions }, Worker mode returns undefined
+   */
+  think(state, difficulty) {
+    const { Store, Game } = this;
+    const { lookahead, weights, beam } = difficulty;
+    const difficultyLevel = Store.getDifficulty();
+    // Expert difficulty reserves mcts algorithm switch (currently unified use of selfPlay)
+    const algorithm = difficultyLevel === 'expert' ? 'mcts' : 'selfPlay';
+    // Select AI strategy mode based on game mode
+    const mode = Game.isVersus() ? 'versus' : 'survival';
+    // Get 7-bag snapshot specific to current Game instance
+    const bag = Game.getBagSnapshot();
+
+    if (this.worker) {
+      // Worker mode (currently unused, reserved for future use)
+      this.workerBusy = true;
+      this.worker.postMessage({
+        type: 'think',
+        state,
+        bag,
+        weights,
+        depth: lookahead,
+        beam,
+        algorithm,
+        mode,
+      });
+    } else {
+      /*
+       * ==================== Fallback (when Worker is unavailable) ====================
+       *
+       * If the Worker branch is taken but no return occurs (Worker mode think() returns undefined),
+       * the code below serves as a fallback to ensure AI can still make decisions.
+       */
+      const snapshot = createSnapshot(state, bag);
+      return selfPlay(snapshot, weights, lookahead, beam, mode);
+    }
+  }
+```
+
 ### AI Architecture Diagram
 
 ![AI Architecture Diagram](assets/img/ai-poster.png)
