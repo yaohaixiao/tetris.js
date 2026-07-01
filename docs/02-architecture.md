@@ -133,9 +133,7 @@ export const updateMainLoop = (timestamp) => {
 
 ### 移动方块
 
-
 大致的流程如下：
-
 
 ```
 Keyboard
@@ -259,8 +257,8 @@ export function drop() {
 }
 ```
 
-
-它们都能够直接修改游戏状态 `gameState`。代码虽然还能工作，但已经开始出严重的耦合依赖问题。
+它们都能够直接修改游戏状态
+`gameState`。代码虽然还能工作，但已经开始出严重的耦合依赖问题。
 
 ## 第二个问题：越来越多的系统开始依赖游戏逻辑
 
@@ -278,7 +276,6 @@ Battle ───────┤
 ```
 
 每一个模块都知道如何操作游戏，每一个模块也都依赖游戏实现，新增一个功能就意味着需要修改多个地方，这也是很多小游戏最终越来越难维护的原因。
-
 
 ## 架构演进：dispatchInput（映射输入）
 
@@ -804,10 +801,11 @@ const Game = {
   // 游戏状态
   store: createGameStore(),
   // 省略...
-}
+};
 ```
 
-然后再需要操作有戏状态信息的时候，就都通过 `store` 统一管理了。还是以 `rotate` 方法的改变：
+然后再需要操作有戏状态信息的时候，就都通过 `store` 统一管理了。还是以 `rotate`
+方法的改变：
 
 ```js
 import Audio from '@/lib/services/audio';
@@ -861,7 +859,8 @@ export default rotate;
 
 ## 架构演进：Command Runtime（命令驱动运行时）
 
-虽然 `Store` 统一的游戏状态的关联，但这是还有一个大问题所有模块都依赖游戏逻辑，所有模块也都需要知道什么时候播放音效、什么时候更新动画、什么时候刷新界面。
+虽然 `Store`
+统一的游戏状态的关联，但这是还有一个大问题所有模块都依赖游戏逻辑，所有模块也都需要知道什么时候播放音效、什么时候更新动画、什么时候刷新界面。
 
 ### 以前的方式
 
@@ -891,7 +890,8 @@ const dispatchInput = (event) => {
 
 ### 为什么需要 Command？
 
-Command 最大的作用，并不是把 `move()` 包装成一个对象。真正重要的是：**把"玩家想做什么"和"游戏如何执行"彻底分离**。
+Command 最大的作用，并不是把 `move()`
+包装成一个对象。真正重要的是：**把"玩家想做什么"和"游戏如何执行"彻底分离**。
 
 所有输入不再直接调用游戏逻辑，它们首先会被转换成 **Command（命令）**。例如：
 
@@ -904,7 +904,8 @@ RESTART
 QUIT
 ```
 
-随后，这些 Command 不会立即执行，而是统一进入 **Command Queue（命令队列）**。整个执行流程变成：
+随后，这些 Command 不会立即执行，而是统一进入 **Command
+Queue（命令队列）**。整个执行流程变成：
 
 ```text
 Keyboard
@@ -996,12 +997,12 @@ export default dispatchInput;
 
 至于：
 
-* 是否允许移动？
-* 当前是不是暂停？
-* 当前是不是 Game Over？
-* 当前有没有动画阻塞？
-* 是否需要播放音效？
-* 是否需要记录 Replay？
+- 是否允许移动？
+- 当前是不是暂停？
+- 当前是不是 Game Over？
+- 当前有没有动画阻塞？
+- 是否需要播放音效？
+- 是否需要记录 Replay？
 
 这些都交给 Runtime 统一决定，输入模块完全不知道游戏内部是如何工作的。
 
@@ -1021,13 +1022,14 @@ Keyboard
 
 如果事件发生时立即执行，那么：
 
-* Keyboard
-* Replay
-* AI
-* Gamepad
-* Battle
+- Keyboard
+- Replay
+- AI
+- Gamepad
+- Battle
 
-都会在不同时间修改游戏状态，这样不仅难以维护，也无法保证每一帧的数据一致性。加入 Command Queue 后，整个流程变成：
+都会在不同时间修改游戏状态，这样不仅难以维护，也无法保证每一帧的数据一致性。加入 Command
+Queue 后，整个流程变成：
 
 ```text
 DOM Event
@@ -1042,7 +1044,8 @@ DOM Event
  Execute Commands
 ```
 
-所有输入都会等待下一次 Tick，然后按照进入队列的顺序（FIFO）依次执行。看看 Command Queue 的实现：
+所有输入都会等待下一次 Tick，然后按照进入队列的顺序（FIFO）依次执行。看看 Command
+Queue 的实现：
 
 ```js
 /**
@@ -1106,11 +1109,12 @@ const CommandQueue = {
 export default CommandQueue;
 ```
 
-通过 `CommandQueue` 的 `flush` 方法实现顺序（FIFO）依次执行。这样带来了三个非常重要的好处：
+通过 `CommandQueue` 的 `flush`
+方法实现顺序（FIFO）依次执行。这样带来了三个非常重要的好处：
 
-* 保证所有输入拥有一致的执行顺序；
-* 保证所有状态更新发生在 Game Loop 内部；
-* 保证所有输入来源（Keyboard、Replay、AI、Gamepad）拥有完全一致的执行流程；
+- 保证所有输入拥有一致的执行顺序；
+- 保证所有状态更新发生在 Game Loop 内部；
+- 保证所有输入来源（Keyboard、Replay、AI、Gamepad）拥有完全一致的执行流程；
 
 另外需要注意：`command.execute()`。
 
@@ -1234,7 +1238,8 @@ const dispatchCommand = (cmd, context) => {
 export default dispatchCommand;
 ```
 
-将原本在 `dispatchInupt` 中执行的 `actions`，转移到 `dispatchCommand` 这里在执行。此时 Runtime 终于拥有了一条稳定、可预测的命令执行流。
+将原本在 `dispatchInupt` 中执行的 `actions`，转移到 `dispatchCommand`
+这里在执行。此时 Runtime 终于拥有了一条稳定、可预测的命令执行流。
 
 ### 当前的架构
 
@@ -1295,7 +1300,6 @@ const loopPlayBGM = (i, m) => {
 };
 
 export default loopPlayBGM;
-
 ```
 
 ```js
@@ -1346,7 +1350,8 @@ export default playTone;
 
 ### 时间开始变得不一致
 
-每个模块都维护着自己的 Timer。例如之前的 Audio 模块就是使用的 `setTimeout()`，来看看当时游戏的主循环 **Game Loop**：
+每个模块都维护着自己的 Timer。例如之前的 Audio 模块就是使用的
+`setTimeout()`，来看看当时游戏的主循环 **Game Loop**：
 
 ```js
 import EngineState from '@/lib/engine/state/engine-state.js';
@@ -1399,9 +1404,14 @@ const startGameLoop = (timestamp) => {
 export default startGameLoop;
 ```
 
-Game Loop 采用是（标准的）requestAnimationFrame，游戏的动画特效和方块绘制都是靠 Game Loop 驱动的。但实际上之前的动画也是 `setTimeout()` 驱动的，就是开始的 Countdown 动画（当然这也是纯实现功能的处理办法）。
+Game
+Loop 采用是（标准的）requestAnimationFrame，游戏的动画特效和方块绘制都是靠 Game
+Loop 驱动的。但实际上之前的动画也是 `setTimeout()`
+驱动的，就是开始的 Countdown 动画（当然这也是纯实现功能的处理办法）。
 
-虽然统一了游戏动画和游戏界面的绘制通过 Game Loop 统一了，但 Audio 和 Game Loop 还是相互独立的。而即便是 Audio 模块内部，采用 `setTimeout()` 也不好保证音频的播放效果，特别是 Audio 的 Sounds 音效子模块：
+虽然统一了游戏动画和游戏界面的绘制通过 Game Loop 统一了，但 Audio 和 Game
+Loop 还是相互独立的。而即便是 Audio 模块内部，采用 `setTimeout()`
+也不好保证音频的播放效果，特别是 Audio 的 Sounds 音效子模块：
 
 ```js
 import playTone from '@/lib/audio/play-tone.js';
@@ -1485,7 +1495,9 @@ const Sounds = {
 export default Sounds;
 ```
 
-特别是例如 `levelUp` 之类的多音频的音效，它们并不知道彼此什么时候开始，也不知道游戏当前是否已经暂停，更无法保证与 Runtime 保持一致。问题并不在于 `setTimeout()` 本身，而在于整个项目已经不存在统一的时间管理。
+特别是例如 `levelUp`
+之类的多音频的音效，它们并不知道彼此什么时候开始，也不知道游戏当前是否已经暂停，更无法保证与 Runtime 保持一致。问题并不在于
+`setTimeout()` 本身，而在于整个项目已经不存在统一的时间管理。
 
 ### 为什么需要 Scheduler？
 
@@ -1683,73 +1695,73 @@ export default loopPlayBGM;
 `Sounds` 模块也变样了，这里只截取 `CLEAR` 和 `LEVEL_UP`：
 
 ```js
-  CLEAR = (lines = 1, level = 1, isPerfectClear = false) => {
-    // 根据等级选择方案（每 16 关一套）
-    const setIndex = Math.min(Math.floor((level - 1) / 16), 15);
-    const frequencies = CHORD_SETS[setIndex];
-    const params = PARAM_SETS[setIndex];
+CLEAR = (lines = 1, level = 1, isPerfectClear = false) => {
+  // 根据等级选择方案（每 16 关一套）
+  const setIndex = Math.min(Math.floor((level - 1) / 16), 15);
+  const frequencies = CHORD_SETS[setIndex];
+  const params = PARAM_SETS[setIndex];
 
-    // 每个音轨的基础播放参数
-    const speeds = [260, 300, 380];
-    const volumes = [0.32, 0.3, 0.25];
-    const timeouts = [160, 320, 480];
+  // 每个音轨的基础播放参数
+  const speeds = [260, 300, 380];
+  const volumes = [0.32, 0.3, 0.25];
+  const timeouts = [160, 320, 480];
 
-    // 获取当前音乐动机
-    const motif = getMotif(lines, isPerfectClear);
-    const cfg = MOTIFS[motif];
+  // 获取当前音乐动机
+  const motif = getMotif(lines, isPerfectClear);
+  const cfg = MOTIFS[motif];
 
-    // 安全索引（防止越界）
-    const index = Math.min(lines, frequencies.length - 1);
-    const baseChord = frequencies[index].filter((f) => f > 0);
+  // 安全索引（防止越界）
+  const index = Math.min(lines, frequencies.length - 1);
+  const baseChord = frequencies[index].filter((f) => f > 0);
 
-    // 生成最终和弦：shift 控制整体音高偏移（半音单位 ×12）
-    const chord = baseChord.map((freq) => freq + cfg.shift * 12);
-    const queue = [];
-    const { Context, Scheduler } = this;
+  // 生成最终和弦：shift 控制整体音高偏移（半音单位 ×12）
+  const chord = baseChord.map((freq) => freq + cfg.shift * 12);
+  const queue = [];
+  const { Context, Scheduler } = this;
 
-    // 逐音轨构建播放序列
-    for (const [i, freq] of chord.entries()) {
-      queue.push({
-        fn: () => {
-          const now = Context.currentTime;
-          playTone(this, freq, speeds[i] * cfg.speed * params.spdMul, {
-            volume: volumes[i] * cfg.volume * params.volMul,
-            wave: params.wave,
-            startTime: now + timeouts[i] / 1000,
-          });
-        },
-      });
-    }
-
-    // 按时间偏移顺序播放和弦
-    Scheduler.sequence(queue);
-  };
-
-  /**
-   * ## 升级庆祝音效
-   *
-   * 演奏上行音阶（C5 → E6），营造升级的成就感和喜悦情绪。 通过 Scheduler.sequence 按精确时间偏移依次触发。
-   *
-   * @returns {void}
-   */
-  LEVEL_UP = () => {
-    const { Context, Scheduler } = this;
-    const now = Context.currentTime;
-
-    Scheduler.sequence([
-      { fn: () => playTone(this, 523, 220) },
-      { fn: () => playTone(this, 587, 220, { startTime: now + 0.26 }) },
-      { fn: () => playTone(this, 659, 240, { startTime: now + 0.52 }) },
-      {
-        delay: 260,
-        fn: () => playTone(this, 784, 260, { startTime: now + 0.78 }),
+  // 逐音轨构建播放序列
+  for (const [i, freq] of chord.entries()) {
+    queue.push({
+      fn: () => {
+        const now = Context.currentTime;
+        playTone(this, freq, speeds[i] * cfg.speed * params.spdMul, {
+          volume: volumes[i] * cfg.volume * params.volMul,
+          wave: params.wave,
+          startTime: now + timeouts[i] / 1000,
+        });
       },
-      { fn: () => playTone(this, 880, 280, { startTime: now + 1.06 }) },
-      { fn: () => playTone(this, 1047, 320, { startTime: now + 1.36 }) },
-      { fn: () => playTone(this, 1175, 360, { startTime: now + 1.7 }) },
-      { fn: () => playTone(this, 1319, 480, { startTime: now + 2.08 }) },
-    ]);
-  };
+    });
+  }
+
+  // 按时间偏移顺序播放和弦
+  Scheduler.sequence(queue);
+};
+
+/**
+ * ## 升级庆祝音效
+ *
+ * 演奏上行音阶（C5 → E6），营造升级的成就感和喜悦情绪。 通过 Scheduler.sequence 按精确时间偏移依次触发。
+ *
+ * @returns {void}
+ */
+LEVEL_UP = () => {
+  const { Context, Scheduler } = this;
+  const now = Context.currentTime;
+
+  Scheduler.sequence([
+    { fn: () => playTone(this, 523, 220) },
+    { fn: () => playTone(this, 587, 220, { startTime: now + 0.26 }) },
+    { fn: () => playTone(this, 659, 240, { startTime: now + 0.52 }) },
+    {
+      delay: 260,
+      fn: () => playTone(this, 784, 260, { startTime: now + 0.78 }),
+    },
+    { fn: () => playTone(this, 880, 280, { startTime: now + 1.06 }) },
+    { fn: () => playTone(this, 1047, 320, { startTime: now + 1.36 }) },
+    { fn: () => playTone(this, 1175, 360, { startTime: now + 1.7 }) },
+    { fn: () => playTone(this, 1319, 480, { startTime: now + 2.08 }) },
+  ]);
+};
 ```
 
 更关键的是 `playTone` 更是使用了精准的时间控制：
@@ -2099,11 +2111,7 @@ class ClearLinesAnimation {
      */
     this._schedulerIds = [];
 
-    const {
-      Scheduler,
-      Game,
-      Store
-    } = this;
+    const { Scheduler, Game, Store } = this;
     const GE = GameEvents(Game.id);
     const AE = AudioEvents();
 
@@ -2132,11 +2140,7 @@ class ClearLinesAnimation {
      *
      * @type {number}
      */
-    const {
-      clearScore,
-      combo,
-      comboScore
-    } = applyClearLines(Game);
+    const { clearScore, combo, comboScore } = applyClearLines(Game);
 
     /**
      * ## 闪烁切换函数
@@ -2171,23 +2175,23 @@ class ClearLinesAnimation {
       },
       {
         fn: toggle,
-        delay: 120
+        delay: 120,
       },
       {
         fn: toggle,
-        delay: 120
+        delay: 120,
       },
       {
         fn: toggle,
-        delay: 120
+        delay: 120,
       },
       {
         fn: toggle,
-        delay: 120
+        delay: 120,
       },
       {
         fn: toggle,
-        delay: 120
+        delay: 120,
       },
     ]);
 
@@ -2222,7 +2226,8 @@ class ClearLinesAnimation {
 
 ### 为什么这是一次架构演进？
 
-Scheduler 并不是为了替代 `setTimeout()`。它真正解决的问题，是让"时间"成为 Runtime 可以统一管理的资源。
+Scheduler 并不是为了替代
+`setTimeout()`。它真正解决的问题，是让"时间"成为 Runtime 可以统一管理的资源。
 
 ```js
 const startGameLoop = (timestamp) => {
@@ -2739,7 +2744,8 @@ class Scheduler {
 export default Scheduler;
 ```
 
-最后看看 Scheduler 是如何衔接 Audio、Animations System、Animation 和 Game Loop 的：
+最后看看 Scheduler 是如何衔接 Audio、Animations System、Animation 和 Game
+Loop 的：
 
 ![Scheduler Diagram](assets/img/scheduler-diagram.png)
 
@@ -2858,7 +2864,8 @@ export default dispatchInput;
 相同结果
 ```
 
-Replay 因此拥有极小的数据量，同时能够完整重现整局游戏。需要注意的是 Replay 不仅仅记录用户的输入指令，也记录 Game Loop 中 Game.tick() 的数据：
+Replay 因此拥有极小的数据量，同时能够完整重现整局游戏。需要注意的是 Replay 不仅仅记录用户的输入指令，也记录 Game
+Loop 中 Game.tick() 的数据：
 
 ```js
 import move from '@/lib/game/logic/move.js';
@@ -2944,6 +2951,7 @@ const tick = (game, isBlocked) => {
 
 export default tick;
 ```
+
 回放的时候除了用户的按键行为，也需要记录方块的自动下落的行为。
 
 ### Replay 的实现
@@ -3375,7 +3383,8 @@ export default ReplayController;
 
 ### syncPlayElapsed
 
-`syncPlayElapsed` 主要是处理用户暂停了游戏或者切换到其他标签页时，游戏停止的状态再 Replay 回放时如何处理时间跳跃过大时，保证回放的连续性。
+`syncPlayElapsed`
+主要是处理用户暂停了游戏或者切换到其他标签页时，游戏停止的状态再 Replay 回放时如何处理时间跳跃过大时，保证回放的连续性。
 
 ```js
 /**
@@ -3407,7 +3416,9 @@ export default ReplayController;
 
 ### update
 
-`update` 则是同步 Game Loop 的时间轴执行记录的 Command，也就是执行 `this.emit(`dispatch:command`, cmd);`，发送消息执行 `dispatchCommand` 方法执行实际的操作。
+`update` 则是同步 Game Loop 的时间轴执行记录的 Command，也就是执行
+`this.emit(`dispatch:command`, cmd);`，发送消息执行 `dispatchCommand`
+方法执行实际的操作。
 
 ```js
   /**
@@ -3483,13 +3494,15 @@ export default ReplayController;
 
 ## 架构演进：EventBus
 
-细心的朋友应该发现了在 Replay 模块的 `update` 方法中使用了 `**this.emit(`dispatch:command`, cmd);**`，它就是：**EventBus**。
+细心的朋友应该发现了在 Replay 模块的 `update` 方法中使用了
+`**this.emit(`dispatch:command`, cmd);**`，它就是：**EventBus**。
 
 ### 为什么引入 EventBus
 
 随着项目不断扩展，模块越来越多，模块之间开始出现越来越多的交互，模块间相互调用，形成了强耦合。
 
-而 **EventBus（事件总线）** 它提供了一套多模块间发布-订阅（Publish-Subscribe）的消息通信机制，让各个模块之间能够解耦通信。
+而 **EventBus（事件总线）**
+它提供了一套多模块间发布-订阅（Publish-Subscribe）的消息通信机制，让各个模块之间能够解耦通信。
 
 #### 以前的实现
 
@@ -3550,7 +3563,8 @@ const clearLines = () => {
 export default clearLines;
 ```
 
-有消除行了，要开始播放动画了，就直接调用了（当时）Controllers 模块的 `startClearLines` 方法触发动画：`ClearLinesAnimation`。
+有消除行了，要开始播放动画了，就直接调用了（当时）Controllers 模块的
+`startClearLines` 方法触发动画：`ClearLinesAnimation`。
 
 接着我们看看 `ClearLinesAnimation` 的逻辑又是如何的：
 
@@ -3781,11 +3795,13 @@ export default ClearLinesAnimation;
 
 看代码可以清晰的知道程序的调用逻辑：
 
-1. `Sounds.clear(lines.length - 1)`；直接调用 Audio 模块内的 `Sounds.clear` 方法播放消除音效;
+1. `Sounds.clear(lines.length - 1)`；直接调用 Audio 模块内的 `Sounds.clear`
+   方法播放消除音效;
 2. `renderClear()`；直接调用 UI 模块的绘制消除行的方法；
 3. `update()`：通过 Game Loop 的 requestAnimationFrame 逐帧更新动画；
 4. `stop()`：动画结束，又直接通过 Game.store 更新游戏状态属性；
-5. `renderHud(store.getState())`；最后又直接通过 UI 的 `renderHud` 方法更新动画；
+5. `renderHud(store.getState())`；最后又直接通过 UI 的 `renderHud`
+   方法更新动画；
 
 这种方式虽然简单，但随着功能越来越多，问题也逐渐暴露出来：
 
@@ -3838,7 +3854,8 @@ const clearLines = () => {
 export default clearLines;
 ```
 
-这个时候的实现 Game 也不直接调用 Controllers 模块的 `startClearLines` 方法 仅发布了一个消息：`effects:start:clear:lines`。这时候 Game 模块 clearLines 不在与 Controllers 强耦合了。
+这个时候的实现 Game 也不直接调用 Controllers 模块的 `startClearLines`
+方法 仅发布了一个消息：`effects:start:clear:lines`。这时候 Game 模块 clearLines 不在与 Controllers 强耦合了。
 
 接着看调整后的 ClearLinesAnimation 采用 EventBus 是如何处理的：
 
@@ -4028,7 +4045,6 @@ class ClearLinesAnimation {
 }
 
 export default ClearLinesAnimation;
-
 ```
 
 ### EventBus 带来的提升
@@ -4101,34 +4117,34 @@ board.drop();
 ```js
 const createSnapshot = (state) =>
   structuredClone({
-  // 控制者身份
-  controller: state.controller,
+    // 控制者身份
+    controller: state.controller,
 
-  // 棋盘状态
-  board: state.board,
+    // 棋盘状态
+    board: state.board,
 
-  // 游戏进度
-  level: state.level,
-  score: state.score,
-  lines: state.lines,
+    // 游戏进度
+    level: state.level,
+    score: state.score,
+    lines: state.lines,
 
-  // 原始方块对象（保留完整信息，方便后续扩展）
-  cur: state.curr,
-  next: state.next,
+    // 原始方块对象（保留完整信息，方便后续扩展）
+    cur: state.curr,
+    next: state.next,
 
-  // AI 决策专用的方块信息：从 state.curr 和 state.cx/cy 中提取并结构化
-  piece: state.curr
-  ? {
-  shape: state.curr.shape,
-  position: {
-  x: state.cx,
-  y: state.cy,
-  },
-  }
-  : null,
+    // AI 决策专用的方块信息：从 state.curr 和 state.cx/cy 中提取并结构化
+    piece: state.curr
+      ? {
+          shape: state.curr.shape,
+          position: {
+            x: state.cx,
+            y: state.cy,
+          },
+        }
+      : null,
 
-  // 游戏模式
-  mode: state.mode,
+    // 游戏模式
+    mode: state.mode,
   });
 
 export default createSnapshot;
@@ -4136,7 +4152,8 @@ export default createSnapshot;
 
 ### Beam Search
 
-AI 在决策工程中，需要大量的棋盘演算，我们不能将所有的数据都保留，只在"还需要继续递归"且"候选数超过 beam 限制"时执行。也就是采用 Beam Search 算法实现决策推演，保留 Beam Search 演算的最佳结果：
+AI 在决策工程中，需要大量的棋盘演算，我们不能将所有的数据都保留，只在"还需要继续递归"且"候选数超过 beam 限制"时执行。也就是采用 Beam
+Search 算法实现决策推演，保留 Beam Search 演算的最佳结果：
 
 ```js
 const selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
@@ -4225,7 +4242,8 @@ const selfPlay = (snapshot, weights, depth = 1, beam = 5) => {
 export default selfPlay;
 ```
 
-AI 搜索完成以后，最终输出的仍然只是：`Command`。`selfPlay` 是做决策的，`generateMoves` 就是用来创建 Command 的：
+AI 搜索完成以后，最终输出的仍然只是：`Command`。`selfPlay`
+是做决策的，`generateMoves` 就是用来创建 Command 的：
 
 ```js
 import rotateMatrix from '@/lib/ai/simulator/rotate-matrix.js';
@@ -4729,11 +4747,14 @@ Game Logic
 - **调试更加简单**：AI 的行为可以完整记录，任何一次决策都可以重新回放；
 - **职责更加清晰**：AI 负责 Decision（决策），Runtime 负责 Simulation（模拟），Renderer 负责 Presentation（渲染）；
 
-整个 AI 模块遵循项目统一的设计原则：**AI 负责 Decision，Runtime 负责 Simulation**。AI 永远不会直接修改游戏状态，而是通过 Command 参与整个 Simulation。因此，在 Runtime 看来玩家与 AI 并没有任何区别，它们只是不同的 Command Producer。
+整个 AI 模块遵循项目统一的设计原则：**AI 负责 Decision，Runtime 负责 Simulation**。AI 永远不会直接修改游戏状态，而是通过 Command 参与整个 Simulation。因此，在 Runtime 看来玩家与 AI 并没有任何区别，它们只是不同的 Command
+Producer。
 
 ### Web Worker 优化 AI 决策性能
 
-虽然采用了 Beam Search 算法，但 AI 演算 1 个 10 x 20 的游戏棋盘，大概也要演算 300-400 次，性能会是一个问题。因此选择了使用 Web Worker 另外开启一个进程进行演算：
+虽然采用了 Beam Search 算法，但 AI 演算 1 个 10 x
+20 的游戏棋盘，大概也要演算 300-400 次，性能会是一个问题。因此选择了使用 Web
+Worker 另外开启一个进程进行演算：
 
 ```js
 /**

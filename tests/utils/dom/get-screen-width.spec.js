@@ -3,9 +3,8 @@ import getScreenWidth from '@/lib/utils/dom/get-screen-width.js';
 
 describe('getScreenWidth', () => {
   /**
-   * 设置 screen 的 mock 值。
-   * screen.width 和 screen.availWidth 是只读属性，无法直接赋值，
-   * 需要通过 Object.defineProperty 来覆盖。
+   * 设置 screen 的 mock 值。 screen.width 和 screen.availWidth 是只读属性，无法直接赋值， 需要通过
+   * Object.defineProperty 来覆盖。
    */
   const setScreen = (width, availWidth) => {
     Object.defineProperty(screen, 'width', {

@@ -105,7 +105,8 @@ Runtime 唯一关心的是：**执行 Command**。因此，整个游戏始终只
 
 ## Game Loop
 
-Runtime 的核心是 **Game Loop**，Game Loop 是整个游戏不断运行的心跳。每一次循环 Runtime 都会完成：
+Runtime 的核心是 **Game Loop**，Game
+Loop 是整个游戏不断运行的心跳。每一次循环 Runtime 都会完成：
 
 1. 处理输入
 2. 执行 Command
@@ -120,7 +121,8 @@ Runtime 的核心是 **Game Loop**，Game Loop 是整个游戏不断运行的心
     <img src="assets/img/game-loop.png" alt="Runtime">
 </p>
 
-整个游戏始终围绕这一循环不断运行，Game Loop 并不关心具体模块如何实现，它只负责组织执行顺序。
+整个游戏始终围绕这一循环不断运行，Game
+Loop 并不关心具体模块如何实现，它只负责组织执行顺序。
 
 ### tetris.js 的 Game Loop 实现
 
@@ -164,10 +166,7 @@ const Engine = {
    * @returns {void}
    */
   tick: (timestamp) => {
-    const {
-      Games,
-      Scheduler
-    } = Engine;
+    const { Games, Scheduler } = Engine;
 
     // 首次运行时初始化时间基准，为每个 Game 实例设置初始累积器时间戳
     if (!Engine.lastTickTime) {
@@ -205,10 +204,11 @@ const Engine = {
     // 步骤 12：请求下一帧，形成游戏循环
     Engine.rafId = requestAnimationFrame(Engine.tick);
   },
-}
+};
 ```
 
-可以用看到 tetris.js 的 Game Loop 非常干净，就是使用 `requestAnimationFrame` 驱动的核心渲染循环。真正做到了不关心具体模块如何实现，它只负责组织执行顺序：
+可以用看到 tetris.js 的 Game Loop 非常干净，就是使用 `requestAnimationFrame`
+驱动的核心渲染循环。真正做到了不关心具体模块如何实现，它只负责组织执行顺序：
 
 - Scheduler：负责定时任务的执行；
 - Game.flush：每个 Game 实例的帧更新；
@@ -216,7 +216,7 @@ const Engine = {
 ### flush：Runtime 的核心
 
 ```js
-import tick from "@/lib/game/logic/tick.js";
+import tick from '@/lib/game/logic/tick.js';
 
 const flush = (runtime, timestamp, lastTickTime, gameAccumulators) => {
   // 解构当前 Game 实例的所有子模块，用于后续步骤
@@ -412,7 +412,8 @@ const flush = (runtime, timestamp, lastTickTime, gameAccumulators) => {
 export default flush;
 ```
 
-可以看到 flush 是 Game Loop 的核心逻辑，执行当前 Game 实例的一帧完整更新所有流程。
+可以看到 flush 是 Game
+Loop 的核心逻辑，执行当前 Game 实例的一帧完整更新所有流程。
 
 ## Command Dispatch
 
@@ -425,7 +426,8 @@ Runtime 中所有操作，最终都会转换成 Command。例如：
 - Hold
 - Pause
 
-以用户按键操作为例，当用户按下某个按钮时，Keyboard Controller 监听 `keydown` 事件：
+以用户按键操作为例，当用户按下某个按钮时，Keyboard Controller 监听 `keydown`
+事件：
 
 ```js
 _onKeydown = (e) => {
@@ -574,10 +576,7 @@ const Engine = {
   _onDispatchInput: (input) => {
     const { payload } = input;
     const { Game } = payload;
-    const {
-      Animations,
-      Replay
-    } = Game;
+    const { Animations, Replay } = Game;
 
     // 检查是否有阻塞动画（消行、倒计时、升级），输入被忽略
     const isBlocked = Animations.hasBlocking([
@@ -592,10 +591,10 @@ const Engine = {
     // 将输入事件分派到对应的输入处理器
     dispatchInput(input, {
       isBlocked,
-      ms
+      ms,
     });
   },
-}
+};
 ```
 
 最终将指令生成 Command 的就是 `dispatchInput`：
@@ -991,7 +990,6 @@ export default dispatchCommand;
 ```
 
 可以看到无论是 Replay 或是 AI 都完全共享的同一套执行流程，不用再各自实现一套自己的逻辑了。
-
 
 ## Store
 
@@ -1524,12 +1522,7 @@ export default GameStore;
 ```js
 class Game extends Base {
   initialize() {
-    const {
-      Elements,
-      Block,
-      Scheduler,
-      Player
-    } = this;
+    const { Elements, Block, Scheduler, Player } = this;
     const { Controls } = Elements;
 
     this.id =
@@ -1550,12 +1543,12 @@ class Game extends Base {
 
     this.Animations = new AnimationSystem({
       Game: this,
-      Player
+      Player,
     });
 
     this.CommandQueue = new CommandQueue({
       Game: this,
-      Player
+      Player,
     });
 
     this.UI = new UI({
@@ -1563,7 +1556,7 @@ class Game extends Base {
       Store,
       Elements,
       Block,
-      Player
+      Player,
     });
 
     const isVersus = this.isVersus();
@@ -1581,7 +1574,7 @@ class Game extends Base {
     this.Keyboard = new KeyboardController({
       Game: this,
       Store,
-      Player
+      Player,
     });
 
     this._initializeGamepadController();
@@ -1620,7 +1613,8 @@ class Game extends Base {
 
 ### GameStore 实际的调用方式
 
-这里以游戏中实现消除方块的 `clearLines` 函数为范本，看看 Runtime 是如何调用 Store 操作游戏状态数据的：
+这里以游戏中实现消除方块的 `clearLines`
+函数为范本，看看 Runtime 是如何调用 Store 操作游戏状态数据的：
 
 ```js
 import findFullLines from '@/lib/game/logic/find-full-lines.js';
@@ -1669,14 +1663,14 @@ const clearLines = (runtime) => {
 };
 
 export default clearLines;
-
 ```
 
 Runtime 负责更新状态，AI、Renderer(UI)、Router、Input(Keyboard/Gamepad/Touch)、Replay 等系统则根据状态完成自己的工作，这种职责划分使系统之间保持较低耦合。
 
 ## Scheduler
 
-除了游戏逻辑，很多行为都具有时间属性。例如：音效播放、延迟生成 Garbage、倒计时特效，这些任务如果全部使用 `setTimeout()`，很难保证节奏一致。
+除了游戏逻辑，很多行为都具有时间属性。例如：音效播放、延迟生成 Garbage、倒计时特效，这些任务如果全部使用
+`setTimeout()`，很难保证节奏一致。
 
 项目真正需要的并不是更多的 Timer，而是一套统一任务管理时间的机制。Scheduler 不关心具体执行什么任务，它只负责：
 
@@ -2028,7 +2022,7 @@ class Scheduler {
       task.nextTime <= gameTime &&
       !task.cancelled &&
       catchUp < this.maxCatchUp
-      ) {
+    ) {
       catchUp++;
       task.fn(task);
       task.nextTime += task.interval;
@@ -2066,7 +2060,8 @@ class Scheduler {
 export default Scheduler;
 ```
 
-Scheduler 的逻辑其实很简单，通过 `this.tasks = []` 存储任务列队，通过 `sequence`、`delay` 和 `interval` 向列队中添加任务。
+Scheduler 的逻辑其实很简单，通过 `this.tasks = []` 存储任务列队，通过
+`sequence`、`delay` 和 `interval` 向列队中添加任务。
 
 ```js
 class Scheduler {
@@ -2095,7 +2090,9 @@ class Scheduler {
 }
 ```
 
-`const task = this.tasks.shift();` 则保证任务以 FIFO 的执行顺序，先进入列队的任务先执行。至于任务时间与 Game Loop 主循环的同步则是通过 `tick` 方法实现的：
+`const task = this.tasks.shift();`
+则保证任务以 FIFO 的执行顺序，先进入列队的任务先执行。至于任务时间与 Game
+Loop 主循环的同步则是通过 `tick` 方法实现的：
 
 ```js
 class Scheduler {
@@ -2118,7 +2115,6 @@ class Scheduler {
   }
 }
 ```
-
 
 Scheduler 就实现了一套统一任务管理时间的机制，Scheduler 因此成为 Runtime 的一部分，所有需要等待执行的任务，都会统一进入 Scheduler。
 
@@ -2164,11 +2160,7 @@ const Engine = {
     const state = Store.getState();
 
     // 解构核心配置，用于后续创建 Game 和 BattleController
-    const {
-      Players,
-      Mode,
-      Elements
-    } = state;
+    const { Players, Mode, Elements } = state;
 
     /*
      * ==================== 步骤 3：创建全局调度器 ====================
@@ -2213,7 +2205,7 @@ const Engine = {
      * Single 模式移除最后一个玩家，只保留第一个。
      * Versus 模式保留全部两个玩家。
      */
-    const finalPlayers = [ ...Players ];
+    const finalPlayers = [...Players];
 
     if (Mode === 'single') {
       // 单人模式只保留第一个玩家（如 ['human', 'ai'] → ['human']）
@@ -2236,7 +2228,7 @@ const Engine = {
      * - 对 Scheduler 和 Audio 的引用
      * - 独立的 7-bag（this.bag = []）
      */
-    for (const [ index, player ] of finalPlayers.entries()) {
+    for (const [index, player] of finalPlayers.entries()) {
       Engine.Games.push(
         new Game({
           Player: {
@@ -2269,23 +2261,21 @@ const Engine = {
       });
     }
   },
-}
+};
 ```
 
 可以看到 Audio、Runtime(Game模块以及其所有子模块) 和 Battle 模块都依赖 Scheduler 统一进行延迟任务的管理。
 
 ### Scheduler 的更新
 
-前面介绍了 Scheduler 任务时间与 Game Loop 主循环的能同步， 我们来看看具体是如何做到的：
+前面介绍了 Scheduler 任务时间与 Game
+Loop 主循环的能同步， 我们来看看具体是如何做到的：
 
 ```js
 const Engine = {
   // 省略其他逻辑...
   tick: (timestamp) => {
-    const {
-      Games,
-      Scheduler
-    } = Engine;
+    const { Games, Scheduler } = Engine;
 
     // 首次运行时初始化时间基准，为每个 Game 实例设置初始累积器时间戳
     if (!Engine.lastTickTime) {
@@ -2323,10 +2313,11 @@ const Engine = {
     // 步骤 12：请求下一帧，形成游戏循环
     Engine.rafId = requestAnimationFrame(Engine.tick);
   },
-}
+};
 ```
 
-可以弹道 Game Loop 每一帧都会通过 `**Scheduler.tick(timestamp)**` 推进 Scheduler，从而保证整个游戏始终运行在同一时间轴上。
+可以弹道 Game Loop 每一帧都会通过 `**Scheduler.tick(timestamp)**`
+推进 Scheduler，从而保证整个游戏始终运行在同一时间轴上。
 
 ### Scheduler 的应用实例
 
@@ -2407,21 +2398,9 @@ class Sounds extends Base {
     const frequencies = CHORD_SETS[setIndex];
     const params = PARAM_SETS[setIndex];
 
-    const speeds = [
-      260,
-      300,
-      380
-    ];
-    const volumes = [
-      0.32,
-      0.3,
-      0.25
-    ];
-    const timeouts = [
-      160,
-      320,
-      480
-    ];
+    const speeds = [260, 300, 380];
+    const volumes = [0.32, 0.3, 0.25];
+    const timeouts = [160, 320, 480];
 
     const motif = getMotif(lines, isPerfectClear);
     const cfg = MOTIFS[motif];
@@ -2431,12 +2410,9 @@ class Sounds extends Base {
 
     const chord = baseChord.map((freq) => freq + cfg.shift * 12);
     const queue = [];
-    const {
-      Context,
-      Scheduler
-    } = this;
+    const { Context, Scheduler } = this;
 
-    for (const [ i, freq ] of chord.entries()) {
+    for (const [i, freq] of chord.entries()) {
       queue.push({
         fn: () => {
           const now = Context.currentTime;
@@ -2453,10 +2429,7 @@ class Sounds extends Base {
   };
 
   LEVEL_UP = () => {
-    const {
-      Context,
-      Scheduler
-    } = this;
+    const { Context, Scheduler } = this;
     const now = Context.currentTime;
 
     Scheduler.sequence([

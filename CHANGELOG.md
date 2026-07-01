@@ -1,16 +1,14 @@
 ## [1.22.1](https://github.com/yaohaixiao/tetris.js/compare/1.22.0...1.22.1) (2026-06-29)
 
-
 ### Bug Fixes
 
-* 修复添加 battle 模式后，针对 single 模式，手机移动设备的显示问题 ([fc764a6](https://github.com/yaohaixiao/tetris.js/commit/fc764a6fd4a00c6974554211313541bd2dd6b8e7))
-* 修复重构 game 模块 launch 方法导致的 battle 模式 vs ai，AI 玩家 hud 的 controller 显示不正确问题 ([6b843f6](https://github.com/yaohaixiao/tetris.js/commit/6b843f663d318b2f30f70a27b1249ddccdb8f156))
-
+- 修复添加 battle 模式后，针对 single 模式，手机移动设备的显示问题 ([fc764a6](https://github.com/yaohaixiao/tetris.js/commit/fc764a6fd4a00c6974554211313541bd2dd6b8e7))
+- 修复重构 game 模块 launch 方法导致的 battle 模式 vs
+  ai，AI 玩家 hud 的 controller 显示不正确问题 ([6b843f6](https://github.com/yaohaixiao/tetris.js/commit/6b843f663d318b2f30f70a27b1249ddccdb8f156))
 
 ### Features
 
-* 针对手机移动设备，强制控制只能玩单人模式； ([97c5a34](https://github.com/yaohaixiao/tetris.js/commit/97c5a34b99a5de726dba43484bc0598d45747dd9))
-
+- 针对手机移动设备，强制控制只能玩单人模式； ([97c5a34](https://github.com/yaohaixiao/tetris.js/commit/97c5a34b99a5de726dba43484bc0598d45747dd9))
 
 # [1.22.0](https://github.com/yaohaixiao/tetris.js/compare/1.21.1...1.22.0) (2026-06-29)
 

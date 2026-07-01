@@ -2,18 +2,21 @@
 
 English | [简体中文](./03-runtime.md)
 
-> Runtime is not a module, but the core that coordinates all systems throughout the entire game runtime.
+> Runtime is not a module, but the core that coordinates all systems throughout
+> the entire game runtime.
 
 ## What is Runtime?
 
-Many developers, when first getting into game development (myself included), start writing game logic directly. For example:
+Many developers, when first getting into game development (myself included),
+start writing game logic directly. For example:
 
 - Listening to keyboard
 - Updating the board
 - Drawing on Canvas
 - Playing audio
 
-As features continue to increase, the code grows. Eventually, a game typically includes:
+As features continue to increase, the code grows. Eventually, a game typically
+includes:
 
 - Input
 - Game Logic
@@ -24,17 +27,22 @@ As features continue to increase, the code grows. Eventually, a game typically i
 - AI
 - Battle
 
-If these modules call each other directly, the entire project quickly becomes difficult to maintain. Therefore, a unified organizer is needed. This organizer is the Runtime.
+If these modules call each other directly, the entire project quickly becomes
+difficult to maintain. Therefore, a unified organizer is needed. This organizer
+is the Runtime.
 
 <p align="center">
     <img src="assets/img/runtime.png" alt="Runtime">
 </p>
 
-It is not responsible for any specific function. Instead, it ensures all systems work together according to unified rules.
+It is not responsible for any specific function. Instead, it ensures all systems
+work together according to unified rules.
 
 ## Runtime Responsibilities
 
-Runtime does not determine how Tetris is played, nor does it handle screen rendering, nor does it participate in AI search. What it is truly responsible for is:
+Runtime does not determine how Tetris is played, nor does it handle screen
+rendering, nor does it participate in AI search. What it is truly responsible
+for is:
 
 - Managing the game lifecycle
 - Driving the Game Loop
@@ -45,7 +53,9 @@ Runtime does not determine how Tetris is played, nor does it handle screen rende
 
 ![Runtime Architecture Diagram](assets/img/runtime-diagram.png)
 
-In other words, Runtime is more like the brain of the entire game. Other systems only need to fulfill their own responsibilities, without worrying about how the entire game is organized and run.
+In other words, Runtime is more like the brain of the entire game. Other systems
+only need to fulfill their own responsibilities, without worrying about how the
+entire game is organized and run.
 
 ## Why Does a Game Need Runtime?
 
@@ -59,7 +69,8 @@ Update Board
 Canvas Redraw
 ```
 
-When the project is small, this implementation is sufficient. However, as more functional modules join:
+When the project is small, this implementation is sufficient. However, as more
+functional modules join:
 
 - AI
 - Replay
@@ -68,11 +79,16 @@ When the project is small, this implementation is sufficient. However, as more f
 - Audio
 - Animation
 
-The game is no longer just about updating the board. It starts to have more and more systems that need to work together. Without Runtime, these modules would eventually become interdependent. The emergence of Runtime is precisely to decouple them from each other.
+The game is no longer just about updating the board. It starts to have more and
+more systems that need to work together. Without Runtime, these modules would
+eventually become interdependent. The emergence of Runtime is precisely to
+decouple them from each other.
 
 ## How Does Runtime Organize the Entire Game?
 
-Runtime can be understood as the scheduling center of the entire game. Once the game starts, all modules work around the Runtime. The entire execution flow can be simplified as:
+Runtime can be understood as the scheduling center of the entire game. Once the
+game starts, all modules work around the Runtime. The entire execution flow can
+be simplified as:
 
 ```text
 Input
@@ -101,11 +117,13 @@ For Runtime, where a Command comes from doesn't matter. It could come from:
 - AI
 - Battle
 
-Runtime only cares about one thing: **executing Commands**. Therefore, the entire game always has only one set of execution flow.
+Runtime only cares about one thing: **executing Commands**. Therefore, the
+entire game always has only one set of execution flow.
 
 ## Game Loop
 
-The core of Runtime is the **Game Loop**. The Game Loop is the heartbeat that keeps the entire game running continuously. Each cycle, Runtime completes:
+The core of Runtime is the **Game Loop**. The Game Loop is the heartbeat that
+keeps the entire game running continuously. Each cycle, Runtime completes:
 
 1. Process input
 2. Execute Commands
@@ -120,7 +138,9 @@ The core of Runtime is the **Game Loop**. The Game Loop is the heartbeat that ke
     <img src="assets/img/game-loop.png" alt="Runtime">
 </p>
 
-The entire game continuously runs around this loop. The Game Loop doesn't care how specific modules are implemented; it is only responsible for organizing the execution order.
+The entire game continuously runs around this loop. The Game Loop doesn't care
+how specific modules are implemented; it is only responsible for organizing the
+execution order.
 
 ### tetris.js Game Loop Implementation
 
@@ -129,28 +149,30 @@ const Engine = {
   /**
    * # Game Main Loop with Speed Control
    *
-   * The core rendering loop driven by `requestAnimationFrame`, controlling the game's drop rhythm, input processing, rendering, and animation updates.
+   * The core rendering loop driven by `requestAnimationFrame`, controlling the
+   * game's drop rhythm, input processing, rendering, and animation updates.
    *
    * ## Frame Loop Flow (per Game instance)
    *
-   * | Step | Operation                   | Description                                           |
-   * | ---- | --------------------------- | ----------------------------------------------------- |
-   * | 1    | `Scheduler.tick()`          | Drives the scheduler, executing due timed tasks (including AI loop) |
-   * | 2    | `Replay.syncPlayElapsed()`  | Synchronizes replay logical clock                     |
-   * | 3    | `Replay.update()`           | Updates replay system, injecting commands to replay   |
-   * | 4    | `Gamepad.update()`          | Updates gamepad input state                           |
-   * | 5    | `Keyboard.update()`         | Updates keyboard input state                          |
-   * | 6    | `CommandQueue.flush()`      | Executes all pending commands in the command queue    |
-   * | 7    | `Game.tick()`               | Executes game logic (drop/collision/clear), at speed interval |
-   * | 8    | `Animations.flush()`        | Merges/cleans animation queue, removes completed animations |
-   * | 9    | `UI.tickHud()`              | Updates HUD animation (score bounce, combo display)   |
-   * | 10   | `UI.render()`               | Renders game screen (board, pieces, ghost, grid)      |
-   * | 11   | `Animations.render()`       | Overlays animation effects (clear, level-up, garbage warning, etc.) |
-   * | 12   | `requestAnimationFrame()`   | Requests next frame, forming the loop                 |
+   * | Step | Operation                  | Description                                                         |
+   * | ---- | -------------------------- | ------------------------------------------------------------------- |
+   * | 1    | `Scheduler.tick()`         | Drives the scheduler, executing due timed tasks (including AI loop) |
+   * | 2    | `Replay.syncPlayElapsed()` | Synchronizes replay logical clock                                   |
+   * | 3    | `Replay.update()`          | Updates replay system, injecting commands to replay                 |
+   * | 4    | `Gamepad.update()`         | Updates gamepad input state                                         |
+   * | 5    | `Keyboard.update()`        | Updates keyboard input state                                        |
+   * | 6    | `CommandQueue.flush()`     | Executes all pending commands in the command queue                  |
+   * | 7    | `Game.tick()`              | Executes game logic (drop/collision/clear), at speed interval       |
+   * | 8    | `Animations.flush()`       | Merges/cleans animation queue, removes completed animations         |
+   * | 9    | `UI.tickHud()`             | Updates HUD animation (score bounce, combo display)                 |
+   * | 10   | `UI.render()`              | Renders game screen (board, pieces, ghost, grid)                    |
+   * | 11   | `Animations.render()`      | Overlays animation effects (clear, level-up, garbage warning, etc.) |
+   * | 12   | `requestAnimationFrame()`  | Requests next frame, forming the loop                               |
    *
    * ## Fixed Time Step
    *
-   * Game logic (drop) is not executed every frame, but controlled by the current level's speed (`Game.getSpeed()`):
+   * Game logic (drop) is not executed every frame, but controlled by the
+   * current level's speed (`Game.getSpeed()`):
    *
    * - Lower levels: slower speed, larger drop interval (~1000ms)
    * - Higher levels: faster speed, smaller drop interval (minimum 120ms)
@@ -158,17 +180,16 @@ const Engine = {
    * ## Two-Player Battle
    *
    * Each Game uses an independent time accumulator (gameAccumulators Map),
-   * allowing each Game to independently calculate drop timing without interference.
-   * P1 may be at level 5 (fast), P2 at level 2 (slow), each dropping at their own pace.
+   * allowing each Game to independently calculate drop timing without
+   * interference. P1 may be at level 5 (fast), P2 at level 2 (slow), each
+   * dropping at their own pace.
    *
-   * @param {number} timestamp - Current timestamp from requestAnimationFrame (milliseconds)
+   * @param {number} timestamp - Current timestamp from requestAnimationFrame
+   *   (milliseconds)
    * @returns {void}
    */
   tick: (timestamp) => {
-    const {
-      Games,
-      Scheduler
-    } = Engine;
+    const { Games, Scheduler } = Engine;
 
     // Initialize time base on first run, setting initial accumulator timestamp for each Game instance
     if (!Engine.lastTickTime) {
@@ -206,10 +227,13 @@ const Engine = {
     // Step 12: Request next frame, forming the game loop
     Engine.rafId = requestAnimationFrame(Engine.tick);
   },
-}
+};
 ```
 
-As you can see, tetris.js's Game Loop is very clean — it's a core rendering loop driven by `requestAnimationFrame`. It truly does not care about how specific modules are implemented; it is only responsible for organizing the execution order:
+As you can see, tetris.js's Game Loop is very clean — it's a core rendering loop
+driven by `requestAnimationFrame`. It truly does not care about how specific
+modules are implemented; it is only responsible for organizing the execution
+order:
 
 - Scheduler: Responsible for executing timed tasks
 - Game.flush: Frame update for each Game instance
@@ -217,7 +241,7 @@ As you can see, tetris.js's Game Loop is very clean — it's a core rendering lo
 ### flush: The Core of Runtime
 
 ```js
-import tick from "@/lib/game/logic/tick.js";
+import tick from '@/lib/game/logic/tick.js';
 
 const flush = (runtime, timestamp, lastTickTime, gameAccumulators) => {
   // Destructure all submodules of the current Game instance for subsequent steps
@@ -415,7 +439,8 @@ const flush = (runtime, timestamp, lastTickTime, gameAccumulators) => {
 export default flush;
 ```
 
-As you can see, flush is the core logic of the Game Loop, executing a complete frame update for the current Game instance through all processes.
+As you can see, flush is the core logic of the Game Loop, executing a complete
+frame update for the current Game instance through all processes.
 
 ## Command Dispatch
 
@@ -428,7 +453,8 @@ All operations in Runtime are ultimately converted into Commands. For example:
 - Hold
 - Pause
 
-Taking user key operations as an example, when the user presses a button, the Keyboard Controller listens to the `keydown` event:
+Taking user key operations as an example, when the user presses a button, the
+Keyboard Controller listens to the `keydown` event:
 
 ```js
 _onKeydown = (e) => {
@@ -449,7 +475,10 @@ _onKeydown = (e) => {
     return this;
   }
 
-  /** Battle mode: AI players skip in playing state. Note: This rechecks AI player condition, forming double protection with _isBlocked check. */
+  /**
+   * Battle mode: AI players skip in playing state. Note: This rechecks AI
+   * player condition, forming double protection with _isBlocked check.
+   */
   if (Store.getMode() === 'playing' && Player.name === 'ai') {
     return this;
   }
@@ -479,7 +508,10 @@ _onKeydown = (e) => {
 
   const events = GameEvents(Game.id);
 
-  /** Execute first movement immediately. Whether it's a direction key or not, first key press responds immediately without waiting for DAS delay. */
+  /**
+   * Execute first movement immediately. Whether it's a direction key or not,
+   * first key press responds immediately without waiting for DAS delay.
+   */
   this.emit(events.DISPATCH_INPUT, {
     device: 'keyboard',
     action,
@@ -505,7 +537,8 @@ const resolveKeyboardAction = (key, mode) => {
   /**
    * Dynamically adjust behavior of the up arrow key based on game mode:
    *
-   * - Selection interface (game-mode / battle-mode / exit-game): ↑ used to move cursor
+   * - Selection interface (game-mode / battle-mode / exit-game): ↑ used to move
+   *   cursor
    * - In-game (playing): ↑ used to rotate piece
    *
    * Other modes maintain default mapping (ROTATE).
@@ -569,7 +602,8 @@ const KEYBOARDS_ACTION_MAP = {
 };
 ```
 
-The generation of Command is handled by the handler listening to the `events.DISPATCH_INPUT` event:
+The generation of Command is handled by the handler listening to the
+`events.DISPATCH_INPUT` event:
 
 ```js
 const Engine = {
@@ -577,10 +611,7 @@ const Engine = {
   _onDispatchInput: (input) => {
     const { payload } = input;
     const { Game } = payload;
-    const {
-      Animations,
-      Replay
-    } = Game;
+    const { Animations, Replay } = Game;
 
     // Check if there are blocking animations (clear lines, countdown, level-up) — input ignored
     const isBlocked = Animations.hasBlocking([
@@ -595,10 +626,10 @@ const Engine = {
     // Dispatch input event to corresponding input handler
     dispatchInput(input, {
       isBlocked,
-      ms
+      ms,
     });
   },
-}
+};
 ```
 
 Finally, `dispatchInput` converts the command into a Command:
@@ -637,11 +668,11 @@ const dispatchInput = (input, context) => {
   /**
    * ======== Replay Recording Layer ========
    *
-   * If replay recording is enabled, writes Command and timestamp to replay data.
-   * ms is the pure play duration after subtracting pause time.
+   * If replay recording is enabled, writes Command and timestamp to replay
+   * data. ms is the pure play duration after subtracting pause time.
    *
-   * Note: This is a side-effect, but temporarily kept in dispatcher,
-   * may be extracted as a separate replay middleware in the future.
+   * Note: This is a side-effect, but temporarily kept in dispatcher, may be
+   * extracted as a separate replay middleware in the future.
    */
   Game.emit(RE.ADD_RECORD, {
     ms,
@@ -667,7 +698,8 @@ const tick = (runtime, isBlocked) => {
   /**
    * ======== Step 1: Mode Check ========
    *
-   * Don't execute drops in non-playing/replay modes, or during animation blocking.
+   * Don't execute drops in non-playing/replay modes, or during animation
+   * blocking.
    */
   if ((mode !== 'playing' && mode !== 'replay') || isBlocked) {
     return;
@@ -805,7 +837,8 @@ loop = () => {
 };
 ```
 
-Runtime executes them sequentially through Command Queue according to unified rules:
+Runtime executes them sequentially through Command Queue according to unified
+rules:
 
 ```js
 class CommandQueue extends Base {
@@ -813,8 +846,9 @@ class CommandQueue extends Base {
   /**
    * ## Execute and clear all Commands in the queue
    *
-   * Executes commands one by one in enqueue order (FIFO), queue empty after execution.
-   * Current implementation executes all commands at once without time-slicing control.
+   * Executes commands one by one in enqueue order (FIFO), queue empty after
+   * execution. Current implementation executes all commands at once without
+   * time-slicing control.
    *
    * @returns {void}
    */
@@ -838,15 +872,19 @@ class Command extends Base {
   /**
    * ## Execute command
    *
-   * Hands the command to the unified dispatch system through the `dispatch:command` event.
-   * Command itself does not execute business logic; it only notifies the scheduling system that "an operation needs to be performed."
+   * Hands the command to the unified dispatch system through the
+   * `dispatch:command` event. Command itself does not execute business logic;
+   * it only notifies the scheduling system that "an operation needs to be
+   * performed."
    *
    * ### Execution Flow
    *
    * 1. Command sends `dispatch:command` event through EventBus
    * 2. Engine layer listens to this event, calls `dispatchCommand` function
-   * 3. `dispatchCommand` routes to corresponding action handler based on current game mode
-   * 4. Action handler executes business logic (e.g., moving piece, pausing game, etc.)
+   * 3. `dispatchCommand` routes to corresponding action handler based on current
+   *    game mode
+   * 4. Action handler executes business logic (e.g., moving piece, pausing game,
+   *    etc.)
    *
    * @example
    *   const cmd = new Command('ROTATE', { Game: game });
@@ -889,8 +927,9 @@ import EXIT_GAME_ACTIONS from '@/lib/game/actions/exit-game-actions.js';
 /**
  * # State → Action Mapping Table
  *
- * Maps each game mode to its corresponding action handler set.
- * This is the core of **State Machine Router**: determining which operations are legal based on current game state.
+ * Maps each game mode to its corresponding action handler set. This is the core
+ * of **State Machine Router**: determining which operations are legal based on
+ * current game state.
  *
  * ## Design Patterns
  *
@@ -899,18 +938,18 @@ import EXIT_GAME_ACTIONS from '@/lib/game/actions/exit-game-actions.js';
  *
  * ## Mode and Action Set Correspondence
  *
- * | mode          | Action Set          | Description                              |
- * | ------------- | -------------------- | ---------------------------------------- |
- * | `game-mode`   | GAME_MODE_ACTIONS    | Game mode selection: Single/Battle       |
- * | `battle-mode` | BATTLE_MODE_ACTIONS  | Battle type selection: VS AI / VS HUMAN  |
- * | `main-menu`   | MAIN_MENU_ACTIONS    | Main menu: Level selection               |
+ * | mode          | Action Set           | Description                                   |
+ * | ------------- | -------------------- | --------------------------------------------- |
+ * | `game-mode`   | GAME_MODE_ACTIONS    | Game mode selection: Single/Battle            |
+ * | `battle-mode` | BATTLE_MODE_ACTIONS  | Battle type selection: VS AI / VS HUMAN       |
+ * | `main-menu`   | MAIN_MENU_ACTIONS    | Main menu: Level selection                    |
  * | `difficulty`  | DIFFICULT_ACTIONS    | Difficulty selection: easy/normal/hard/expert |
- * | `playing`     | GAME_PLAYING_ACTIONS | In-game: move, rotate, hard drop, etc.   |
- * | `paused`      | PAUSED_ACTIONS       | Paused: resume, restart, exit            |
- * | `exit-game`   | EXIT_GAME_ACTIONS    | Exit menu: resume game, exit game        |
- * | `game-over`   | GAME_OVER_ACTIONS    | Game over: restart, exit                 |
- * | `replay`      | REPLAY_ACTIONS       | Replaying: watch, confirm exit           |
- * | `battle-over` | BATTLE_OVER_ACTIONS  | Battle over: rematch                     |
+ * | `playing`     | GAME_PLAYING_ACTIONS | In-game: move, rotate, hard drop, etc.        |
+ * | `paused`      | PAUSED_ACTIONS       | Paused: resume, restart, exit                 |
+ * | `exit-game`   | EXIT_GAME_ACTIONS    | Exit menu: resume game, exit game             |
+ * | `game-over`   | GAME_OVER_ACTIONS    | Game over: restart, exit                      |
+ * | `replay`      | REPLAY_ACTIONS       | Replaying: watch, confirm exit                |
+ * | `battle-over` | BATTLE_OVER_ACTIONS  | Battle over: rematch                          |
  *
  * ### exit-game mode
  *
@@ -939,13 +978,17 @@ const ACTIONS_MAP = {
 /**
  * # Command Dispatcher
  *
- * Routes Commands to the corresponding action handler based on current game state (mode).
+ * Routes Commands to the corresponding action handler based on current game
+ * state (mode).
  *
  * ## Core Responsibilities
  *
- * - **Does not execute business logic**: dispatchCommand itself contains no game operation logic
- * - **Only responsible for routing + dispatching**: finds action set based on mode, then finds handler based on action name
- * - **State isolation**: Same action name can have different behaviors in different modes (e.g., arrow keys in main-menu vs playing)
+ * - **Does not execute business logic**: dispatchCommand itself contains no game
+ *   operation logic
+ * - **Only responsible for routing + dispatching**: finds action set based on
+ *   mode, then finds handler based on action name
+ * - **State isolation**: Same action name can have different behaviors in
+ *   different modes (e.g., arrow keys in main-menu vs playing)
  *
  * ## Execution Flow
  *
@@ -997,11 +1040,13 @@ const dispatchCommand = (cmd, options) => {
 export default dispatchCommand;
 ```
 
-As you can see, whether from Replay or AI, they all fully share the same execution flow, without needing to implement their own logic separately.
+As you can see, whether from Replay or AI, they all fully share the same
+execution flow, without needing to implement their own logic separately.
 
 ## Store
 
-Runtime does not directly store all data. The actual game state is managed by Store. For example:
+Runtime does not directly store all data. The actual game state is managed by
+Store. For example:
 
 - Board
 - Current Piece
@@ -1021,8 +1066,8 @@ const GameState = {
   /**
    * ## Game mode selection index
    *
-   * Cursor position in the game mode selection interface (game-mode).
-   * Used for moving up and down to select different game modes.
+   * Cursor position in the game mode selection interface (game-mode). Used for
+   * moving up and down to select different game modes.
    *
    * - `0`: Single mode (SINGLE)
    * - `1`: Versus mode (VERSUS)
@@ -1035,8 +1080,8 @@ const GameState = {
   /**
    * ## Battle mode selection index
    *
-   * Cursor position in the battle mode selection interface (battle-mode).
-   * Used for moving up and down to select different battle types.
+   * Cursor position in the battle mode selection interface (battle-mode). Used
+   * for moving up and down to select different battle types.
    *
    * - `0`: Human vs AI
    * - `1`: Human vs Human
@@ -1049,8 +1094,8 @@ const GameState = {
   /**
    * ## Exit game selection index
    *
-   * Cursor position in the exit game menu interface (exit-game).
-   * Used for moving up and down to select different exit options.
+   * Cursor position in the exit game menu interface (exit-game). Used for
+   * moving up and down to select different exit options.
    *
    * - `0`: RESUME GAME
    * - `1`: EXIT GAME
@@ -1086,8 +1131,8 @@ const GameState = {
   /**
    * ## Initial board data at game start
    *
-   * Used to restore initial state in replay mode.
-   * Set to initial board in `setBeginningState()`, then not modified.
+   * Used to restore initial state in replay mode. Set to initial board in
+   * `setBeginningState()`, then not modified.
    *
    * @default [ ]
    * @type {string[][]}
@@ -1097,8 +1142,9 @@ const GameState = {
   /**
    * ## Game board
    *
-   * 20 rows × 10 columns 2D array. Each cell value is a color string (e.g., `"#00c8ff"`),
-   * empty string `""` represents empty cell. Board bottom is row 19, top is row 0.
+   * 20 rows × 10 columns 2D array. Each cell value is a color string (e.g.,
+   * `"#00c8ff"`), empty string `""` represents empty cell. Board bottom is row
+   * 19, top is row 0.
    *
    * @default [ ]
    * @type {string[][]}
@@ -1112,8 +1158,8 @@ const GameState = {
   /**
    * ## Current active piece object
    *
-   * Contains piece shape, position (cx, cy), color, etc.
-   * `null` means no active piece (game not started or piece locked).
+   * Contains piece shape, position (cx, cy), color, etc. `null` means no active
+   * piece (game not started or piece locked).
    *
    * @default null
    * @type {object | null}
@@ -1133,7 +1179,8 @@ const GameState = {
   /**
    * ## Current piece Y coordinate (row index)
    *
-   * Row position of the piece's top-left corner on the board. 0 is the top of the board.
+   * Row position of the piece's top-left corner on the board. 0 is the top of
+   * the board.
    *
    * @default 0
    * @type {number}
@@ -1143,8 +1190,8 @@ const GameState = {
   /**
    * ## Next preview piece object
    *
-   * When current piece locks, `next` piece becomes the new `curr` piece.
-   * `null` means not yet generated.
+   * When current piece locks, `next` piece becomes the new `curr` piece. `null`
+   * means not yet generated.
    *
    * @default null
    * @type {object | null}
@@ -1183,8 +1230,8 @@ const GameState = {
   /**
    * ## Back-to-Back consecutive special clear flag
    *
-   * Triggered when two consecutive clears are special clears (T-Spin or Tetris).
-   * Grants additional score bonus.
+   * Triggered when two consecutive clears are special clears (T-Spin or
+   * Tetris). Grants additional score bonus.
    *
    * @default false
    * @type {boolean}
@@ -1198,7 +1245,8 @@ const GameState = {
   /**
    * ## Current score
    *
-   * Accumulated after each clear based on number of cleared lines and current level.
+   * Accumulated after each clear based on number of cleared lines and current
+   * level.
    *
    * @default 0
    * @type {number}
@@ -1218,7 +1266,8 @@ const GameState = {
   /**
    * ## Current level
    *
-   * Starts from 1, max 256. Higher levels mean faster drop speed and higher score multiplier.
+   * Starts from 1, max 256. Higher levels mean faster drop speed and higher
+   * score multiplier.
    *
    * @default 1
    * @type {number}
@@ -1228,8 +1277,8 @@ const GameState = {
   /**
    * ## Combo count
    *
-   * Number of consecutive clears. Each clear increments combo by 1, reset to 0 when no clear.
-   * Higher combo gives more bonus points.
+   * Number of consecutive clears. Each clear increments combo by 1, reset to 0
+   * when no clear. Higher combo gives more bonus points.
    *
    * @default 0
    * @type {number}
@@ -1249,7 +1298,8 @@ const GameState = {
   /**
    * ## All-time high score
    *
-   * Loaded from localStorage, updated when current score exceeds it at game over.
+   * Loaded from localStorage, updated when current score exceeds it at game
+   * over.
    *
    * @default 0
    * @type {number}
@@ -1263,8 +1313,9 @@ const GameState = {
   /**
    * ## Base lines for leveling
    *
-   * Used to calculate level progression progress. Lines needed for level up = baseLines + levelUpSteps.
-   * After each level up, baseLines updates to current lines value.
+   * Used to calculate level progression progress. Lines needed for level up =
+   * baseLines + levelUpSteps. After each level up, baseLines updates to current
+   * lines value.
    *
    * @default 0
    * @type {number}
@@ -1288,8 +1339,8 @@ const GameState = {
   /**
    * ## Current full row indices to clear
    *
-   * Stores all filled row indices that need to be cleared.
-   * Cleared after clear animation completes.
+   * Stores all filled row indices that need to be cleared. Cleared after clear
+   * animation completes.
    *
    * @default [ ]
    * @type {number[]}
@@ -1354,7 +1405,8 @@ export default GameState;
 
 ### GameStore Operations on GameState Data
 
-However, tetris.js does not directly manipulate GameState. Instead, it uses the dedicated GameStore module to manage GameState data operations:
+However, tetris.js does not directly manipulate GameState. Instead, it uses the
+dedicated GameStore module to manage GameState data operations:
 
 ```js
 import placeGarbageOnBoard from '@/lib/state/utils/place-garbage-on-board.js';
@@ -1536,17 +1588,13 @@ class GameStore {
 export default GameStore;
 ```
 
-You just need to create GameStore when Runtime initializes, then Runtime can operate GameState through it:
+You just need to create GameStore when Runtime initializes, then Runtime can
+operate GameState through it:
 
 ```js
 class Game extends Base {
   initialize() {
-    const {
-      Elements,
-      Block,
-      Scheduler,
-      Player
-    } = this;
+    const { Elements, Block, Scheduler, Player } = this;
     const { Controls } = Elements;
 
     this.id =
@@ -1567,12 +1615,12 @@ class Game extends Base {
 
     this.Animations = new AnimationSystem({
       Game: this,
-      Player
+      Player,
     });
 
     this.CommandQueue = new CommandQueue({
       Game: this,
-      Player
+      Player,
     });
 
     this.UI = new UI({
@@ -1580,7 +1628,7 @@ class Game extends Base {
       Store,
       Elements,
       Block,
-      Player
+      Player,
     });
 
     const isVersus = this.isVersus();
@@ -1598,7 +1646,7 @@ class Game extends Base {
     this.Keyboard = new KeyboardController({
       Game: this,
       Store,
-      Player
+      Player,
     });
 
     this._initializeGamepadController();
@@ -1637,7 +1685,8 @@ class Game extends Base {
 
 ### Actual GameStore Call Pattern
 
-Here, using the `clearLines` function that implements line clearing in the game as an example, let's see how Runtime calls Store to operate game state data:
+Here, using the `clearLines` function that implements line clearing in the game
+as an example, let's see how Runtime calls Store to operate game state data:
 
 ```js
 import findFullLines from '@/lib/game/logic/find-full-lines.js';
@@ -1672,16 +1721,16 @@ const clearLines = (runtime) => {
   /**
    * ======== Step 3: Store in Store ========
    *
-   * Write full row indices to `state.clearLines`,
-   * for use by `ClearLinesAnimation` and `applyClearLines`.
+   * Write full row indices to `state.clearLines`, for use by
+   * `ClearLinesAnimation` and `applyClearLines`.
    */
   Store.setClearLines(linesToClear);
 
   /**
    * ======== Step 4: Trigger Clear Animation ========
    *
-   * Starts `ClearLinesAnimation` blink effect.
-   * After 720ms animation completes, automatically calls `applyClearLines` to finish line clearing.
+   * Starts `ClearLinesAnimation` blink effect. After 720ms animation completes,
+   * automatically calls `applyClearLines` to finish line clearing.
    */
   const GE = GameEvents(id);
   runtime.emit(GE.START_CLEAR_LINES, { linesToClear });
@@ -1690,13 +1739,20 @@ const clearLines = (runtime) => {
 export default clearLines;
 ```
 
-Runtime is responsible for updating state, while AI, Renderer (UI), Router, Input (Keyboard/Gamepad/Touch), Replay, and other systems perform their work based on state. This division of responsibilities keeps the coupling between systems low.
+Runtime is responsible for updating state, while AI, Renderer (UI), Router,
+Input (Keyboard/Gamepad/Touch), Replay, and other systems perform their work
+based on state. This division of responsibilities keeps the coupling between
+systems low.
 
 ## Scheduler
 
-In addition to game logic, many behaviors have temporal attributes. For example: audio playback, delayed garbage generation, countdown effects. If all these tasks use `setTimeout()`, it's difficult to maintain consistent timing.
+In addition to game logic, many behaviors have temporal attributes. For example:
+audio playback, delayed garbage generation, countdown effects. If all these
+tasks use `setTimeout()`, it's difficult to maintain consistent timing.
 
-What the project truly needs isn't more Timers, but a unified mechanism for managing task timing. Scheduler doesn't care what specific tasks are executed. It is only responsible for:
+What the project truly needs isn't more Timers, but a unified mechanism for
+managing task timing. Scheduler doesn't care what specific tasks are executed.
+It is only responsible for:
 
 - When to execute;
 - Whether to delay;
@@ -1704,11 +1760,13 @@ What the project truly needs isn't more Timers, but a unified mechanism for mana
 - Whether it should pause;
 - Whether it continues running with Runtime.
 
-All behaviors that require "waiting" are uniformly handed over to Scheduler for scheduling.
+All behaviors that require "waiting" are uniformly handed over to Scheduler for
+scheduling.
 
 ### Scheduler Implementation
 
-Let's look at the Scheduler module implementation to understand how Scheduler uniformly schedules all behaviors that require "waiting":
+Let's look at the Scheduler module implementation to understand how Scheduler
+uniformly schedules all behaviors that require "waiting":
 
 ```js
 /**
@@ -1719,24 +1777,31 @@ Let's look at the Scheduler module implementation to understand how Scheduler un
  *
  * ## Core Features
  *
- * - **Absolute Time Model**: Tasks bound to absolute timestamps, not dependent on `tick` initialization
- * - **Sorted Task Queue**: Sorted by `time + order`, guaranteeing stable execution order
- * - **Interval Drift Fix**: Interval calculated precisely from `nextTime`, avoiding cumulative errors
- * - **Catch-up Protection**: Limits maximum catch-up per `tick` to prevent freezing after switching tabs
+ * - **Absolute Time Model**: Tasks bound to absolute timestamps, not dependent on
+ *   `tick` initialization
+ * - **Sorted Task Queue**: Sorted by `time + order`, guaranteeing stable
+ *   execution order
+ * - **Interval Drift Fix**: Interval calculated precisely from `nextTime`,
+ *   avoiding cumulative errors
+ * - **Catch-up Protection**: Limits maximum catch-up per `tick` to prevent
+ *   freezing after switching tabs
  *
  * ## Task Types
  *
- * | Type     | Method       | Description                   |
- * | -------- | ------------ | ----------------------------- |
- * | delay    | `delay()`    | One-time delayed task        |
- * | interval | `interval()` | Periodic repeating task      |
+ * | Type     | Method       | Description                             |
+ * | -------- | ------------ | --------------------------------------- |
+ * | delay    | `delay()`    | One-time delayed task                   |
+ * | interval | `interval()` | Periodic repeating task                 |
  * | sequence | `sequence()` | Sequential task chain with time offsets |
  *
  * ## Design Philosophy
  *
- * - **Not Dependent on RAF**: Driven externally by `startGameLoop`, decoupled from render loop
- * - **Stable Sorting**: Tasks at the same time execute by `order`, ensuring consistent timing in scenarios like audio sequences
- * - **Lazy Cleanup**: Canceled tasks only marked as `cancelled`, cleaned up at the end of `tick`
+ * - **Not Dependent on RAF**: Driven externally by `startGameLoop`, decoupled
+ *   from render loop
+ * - **Stable Sorting**: Tasks at the same time execute by `order`, ensuring
+ *   consistent timing in scenarios like audio sequences
+ * - **Lazy Cleanup**: Canceled tasks only marked as `cancelled`, cleaned up at
+ *   the end of `tick`
  *
  * @class Scheduler
  */
@@ -1750,8 +1815,9 @@ class Scheduler {
     /**
      * ## Task queue
      *
-     * Sorted array in ascending order by `time + order`. Replaces Map implementation
-     * to avoid full traversal, ensuring time order and execution stability.
+     * Sorted array in ascending order by `time + order`. Replaces Map
+     * implementation to avoid full traversal, ensuring time order and execution
+     * stability.
      *
      * @type {object[]}
      */
@@ -1769,7 +1835,8 @@ class Scheduler {
     /**
      * ## Order counter
      *
-     * Tasks at the same time execute in ascending `order`, guaranteeing stable sorting.
+     * Tasks at the same time execute in ascending `order`, guaranteeing stable
+     * sorting.
      *
      * @type {number}
      */
@@ -1787,7 +1854,8 @@ class Scheduler {
     /**
      * ## Lazy cleanup flag
      *
-     * Set to `true` when a task is cancelled, cleaned up at the next `tick` end.
+     * Set to `true` when a task is cancelled, cleaned up at the next `tick`
+     * end.
      *
      * @type {boolean}
      */
@@ -1809,7 +1877,8 @@ class Scheduler {
   /**
    * ## Create a delay task
    *
-   * Replaces `setTimeout`, executes callback once after specified delay from current logical time.
+   * Replaces `setTimeout`, executes callback once after specified delay from
+   * current logical time.
    *
    * @example
    *   const id = scheduler.delay(() => console.log('done'), 100);
@@ -1836,13 +1905,15 @@ class Scheduler {
   /**
    * ## Create a periodic task
    *
-   * Replaces `setInterval`, executes callback periodically at specified interval.
+   * Replaces `setInterval`, executes callback periodically at specified
+   * interval.
    *
    * @example
    *   const id = scheduler.interval(() => console.log('tick'), 200);
    *
    * @param {Function} fn - Callback function
-   * @param {number} [interval=1000] - Execution interval (milliseconds). Default is `1000`
+   * @param {number} [interval=1000] - Execution interval (milliseconds).
+   *   Default is `1000`
    * @returns {number} Task ID, can be used with `cancel()`
    */
   interval(fn, interval = 1000) {
@@ -1865,8 +1936,10 @@ class Scheduler {
   /**
    * ## Create a task sequence
    *
-   * Executes multiple tasks sequentially with time offsets. Each task can specify delay relative to the sequence start time.
-   * Internally uses `delay()`, binding to absolute time without depending on `tick` initialization.
+   * Executes multiple tasks sequentially with time offsets. Each task can
+   * specify delay relative to the sequence start time. Internally uses
+   * `delay()`, binding to absolute time without depending on `tick`
+   * initialization.
    *
    * @example
    *   scheduler.sequence([
@@ -1877,7 +1950,8 @@ class Scheduler {
    *
    * @param {{ fn: Function; delay?: number }[]} list - Task list
    * @param {Function} list[].fn - Callback function
-   * @param {number} [list[].delay=0] - Delay of this task relative to the previous task (milliseconds). Default is `0`
+   * @param {number} [list[].delay=0] - Delay of this task relative to the
+   *   previous task (milliseconds). Default is `0`
    * @returns {number[]} Array of all task IDs
    */
   sequence(list) {
@@ -1896,8 +1970,8 @@ class Scheduler {
   /**
    * ## Cancel a task
    *
-   * Marks a task as cancelled by its ID. Cancelled tasks are not immediately removed,
-   * but batch cleaned up in the next `tick()`.
+   * Marks a task as cancelled by its ID. Cancelled tasks are not immediately
+   * removed, but batch cleaned up in the next `tick()`.
    *
    * @param {number} id - Task ID to cancel
    * @returns {void}
@@ -1916,7 +1990,8 @@ class Scheduler {
   /**
    * ## Clear all tasks
    *
-   * Immediately deletes all tasks and clears the dirty flag. Usually called when restarting the game or switching modes.
+   * Immediately deletes all tasks and clears the dirty flag. Usually called
+   * when restarting the game or switching modes.
    *
    * @returns {void}
    */
@@ -1928,10 +2003,12 @@ class Scheduler {
   /**
    * ## Drive the scheduler
    *
-   * Called every frame by the external Game Loop, passing the current game time.
-   * Iterates through due tasks and executes them, then cleans up cancelled tasks.
+   * Called every frame by the external Game Loop, passing the current game
+   * time. Iterates through due tasks and executes them, then cleans up
+   * cancelled tasks.
    *
-   * @param {number} [gameTime=performance.now()] - Current game timestamp (milliseconds). Default is `performance.now()`
+   * @param {number} [gameTime=performance.now()] - Current game timestamp
+   *   (milliseconds). Default is `performance.now()`
    * @returns {void}
    */
   tick(gameTime = performance.now()) {
@@ -1998,7 +2075,8 @@ class Scheduler {
   /**
    * ## Execute all due tasks
    *
-   * Takes tasks from the head of the queue where `time <= gameTime` and dispatches them by type.
+   * Takes tasks from the head of the queue where `time <= gameTime` and
+   * dispatches them by type.
    *
    * @private
    * @param {number} gameTime - Current game timestamp
@@ -2035,8 +2113,9 @@ class Scheduler {
    * ## Execute Interval task
    *
    * Periodic task, updates `nextTime` and reinserts into queue after execution.
-   * Includes catch-up protection: catches up at most `maxCatchUp` times after long pauses,
-   * resets `nextTime` to current time beyond that to prevent frame bursts.
+   * Includes catch-up protection: catches up at most `maxCatchUp` times after
+   * long pauses, resets `nextTime` to current time beyond that to prevent frame
+   * bursts.
    *
    * @private
    * @param {object} task - Periodic task object
@@ -2046,8 +2125,10 @@ class Scheduler {
   _runIntervalTask(task, gameTime) {
     let catchUp = 0;
 
-    /** Catch-up loop: if `nextTime` lags behind current time, continuously catch up,
-     * at most `maxCatchUp` times to prevent explosion after long pauses. */
+    /**
+     * Catch-up loop: if `nextTime` lags behind current time, continuously catch
+     * up, at most `maxCatchUp` times to prevent explosion after long pauses.
+     */
     while (
       task.nextTime <= gameTime &&
       !task.cancelled &&
@@ -2058,8 +2139,10 @@ class Scheduler {
       task.nextTime += task.interval;
     }
 
-    /** Reached catch-up limit: reset nextTime to current time,
-     * abandon catching up to avoid executing too many callbacks instantly. */
+    /**
+     * Reached catch-up limit: reset nextTime to current time, abandon catching
+     * up to avoid executing too many callbacks instantly.
+     */
     if (catchUp >= this.maxCatchUp) {
       task.nextTime = gameTime + task.interval;
     }
@@ -2075,7 +2158,8 @@ class Scheduler {
   /**
    * ## Batch clean up cancelled tasks
    *
-   * Lazy cleanup: only executes when dirty flag is set. Filters out all tasks with `cancelled === true`.
+   * Lazy cleanup: only executes when dirty flag is set. Filters out all tasks
+   * with `cancelled === true`.
    *
    * @private
    * @returns {void}
@@ -2091,14 +2175,17 @@ class Scheduler {
 export default Scheduler;
 ```
 
-Scheduler's logic is actually quite simple. It stores tasks in `this.tasks = []`, and adds tasks to the queue through `sequence`, `delay`, and `interval`.
+Scheduler's logic is actually quite simple. It stores tasks in
+`this.tasks = []`, and adds tasks to the queue through `sequence`, `delay`, and
+`interval`.
 
 ```js
 class Scheduler {
   /**
    * ## Execute all due tasks
    *
-   * Takes tasks from the head of the queue where `time <= gameTime` and dispatches them by type.
+   * Takes tasks from the head of the queue where `time <= gameTime` and
+   * dispatches them by type.
    *
    * @private
    * @param {number} gameTime - Current game timestamp
@@ -2120,17 +2207,21 @@ class Scheduler {
 }
 ```
 
-`const task = this.tasks.shift();` ensures FIFO execution order — tasks that enter the queue first execute first. Task timing synchronization with the main Game Loop is achieved through the `tick` method:
+`const task = this.tasks.shift();` ensures FIFO execution order — tasks that
+enter the queue first execute first. Task timing synchronization with the main
+Game Loop is achieved through the `tick` method:
 
 ```js
 class Scheduler {
   /**
    * ## Drive the scheduler
    *
-   * Called every frame by the external Game Loop, passing the current game time.
-   * Iterates through due tasks and executes them, then cleans up cancelled tasks.
+   * Called every frame by the external Game Loop, passing the current game
+   * time. Iterates through due tasks and executes them, then cleans up
+   * cancelled tasks.
    *
-   * @param {number} [gameTime=performance.now()] - Current game timestamp (milliseconds). Default is `performance.now()`
+   * @param {number} [gameTime=performance.now()] - Current game timestamp
+   *   (milliseconds). Default is `performance.now()`
    * @returns {void}
    */
   tick(gameTime = performance.now()) {
@@ -2144,7 +2235,9 @@ class Scheduler {
 }
 ```
 
-Scheduler implements a unified mechanism for managing task timing. Scheduler thus becomes part of Runtime, and all tasks that need to wait for execution are uniformly entered into Scheduler.
+Scheduler implements a unified mechanism for managing task timing. Scheduler
+thus becomes part of Runtime, and all tasks that need to wait for execution are
+uniformly entered into Scheduler.
 
 ### Scheduler Initialization
 
@@ -2188,11 +2281,7 @@ const Engine = {
     const state = Store.getState();
 
     // Destructure core configuration for subsequent Game and BattleController creation
-    const {
-      Players,
-      Mode,
-      Elements
-    } = state;
+    const { Players, Mode, Elements } = state;
 
     /*
      * ==================== Step 3: Create Global Scheduler ====================
@@ -2237,7 +2326,7 @@ const Engine = {
      * Single mode removes the last player, keeping only the first.
      * Versus mode keeps all two players.
      */
-    const finalPlayers = [ ...Players ];
+    const finalPlayers = [...Players];
 
     if (Mode === 'single') {
       // Single mode keeps only the first player (e.g., ['human', 'ai'] → ['human'])
@@ -2260,7 +2349,7 @@ const Engine = {
      * - References to Scheduler and Audio
      * - Independent 7-bag (this.bag = [])
      */
-    for (const [ index, player ] of finalPlayers.entries()) {
+    for (const [index, player] of finalPlayers.entries()) {
       Engine.Games.push(
         new Game({
           Player: {
@@ -2293,23 +2382,22 @@ const Engine = {
       });
     }
   },
-}
+};
 ```
 
-As you can see, Audio, Runtime (Game module and all its submodules), and Battle all rely on Scheduler for unified delayed task management.
+As you can see, Audio, Runtime (Game module and all its submodules), and Battle
+all rely on Scheduler for unified delayed task management.
 
 ### Scheduler Updates
 
-Earlier we introduced how Scheduler task timing synchronizes with the main Game Loop. Let's see exactly how this is achieved:
+Earlier we introduced how Scheduler task timing synchronizes with the main Game
+Loop. Let's see exactly how this is achieved:
 
 ```js
 const Engine = {
   // Other logic omitted...
   tick: (timestamp) => {
-    const {
-      Games,
-      Scheduler
-    } = Engine;
+    const { Games, Scheduler } = Engine;
 
     // Initialize time base on first run, setting initial accumulator timestamp for each Game instance
     if (!Engine.lastTickTime) {
@@ -2347,14 +2435,17 @@ const Engine = {
     // Step 12: Request next frame, forming the game loop
     Engine.rafId = requestAnimationFrame(Engine.tick);
   },
-}
+};
 ```
 
-You can see that the Game Loop advances Scheduler through `**Scheduler.tick(timestamp)**` every frame, ensuring the entire game always runs on the same timeline.
+You can see that the Game Loop advances Scheduler through
+`**Scheduler.tick(timestamp)**` every frame, ensuring the entire game always
+runs on the same timeline.
 
 ### Scheduler Application Examples
 
-The Audio module playing background music and sound effects is a classic example of applying unified delayed task management:
+The Audio module playing background music and sound effects is a classic example
+of applying unified delayed task management:
 
 #### loopPlayBGM
 
@@ -2431,21 +2522,9 @@ class Sounds extends Base {
     const frequencies = CHORD_SETS[setIndex];
     const params = PARAM_SETS[setIndex];
 
-    const speeds = [
-      260,
-      300,
-      380
-    ];
-    const volumes = [
-      0.32,
-      0.3,
-      0.25
-    ];
-    const timeouts = [
-      160,
-      320,
-      480
-    ];
+    const speeds = [260, 300, 380];
+    const volumes = [0.32, 0.3, 0.25];
+    const timeouts = [160, 320, 480];
 
     const motif = getMotif(lines, isPerfectClear);
     const cfg = MOTIFS[motif];
@@ -2455,12 +2534,9 @@ class Sounds extends Base {
 
     const chord = baseChord.map((freq) => freq + cfg.shift * 12);
     const queue = [];
-    const {
-      Context,
-      Scheduler
-    } = this;
+    const { Context, Scheduler } = this;
 
-    for (const [ i, freq ] of chord.entries()) {
+    for (const [i, freq] of chord.entries()) {
       queue.push({
         fn: () => {
           const now = Context.currentTime;
@@ -2477,10 +2553,7 @@ class Sounds extends Base {
   };
 
   LEVEL_UP = () => {
-    const {
-      Context,
-      Scheduler
-    } = this;
+    const { Context, Scheduler } = this;
     const now = Context.currentTime;
 
     Scheduler.sequence([
@@ -2502,7 +2575,8 @@ class Sounds extends Base {
 
 ## Renderer
 
-Renderer does not participate in game logic. It is only responsible for rendering Canvas graphics based on the current state.
+Renderer does not participate in game logic. It is only responsible for
+rendering Canvas graphics based on the current state.
 
 ### Renderer Implementation
 
@@ -2662,7 +2736,8 @@ class CanvasRenderer extends Base {
 export default CanvasRenderer;
 ```
 
-As you can see, Renderer has a very single responsibility. Runtime updates state, Renderer reads state, and then renders the Canvas game screen.
+As you can see, Renderer has a very single responsibility. Runtime updates
+state, Renderer reads state, and then renders the Canvas game screen.
 
 This way, regardless of whether currently running:
 
@@ -2675,13 +2750,17 @@ Renderer does not need to modify any logic.
 
 ## AI, Replay, and Runtime
 
-Both AI and Replay are built on top of Runtime. Replay saves Commands, and AI outputs Commands as well.
+Both AI and Replay are built on top of Runtime. Replay saves Commands, and AI
+outputs Commands as well.
 
-Therefore, for Runtime, Replay is no different from a player, and AI is no different from a keyboard. Runtime always executes a unified data flow. This is also the key to maintaining determinism throughout the entire project.
+Therefore, for Runtime, Replay is no different from a player, and AI is no
+different from a keyboard. Runtime always executes a unified data flow. This is
+also the key to maintaining determinism throughout the entire project.
 
 ## What Does Runtime Bring?
 
-With the establishment of Runtime, more and more new capabilities begin to grow naturally. For example:
+With the establishment of Runtime, more and more new capabilities begin to grow
+naturally. For example:
 
 - Replay
 - AI
@@ -2692,20 +2771,28 @@ With the establishment of Runtime, more and more new capabilities begin to grow 
 - Audio
 - Animations
 
-None of them need to re-implement a new game. Instead, they share the same Runtime. Therefore, adding new features more often means adding new modules rather than modifying existing systems. This is also the greatest value of Runtime.
+None of them need to re-implement a new game. Instead, they share the same
+Runtime. Therefore, adding new features more often means adding new modules
+rather than modifying existing systems. This is also the greatest value of
+Runtime.
 
 ## Summary
 
-Runtime is not intended to make the architecture look more complex. On the contrary, it gives complex systems a unified way of organization.
+Runtime is not intended to make the architecture look more complex. On the
+contrary, it gives complex systems a unified way of organization.
 
 - For Gameplay, it only cares about game rules;
 - For Renderer, it only cares about visuals;
 - For AI, it only cares about decision-making;
 
-And Runtime is responsible for bringing all of these together. This is the core of the entire tetris.js.
+And Runtime is responsible for bringing all of these together. This is the core
+of the entire tetris.js.
 
 ## Next Reading
 
-Runtime is responsible for organizing the entire game. What truly determines game behavior is Gameplay and AI. The next chapter will dive into one of the most complex systems in the entire project: **AI**. Learn how AI completes search, simulation, and decision-making without modifying the real board.
+Runtime is responsible for organizing the entire game. What truly determines
+game behavior is Gameplay and AI. The next chapter will dive into one of the
+most complex systems in the entire project: **AI**. Learn how AI completes
+search, simulation, and decision-making without modifying the real board.
 
 **Next Chapter: [04-ai.en.md](./04-ai.en.md)**
