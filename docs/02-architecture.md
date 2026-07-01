@@ -4071,6 +4071,9 @@ EventBus 带来了几个明显优势：
 
 它们之间彼此不知道对方的存在，只通过事件进行通信。因此，在整个 Runtime 中 Command 用于传递输入（Input），EventBus 用于传递事件（Event），Scheduler 用于调度时间（Time）。三者共同构成了 Runtime 的基础设施（Infrastructure），让所有业务模块都建立在统一的运行机制之上。
 
+### 运行时架构图
+
+![Runtime Architecture Diagram](assets/img/runtime-diagram.png)
 
 ## 架构演进：AI
 

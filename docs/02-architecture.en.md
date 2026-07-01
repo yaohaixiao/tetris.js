@@ -4103,6 +4103,11 @@ In the entire project, the vast majority of systems are built on top of EventBus
 
 They don't know about each other's existence, only communicating through events. Therefore, in the entire Runtime, Command is used for passing Input, EventBus is used for passing Events, and Scheduler is used for scheduling Time. Together, they form the infrastructure of Runtime, allowing all business modules to operate on a unified mechanism.
 
+### Runtime Architecture Diagram
+
+![Runtime Architecture Diagram](assets/img/runtime-diagram.png)
+
+
 ## Architectural Evolution: AI
 
 As the project continued to evolve, the architecture had become sufficient to support everything needed for AI implementation. Naturally, tetris.js implemented AI. However, the initial approach was the most direct one — letting AI directly modify the board state:
