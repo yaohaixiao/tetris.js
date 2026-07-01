@@ -27,7 +27,7 @@ As features continue to increase, the code grows. Eventually, a game typically i
 If these modules call each other directly, the entire project quickly becomes difficult to maintain. Therefore, a unified organizer is needed. This organizer is the Runtime.
 
 <p align="center">
-    <img src="docs/assets/img/runtime.png" alt="Runtime">
+    <img src="assets/img/runtime.png" alt="Runtime">
 </p>
 
 It is not responsible for any specific function. Instead, it ensures all systems work together according to unified rules.
@@ -117,7 +117,7 @@ The core of Runtime is the **Game Loop**. The Game Loop is the heartbeat that ke
 8. Render the screen
 
 <p align="center">
-    <img src="docs/assets/img/game-loop.png" alt="Runtime">
+    <img src="assets/img/game-loop.png" alt="Runtime">
 </p>
 
 The entire game continuously runs around this loop. The Game Loop doesn't care how specific modules are implemented; it is only responsible for organizing the execution order.

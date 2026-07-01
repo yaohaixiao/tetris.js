@@ -27,7 +27,7 @@
 如果这些模块彼此直接调用，整个项目很快就会变得难以维护。因此，需要有一个统一的组织者，这个组织者，就是 Runtime。
 
 <p align="center">
-    <img src="docs/assets/img/runtime.png" alt="Runtime">
+    <img src="assets/img/runtime.png" alt="Runtime">
 </p>
 
 它并不是负责某一个具体功能，而是负责让所有系统能够按照统一的规则协同工作。
@@ -117,7 +117,7 @@ Runtime 的核心是 **Game Loop**，Game Loop 是整个游戏不断运行的心
 8. 渲染画面
 
 <p align="center">
-    <img src="docs/assets/img/game-loop.png" alt="Runtime">
+    <img src="assets/img/game-loop.png" alt="Runtime">
 </p>
 
 整个游戏始终围绕这一循环不断运行，Game Loop 并不关心具体模块如何实现，它只负责组织执行顺序。
