@@ -4,10 +4,10 @@
  * @file BattleStore 单元测试
  */
 
-import BattleStore from '@/lib/battle/battle-store.js';
+import BattleStore from '@/lib/battle/state/battle-store.js';
 
 // Mock Base 类
-jest.mock('@/lib/core', () => {
+jest.mock('@/lib/core/index.js', () => {
   return jest.fn(function Base(options) {
     Object.assign(this, options);
   });
