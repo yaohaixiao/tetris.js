@@ -1320,6 +1320,125 @@ Because:
 
 Battle almost doesn't need to redesign these systems. It simply makes multiple Runtimes run simultaneously. This is also a demonstration of the entire architecture's extensibility.
 
+## Scoped Event
+
+When discussing the Battle module, there's one related topic that needs to be addressed: **Scoped Event**.
+
+**Scoped Event** is an event namespace isolation mechanism in tetris.js's EventBus. Its core purpose is to ensure that the same event name does not interfere between different Game instances.
+
+Let's take `GameEvents` as an example:
+
+```js
+export const GameEvents = (uuid) => ({
+  /* ---------- State Updates ---------- */
+  UPDATE_STATE: `game:${uuid}:update:state`,
+  UPDATE_MODE_INDEX: `game:${uuid}:update:mode:index`,
+  UPDATE_BATTLE_INDEX: `game:${uuid}:update:battle:index`,
+  UPDATE_MODE: `game:${uuid}:update:mode`,
+  UPDATE_LEVEL: `game:${uuid}:update:level`,
+  UPDATE_GAMEPAD_CONNECTED: `game:${uuid}:update:gamepad:connected`,
+
+  /* ---------- HUD Updates ---------- */
+  SWITCH_CONTROLLER: `game:${uuid}:swtich:controller`,
+  UPDATE_HUD: `game:${uuid}:update:hud`,
+  SAVE_HIGH_SCORE: `game:${uuid}:save:high:score`,
+
+  /* ---------- Scene Updates ---------- */
+  SWITCH_TO_GAME_MODE: `game:${uuid}:switch:to:game:mode`,
+  SWITCH_TO_BATTLE_MODE: `game:${uuid}:switch:to:battle:mode`,
+  SWITCH_TO_MAIN_MENU: `game:${uuid}:switch:to:main:menu`,
+  SELECT_LEVEL: `game:${uuid}:select:level`,
+  SWITCH_TO_DIFFICULTY: `game:${uuid}:switch:difficulty`,
+  SELECT_DIFFICULTY: `game:${uuid}:select:difficulty`,
+
+  /* ---------- Core Flow ---------- */
+  BEGIN: `game:${uuid}:begin`,
+  START: `game:${uuid}:start`,
+  TOGGLE_PAUSED: `game:${uuid}:toggle:paused`,
+  RESET: `game:${uuid}:reset`,
+  RESTART: `game:${uuid}:restart`,
+  OVER: `game:${uuid}:over`,
+
+  /* ---------- Ghost Position ---------- */
+  GET_GHOST_POSITION: `game:${uuid}:get:ghost:position`,
+
+  /* ---------- Piece Operations ---------- */
+  BLOCK_MOVE: `game:${uuid}:block:move`,
+  BLOCK_ROTATE: `game:${uuid}:block:rotate`,
+  BLOCK_DROP: `game:${uuid}:block:drop`,
+  BLOCK_TICK: `game:${uuid}:block:tick`,
+  BLOCK_SPAWN: `game:${uuid}:block:spawn`,
+  BLOCK_HOLD: `game:${uuid}:block:hold`,
+
+  /* ---------- Animation Effects ---------- */
+  START_COUNTDOWN: `game:${uuid}:start:countdown`,
+  START_PAUSED: `game:${uuid}:start:paused`,
+  STOP_PAUSED: `game:${uuid}:stop:paused`,
+  START_CLEAR_LINES: `game:${uuid}:start:clear:lines`,
+  START_CLEAR_SCORE: `game:${uuid}:start:clear:score`,
+  START_LEVEL_UP: `game:${uuid}:start:level:up`,
+  START_LANDING_FLASH: `game:${uuid}:start:landing:flash`,
+  START_GARBAGE_WARNING: `game:${uuid}:start:garbage:warning`,
+  START_GARBAGE_PUSH: `game:${uuid}:start:garbage:push`,
+
+  /* ---------- Background Music ---------- */
+  TOGGLE_BGM: `game:${uuid}:toggle:bgm`,
+
+  /* ---------- Replay Preparation ---------- */
+  REPLAY_PREPARE: `game:${uuid}:replay:prepare`,
+
+  /* ---------- Battle Surrender ---------- */
+  SURRENDER: `game:${uuid}:surrender`,
+
+  /* ---------- Exit Game ---------- */
+  EXIT: `game:${uuid}:exit`,
+  UPDATE_EXIT_INDEX: `game:${uuid}:update:exit:index`,
+  GIVE_UP: `game:${uuid}:give:up`,
+  RESUME: `game:${uuid}:resume`,
+
+  /* ---------- Input & Command Mapping ---------- */
+  DISPATCH_INPUT: `game:${uuid}:dispatch:input`,
+  DISPATCH_COMMAND: `game:${uuid}:dispatch:command`,
+});
+```
+
+The uuid here is generated during the initialization of each Game instance. All GameEvents event names use the **uuid** as the scope of the Scoped Event.
+
+### Why Do We Need Scoped Events?
+
+In Battle mode, two Game instances (P1 and P2) are running simultaneously. Without event isolation, the following problems would occur:
+
+```js
+// Without isolation: P1 and P2 share the same event
+EventBus.emit('game:start', { Game: game1 });
+EventBus.emit('game:start', { Game: game2 });
+
+// Both listeners would be triggered, causing chaos
+EventBus.on('game:start', () => { /* P1's start logic */ });
+EventBus.on('game:start', () => { /* P2's start logic */ });
+```
+
+Without isolation, P1 and P2 share the same event, and both listeners would be triggered, causing confusion. With Scoped Events, this problem is eliminated:
+
+
+```js
+// With isolation: each Game instance has its own event namespace
+const G1 = GameEvents('uuid-p1');
+const G2 = GameEvents('uuid-p2');
+
+// P1's event
+EventBus.emit(G1.START, { Game: game1 });  // → 'game:uuid-p1:start'
+// P2's event
+EventBus.emit(G2.START, { Game: game2 });  // → 'game:uuid-p2:start'
+
+// P1 only listens to P1's events
+EventBus.on(G1.START, () => { /* Only handles P1's start */ });
+EventBus.on(G2.START, () => { /* Only handles P2's start */ });
+```
+
+Scoped Events give each Game instance its own "event channel", just like each player has their own controller — operations only affect themselves and never leak to the other side.
+
+
 ## Summary
 
 Battle did not re-implement Tetris. It simply makes multiple Runtimes work together in the same match. Each player, whether human or AI, has their own Runtime. The Battle Controller coordinates the interaction between them.
