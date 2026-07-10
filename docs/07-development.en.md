@@ -223,7 +223,7 @@ clear, and subsequent modules are easier to understand.
     code comments for implementation;
   - Register animation:
     - Subscribe to animation messages: Listen for animation trigger messages in
-      `lib/game/index.js`;
+      `lib/game/elapsed-timer.js`;
     - Execute animation:
       `this.Animations.register(new CountdownAnimation({ Scheduler, Game: this }))`;
     - Dependency injection: `{ Scheduler, Game: this }` Configuration
@@ -241,8 +241,8 @@ clear, and subsequent modules are easier to understand.
 - Extend new input devices:
   - Add new adapter in `lib/services/input` layer (inherit Base class, implement
     dependency injection and message subscription/publishing);
-  - Register: Register in the game core module in `lib/game/index.js` (refer to
-    existing Keyboard, Gamepad, and Touch);
+  - Register: Register in the game core module in `lib/game/elapsed-timer.js`
+    (refer to existing Keyboard, Gamepad, and Touch);
 - Input/Command mapping:
   - Input mapping: `lib/engine/dispatch-input.js`;
   - Command mapping: `lib/engine/dispatch-command.js`;

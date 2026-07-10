@@ -28,7 +28,8 @@ Hard Drop
 Hold
 ```
 
-这些操作都需要转换成统一的 Command，在回放的时候逐个执行记录的操作命令就可以实现了。而 tetris.js 已经实现了 Command Runtime 的架构了，天然就支持 Replay 功能的实现。
+这些操作都需要转换成统一的 Command，在回放的时候逐个执行记录的操作命令就可以实现了。而 tetris.js 已经实现了 Command
+Runtime 的架构了，天然就支持 Replay 功能的实现。
 
 ### dispatchInput 中记录用户行为
 
@@ -269,7 +270,8 @@ export default tick;
 
 ## 为什么只保存 Command？
 
-因为 Runtime 保证了游戏运行的确定性（Deterministic），对于 Runtime 来说，只要：**初始状态相同**、**随机序列相同**、**Command** 相同，最终得到的游戏结果一定相同。
+因为 Runtime 保证了游戏运行的确定性（Deterministic），对于 Runtime 来说，只要：**初始状态相同**、**随机序列相同**、**Command**
+相同，最终得到的游戏结果一定相同。
 
 因此，Replay 不需要保存：Board、Score 、Animation、Canvas 这些游戏状态信息，仅需记录 Command 信息，这样 Replay 的数据量也非常小。Replay 回放的时候只需要重新想 Runtime 输入同样的 Command，Runtime 在运行时就会重新自动计算出来运行是的这些游戏状态，保证整个能完美的重现之前游戏操作。
 
@@ -1165,7 +1167,7 @@ class Replay extends Base {
       this.playing &&
       this.cursor < data.length &&
       data[this.cursor].ms <= this.playElapsed
-      ) {
+    ) {
       const { cmd } = data[this.cursor];
 
       if (cmd.action === 'HOLD_SYNC') {
@@ -1185,7 +1187,8 @@ update 方法会接受两个参数：
 - speed：当前下落间隔（毫秒），用于快进阈值计算
 - timestamp： 当前游戏主循环 Game Loop 的 requestAnimationFrame 时间戳
 
-`timestamp` 就是游戏 Game Loop 主循环的时间戳，Replay 播放回放镜头的时候就是靠的它与主循环同步时间。
+`timestamp` 就是游戏 Game
+Loop 主循环的时间戳，Replay 播放回放镜头的时候就是靠的它与主循环同步时间。
 
 ### requestAnimationFrame 在标签页失去焦点的问题
 
@@ -1207,7 +1210,8 @@ update 方法会接受两个参数：
 
 ### syncPlayElapsed 同步回放逻辑时钟
 
-再讲具体些就是玩家切回游戏标签页面后会瞬间执行大量 command 导致爆帧，为了解决这个问题，Replay 专门提供了 `syncPlayElapsed` 方法来同步回放逻辑时钟：
+再讲具体些就是玩家切回游戏标签页面后会瞬间执行大量 command 导致爆帧，为了解决这个问题，Replay 专门提供了
+`syncPlayElapsed` 方法来同步回放逻辑时钟：
 
 ```js
 /**
@@ -1252,7 +1256,7 @@ while (
   this.playing &&
   this.cursor < data.length &&
   data[this.cursor].ms <= this.playElapsed
-  ) {
+) {
   const { cmd } = data[this.cursor];
 
   if (cmd.action === 'HOLD_SYNC') {
@@ -1267,10 +1271,10 @@ while (
 
 如果检测到时间跳跃过大（标签页切后台），限制单次跳跃上限为 1 秒，**防止切回后瞬间执行大量 command 导致爆帧**。
 
-
 ## Replay 带来的价值
 
-Replay 的意义远远不只是"回放一局游戏"。由于 Replay 本质上保存的是 `Command`，它还能用于：
+Replay 的意义远远不只是"回放一局游戏"。由于 Replay 本质上保存的是
+`Command`，它还能用于：
 
 - Bug 重现
 - AI 调试

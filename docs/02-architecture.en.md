@@ -1840,8 +1840,8 @@ CLEAR = (lines = 1, level = 1, isPerfectClear = false) => {
 /**
  * ## Level Up Sound Effect
  *
- * Plays an ascending scale (C5 → E6), creating a sense of achievement and
- * joy. Uses Scheduler.sequence to trigger at precise time offsets.
+ * Plays an ascending scale (C5 → E6), creating a sense of achievement and joy.
+ * Uses Scheduler.sequence to trigger at precise time offsets.
  *
  * @returns {void}
  */
@@ -4091,7 +4091,7 @@ after EventBus decoupling:
 ```js
 import Game from '@/lib/game';
 import findFullLines from '@/lib/game/utils/find-full-lines.js';
-import EventBus from '@/lib/core/event-bus/index.js';
+import EventBus from '@/lib/core/event-bus/elapsed-timer.js';
 
 /**
  * # Execute line clear logic (including 3-blink effect)

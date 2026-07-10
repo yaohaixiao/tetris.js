@@ -545,19 +545,19 @@ body {
 @media screen and (max-width: 320px) {
   .tetris-next-piece,
   .tetris-hold-piece {
-    width: 72%;
+    width: 62%;
   }
 }
 @media screen and (max-width: 375px) {
   .tetris-next-piece,
   .tetris-hold-piece {
-    width: 72%;
+    width: 62%;
   }
 }
 @media screen and (max-width: 480px) {
   .tetris-next-piece,
   .tetris-hold-piece {
-    width: 72%;
+    width: 62%;
   }
 }
 @media screen and (max-width: 320px) {

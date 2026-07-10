@@ -3828,7 +3828,7 @@ export default ClearLinesAnimation;
 ```js
 import Game from '@/lib/game';
 import findFullLines from '@/lib/game/utils/find-full-lines.js';
-import EventBus from '@/lib/core/event-bus/index.js';
+import EventBus from '@/lib/core/event-bus/elapsed-timer.js';
 
 /**
  * # 执行消行逻辑（包含闪烁3次特效）
@@ -4415,7 +4415,8 @@ HARD_DROP
 HOLD
 ```
 
-随后，这些 Command 会像玩家输入一样，进入统一的 Command Queue，由 Runtime 在 Game Loop 中执行。
+随后，这些 Command 会像玩家输入一样，进入统一的 Command
+Queue，由 Runtime 在 Game Loop 中执行。
 
 ```js
 import Base from '@/lib/core';

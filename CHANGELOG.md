@@ -296,7 +296,7 @@
 
 ### Bug Fixes
 
-- 修复 audio/index.js 中 emit() 方法接入错误的问题； ([eee6c50](https://github.com/yaohaixiao/tetris.js/commit/eee6c50f3bd703dc1aa2fb15f6b81ebfe603c775))
+- 修复 audio/elapsed-timer.js 中 emit() 方法接入错误的问题； ([eee6c50](https://github.com/yaohaixiao/tetris.js/commit/eee6c50f3bd703dc1aa2fb15f6b81ebfe603c775))
 
 ### Features
 

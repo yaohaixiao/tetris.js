@@ -212,7 +212,7 @@ Runtime
   - 动画管理系统：`lib/runtime/animation-system.js`；
   - 新增动画：`lib/services/animations`，动画实现参考现有动画设代码注释；
   - 注册动画：
-    - 订阅动画消息：`lib/game/index.js` 中监听动画触发消息；
+    - 订阅动画消息：`lib/game/elapsed-timer.js` 中监听动画触发消息；
     - 执行动画：`this.Animations.register(new CountdownAnimation({ Scheduler, Game: this }))`;
     - 依赖注入：`{ Scheduler, Game: this }`
       配置信息既是需要注入的依赖，根据需要注入依赖；
@@ -226,7 +226,7 @@ Runtime
 - 扩展新输入设备：
   - 新增：`lib/services/input`
     层新增适配器即可（继承 Base 基类，实现依赖注入和消息订阅发布；
-  - 注册：`lib/game/index.js` 在游戏核心模块注册（参考现有的 Keyboard,
+  - 注册：`lib/game/elapsed-timer.js` 在游戏核心模块注册（参考现有的 Keyboard,
     Gamepad 和 Touch）；
 - 输入/命令映射：
   - 输入映射：`lib/engine/dispatch-input.js`;
