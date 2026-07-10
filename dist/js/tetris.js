@@ -14795,6 +14795,7 @@ var tetris = (() => {
     } else {
       runtime.emit(RE.GAME_OVER);
     }
+    runtime.emit(GE.PAUSE_TIMER);
   };
   var over_default = over;
 
