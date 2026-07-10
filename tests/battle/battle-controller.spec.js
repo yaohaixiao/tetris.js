@@ -5,11 +5,11 @@
  */
 
 import BattleController from '@/lib/battle/battle-controller.js';
-import BattleStore from '@/lib/battle/battle-store.js';
-import BattleHUD from '@/lib/battle/battle-hud.js';
-import BattleUI from '@/lib/battle/battle-ui.js';
+import BattleStore from '@/lib/battle/state/battle-store.js';
+import BattleHUD from '@/lib/battle/ui/battle-hud.js';
+import BattleUI from '@/lib/battle/ui/battle-ui.js';
 import BattleRouter from '@/lib/events/router/battle-router.js';
-import * as garbageSystem from '@/lib/battle/garbage-system.js';
+import * as garbageSystem from '@/lib/battle/rules/garbage-system.js';
 import { GameEvents } from '@/lib/events/event-catalog.js';
 
 // ==================== Mock 模块 ====================
@@ -21,7 +21,7 @@ jest.mock('@/lib/core', () => {
   });
 });
 
-jest.mock('@/lib/battle/battle-store.js', () => {
+jest.mock('@/lib/battle/state/battle-store.js', () => {
   return jest.fn(function (options) {
     Object.assign(this, options);
     this.state = {
@@ -91,14 +91,14 @@ jest.mock('@/lib/battle/battle-store.js', () => {
   });
 });
 
-jest.mock('@/lib/battle/battle-hud.js', () => {
+jest.mock('@/lib/battle/ui/battle-hud.js', () => {
   return jest.fn(function (options) {
     Object.assign(this, options);
     this.updateScores = jest.fn();
   });
 });
 
-jest.mock('@/lib/battle/battle-ui.js', () => {
+jest.mock('@/lib/battle/ui/battle-ui.js', () => {
   return jest.fn(function (options) {
     Object.assign(this, options);
     this.show = jest.fn();
@@ -115,7 +115,7 @@ jest.mock('@/lib/events/router/battle-router.js', () => {
   });
 });
 
-jest.mock('@/lib/battle/garbage-system.js', () => ({
+jest.mock('@/lib/battle/rules/garbage-system.js', () => ({
   calculateGarbage: jest.fn(),
   applyGarbage: jest.fn(),
 }));

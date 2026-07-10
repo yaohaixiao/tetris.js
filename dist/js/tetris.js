@@ -16360,7 +16360,7 @@ var tetris = (() => {
   };
   var game_default2 = Game;
 
-  // lib/battle/battle-state.js
+  // lib/battle/state/battle-state.js
   var BattleState = {
     /** 对战是否进行中 */
     running: false,
@@ -16397,7 +16397,7 @@ var tetris = (() => {
   };
   var battle_state_default = BattleState;
 
-  // lib/battle/battle-store.js
+  // lib/battle/state/battle-store.js
   var BattleStore = class extends core_default {
     /**
      * ## 构造函数
@@ -16703,7 +16703,7 @@ var tetris = (() => {
   };
   var battle_store_default = BattleStore;
 
-  // lib/battle/battle-hud.js
+  // lib/battle/ui/battle-hud.js
   var BattleHUD = class extends core_default {
     /**
      * ## 构造函数
@@ -16835,7 +16835,7 @@ var tetris = (() => {
   };
   var battle_hud_default = BattleHUD;
 
-  // lib/battle/battle-ui.js
+  // lib/battle/ui/battle-ui.js
   var CLS_HIDDEN = "tetris-hidden";
   var BattleUI = class extends core_default {
     /**
@@ -17292,7 +17292,7 @@ var tetris = (() => {
   };
   var battle_router_default = BattleRouter;
 
-  // lib/battle/garbage-system.js
+  // lib/battle/rules/garbage-system.js
   var GARBAGE_MAP = {
     1: 0,
     // 消 1 行 → 无攻击

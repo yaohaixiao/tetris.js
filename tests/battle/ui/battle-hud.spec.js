@@ -4,10 +4,10 @@
  * @file BattleHUD 单元测试
  */
 
-import BattleHUD from '@/lib/battle/battle-hud.js';
+import BattleHUD from '@/lib/battle/ui/battle-hud.js';
 
 // Mock Base 类
-jest.mock('@/lib/core', () => {
+jest.mock('@/lib/core/index.js', () => {
   return jest.fn(function Base(options) {
     Object.assign(this, options);
   });

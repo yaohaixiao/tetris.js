@@ -4,10 +4,10 @@
  * @file BattleUI 单元测试
  */
 
-import BattleUI from '@/lib/battle/battle-ui.js';
+import BattleUI from '@/lib/battle/ui/battle-ui.js';
 
 // Mock Base 类
-jest.mock('@/lib/core', () => {
+jest.mock('@/lib/core/index.js', () => {
   return jest.fn(function Base(options) {
     Object.assign(this, options);
   });
