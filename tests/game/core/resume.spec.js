@@ -1,5 +1,20 @@
 import resume from '@/lib/game/core/resume';
 
+// Mock event-catalog
+jest.mock('@/lib/events/event-catalog.js', () => ({
+  AudioEvents: () => ({
+    PLAY_SOUND: 'audio:play:sound',
+    RESUME_BGM: 'audio:resume:bgm',
+  }),
+  GameEvents: (id) => ({
+    STOP_PAUSED: `game:${id}:stop:paused`,
+    START_TIMER: `game:${id}:start:timer`,
+  }),
+  UIEvents: (id) => ({
+    UPDATE_MODE: `ui:${id}:update:mode`,
+  }),
+}));
+
 describe('resume', () => {
   let mockContext;
   let mockStore;
@@ -59,6 +74,14 @@ describe('resume', () => {
       expect(mockContext.emit).toHaveBeenCalledWith('audio:resume:bgm', {
         level: 5,
       });
+    });
+
+    it('应发送 start:timer 事件恢复计时', () => {
+      resume(mockContext);
+
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'game:test-uuid-001:start:timer',
+      );
     });
   });
 
@@ -133,7 +156,7 @@ describe('resume', () => {
       expect(firstEmitOrder).toBeLessThan(setModeOrder);
     });
 
-    it('emit 顺序应为 ui → stop:paused → sound → bgm', () => {
+    it('emit 顺序应为 ui → stop:paused → sound → bgm → start:timer', () => {
       resume(mockContext);
 
       const events = mockContext.emit.mock.calls.map(([event]) => event);
@@ -143,6 +166,7 @@ describe('resume', () => {
         'game:test-uuid-001:stop:paused',
         'audio:play:sound',
         'audio:resume:bgm',
+        'game:test-uuid-001:start:timer',
       ]);
     });
   });

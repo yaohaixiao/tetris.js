@@ -17,6 +17,13 @@ jest.mock('@/lib/events/event-catalog.js', () => ({
   AudioEvents: () => ({
     PLAY_SOUND: 'audio:play:sound',
     RESUME_BGM: 'audio:resume:bgm',
+    STOP_BGM: 'audio:stop:bgm',
+  }),
+  GameEvents: (id) => ({
+    START_TIMER: `game:${id}:start:timer`,
+    // 如果 begin.js 中还有其他 GameEvents，在这里添加
+    // UPDATE_HUD: `game:${id}:update:hud`,  // 如果有的话
+    // PAUSE_TIMER: `game:${id}:pause:timer`, // 如果有的话
   }),
   ReplayEvents: (id) => ({
     START_RECORD: `replay:${id}:start:record`,
@@ -100,6 +107,13 @@ describe('begin', () => {
       const hudIdx = events.indexOf('ui:test-game-uuid:update:hud');
       const recordIdx = events.indexOf('replay:test-game-uuid:start:record');
       expect(hudIdx).toBeGreaterThan(recordIdx);
+    });
+
+    it('应该发送 START_TIMER 事件', () => {
+      begin(mockContext);
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'game:test-game-uuid:start:timer',
+      );
     });
   });
 

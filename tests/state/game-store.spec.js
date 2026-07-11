@@ -20,6 +20,10 @@ describe('GameStore', () => {
     jest.clearAllMocks();
 
     mockGameState = {
+      modeIndex: 0,
+      battleIndex: 0,
+      exitIndex: 0,
+      controller: 'human',
       beginningBoard: [],
       board: Array.from({ length: 20 }, () =>
         Array.from({ length: 10 }, () => 0),
@@ -28,16 +32,23 @@ describe('GameStore', () => {
       cx: 0,
       cy: 0,
       next: null,
+      hold: null,
+      tSpin: null,
+      backToBack: false,
       score: 0,
       lines: 0,
       level: 1,
+      combo: 0,
+      comboScore: 0,
       highScore: 0,
+      elapsedTime: 0,
+      sessionTime: 0,
       baseLines: 0,
+      levelUpSteps: 10,
       clearLines: [],
       difficulty: 'easy',
-      mode: 'main-menu',
+      mode: 'game-mode',
       gamepadConnected: false,
-      controller: 'human',
     };
 
     store = new GameStore({
@@ -77,7 +88,7 @@ describe('GameStore', () => {
 
       expect(state.score).toBe(0);
       expect(state.level).toBe(1);
-      expect(state.mode).toBe('main-menu');
+      expect(state.mode).toBe('game-mode');
     });
 
     it('返回的应该是 state 引用', () => {
@@ -132,7 +143,7 @@ describe('GameStore', () => {
 
       expect(store.getState().score).toBe(0);
       expect(store.getState().level).toBe(1);
-      expect(store.getState().mode).toBe('main-menu');
+      expect(store.getState().mode).toBe('game-mode');
     });
 
     it('重置后 defaults 不应该被修改', () => {
@@ -149,16 +160,16 @@ describe('GameStore', () => {
       store.setLevel(10);
       store.setHighScore(5000);
       store.setState({ score: 3000 });
-      store.setController('ai'); // 新增：先改为 ai
+      store.setController('ai');
 
       store.resetState();
 
       const state = store.getState();
-      expect(state.mode).toBe('main-menu');
+      expect(state.mode).toBe('game-mode');
       expect(state.level).toBe(1);
       expect(state.highScore).toBe(0);
       expect(state.score).toBe(0);
-      expect(state.controller).toBe('human'); // 新增：验证重置为 human
+      expect(state.controller).toBe('human');
     });
   });
 
@@ -344,24 +355,40 @@ describe('GameStore', () => {
 
   // ==================== HUD ====================
   describe('HUD 数据', () => {
-    it('getHub 应该返回 score, lines, level', () => {
-      store.setState({ score: 500, lines: 10, level: 3 });
+    it('getHub 应该返回 score, lines, level, combo, comboScore', () => {
+      store.setState({
+        score: 500,
+        lines: 10,
+        level: 3,
+        combo: 2,
+        comboScore: 50,
+      });
 
       const hud = store.getHub();
 
       expect(hud).toEqual({
-        source: undefined,
+        score: 500,
         lines: 10,
         level: 3,
+        combo: 2,
+        comboScore: 50,
       });
     });
 
-    it('setHud 应该更新 score, lines, level', () => {
-      store.setHud({ score: 1000, lines: 20, level: 5 });
+    it('setHud 应该更新 score, lines, level, combo, comboScore', () => {
+      store.setHud({
+        score: 1000,
+        lines: 20,
+        level: 5,
+        combo: 3,
+        comboScore: 75,
+      });
 
       expect(store.getScore()).toBe(1000);
       expect(store.getState().lines).toBe(20);
       expect(store.getLevel()).toBe(5);
+      expect(store.getState().combo).toBe(3);
+      expect(store.getState().comboScore).toBe(75);
     });
   });
 
@@ -411,36 +438,8 @@ describe('GameStore', () => {
       expect(store.getMode()).toBe('paused');
     });
 
-    it('初始模式应该为 main-menu', () => {
-      expect(store.getMode()).toBe('main-menu');
-    });
-  });
-
-  // ==================== 完整性 ====================
-  describe('完整性', () => {
-    it('多次 setState 应该正确累计', () => {
-      store.setState({ score: 100 });
-      store.setState((prev) => ({ score: prev.score + 50, level: 3 }));
-      store.setState({ mode: 'playing' });
-
-      expect(store.getState().score).toBe(150);
-      expect(store.getState().level).toBe(3);
-      expect(store.getState().mode).toBe('playing');
-    });
-
-    it('resetState 后所有字段应该恢复初始值', () => {
-      store.setMode('playing');
-      store.setLevel(10);
-      store.setHighScore(5000);
-      store.setState({ score: 3000 });
-
-      store.resetState();
-
-      const state = store.getState();
-      expect(state.mode).toBe('main-menu');
-      expect(state.level).toBe(1);
-      expect(state.highScore).toBe(0);
-      expect(state.score).toBe(0);
+    it('初始模式应该为 game-mode', () => {
+      expect(store.getMode()).toBe('game-mode');
     });
   });
 
@@ -473,37 +472,110 @@ describe('GameStore', () => {
     });
   });
 
-  // ==================== modeIndex / battleIndex ====================
-  describe('modeIndex 和 battleIndex', () => {
-    beforeEach(() => {
-      // 直接用 GameState 和尺寸初始化
-      store = new GameStore({
-        GameState: require('@/lib/state/game-state.js').default,
-        cols: 10,
-        rows: 20,
-      });
-    });
-
+  // ==================== modeIndex / battleIndex / exitIndex ====================
+  describe('modeIndex、battleIndex 和 exitIndex', () => {
     describe('getModeIndex / setModeIndex', () => {
-      test('初始值应该为 0', () => {
+      it('初始值应该为 0', () => {
         expect(store.getModeIndex()).toBe(0);
       });
 
-      test('setModeIndex 应该正确更新', () => {
+      it('setModeIndex 应该正确更新', () => {
         store.setModeIndex(1);
         expect(store.getModeIndex()).toBe(1);
       });
     });
 
     describe('getBattleIndex / setBattleIndex', () => {
-      test('初始值应该为 0', () => {
+      it('初始值应该为 0', () => {
         expect(store.getBattleIndex()).toBe(0);
       });
 
-      test('setBattleIndex 应该正确更新', () => {
+      it('setBattleIndex 应该正确更新', () => {
         store.setBattleIndex(1);
         expect(store.getBattleIndex()).toBe(1);
       });
+    });
+
+    describe('getExitIndex / setExitIndex', () => {
+      it('初始值应该为 0', () => {
+        expect(store.getExitIndex()).toBe(0);
+      });
+
+      it('setExitIndex 应该正确更新', () => {
+        store.setExitIndex(1);
+        expect(store.getExitIndex()).toBe(1);
+      });
+    });
+  });
+
+  // ==================== ElapsedTime / SessionTime ====================
+  describe('计时数据', () => {
+    describe('getElapsedTime / setElapsedTime', () => {
+      it('初始值应该为 0', () => {
+        expect(store.getElapsedTime()).toBe(0);
+      });
+
+      it('setElapsedTime 应该正确更新', () => {
+        store.setElapsedTime(120);
+        expect(store.getElapsedTime()).toBe(120);
+      });
+    });
+
+    describe('getSessionTime / setSessionTime', () => {
+      it('初始值应该为 0', () => {
+        expect(store.getSessionTime()).toBe(0);
+      });
+
+      it('setSessionTime 应该正确更新', () => {
+        store.setSessionTime(300);
+        expect(store.getSessionTime()).toBe(300);
+      });
+    });
+  });
+
+  // ==================== Board ====================
+  describe('棋盘数据', () => {
+    it('getBoard 应该返回当前棋盘', () => {
+      const board = store.getBoard();
+      expect(board).toBe(store.state.board);
+      expect(board).toHaveLength(20);
+      board.forEach((row) => {
+        expect(row).toHaveLength(10);
+      });
+    });
+  });
+
+  // ==================== 完整性 ====================
+  describe('完整性', () => {
+    it('多次 setState 应该正确累计', () => {
+      store.setState({ score: 100 });
+      store.setState((prev) => ({ score: prev.score + 50, level: 3 }));
+      store.setState({ mode: 'playing' });
+
+      expect(store.getState().score).toBe(150);
+      expect(store.getState().level).toBe(3);
+      expect(store.getState().mode).toBe('playing');
+    });
+
+    it('resetState 后所有字段应该恢复初始值', () => {
+      store.setMode('playing');
+      store.setLevel(10);
+      store.setHighScore(5000);
+      store.setState({ score: 3000 });
+      store.setController('ai');
+      store.setElapsedTime(120);
+      store.setSessionTime(300);
+
+      store.resetState();
+
+      const state = store.getState();
+      expect(state.mode).toBe('game-mode');
+      expect(state.level).toBe(1);
+      expect(state.highScore).toBe(0);
+      expect(state.score).toBe(0);
+      expect(state.controller).toBe('human');
+      expect(state.elapsedTime).toBe(0);
+      expect(state.sessionTime).toBe(0);
     });
   });
 });
