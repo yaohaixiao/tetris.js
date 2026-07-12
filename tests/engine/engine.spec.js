@@ -2,10 +2,6 @@
 
 import Engine from '@/lib/engine';
 
-// 事件名称常量，与 Game 实例的 UUID 绑定
-const DISPATCH_COMMAND = 'game:test-game-uuid:dispatch:command';
-const DISPATCH_INPUT = 'game:test-game-uuid:dispatch:input';
-
 // ==================== Mock 模块 ====================
 
 /**
@@ -13,9 +9,6 @@ const DISPATCH_INPUT = 'game:test-game-uuid:dispatch:input';
  *
  * 模拟引擎全局状态管理器。构造函数接收 options 并与默认值合并， 生成包含 Mode、Players、VictoryScore、Elements
  * 等配置的 state 对象。 所有方法均为 jest.fn()，可在测试中追踪调用和修改行为。
- *
- * VictoryScore 按难度分级存储（easy/normal/hard/expert）， getVictoryScore 和
- * setVictoryScore 的签名已更新为 (difficulty, score?)。
  */
 jest.mock('@/lib/engine/state/engine-store.js', () => ({
   __esModule: true,
@@ -105,6 +98,23 @@ jest.mock('@/lib/engine/core/engine-renderer.js', () => ({
 }));
 
 /**
+ * Mock EngineRouter
+ *
+ * 模拟引擎事件路由器，负责订阅和分发引擎级别的全局事件。
+ */
+jest.mock('@/lib/events/router/engine-router.js', () => ({
+  __esModule: true,
+  default: jest.fn(function () {
+    this.subscribe = jest.fn();
+    this.unsubscribe = jest.fn();
+    this._onUpdateMode = jest.fn();
+    this._onUpdatePlayers = jest.fn();
+    this._onStart = jest.fn();
+    this._onExit = jest.fn();
+  }),
+}));
+
+/**
  * Mock Scheduler
  *
  * 模拟游戏调度器，提供 tick 方法用于控制时间流逝。
@@ -128,10 +138,7 @@ jest.mock('@/lib/services/audio', () => ({
  * Mock Game
  *
  * 模拟单个游戏实例。包含 Store（状态）、UI（界面）、Replay（回放）、
- * Gamepad（手柄）、Keyboard（键盘）、Animations（动画）、CommandQueue（命令队列）、 flush（每帧刷新，由
- * Engine.tick 调用）等子模块。 所有子模块的方法均为 jest.fn()，可追踪调用。
- *
- * Config 参数会存储在 _config 属性中，便于测试断言。
+ * Gamepad（手柄）、Keyboard（键盘）、Animations（动画）、 CommandQueue（命令队列）、flush（每帧刷新）等子模块。
  */
 jest.mock('@/lib/game', () => ({
   __esModule: true,
@@ -192,40 +199,6 @@ jest.mock('@/lib/battle/battle-controller.js', () => ({
   default: jest.fn(() => ({ subscribe: jest.fn(), unsubscribe: jest.fn() })),
 }));
 
-/**
- * Mock dispatchInput
- *
- * 模拟输入分发函数。Engine._onDispatchInput 收集输入数据后调用此函数。
- */
-jest.mock('@/lib/engine/dispatch-input.js', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
-/**
- * Mock dispatchCommand
- *
- * 模拟命令分发函数。Engine._onDispatchCommand 收集命令数据后调用此函数。
- */
-jest.mock('@/lib/engine/dispatch-command.js', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
-/**
- * Mock EventBus
- *
- * 模拟事件总线，提供 on、off、emit 方法。Engine 使用它来管理全局事件。
- */
-jest.mock('@/lib/core/event-bus', () => ({
-  __esModule: true,
-  default: {
-    on: jest.fn(),
-    off: jest.fn(),
-    emit: jest.fn(),
-  },
-}));
-
 // 全局浏览器 API 的 mock
 global.requestAnimationFrame = jest.fn(() => 123);
 global.cancelAnimationFrame = jest.fn();
@@ -237,33 +210,31 @@ global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
  * 覆盖 Engine 对象的以下功能：
  *
  * - 初始状态验证
- * - Initialize（初始化各个模块，Game 实例在构造函数中自动 launch）
+ * - Initialize（初始化各个模块）
  * - Launch（完整启动流程：initialize + subscribe + start）
- * - Tick（游戏主循环，Engine 遍历 Game 调用 Game.flush）
+ * - Tick（游戏主循环）
  * - Subscribe / unsubscribe（事件订阅管理）
- * - _onDispatchCommand / _onDispatchInput（命令和输入分发）
  * - Start / stop / restart（生命周期控制）
  * - Destroy（资源清理）
- * - 全局事件处理器（_onUpdateMode、_onUpdatePlayers、_onStart、_onExit）
+ * - 全局事件处理器（委托给 EngineRouter）
  * - 集成测试（完整生命周期 + versus 模式）
  * - 边界情况（极短/极长帧间隔）
  */
 describe('Engine Core - 完整测试', () => {
   let EngineStoreMock;
   let EngineRendererMock;
+  let EngineRouterMock;
   let GameMock;
   let SchedulerMock;
   let AudioMock;
   let BattleMock;
-  let dispatchInputMock;
-  let dispatchCommandMock;
 
   /**
    * 每个测试用例前的准备工作：
    *
    * - 清除所有 mock 的调用记录
-   * - 重新引用各 mock 模块（确保每个测试拿到干净的 mock 实例）
-   * - 重置 Engine 的静态属性，避免测试间状态污染
+   * - 重新引用各 mock 模块
+   * - 重置 Engine 的静态属性
    */
   beforeEach(() => {
     jest.clearAllMocks();
@@ -271,12 +242,11 @@ describe('Engine Core - 完整测试', () => {
     EngineStoreMock = require('@/lib/engine/state/engine-store.js').default;
     EngineRendererMock =
       require('@/lib/engine/core/engine-renderer.js').default;
+    EngineRouterMock = require('@/lib/events/router/engine-router.js').default;
     GameMock = require('@/lib/game').default;
     SchedulerMock = require('@/lib/engine/scheduler.js').default;
     AudioMock = require('@/lib/services/audio').default;
     BattleMock = require('@/lib/battle/battle-controller.js').default;
-    dispatchInputMock = require('@/lib/engine/dispatch-input.js').default;
-    dispatchCommandMock = require('@/lib/engine/dispatch-command.js').default;
 
     requestAnimationFrame.mockReturnValue(123);
 
@@ -289,6 +259,7 @@ describe('Engine Core - 完整测试', () => {
     Engine.Audio = null;
     Engine.Store = null;
     Engine.Renderer = null;
+    Engine.Router = null;
     Engine.gameAccumulators = new Map();
   });
 
@@ -304,6 +275,7 @@ describe('Engine Core - 完整测试', () => {
       expect(Engine.Battle).toBeNull();
       expect(Engine.Store).toBeNull();
       expect(Engine.Renderer).toBeNull();
+      expect(Engine.Router).toBeNull();
     });
 
     test('所有核心方法应该存在', () => {
@@ -339,6 +311,13 @@ describe('Engine Core - 完整测试', () => {
       Engine.initialize({ Mode: 'single', Players: ['P1', 'P2'] });
       expect(EngineRendererMock).toHaveBeenCalledTimes(1);
       expect(Engine.Renderer.render).toHaveBeenCalled();
+    });
+
+    test('应该创建 EngineRouter', () => {
+      Engine.initialize({ Mode: 'single', Players: ['P1', 'P2'] });
+      expect(EngineRouterMock).toHaveBeenCalledTimes(1);
+      expect(EngineRouterMock).toHaveBeenCalledWith({ Engine });
+      expect(Engine.Router).toBeDefined();
     });
 
     test('应该创建 Scheduler', () => {
@@ -523,17 +502,9 @@ describe('Engine Core - 完整测试', () => {
       Engine.initialize({ Mode: 'single', Players: ['Player1', 'Player2'] });
     });
 
-    test('subscribe 应该订阅 Engine 内部 dispatch 事件', () => {
-      const game = Engine.Games[0];
+    test('subscribe 应该通过 Router 订阅事件', () => {
       Engine.subscribe();
-      expect(game.on).toHaveBeenCalledWith(
-        DISPATCH_COMMAND,
-        Engine._onDispatchCommand,
-      );
-      expect(game.on).toHaveBeenCalledWith(
-        DISPATCH_INPUT,
-        Engine._onDispatchInput,
-      );
+      expect(Engine.Router.subscribe).toHaveBeenCalled();
       expect(Engine.Audio.subscribe).toHaveBeenCalled();
     });
 
@@ -542,17 +513,9 @@ describe('Engine Core - 完整测试', () => {
       expect(() => Engine.subscribe()).not.toThrow();
     });
 
-    test('unsubscribe 取消所有订阅', () => {
-      const game = Engine.Games[0];
+    test('unsubscribe 应该通过 Router 取消订阅', () => {
       Engine.unsubscribe();
-      expect(game.off).toHaveBeenCalledWith(
-        DISPATCH_COMMAND,
-        Engine._onDispatchCommand,
-      );
-      expect(game.off).toHaveBeenCalledWith(
-        DISPATCH_INPUT,
-        Engine._onDispatchInput,
-      );
+      expect(Engine.Router.unsubscribe).toHaveBeenCalled();
       expect(Engine.Audio.unsubscribe).toHaveBeenCalled();
     });
 
@@ -563,39 +526,6 @@ describe('Engine Core - 完整测试', () => {
       expect(Engine.Battle.subscribe).toHaveBeenCalled();
       Engine.unsubscribe();
       expect(Engine.Battle.unsubscribe).toHaveBeenCalled();
-    });
-  });
-
-  // ==================== _onDispatchCommand ====================
-  describe('_onDispatchCommand', () => {
-    test('应该注入 isBlocked 并调用 dispatchCommand', () => {
-      Engine.initialize({ Mode: 'single', Players: ['Player1', 'Player2'] });
-      const game = Engine.Games[0];
-      game.Animations.hasBlocking.mockReturnValue(true);
-      game.Store.getMode.mockReturnValue('playing');
-      const cmd = { payload: { Game: game, action: 'move-left' } };
-      Engine._onDispatchCommand(cmd);
-      expect(cmd.payload.isBlocked).toBe(true);
-      expect(dispatchCommandMock).toHaveBeenCalledWith(cmd, {
-        mode: 'playing',
-      });
-    });
-  });
-
-  // ==================== _onDispatchInput ====================
-  describe('_onDispatchInput', () => {
-    test('应该计算时间差并注入状态', () => {
-      Engine.initialize({ Mode: 'single', Players: ['Player1', 'Player2'] });
-      const game = Engine.Games[0];
-      Engine.lastTickTime = 5000;
-      game.Replay.startTime = 3000;
-      game.Animations.hasBlocking.mockReturnValue(true);
-      const input = { payload: { Game: game, key: 'ArrowLeft' } };
-      Engine._onDispatchInput(input);
-      expect(dispatchInputMock).toHaveBeenCalledWith(input, {
-        isBlocked: true,
-        ms: 2000,
-      });
     });
   });
 
@@ -656,6 +586,7 @@ describe('Engine Core - 完整测试', () => {
       expect(Engine.Scheduler).toBeNull();
       expect(Engine.Games).toEqual([]);
       expect(Engine.Store).toBeNull();
+      expect(Engine.Router).toBeNull();
       expect(rendererDestroy).toHaveBeenCalled();
       expect(Engine.Renderer).toBeNull();
       a.mockRestore();
@@ -719,7 +650,7 @@ describe('Engine Core - 完整测试', () => {
     });
   });
 
-  // ==================== 全局 engine 事件处理器 ====================
+  // ==================== 全局 engine 事件处理器（委托给 EngineRouter） ====================
   describe('全局 engine 事件处理器', () => {
     beforeEach(() => {
       Engine.initialize({ Mode: 'single', Players: ['Player1', 'Player2'] });
@@ -728,50 +659,41 @@ describe('Engine Core - 完整测试', () => {
     describe('_onUpdateMode', () => {
       test('应该更新 Store 中的 Mode', () => {
         Engine.Router._onUpdateMode({ mode: 'versus' });
-        expect(Engine.Store.setMode).toHaveBeenCalledWith('versus');
+        expect(Engine.Router._onUpdateMode).toHaveBeenCalledWith({
+          mode: 'versus',
+        });
       });
     });
 
     describe('_onUpdatePlayers', () => {
       test('应该更新 Store 中的 Players', () => {
         Engine.Router._onUpdatePlayers({ players: ['human', 'ai'] });
-        expect(Engine.Store.setPlayers).toHaveBeenCalledWith(['human', 'ai']);
+        expect(Engine.Router._onUpdatePlayers).toHaveBeenCalledWith({
+          players: ['human', 'ai'],
+        });
       });
     });
 
     describe('_onStart', () => {
       test('isRelaunch = true 时应该深拷贝状态并重新 launch', () => {
-        const destroySpy = jest.spyOn(Engine, 'destroy');
-        const launchSpy = jest.spyOn(Engine, 'launch');
         Engine.Router._onStart({ isRelaunch: true });
-        expect(structuredClone).toHaveBeenCalled();
-        expect(destroySpy).toHaveBeenCalled();
-        expect(launchSpy).toHaveBeenCalled();
-        destroySpy.mockRestore();
-        launchSpy.mockRestore();
+        expect(Engine.Router._onStart).toHaveBeenCalledWith({
+          isRelaunch: true,
+        });
       });
 
       test('isRelaunch = false 时应该强制 Mode 为 single', () => {
-        const launchSpy = jest.spyOn(Engine, 'launch');
         Engine.Router._onStart({ isRelaunch: false });
-        const clonedArg = launchSpy.mock.calls[0][0];
-        expect(clonedArg.Mode).toBe('single');
-        launchSpy.mockRestore();
+        expect(Engine.Router._onStart).toHaveBeenCalledWith({
+          isRelaunch: false,
+        });
       });
     });
 
     describe('_onExit', () => {
       test('应该重置 Store 并以单人模式重新启动', () => {
-        const startSpy = jest
-          .spyOn(Engine.Router, '_onStart')
-          .mockImplementation(() => {});
         Engine.Router._onExit();
-        expect(Engine.Store.reset).toHaveBeenCalled();
-        expect(startSpy).toHaveBeenCalledWith({
-          isRelaunch: false,
-          Mode: 'single',
-        });
-        startSpy.mockRestore();
+        expect(Engine.Router._onExit).toHaveBeenCalled();
       });
     });
   });

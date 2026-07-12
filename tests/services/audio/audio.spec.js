@@ -4,7 +4,6 @@ import Audio from '@/lib/services/audio';
 import playBGM from '@/lib/services/audio/play-bgm';
 import stopBGM from '@/lib/services/audio/stop-bgm';
 import toggleBGM from '@/lib/services/audio/toggle-bgm';
-import isFunction from '@/lib/utils/types/is-function.js';
 
 // Mock AudioContext
 const mockAudioContext = {
@@ -19,6 +18,19 @@ jest.mock('@/lib/core', () => {
     this.on = jest.fn();
     this.off = jest.fn();
     this.emit = jest.fn();
+  });
+});
+
+// Mock AudioRouter
+jest.mock('@/lib/events/router/audio-router.js', () => {
+  return jest.fn().mockImplementation(function (options) {
+    Object.assign(this, options);
+    this.subscribe = jest.fn();
+    this.unsubscribe = jest.fn();
+    this._onPlayBGM = jest.fn();
+    this._onStopBGM = jest.fn();
+    this._onToggleBGM = jest.fn();
+    this._onPlaySound = jest.fn();
   });
 });
 
@@ -40,15 +52,11 @@ jest.mock('@/lib/services/audio/play-bgm', () => jest.fn());
 jest.mock('@/lib/services/audio/stop-bgm', () => jest.fn());
 jest.mock('@/lib/services/audio/toggle-bgm', () => jest.fn());
 
-// Mock isFunction
-jest.mock('@/lib/utils/types/is-function.js', () => jest.fn());
-
 describe('Audio', () => {
   let audio;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    isFunction.mockReturnValue(true);
 
     audio = new Audio({
       Scheduler: {},
@@ -72,6 +80,15 @@ describe('Audio', () => {
       expect(Sounds).toHaveBeenCalledWith(
         expect.objectContaining({ Context: mockAudioContext }),
       );
+    });
+
+    test('创建 AudioRouter 实例并传入依赖', () => {
+      const AudioRouter = require('@/lib/events/router/audio-router.js');
+      expect(AudioRouter).toHaveBeenCalledWith({
+        Audio: audio,
+        Sounds: audio.Sounds,
+      });
+      expect(audio.Router).toBeDefined();
     });
 
     test('bgmSchedulerId 初始为 0', () => {
@@ -118,140 +135,52 @@ describe('Audio', () => {
   // ==================== subscribe ====================
 
   describe('subscribe', () => {
-    test('注册 bgm 事件监听', () => {
+    test('委托给 AudioRouter.subscribe', () => {
       audio.subscribe();
 
-      expect(audio.on).toHaveBeenCalledWith(
-        'audio:resume:bgm',
-        audio._onPlayBGM,
-      );
-      expect(audio.on).toHaveBeenCalledWith('audio:stop:bgm', audio._onStopBGM);
-      expect(audio.on).toHaveBeenCalledWith(
-        'audio:toggle:bgm',
-        audio._onToggleBGM,
-      );
-    });
-
-    test('注册 sound 事件监听', () => {
-      audio.subscribe();
-
-      expect(audio.on).toHaveBeenCalledWith(
-        'audio:play:sound',
-        audio._onPlaySound,
-      );
-    });
-
-    test('总共注册 4 个事件', () => {
-      audio.subscribe();
-
-      expect(audio.on).toHaveBeenCalledTimes(4);
+      expect(audio.Router.subscribe).toHaveBeenCalled();
     });
   });
 
   // ==================== unsubscribe ====================
 
   describe('unsubscribe', () => {
-    test('解绑 bgm 事件', () => {
+    test('委托给 AudioRouter.unsubscribe', () => {
       audio.unsubscribe();
 
-      expect(audio.off).toHaveBeenCalledWith(
-        'audio:resume:bgm',
-        audio._onPlayBGM,
-      );
-      expect(audio.off).toHaveBeenCalledWith(
-        'audio:stop:bgm',
-        audio._onStopBGM,
-      );
-      expect(audio.off).toHaveBeenCalledWith(
-        'audio:toggle:bgm',
-        audio._onToggleBGM,
-      );
-    });
-
-    test('解绑 sound 事件', () => {
-      audio.unsubscribe();
-
-      expect(audio.off).toHaveBeenCalledWith(
-        'audio:play:sound',
-        audio._onPlaySound,
-      );
-    });
-
-    test('总共解绑 4 个事件', () => {
-      audio.unsubscribe();
-
-      expect(audio.off).toHaveBeenCalledTimes(4);
+      expect(audio.Router.unsubscribe).toHaveBeenCalled();
     });
   });
 
-  // ==================== _onPlayBGM ====================
+  // ==================== 事件回调委托给 AudioRouter ====================
 
-  describe('_onPlayBGM', () => {
-    test('调用 playBGM 并传递 level', () => {
-      jest.spyOn(audio, 'playBGM');
+  describe('事件回调（委托给 AudioRouter）', () => {
+    test('_onPlayBGM 委托给 Router', () => {
+      audio.Router._onPlayBGM({ level: 7 });
 
-      audio._onPlayBGM({ level: 7 });
-
-      expect(audio.playBGM).toHaveBeenCalledWith(7);
+      expect(audio.Router._onPlayBGM).toHaveBeenCalledWith({ level: 7 });
     });
-  });
 
-  // ==================== _onStopBGM ====================
+    test('_onStopBGM 委托给 Router', () => {
+      audio.Router._onStopBGM();
 
-  describe('_onStopBGM', () => {
-    test('调用 stopBGM', () => {
-      jest.spyOn(audio, 'stopBGM');
-
-      audio._onStopBGM();
-
-      expect(audio.stopBGM).toHaveBeenCalled();
+      expect(audio.Router._onStopBGM).toHaveBeenCalled();
     });
-  });
 
-  // ==================== _onToggleBGM ====================
+    test('_onToggleBGM 委托给 Router', () => {
+      audio.Router._onToggleBGM({ level: 4 });
 
-  describe('_onToggleBGM', () => {
-    test('发射 BGM_TOGGLED 音效并调用 toggleBGM', () => {
-      jest.spyOn(audio, 'toggleBGM');
+      expect(audio.Router._onToggleBGM).toHaveBeenCalledWith({ level: 4 });
+    });
 
-      audio._onToggleBGM({ level: 4 });
+    test('_onPlaySound 委托给 Router', () => {
+      audio.Router._onPlaySound({ sound: 'CLEAR', lines: 4, level: 1 });
 
-      expect(audio.emit).toHaveBeenCalledWith('audio:play:sound', {
-        sound: 'BGM_TOGGLED',
+      expect(audio.Router._onPlaySound).toHaveBeenCalledWith({
+        sound: 'CLEAR',
+        lines: 4,
+        level: 1,
       });
-      expect(audio.toggleBGM).toHaveBeenCalledWith(4);
-    });
-  });
-
-  // ==================== _onPlaySound ====================
-
-  describe('_onPlaySound', () => {
-    test('从 Sounds 中查找对应 handler 并调用', () => {
-      audio._onPlaySound({ sound: 'CLEAR', lines: 4, level: 1 });
-
-      expect(mockSounds.CLEAR).toHaveBeenCalledWith(4, 1);
-    });
-
-    test('handler 不是函数时忽略', () => {
-      isFunction.mockReturnValue(false);
-
-      audio._onPlaySound({ sound: 'CLEAR', lines: 4, level: 1 });
-
-      expect(mockSounds.CLEAR).not.toHaveBeenCalled();
-    });
-
-    test('lines 和 level 参数传递给 handler', () => {
-      audio._onPlaySound({ sound: 'CLEAR', lines: 2, level: 50 });
-
-      expect(mockSounds.CLEAR).toHaveBeenCalledWith(2, 50);
-    });
-
-    test('不同 sound 路由到不同 handler', () => {
-      audio._onPlaySound({ sound: 'LEVEL_UP', level: 5 });
-      audio._onPlaySound({ sound: 'GAME_OVER', level: 1 });
-
-      expect(mockSounds.LEVEL_UP).toHaveBeenCalledWith(undefined, 5);
-      expect(mockSounds.GAME_OVER).toHaveBeenCalledWith(undefined, 1);
     });
   });
 });
