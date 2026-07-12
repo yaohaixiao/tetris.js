@@ -69,9 +69,7 @@ var simulateDrop = (board, shape, startX) => {
     return targetBoard;
   };
   return {
-    /** 硬降终点的 Y 坐标 */
     y,
-    /** 放置函数：在分支棋盘上写入方块 */
     placeOn
   };
 };
@@ -121,13 +119,9 @@ var createCandidate = ({
     originalX: originalPiece.position.x
   });
   return {
-    /** 硬降终点 X 坐标（用于 advanceSnapshot 正确模拟放置位置） */
     x: targetX,
-    /** 硬降终点 Y 坐标 */
     y,
-    /** 放置函数：在分支棋盘上写入方块 */
     placeOn,
-    /** 动作序列 */
     actions
   };
 };
@@ -217,13 +211,9 @@ var evaluateBoard = (board, weights, clearResult, mode = "survival") => {
   const heights = [];
   const w = {
     holes: -8,
-    // 空洞惩罚：一个洞 ≈ 10 分
     height: -0.7,
-    // 背景压力：适中恐高
     bumpiness: -0.35,
-    // 不平整度：引导平整表面
     completeLines: 20,
-    // 消行奖励缩放因子
     ...weights
   };
   if (mode === "versus") {
@@ -301,28 +291,19 @@ var simulate_placement_default = simulatePlacement;
 // lib/game/constants/game.js
 var AI_ALLOWED_ACTIONS = [
   "SWITCH_CONTROLLER",
-  // 切换控制器（human ↔ ai）
   "TOGGLE_MUSIC",
-  // 切换音乐开关
   "TOGGLE_PAUSED",
-  // 暂停/继续游戏
   "RESTART",
-  // 重新开始游戏
   "QUIT"
-  // 退出游戏
 ];
 var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
 var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
 var MAX_LEVEL = 256;
 var SPEED_STEPS = {
   EASY: 0.6,
-  // Easy：前 60% 等级线性加速
   NORMAL: 0.4,
-  // Normal：前 40% 等级线性加速
   HARD: 0.2,
-  // Hard：前 20% 等级线性加速
   EXPERT: 0.1
-  // Expert：前 10% 等级线性加速
 };
 var ALL_CLEAR_SCORE = 2e3;
 var T_SPIN_SCORES = [400, 800, 1200, 1600];
@@ -371,27 +352,16 @@ var simulateClearResult = (board, snapshot, actualCleared) => {
   const allClearScore = isAllClear ? 2e3 : 0;
   const clearScore = Math.floor(baseScore * multiplier) + comboScore + allClearScore;
   return {
-    /** 消除行数 */
     cleared,
-    /** 基础分（乘倍率前） */
     baseScore,
-    /** 最终得分 */
     clearScore,
-    /** 是否为 T-Spin */
     isTSpin,
-    /** 是否为 T-Spin Mini */
     isTSpinMini,
-    /** 是否为大招（用于更新 Back-to-Back 状态） */
     isBigMove,
-    /** 是否触发了 Back-to-Back 奖励 */
     isBackToBack,
-    /** 是否触发了 All Clear */
     isAllClear,
-    /** 更新后的连击次数 */
     combo,
-    /** 本次 Combo 额外加分 */
     comboScore,
-    /** 本次 All Clear 加分 */
     allClearScore
   };
 };
@@ -447,13 +417,9 @@ var advanceSnapshot = (snapshot, move) => {
     cur: nextPiece,
     next: nextNext,
     bag,
-    // 更新计分状态：combo 递增（如果有消行），否则清零
     combo: clearResult ? clearResult.combo : 0,
-    // 更新 Back-to-Back：本次是大招则保留标记，否则继承原值
     backToBack: clearResult ? clearResult.isBigMove : snapshot.backToBack,
-    // 清空 T-Spin 标记（每次锁定时重新检测）
     tSpin: null,
-    // 传递消行结果到下一层，确保深层搜索能看到消行价值
     clearResult: clearResult || null
   };
 };
@@ -531,61 +497,16 @@ var self_play_default = selfPlay;
 
 // lib/ai/snapshot/create-snapshot.js
 var createSnapshot = (state, bag) => structuredClone({
-  /*
-   * ==================== 控制者身份 ====================
-   *
-   * 标识当前由谁控制：'human' 或 'ai'。
-   * 保留此字段方便后续扩展（如根据控制者调整 AI 策略）。
-   */
   controller: state.controller,
-  /*
-   * ==================== 棋盘状态 ====================
-   *
-   * 20 行 × 10 列的二维数组。
-   * 每个格子的值为 0（空格）或颜色字符串（如 "#00c8ff"）。
-   * 这是 AI 决策的核心数据——所有候选移动都在此棋盘上模拟。
-   */
   board: state.board,
-  /*
-   * ==================== 游戏进度 ====================
-   *
-   * 保留 level、score、lines 供 AI 参考。
-   * level 影响下落速度和配色方案，score 和 lines 可用于评估游戏进程。
-   */
   level: state.level,
   score: state.score,
   lines: state.lines,
-  /*
-   * ==================== 计分状态 ====================
-   *
-   * 这些状态沿前瞻链传递，供 AI 评估 T-Spin / Combo / Back-to-Back。
-   * 使用 || 运算符提供默认值，防止 undefined 导致计算错误。
-   */
   combo: state.combo || 0,
   backToBack: state.backToBack || false,
   tSpin: state.tSpin || null,
-  /*
-   * ==================== 原始方块对象 ====================
-   *
-   * cur：当前正在下落的活动方块，包含 shape、type、color、rotation 等完整信息
-   * next：下一个预览方块，用于 Hold 槽为空时作为备选
-   *
-   * 保留原始对象方便后续扩展（如根据方块类型调整策略）。
-   */
   cur: state.curr,
   next: state.next,
-  /*
-   * ==================== AI 决策专用的方块位置信息 ====================
-   *
-   * 从 state.curr 和 state.cx/cy 中提取并结构化。
-   *
-   * piece.shape：当前方块的形状矩阵（如 [[1,1],[1,1]] 表示 O 块）
-   * piece.position.x：方块左上角在棋盘上的列坐标（0-9）
-   * piece.position.y：方块左上角在棋盘上的行坐标（0 为顶部）
-   *
-   * 这是 generateMoves 的输入——AI 基于此位置生成所有旋转和平移候选。
-   * 如果 curr 为 null（无活动方块），piece 也为 null。
-   */
   piece: state.curr ? {
     shape: state.curr.shape,
     position: {
@@ -593,41 +514,17 @@ var createSnapshot = (state, bag) => structuredClone({
       y: state.cy
     }
   } : null,
-  /*
-   * ==================== 游戏模式 ====================
-   *
-   * 标识游戏当前所处的阶段：'playing'、'paused'、'game-over' 等。
-   * AI 只在 'playing' 模式下进行决策。
-   */
   mode: state.mode,
-  /*
-   * ==================== 7-bag 状态 ====================
-   *
-   * 当前 Game 实例专属的 7-bag 快照。
-   *
-   * Battle 模式修复：
-   * 之前使用模块级全局变量 `getBagSnapshot()`，导致两个 Game 实例
-   * 共享同一个 bag。现在每个 Game 实例维护独立的 `this.bag`，
-   * 通过 `Game.getBagSnapshot()` 获取深拷贝快照。
-   *
-   * 此数组在 advanceSnapshot 中被 shift 消费，用于确定性前瞻——
-   * AI 可以精确知道接下来会拿到哪些方块。
-   */
   bag,
-  /*
-   * ==================== Hold 槽状态 ====================
-   *
-   * 暂存区中的方块对象。null 表示暂存区为空。
-   * generateMoves 使用此字段生成 Hold 候选——
-   * 如果 hold 有方块，AI 可以评估"换出来是否更好"。
-   * 如果 hold 为空，AI 使用 next 作为备选评估"Hold 一下值不值得"。
-   */
   hold: state.hold || null
 });
 var create_snapshot_default = createSnapshot;
 
 // lib/worker/ai-worker.js
 globalThis.addEventListener("message", (e) => {
+  if (e.origin !== globalThis.location.origin) {
+    return;
+  }
   const { type, bag, state, weights, depth, beam } = e.data;
   if (type !== "think") {
     return;

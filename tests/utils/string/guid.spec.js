@@ -35,7 +35,9 @@ describe('guid', () => {
     let mockRandomUUID;
 
     beforeEach(() => {
-      mockRandomUUID = jest.fn().mockReturnValue('123e4567-e89b-12d3-a456-426614174000');
+      mockRandomUUID = jest
+        .fn()
+        .mockReturnValue('123e4567-e89b-12d3-a456-426614174000');
       Object.defineProperty(globalThis, 'crypto', {
         value: { randomUUID: mockRandomUUID },
         writable: true,
@@ -59,7 +61,8 @@ describe('guid', () => {
     });
 
     it('应该返回符合 UUID v4 格式的字符串', () => {
-      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidPattern =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       mockRandomUUID.mockReturnValue('f47ac10b-58cc-4372-a567-0e02b2c3d479');
 
       const id = guid();

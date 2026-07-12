@@ -4,10 +4,7 @@ var tetris = (() => {
     if (val == null || typeof val !== "function" && typeof val !== "object") {
       return false;
     }
-    return (
-      // 处理某些特殊环境下 typeof 误判为 object 的函数（极少数情况）
-      typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]"
-    );
+    return typeof val === "function" || Object.prototype.toString.call(val) === "[object Function]";
   };
   var is_function_default = isFunction;
 
@@ -18,7 +15,7 @@ var tetris = (() => {
   // lib/core/event-bus/index.js
   var EventBus = {
     /**
-     * ## 事件订阅映射表
+     * 事件订阅映射表。
      *
      * Key 为事件名称，Value 为该事件对应的处理函数集合。
      *
@@ -26,12 +23,12 @@ var tetris = (() => {
      */
     events: /* @__PURE__ */ new Map(),
     /**
-     * ## 订阅事件
+     * ## on：订阅事件
      *
-     * 注册一个处理函数，每当事件触发时都会调用。 如果事件不存在，会自动创建。 相同的 handler 不会重复注册（Set 去重）。
+     * 注册一个处理函数，每当事件触发时都会调用。 相同的 handler 不会重复注册（Set 去重）。
      *
      * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
+     * @param {Function} handler - 处理函数
      * @returns {void}
      */
     on(event, handler) {
@@ -44,12 +41,12 @@ var tetris = (() => {
       this.events.get(event).add(handler);
     },
     /**
-     * ## 订阅事件，仅触发一次
+     * ## once：一次性订阅事件
      *
-     * 注册的处理函数在第一次触发后自动取消订阅。 内部通过创建包装函数实现，触发后在 `finally` 中调用 `off`。
+     * 注册的处理函数在第一次触发后自动取消订阅。 内部通过创建包装函数实现，触发后在 finally 中调用 off。
      *
      * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数，接收 `payload` 作为参数
+     * @param {Function} handler - 处理函数
      * @returns {void}
      */
     once(event, handler) {
@@ -66,7 +63,7 @@ var tetris = (() => {
       this.on(event, wrapper);
     },
     /**
-     * ## 取消订阅
+     * ## off：取消订阅
      *
      * 从指定事件的订阅列表中移除处理函数。 如果移除后该事件没有订阅者，会清理该事件条目。
      *
@@ -88,9 +85,9 @@ var tetris = (() => {
       }
     },
     /**
-     * ## 触发事件
+     * ## emit：触发事件
      *
-     * 通知指定事件的所有订阅者，依次调用它们的处理函数。 如果事件没有订阅者，不做任何操作。
+     * 通知指定事件的所有订阅者，依次调用它们的处理函数。
      *
      * @param {string} event - 事件名称
      * @param {object} [payload] - 传递给处理函数的参数对象
@@ -109,9 +106,9 @@ var tetris = (() => {
       }
     },
     /**
-     * ## 清空所有事件
+     * ## clear：清空所有事件
      *
-     * 移除所有事件和订阅者。 用于游戏重启、单元测试 reset、或完全重置状态时调用。
+     * 移除所有事件和订阅者。
      *
      * @returns {void}
      */
@@ -124,41 +121,36 @@ var tetris = (() => {
   // lib/engine/state/engine-state.js
   var EngineState = {
     /**
-     * ## 游戏模式
-     *
-     * 决定游戏的核心玩法分支。
+     * 游戏模式。
      *
      * | 值       | 说明                                        |
-     * | -------- | ------------------------------------------- |
+     * | :------- | :------------------------------------------ |
      * | 'single' | 单人模式：经典 Tetris，无限循环，追求最高分 |
      * | 'versus' | 对战模式：两人或人机对战，先达目标分者获胜  |
      */
     Mode: "single",
     /**
-     * ## 对战玩家列表
+     * 对战玩家列表。
      *
-     * 仅在 Mode='versus' 时生效。数组长度为 2，分别对应 P1 和 P2。
+     * 仅在 Mode='versus' 时生效，数组长度为 2。
      *
      * | 配置               | 说明             |
-     * | ------------------ | ---------------- |
+     * | :----------------- | :--------------- |
      * | ['human', 'ai']    | 人机对战（默认） |
      * | ['human', 'human'] | 双人对战         |
      */
     Players: ["human", "ai"],
     /*
-     * ==================== 方块渲染配置 ====================
-     *
-     * 控制 Tetromino 方块的视觉外观。
-     * 包含两层：渲染风格（style）决定着色方式，图案（pattern）决定表面纹理。
+     * ============================================================
+     * 方块渲染配置
+     * ============================================================
      */
     Block: {
       /**
-       * ## 渲染风格
-       *
-       * 决定方块的着色方式和整体质感。
+       * 渲染风格。
        *
        * | 值       | 光照模型        | 适用场景       |
-       * | -------- | --------------- | -------------- |
+       * | :------- | :-------------- | :------------- |
        * | classic  | 纯色 + 黑色边框 | 经典 NES 风格  |
        * | frosted  | 半透明 + 噪点   | 现代简约风格   |
        * | glass    | 半透明 + 高光   | 现代玻璃质感   |
@@ -170,12 +162,12 @@ var tetris = (() => {
        */
       style: "glossy",
       /**
-       * ## 方块图案
+       * 方块图案。
        *
-       * 在渲染风格之上叠加的纹理图案，增加视觉辨识度。 设为 'square' 表示无额外纹理。
+       * 在渲染风格之上叠加的纹理图案。 设为 'square' 表示无额外纹理。
        *
        * | 值     | 纹理形状   | 推荐搭配          |
-       * | ------ | ---------- | ----------------- |
+       * | :----- | :--------- | :---------------- |
        * | square | 无纹理     | 所有风格皆可      |
        * | jay    | J 方块轮廓 | glossy / gradient |
        * | ell    | L 方块轮廓 | glossy / gradient |
@@ -184,17 +176,12 @@ var tetris = (() => {
       pattern: "tee"
     },
     /*
-     * ==================== 游戏元素配置 ====================
-     *
-     * 管理游戏中所有 DOM 元素的 ID 绑定。
-     * 如果你的 HTML 结构不同，只需修改这里的 ID 即可适配。
+     * ============================================================
+     * 游戏元素配置
+     * ============================================================
      */
     Elements: {
-      /**
-       * ## 对战模式覆盖层元素
-       *
-       * 当对战结束（battle-over）时显示的覆盖层 DOM 元素。
-       */
+      /** 对战模式覆盖层元素。 */
       Battle: {
         /** 覆盖层容器（半透明背景） */
         overlay: "tetris-battle-overlay",
@@ -208,110 +195,47 @@ var tetris = (() => {
       /** 游戏主容器 DOM 元素 ID */
       Container: "tetris-container",
       /*
-       * ==================== 棋盘 Canvas 配置 ====================
-       *
-       * 棋盘尺寸和 Canvas 元素 ID 绑定。
-       * cols × rows 定义了游戏区域的大小，标准 Tetris 为 10×20。
+       * ============================================================
+       * 棋盘 Canvas 配置
+       * ============================================================
        */
       Canvas: {
-        /**
-         * 棋盘列数（宽度）
-         *
-         * 标准值为 10。增大可创建更宽的棋盘（非标准玩法）。
-         */
+        /** 棋盘列数（宽度），标准值为 10 */
         cols: 10,
-        /**
-         * 棋盘行数（高度）
-         *
-         * 标准值为 20。增大可创建更高的棋盘（非标准玩法）。
-         */
+        /** 棋盘行数（高度），标准值为 20 */
         rows: 20,
-        /**
-         * 主棋盘 Canvas 元素 ID
-         *
-         * 游戏的主要渲染区域，所有方块在此绘制。
-         */
+        /** 主棋盘 Canvas 元素 ID */
         board: "tetris-game-board",
-        /**
-         * 预览方块 Canvas 元素 ID
-         *
-         * 显示下一个即将出现的方块。
-         */
+        /** 预览方块 Canvas 元素 ID */
         next: "tetris-next-piece",
-        /**
-         * 暂存方块 Canvas 元素 ID
-         *
-         * 显示当前暂存（Hold）的方块。
-         */
+        /** 暂存方块 Canvas 元素 ID */
         hold: "tetri-hold-piece"
       },
       /*
-       * ==================== HUD 显示元素配置 ====================
-       *
-       * 游戏界面上实时更新的数据面板，通过 DOM 元素 ID 绑定。
-       * 这些值由游戏循环持续更新。
+       * ============================================================
+       * HUD 显示元素配置
+       * ============================================================
        */
       Hud: {
-        /**
-         * 控制者标识 DOM 元素 ID
-         *
-         * 显示当前由谁控制：HUMAN（人类玩家）或 AI（人工智能）。 在对战模式中用于区分 P1 和 P2 的控制者。
-         */
+        /** 控制者标识 DOM 元素 ID（HUMAN/AI） */
         controller: "tetris-controller",
-        /**
-         * 当前分数 DOM 元素 ID
-         *
-         * 实时显示玩家当前得分。分数由消行、连击等因素决定。
-         */
+        /** 当前分数 DOM 元素 ID */
         score: "tetris-score",
-        /**
-         * 当前消除行数 DOM 元素 ID
-         *
-         * 显示本局游戏已消除的总行数。
-         */
+        /** 当前消除行数 DOM 元素 ID */
         lines: "tetris-lines",
-        /**
-         * 当前等级 DOM 元素 ID
-         *
-         * 等级随消除行数提升，影响方块下落速度。
-         */
+        /** 当前等级 DOM 元素 ID */
         level: "tetris-level",
-        /**
-         * 连击数 DOM 元素 ID
-         *
-         * 显示当前连续消行的次数（连续多步消行）。
-         */
+        /** 连击数 DOM 元素 ID */
         combo: "tetris-combo",
-        /**
-         * 最高分 DOM 元素 ID
-         *
-         * 显示历史最高分（从 localStorage 读取）。
-         */
+        /** 最高分 DOM 元素 ID */
         highScore: "tetris-high-score",
-        /**
-         * 计时器 DOM 元素 ID
-         *
-         * 显示当前用户的游戏用时
-         */
+        /** 计时器 DOM 元素 ID */
         timer: "tetris-elapsed-timer"
       },
       /*
-       * ==================== 手柄按钮元素配置 ====================
-       *
-       * 移动端触摸操作按钮的 DOM 元素 ID 绑定。
-       * 每个按钮对应一个游戏操作，与键盘/手柄映射保持一致。
-       *
-       * 布局参考（右侧按钮区）：
-       *
-       *        [Y]
-       *     [X]   [A]
-       *        [B]
-       *
-       * 布局参考（左侧方向键区）：
-       *
-       *        [↑]
-       *   [←]  [→]
-       *        [↓]
+       * ============================================================
+       * 手柄按钮元素配置
+       * ============================================================
        */
       Controls: {
         /** 返回按钮 — 返回上级菜单 / 退出游戏 */
@@ -376,42 +300,17 @@ var tetris = (() => {
      *
      * 接收可选的配置覆盖项，与默认 EngineState 合并后深拷贝存储。
      *
-     * @example
-     *   // 创建默认配置的 Store（单人模式，glossy 风格）
-     *   const store = new EngineStore();
-     *
-     *   // 创建自定义配置的 Store（对战模式）
-     *   const store = new EngineStore({
-     *     Mode: 'versus',
-     *     Players: ['human', 'ai'],
-     *   });
-     *
-     * @param {object} [options={}] - 配置覆盖项，会与 EngineState 合并。默认值 `{}`. Default is
-     *   `{}`
+     * @param {object} [options={}] - 配置覆盖项. Default is `{}`
      */
     constructor(options = {}) {
       this.initialize(options);
     }
     /**
-     * ## 初始化状态
+     * ## initialize：初始化状态
      *
-     * 将传入的配置与默认 EngineState 合并，然后通过 `structuredClone` 深拷贝， 确保每次创建 EngineStore
-     * 都拥有独立的状态副本，不会相互影响。
+     * 将传入的配置与默认 EngineState 合并后深拷贝， 确保每次创建 EngineStore 都拥有独立的状态副本。
      *
-     * ### 初始化流程
-     *
-     *     EngineState（默认值）
-     *       + options（用户覆盖值）
-     *       → extend() 合并
-     *       → structuredClone() 深拷贝
-     *       → this.state（独立副本）
-     *
-     * @example
-     *   // 重新初始化 Store，重置为默认配置 + 自定义覆盖
-     *   store.initialize({ Mode: 'versus' });
-     *
-     * @param {object} [options={}] - 配置覆盖项，会与 EngineState 合并。默认值 `{}`. Default is
-     *   `{}`
+     * @param {object} [options={}] - 配置覆盖项. Default is `{}`
      * @returns {void}
      */
     initialize(options) {
@@ -419,18 +318,9 @@ var tetris = (() => {
       this.state = structuredClone(normalizedOptions);
     }
     /**
-     * ## 获取完整状态对象
+     * ## getState：获取完整状态对象
      *
-     * 返回当前存储的完整配置状态。
-     *
-     * ⚠️ **注意**：返回的是 `this.state` 的直接引用，修改返回值**会**影响内部状态。 如需修改，建议使用对应的 setter
-     * 方法（如 `setMode()`、`setBlockStyle()`）， 以保持状态变更的可追踪性。
-     *
-     * @example
-     *   const state = store.getState();
-     *   console.log(state.Mode); // 'single' | 'versus' | null
-     *   console.log(state.Players); // ['human', 'ai']
-     *   console.log(state.Block.style); // 'glossy'
+     * 注意：返回的是 this.state 的直接引用， 修改返回值会影响内部状态。 如需修改，建议使用对应的 setter 方法。
      *
      * @returns {object} 完整的引擎状态对象
      */
@@ -438,194 +328,88 @@ var tetris = (() => {
       return this.state;
     }
     /**
-     * ## 判断是否为对战模式
+     * ## isVersus：判断是否为对战模式
      *
-     * 检查当前游戏模式是否为 `'versus'`（对战模式）。 常用于条件分支，决定是否创建 BattleController 等对战专属资源。
-     *
-     * @example
-     *   if (store.isVersus()) {
-     *   // 创建对战模式需要的资源（2 个 Game + BattleController）
-     *   this.battleController = new BattleController(...);
-     *   }
-     *
-     * @returns {boolean} `true` 表示对战模式，`false` 表示单人模式或未选择模式
+     * @returns {boolean} True 表示对战模式
      */
     isVersus() {
       return this.state.Mode === "versus";
     }
     /**
-     * ## 获取当前游戏模式
+     * ## getMode：获取当前游戏模式
      *
-     * 返回值为 `null` 时表示玩家尚未选择模式（处于模式选择界面）。
+     * 返回值为 null 时表示玩家尚未选择模式。
      *
-     * @example
-     *   const mode = store.getMode();
-     *   if (mode === null) {
-     *     // 显示模式选择界面
-     *   } else if (mode === 'single') {
-     *     // 初始化单人模式
-     *   } else {
-     *     // 初始化对战模式
-     *   }
-     *
-     * @returns {string | null} 游戏模式：
-     *
-     *   - `'single'`：单人模式
-     *   - `'versus'`：对战模式
-     *   - `null`：未选择（模式选择界面）
+     * @returns {string | null} 游戏模式：'single' / 'versus' / null
      */
     getMode() {
       return this.state.Mode;
     }
     /**
-     * ## 设置游戏模式
+     * ## setMode：设置游戏模式
      *
-     * 切换 `single` ↔ `versus` 模式，或设置为 `null` 回到模式选择状态。 通常在场景切换时调用。
+     * 切换 single ↔ versus 模式，或设置为 null 回到模式选择状态。
      *
-     * @example
-     *   // 切换到对战模式
-     *   store.setMode('versus');
-     *
-     *   // 回到模式选择界面
-     *   store.setMode(null);
-     *
-     * @param {string | null} mode - 游戏模式：
-     *
-     *   - `'single'`：单人模式
-     *   - `'versus'`：对战模式
-     *   - `null`：模式选择状态
-     *
+     * @param {string | null} mode - 游戏模式
      * @returns {void}
      */
     setMode(mode) {
       this.state.Mode = mode;
     }
     /**
-     * ## 获取方块渲染风格
+     * ## getBlockStyle：获取方块渲染风格
      *
-     * 获取当前配置的方块渲染风格，影响游戏中所有方块的视觉样式。
-     *
-     * @example
-     *   const style = store.getBlockStyle(); // 'glossy'
-     *
-     * @returns {string} 渲染风格，可选值：
-     *
-     *   - `'classic'`：经典纯色 + 黑色边框，NES 经典风格
-     *   - `'frosted'`：毛玻璃质感，半透明 + 噪点纹理
-     *   - `'glass'`：光面玻璃质感，半透明 + 对角线高光
-     *   - `'glossy'`：高光质感（默认），渐变填充 + 顶部高光条
-     *   - `'gradient'`：垂直渐变，上亮下暗
-     *   - `'inset'`：内嵌风格，凹陷立体感
-     *   - `'pixel'`：像素风格，8-bit 复古纹理
-     *   - `'shaded'`：立体阴影，4 色几何分块模拟 3D 光照
+     * @returns {string} 渲染风格标识
      */
     getBlockStyle() {
       return this.state.Block.style;
     }
     /**
-     * ## 设置方块渲染风格
+     * ## setBlockStyle：设置方块渲染风格
      *
-     * 修改方块的渲染风格。调用后需要触发重新渲染才能看到效果。
-     *
-     * @example
-     *   // 切换到像素风格
-     *   store.setBlockStyle('pixel');
-     *   // 下一帧渲染时会应用新风格
-     *
-     * @param {string} style - 渲染风格，必须是 `getBlockStyle()` 中列出的有效值之一
+     * @param {string} style - 渲染风格
      * @returns {void}
      */
     setBlockStyle(style) {
       this.state.Block.style = style;
     }
     /**
-     * ## 获取方块图案
+     * ## getBlockPattern：获取方块图案
      *
-     * 获取当前配置的方块图案，影响方块表面的纹理样式。 图案叠加在渲染风格之上，提供额外的视觉辨识度。
-     *
-     * @example
-     *   const pattern = store.getBlockPattern(); // 'tee'
-     *
-     * @returns {string} 方块图案，可选值：
-     *
-     *   - `'square'`：无额外纹理，标准正方形
-     *   - `'jay'`：J 方块形状的暗纹
-     *   - `'ell'`：L 方块形状的暗纹
-     *   - `'tee'`：T 方块形状的暗纹
+     * @returns {string} 方块图案标识
      */
     getBlockPattern() {
       return this.state.Block.pattern;
     }
     /**
-     * ## 设置方块图案
+     * ## setBlockPattern：设置方块图案
      *
-     * 修改方块的图案样式。调用后需要触发重新渲染才能看到效果。
-     *
-     * @example
-     *   // 切换到 J 型纹理
-     *   store.setBlockPattern('jay');
-     *
-     * @param {string} pattern - 方块图案，必须是 `getBlockPattern()` 中列出的有效值之一
+     * @param {string} pattern - 方块图案
      * @returns {void}
      */
     setBlockPattern(pattern) {
       this.state.Block.pattern = pattern;
     }
     /**
-     * ## 设置玩家列表
+     * ## setPlayers：设置玩家列表
      *
-     * 配置当前游戏模式的玩家列表。数组长度和内容决定游戏类型：
+     * | 模式      | Players 值         | 说明           |
+     * | :-------- | :----------------- | :------------- |
+     * | 模式选择  | []                 | 未选择任何模式 |
+     * | 单人模式  | ['human']          | 单人游戏       |
+     * | 对战-人机 | ['human', 'ai']    | 玩家 VS AI     |
+     * | 对战-双人 | ['human', 'human'] | 双人对战       |
      *
-     * | 模式      | Players 值           | 说明           |
-     * | --------- | -------------------- | -------------- |
-     * | 模式选择  | `[]`                 | 未选择任何模式 |
-     * | 单人模式  | `['human']`          | 单人游戏       |
-     * | 对战-人机 | `['human', 'ai']`    | 玩家 VS AI     |
-     * | 对战-双人 | `['human', 'human']` | 双人对战       |
-     *
-     * @example
-     *   // 单人模式
-     *   store.setPlayers(['human']);
-     *
-     *   // 人机对战
-     *   store.setPlayers(['human', 'ai']);
-     *
-     *   // 双人对战
-     *   store.setPlayers(['human', 'human']);
-     *
-     * @param {string[]} players - 玩家名称数组，每个元素为 `'human'` 或 `'ai'`
+     * @param {string[]} players - 玩家名称数组
      * @returns {void}
      */
     setPlayers(players) {
       this.state.Players = players;
     }
     /**
-     * ## 重置状态
+     * ## reset：重置状态
      *
-     * 将当前状态完全重置为 EngineState 中定义的默认配置。 使用 `structuredClone` 深拷贝，确保与默认配置完全一致且独立。
-     *
-     * ### 重置后的状态
-     *
-     * | 属性          | 重置值                                         |
-     * | ------------- | ---------------------------------------------- |
-     * | Mode          | `'single'`                                     |
-     * | Players       | `['human', 'ai']`                              |
-     * | VictoryScore  | `{ easy: 5, normal: 8, hard: 12, expert: 15 }` |
-     * | Block.style   | `'glossy'`                                     |
-     * | Block.pattern | `'tee'`                                        |
-     * | Elements.\*   | 全部恢复默认                                   |
-     *
-     * ### 典型使用场景
-     *
-     * - 从对战模式返回主菜单时重置
-     * - 切换语言/主题后需要恢复默认游戏配置时
-     *
-     * @example
-     *   // 返回主菜单时重置状态
-     *   store.reset();
-     *   console.log(store.getMode()); // 'single'
-     *   console.log(store.getState().Players); // ['human', 'ai']
-     *   console.log(store.getBlockStyle()); // 'glossy'
+     * 将当前状态完全重置为 EngineState 中定义的默认配置。
      *
      * @returns {void}
      */
@@ -642,32 +426,24 @@ var tetris = (() => {
      *
      * 接收依赖对象并注入到实例上。
      *
-     * @example
-     *   const controller = new MyController({
-     *     Game: gameInstance,
-     *     Store: gameStore,
-     *     Scheduler: schedulerInstance,
-     *   });
-     *   // controller.Game === gameInstance
-     *
-     * @param {object} [deps={}] - 依赖对象，其属性会被复制到当前实例。默认值为 `{}`. Default is `{}`
+     * @param {object} [deps={}] - 依赖对象. Default is `{}`
      */
     constructor(deps = {}) {
       this.inject(deps);
     }
     /**
-     * ## 依赖注入
+     * ## inject：依赖注入
      *
-     * 将传入对象的属性复制到当前实例上。 使用 `Object.assign` 进行浅拷贝。
+     * 将传入对象的属性复制到当前实例上。 使用 Object.assign 进行浅拷贝。
      *
-     * @param {object} [deps={}] - 依赖对象。默认值为 `{}`. Default is `{}`
+     * @param {object} [deps={}] - 依赖对象. Default is `{}`
      * @returns {void}
      */
     inject(deps = {}) {
       Object.assign(this, deps);
     }
     /**
-     * ## 触发事件（EventBus 代理）
+     * ## emit：触发事件
      *
      * 通知所有订阅了该事件的处理函数。
      *
@@ -679,7 +455,7 @@ var tetris = (() => {
       event_bus_default.emit(event, payload);
     }
     /**
-     * ## 订阅事件（EventBus 代理）
+     * ## on：订阅事件
      *
      * 注册一个持续监听的处理函数。
      *
@@ -691,7 +467,7 @@ var tetris = (() => {
       event_bus_default.on(event, handler);
     }
     /**
-     * ## 一次性订阅事件（EventBus 代理）
+     * ## once：一次性订阅事件
      *
      * 注册的处理函数在首次触发后自动取消订阅。
      *
@@ -703,7 +479,7 @@ var tetris = (() => {
       event_bus_default.once(event, handler);
     }
     /**
-     * ## 取消订阅事件（EventBus 代理）
+     * ## off：取消订阅事件
      *
      * 从指定事件的订阅列表中移除处理函数。
      *
@@ -715,9 +491,9 @@ var tetris = (() => {
       event_bus_default.off(event, handler);
     }
     /**
-     * ## 清空所有事件（EventBus 代理）
+     * ## clear：清空所有事件
      *
-     * 移除全局 EventBus 中的所有事件订阅。 注意：这是全局操作，会影响所有继承 Base 的实例。 通常用于游戏重启或单元测试 teardown。
+     * 移除全局 EventBus 中的所有事件订阅。 注意：这是全局操作，会影响所有继承 Base 的实例。
      *
      * @returns {void}
      */
@@ -731,17 +507,7 @@ var tetris = (() => {
   var getBattleOverlayTemplate = (elements, players) => {
     const { Battle } = elements;
     const templates = [
-      /**
-       * ======== 胜者展示面板 ========
-       *
-       * 整场对战结束时显示，包含：
-       *
-       * - 标题 "BATTLE OVER"
-       * - 胜者名称（由 BattleUI 动态填充）
-       * - 重赛提示 "ENTER TO REMATCH"
-       *
-       * 默认添加 tetris-hidden 类隐藏。
-       */
+      // 胜者展示面板
       `
     <section id="${Battle.over}" class="tetris-battle-over tetris-hidden">
       <h2 class="tetris-battle-title">BATTLE OVER</h2>
@@ -834,7 +600,7 @@ var tetris = (() => {
   var getBattleScoreTemplate = (player, index) => `
   <div class="tetris-battle-score">
     <h3 class="tetris-battle-player">${index + 1}P</h3>
-    <span id="${player}-${index}-tetris-battle-score" >0</span>
+    <span id="${player}-${index}-tetris-battle-score">0</span>
   </div>
 `;
   var get_battle_score_template_default = getBattleScoreTemplate;
@@ -844,17 +610,14 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收 Store 依赖，缓存根容器引用，初始化模板数组。
-     *
      * @param {object} options - 配置对象
-     * @param {object} options.Store - EngineStore 实例
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化
+     * ## initialize：初始化
      *
      * 缓存根容器 DOM 元素引用，并生成所有 HTML 模板。
      *
@@ -868,26 +631,9 @@ var tetris = (() => {
       this._initializeTemplates();
     }
     /**
-     * ## 初始化 HTML 模板
+     * ## _initializeTemplates：初始化 HTML 模板
      *
-     * 根据 Store 中的 Mode 和 Players 配置，生成对应数量和结构的 HTML 模板。 收集到 `this.templates`
-     * 数组中，供 `render()` 方法统一注入。
-     *
-     * ### 生成规则
-     *
-     * - **versus 模式**：
-     *
-     *   1. 生成对战覆盖层（胜者面板 + fly canvas）
-     *   2. 为每个玩家生成完整的游戏界面
-     *   3. 为每个玩家生成记分牌
-     * - **single 模式**：
-     *
-     *   1. 移除多余玩家（pop）
-     *   2. 为剩余玩家生成完整的游戏界面
-     * - **模式选择（Mode = null）**：
-     *
-     *   1. 不生成任何模板（空数组）
-     *   2. 由 Scene Manager 在 Canvas 上绘制模式选择界面
+     * 根据 Store 中的 Mode 和 Players 配置， 生成对应数量和结构的 HTML 模板。
      *
      * @private
      * @returns {void}
@@ -911,17 +657,9 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 渲染界面
+     * ## render：渲染界面
      *
      * 一次性将所有 HTML 模板注入根容器。
-     *
-     * 使用 innerHTML 直接替换容器内容。 这是游戏初始化时的一次性操作，不需要考虑增量更新。 所有后续的 UI 更新都通过 DOM
-     * 选择器定位具体元素进行。
-     *
-     * ### 模式选择特殊处理
-     *
-     * 当 Store.getMode() 返回 null 时，$container.dataset.mode 设置为 'single'， 此时
-     * templates 为空数组，容器内无任何游戏界面 DOM，由 Scene Manager 负责渲染。
      *
      * @returns {void}
      */
@@ -932,13 +670,9 @@ var tetris = (() => {
       $container.innerHTML = templates.join("");
     }
     /**
-     * ## 销毁渲染器
+     * ## destroy：销毁渲染器
      *
-     * - 重置 data-mode 属性
-     * - 清空容器内容
-     * - 清空模板缓存
-     *
-     * 在 Engine.destroy() 或模式切换时调用。
+     * 重置 data-mode 属性，清空容器内容和模板缓存。
      *
      * @returns {void}
      */
@@ -965,18 +699,19 @@ var tetris = (() => {
       this.dirty = false;
       this.maxCatchUp = 5;
     }
-    /* ================== 公共 API ================== */
+    /*
+     * ============================================================
+     * 公共 API
+     * ============================================================
+     */
     /**
-     * ## 创建延迟任务
+     * ## delay：创建延迟任务
      *
-     * 替代 `setTimeout`，在当前逻辑时间 + 指定延迟后执行一次回调。
-     *
-     * @example
-     *   const id = scheduler.delay(() => console.log('done'), 100);
+     * 替代 setTimeout，在当前逻辑时间 + 指定延迟后执行一次回调。
      *
      * @param {Function} fn - 回调函数
-     * @param {number} [delay=0] - 延迟时间（毫秒）。默认值为 `0`. Default is `0`
-     * @returns {number} 任务 ID，可用于 `cancel()`
+     * @param {number} [delay=0] - 延迟时间（毫秒）. Default is `0`
+     * @returns {number} 任务 ID，可用于 cancel()
      */
     delay(fn, delay = 0) {
       const id = this.nextId++;
@@ -991,16 +726,13 @@ var tetris = (() => {
       return id;
     }
     /**
-     * ## 创建周期任务
+     * ## interval：创建周期任务
      *
-     * 替代 `setInterval`，按指定间隔周期性执行回调。
-     *
-     * @example
-     *   const id = scheduler.interval(() => console.log('tick'), 200);
+     * 替代 setInterval，按指定间隔周期性执行回调。
      *
      * @param {Function} fn - 回调函数
-     * @param {number} [interval=1000] - 执行间隔（毫秒）。默认值为 `1000`. Default is `1000`
-     * @returns {number} 任务 ID，可用于 `cancel()`
+     * @param {number} [interval=1000] - 执行间隔（毫秒）. Default is `1000`
+     * @returns {number} 任务 ID，可用于 cancel()
      */
     interval(fn, interval = 1e3) {
       const id = this.nextId++;
@@ -1017,22 +749,11 @@ var tetris = (() => {
       return id;
     }
     /**
-     * ## 创建任务序列
+     * ## sequence：创建任务序列
      *
-     * 按时间偏移顺序执行多个任务。每个任务可指定相对于序列起始时间的延迟。 内部使用 `delay()` 实现，直接绑定绝对时间，不依赖 `tick`
-     * 初始化。
-     *
-     * @example
-     *   scheduler.sequence([
-     *     { fn: () => playNote('C4') },
-     *     { fn: () => playNote('E4'), delay: 260 },
-     *     { fn: () => playNote('G4'), delay: 260 },
-     *   ]);
+     * 按时间偏移顺序执行多个任务。 内部使用 delay() 实现，直接绑定绝对时间。
      *
      * @param {{ fn: Function; delay?: number }[]} list - 任务列表
-     * @param {Function} list[].fn - 回调函数
-     * @param {number} [list[].delay=0] - 该任务相对于上一个任务的延迟（毫秒）。默认值为 `0`. Default is
-     *   `0`
      * @returns {number[]} 所有任务的 ID 数组
      */
     sequence(list) {
@@ -1046,9 +767,9 @@ var tetris = (() => {
       return ids;
     }
     /**
-     * ## 取消任务
+     * ## cancel：取消任务
      *
-     * 通过任务 ID 标记任务为取消状态。 取消的任务不会立即删除，而是在下一次 `tick()` 时批量清理。
+     * 通过任务 ID 标记任务为取消状态。 取消的任务不会立即删除，而是在下一次 tick() 时批量清理。
      *
      * @param {number} id - 要取消的任务 ID
      * @returns {void}
@@ -1062,9 +783,9 @@ var tetris = (() => {
       this.dirty = true;
     }
     /**
-     * ## 清空所有任务
+     * ## clear：清空所有任务
      *
-     * 立即删除所有任务并清除脏标记。 通常在游戏重启或模式切换时调用。
+     * 立即删除所有任务并清除脏标记。
      *
      * @returns {void}
      */
@@ -1073,12 +794,12 @@ var tetris = (() => {
       this.dirty = false;
     }
     /**
-     * ## 驱动调度器
+     * ## tick：驱动调度器
      *
      * 由外部 Game Loop 每帧调用，传入当前游戏时间。 遍历到期任务并执行，最后清理已取消的任务。
      *
-     * @param {number} [gameTime=performance.now()] - 当前游戏时间戳（毫秒）。默认值为
-     *   `performance.now()`. Default is `performance.now()`
+     * @param {number} [gameTime=performance.now()] - 当前游戏时间戳. Default is
+     *   `performance.now()`
      * @returns {void}
      */
     tick(gameTime = performance.now()) {
@@ -1088,20 +809,24 @@ var tetris = (() => {
       this._cleanup();
     }
     /**
-     * ## 获取任务数量
+     * ## size：获取任务数量
      *
-     * Debug 辅助方法，用于测试和调试。
+     * Debug 辅助方法。
      *
      * @returns {number} 当前任务队列中的任务数量
      */
     size() {
       return this.tasks.length;
     }
-    /* ================== 核心引擎（私有） ================== */
+    /*
+     * ============================================================
+     * 核心引擎（私有）
+     * ============================================================
+     */
     /**
-     * ## 插入任务并保持队列有序
+     * ## _insertTask：插入任务并保持队列有序
      *
-     * 使用插入排序将任务按 `time + order` 升序排列。 同一时间点的任务按 `order` 保证执行顺序稳定。
+     * 使用插入排序将任务按 time + order 升序排列。
      *
      * @private
      * @param {object} task - 任务对象
@@ -1121,9 +846,9 @@ var tetris = (() => {
       tasks[i] = task;
     }
     /**
-     * ## 执行所有到期任务
+     * ## _executeDueTasks：执行所有到期任务
      *
-     * 从队头依次取出 `time <= gameTime` 的任务，按类型分发处理。
+     * 从队头依次取出 time <= gameTime 的任务，按类型分发处理。
      *
      * @private
      * @param {number} gameTime - 当前游戏时间戳
@@ -1134,29 +859,16 @@ var tetris = (() => {
         const task = this.tasks.shift();
         if (task.cancelled) continue;
         if (task.type === "delay") {
-          this._runDelayTask(task);
+          task.fn(task);
         } else if (task.type === "interval") {
           this._runIntervalTask(task, gameTime);
         }
       }
     }
     /**
-     * ## 执行 Delay 任务
+     * ## _runIntervalTask：执行 Interval 任务
      *
-     * 一次性任务，执行后即结束。
-     *
-     * @private
-     * @param {object} task - 延迟任务对象
-     * @returns {void}
-     */
-    _runDelayTask(task) {
-      task.fn(task);
-    }
-    /**
-     * ## 执行 Interval 任务
-     *
-     * 周期任务，执行后更新 `nextTime` 并重新插入队列。 包含补帧保护：长时间暂停后最多补 `maxCatchUp` 次， 超过后重置
-     * `nextTime` 为当前时间，防止瞬间爆帧。
+     * 周期任务，执行后更新 nextTime 并重新插入队列。 包含补帧保护：长时间暂停后最多补 maxCatchUp 次。
      *
      * @private
      * @param {object} task - 周期任务对象
@@ -1179,9 +891,9 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 批量清理已取消的任务
+     * ## _cleanup：批量清理已取消的任务
      *
-     * 延迟清理机制：有脏标记时才执行清理。 过滤掉所有 `cancelled === true` 的任务。
+     * 有脏标记时才执行清理，过滤掉所有 cancelled === true 的任务。
      *
      * @private
      * @returns {void}
@@ -1196,19 +908,19 @@ var tetris = (() => {
 
   // lib/services/audio/constants/motifs.js
   var MOTIFS = {
-    /** ## 普通消行（1-3 行）：标准参数 */
+    /** 普通消行（1-3 行）：标准参数 */
     combo: {
       shift: 0,
       speed: 1,
       volume: 1
     },
-    /** ## 俄罗斯方块（4 行）：音调提高，加速，音量增大 */
+    /** 俄罗斯方块（4 行）：音调提高，加速，音量增大 */
     tetris: {
       shift: 2,
       speed: 1.2,
       volume: 1.1
     },
-    /** ## 全清（Perfect Clear）：音调大幅提高，稍慢，音量最大 */
+    /** 全清（Perfect Clear）：音调大幅提高，稍慢，音量最大 */
     perfect: {
       shift: 5,
       speed: 0.9,
@@ -1222,210 +934,130 @@ var tetris = (() => {
     // 0: 1-16 关 — 大三和弦（明亮）
     [
       [440, 554, 659],
-      // A4 + C#5 + E5
       [587, 740, 880],
-      // D5 + F#5 + A5
       [523, 622, 784],
-      // C5 + Eb5 + G5
       [659, 784, 988],
-      // E5 + G5 + B5
       [440, 659, 880]
-      // A4 + E5 + A5
     ],
     // 1: 17-32 关 — 大二和弦（温暖，升调）
     [
       [494, 622, 740],
-      // B4 + Eb5 + F#5
       [659, 831, 988],
-      // E5 + Ab5 + B5
       [587, 698, 880],
-      // D5 + F5 + A5
       [740, 880, 1109],
-      // F#5 + A5 + C#6
       [494, 740, 988]
-      // B4 + F#5 + B5
     ],
     // 2: 33-48 关 — 小三和弦（蓝调，降调）
     [
       [440, 523, 659],
-      // A4 + C5 + E5
       [587, 698, 880],
-      // D5 + F5 + A5
       [523, 659, 784],
-      // C5 + E5 + G5
       [659, 784, 988],
-      // E5 + G5 + B5
       [440, 659, 880]
-      // A4 + E5 + A5
     ],
     // 3: 49-64 关 — 挂留和弦（紧张）
     [
       [440, 587, 659],
-      // A4 + D5 + E5
       [587, 740, 880],
-      // D5 + F#5 + A5
       [523, 622, 784],
-      // C5 + Eb5 + G5
       [659, 784, 988],
-      // E5 + G5 + B5
       [440, 659, 880]
-      // A4 + E5 + A5
     ],
     // 4: 65-80 关 — 纯五度（空灵）
     [
       [440, 659, 0],
-      // A4 + E5（两音）
       [587, 880, 0],
-      // D5 + A5（两音）
       [523, 784, 0],
-      // C5 + G5（两音）
       [659, 988, 0],
-      // E5 + B5（两音）
       [440, 880, 0]
-      // A4 + A5（八度）
     ],
     // 5: 81-96 关 — 大七和弦（爵士）
     [
       [440, 554, 659, 831],
-      // A4 + C#5 + E5 + Ab5
       [587, 740, 880, 1109],
-      // D5 + F#5 + A5 + C#6
       [523, 622, 784, 988],
-      // C5 + Eb5 + G5 + B5
       [659, 784, 988, 1245],
-      // E5 + G5 + B5 + Eb6
       [440, 659, 880, 1109]
-      // A4 + E5 + A5 + C#6
     ],
     // 6: 97-112 关 — 小七和弦（忧郁）
     [
       [440, 523, 659, 784],
-      // A4 + C5 + E5 + G5
       [587, 698, 880, 1047],
-      // D5 + F5 + A5 + C6
       [523, 622, 784, 932],
-      // C5 + Eb5 + G5 + Bb5
       [659, 784, 988, 1175],
-      // E5 + G5 + B5 + D6
       [440, 659, 880, 1047]
-      // A4 + E5 + A5 + C6
     ],
     // 7: 113-128 关 — 增三和弦（梦幻）
     [
       [440, 554, 670],
-      // A4 + C#5 + E#5（≈F5）
       [587, 740, 900],
-      // D5 + F#5 + A#5（≈Bb5）
       [523, 659, 800],
-      // C5 + E5 + G#5（≈Ab5）
       [659, 831, 1e3],
-      // E5 + Ab5 + C6
       [440, 659, 840]
-      // A4 + E5 + A#5（≈Bb5）
     ],
     // 8: 129-144 关 — 减三和弦（不安）
     [
       [440, 523, 622],
-      // A4 + C5 + Eb5
       [587, 698, 831],
-      // D5 + F5 + Ab5
       [523, 622, 740],
-      // C5 + Eb5 + F#5
       [659, 784, 932],
-      // E5 + G5 + Bb5
       [440, 622, 831]
-      // A4 + Eb5 + Ab5
     ],
     // 9: 145-160 关 — 挂四和弦（悬疑）
     [
       [440, 587, 698],
-      // A4 + D5 + F5
       [587, 784, 932],
-      // D5 + G5 + Bb5
       [523, 698, 880],
-      // C5 + F5 + A5
       [659, 880, 1047],
-      // E5 + A5 + C6
       [440, 698, 932]
-      // A4 + F5 + Bb5
     ],
     // 10: 161-176 关 — 大六和弦（复古）
     [
       [440, 554, 659, 740],
-      // A4 + C#5 + E5 + F#5
       [587, 740, 880, 988],
-      // D5 + F#5 + A5 + B5
       [523, 622, 784, 880],
-      // C5 + Eb5 + G5 + A5
       [659, 784, 988, 1109],
-      // E5 + G5 + B5 + C#6
       [440, 659, 880, 988]
-      // A4 + E5 + A5 + B5
     ],
     // 11: 177-192 关 — 小六和弦（神秘）
     [
       [440, 523, 659, 740],
-      // A4 + C5 + E5 + F#5
       [587, 698, 880, 988],
-      // D5 + F5 + A5 + B5
       [523, 622, 784, 880],
-      // C5 + Eb5 + G5 + A5
       [659, 784, 988, 1109],
-      // E5 + G5 + B5 + C#6
       [440, 659, 880, 988]
-      // A4 + E5 + A5 + B5
     ],
     // 12: 193-208 关 — 属七和弦（推动感）
     [
       [440, 554, 659, 784],
-      // A4 + C#5 + E5 + G5
       [587, 740, 880, 1047],
-      // D5 + F#5 + A5 + C6
       [523, 622, 784, 932],
-      // C5 + Eb5 + G5 + Bb5
       [659, 784, 988, 1175],
-      // E5 + G5 + B5 + D6
       [440, 659, 880, 1047]
-      // A4 + E5 + A5 + C6
     ],
     // 13: 209-224 关 — 大九和弦（宽广）
     [
       [440, 554, 659, 831, 988],
-      // A4 + C#5 + E5 + Ab5 + B5
       [587, 740, 880, 1109, 1319],
-      // D5 + F#5 + A5 + C#6 + E6
       [523, 622, 784, 988, 1175],
-      // C5 + Eb5 + G5 + B5 + D6
       [659, 784, 988, 1245, 1480],
-      // E5 + G5 + B5 + Eb6 + F#6
       [440, 659, 880, 1109, 1319]
-      // A4 + E5 + A5 + C#6 + E6
     ],
     // 14: 225-240 关 — 小九和弦（深邃）
     [
       [440, 523, 659, 784, 932],
-      // A4 + C5 + E5 + G5 + Bb5
       [587, 698, 880, 1047, 1245],
-      // D5 + F5 + A5 + C6 + Eb6
       [523, 622, 784, 932, 1109],
-      // C5 + Eb5 + G5 + Bb5 + C#6
       [659, 784, 988, 1175, 1397],
-      // E5 + G5 + B5 + D6 + F6
       [440, 659, 880, 1047, 1245]
-      // A4 + E5 + A5 + C6 + Eb6
     ],
     // 15: 241-256 关 — 加音和弦（辉煌）
     [
       [440, 554, 659, 784, 880],
-      // A4 + C#5 + E5 + G5 + A5
       [587, 740, 880, 1047, 1175],
-      // D5 + F#5 + A5 + C6 + D6
       [523, 622, 784, 932, 1047],
-      // C5 + Eb5 + G5 + Bb5 + C6
       [659, 784, 988, 1175, 1319],
-      // E5 + G5 + B5 + D6 + E6
       [440, 659, 880, 1109, 1319]
-      // A4 + E5 + A5 + C#6 + E6
     ]
   ];
   var chord_sets_default = CHORD_SETS;
@@ -1479,15 +1111,10 @@ var tetris = (() => {
     const { Context } = audio;
     const {
       volume = 0.15,
-      // 音量峰值，默认 15%
       wave = "square",
-      // 波形类型，默认方波（音色较硬，适合游戏音效）
       gate = 1,
-      // 时值占比，1 = 连奏（音符唱满）
       articulation = {},
-      // 运音包络参数，详见下方解构
       startTime = Context.currentTime
-      // 开始时间，默认立即播放
     } = options;
     const osc = Context.createOscillator();
     const gain = Context.createGain();
@@ -1497,11 +1124,8 @@ var tetris = (() => {
     const noteLen = step * gate;
     const {
       attackTime = 3e-3,
-      // 起音时间：从触发到达到峰值的时间（秒）
       releaseTime = 0.02,
-      // 释音时间：从开始衰减到归零的时间（秒）
       sustainRatio = 0.9
-      // 延音比：峰值音量在 hold 阶段的保持比例
     } = articulation;
     const t0 = startTime;
     const t1 = t0 + attackTime;
@@ -1554,13 +1178,13 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * @param {object} options - 配置（依赖的执行上下文）对象
+     * @param {object} options - 配置对象
      */
     constructor(options) {
       super(options);
     }
     /**
-     * ## 等级选择音效
+     * ## LEVEL_CHANGED：等级选择音效
      *
      * 三角波柔和音效，520Hz，80ms。
      *
@@ -1570,9 +1194,9 @@ var tetris = (() => {
       play_tone_default(this, 520, 80, { volume: 0.2, wave: "triangle" });
     };
     /**
-     * ## 主菜单/难度选择场景切换音效
+     * ## SWITCH_SCENE：场景切换音效
      *
-     * 三角波音效，620Hz，80ms。
+     * 三角波音效，620Hz，100ms。
      *
      * @returns {void}
      */
@@ -1580,7 +1204,7 @@ var tetris = (() => {
       play_tone_default(this, 620, 100, { volume: 0.25, wave: "triangle" });
     };
     /**
-     * ## 难度选择音效
+     * ## DIFFICULTY_CHANGED：难度选择音效
      *
      * 三角波音效，880Hz，80ms。
      *
@@ -1590,7 +1214,7 @@ var tetris = (() => {
       play_tone_default(this, 880, 80, { volume: 0.2, wave: "triangle" });
     };
     /**
-     * ## 等级开始音效
+     * ## GAME_STARTED：等级开始音效
      *
      * 三角波音效，1319Hz，160ms。
      *
@@ -1600,7 +1224,7 @@ var tetris = (() => {
       play_tone_default(this, 1319, 160, { volume: 0.22, wave: "triangle" });
     };
     /**
-     * ## 开始倒计时音效
+     * ## COUNTDOWN：开始倒计时音效
      *
      * 正弦波音效，784Hz，180ms，音量较大。
      *
@@ -1610,7 +1234,7 @@ var tetris = (() => {
       play_tone_default(this, 784, 180, { volume: 0.4, wave: "sine" });
     };
     /**
-     * ## 方块移动音效
+     * ## MOVE：方块移动音效
      *
      * 330Hz，60ms，默认方波。
      *
@@ -1618,7 +1242,7 @@ var tetris = (() => {
      */
     MOVE = () => play_tone_default(this, 330, 60);
     /**
-     * ## 方块旋转音效
+     * ## ROTATE：方块旋转音效
      *
      * 440Hz，60ms，默认方波。
      *
@@ -1626,7 +1250,7 @@ var tetris = (() => {
      */
     ROTATE = () => play_tone_default(this, 440, 60);
     /**
-     * ## 方块快速下落音效
+     * ## DROP：方块快速下落音效
      *
      * 220Hz，100ms，默认方波。
      *
@@ -1634,45 +1258,39 @@ var tetris = (() => {
      */
     DROP = () => play_tone_default(this, 220, 100);
     /**
-     * ## 方块落地音效
+     * ## FALL：方块落地音效
      *
      * 180Hz，200ms，默认方波。
      *
      * @returns {void}
      */
     FALL = () => play_tone_default(this, 180, 200);
-    // 在 Sounds 类中 CLEAR 方法的注释：
     /**
-     * ## 消行动效音（16 套和弦 + 动机系统）
+     * ## CLEAR：消行动效音（16 套和弦 + 动机系统）
      *
-     * 根据消除行数、当前等级和是否全清，选择不同的和弦方案和配器参数， 使用 Scheduler.sequence 按时间偏移依次触发三个音轨。
+     * 根据消除行数、当前等级和是否全清， 选择不同的和弦方案和配器参数， 使用 Scheduler.sequence 按时间偏移依次触发三个音轨。
      *
      * ### 等级配色
      *
-     * 每 16 关从 `CHORD_SETS` 和 `PARAM_SETS` 中各选一套， 共 16 套（256 / 16），与 BGM 同步切换。
+     * 每 16 关从 CHORD_SETS 和 PARAM_SETS 中各选一套， 共 16 套（256 / 16），与 BGM 同步切换。
      *
      * ### 动机系统
      *
-     * | 条件                  | 动机类型  | shift | speed | volume |
-     * | --------------------- | --------- | ----- | ----- | ------ |
-     * | 全清（Perfect Clear） | `perfect` | +4    | ×2.0  | ×1.5   |
-     * | 消除 4 行（Tetris）   | `tetris`  | +2    | ×1.5  | ×1.2   |
-     * | 消除 1-3 行           | `combo`   | 0     | ×1.0  | ×1.0   |
+     * | 条件                  | 动机类型 | shift | speed | volume |
+     * | :-------------------- | :------- | :---- | :---- | :----- |
+     * | 全清（Perfect Clear） | perfect  | +4    | ×2.0  | ×1.5   |
+     * | 消除 4 行（Tetris）   | tetris   | +2    | ×1.5  | ×1.2   |
+     * | 消除 1-3 行           | combo    | 0     | ×1.0  | ×1.0   |
      *
      * ### 音轨结构
-     *
-     * 每个和弦由 3-5 个音符组成，通过三个音轨按时间偏移播放：
      *
      * - 音轨 0：160ms 后开始，speed=260ms，volume=0.32
      * - 音轨 1：320ms 后开始，speed=300ms，volume=0.30
      * - 音轨 2：480ms 后开始，speed=380ms，volume=0.25
      *
-     * 各参数再乘以动机的倍率和配器参数的倍率。
-     *
-     * @param {number} [lines=1] - 消除行数（1-5）。默认值为 `1`. Default is `1`
-     * @param {number} [level=1] - 当前等级，用于选择和弦和配器方案。默认值为 `1`. Default is `1`
-     * @param {boolean} [isPerfectClear=false] - 是否全清。默认值为 `false`. Default is
-     *   `false`
+     * @param {number} [lines=1] - 消除行数（1-5）. Default is `1`
+     * @param {number} [level=1] - 当前等级. Default is `1`
+     * @param {boolean} [isPerfectClear=false] - 是否全清. Default is `false`
      * @returns {void}
      */
     CLEAR = (lines = 1, level = 1, isPerfectClear = false) => {
@@ -1704,9 +1322,9 @@ var tetris = (() => {
       Scheduler2.sequence(queue);
     };
     /**
-     * ## 升级庆祝音效
+     * ## LEVEL_UP：升级庆祝音效
      *
-     * 演奏上行音阶（C5 → E6），营造升级的成就感和喜悦情绪。 通过 Scheduler.sequence 按精确时间偏移依次触发。
+     * 演奏上行音阶（C5 → E6），营造升级的成就感和喜悦情绪。
      *
      * @returns {void}
      */
@@ -1728,7 +1346,7 @@ var tetris = (() => {
       ]);
     };
     /**
-     * ## 暂停游戏音效
+     * ## PAUSED：暂停游戏音效
      *
      * 300Hz，150ms。
      *
@@ -1736,7 +1354,7 @@ var tetris = (() => {
      */
     PAUSED = () => play_tone_default(this, 300, 150);
     /**
-     * ## 秒针走动音效
+     * ## SECOND_TICK：秒针走动音效
      *
      * 三角波，880Hz，50ms，低音量。暂停时每秒播放一次。
      *
@@ -1746,7 +1364,7 @@ var tetris = (() => {
       play_tone_default(this, 880, 50, { volume: 0.085, wave: "triangle" });
     };
     /**
-     * ## 恢复游戏音效
+     * ## RESUME：恢复游戏音效
      *
      * 400Hz，150ms。
      *
@@ -1754,7 +1372,7 @@ var tetris = (() => {
      */
     RESUME = () => play_tone_default(this, 400, 150);
     /**
-     * ## 游戏结束音效（悲伤旋律）
+     * ## GAME_OVER：游戏结束音效（悲伤旋律）
      *
      * 下行旋律（E4 → D4 → C4），营造游戏结束的失落感。
      *
@@ -1770,7 +1388,7 @@ var tetris = (() => {
       ]);
     };
     /**
-     * ## 垃圾行预警音效
+     * ## GARBAGE_WARNING：垃圾行预警音效
      *
      * 降调警示音，三声递减（900→700→500Hz），营造紧迫危机感。
      *
@@ -1798,9 +1416,9 @@ var tetris = (() => {
       ]);
     };
     /**
-     * ## 垃圾行插入音效
+     * ## GARBAGE_RECEIVED：垃圾行插入音效
      *
-     * 两段式低沉下行音效，模拟垃圾行从底部推入的沉重感。 第一段 250Hz 80ms，第二段 150Hz 120ms。
+     * 两段式低沉下行音效，模拟垃圾行从底部推入的沉重感。
      *
      * @returns {void}
      */
@@ -1819,24 +1437,21 @@ var tetris = (() => {
       ]);
     };
     /**
-     * ## 手柄连接通知音效
+     * ## GAMEPAD_NOTIFY：手柄连接通知音效
      *
-     * 六段短音，C5 和 D5 交替，与闪烁动画的 6 帧完全同步。 每 200ms 一声，总时长 1.2s，与
-     * GamepadNotificationAnimation 对齐。
+     * 六段短音，C5 和 D5 交替， 与闪烁动画的 6 帧完全同步。
      *
      * ### 时间线
      *
-     * | 时间   | 音高 | 动画帧   |
-     * | ------ | ---- | -------- |
-     * | 0ms    | C5   | 显       |
-     * | 200ms  | D5   | 隐       |
-     * | 400ms  | C5   | 显       |
-     * | 600ms  | D5   | 隐       |
-     * | 800ms  | C5   | 显       |
-     * | 1000ms | D5   | 隐       |
-     * | 1200ms | —    | 动画结束 |
-     *
-     * C5(523) 和 D5(587) 交替，三角波，与动画帧同步。 两个音高接近，有轻微起伏感但不突兀。
+     * | 时间   | 音高 | 动画帧 |
+     * | :----- | :--- | :----- |
+     * | 0ms    | C5   | 显     |
+     * | 200ms  | D5   | 隐     |
+     * | 400ms  | C5   | 显     |
+     * | 600ms  | D5   | 隐     |
+     * | 800ms  | C5   | 显     |
+     * | 1000ms | D5   | 隐     |
+     * | 1200ms | —    | 结束   |
      *
      * @returns {void}
      */
@@ -1845,10 +1460,7 @@ var tetris = (() => {
       const now = Context.currentTime;
       Scheduler2.sequence([
         {
-          fn: () => play_tone_default(this, 523, 60, {
-            volume: 0.2,
-            wave: "square"
-          })
+          fn: () => play_tone_default(this, 523, 60, { volume: 0.2, wave: "square" })
         },
         {
           fn: () => play_tone_default(this, 587, 60, {
@@ -1888,7 +1500,7 @@ var tetris = (() => {
       ]);
     };
     /**
-     * ## 背景音乐开关音效
+     * ## BGM_TOGGLED：背景音乐开关音效
      *
      * 440Hz，100ms。
      *
@@ -1901,28 +1513,19 @@ var tetris = (() => {
   // lib/game/constants/game.js
   var AI_ALLOWED_ACTIONS = [
     "SWITCH_CONTROLLER",
-    // 切换控制器（human ↔ ai）
     "TOGGLE_MUSIC",
-    // 切换音乐开关
     "TOGGLE_PAUSED",
-    // 暂停/继续游戏
     "RESTART",
-    // 重新开始游戏
     "QUIT"
-    // 退出游戏
   ];
   var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
   var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
   var MAX_LEVEL = 256;
   var SPEED_STEPS = {
     EASY: 0.6,
-    // Easy：前 60% 等级线性加速
     NORMAL: 0.4,
-    // Normal：前 40% 等级线性加速
     HARD: 0.2,
-    // Hard：前 20% 等级线性加速
     EXPERT: 0.1
-    // Expert：前 10% 等级线性加速
   };
   var ALL_CLEAR_SCORE = 2e3;
   var T_SPIN_SCORES = [400, 800, 1200, 1600];
@@ -1941,20 +1544,17 @@ var tetris = (() => {
 
   // lib/services/audio/constants/bgm/tetris-theme.js
   var TetrisTheme = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "TetrisTheme",
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz）
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== A 段：经典律动（长-短-短）=====
+      // A 段：经典律动（长-短-短）
       { freq: 659, dur: 1.2 },
       { freq: 659, dur: 0.4 },
       { freq: 659, dur: 0.4 },
@@ -1992,7 +1592,7 @@ var tetris = (() => {
       { freq: 440, dur: 1.2 },
       { freq: 440, dur: 0.4 },
       { freq: 440, dur: 0.4 },
-      // ===== A' 段：高音区 =====
+      // A' 段：高音区
       { freq: 587, dur: 1.2 },
       { freq: 587, dur: 0.4 },
       { freq: 587, dur: 0.4 },
@@ -2030,7 +1630,7 @@ var tetris = (() => {
       { freq: 440, dur: 1.2 },
       { freq: 440, dur: 0.4 },
       { freq: 440, dur: 0.4 },
-      // ===== B 段：下行区 =====
+      // B 段：下行区
       { freq: 659, dur: 1.2 },
       { freq: 659, dur: 0.4 },
       { freq: 659, dur: 0.4 },
@@ -2067,7 +1667,7 @@ var tetris = (() => {
       { freq: 880, dur: 1.2 },
       { freq: 880, dur: 0.4 },
       { freq: 880, dur: 0.4 },
-      // ===== 结尾收束 =====
+      // 结尾收束
       { freq: 784, dur: 1.2 },
       { freq: 784, dur: 0.4 },
       { freq: 784, dur: 0.4 },
@@ -2095,56 +1695,42 @@ var tetris = (() => {
       { freq: 440, dur: 0.4 },
       { freq: 440, dur: 0.4 }
     ],
-    /** ## 每个音符的基准时长（ms） */
+    /** 每个音符的基准时长（ms） */
     duration: 220,
-    /** ## 音量（0-1） */
+    /** 音量（0-1） */
     volume: 0.11,
-    /** ## 波形类型：方波（经典 8-bit 音色） */
+    /** 波形类型：方波（经典 8-bit 音色） */
     wave: "square",
-    /** ## 连奏/断奏比例（0.6，明显断奏颗粒感） */
+    /** 连奏/断奏比例 */
     gate: 0.6
   };
   var tetris_theme_default = TetrisTheme;
 
   // lib/services/audio/constants/bgm/spring-festival.js
   var SpringFestival = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "Spring Festival",
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz），0 表示休止符
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。 freq=0 表示休止符。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== 第一句：秧歌调 =====
+      // 第一句：秧歌调
       { freq: 523, dur: 0.6 },
-      // 啦 (C5)
       { freq: 587, dur: 0.3 },
-      // 啦 (D5)
       { freq: 659, dur: 0.9 },
-      // 啦～ (E5)
       { freq: 659, dur: 0.6 },
-      // 啦
       { freq: 784, dur: 0.3 },
-      // 啦
       { freq: 880, dur: 1.2 },
-      // 啦～ (A5)
       { freq: 880, dur: 0.6 },
-      // 啦
       { freq: 784, dur: 0.3 },
-      // 啦
       { freq: 659, dur: 0.9 },
-      // 啦～
       { freq: 587, dur: 0.6 },
-      // 啦
       { freq: 523, dur: 1.5 },
-      // 啦～
-      // ===== 第二句：欢腾段落 =====
+      // 第二句：欢腾段落
       { freq: 659, dur: 0.3 },
       { freq: 659, dur: 0.3 },
       { freq: 784, dur: 0.3 },
@@ -2161,7 +1747,7 @@ var tetris = (() => {
       { freq: 784, dur: 0.3 },
       { freq: 659, dur: 0.6 },
       { freq: 523, dur: 1.2 },
-      // ===== 第三句：再现秧歌，更热烈 =====
+      // 第三句：再现秧歌，更热烈
       { freq: 523, dur: 0.4 },
       { freq: 587, dur: 0.2 },
       { freq: 659, dur: 0.6 },
@@ -2169,18 +1755,15 @@ var tetris = (() => {
       { freq: 784, dur: 0.2 },
       { freq: 880, dur: 0.8 },
       { freq: 1047, dur: 0.4 },
-      // 拔高 (C6)
       { freq: 880, dur: 0.2 },
       { freq: 784, dur: 0.6 },
       { freq: 659, dur: 0.4 },
       { freq: 587, dur: 0.4 },
       { freq: 523, dur: 2 },
-      // 收束
-      // ===== 第四句：锣鼓模仿 =====
+      // 第四句：锣鼓模仿
       { freq: 659, dur: 0.2 },
       { freq: 659, dur: 0.2 },
       { freq: 0, dur: 0.1 },
-      // 休止符模仿锣鼓间隙
       { freq: 659, dur: 0.2 },
       { freq: 0, dur: 0.1 },
       { freq: 784, dur: 0.2 },
@@ -2192,23 +1775,22 @@ var tetris = (() => {
       { freq: 587, dur: 0.4 },
       { freq: 523, dur: 0.8 },
       { freq: 0, dur: 1 }
-      // 段落呼吸
     ],
-    /** ## 每个音符的基准时长（ms），较快节奏 */
+    /** 每个音符的基准时长（ms），较快节奏 */
     duration: 280,
-    /** ## 音量（0-1） */
+    /** 音量（0-1） */
     volume: 0.11,
-    /** ## 波形类型：方波（模拟唢呐/秧歌的热闹感） */
+    /** 波形类型：方波（模拟唢呐/秧歌的热闹感） */
     wave: "square",
-    /** ## 连奏/断奏比例（0.7，轻断奏，颗粒分明） */
+    /** 连奏/断奏比例（0.7，轻断奏，颗粒分明） */
     gate: 0.7,
-    /** ## 运音包络 */
+    /** 运音包络 */
     articulation: {
-      /** ## 起音时间（3ms，快速起音） */
+      /** 起音时间（3ms，快速起音） */
       attackTime: 3e-3,
-      /** ## 释音时间（20ms） */
+      /** 释音时间（20ms） */
       releaseTime: 0.02,
-      /** ## 延音比（0.5，较低，音符跳跃） */
+      /** 延音比（0.5，较低，音符跳跃） */
       sustainRatio: 0.5
     }
   };
@@ -2216,20 +1798,17 @@ var tetris = (() => {
 
   // lib/services/audio/constants/bgm/first-division.js
   var FirstDivision = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "FirstDivision",
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz）
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== 主动机（进行曲感）=====
+      // 主动机（进行曲感）
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 0.8 },
       { freq: 659, dur: 1.2 },
@@ -2239,7 +1818,7 @@ var tetris = (() => {
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 0.8 },
       { freq: 659, dur: 1.2 },
-      // ===== 重复推进 =====
+      // 重复推进
       { freq: 659, dur: 0.8 },
       { freq: 698, dur: 0.8 },
       { freq: 784, dur: 1.2 },
@@ -2249,7 +1828,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 1.2 },
-      // ===== 第二句（上行）=====
+      // 第二句（上行）
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 0.8 },
       { freq: 659, dur: 0.8 },
@@ -2261,7 +1840,7 @@ var tetris = (() => {
       { freq: 523, dur: 0.8 },
       { freq: 494, dur: 0.8 },
       { freq: 523, dur: 1.2 },
-      // ===== 强化段（军乐推进）=====
+      // 强化段（军乐推进）
       { freq: 659, dur: 0.8 },
       { freq: 784, dur: 0.8 },
       { freq: 880, dur: 1.2 },
@@ -2274,7 +1853,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.8 },
       { freq: 698, dur: 0.8 },
       { freq: 784, dur: 1.2 },
-      // ===== 高潮（稳定推进）=====
+      // 高潮（稳定推进）
       { freq: 784, dur: 0.8 },
       { freq: 880, dur: 0.8 },
       { freq: 988, dur: 1.2 },
@@ -2287,7 +1866,7 @@ var tetris = (() => {
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 0.8 },
       { freq: 659, dur: 1.2 },
-      // ===== 回落（收束）=====
+      // 回落（收束）
       { freq: 587, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 494, dur: 1.2 },
@@ -2296,136 +1875,87 @@ var tetris = (() => {
       { freq: 659, dur: 1.2 },
       { freq: 587, dur: 0.8 },
       { freq: 523, dur: 1.2 },
-      // ===== 循环点 =====
+      // 循环点
       { freq: 494, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 1.2 },
       { freq: 523, dur: 0.8 },
       { freq: 494, dur: 1.6 }
     ],
-    /** ## 每个音符的基准时长（ms） */
+    /** 每个音符的基准时长（ms） */
     duration: 180,
-    /** ## 音量（0-1） */
+    /** 音量（0-1） */
     volume: 0.13,
-    /** ## 波形类型：方波（经典 8-bit 音色） */
+    /** 波形类型：方波（经典 8-bit 音色） */
     wave: "square"
   };
   var first_division_default = FirstDivision;
 
   // lib/services/audio/constants/bgm/gong-xi-fa-cai.js
   var GongXiFaCai = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "Gong Xi Fa Cai",
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz），0 表示休止符
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。 freq=0 表示休止符。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== 恭喜发财 恭喜发财 =====
+      // 恭喜发财 恭喜发财
       { freq: 523, dur: 0.5 },
-      // 恭 (C5)
       { freq: 587, dur: 0.5 },
-      // 喜 (D5)
       { freq: 659, dur: 0.8 },
-      // 发 (E5)
       { freq: 659, dur: 0.8 },
-      // 财～
       { freq: 784, dur: 0.5 },
-      // 恭
       { freq: 880, dur: 0.5 },
-      // 喜
       { freq: 784, dur: 0.8 },
-      // 发
       { freq: 659, dur: 1.5 },
-      // 财～
       { freq: 587, dur: 0.5 },
-      // 恭
       { freq: 659, dur: 0.5 },
-      // 喜
       { freq: 784, dur: 0.8 },
-      // 发
       { freq: 784, dur: 0.8 },
-      // 财～
       { freq: 880, dur: 0.5 },
-      // 恭
       { freq: 1047, dur: 0.5 },
-      // 喜 (C6)
       { freq: 880, dur: 0.8 },
-      // 发
       { freq: 784, dur: 1.5 },
-      // 财～
-      // ===== 我恭喜你发财 我恭喜你精彩 =====
+      // 我恭喜你发财 我恭喜你精彩
       { freq: 659, dur: 0.3 },
-      // 我
       { freq: 784, dur: 0.3 },
-      // 恭
       { freq: 880, dur: 0.5 },
-      // 喜
       { freq: 880, dur: 0.3 },
-      // 你
       { freq: 784, dur: 0.3 },
-      // 发
       { freq: 659, dur: 1 },
-      // 财～
       { freq: 587, dur: 0.3 },
-      // 我
       { freq: 659, dur: 0.3 },
-      // 恭
       { freq: 784, dur: 0.5 },
-      // 喜
       { freq: 784, dur: 0.3 },
-      // 你
       { freq: 659, dur: 0.3 },
-      // 精
       { freq: 587, dur: 1 },
-      // 彩～
-      // ===== 最好的请过来 不好的请走开 =====
+      // 最好的请过来 不好的请走开
       { freq: 523, dur: 0.4 },
-      // 最
       { freq: 587, dur: 0.4 },
-      // 好
       { freq: 659, dur: 0.4 },
-      // 的
       { freq: 784, dur: 0.4 },
-      // 请
       { freq: 880, dur: 0.4 },
-      // 过
       { freq: 784, dur: 0.8 },
-      // 来～
       { freq: 659, dur: 0.4 },
-      // 不
       { freq: 587, dur: 0.4 },
-      // 好
       { freq: 659, dur: 0.4 },
-      // 的
       { freq: 784, dur: 0.4 },
-      // 请
       { freq: 659, dur: 0.4 },
-      // 走
       { freq: 523, dur: 1.2 },
-      // 开～
-      // ===== 礼多人不怪 =====
+      // 礼多人不怪
       { freq: 587, dur: 0.4 },
-      // 礼
       { freq: 659, dur: 0.4 },
-      // 多
       { freq: 784, dur: 0.4 },
-      // 人
       { freq: 659, dur: 0.4 },
-      // 不
       { freq: 587, dur: 0.8 },
-      // 怪～
       { freq: 523, dur: 1.5 },
-      // （收）
-      // ===== 间奏过渡 =====
+      // 间奏过渡
       { freq: 0, dur: 0.8 },
-      // ===== 恭喜发财 循环再现 =====
+      // 恭喜发财 循环再现
       { freq: 523, dur: 0.4 },
       { freq: 587, dur: 0.4 },
       { freq: 659, dur: 0.6 },
@@ -2442,30 +1972,29 @@ var tetris = (() => {
       { freq: 1047, dur: 0.4 },
       { freq: 880, dur: 0.6 },
       { freq: 784, dur: 1.2 },
-      // ===== 收尾高音 =====
+      // 收尾高音
       { freq: 880, dur: 0.5 },
       { freq: 1047, dur: 0.5 },
       { freq: 880, dur: 0.5 },
       { freq: 784, dur: 0.5 },
       { freq: 659, dur: 2 },
       { freq: 0, dur: 1.5 }
-      // 段落呼吸
     ],
-    /** ## 每个音符的基准时长（ms） */
+    /** 每个音符的基准时长（ms） */
     duration: 260,
-    /** ## 音量（0-1） */
+    /** 音量（0-1） */
     volume: 0.13,
-    /** ## 波形类型：方波 */
+    /** 波形类型：方波 */
     wave: "square",
-    /** ## 连奏/断奏比例（0.8，较连奏） */
+    /** 连奏/断奏比例（0.8，较连奏） */
     gate: 0.8,
-    /** ## 运音包络 */
+    /** 运音包络 */
     articulation: {
-      /** ## 起音时间（3ms，快速起音） */
+      /** 起音时间（3ms，快速起音） */
       attackTime: 3e-3,
-      /** ## 释音时间（20ms，平滑收尾） */
+      /** 释音时间（20ms，平滑收尾） */
       releaseTime: 0.02,
-      /** ## 延音比（0.6，中高延音） */
+      /** 延音比（0.6，中高延音） */
       sustainRatio: 0.6
     }
   };
@@ -2473,20 +2002,17 @@ var tetris = (() => {
 
   // lib/services/audio/constants/bgm/loginska.js
   var Loginska = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "Loginska",
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz）
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== A 段：沉稳推进 =====
+      // A 段：沉稳推进
       { freq: 659, dur: 1.2 },
       { freq: 659, dur: 0.4 },
       { freq: 659, dur: 0.4 },
@@ -2507,7 +2033,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.4 },
       { freq: 784, dur: 0.6 },
       { freq: 880, dur: 0.6 },
-      // ===== B 段：上行高潮 =====
+      // B 段：上行高潮
       { freq: 784, dur: 1.2 },
       { freq: 784, dur: 0.4 },
       { freq: 784, dur: 0.4 },
@@ -2528,7 +2054,7 @@ var tetris = (() => {
       { freq: 587, dur: 0.4 },
       { freq: 659, dur: 0.6 },
       { freq: 784, dur: 0.6 },
-      // ===== C 段：急促下行收束 =====
+      // C 段：急促下行收束
       { freq: 784, dur: 1.2 },
       { freq: 784, dur: 0.4 },
       { freq: 784, dur: 0.4 },
@@ -2548,25 +2074,23 @@ var tetris = (() => {
       { freq: 440, dur: 0.4 },
       { freq: 440, dur: 0.4 }
     ],
-    /** ## 每个音符的基准时长（ms） */
+    /** 每个音符的基准时长（ms） */
     duration: 180,
-    /** ## 音量（0-1），略低于其他曲目 */
+    /** 音量（0-1），略低于其他曲目 */
     volume: 0.11,
-    /** ## 波形类型：方波（经典 8-bit 音色） */
+    /** 波形类型：方波（经典 8-bit 音色） */
     wave: "square"
   };
   var loginska_default = Loginska;
 
   // lib/services/audio/constants/bgm/beyond-the-wall.js
   var BeyondTheWall = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "BeyondTheWall",
     /**
-     * ## 分段 Gate 配置（可选）
+     * 分段 Gate 配置（可选）。
      *
-     * 控制不同段落的连奏/断奏比例：
-     *
-     * - Gate 值越大越连奏，越小越断奏
+     * 控制不同段落的连奏/断奏比例， gate 值越大越连奏，越小越断奏。
      *
      * @type {object}
      */
@@ -2585,17 +2109,14 @@ var tetris = (() => {
       }
     },
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz），0 表示休止符
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。 freq=0 表示休止符。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== 前奏：胡笳感脉冲 =====
+      // 前奏：胡笳感脉冲
       { freq: 330, dur: 0.6 },
       { freq: 0, dur: 0.15 },
       { freq: 392, dur: 0.6 },
@@ -2608,7 +2129,7 @@ var tetris = (() => {
       { freq: 0, dur: 0.15 },
       { freq: 440, dur: 1.8 },
       { freq: 0, dur: 0.3 },
-      // ===== 主旋律：苍凉开场 =====
+      // 主旋律：苍凉开场
       { freq: 440, dur: 1.2 },
       { freq: 523, dur: 0.6 },
       { freq: 587, dur: 1.2 },
@@ -2629,7 +2150,7 @@ var tetris = (() => {
       { freq: 392, dur: 1.2 },
       { freq: 330, dur: 1.2 },
       { freq: 0, dur: 0.3 },
-      // ===== 推进段：马蹄 =====
+      // 推进段：马蹄
       { freq: 392, dur: 0.6 },
       { freq: 440, dur: 0.3 },
       { freq: 523, dur: 0.6 },
@@ -2646,7 +2167,7 @@ var tetris = (() => {
       { freq: 0, dur: 0.2 },
       { freq: 587, dur: 0.6 },
       { freq: 523, dur: 1.2 },
-      // ===== 高潮：边塞号角 =====
+      // 高潮：边塞号角
       { freq: 659, dur: 1.2 },
       { freq: 784, dur: 0.6 },
       { freq: 880, dur: 1.8 },
@@ -2665,7 +2186,7 @@ var tetris = (() => {
       { freq: 659, dur: 1.2 },
       { freq: 587, dur: 0.6 },
       { freq: 523, dur: 1.8 },
-      // ===== DnB 段：破碎节奏 + 空拍 =====
+      // DnB 段：破碎节奏 + 空拍
       { freq: 440, dur: 0.4 },
       { freq: 0, dur: 0.2 },
       { freq: 440, dur: 0.4 },
@@ -2688,7 +2209,7 @@ var tetris = (() => {
       { freq: 0, dur: 0.2 },
       { freq: 440, dur: 0.4 },
       { freq: 523, dur: 0.4 },
-      // ===== 回落：大漠孤烟 =====
+      // 回落：大漠孤烟
       { freq: 659, dur: 1.2 },
       { freq: 0, dur: 0.25 },
       { freq: 587, dur: 0.6 },
@@ -2703,7 +2224,7 @@ var tetris = (() => {
       { freq: 0, dur: 0.25 },
       { freq: 330, dur: 0.6 },
       { freq: 392, dur: 1.8 },
-      // ===== 循环衔接（更"远"） =====
+      // 循环衔接（更"远"）
       { freq: 330, dur: 0.6 },
       { freq: 0, dur: 0.15 },
       { freq: 392, dur: 0.6 },
@@ -2712,31 +2233,28 @@ var tetris = (() => {
       { freq: 392, dur: 0.6 },
       { freq: 440, dur: 1.8 }
     ],
-    /** ## 每个音符的基准时长（ms） */
+    /** 每个音符的基准时长（ms） */
     duration: 130,
-    /** ## 音量（0-1） */
+    /** 音量（0-1） */
     volume: 0.12,
-    /** ## 波形类型：三角波（音色柔和） */
+    /** 波形类型：三角波（音色柔和） */
     wave: "square"
   };
   var beyond_the_wall_default = BeyondTheWall;
 
   // lib/services/audio/constants/bgm/technotris.js
   var Technotris = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "Technotris",
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz）
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== Intro（电子重复）=====
+      // Intro（电子重复）
       { freq: 659, dur: 0.6 },
       { freq: 659, dur: 0.6 },
       { freq: 494, dur: 0.6 },
@@ -2749,7 +2267,7 @@ var tetris = (() => {
       { freq: 523, dur: 0.6 },
       { freq: 494, dur: 0.6 },
       { freq: 494, dur: 0.6 },
-      // ===== 主旋律 A =====
+      // 主旋律 A
       { freq: 659, dur: 0.8 },
       { freq: 494, dur: 0.8 },
       { freq: 523, dur: 0.8 },
@@ -2766,7 +2284,7 @@ var tetris = (() => {
       { freq: 587, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 494, dur: 1.2 },
-      // ===== 电子重复变体 =====
+      // 电子重复变体
       { freq: 523, dur: 0.6 },
       { freq: 523, dur: 0.6 },
       { freq: 587, dur: 0.6 },
@@ -2779,7 +2297,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.6 },
       { freq: 587, dur: 0.6 },
       { freq: 587, dur: 0.6 },
-      // ===== 上行推进 =====
+      // 上行推进
       { freq: 659, dur: 0.8 },
       { freq: 784, dur: 0.8 },
       { freq: 880, dur: 0.8 },
@@ -2795,7 +2313,7 @@ var tetris = (() => {
       { freq: 988, dur: 0.8 },
       { freq: 880, dur: 0.8 },
       { freq: 784, dur: 1.2 },
-      // ===== 高潮 =====
+      // 高潮
       { freq: 784, dur: 0.8 },
       { freq: 880, dur: 0.8 },
       { freq: 988, dur: 0.8 },
@@ -2810,7 +2328,7 @@ var tetris = (() => {
       { freq: 784, dur: 0.6 },
       { freq: 880, dur: 0.6 },
       { freq: 880, dur: 0.6 },
-      // ===== Break =====
+      // Break
       { freq: 659, dur: 0.8 },
       { freq: 587, dur: 0.8 },
       { freq: 523, dur: 0.8 },
@@ -2818,7 +2336,7 @@ var tetris = (() => {
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 0.8 },
       { freq: 659, dur: 1.2 },
-      // ===== Drop =====
+      // Drop
       { freq: 784, dur: 0.6 },
       { freq: 784, dur: 0.6 },
       { freq: 880, dur: 0.6 },
@@ -2835,7 +2353,7 @@ var tetris = (() => {
       { freq: 587, dur: 0.6 },
       { freq: 523, dur: 0.6 },
       { freq: 523, dur: 0.6 },
-      // ===== Ending =====
+      // Ending
       { freq: 494, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 0.8 },
@@ -2845,105 +2363,75 @@ var tetris = (() => {
       { freq: 494, dur: 0.8 },
       { freq: 440, dur: 1.6 }
     ],
-    /** ## 每个音符的基准时长（ms） */
+    /** 每个音符的基准时长（ms） */
     duration: 180,
-    /** ## 音量（0-1） */
+    /** 音量（0-1） */
     volume: 0.13,
-    /** ## 波形类型：方波（电子音色） */
+    /** 波形类型：方波（电子音色） */
     wave: "square"
   };
   var technotris_default = Technotris;
 
   // lib/services/audio/constants/bgm/golden-snake-dance.js
   var GoldenSnakeDance = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "Golden Snake Dance",
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz），0 表示休止符
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。 freq=0 表示休止符。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== 核心主题：赛龙舟 =====
+      // 核心主题：赛龙舟
       { freq: 659, dur: 0.3 },
-      // 啦 (E5)
       { freq: 587, dur: 0.3 },
-      // 啦 (D5)
       { freq: 523, dur: 0.3 },
-      // 啦 (C5)
       { freq: 587, dur: 0.3 },
-      // 啦
       { freq: 659, dur: 0.6 },
-      // 啦～
       { freq: 659, dur: 0.3 },
       { freq: 659, dur: 0.3 },
       { freq: 659, dur: 0.6 },
       { freq: 587, dur: 0.3 },
       { freq: 523, dur: 0.3 },
       { freq: 440, dur: 0.3 },
-      // 啦 (A4)
       { freq: 523, dur: 0.3 },
       { freq: 587, dur: 0.6 },
       { freq: 587, dur: 0.3 },
       { freq: 587, dur: 0.3 },
       { freq: 587, dur: 0.6 },
-      // ===== 对答段落：锣鼓模仿 =====
+      // 对答段落：锣鼓模仿
       { freq: 784, dur: 0.2 },
-      // 锵 (G5)
       { freq: 784, dur: 0.2 },
-      // 锵
       { freq: 784, dur: 0.2 },
-      // 锵
       { freq: 659, dur: 0.4 },
-      // 咚
       { freq: 659, dur: 0.2 },
-      // 咚
       { freq: 659, dur: 0.2 },
-      // 咚
       { freq: 784, dur: 0.2 },
-      // 锵
       { freq: 880, dur: 0.2 },
-      // 锵 (A5)
       { freq: 784, dur: 0.2 },
-      // 锵
       { freq: 659, dur: 0.4 },
-      // 咚
       { freq: 659, dur: 0.2 },
-      // 咚
       { freq: 659, dur: 0.2 },
-      // 咚
       { freq: 880, dur: 0.2 },
-      // 锵
       { freq: 784, dur: 0.2 },
-      // 锵
       { freq: 659, dur: 0.2 },
-      // 锵
       { freq: 587, dur: 0.4 },
-      // 咚
       { freq: 587, dur: 0.2 },
-      // 咚
       { freq: 587, dur: 0.2 },
-      // 咚
       { freq: 784, dur: 0.2 },
       { freq: 659, dur: 0.2 },
       { freq: 587, dur: 0.2 },
       { freq: 523, dur: 0.6 },
-      // 咚～
       { freq: 523, dur: 0.3 },
       { freq: 523, dur: 0.3 },
-      // ===== 主题再现，上行递进 =====
+      // 主题再现，上行递进
       { freq: 659, dur: 0.3 },
       { freq: 784, dur: 0.3 },
-      // 拔高
       { freq: 880, dur: 0.3 },
       { freq: 784, dur: 0.3 },
       { freq: 1047, dur: 0.6 },
-      // 更高 (C6)
       { freq: 1047, dur: 0.3 },
       { freq: 1047, dur: 0.3 },
       { freq: 1047, dur: 0.6 },
@@ -2955,7 +2443,7 @@ var tetris = (() => {
       { freq: 880, dur: 0.3 },
       { freq: 880, dur: 0.3 },
       { freq: 880, dur: 0.6 },
-      // ===== 热烈对答，加速感 =====
+      // 热烈对答，加速感
       { freq: 784, dur: 0.15 },
       { freq: 880, dur: 0.15 },
       { freq: 784, dur: 0.15 },
@@ -2972,7 +2460,7 @@ var tetris = (() => {
       { freq: 784, dur: 0.15 },
       { freq: 659, dur: 0.6 },
       { freq: 587, dur: 0.4 },
-      // ===== 收束 =====
+      // 收束
       { freq: 659, dur: 0.3 },
       { freq: 784, dur: 0.3 },
       { freq: 880, dur: 0.3 },
@@ -2981,31 +2469,22 @@ var tetris = (() => {
       { freq: 587, dur: 0.3 },
       { freq: 523, dur: 1.5 },
       { freq: 0, dur: 1 }
-      // 段落呼吸
     ],
-    /** ## 每个音符的基准时长（ms），较快节奏 */
+    /** 每个音符的基准时长（ms），较快节奏 */
     duration: 200,
-    /** ## 音量（0-1） */
+    /** 音量（0-1） */
     volume: 0.12,
-    /** ## 波形类型：方波（模拟唢呐/弹拨乐） */
+    /** 波形类型：方波（模拟唢呐/弹拨乐） */
     wave: "square",
-    /**
-     * ## 连奏/断奏比例
-     *
-     * 0.6 表示明显断奏，模仿弹拨乐颗粒感
-     */
+    /** 连奏/断奏比例（0.6，明显断奏） */
     gate: 0.6,
-    /**
-     * ## 运音包络
-     *
-     * 控制音符的起音、释音和延音比例。
-     */
+    /** 运音包络 */
     articulation: {
-      /** ## 起音时间（2ms，快速起音） */
+      /** 起音时间（2ms，快速起音） */
       attackTime: 2e-3,
-      /** ## 释音时间（15ms，快速收尾） */
+      /** 释音时间（15ms，快速收尾） */
       releaseTime: 0.015,
-      /** ## 延音比（0.4，低延音使音符跳跃） */
+      /** 延音比（0.4，低延音使音符跳跃） */
       sustainRatio: 0.4
     }
   };
@@ -3013,20 +2492,17 @@ var tetris = (() => {
 
   // lib/services/audio/constants/bgm/korobeiniki.js
   var Korobeiniki = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "Korobeiniki",
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz）
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== A 段（经典开头）=====
+      // A 段（经典开头）
       { freq: 659, dur: 0.8 },
       { freq: 494, dur: 0.8 },
       { freq: 523, dur: 0.8 },
@@ -3044,7 +2520,7 @@ var tetris = (() => {
       { freq: 587, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 494, dur: 1.2 },
-      // ===== A' 段（变体）=====
+      // A' 段（变体）
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 0.8 },
       { freq: 659, dur: 1.2 },
@@ -3059,7 +2535,7 @@ var tetris = (() => {
       { freq: 587, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 494, dur: 1.2 },
-      // ===== B 段（推进）=====
+      // B 段（推进）
       { freq: 587, dur: 0.8 },
       { freq: 659, dur: 0.8 },
       { freq: 784, dur: 1.2 },
@@ -3075,7 +2551,7 @@ var tetris = (() => {
       { freq: 880, dur: 1.2 },
       { freq: 784, dur: 0.8 },
       { freq: 659, dur: 1.2 },
-      // ===== C 段（高潮）=====
+      // C 段（高潮）
       { freq: 587, dur: 0.8 },
       { freq: 659, dur: 0.8 },
       { freq: 784, dur: 1.2 },
@@ -3090,7 +2566,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.8 },
       { freq: 587, dur: 0.8 },
       { freq: 523, dur: 1.2 },
-      // ===== D 段（变化）=====
+      // D 段（变化）
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 0.8 },
       { freq: 659, dur: 1.2 },
@@ -3106,7 +2582,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 494, dur: 1.2 },
-      // ===== E 段（回落）=====
+      // E 段（回落）
       { freq: 440, dur: 0.8 },
       { freq: 494, dur: 0.8 },
       { freq: 523, dur: 1.2 },
@@ -3118,7 +2594,7 @@ var tetris = (() => {
       { freq: 523, dur: 0.8 },
       { freq: 587, dur: 1.2 },
       { freq: 659, dur: 1.2 },
-      // ===== F 段（再现+收束）=====
+      // F 段（再现+收束）
       { freq: 659, dur: 0.8 },
       { freq: 784, dur: 0.8 },
       { freq: 880, dur: 1.2 },
@@ -3132,32 +2608,40 @@ var tetris = (() => {
       { freq: 587, dur: 0.8 },
       { freq: 523, dur: 0.8 },
       { freq: 494, dur: 1.2 },
-      // ===== 结尾（循环点）=====
+      // 结尾（循环点）
       { freq: 523, dur: 1.2 },
       { freq: 494, dur: 0.8 },
       { freq: 440, dur: 1.6 }
     ],
-    /** ## 每个音符的基准时长（ms） */
+    /** 每个音符的基准时长（ms） */
     duration: 140,
-    /** ## 音量（0-1） */
+    /** 音量（0-1） */
     volume: 0.12,
-    /** ## 波形类型：方波（经典 8-bit 音色） */
+    /** 波形类型：方波（经典 8-bit 音色） */
     wave: "square"
   };
   var korobeiniki_default = Korobeiniki;
 
   // lib/services/audio/constants/bgm/ascension.js
   var Ascension = {
+    /** 音乐名称 */
     name: "Ascension",
+    /**
+     * 旋律数据。
+     *
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
+     *
+     * @type {{ freq: number; dur: number }[]}
+     */
     melody: [
-      // ===== 序章（黎明）=====
+      // 序章（黎明）
       { freq: 262, dur: 3 },
       { freq: 330, dur: 2 },
       { freq: 392, dur: 3 },
       { freq: 330, dur: 1 },
       { freq: 392, dur: 1 },
       { freq: 523, dur: 4 },
-      // ===== 升华（逐级上行）=====
+      // 升华（逐级上行）
       { freq: 523, dur: 1 },
       { freq: 587, dur: 1 },
       { freq: 659, dur: 2 },
@@ -3168,7 +2652,7 @@ var tetris = (() => {
       { freq: 659, dur: 1 },
       { freq: 587, dur: 1 },
       { freq: 523, dur: 2 },
-      // ===== 天梯攀登 =====
+      // 天梯攀登
       { freq: 784, dur: 1 },
       { freq: 880, dur: 1 },
       { freq: 988, dur: 2 },
@@ -3181,7 +2665,7 @@ var tetris = (() => {
       { freq: 784, dur: 1 },
       { freq: 659, dur: 1 },
       { freq: 523, dur: 2 },
-      // ===== 云层之上（高音区）=====
+      // 云层之上（高音区）
       { freq: 1175, dur: 0.5 },
       { freq: 1319, dur: 0.5 },
       { freq: 1568, dur: 1 },
@@ -3195,7 +2679,7 @@ var tetris = (() => {
       { freq: 1175, dur: 1 },
       { freq: 988, dur: 1 },
       { freq: 880, dur: 2 },
-      // ===== 循环之门 =====
+      // 循环之门
       { freq: 784, dur: 1 },
       { freq: 880, dur: 0.5 },
       { freq: 988, dur: 0.5 },
@@ -3207,7 +2691,7 @@ var tetris = (() => {
       { freq: 784, dur: 1 },
       { freq: 659, dur: 1 },
       { freq: 523, dur: 2 },
-      // ===== 循环衔接（回到起点）=====
+      // 循环衔接（回到起点）
       { freq: 440, dur: 1 },
       { freq: 392, dur: 1 },
       { freq: 330, dur: 1 },
@@ -3218,18 +2702,30 @@ var tetris = (() => {
       { freq: 0, dur: 1 },
       { freq: 262, dur: 2 }
     ],
+    /** 每个音符的基准时长（ms） */
     duration: 200,
+    /** 音量（0-1） */
     volume: 0.11,
+    /** 波形类型：三角波 */
     wave: "triangle",
+    /** 连奏/断奏比例 */
     gate: 1
   };
   var ascension_default = Ascension;
 
   // lib/services/audio/constants/bgm/neon-nights.js
   var NeonNights = {
+    /** 音乐名称 */
     name: "NeonNights",
+    /**
+     * 旋律数据。
+     *
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
+     *
+     * @type {{ freq: number; dur: number }[]}
+     */
     melody: [
-      // ===== 引子（低音铺垫）=====
+      // 引子（低音铺垫）
       { freq: 220, dur: 1 },
       { freq: 277, dur: 1 },
       { freq: 330, dur: 1 },
@@ -3240,7 +2736,7 @@ var tetris = (() => {
       { freq: 330, dur: 0.5 },
       { freq: 277, dur: 0.5 },
       { freq: 220, dur: 0.5 },
-      // ===== 主动机（霓虹闪烁）=====
+      // 主动机（霓虹闪烁）
       { freq: 440, dur: 0.5 },
       { freq: 554, dur: 0.5 },
       { freq: 659, dur: 1 },
@@ -3256,7 +2752,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.5 },
       { freq: 554, dur: 0.5 },
       { freq: 440, dur: 0.5 },
-      // ===== 上行推进 =====
+      // 上行推进
       { freq: 554, dur: 0.5 },
       { freq: 659, dur: 0.5 },
       { freq: 740, dur: 0.5 },
@@ -3269,7 +2765,7 @@ var tetris = (() => {
       { freq: 440, dur: 0.5 },
       { freq: 554, dur: 0.5 },
       { freq: 659, dur: 1 },
-      // ===== 间奏（律动切分）=====
+      // 间奏（律动切分）
       { freq: 330, dur: 0.5 },
       { freq: 0, dur: 0.25 },
       { freq: 330, dur: 0.25 },
@@ -3283,7 +2779,7 @@ var tetris = (() => {
       { freq: 330, dur: 0.5 },
       { freq: 277, dur: 0.5 },
       { freq: 330, dur: 1 },
-      // ===== 高潮（全开合成器）=====
+      // 高潮（全开合成器）
       { freq: 440, dur: 0.25 },
       { freq: 554, dur: 0.25 },
       { freq: 659, dur: 0.25 },
@@ -3300,7 +2796,7 @@ var tetris = (() => {
       { freq: 440, dur: 0.5 },
       { freq: 370, dur: 0.5 },
       { freq: 440, dur: 1 },
-      // ===== 回落 =====
+      // 回落
       { freq: 370, dur: 0.5 },
       { freq: 330, dur: 0.5 },
       { freq: 277, dur: 0.5 },
@@ -3310,7 +2806,7 @@ var tetris = (() => {
       { freq: 277, dur: 0.5 },
       { freq: 220, dur: 1 },
       { freq: 0, dur: 0.5 },
-      // ===== 循环衔接 =====
+      // 循环衔接
       { freq: 220, dur: 0.5 },
       { freq: 277, dur: 0.5 },
       { freq: 330, dur: 0.5 },
@@ -3321,18 +2817,30 @@ var tetris = (() => {
       { freq: 277, dur: 0.5 },
       { freq: 220, dur: 1.5 }
     ],
+    /** 每个音符的基准时长（ms） */
     duration: 160,
+    /** 音量（0-1） */
     volume: 0.12,
+    /** 波形类型：三角波 */
     wave: "triangle",
+    /** 连奏/断奏比例 */
     gate: 0.85
   };
   var neon_nights_default = NeonNights;
 
   // lib/services/audio/constants/bgm/frozen-peaks.js
   var FrozenPeaks = {
+    /** 音乐名称 */
     name: "FrozenPeaks",
+    /**
+     * 旋律数据。
+     *
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
+     *
+     * @type {{ freq: number; dur: number }[]}
+     */
     melody: [
-      // ===== 引子（高远冰峰）=====
+      // 引子（高远冰峰）
       { freq: 880, dur: 2 },
       { freq: 0, dur: 0.5 },
       { freq: 784, dur: 1.5 },
@@ -3342,7 +2850,7 @@ var tetris = (() => {
       { freq: 880, dur: 1 },
       { freq: 784, dur: 0.5 },
       { freq: 698, dur: 1 },
-      // ===== 主动机（雪花飘落）=====
+      // 主动机（雪花飘落）
       { freq: 659, dur: 0.75 },
       { freq: 698, dur: 0.25 },
       { freq: 784, dur: 1 },
@@ -3355,7 +2863,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.75 },
       { freq: 698, dur: 0.25 },
       { freq: 784, dur: 1 },
-      // ===== 上行探索 =====
+      // 上行探索
       { freq: 784, dur: 0.5 },
       { freq: 880, dur: 0.5 },
       { freq: 988, dur: 1 },
@@ -3368,7 +2876,7 @@ var tetris = (() => {
       { freq: 880, dur: 0.5 },
       { freq: 784, dur: 0.5 },
       { freq: 698, dur: 1 },
-      // ===== 暴风雪（密集音符）=====
+      // 暴风雪（密集音符）
       { freq: 659, dur: 0.25 },
       { freq: 698, dur: 0.25 },
       { freq: 784, dur: 0.25 },
@@ -3384,7 +2892,7 @@ var tetris = (() => {
       { freq: 1175, dur: 0.25 },
       { freq: 988, dur: 0.5 },
       { freq: 880, dur: 1 },
-      // ===== 平静（风雪渐歇）=====
+      // 平静（风雪渐歇）
       { freq: 784, dur: 1.5 },
       { freq: 0, dur: 0.5 },
       { freq: 698, dur: 1 },
@@ -3394,7 +2902,7 @@ var tetris = (() => {
       { freq: 587, dur: 0.5 },
       { freq: 659, dur: 1 },
       { freq: 0, dur: 0.5 },
-      // ===== 循环点（冰峰再现）=====
+      // 循环点（冰峰再现）
       { freq: 880, dur: 1.5 },
       { freq: 0, dur: 0.5 },
       { freq: 784, dur: 1 },
@@ -3402,18 +2910,30 @@ var tetris = (() => {
       { freq: 587, dur: 0.5 },
       { freq: 523, dur: 2 }
     ],
+    /** 每个音符的基准时长（ms） */
     duration: 200,
+    /** 音量（0-1） */
     volume: 0.11,
+    /** 波形类型：正弦波 */
     wave: "sine",
+    /** 连奏/断奏比例 */
     gate: 1
   };
   var frozen_peaks_default = FrozenPeaks;
 
   // lib/services/audio/constants/bgm/cyber-rush.js
   var CyberRush = {
+    /** 音乐名称 */
     name: "CyberRush",
+    /**
+     * 旋律数据。
+     *
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
+     *
+     * @type {{ freq: number; dur: number }[]}
+     */
     melody: [
-      // ===== 警报引子 =====
+      // 警报引子
       { freq: 440, dur: 0.25 },
       { freq: 0, dur: 0.25 },
       { freq: 440, dur: 0.25 },
@@ -3428,7 +2948,7 @@ var tetris = (() => {
       { freq: 0, dur: 0.25 },
       { freq: 659, dur: 0.5 },
       { freq: 0, dur: 0.5 },
-      // ===== 主动机（高速脉冲）=====
+      // 主动机（高速脉冲）
       { freq: 330, dur: 0.25 },
       { freq: 370, dur: 0.25 },
       { freq: 440, dur: 0.25 },
@@ -3442,7 +2962,7 @@ var tetris = (() => {
       { freq: 440, dur: 0.25 },
       { freq: 554, dur: 0.25 },
       { freq: 659, dur: 0.5 },
-      // ===== 加速段 =====
+      // 加速段
       { freq: 440, dur: 0.125 },
       { freq: 494, dur: 0.125 },
       { freq: 554, dur: 0.125 },
@@ -3457,7 +2977,7 @@ var tetris = (() => {
       { freq: 740, dur: 0.25 },
       { freq: 659, dur: 0.25 },
       { freq: 554, dur: 0.25 },
-      // ===== 间奏（故障效果）=====
+      // 间奏（故障效果）
       { freq: 220, dur: 0.125 },
       { freq: 0, dur: 0.125 },
       { freq: 330, dur: 0.125 },
@@ -3472,7 +2992,7 @@ var tetris = (() => {
       { freq: 440, dur: 0.125 },
       { freq: 554, dur: 0.25 },
       { freq: 659, dur: 0.5 },
-      // ===== 冲刺高潮 =====
+      // 冲刺高潮
       { freq: 659, dur: 0.25 },
       { freq: 740, dur: 0.25 },
       { freq: 784, dur: 0.25 },
@@ -3488,7 +3008,7 @@ var tetris = (() => {
       { freq: 1175, dur: 0.5 },
       { freq: 988, dur: 0.25 },
       { freq: 880, dur: 0.25 },
-      // ===== 回落 =====
+      // 回落
       { freq: 740, dur: 0.25 },
       { freq: 659, dur: 0.25 },
       { freq: 554, dur: 0.25 },
@@ -3498,7 +3018,7 @@ var tetris = (() => {
       { freq: 440, dur: 0.25 },
       { freq: 370, dur: 0.25 },
       { freq: 330, dur: 0.5 },
-      // ===== 循环衔接 =====
+      // 循环衔接
       { freq: 330, dur: 0.25 },
       { freq: 0, dur: 0.25 },
       { freq: 440, dur: 0.25 },
@@ -3512,25 +3032,37 @@ var tetris = (() => {
       { freq: 659, dur: 0.5 },
       { freq: 0, dur: 1 }
     ],
+    /** 每个音符的基准时长（ms） */
     duration: 120,
+    /** 音量（0-1） */
     volume: 0.1,
+    /** 波形类型：锯齿波 */
     wave: "sawtooth",
+    /** 连奏/断奏比例 */
     gate: 0.6
   };
   var cyber_rush_default = CyberRush;
 
   // lib/services/audio/constants/bgm/starlight.js
   var Starlight = {
+    /** 音乐名称 */
     name: "Starlight",
+    /**
+     * 旋律数据。
+     *
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
+     *
+     * @type {{ freq: number; dur: number }[]}
+     */
     melody: [
-      // ===== 引子（深空低吟）=====
+      // 引子（深空低吟）
       { freq: 330, dur: 2 },
       { freq: 0, dur: 1 },
       { freq: 440, dur: 3 },
       { freq: 0, dur: 1 },
       { freq: 392, dur: 2 },
       { freq: 330, dur: 2 },
-      // ===== 星星闪烁 =====
+      // 星星闪烁
       { freq: 523, dur: 0.5 },
       { freq: 0, dur: 0.5 },
       { freq: 659, dur: 0.5 },
@@ -3544,7 +3076,7 @@ var tetris = (() => {
       { freq: 698, dur: 0.5 },
       { freq: 784, dur: 0.5 },
       { freq: 880, dur: 1.5 },
-      // ===== 星座巡游 =====
+      // 星座巡游
       { freq: 784, dur: 0.5 },
       { freq: 880, dur: 0.5 },
       { freq: 988, dur: 1 },
@@ -3555,7 +3087,7 @@ var tetris = (() => {
       { freq: 523, dur: 0.5 },
       { freq: 440, dur: 1.5 },
       { freq: 0, dur: 0.5 },
-      // ===== 银河漩涡 =====
+      // 银河漩涡
       { freq: 659, dur: 0.25 },
       { freq: 698, dur: 0.25 },
       { freq: 784, dur: 0.25 },
@@ -3569,7 +3101,7 @@ var tetris = (() => {
       { freq: 880, dur: 0.5 },
       { freq: 784, dur: 1 },
       { freq: 0, dur: 0.5 },
-      // ===== 归航 =====
+      // 归航
       { freq: 698, dur: 0.5 },
       { freq: 659, dur: 0.5 },
       { freq: 587, dur: 0.5 },
@@ -3581,7 +3113,7 @@ var tetris = (() => {
       { freq: 440, dur: 1 },
       { freq: 523, dur: 1 },
       { freq: 440, dur: 1.5 },
-      // ===== 循环点（重回深空）=====
+      // 循环点（重回深空）
       { freq: 330, dur: 2 },
       { freq: 0, dur: 1 },
       { freq: 392, dur: 1.5 },
@@ -3589,18 +3121,30 @@ var tetris = (() => {
       { freq: 0, dur: 0.5 },
       { freq: 330, dur: 2 }
     ],
+    /** 每个音符的基准时长（ms） */
     duration: 180,
+    /** 音量（0-1） */
     volume: 0.1,
+    /** 波形类型：正弦波 */
     wave: "sine",
+    /** 连奏/断奏比例 */
     gate: 1
   };
   var starlight_default = Starlight;
 
   // lib/services/audio/constants/bgm/final-push.js
   var FinalPush = {
+    /** 音乐名称 */
     name: "FinalPush",
+    /**
+     * 旋律数据。
+     *
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。
+     *
+     * @type {{ freq: number; dur: number }[]}
+     */
     melody: [
-      // ===== 战鼓引子 =====
+      // 战鼓引子
       { freq: 220, dur: 0.5 },
       { freq: 220, dur: 0.5 },
       { freq: 220, dur: 0.5 },
@@ -3614,7 +3158,7 @@ var tetris = (() => {
       { freq: 0, dur: 0.25 },
       { freq: 330, dur: 0.25 },
       { freq: 440, dur: 1 },
-      // ===== 冲锋号角 =====
+      // 冲锋号角
       { freq: 523, dur: 0.5 },
       { freq: 659, dur: 0.5 },
       { freq: 784, dur: 1 },
@@ -3628,7 +3172,7 @@ var tetris = (() => {
       { freq: 587, dur: 0.5 },
       { freq: 659, dur: 0.5 },
       { freq: 784, dur: 1 },
-      // ===== 推进阵线 =====
+      // 推进阵线
       { freq: 784, dur: 0.5 },
       { freq: 880, dur: 0.5 },
       { freq: 988, dur: 0.5 },
@@ -3643,7 +3187,7 @@ var tetris = (() => {
       { freq: 880, dur: 0.5 },
       { freq: 784, dur: 0.5 },
       { freq: 659, dur: 1 },
-      // ===== 间奏（重整旗鼓）=====
+      // 间奏（重整旗鼓）
       { freq: 440, dur: 0.5 },
       { freq: 494, dur: 0.5 },
       { freq: 523, dur: 0.5 },
@@ -3656,7 +3200,7 @@ var tetris = (() => {
       { freq: 440, dur: 0.5 },
       { freq: 494, dur: 0.5 },
       { freq: 523, dur: 1 },
-      // ===== 总攻高潮 =====
+      // 总攻高潮
       { freq: 659, dur: 0.25 },
       { freq: 784, dur: 0.25 },
       { freq: 880, dur: 0.25 },
@@ -3671,7 +3215,7 @@ var tetris = (() => {
       { freq: 988, dur: 0.5 },
       { freq: 1175, dur: 0.5 },
       { freq: 1319, dur: 1 },
-      // ===== 胜利在望 =====
+      // 胜利在望
       { freq: 1175, dur: 0.5 },
       { freq: 988, dur: 0.5 },
       { freq: 880, dur: 0.5 },
@@ -3680,7 +3224,7 @@ var tetris = (() => {
       { freq: 784, dur: 0.5 },
       { freq: 659, dur: 0.5 },
       { freq: 523, dur: 1 },
-      // ===== 循环（再度冲锋）=====
+      // 循环（再度冲锋）
       { freq: 440, dur: 0.5 },
       { freq: 392, dur: 0.5 },
       { freq: 330, dur: 0.5 },
@@ -3692,33 +3236,33 @@ var tetris = (() => {
       { freq: 330, dur: 0.5 },
       { freq: 440, dur: 1.5 }
     ],
+    /** 每个音符的基准时长（ms） */
     duration: 140,
+    /** 音量（0-1） */
     volume: 0.11,
+    /** 波形类型：方波 */
     wave: "square",
+    /** 连奏/断奏比例 */
     gate: 0.8
   };
   var final_push_default = FinalPush;
 
   // lib/services/audio/constants/bgm/journey-to-west.js
   var JourneyToWest = {
-    /** ## 音乐名称 */
+    /** 音乐名称 */
     name: "JourneyToWest",
     /**
-     * ## 旋律数据
+     * 旋律数据。
      *
-     * 每个音符包含：
-     *
-     * - `freq`：频率（Hz），0 表示休止符
-     * - `dur`：时长系数（乘以 duration 得到实际时长）
+     * 每个音符包含 freq（频率 Hz）和 dur（时长系数）。 freq=0 表示休止符。
      *
      * @type {{ freq: number; dur: number }[]}
      */
     melody: [
-      // ===== 前奏：标志性的"丢丢丢丢" =====
+      // 前奏：标志性的"丢丢丢丢"
       { freq: 880, dur: 1.2 },
       { freq: 880, dur: 1.2 },
       { freq: 0, dur: 0.6 },
-      // 休止
       { freq: 880, dur: 1.2 },
       { freq: 880, dur: 1.2 },
       { freq: 0, dur: 0.6 },
@@ -3727,7 +3271,7 @@ var tetris = (() => {
       { freq: 0, dur: 0.6 },
       { freq: 880, dur: 1.2 },
       { freq: 880, dur: 2.4 },
-      // ===== 主旋律（附点节奏 3-1-1）=====
+      // 主旋律（附点节奏 3-1-1）
       { freq: 440, dur: 3.6 },
       { freq: 440, dur: 0.9 },
       { freq: 440, dur: 2.7 },
@@ -3736,7 +3280,7 @@ var tetris = (() => {
       { freq: 587, dur: 0.9 },
       { freq: 587, dur: 2.7 },
       { freq: 659, dur: 4.5 },
-      // ===== 冲上云霄 =====
+      // 冲上云霄
       { freq: 880, dur: 3.6 },
       { freq: 880, dur: 0.9 },
       { freq: 880, dur: 2.7 },
@@ -3745,7 +3289,7 @@ var tetris = (() => {
       { freq: 659, dur: 0.9 },
       { freq: 659, dur: 2.7 },
       { freq: 659, dur: 4.5 },
-      // ===== 转折 =====
+      // 转折
       { freq: 587, dur: 3.6 },
       { freq: 587, dur: 0.9 },
       { freq: 587, dur: 2.7 },
@@ -3754,7 +3298,7 @@ var tetris = (() => {
       { freq: 440, dur: 0.9 },
       { freq: 440, dur: 2.7 },
       { freq: 440, dur: 4.5 },
-      // ===== 燃段 =====
+      // 燃段
       { freq: 587, dur: 2.7 },
       { freq: 587, dur: 1.8 },
       { freq: 659, dur: 2.7 },
@@ -3769,7 +3313,7 @@ var tetris = (() => {
       { freq: 784, dur: 2.7 },
       { freq: 784, dur: 1.8 },
       { freq: 784, dur: 3.6 },
-      // ===== 回响：超高音 =====
+      // 回响：超高音
       { freq: 1175, dur: 1.4 },
       { freq: 1175, dur: 1.4 },
       { freq: 0, dur: 0.9 },
@@ -3778,119 +3322,55 @@ var tetris = (() => {
       { freq: 0, dur: 0.9 },
       { freq: 880, dur: 2.7 },
       { freq: 880, dur: 2.7 },
-      // ===== 结尾 =====
+      // 结尾
       { freq: 440, dur: 3.6 },
       { freq: 440, dur: 1.8 },
       { freq: 440, dur: 3.6 },
       { freq: 440, dur: 1.8 },
       { freq: 440, dur: 5.4 }
     ],
-    /** ## 每个音符的基准时长（ms），较慢节奏 */
+    /** 每个音符的基准时长（ms），较慢节奏 */
     duration: 110,
-    /** ## 音量（0-1），比其他曲目更响亮 */
+    /** 音量（0-1），比其他曲目更响亮 */
     volume: 0.12,
-    /** ## 波形类型：方波（经典 8-bit 音色） */
+    /** 波形类型：方波（经典 8-bit 音色） */
     wave: "square"
   };
   var journey_to_west_default = JourneyToWest;
 
   // lib/services/audio/constants/musics.js
   var Musics = [
-    /**
-     * ## 背景音乐：TetrisTheme
-     *
-     * @type {Music}
-     */
+    /** @type {Music} TetrisTheme */
     tetris_theme_default,
-    /**
-     * ## 背景音乐：SpringFestival
-     *
-     * @type {Music}
-     */
+    /** @type {Music} SpringFestival */
     spring_festival_default,
-    /**
-     * ## 背景音乐：FirstDivision
-     *
-     * @type {Music}
-     */
+    /** @type {Music} FirstDivision */
     first_division_default,
-    /**
-     * ## 背景音乐：GongXiFaCai
-     *
-     * @type {Music}
-     */
+    /** @type {Music} GongXiFaCai */
     gong_xi_fa_cai_default,
-    /**
-     * ## 背景音乐：Loginska
-     *
-     * @type {Music}
-     */
+    /** @type {Music} Loginska */
     loginska_default,
-    /**
-     * ## 背景音乐：BeyondTheWall
-     *
-     * @type {Music}
-     */
+    /** @type {Music} BeyondTheWall */
     beyond_the_wall_default,
-    /**
-     * ## 背景音乐：Technotris
-     *
-     * @type {Music}
-     */
+    /** @type {Music} Technotris */
     technotris_default,
-    /**
-     * ## 背景音乐：GoldenSnakeDance
-     *
-     * @type {Music}
-     */
+    /** @type {Music} GoldenSnakeDance */
     golden_snake_dance_default,
-    /**
-     * ## 背景音乐：Korobeiniki
-     *
-     * @type {Music}
-     */
+    /** @type {Music} Korobeiniki */
     korobeiniki_default,
-    /**
-     * ## 背景音乐：Ascension
-     *
-     * @type {Music}
-     */
+    /** @type {Music} Ascension */
     ascension_default,
-    /**
-     * ## 背景音乐：NeonNights
-     *
-     * @type {Music}
-     */
+    /** @type {Music} NeonNights */
     neon_nights_default,
-    /**
-     * ## 背景音乐：FrozenPeaks
-     *
-     * @type {Music}
-     */
+    /** @type {Music} FrozenPeaks */
     frozen_peaks_default,
-    /**
-     * ## 背景音乐：CyberRush
-     *
-     * @type {Music}
-     */
+    /** @type {Music} CyberRush */
     cyber_rush_default,
-    /**
-     * ## 背景音乐：Starlight
-     *
-     * @type {Music}
-     */
+    /** @type {Music} Starlight */
     starlight_default,
-    /**
-     * ## 背景音乐：FinalPush
-     *
-     * @type {Music}
-     */
+    /** @type {Music} FinalPush */
     final_push_default,
-    /**
-     * ## 背景音乐：JourneyToWest
-     *
-     * @type {Music}
-     */
+    /** @type {Music} JourneyToWest */
     journey_to_west_default
   ];
   var musics_default = Musics;
@@ -3943,7 +3423,7 @@ var tetris = (() => {
   var loop_play_bgm_default = loopPlayBGM;
 
   // lib/services/audio/play-bgm.js
-  var getMusicByLevel = (audio, level) => {
+  var getMusicByLevel = (level) => {
     const { length } = musics_default;
     const { MAX_LEVEL: MAX_LEVEL2 } = game_default;
     const step = Math.floor(MAX_LEVEL2 / length);
@@ -3951,7 +3431,7 @@ var tetris = (() => {
     return musics_default[index];
   };
   var playBGM = (audio, level = 1) => {
-    const music = getMusicByLevel(audio, level);
+    const music = getMusicByLevel(level);
     const { melody, duration, volume, wave, gate, articulation } = music;
     loop_play_bgm_default(audio, melody, {
       duration,
@@ -3985,11 +3465,11 @@ var tetris = (() => {
     CLEAR: `animations:${uuid}:clear`
   });
   var AudioEvents = () => ({
-    /* ---------- 背景音乐 ---------- */
+    // 背景音乐
     RESUME_BGM: "audio:resume:bgm",
     STOP_BGM: "audio:stop:bgm",
     TOGGLE_BGM: "audio:toggle:bgm",
-    /* ---------- 游戏音效 ---------- */
+    // 游戏音效
     PLAY_SOUND: "audio:play:sound"
   });
   var AIEvents = (uuid) => ({
@@ -4011,47 +3491,47 @@ var tetris = (() => {
     ENQUEUE: `command:queue:${uuid}:enqueue`
   });
   var EngineEvents = () => ({
-    EXIT: `engine:exit`,
-    UPDATE_MODE: `engine:update:mode`,
-    UPDATE_PLAYERS: `engine:update:players`,
-    START: `engine:start`
+    EXIT: "engine:exit",
+    UPDATE_MODE: "engine:update:mode",
+    UPDATE_PLAYERS: "engine:update:players",
+    START: "engine:start"
   });
   var GameEvents = (uuid) => ({
-    /* ---------- 状态更新 ---------- */
+    // 状态更新
     UPDATE_STATE: `game:${uuid}:update:state`,
     UPDATE_MODE_INDEX: `game:${uuid}:update:mode:index`,
     UPDATE_BATTLE_INDEX: `game:${uuid}:update:battle:index`,
     UPDATE_MODE: `game:${uuid}:update:mode`,
     UPDATE_LEVEL: `game:${uuid}:update:level`,
     UPDATE_GAMEPAD_CONNECTED: `game:${uuid}:update:gamepad:connected`,
-    /* ---------- HUD 更新 ---------- */
+    // HUD 更新
     SWITCH_CONTROLLER: `game:${uuid}:swtich:controller`,
     UPDATE_HUD: `game:${uuid}:update:hud`,
     SAVE_HIGH_SCORE: `game:${uuid}:save:high:score`,
-    /* ---------- 场景更新 ---------- */
+    // 场景切换
     SWITCH_TO_GAME_MODE: `game:${uuid}:switch:to:game:mode`,
     SWITCH_TO_BATTLE_MODE: `game:${uuid}:switch:to:battle:mode`,
     SWITCH_TO_MAIN_MENU: `game:${uuid}:switch:to:main:menu`,
     SELECT_LEVEL: `game:${uuid}:select:level`,
     SWITCH_TO_DIFFICULTY: `game:${uuid}:switch:difficulty`,
     SELECT_DIFFICULTY: `game:${uuid}:select:difficulty`,
-    /* ---------- 核心流程 ---------- */
+    // 核心流程
     BEGIN: `game:${uuid}:begin`,
     START: `game:${uuid}:start`,
     TOGGLE_PAUSED: `game:${uuid}:toggle:paused`,
     RESET: `game:${uuid}:reset`,
     RESTART: `game:${uuid}:restart`,
     OVER: `game:${uuid}:over`,
-    /* ---------- 获取 ghost 定位 ---------- */
+    // Ghost 定位
     GET_GHOST_POSITION: `game:${uuid}:get:ghost:position`,
-    /* ---------- 方块操作 ---------- */
+    // 方块操作
     BLOCK_MOVE: `game:${uuid}:block:move`,
     BLOCK_ROTATE: `game:${uuid}:block:rotate`,
     BLOCK_DROP: `game:${uuid}:block:drop`,
     BLOCK_TICK: `game:${uuid}:block:tick`,
     BLOCK_SPAWN: `game:${uuid}:block:spawn`,
     BLOCK_HOLD: `game:${uuid}:block:hold`,
-    /* ---------- 动画特效 ---------- */
+    // 动画特效
     START_COUNTDOWN: `game:${uuid}:start:countdown`,
     START_PAUSED: `game:${uuid}:start:paused`,
     STOP_PAUSED: `game:${uuid}:stop:paused`,
@@ -4061,53 +3541,53 @@ var tetris = (() => {
     START_LANDING_FLASH: `game:${uuid}:start:landing:flash`,
     START_GARBAGE_WARNING: `game:${uuid}:start:garbage:warning`,
     START_GARBAGE_PUSH: `game:${uuid}:start:garbage:push`,
-    /* ---------- 背景音乐 ---------- */
+    // 背景音乐
     TOGGLE_BGM: `game:${uuid}:toggle:bgm`,
-    /* ---------- 回放准备 ---------- */
+    // 回放准备
     REPLAY_PREPARE: `game:${uuid}:replay:prepare`,
-    /* ---------- 对战认输 ---------- */
+    // 对战认输
     SURRENDER: `game:${uuid}:surrender`,
-    /* ---------- 游戏计时 ---------- */
+    // 游戏计时
     START_TIMER: `game:${uuid}:start:timer`,
     PAUSE_TIMER: `game:${uuid}:pause:timer`,
     RESET_TIMER: `game:${uuid}:reset:timer`,
-    /* ---------- 更新游戏记录 ---------- */
+    // 更新游戏记录
     UPDATE_RECORDS: `game:${uuid}:update:records`,
-    /* ---------- 退出游戏 ---------- */
+    // 退出游戏
     EXIT: `game:${uuid}:exit`,
     UPDATE_EXIT_INDEX: `game:${uuid}:update:exit:index`,
     GIVE_UP: `game:${uuid}:give:up`,
     RESUME: `game:${uuid}:resume`,
-    /* ---------- input 和 command 映射 ---------- */
+    // Input 和 Command 映射
     DISPATCH_INPUT: `game:${uuid}:dispatch:input`,
     DISPATCH_COMMAND: `game:${uuid}:dispatch:command`
   });
   var ReplayEvents = (uuid) => ({
-    /* ---------- 记录操作 ---------- */
+    // 录制操作
     START_RECORD: `replay:${uuid}:start:record`,
     STOP_RECORD: `replay:${uuid}:stop:record`,
     ADD_RECORD: `replay:${uuid}:add:record`,
     ADD_PIECE: `replay:${uuid}:add:piece`,
-    /* ---------- 回放操作 ---------- */
+    // 回放操作
     START_PLAY: `replay:${uuid}:start:play`,
     RESET: `replay:${uuid}:reset`,
-    /* ---------- 流程控制 ---------- */
+    // 流程控制
     GAME_OVER: `replay:${uuid}:game:over`,
     STOP_CLEAR_LINES: `replay:${uuid}:stop:clear:lines`
   });
   var UIEvents = (uuid) => ({
-    /* ---------- HUD 绘制 ---------- */
+    // HUD 绘制
     UPDATE_MODE: `ui:${uuid}:update:mode`,
     UPDATE_CONTROLLER: `ui:${uuid}:update:controller`,
     UPDATE_HUD: `ui:${uuid}:update:hud`,
-    /* ---------- 画布绘制 ---------- */
+    // 画布绘制
     RESIZE: `ui:${uuid}:resize`,
     RENDER_NEXT_PIECE: `ui:${uuid}:render:next:piece`,
     RENDER_HOLD_PIECE: `ui:${uuid}:render:hold:piece`,
     CLEAR_NEXT_PIECE: `ui:${uuid}:clear:next:piece`,
     CLEAR_HOLD_PIECE: `ui:${uuid}:clear:hold:piece`,
     RENDER_GHOST_PIECE: `ui:${uuid}:render:ghost:piece`,
-    /* ---------- 动画特效 ---------- */
+    // 动画特效
     RENDER_COUNTDOWN: `ui:${uuid}:render:countdown`,
     RENDER_CLEAR_LINES: `ui:${uuid}:render:clear:lines`,
     RENDER_CLEAR_SCORE: `ui:${uuid}:render:clear:score`,
@@ -4123,15 +3603,14 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Scheduler - 任务调度器
+     * @param {object} options - 配置对象
      */
     constructor(options) {
       super(options);
       this.initialize(options);
     }
     /**
-     * ## 初始化音频系统
+     * ## initialize：初始化音频系统
      *
      * 创建 AudioContext 和 Sounds 实例。
      *
@@ -4148,9 +3627,9 @@ var tetris = (() => {
       this.bgmSchedulerId = 0;
     }
     /**
-     * ## 播放背景音乐
+     * ## playBGM：播放背景音乐
      *
-     * @param {number} level - 当前游戏等级（影响曲目选择）
+     * @param {number} level - 当前游戏等级
      * @returns {void}
      */
     playBGM(level) {
@@ -4160,7 +3639,7 @@ var tetris = (() => {
       play_bgm_default(this, level);
     }
     /**
-     * ## 停止背景音乐
+     * ## stopBGM：停止背景音乐
      *
      * @returns {void}
      */
@@ -4168,7 +3647,7 @@ var tetris = (() => {
       stop_bgm_default(this);
     }
     /**
-     * ## 切换背景音乐
+     * ## toggleBGM：切换背景音乐
      *
      * @param {number} level - 当前游戏等级
      * @returns {void}
@@ -4177,9 +3656,7 @@ var tetris = (() => {
       toggle_bgm_default(this, level);
     }
     /**
-     * ## 订阅音频事件
-     *
-     * 绑定背景音乐和音效相关的事件监听。
+     * ## subscribe：订阅音频事件
      *
      * @returns {void}
      */
@@ -4191,7 +3668,7 @@ var tetris = (() => {
       this.on(events.PLAY_SOUND, this._onPlaySound);
     }
     /**
-     * ## 取消订阅音频事件
+     * ## unsubscribe：取消订阅音频事件
      *
      * @returns {void}
      */
@@ -4203,7 +3680,7 @@ var tetris = (() => {
       this.off(events.PLAY_SOUND, this._onPlaySound);
     }
     /**
-     * ## 处理播放背景音乐事件
+     * ## _onPlayBGM：处理播放背景音乐事件
      *
      * @private
      * @param {object} payload - 事件参数
@@ -4214,7 +3691,7 @@ var tetris = (() => {
       this.playBGM(level);
     };
     /**
-     * ## 处理停止背景音乐事件
+     * ## _onStopBGM：处理停止背景音乐事件
      *
      * @private
      * @returns {void}
@@ -4223,7 +3700,7 @@ var tetris = (() => {
       this.stopBGM();
     };
     /**
-     * ## 处理切换背景音乐事件
+     * ## _onToggleBGM：处理切换背景音乐事件
      *
      * 先播放切换音效，再执行切换逻辑。
      *
@@ -4238,15 +3715,15 @@ var tetris = (() => {
       this.toggleBGM(level);
     };
     /**
-     * ## 处理播放音效事件
+     * ## _onPlaySound：处理播放音效事件
      *
      * 根据 sound 名称从 Sounds 集合中找到对应的音效函数并执行。
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {string} payload.sound - 音效名称（如 MOVE、ROTATE、CLEAR 等）
-     * @param {number} [payload.lines] - 消除行数（消行音效专用）
-     * @param {number} [payload.level] - 当前等级（消行音效专用）
+     * @param {string} payload.sound - 音效名称
+     * @param {number} [payload.lines] - 消除行数
+     * @param {number} [payload.level] - 当前等级
      * @returns {void}
      */
     _onPlaySound = ({ sound, lines, level }) => {
@@ -6217,15 +5694,14 @@ var tetris = (() => {
      *
      * 初始化空队列。
      *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
+     * @param {object} options - 配置对象
      */
     constructor(options) {
       super(options);
       this.queue = [];
     }
     /**
-     * ## 入队一个 Command
+     * ## enqueue：入队一个 Command
      *
      * 将命令添加到队列末尾，等待后续 flush 时执行。
      *
@@ -6236,9 +5712,9 @@ var tetris = (() => {
       this.queue.push(command);
     }
     /**
-     * ## 执行并清空队列中的所有 Command
+     * ## flush：执行并清空队列中的所有 Command
      *
-     * 按入队顺序（FIFO）逐个执行命令，执行完毕后队列为空。 当前实现为一次性执行全部命令，不做时间分帧控制。
+     * 按入队顺序（FIFO）逐个执行命令，执行完毕后队列为空。
      *
      * @returns {void}
      */
@@ -6250,7 +5726,7 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 清空队列
+     * ## clear：清空队列
      *
      * 丢弃所有未执行的命令。通常在游戏重置或切换模式时调用。
      *
@@ -6260,9 +5736,7 @@ var tetris = (() => {
       this.queue.length = 0;
     }
     /**
-     * ## 订阅命令队列事件
-     *
-     * 绑定 `command:queue:<uuid>:enqueue` 和 `command:queue:<uuid>:clear` 事件。
+     * ## subscribe：订阅命令队列事件
      *
      * @returns {void}
      */
@@ -6274,7 +5748,7 @@ var tetris = (() => {
       this.on(events.ENQUEUE, this._onEnqueue);
     }
     /**
-     * ## 取消订阅命令队列事件
+     * ## unsubscribe：取消订阅命令队列事件
      *
      * @returns {void}
      */
@@ -6286,7 +5760,7 @@ var tetris = (() => {
       this.off(events.ENQUEUE, this._onEnqueue);
     }
     /**
-     * ## 处理清空队列事件
+     * ## _onClear：处理清空队列事件
      *
      * @private
      * @returns {void}
@@ -6295,7 +5769,7 @@ var tetris = (() => {
       this.clear();
     };
     /**
-     * ## 处理命令入队事件
+     * ## _onEnqueue：处理命令入队事件
      *
      * @private
      * @param {object} params - 事件参数
@@ -6311,45 +5785,39 @@ var tetris = (() => {
   // lib/runtime/animation-system.js
   var AnimationSystem = class extends core_default {
     /**
-     * ## 当前活跃的动画队列
-     *
-     * 存储所有正在运行的动画对象。在 `flush()` 中移除已结束的动画。
+     * 当前活跃的动画队列。
      *
      * @private
      * @type {object[]}
      */
     #queue = [];
     /**
-     * ## 等待注册的动画队列
+     * 等待注册的动画队列。
      *
-     * 新注册的动画先加入此队列，在下次 `flush()` 时合并到 `#queue`。 避免在遍历活跃队列时直接修改数组。
+     * 新注册的动画先加入此队列，在下次 flush() 时合并。
      *
      * @private
      * @type {object[]}
      */
     #pending = [];
     /**
-     * ## 按 layer 排序后的缓存数组
+     * 按 layer 排序后的缓存数组。
      *
-     * 用于渲染阶段，避免每帧重新排序。只在 `#dirty = true` 时重新计算。
+     * 只在 #dirty = true 时重新计算。
      *
      * @private
      * @type {object[]}
      */
     #sorted = [];
     /**
-     * ## 排序缓存是否需要重新计算
-     *
-     * 当队列发生变化时设为 `true`，下次 `render()` 时触发重新排序。
+     * 排序缓存是否需要重新计算。
      *
      * @private
      * @type {boolean}
      */
     #dirty = false;
     /**
-     * ## 当前动画总数（调试用）
-     *
-     * 返回活跃队列和待注册队列中的动画总数。
+     * ## size：当前动画总数（调试用）
      *
      * @type {number}
      */
@@ -6359,32 +5827,25 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 初始化动画管理系统实例。需要手动调用 `subscribe()` 订阅事件。
-     *
      * @param {object} options - 配置对象
-     * @param {object} options.Game - 游戏主实例
      */
     constructor(options) {
       super(options);
     }
     /**
-     * ## 注册动画
+     * ## register：注册动画
      *
-     * 将动画对象注册到系统中。新动画不会立即生效，而是在下次 `flush()` 时合并。
-     *
-     * ### 验证
-     *
-     * 动画对象必须包含 `render()` 方法，否则抛出错误。
+     * 将动画对象注册到系统中。新动画在下次 flush() 时合并。
      *
      * ### 默认值
      *
-     * - `layer`：默认为 0（最底层）
-     * - `blocking`：默认为 false（非阻塞）
-     * - `name`：默认为 'anonymous'
+     * - Layer：默认为 0（最底层）
+     * - Blocking：默认为 false（非阻塞）
+     * - Name：默认为 'anonymous'
      *
-     * @param {object} animation - 动画对象，必须包含 `render()` 方法
+     * @param {object} animation - 动画对象，必须包含 render() 方法
      * @returns {void}
-     * @throws {Error} 如果动画对象不包含 `render()` 方法
+     * @throws {Error} 如果动画对象不包含 render() 方法
      */
     register(animation) {
       if (!animation || typeof animation.render !== "function") {
@@ -6397,14 +5858,10 @@ var tetris = (() => {
       this.#dirty = true;
     }
     /**
-     * ## 刷新动画队列
-     *
-     * 在 Scheduler.tick() 之后调用，执行两个操作：
+     * ## flush：刷新动画队列
      *
      * 1. 合并待注册动画到活跃队列
-     * 2. 移除已结束的动画（调用其 `dispose()` 方法）
-     *
-     * 替代了原来的 `update(delta)`，不再执行帧更新逻辑。
+     * 2. 移除已结束的动画（调用其 dispose() 方法）
      *
      * @returns {void}
      */
@@ -6413,9 +5870,9 @@ var tetris = (() => {
       this.#removeFinished();
     }
     /**
-     * ## 渲染所有动画
+     * ## render：渲染所有动画
      *
-     * 采用懒排序策略：只在队列发生变化时重新排序。 `layer` 值越小越先渲染，越大越后渲染（顶层）。
+     * 采用懒排序策略：只在队列发生变化时重新排序。 layer 值越小越先渲染，越大越后渲染。
      *
      * @returns {void}
      */
@@ -6429,13 +5886,12 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 检查是否存在阻塞性动画
+     * ## hasBlocking：检查是否存在阻塞性动画
      *
-     * 阻塞动画会暂停用户输入或游戏逻辑。支持按名称精确匹配。
+     * 支持按名称精确匹配。
      *
-     * @param {string[]} [names=[]] - 可选，指定要检查的动画名称列表。 为空时检查所有阻塞动画。. Default is
-     *   `[]`
-     * @returns {boolean} 存在匹配的阻塞动画则返回 `true`
+     * @param {string[]} [names=[]] - 指定要检查的动画名称列表. Default is `[]`
+     * @returns {boolean} 存在匹配的阻塞动画则返回 true
      */
     hasBlocking(names = []) {
       const hasNames = names.length > 0;
@@ -6450,9 +5906,9 @@ var tetris = (() => {
       return false;
     }
     /**
-     * ## 清空所有动画
+     * ## clear：清空所有动画
      *
-     * 移除系统中的所有动画，调用每个动画的 `dispose()` 方法清理资源， 并重置所有内部状态。通常在游戏重置或场景切换时调用。
+     * 移除系统中的所有动画，调用每个动画的 dispose() 方法， 并重置所有内部状态。
      *
      * @returns {void}
      */
@@ -6473,9 +5929,7 @@ var tetris = (() => {
       this.#dirty = false;
     }
     /**
-     * ## 订阅动画系统事件
-     *
-     * 监听 `animations:<id>:clear` 事件，用于外部触发清空操作。
+     * ## subscribe：订阅动画系统事件
      *
      * @returns {void}
      */
@@ -6485,9 +5939,7 @@ var tetris = (() => {
       this.on(events.CLEAR, this._onClear);
     }
     /**
-     * ## 取消订阅动画系统事件
-     *
-     * 移除对 `animations:<id>:clear` 事件的监听。 在组件销毁时调用，避免内存泄漏。
+     * ## unsubscribe：取消订阅动画系统事件
      *
      * @returns {void}
      */
@@ -6497,9 +5949,7 @@ var tetris = (() => {
       this.off(events.CLEAR, this._onClear);
     }
     /**
-     * ## 处理清空事件
-     *
-     * 当接收到 `animations:<id>:clear` 事件时的回调。
+     * ## _onClear：处理清空事件
      *
      * @private
      * @returns {void}
@@ -6508,9 +5958,7 @@ var tetris = (() => {
       this.clear();
     };
     /**
-     * ## 合并待注册动画到活跃队列
-     *
-     * 将 `#pending` 中的动画全部移入 `#queue`，并标记排序缓存失效。 没有待注册动画时直接返回。
+     * 合并待注册动画到活跃队列。
      *
      * @private
      * @returns {void}
@@ -6522,10 +5970,9 @@ var tetris = (() => {
       this.#dirty = true;
     }
     /**
-     * ## 移除已结束的动画
+     * 移除已结束的动画。
      *
-     * 遍历活跃队列，对 `_finished` 为 `true` 的动画调用 `dispose()` 后移除。 倒序遍历避免 `splice`
-     * 导致索引错位。
+     * 倒序遍历避免 splice 导致索引错位。
      *
      * @private
      * @returns {void}
@@ -6562,6 +6009,19 @@ var tetris = (() => {
       super(options);
       this.initialize(options);
     }
+    /**
+     * ## initialize：初始化 Canvas 管理器
+     *
+     * 获取三个 Canvas 元素及其 2D 渲染上下文， 初始化 fontSize 和 blockSize 为 0。
+     *
+     * @param {object} options - 配置选项
+     * @param {string} options.board - 棋盘 Canvas ID
+     * @param {string} options.next - 预览方块 Canvas ID
+     * @param {string} options.hold - 缓存方块 Canvas ID
+     * @param {string} options.name - 玩家名称
+     * @param {number} options.index - 玩家索引
+     * @returns {void}
+     */
     initialize(options) {
       const { board, next, hold: hold2, name, index } = options;
       this.gameBoard = document.querySelector(`#${name}-${index}-${board}`);
@@ -6573,6 +6033,12 @@ var tetris = (() => {
       this.fontSize = 0;
       this.blockSize = 0;
     }
+    /**
+     * ## getCanvas：获取 Canvas 元素
+     *
+     * @param {boolean} [isNext=false] - 是否获取预览方块 Canvas. Default is `false`
+     * @returns {HTMLCanvasElement} Canvas DOM 元素
+     */
     getCanvas(isNext = false) {
       return isNext ? this.nextPiece : this.gameBoard;
     }
@@ -6598,7 +6064,7 @@ var tetris = (() => {
     const { controller, score, lines, level, combo, highScore } = Hud;
     const { name, index } = Player;
     return {
-      /** @type {HTMLElement | null} 分数显示元素 */
+      /** @type {HTMLElement | null} 控制者显示元素 */
       controller: document.querySelector(`#${name}-${index}-${controller}`),
       /** @type {HTMLElement | null} 分数显示元素 */
       score: document.querySelector(`#${name}-${index}-${score}`),
@@ -6648,9 +6114,9 @@ var tetris = (() => {
       this.prev = { lines: -1, level: -1, combo: -1 };
     }
     /**
-     * ## 更新 HUD 目标值
+     * ## update：更新 HUD 目标值
      *
-     * 分数和最高分只更新 target（由 `tick()` 驱动动画）， 行数和等级立即更新 DOM。
+     * 分数和最高分只更新 target（由 tick 驱动动画）， 行数和等级立即更新 DOM。
      *
      * @param {object} state - 游戏状态
      * @param {number} state.score - 当前分数
@@ -6678,16 +6144,16 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 更新控制者标识
+     * ## updateController：更新控制者标识
      *
-     * @param {string} controller - 控制者身份（'human' 或 'ai'），会转为大写显示
+     * @param {string} controller - 控制者身份（'human' 或 'ai'）
      * @returns {void}
      */
     updateController(controller) {
       setText(this.elements.controller, controller.toUpperCase());
     }
     /**
-     * ## 每帧驱动动画
+     * ## tick：每帧驱动动画
      *
      * 在游戏主循环中调用，更新分数和最高分的平滑动画。
      *
@@ -6699,9 +6165,9 @@ var tetris = (() => {
       animationScore(highScoreTracker, elements.highScore, 5);
     }
     /**
-     * ## 重置 HUD 为初始状态
+     * ## reset：重置 HUD 为初始状态
      *
-     * 清空所有追踪器和 DOM 显示，通常在返回主菜单或游戏重置时调用。
+     * 清空所有追踪器和 DOM 显示， 通常在返回主菜单或游戏重置时调用。
      *
      * @returns {void}
      */
@@ -6726,12 +6192,12 @@ var tetris = (() => {
   // lib/constants/options.js
   var OPTIONS = {
     /**
-     * ## 游戏模式选择选项
+     * 游戏模式选择选项。
      *
-     * 在 game-mode 界面中使用，玩家通过 ↑↓ 方向键移动光标选择游戏模式。 按 Enter 确认后进入对应的模式流程。
+     * 在 game-mode 界面中使用，玩家通过 ↑↓ 方向键移动光标选择游戏模式。
      *
      * | 选项   | 按键 | 模式   | 玩家配置        | 说明             |
-     * | ------ | ---- | ------ | --------------- | ---------------- |
+     * | :----- | :--- | :----- | :-------------- | :--------------- |
      * | SINGLE | S    | single | ['human']       | 单人模式         |
      * | BATTLE | B    | versus | ['human', 'ai'] | 对战模式（人机） |
      *
@@ -6752,16 +6218,14 @@ var tetris = (() => {
       }
     ],
     /**
-     * ## 对战模式选择选项
+     * 对战模式选择选项。
      *
-     * 在 battle-mode 界面中使用，玩家通过 ↑↓ 方向键选择对战类型。 按 Enter 确认后启动对战。
+     * 在 battle-mode 界面中使用，玩家通过 ↑↓ 方向键选择对战类型。
      *
      * | 选项     | 按键 | 玩家配置           | 说明                   |
-     * | -------- | ---- | ------------------ | ---------------------- |
+     * | :------- | :--- | :----------------- | :--------------------- |
      * | VS AI    | A    | ['human', 'ai']    | 人机对战（玩家 VS AI） |
      * | VS HUMAN | H    | ['human', 'human'] | 双人对战               |
-     *
-     * 选择后触发 engine:start 事件，Engine 销毁当前实例并重新 launch。
      */
     BATTLE_OPTIONS: [
       {
@@ -6776,17 +6240,14 @@ var tetris = (() => {
       }
     ],
     /**
-     * ## 退出游戏菜单选项
+     * 退出游戏菜单选项。
      *
-     * 在 exit-game 界面中使用（Single 模式下按 ESC 键触发）。 玩家通过 ↑↓ 方向键选择操作。
+     * 在 exit-game 界面中使用（Single 模式下按 ESC 键触发）。
      *
      * | 选项        | 按键 | 事件    | 说明                           |
-     * | ----------- | ---- | ------- | ------------------------------ |
+     * | :---------- | :--- | :------ | :----------------------------- |
      * | RESUME GAME | R    | RESUME  | 继续游戏，返回 playing 模式    |
      * | EXIT GAME   | E    | GIVE_UP | 退出游戏，返回游戏模式选择界面 |
-     *
-     * - **RESUME**：关闭退出菜单，恢复游戏状态
-     * - **GIVE_UP**：触发 engine:exit 事件，Engine 销毁当前实例并重新 launch 到模式选择界面
      */
     EXIT_OPTIONS: [
       {
@@ -6946,7 +6407,7 @@ var tetris = (() => {
     let x;
     let y;
     switch (scene) {
-      /** 主菜单 / 倒计时场景：使用 Tetris 图标 */
+      // 主菜单 / 倒计时 / 模式选择：使用 Tetris 图标
       case "game-mode":
       case "battle-mode":
       case "main-menu":
@@ -6957,7 +6418,7 @@ var tetris = (() => {
         y = height - size;
         break;
       }
-      /** 游戏进行中场景：根据时间切换主题背景 */
+      // 游戏进行中：根据时间切换主题背景
       case "playing": {
         if (hours >= 0 && hours <= 8) {
           icon = "pagoda";
@@ -6974,7 +6435,7 @@ var tetris = (() => {
         y = height - size;
         break;
       }
-      /** 暂停场景：使用咖啡杯图标 */
+      // 暂停场景：使用咖啡杯图标
       case "paused": {
         img = getImage(scenes_background_default.coffee);
         size = width * 0.76;
@@ -6982,7 +6443,7 @@ var tetris = (() => {
         y = height - size * 0.94;
         break;
       }
-      /** 游戏结束场景：使用笑脸图标 */
+      // 游戏结束场景：使用笑脸图标
       case "game-over": {
         img = getImage(scenes_background_default.happy);
         size = Math.floor(width * 0.42);
@@ -7392,29 +6853,53 @@ var tetris = (() => {
   var getChineseHourDialTheme = (hour) => {
     const map = [
       "Red",
+      // 0  子时
       "White",
+      // 1  丑时
       "White",
+      // 2
       "Orange",
+      // 3  寅时
       "Orange",
+      // 4
       "Cyan",
+      // 5  卯时
       "Cyan",
+      // 6
       "Blue",
+      // 7  辰时
       "Blue",
+      // 8
       "Coral",
+      // 9  巳时
       "Coral",
+      // 10
       "Purple",
+      // 11 午时
       "Purple",
+      // 12
       "Green",
+      // 13 未时
       "Green",
+      // 14
       "Yellow",
+      // 15 申时
       "Yellow",
+      // 16
       "Pink",
+      // 17 酉时
       "Pink",
+      // 18
       "Teal",
+      // 19 戌时
       "Teal",
+      // 20
       "Violet",
+      // 21 亥时
       "Violet",
+      // 22
       "Red"
+      // 23 回到子时
     ];
     return map[hour];
   };
@@ -7672,9 +7157,13 @@ var tetris = (() => {
   };
   var render_classic_block_default = renderClassicBlock;
 
+  // lib/utils/color/parse-to-full-hex.js
+  var parseToFullHex = (hex) => hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+  var parse_to_full_hex_default = parseToFullHex;
+
   // lib/utils/color/darken.js
   var darken = (hex, factor) => {
-    const fullHex = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+    const fullHex = parse_to_full_hex_default(hex);
     const r = Number.parseInt(fullHex.slice(1, 3), 16);
     const g = Number.parseInt(fullHex.slice(3, 5), 16);
     const b = Number.parseInt(fullHex.slice(5, 7), 16);
@@ -7687,10 +7176,7 @@ var tetris = (() => {
 
   // lib/utils/color/hex-to-rgba.js
   var hexToRgba = (hex, alpha = 1) => {
-    let fullHex = hex;
-    if (hex.length === 4) {
-      fullHex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
-    }
+    const fullHex = parse_to_full_hex_default(hex);
     const r = Number.parseInt(fullHex.slice(1, 3), 16);
     const g = Number.parseInt(fullHex.slice(3, 5), 16);
     const b = Number.parseInt(fullHex.slice(5, 7), 16);
@@ -7762,7 +7248,7 @@ var tetris = (() => {
 
   // lib/utils/color/lighten.js
   var lighten = (hex, factor) => {
-    const fullHex = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+    const fullHex = parse_to_full_hex_default(hex);
     const r = Number.parseInt(fullHex.slice(1, 3), 16);
     const g = Number.parseInt(fullHex.slice(3, 5), 16);
     const b = Number.parseInt(fullHex.slice(5, 7), 16);
@@ -7858,13 +7344,9 @@ var tetris = (() => {
     ctx.fillStyle = color;
     ctx.fillRect(
       px + u * steps,
-      // X 坐标：缩进 steps 个单元
       py + u * steps,
-      // Y 坐标：缩进 steps 个单元
       w - u * steps * 2,
-      // 宽度：两侧各缩进 steps 个单元
       h - u * steps * 2
-      // 高度：两侧各缩进 steps 个单元
     );
   };
   var drawLayers = (options) => {
@@ -7883,19 +7365,19 @@ var tetris = (() => {
     const darkColor = darken_default(color, 0.4);
     const lightColor = lighten_default(color, 0.5);
     switch (pattern) {
-      /** Jay：4 层嵌套，最内层用亮色 */
+      // Jay：4 层嵌套，最内层用亮色
       case "jay": {
         drawLayers({ ctx, px, py, w, h, u, color, darkColor });
         layer({ ctx, px, py, w, h, u, steps: 3, color: lightColor });
         break;
       }
-      /** Ell：2 层嵌套（外暗→主色） */
+      // Ell：2 层嵌套（外暗→主色）
       case "ell": {
         layer({ ctx, px, py, w, h, u, steps: 0, color: darkColor });
         layer({ ctx, px, py, w, h, u, steps: 1, color });
         break;
       }
-      /** Tee：2 层 + 横竖条内部细节 */
+      // Tee：2 层 + 横竖条内部细节
       case "tee": {
         layer({ ctx, px, py, w, h, u, steps: 0, color: darkColor });
         layer({ ctx, px, py, w, h, u, steps: 1, color });
@@ -7907,7 +7389,7 @@ var tetris = (() => {
         ctx.fillRect(px + u * 5, py + u * 3, u, h - u * 6);
         break;
       }
-      /** Square：3 层嵌套（默认） */
+      // Square：3 层嵌套（默认）
       default: {
         drawLayers({ ctx, px, py, w, h, u, color, darkColor });
       }
@@ -8079,9 +7561,9 @@ var tetris = (() => {
     /**
      * ## 深夜 0-3 点：右侧偏大
      *
-     * @param {number} width - 宽度值
-     * @param {number} height - 高度值
-     * @returns {object} - 返回 Strategy 对象信息
+     * @param {number} width - 画布宽度
+     * @param {number} height - 画布高度
+     * @returns {object} 布局参数 { size, x, y }
      */
     night_0_3: (width, height) => ({
       size: Math.floor(width * 0.48),
@@ -8091,9 +7573,9 @@ var tetris = (() => {
     /**
      * ## 清晨 4-7 点：右侧偏中
      *
-     * @param {number} width - 宽度值
-     * @param {number} height - 高度值
-     * @returns {object} - 返回 Strategy 对象信息
+     * @param {number} width - 画布宽度
+     * @param {number} height - 画布高度
+     * @returns {object} 布局参数 { size, x, y }
      */
     morning_4_7: (width, height) => {
       const size = Math.floor(width * 0.52);
@@ -8106,9 +7588,9 @@ var tetris = (() => {
     /**
      * ## 上午 8-11 点：右侧较大
      *
-     * @param {number} width - 宽度值
-     * @param {number} height - 高度值
-     * @returns {object} - 返回 Strategy 对象信息
+     * @param {number} width - 画布宽度
+     * @param {number} height - 画布高度
+     * @returns {object} 布局参数 { size, x, y }
      */
     morning_8_11: (width, height) => {
       const size = Math.floor(width * 0.58);
@@ -8121,8 +7603,8 @@ var tetris = (() => {
     /**
      * ## 中午 12-14 点：居中最大
      *
-     * @param {number} width - 宽度值
-     * @returns {object} - 返回 Strategy 对象信息
+     * @param {number} width - 画布宽度
+     * @returns {object} 布局参数 { size, x, y }
      */
     noon_12_14: (width) => {
       const size = Math.floor(width * 0.68);
@@ -8135,9 +7617,9 @@ var tetris = (() => {
     /**
      * ## 下午 14-16 点：左侧较大
      *
-     * @param {number} width - 宽度值
-     * @param {number} height - 高度值
-     * @returns {object} - 返回 Strategy 对象信息
+     * @param {number} width - 画布宽度
+     * @param {number} height - 画布高度
+     * @returns {object} 布局参数 { size, x, y }
      */
     afternoon_14_16: (width, height) => {
       const size = Math.floor(width * 0.58);
@@ -8150,9 +7632,9 @@ var tetris = (() => {
     /**
      * ## 傍晚 17-19 点：左侧偏中
      *
-     * @param {number} width - 宽度值
-     * @param {number} height - 高度值
-     * @returns {object} - 返回 Strategy 对象信息
+     * @param {number} width - 画布宽度
+     * @param {number} height - 画布高度
+     * @returns {object} 布局参数 { size, x, y }
      */
     evening_17_19: (width, height) => {
       const size = Math.floor(width * 0.52);
@@ -8165,9 +7647,9 @@ var tetris = (() => {
     /**
      * ## 夜晚 20-23 点：左侧偏小
      *
-     * @param {number} width - 宽度值
-     * @param {number} height - 高度值
-     * @returns {object} - 返回 Strategy 对象信息
+     * @param {number} width - 画布宽度
+     * @param {number} height - 画布高度
+     * @returns {object} 布局参数 { size, x, y }
      */
     night_20_23: (width, height) => {
       const size = Math.floor(width * 0.48);
@@ -8206,8 +7688,7 @@ var tetris = (() => {
     const character = get_chinese_hour_character_default(hour);
     const img = getImage(chinese_hour_characters_default[character]);
     const key = getStrategyKey(hour);
-    const strategy = LAYOUT_STRATEGIES[key];
-    const { size, x, y } = strategy(width, height);
+    const { size, x, y } = LAYOUT_STRATEGIES[key](width, height);
     render_image_default(canvas, { img, x, y, size });
   };
   var render_chinese_hour_character_default = renderChineseHourCharacter;
@@ -8498,7 +7979,6 @@ var tetris = (() => {
         text: `[${checked}] ${option.label}`,
         x: width * 0.5,
         y,
-        // 选中项用绿色高亮，未选中用白色
         color: isSelected ? colors_default.GREEN : colors_default.WHITE
       });
     }
@@ -8549,7 +8029,7 @@ var tetris = (() => {
     /**
      * ## 退出游戏菜单场景
      *
-     * Single 模式下按 ESC 键触发，显示 RESUME GAME / EXIT GAME 选项。
+     * Single 模式下按 ESC 键触发， 显示 RESUME GAME / EXIT GAME 选项。
      *
      * @param {object} canvas - Canvas 画布管理器
      * @param {object} state - 当前游戏状态
@@ -8582,7 +8062,7 @@ var tetris = (() => {
     /**
      * ## 游戏进行中场景
      *
-     * 渲染棋盘、当前方块、Ghost 方块、预览方块和 Hold 方块。
+     * 渲染棋盘、当前方块、Ghost 方块、 预览方块和 Hold 方块。
      *
      * @param {object} canvas - Canvas 画布管理器
      * @param {object} state - 当前游戏状态
@@ -8790,10 +8270,8 @@ var tetris = (() => {
       color: GREEN4,
       stroke: true,
       strokeColor: BLACK2,
-      // 固定字号
       size: 1.1,
       center: true,
-      // 对齐方式与你原逻辑一致
       baseline: "top"
     });
   };
@@ -8867,17 +8345,11 @@ var tetris = (() => {
       x: width / 2,
       y: height / 1.6,
       color: YELLOW4,
-      // 黄色填充
       stroke: true,
-      // 启用描边
       strokeColor: BLACK2,
-      // 黑色描边
       lineWidth: 3,
-      // 描边宽度 3px
       size: 1.3,
-      // 字体大小系数
       center: true
-      // 水平居中
     });
   };
   var render_congrats_text_default = renderCongratsText;
@@ -9027,7 +8499,7 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收依赖配置，调用 `initialize()` 创建子模块。
+     * 接收依赖配置，调用 initialize() 创建子模块。
      *
      * @param {object} options - 配置（依赖的执行上下文）对象
      */
@@ -9036,10 +8508,9 @@ var tetris = (() => {
       this.initialize();
     }
     /**
-     * ## 初始化渲染器
+     * ## initialize：初始化渲染器
      *
-     * 创建 HudManager（HUD 显示管理器）和 CanvasManager（Canvas 画布管理器）实例。
-     * 这两个管理器是渲染器的基础依赖，后续所有渲染操作都通过它们进行。
+     * 创建 HudManager 和 CanvasManager 实例。 这两个管理器是渲染器的基础依赖， 后续所有渲染操作都通过它们进行。
      *
      * @returns {void}
      */
@@ -9055,7 +8526,7 @@ var tetris = (() => {
       });
     }
     /**
-     * ## 获取 Canvas 画布管理器
+     * ## getCanvas：获取 Canvas 画布元素
      *
      * 供外部模块（如 FlyAnimation）获取棋盘的 DOM 元素引用。
      *
@@ -9065,39 +8536,37 @@ var tetris = (() => {
     getCanvas(isNext = false) {
       return this.Canvas.getCanvas(isNext);
     }
-    // ==================== 状态更新方法 ====================
+    /*
+     * ============================================================
+     * 状态更新方法
+     * ============================================================
+     */
     /**
-     * ## 更新游戏模式标识
+     * ## updateMode：更新游戏模式标识
      *
-     * 修改棋盘 Canvas 的 `data-mode` 属性，用于 CSS 样式切换。 不同模式对应不同的视觉风格（如主菜单、游戏中、暂停）。
+     * 修改棋盘 Canvas 的 data-mode 属性，用于 CSS 样式切换。
      *
-     * @param {string} mode - 游戏模式（main-menu / playing / paused / game-over /
-     *   replay）
+     * @param {string} mode - 游戏模式
      * @returns {void}
      */
     updateMode(mode) {
       this.Canvas.gameBoard.dataset.mode = mode;
     }
     /**
-     * ## 更新控制者标识
+     * ## updateController：更新控制者标识
      *
-     * 在 HUD 上显示当前控制者身份（HUMAN 或 AI）。 控制者切换时自动更新 DOM 文本。
+     * 在 HUD 上显示当前控制者身份（HUMAN 或 AI）。
      *
-     * @param {string} controller - 当前控制者（'human' 或 'ai'），会转为大写显示
+     * @param {string} controller - 当前控制者
      * @returns {void}
      */
     updateController(controller) {
       this.Hud.updateController(controller);
     }
     /**
-     * ## 更新 HUD 显示
+     * ## updateHud：更新 HUD 显示
      *
-     * 从 Store 读取最新状态（分数、行数、等级、最高分、连击数）， 更新 HUD 的数字显示。
-     *
-     * ### 特殊处理
-     *
-     * - 主菜单模式（main-menu）或需要重置（needReset）时，先归零所有 HUD 显示
-     * - 通过 HudManager.update() 平滑过渡数字动画
+     * 从 Store 读取最新状态，更新 HUD 的数字显示。 主菜单模式或需要重置时先归零所有 HUD 显示。
      *
      * @returns {void}
      */
@@ -9119,21 +8588,24 @@ var tetris = (() => {
       this.Hud.update({ score, lines, level, highScore, combo });
     }
     /**
-     * ## 更新 HUD 动画
+     * ## tickHud：更新 HUD 动画
      *
-     * 每帧调用，驱动 HUD 数字（分数、最高分）的平滑过渡动画。 由 Engine 的游戏循环在每帧中调用。
+     * 每帧调用，驱动 HUD 数字的平滑过渡动画。
      *
      * @returns {void}
      */
     tickHud() {
       this.Hud.tick();
     }
-    // ==================== 场景渲染方法 ====================
+    /*
+     * ============================================================
+     * 场景渲染方法
+     * ============================================================
+     */
     /**
-     * ## 延迟渲染场景
+     * ## lazyRender：延迟渲染场景
      *
-     * 等待像素字体 "Press Start 2P" 加载完成后渲染主菜单场景。 使用 document.fonts.ready 检测字体加载状态。
-     * 在游戏首次启动时调用一次。
+     * 等待像素字体加载完成后渲染主菜单场景。
      *
      * @returns {void}
      */
@@ -9142,17 +8614,9 @@ var tetris = (() => {
       lazy_render_scene_default(this.Canvas, Store.getState());
     }
     /**
-     * ## 渲染游戏场景
+     * ## render：渲染游戏场景
      *
-     * 每帧调用，根据当前游戏模式（mode）路由到对应场景渲染函数。
-     *
-     * ### 模式路由
-     *
-     * - Main-menu → 主菜单场景
-     * - Playing → 游戏主场景（棋盘 + 当前方块 + ghost）
-     * - Paused → 暂停场景
-     * - Game-over → 游戏结束场景
-     * - Replay → 回放场景
+     * 每帧调用，根据当前游戏模式路由到对应场景渲染函数。
      *
      * @returns {void}
      */
@@ -9161,21 +8625,24 @@ var tetris = (() => {
       render_scene_default(this.Canvas, Store.getState());
     }
     /**
-     * ## 画布自适应
+     * ## resize：画布自适应
      *
-     * 根据窗口尺寸调整棋盘和预览画布的大小。 重新计算 `blockSize` 和 `fontSize` 等全局参数，
-     * 确保游戏界面在不同屏幕尺寸下保持正确的比例。
+     * 根据窗口尺寸调整棋盘和预览画布的大小。
      *
      * @returns {void}
      */
     resize() {
       resize_default(this.Canvas);
     }
-    // ==================== 动画特效方法 ====================
+    /*
+     * ============================================================
+     * 预览方块方法
+     * ============================================================
+     */
     /**
-     * ## 渲染下一个方块预览
+     * ## renderNextPiece：渲染下一个方块预览
      *
-     * 在预览画布中居中绘制下一个方块的形状。 使用当前关卡的配色方案。
+     * 在预览画布中居中绘制下一个方块的形状。
      *
      * @returns {void}
      */
@@ -9184,9 +8651,9 @@ var tetris = (() => {
       render_next_piece_default(Canvas, Store.getState());
     }
     /**
-     * ## 渲染缓存方块预览
+     * ## renderHoldPiece：渲染缓存方块预览
      *
-     * 在缓存画布中居中绘制缓存（Hold）方块的形状。 如果 Hold 槽为空，显示灰色半透明方块。
+     * 在缓存画布中居中绘制缓存（Hold）方块的形状。
      *
      * @returns {void}
      */
@@ -9195,9 +8662,9 @@ var tetris = (() => {
       render_hold_piece_default(Canvas, Store.getState());
     }
     /**
-     * ## 清空预览方块画布
+     * ## clearNextPiece：清空预览方块画布
      *
-     * 清除下一个方块预览区域的 Canvas 内容。 在方块生成失败或游戏结束时调用。
+     * 清除下一个方块预览区域的 Canvas 内容。
      *
      * @returns {void}
      */
@@ -9206,9 +8673,9 @@ var tetris = (() => {
       clear_next_piece_default(Canvas);
     }
     /**
-     * ## 清空缓存方块画布
+     * ## clearHoldPiece：清空缓存方块画布
      *
-     * 清除缓存（Hold）方块预览区域的 Canvas 内容。 在游戏重置时调用。
+     * 清除缓存（Hold）方块预览区域的 Canvas 内容。
      *
      * @returns {void}
      */
@@ -9217,10 +8684,9 @@ var tetris = (() => {
       clear_hold_piece_default(Canvas);
     }
     /**
-     * ## 渲染幽灵方块（落点预览）
+     * ## renderGhostPiece：渲染幽灵方块
      *
-     * 在当前方块的正下方绘制半透明的"幽灵"方块， 显示如果直接硬降（Hard Drop）方块将落到的位置。 Level <= 9
-     * 时才绘制，高等级不显示落点预览增加难度。
+     * 在当前方块正下方绘制半透明的落点预览。
      *
      * @param {object} ghost - 幽灵方块数据
      * @returns {void}
@@ -9229,24 +8695,26 @@ var tetris = (() => {
       const { Canvas } = this;
       render_ghost_piece_default(Canvas, ghost);
     }
+    /*
+     * ============================================================
+     * 动画特效方法
+     * ============================================================
+     */
     /**
-     * ## 渲染倒计时特效
+     * ## renderCountdown：渲染倒计时特效
      *
-     * 在游戏开始前显示 3、2、1 的倒计时数字和缩放动画。 动画由 `CountdownAnimation` 控制，本方法只负责根据状态绘制。
+     * 在游戏开始前显示 3、2、1 的倒计时数字和缩放动画。
      *
      * @param {object} state - 倒计时动画状态
-     * @param {number} state.number - 当前倒计时数字（3/2/1）
-     * @param {number} state.scale - 数字缩放比例（1.0 → 1.5 → 1.0）
      * @returns {void}
      */
     renderCountdown(state) {
       render_countdown_default(this.Canvas, state);
     }
     /**
-     * ## 渲染消行闪烁特效
+     * ## renderClearLines：渲染消行闪烁特效
      *
-     * 在消除满行时，将待消除的行以白色高亮闪烁。 闪烁由 `ClearLinesAnimation` 控制（6 次切换，共 720ms），
-     * 本方法只负责在可见帧绘制白色覆盖。
+     * 在消除满行时，将待消除的行以白色高亮闪烁。
      *
      * @param {object} state - 消行动画状态
      * @returns {void}
@@ -9255,51 +8723,43 @@ var tetris = (() => {
       render_clear_lines_default(this.Canvas, state);
     }
     /**
-     * ## 渲染消除得分弹出动画
+     * ## renderClearScore：渲染消除得分弹出动画
      *
-     * 在消除行的位置绘制上浮渐隐的得分数字。 动画由 `ClearScoreAnimation` 控制，本方法只负责绘制。
+     * 在消除行的位置绘制上浮渐隐的得分数字。
      *
      * @param {object} state - 得分动画状态
-     * @param {number} state.score - 本次消除得分
-     * @param {number} state.y - 消除行的 Y 坐标
-     * @param {number} state.alpha - 当前透明度（1.0 → 0）
-     * @param {number} state.offsetY - Y 轴上浮偏移量
      * @returns {void}
      */
     renderClearScore(state) {
       render_clear_score_default(this.Canvas, state);
     }
     /**
-     * ## 渲染升级烟花特效
+     * ## renderLevelUp：渲染升级烟花特效
      *
-     * 在玩家升级时显示烟花粒子动画和 "LEVEL UP" 文字。 动画由 `LevelUpAnimation` 控制，本方法只负责绘制。
+     * 在玩家升级时显示烟花粒子动画和 "LEVEL UP" 文字。
      *
      * @param {number} level - 升级后的新等级
-     * @param {object[]} fireworks - 烟花粒子数组，每个粒子包含 x、y、vx、vy、color、life
+     * @param {object[]} fireworks - 烟花粒子数组
      * @returns {void}
      */
     renderLevelUp(level, fireworks) {
       render_level_up_default(this.Canvas, level, fireworks);
     }
     /**
-     * ## 渲染落地高亮特效
+     * ## renderLandingFlash：渲染落地高亮特效
      *
-     * 方块落地的瞬间在落地格子上显示半透明（60% 透明度）白色覆盖。 动画由 `LandingFlashAnimation` 控制（约 200ms），
-     * 本方法只负责绘制。
+     * 方块落地的瞬间在落地格子上显示半透明白色覆盖。
      *
      * @param {object} flashData - 高亮数据
-     * @param {object[]} flashData.cells - 需要高亮的格子数组
      * @returns {void}
      */
     renderLandingFlash(flashData) {
       render_landing_flash_default(this.Canvas, flashData);
     }
     /**
-     * ## 渲染垃圾行预警特效
+     * ## renderGarbageWarning：渲染垃圾行预警特效
      *
-     * 在棋盘上绘制半透明橙色覆盖层 + 网格线 + "INCOMING ATTACK" 警告文字。 根据 amount
-     * 显示不同颜色（2行黄色/3行橙色/4行红色）。 动画由 `GarbageWarningAnimation` 控制（5 次闪烁共 600ms），
-     * 本方法只负责绘制。
+     * 在棋盘上绘制半透明覆盖层 + 网格线 + 警告文字。
      *
      * @param {number} amount - 即将到来的垃圾行数量
      * @returns {void}
@@ -9308,25 +8768,23 @@ var tetris = (() => {
       render_garbage_warning_default(this.Canvas, amount);
     }
     /**
-     * ## 渲染垃圾行推入动画
+     * ## renderGarbagePush：渲染垃圾行推入动画
      *
-     * 垃圾行插入后，垃圾方块在灰色和白色之间交替闪烁。 动画由 `GarbagePushAnimation` 控制（5 次闪烁共 600ms），
-     * 本方法只负责绘制。
+     * 垃圾行插入后，垃圾方块在灰色和白色之间交替闪烁。
      *
-     * @param {number[][]} rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
-     * @param {boolean} visible - 当前帧是否可见（true=绘制灰色，false=绘制白色）
+     * @param {number[][]} rows - 垃圾行数据
+     * @param {boolean} visible - 当前帧是否可见
      * @returns {void}
      */
     renderGarbagePush(rows, visible) {
       render_garbage_push_default(this.Canvas, rows, visible);
     }
     /**
-     * ## 渲染手柄连接/断开通知
+     * ## renderGamepadNotification：渲染手柄连接通知
      *
-     * 在棋盘上显示半透明遮罩 + 手柄图标 + 状态文字。 连接时显示绿色 "CONNECTED"，断开时显示橙色 "DISCONNECTED"。 动画由
-     * `GamepadNotificationAnimation` 控制（6 次闪烁共 1200ms）， 本方法只负责绘制。
+     * 在棋盘上显示半透明遮罩 + 手柄图标 + 状态文字。
      *
-     * @param {boolean} connected - 手柄是否已连接（true=连接，false=断开）
+     * @param {boolean} connected - 手柄是否已连接
      * @returns {void}
      */
     renderGamepadNotification(connected) {
@@ -9340,25 +8798,15 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 创建 UIRouter 实例。 注意：构造函数不会自动订阅事件，需要手动调用 `subscribe()`。
-     *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.UI - UI 实例，负责实际的渲染工作
+     * @param {object} options - 配置对象
      */
     constructor(options) {
       super(options);
     }
     /**
-     * ## 订阅 UI 事件
+     * ## subscribe：订阅 UI 事件
      *
-     * 绑定所有 UI 相关的渲染事件。在游戏初始化或 UI 系统启动时调用。
-     *
-     * ### 监听的事件分类
-     *
-     * 1. **HUD 绘制事件**：模式更新、控制者更新、抬头显示更新
-     * 2. **画布绘制事件**：窗口大小调整、预览方块渲染、暂存方块渲染、Ghost 方块
-     * 3. **动画特效事件**：倒计时、消行、得分、升级、落地高亮、垃圾行预警、垃圾行推入、手柄通知
+     * 绑定所有 UI 相关的渲染事件。
      *
      * @returns {void}
      */
@@ -9387,9 +8835,9 @@ var tetris = (() => {
       );
     }
     /**
-     * ## 取消订阅 UI 事件
+     * ## unsubscribe：取消订阅 UI 事件
      *
-     * 移除所有已注册的 UI 事件监听器。 在组件销毁或 UI 系统关闭时调用，避免内存泄漏。
+     * 移除所有已注册的 UI 事件监听器。
      *
      * @returns {void}
      */
@@ -9417,212 +8865,135 @@ var tetris = (() => {
         this._onRenderGamepadNotification
       );
     }
-    // ==================== 事件处理器（私有） ====================
+    /*
+     * ============================================================
+     * 事件处理器
+     * ============================================================
+     */
     /**
-     * ## 处理模式更新事件
-     *
-     * 当游戏模式发生变化时触发（如从主菜单切换到游戏中）。 通知 UI 更新当前显示的模式，切换不同的界面布局。
+     * ## _onUpdateMode：处理模式更新事件
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {string} payload.mode - 游戏模式（main-menu / difficulty / playing /
-     *   replay / game-over）
+     * @param {string} payload.mode - 游戏模式
      * @returns {void}
      */
     _onUpdateMode = ({ mode }) => {
-      const { UI: UI2 } = this;
-      UI2.updateMode(mode);
+      this.UI.updateMode(mode);
     };
     /**
-     * ## 处理控制者更新事件
-     *
-     * 当游戏控制器类型发生变化时触发（玩家控制 ↔ AI 控制）。 通知 UI 更新控制器显示标识。
+     * ## _onUpdateController：处理控制者更新事件
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {string} payload.controller - 控制者身份（human / ai）
+     * @param {string} payload.controller - 控制者身份
      * @returns {void}
      */
     _onUpdateController = ({ controller }) => {
-      const { UI: UI2 } = this;
-      UI2.updateController(controller);
+      this.UI.updateController(controller);
     };
     /**
-     * ## 处理 HUD 更新事件
-     *
-     * 当游戏数据发生变化时触发（如分数增加、等级提升等）。 通知 UI 刷新抬头显示（Heads-Up Display）的所有数据。
-     *
-     * ### 更新的数据包括
-     *
-     * - 当前得分
-     * - 历史最高分
-     * - 当前等级
-     * - 消除行数
-     * - 连击数
+     * ## _onUpdateHud：处理 HUD 更新事件
      *
      * @private
      * @returns {void}
      */
     _onUpdateHud = () => {
-      const { UI: UI2 } = this;
-      UI2.updateHud();
+      this.UI.updateHud();
     };
     /**
-     * ## 处理画布自适应事件
-     *
-     * 当浏览器窗口大小发生变化时触发。 通知 UI 重新计算画布尺寸并调整游戏区域的布局。
-     *
-     * ### 自适应内容
-     *
-     * - 主游戏画布的尺寸
-     * - 预览方块的显示区域
-     * - 暂存方块的显示区域
-     * - UI 元素的相对位置
-     * - 字体大小的缩放
+     * ## _onResize：处理画布自适应事件
      *
      * @private
      * @returns {void}
      */
     _onResize = () => {
-      const { UI: UI2 } = this;
-      UI2.resize();
+      this.UI.resize();
     };
     /**
-     * ## 处理渲染预览方块事件
-     *
-     * 当预览方块发生变化时触发。 通知 UI 重新渲染下一个方块的预览图像。
+     * ## _onRenderNextPiece：处理渲染预览方块事件
      *
      * @private
      * @returns {void}
      */
     _onRenderNextPiece = () => {
-      const { UI: UI2 } = this;
-      UI2.renderNextPiece();
+      this.UI.renderNextPiece();
     };
     /**
-     * ## 处理渲染暂存方块事件
-     *
-     * 当暂存方块发生变化时（首次暂存或交换）触发。 通知 UI 重新渲染暂存方块的预览图像。
+     * ## _onRenderHoldPiece：处理渲染暂存方块事件
      *
      * @private
      * @returns {void}
      */
     _onRenderHoldPiece = () => {
-      const { UI: UI2 } = this;
-      UI2.renderHoldPiece();
+      this.UI.renderHoldPiece();
     };
     /**
-     * ## 处理清空预览方块事件
-     *
-     * 当需要清空下一个方块预览时触发。
+     * ## _onClearNextPiece：处理清空预览方块事件
      *
      * @private
      * @returns {void}
      */
     _onClearNextPiece = () => {
-      const { UI: UI2 } = this;
-      UI2.clearNextPiece();
+      this.UI.clearNextPiece();
     };
     /**
-     * ## 处理清空暂存方块事件
-     *
-     * 当需要清空暂存方块预览时触发。
+     * ## _onClearHoldPiece：处理清空暂存方块事件
      *
      * @private
      * @returns {void}
      */
     _onClearHoldPiece = () => {
-      const { UI: UI2 } = this;
-      UI2.clearHoldPiece();
+      this.UI.clearHoldPiece();
     };
     /**
-     * ## 绘制 ghost 方块（落点预览）
+     * ## _onRenderGhostPiece：绘制 ghost 方块
      *
-     * 在当前方块正下方投影位置绘制半透明 Ghost， 帮助玩家预判硬降后的落点位置。 Level <= 9 时才绘制 ghost
-     * 方块，高等级不显示落点预览增加难度。
+     * Level <= 9 时才绘制，高等级不显示落点预览增加难度。
      *
      * @private
      * @param {object} payload - 参数对象
-     * @param {object} payload.ghost - Ghost 方块数据（cx, cy, shape, color）
+     * @param {object} payload.ghost - Ghost 方块数据
      * @returns {void}
      */
     _onRenderGhostPiece = (payload) => {
-      const { UI: UI2 } = this;
-      const { ghost } = payload;
-      UI2.renderGhostPiece(ghost);
+      this.UI.renderGhostPiece(payload.ghost);
     };
     /**
-     * ## 处理渲染倒计时事件
-     *
-     * 当游戏开始倒计时特效运行时触发。 通知 UI 根据当前倒计时状态渲染数字和缩放动画。
-     *
-     * ### 倒计时流程
-     *
-     * - 显示 "3" → "2" → "1"
-     * - 每个数字持续约 1 秒
-     * - 配合缩放和透明度动画效果
+     * ## _onRenderCountdown：处理渲染倒计时事件
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {object} payload.state - 倒计时动画状态（含 number、scale）
+     * @param {object} payload.state - 倒计时动画状态
      * @returns {void}
      */
     _onRenderCountdown = (payload) => {
-      const { state } = payload;
-      const { UI: UI2 } = this;
-      UI2.renderCountdown(state);
+      this.UI.renderCountdown(payload.state);
     };
     /**
-     * ## 处理渲染消行闪烁事件
-     *
-     * 当消除行特效动画运行时触发。 通知 UI 根据消行动画状态渲染闪烁效果。
-     *
-     * ### 消行动画效果
-     *
-     * - 被消除的行会闪烁白色
-     * - 闪烁 6 个阶段（显→隐→显→隐→显→隐），共 720ms
-     * - 闪烁后行消失，上方行下落
+     * ## _onRenderClearLines：处理渲染消行闪烁事件
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {object} payload.state - 消行动画状态（含 lines 数组）
+     * @param {object} payload.state - 消行动画状态
      * @returns {void}
      */
     _onRenderClearLines = (payload) => {
-      const { state } = payload;
-      const { UI: UI2 } = this;
-      UI2.renderClearLines(state);
+      this.UI.renderClearLines(payload.state);
     };
     /**
-     * ## 处理渲染消除得分事件
-     *
-     * 当消除得分动画运行时触发。 通知 UI 在消除行位置绘制上浮渐隐的得分数字。
-     *
-     * ### 动画效果
-     *
-     * - 得分数字从消除行位置持续上浮
-     * - 透明度从 1 逐渐衰减到 0
+     * ## _onRenderClearScore：处理渲染消除得分事件
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {object} payload.state - 得分动画状态（含 score、y、alpha、offsetY）
+     * @param {object} payload.state - 得分动画状态
      * @returns {void}
      */
     _onRenderClearScore = (payload) => {
-      const { state } = payload;
-      const { UI: UI2 } = this;
-      UI2.renderClearScore(state);
+      this.UI.renderClearScore(payload.state);
     };
     /**
-     * ## 处理渲染升级烟花事件
-     *
-     * 当等级提升特效动画运行时触发。 通知 UI 根据等级和烟花粒子数组渲染庆祝效果。
-     *
-     * ### 升级特效效果
-     *
-     * - 屏幕中央显示 "LEVEL UP!" 文字
-     * - 彩色烟花粒子从中心向外扩散
-     * - 粒子有重力、速度和生命周期
+     * ## _onRenderLevelUp：处理渲染升级烟花事件
      *
      * @private
      * @param {object} payload - 事件参数
@@ -9632,34 +9003,21 @@ var tetris = (() => {
      */
     _onRenderLevelUp = (payload) => {
       const { level, fireworks } = payload;
-      const { UI: UI2 } = this;
-      UI2.renderLevelUp(level, fireworks);
+      this.UI.renderLevelUp(level, fireworks);
     };
     /**
-     * ## 处理渲染落地高亮事件
-     *
-     * 方块落地的瞬间在落地格子上显示半透明白色高亮。 动画由 `LandingFlashAnimation` 控制，持续约 200ms。
-     *
-     * ### 动画效果
-     *
-     * - 落地格子上覆盖 60% 透明度白色
-     * - 短暂的"高亮一闪"视觉反馈
+     * ## _onRenderLandingFlash：处理渲染落地高亮事件
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {object} payload.state - 高亮动画状态（含 cells 数组）
+     * @param {object} payload.state - 高亮动画状态
      * @returns {void}
      */
     _onRenderLandingFlash = (payload) => {
-      const { state } = payload;
-      const { UI: UI2 } = this;
-      UI2.renderLandingFlash(state);
+      this.UI.renderLandingFlash(payload.state);
     };
     /**
-     * ## 处理渲染垃圾行预警事件
-     *
-     * 当玩家即将受到垃圾行攻击时触发。 通知 UI 在棋盘上绘制橙色网格覆盖 + "INCOMING ATTACK" 警告文字。 动画由
-     * `GarbageWarningAnimation` 控制，5 次闪烁共 600ms。
+     * ## _onRenderGarbageWarning：处理渲染垃圾行预警事件
      *
      * @private
      * @param {object} payload - 事件参数
@@ -9667,42 +9025,31 @@ var tetris = (() => {
      * @returns {void}
      */
     _onRenderGarbageWarning = (payload) => {
-      const { UI: UI2 } = this;
-      const { amount } = payload;
-      UI2.renderGarbageWarning(amount);
+      this.UI.renderGarbageWarning(payload.amount);
     };
     /**
-     * ## 处理渲染垃圾行推入事件
-     *
-     * 当垃圾行实际插入棋盘后触发。 通知 UI 渲染垃圾方块在灰色和白色之间交替闪烁的动画。 动画由 `GarbagePushAnimation` 控制，5
-     * 次闪烁共 600ms。
+     * ## _onRenderGarbagePush：处理渲染垃圾行推入事件
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {number[][]} payload.rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
+     * @param {number[][]} payload.rows - 垃圾行数据
      * @param {boolean} payload.visible - 当前帧是否可见
      * @returns {void}
      */
     _onRenderGarbagePush = (payload) => {
       const { rows, visible } = payload;
-      const { UI: UI2 } = this;
-      UI2.renderGarbagePush(rows, visible);
+      this.UI.renderGarbagePush(rows, visible);
     };
     /**
-     * ## 处理渲染手柄连接/断开通知事件
-     *
-     * 当手柄连接或断开时触发。 通知 UI 在棋盘上显示半透明遮罩 + 手柄图标 + 状态文字。 动画由
-     * `GamepadNotificationAnimation` 控制，6 次闪烁共 1200ms。
+     * ## _onRenderGamepadNotification：处理渲染手柄通知事件
      *
      * @private
      * @param {object} payload - 事件参数
-     * @param {boolean} payload.connected - 手柄是否已连接（true=连接，false=断开）
+     * @param {boolean} payload.connected - 手柄是否已连接
      * @returns {void}
      */
     _onRenderGamepadNotification = (payload) => {
-      const { connected } = payload;
-      const { UI: UI2 } = this;
-      UI2.renderGamepadNotification(connected);
+      this.UI.renderGamepadNotification(payload.connected);
     };
   };
   var ui_router_default = UIRouter;
@@ -10035,73 +9382,46 @@ var tetris = (() => {
   // lib/services/input/keyboard-controller.js
   var DAS_CONFIG = {
     DAS: 10,
-    // 延迟 10 帧（≈167ms）后开始自动移动
+    // 延迟 10 帧（≈167ms）
     ARR: 2
     // 之后每 2 帧（≈33ms）移动一次
   };
   var KEYBOARDS_ACTION_MAP = {
     // 强制退出/返回
     escape: "EXIT",
-    // ========== 方块操作 ==========
+    // 方块操作
     arrowleft: "MOVE_LEFT",
-    // 向左移动方块
     arrowright: "MOVE_RIGHT",
-    // 向右移动方块
     arrowdown: "MOVE_DOWN",
-    // 向下加速移动（软降）
     arrowup: "ROTATE",
-    // 旋转方块（或在菜单中向上移动光标）
     " ": "DROP",
-    // 空格键：方块直接落底（硬降）
-    // ========== 游戏控制 ==========
+    // 游戏控制
     s: "SWITCH_CONTROLLER",
-    // 切换控制器（玩家 ↔ AI）
     m: "TOGGLE_MUSIC",
-    // 切换音乐开关
     p: "TOGGLE_PAUSED",
-    // 暂停/继续游戏
     r: "RESTART",
-    // 重新开始游戏
     q: "QUIT",
-    // 退出游戏
-    // ========== 缓存方块 ==========
+    // 缓存方块
     c: "HOLD",
-    // 将当前方块存入 Hold 区
-    // ========== 关卡选择 ==========
+    // 关卡选择
     1: "LEVEL_ONE",
-    // 第 1 关
     2: "LEVEL_TWO",
-    // 第 2 关
     3: "LEVEL_THREE",
-    // 第 3 关
     4: "LEVEL_FOUR",
-    // 第 4 关
     5: "LEVEL_FIVE",
-    // 第 5 关
     6: "LEVEL_SIX",
-    // 第 6 关
     7: "LEVEL_SEVEN",
-    // 第 7 关
     8: "LEVEL_EIGHT",
-    // 第 8 关
     9: "LEVEL_NINE",
-    // 第 9 关
     t: "LEVEL_TEN",
-    // T 键：第 10 关
-    // ========== 难度选择 ==========
+    // 难度选择
     e: "EASY",
-    // 简单难度
     n: "NORMAL",
-    // 普通难度
     h: "HARD",
-    // 困难难度
     x: "EXPERT",
-    // 专家难度
-    // ========== 界面导航 ==========
+    // 界面导航
     b: "BACK",
-    // 返回上一级
     enter: "CONFIRM"
-    // 确认操作
   };
   var resolveKeyboardAction = (key, mode) => {
     if (!key) {
@@ -10119,41 +9439,28 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 创建键盘控制器实例。 注意：构造函数不会自动绑定事件，需要手动调用 `addEventListeners()`。
-     *
-     * @class
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Store - 游戏状态存储
+     * @param {object} options - 配置对象
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化 DAS/ARR 状态
-     *
-     * 设置 DAS/ARR 的初始状态和键盘禁用标记。
+     * ## initialize：初始化 DAS/ARR 状态
      *
      * @returns {void}
      */
     initialize() {
       this.dasState = {
         dasTimer: -1,
-        // -1 = DAS 未激活
         arrTimer: 0,
-        // ARR 计时器从 0 开始
         direction: 0,
-        // 0 = 无方向
         active: false
-        // 初始未激活
       };
       this.disabled = false;
     }
     /**
-     * ## 设置键盘禁用状态
-     *
-     * 对战模式下，P2 的键盘在 playing 状态时被禁用， 只能使用手柄操作。
+     * ## setDisabled：设置键盘禁用状态
      *
      * @param {boolean} disabled - True 禁用，false 启用
      * @returns {KeyboardController} 返回自身，支持链式调用
@@ -10163,16 +9470,9 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 每帧更新 DAS/ARR（由 Engine.tick 驱动）
+     * ## update：每帧更新 DAS/ARR
      *
-     * 在游戏主循环中每帧调用，管理长按方向键时的自动重复移动。
-     *
-     * ### 工作流程
-     *
-     * - **DAS 阶段**：等待 DAS_CONFIG.DAS（10 帧）后开始
-     * - **ARR 阶段**：每 DAS_CONFIG.ARR（2 帧）自动移动一次
-     * - 仅在 playing 模式下生效
-     * - 键盘禁用时跳过
+     * 在游戏主循环中每帧调用， 管理长按方向键时的自动重复移动。
      *
      * @returns {void}
      */
@@ -10204,15 +9504,11 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 绑定游戏中键盘操作相关的事件
+     * ## addEventListeners：绑定键盘事件
      *
-     * 注册全局事件监听器：
+     * 注册全局事件监听器：resize、keydown、keyup。
      *
-     * - `resize`：监听窗口大小变化，用于调整游戏画布尺寸
-     * - `keydown`：监听键盘按下，处理游戏操作输入
-     * - `keyup`：监听键盘松开，用于停止 DAS/ARR
-     *
-     * @returns {KeyboardController} 返回 KeyboardController 对象，可链式调用
+     * @returns {KeyboardController} 返回自身，支持链式调用
      */
     addEventListeners() {
       globalThis.addEventListener("resize", this._onResize);
@@ -10221,11 +9517,11 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 解除游戏中键盘操作相关的事件绑定
+     * ## removeEventListeners：解绑键盘事件
      *
-     * 移除之前注册的所有事件监听器。 在 Engine.destroy() 或模式切换时调用。
+     * 移除之前注册的所有事件监听器。
      *
-     * @returns {KeyboardController} 返回 KeyboardController 对象，可链式调用
+     * @returns {KeyboardController} 返回自身，支持链式调用
      */
     removeEventListeners() {
       globalThis.removeEventListener("resize", this._onResize);
@@ -10234,26 +9530,13 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 判断按键是否被屏蔽
+     * ## _isBlocked：判断按键是否被屏蔽
      *
      * 根据当前游戏状态决定是否应该响应该按键。
      *
-     * ### 屏蔽场景
-     *
-     * 1. **按键不在映射表中**：无对应动作
-     * 2. **回放模式**：只允许按 Enter 键确认
-     * 3. **AI 控制 + 游戏中**：只允许 AI_ALLOWED_ACTIONS 中的操作
-     * 4. **对战模式特殊限制**：
-     *
-     *    - R 键（重新开始）始终禁用
-     *    - AI 玩家禁用 M（音乐）、P（暂停）、C（缓存）
-     *    - 人类玩家禁用 S（切换控制器）
-     *    - P2（index=1）禁用 P（暂停）
-     *    - P2 在 playing 模式下所有键盘输入被禁用
-     *
      * @private
      * @param {string} key - 按键名称（已小写化）
-     * @returns {boolean} 按键被屏蔽返回 true，否则返回 false
+     * @returns {boolean} 被屏蔽返回 true
      */
     _isBlocked(key) {
       const { Store, Game: Game2 } = this;
@@ -10261,26 +9544,15 @@ var tetris = (() => {
       const mode = Store.getMode();
       const action = resolveKeyboardAction(key, mode);
       const controller = Store.getController();
-      return (
-        // 1. 无对应动作
-        !action || // 2. 回放模式只允许 Enter
-        mode === "replay" && key !== "enter" && key !== "escape" || // 3. AI 控制时只允许指定操作
-        controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || // 4. 对战模式特殊限制
-        Game2.isVersus() && (key === "r" || // 禁止重新开始
-        // AI 玩家限制
-        Player.name === "ai" && (key === "m" || key === "p" || key === "c") || // 人类玩家限制
-        Player.name === "human" && (key === "s" || // 不能切换控制器
-        key === "p" && Player.index === 1 || // P2 不能暂停
-        mode === "playing" && Player.index === 1))
-      );
+      return !action || mode === "replay" && key !== "enter" && key !== "escape" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (key === "r" || Player.name === "ai" && (key === "m" || key === "p" || key === "c") || Player.name === "human" && (key === "s" || key === "p" && Player.index === 1 || mode === "playing" && Player.index === 1));
     }
     /**
-     * ## resize 事件处理
+     * ## _onResize：resize 事件处理
      *
-     * 当浏览器窗口大小改变时触发。 发送 RESIZE 事件通知 UI 层重新计算画布尺寸。
+     * 窗口大小改变时发送 RESIZE 事件通知 UI 层。
      *
      * @private
-     * @returns {KeyboardController} 返回 KeyboardController，支持链式方法调用
+     * @returns {KeyboardController} 返回自身，支持链式调用
      */
     _onResize = () => {
       const { Game: Game2 } = this;
@@ -10289,21 +9561,13 @@ var tetris = (() => {
       return this;
     };
     /**
-     * ## keydown 事件处理
+     * ## _onKeydown：keydown 事件处理
      *
-     * 当用户按下键盘按键时触发。
-     *
-     * ### 处理流程
-     *
-     * 1. 键盘禁用时跳过
-     * 2. 按键被屏蔽时跳过
-     * 3. AI 玩家在 playing 模式时跳过
-     * 4. 左右方向键启动 DAS/ARR 自动重复移动
-     * 5. 所有按键立即执行第一次动作
+     * 按下键盘按键时触发。 左右方向键启动 DAS/ARR，所有按键立即执行第一次动作。
      *
      * @private
      * @param {object} e - 键盘事件对象
-     * @returns {KeyboardController} 返回 KeyboardController，支持链式方法调用
+     * @returns {KeyboardController} 返回自身，支持链式调用
      */
     _onKeydown = (e) => {
       const { Game: Game2, Store, Player } = this;
@@ -10338,17 +9602,13 @@ var tetris = (() => {
       return this;
     };
     /**
-     * ## keyup 事件处理
+     * ## _onKeyup：keyup 事件处理
      *
-     * 当用户松开键盘按键时触发。 松开左右方向键会停止 DAS/ARR 自动重复移动。
-     *
-     * ### 防止误停止
-     *
-     * 只有当松开的按键与当前 DAS 方向匹配时才停止。 例如：按住左键期间按下右键，松开左键不会停止 DAS（因为方向已变为右）。
+     * 松开左右方向键时停止 DAS/ARR。 只有当松开的按键与当前 DAS 方向匹配时才停止。
      *
      * @private
      * @param {object} e - 键盘事件对象
-     * @returns {KeyboardController} 返回 KeyboardController，支持链式方法调用
+     * @returns {KeyboardController} 返回自身，支持链式调用
      */
     _onKeyup = (e) => {
       const key = e.key?.toLowerCase();
@@ -10366,30 +9626,18 @@ var tetris = (() => {
   var GAMEPAD_ACTION_MAP = {
     // 基础控制按键
     A: "TOGGLE_MUSIC",
-    // 切换音乐（游戏中）
     B: "DROP",
-    // 方块直接落底
     X: "RESTART",
-    // 重新开始游戏
     Y: "TOGGLE_PAUSE",
-    // 暂停/继续游戏
     START: "CONFIRM",
-    // 确认操作
     BACK: "QUIT",
-    // 退出游戏
     RB: "SWITCH_CONTROLLER",
-    // 切换 AI/HUMAN 控制器
     RT: "HOLD",
-    // 缓存方块
     // 方向键（DPad）
     DPAD_LEFT: "MOVE_LEFT",
-    // 向左移动
     DPAD_RIGHT: "MOVE_RIGHT",
-    // 向右移动
     DPAD_DOWN: "MOVE_DOWN",
-    // 向下加速
     DPAD_UP: "ROTATE"
-    // 旋转方块（或在菜单中向上移动光标）
   };
   var LEVELS = [
     "ONE",
@@ -10401,7 +9649,7 @@ var tetris = (() => {
     "FOUR",
     // 第 4 关
     "FIX",
-    // 第 5 关（注意这里是 FIX 不是 FIVE，可能是拼写约定）
+    // 第 5 关
     "SIX",
     // 第 6 关
     "SEVEN",
@@ -10415,81 +9663,44 @@ var tetris = (() => {
   ];
   var STANDARD_BTN_MAP = {
     A: 0,
-    // A 键 / 交叉键 → buttons[0]
     B: 1,
-    // B 键 / 圆圈键 → buttons[1]
     X: 2,
-    // X 键 / 方块键 → buttons[2]
     Y: 3,
-    // Y 键 / 三角键 → buttons[3]
     LB: 4,
-    // 左肩键 → buttons[4]
     RB: 5,
-    // 右肩键 → buttons[5]
     LT: 6,
-    // 左扳机 → buttons[6]
     RT: 7,
-    // 右扳机 → buttons[7]
     BACK: 8,
-    // 返回键 → buttons[8]
     START: 9,
-    // 开始键 → buttons[9]
     DPAD_UP: 12,
-    // 方向键上 → buttons[12]
     DPAD_DOWN: 13,
-    // 方向键下 → buttons[13]
     DPAD_LEFT: 14,
-    // 方向键左 → buttons[14]
     DPAD_RIGHT: 15
-    // 方向键右 → buttons[15]
   };
   var BETOP_20BC_1263_BTN_MAP = {
     A: 2,
-    // A 键映射到索引 2
     B: 1,
-    // B 键映射到索引 1
     X: 3,
-    // X 键映射到索引 3
     Y: 0,
-    // Y 键映射到索引 0
     LB: 4,
-    // 左肩键
     RB: 5,
-    // 右肩键
     LT: 6,
-    // 左扳机
     RT: 7,
-    // 右扳机
     BACK: 8,
-    // 返回键
     START: 9
-    // 开始键
-    // 注意：北通手柄的 DPAD 不走 buttons，而是通过 axis[9] 的值来判断
   };
   var GamepadController = class extends core_default {
     /**
      * ## 构造函数
      *
-     * 初始化手柄控制器的所有内部状态。
-     *
-     * @class
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Store - 游戏状态存储
+     * @param {object} options - 配置对象
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化手柄控制器内部状态
-     *
-     * 设置所有内部状态变量的初始值，包括：
-     *
-     * - 激活手柄索引
-     * - 防抖状态
-     * - 摇杆阈值
-     * - 按钮映射表
+     * ## initialize：初始化手柄控制器内部状态
      *
      * @returns {void}
      */
@@ -10505,28 +9716,20 @@ var tetris = (() => {
       this.curBtnMap = STANDARD_BTN_MAP;
       this.dpadAxisState = {
         up: false,
-        // 上方向是否激活
         down: false,
-        // 下方向是否激活
         left: false,
-        // 左方向是否激活
         right: false
-        // 右方向是否激活
       };
       this.AXIS_MAP = {
         LEFT_STICK_X: 0,
-        // 左摇杆 X 轴 → axes[0]
         LEFT_STICK_Y: 1
-        // 左摇杆 Y 轴 → axes[1]
       };
       this.boundGamepadIndex = null;
     }
     /**
-     * ## 设置绑定的手柄索引
+     * ## setBoundIndex：设置绑定的手柄索引
      *
-     * 对战模式下，P2 调用此方法绑定到 index=1 的手柄。 同时设置 activeGamepadIndex，跳过自动选择逻辑。
-     *
-     * @param {number} index - 手柄索引（通常是 0 或 1）
+     * @param {number} index - 手柄索引
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     setBoundIndex(index) {
@@ -10535,29 +9738,22 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 每帧调用
-     *
-     * 这是主要的更新循环，每帧调用一次。
+     * ## update：每帧调用
      *
      * 执行流程：
      *
-     * 1. 刷新 Gamepad snapshot（获取最新的手柄状态）
-     * 2. 检查模式限制：
-     *
-     *    - 对战 P2 只在 playing 响应
-     *    - AI 不响应手柄输入
+     * 1. 刷新 Gamepad snapshot
+     * 2. 检查模式限制
      * 3. 如果有激活的手柄，收集所有输入并派发指令
      *
      * @param {number} now - 当前时间的时间戳（毫秒）
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     update(now) {
       const { Store, Player } = this;
       const mode = Store.getMode();
       this._refreshGamepadState();
-      if (this.boundGamepadIndex !== null && // 如果有绑定的手柄索引
-      this.boundGamepadIndex > 0 && // 且绑定的不是第一个手柄（即 P2）
-      mode !== "playing") {
+      if (this.boundGamepadIndex !== null && this.boundGamepadIndex > 0 && mode !== "playing") {
         return this;
       }
       if (mode === "playing" && Player.name === "ai") {
@@ -10570,11 +9766,11 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 绑定 Gamepad 连接事件
+     * ## addEventListeners：绑定 Gamepad 连接事件
      *
-     * 注册游戏手柄的连接和断开事件监听器。 支持链式调用，可多次调用但只会绑定一次（通过 _eventsBound 标记）。
+     * 通过 _eventsBound 标记避免重复绑定。
      *
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     addEventListeners() {
       if (this._eventsBound) {
@@ -10586,11 +9782,9 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 销毁事件绑定
+     * ## removeEventListeners：销毁事件绑定
      *
-     * 移除手柄事件的监听器，清理内部状态。 在组件卸载或不需要手柄控制时调用。
-     *
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     removeEventListeners() {
       globalThis.removeEventListener("gamepadconnected", this._onConnect);
@@ -10599,21 +9793,12 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 手柄连接事件处理
-     *
-     * 当检测到新的手柄连接时触发。
-     *
-     * 处理流程：
-     *
-     * 1. 如果绑定了指定索引，只响应绑定手柄的连接
-     * 2. 如果已有激活手柄，忽略新连接（单手柄模式）
-     * 3. 自动识别 BETOP 并切换 mapping
-     * 4. 发送手柄连接状态更新事件
+     * ## _onConnect：手柄连接事件处理
      *
      * @private
      * @param {object} e - 事件对象
      * @param {Gamepad} e.gamepad - 连接的手柄对象
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _onConnect = (e) => {
       const pad = e.gamepad;
@@ -10635,26 +9820,16 @@ var tetris = (() => {
       this.curBtnMap = this._isBetop(pad.id) ? BETOP_20BC_1263_BTN_MAP : STANDARD_BTN_MAP;
       const { Game: Game2 } = this;
       const events = GameEvents(Game2.id);
-      this.emit(events.UPDATE_GAMEPAD_CONNECTED, {
-        connected: true
-      });
+      this.emit(events.UPDATE_GAMEPAD_CONNECTED, { connected: true });
       return this;
     };
     /**
-     * ## 手柄断开事件处理
-     *
-     * 当激活的手柄断开连接时触发。
-     *
-     * 处理步骤：
-     *
-     * - 清空激活手柄的状态
-     * - 重置所有防抖状态
-     * - 发送断开状态更新事件
+     * ## _onDisconnect：手柄断开事件处理
      *
      * @private
      * @param {object} e - 事件对象
      * @param {Gamepad} e.gamepad - 断开的手柄对象
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _onDisconnect = (e) => {
       if (this.activeGamepadIndex !== e.gamepad.index) {
@@ -10665,34 +9840,24 @@ var tetris = (() => {
       this.axisStates = {};
       const { Game: Game2 } = this;
       const events = GameEvents(Game2.id);
-      this.emit(events.UPDATE_GAMEPAD_CONNECTED, {
-        connected: false
-      });
+      this.emit(events.UPDATE_GAMEPAD_CONNECTED, { connected: false });
       return this;
     };
     /**
-     * ## 判断是否为 BETOP（北通）手柄
+     * ## _isBetop：判断是否为北通手柄
      *
-     * 通过手柄 ID 字符串进行识别。 北通特定型号 20bc:1263 需要特殊处理。 因为它的按键映射和 DPAD 实现与标准手柄不同。
-     *
-     * @param {string} id - 手柄 id 字符串（如 'Xbox 360 Controller' 或 '20bc:1263'）
-     * @returns {boolean} 是北通手柄返回 true，否则返回 false
+     * @param {string} id - 手柄 id 字符串
+     * @returns {boolean} 是北通手柄返回 true
      */
     _isBetop(id) {
       return id.includes("20bc") && id.includes("1263");
     }
     /**
-     * ## 刷新 Gamepad 状态
+     * ## _refreshGamepadState：刷新 Gamepad 状态
      *
-     * 必须每帧调用 navigator.getGamepads()，因为 Gamepad 对象是 snapshot，不是实时引用。
-     * 如果不在每帧刷新，获取到的永远是同一个状态快照。
+     * 必须每帧调用 navigator.getGamepads()， 因为 Gamepad 对象是 snapshot，不是实时引用。
      *
-     * 处理逻辑：
-     *
-     * - 如果绑定了指定索引，优先使用绑定索引
-     * - 如果没有激活手柄，自动选择第一个可用的手柄
-     *
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _refreshGamepadState() {
       const pads = navigator.getGamepads?.() || [];
@@ -10715,20 +9880,11 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 根据游戏当前模式更新按键的响应动作
-     *
-     * 不同游戏模式下，同一个手柄按键可以有不同的功能。 这是手柄控制器的核心功能之一，实现了按键的上下文感知。
-     *
-     * ### 模式映射
-     *
-     * - `game-mode` / `battle-mode`：DPAD_UP 用于移动光标，BACK 用于退出
-     * - `difficulty`：ABXY 用于选择难度，BACK 用于返回
-     * - `playing`：标准游戏操作，DPAD_UP 用于旋转方块
+     * ## _updateActionMap：根据游戏模式更新按键响应动作
      *
      * @private
-     * @param {string} mode - 游戏模式（'game-mode', 'battle-mode', 'difficulty',
-     *   'playing' 等）
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @param {string} mode - 游戏模式
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _updateActionMap(mode) {
       switch (mode) {
@@ -10763,18 +9919,18 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 解析手柄按钮的响应动作名称
+     * ## _resolveAction：解析手柄按钮的响应动作名称
      *
-     * 根据游戏模式、当前等级等信息，确定按钮按下后应该触发的具体动作。 特别处理主菜单下的方向键（用于选择关卡，带冷却防抖）。
+     * 特别处理主菜单下的方向键（带冷却防抖）。
      *
      * @private
-     * @param {string} action - 原始按键执行动作名称
-     * @param {string} btnName - 按钮名称（如 'DPAD_UP'）
+     * @param {string} action - 原始动作名称
+     * @param {string} btnName - 按钮名称
      * @param {boolean} isDPad - 是否为 DPad 方向键
      * @param {string} mode - 游戏当前模式
-     * @param {string} level - 游戏当前等级（1-10）
-     * @param {number} now - 当前时间的时间戳（毫秒）
-     * @returns {string} 解析后的按键执行动作名称，空字符串表示不触发动作
+     * @param {string} level - 游戏当前等级
+     * @param {number} now - 当前时间戳（毫秒）
+     * @returns {string} 解析后的动作名称，空字符串表示不触发
      */
     _resolveAction(action, btnName, isDPad, mode, level, now) {
       if (!isDPad || mode !== "main-menu") {
@@ -10793,27 +9949,14 @@ var tetris = (() => {
       return action;
     }
     /**
-     * ## 处理标准游戏手柄的按钮响应
-     *
-     * 遍历所有按钮映射，检查哪些按钮被按下，并派发相应的指令。
-     *
-     * ### 屏蔽条件（哪些情况下不处理按钮输入）
-     *
-     * 1. 无法获取 action 指令名称
-     * 2. 回放或游戏结束状态，按了非 START 键（只有确认键可用）
-     * 3. AI 控制时，按了 AI 不允许的操作
-     * 4. 对战模式特殊限制：
-     *
-     *    - X 键（重新开始）始终禁用
-     *    - AI 玩家禁用 Y（暂停）和 RT（缓存）
-     *    - 人类玩家禁用 RB（切换控制器）
+     * ## _handleStandardButtons：处理标准游戏手柄的按钮响应
      *
      * @private
      * @param {object} pad - Gamepad 对象
      * @param {string} mode - 游戏当前模式
      * @param {string} level - 游戏当前级别
-     * @param {number} now - 当前时间的时间戳
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @param {number} now - 当前时间戳
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStandardButtons(pad, mode, level, now) {
       const isBetop = this._isBetop(pad.id);
@@ -10821,17 +9964,7 @@ var tetris = (() => {
       const { Player } = Game2;
       const controller = Store.getController();
       for (const [btnName, action] of Object.entries(GAMEPAD_ACTION_MAP)) {
-        const isBlocked = !action || // 没有对应的动作
-        (mode === "replay" || mode === "game-over") && // 回放或游戏结束
-        btnName !== "START" && // 且不是 START 键
-        btnName !== "BACK" || // 且不是 BACK 键（允许返回）
-        controller === "ai" && // AI 控制时
-        mode === "playing" && // 在游戏中
-        !game_default.AI_ALLOWED_ACTIONS.includes(action) || // 且不是 AI 允许的动作
-        Game2.isVersus() && // 对战模式
-        (btnName === "X" || // X 键始终禁用（不能重新开始）
-        Player.name === "ai" && (btnName === "Y" || btnName === "RT") || // AI 禁用暂停和缓存
-        Player.name === "human" && btnName === "RB");
+        const isBlocked = !action || (mode === "replay" || mode === "game-over") && btnName !== "START" && btnName !== "BACK" || controller === "ai" && mode === "playing" && !game_default.AI_ALLOWED_ACTIONS.includes(action) || Game2.isVersus() && (btnName === "X" || Player.name === "ai" && (btnName === "Y" || btnName === "RT") || Player.name === "human" && btnName === "RB");
         const isDPad = btnName.startsWith("DPAD_");
         if (!this._isPressed(btnName)) {
           continue;
@@ -10856,30 +9989,20 @@ var tetris = (() => {
         const events = GameEvents(Game2.id);
         this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
-          // 输入设备类型：手柄
           action: finalAction,
-          // 具体动作
           payload: { Game: Game2 }
-          // 附带游戏实例
         });
       }
       return this;
     }
     /**
-     * ## 收集所有输入
+     * ## _collectCommands：收集所有输入
      *
-     * 处理按钮、摇杆、方向键等所有输入源。 转换为统一的 dispatchInput 指令。
-     *
-     * ### 处理流程
-     *
-     * 1. 根据当前游戏模式更新按键映射
-     * 2. 处理标准按钮输入（ABXY、START、BACK 等）
-     * 3. 非回放/非结束时处理摇杆和 DPAD
-     * 4. 北通手柄特殊处理（DPAD 通过 axis9 传递）
+     * 处理按钮、摇杆、方向键等所有输入源。
      *
      * @private
-     * @param {number} now - 当前时间的时间戳（毫秒）
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @param {number} now - 当前时间戳（毫秒）
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _collectCommands(now) {
       const { Store } = this;
@@ -10904,14 +10027,12 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 开始轴动作（触发一次）
+     * ## _startAxisAction：开始轴动作
      *
-     * 仅在未触发时触发 dispatch，防止重复触发。 用于摇杆移动等连续输入场景。
+     * 仅在未触发时派发，防止重复触发。
      *
-     * 例如：用户持续推左摇杆，只会在第一次超过阈值时触发一次 MOVE_LEFT， 后续持续推动不会重复触发。
-     *
-     * @param {string} action - 动作名称（如 'MOVE_LEFT'）
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @param {string} action - 动作名称
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _startAxisAction(action) {
       if (this.axisStates[action]) {
@@ -10928,24 +10049,20 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 停止轴动作（重置状态）
-     *
-     * 当摇杆回到死区范围内时调用。 重置轴状态，下次推动摇杆时可以再次触发动作。
+     * ## _stopAxisAction：停止轴动作
      *
      * @param {string} action - 动作名称
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _stopAxisAction(action) {
       this.axisStates[action] = false;
       return this;
     }
     /**
-     * ## 处理摇杆向上移动
-     *
-     * Y 轴负值表示向上推动摇杆。
+     * ## _handleStickUp：处理摇杆向上移动
      *
      * @private
-     * @param {number} y - Y轴偏移值（-1 到 1，-1 表示推到底部）
+     * @param {number} y - Y 轴偏移值
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStickUp(y) {
@@ -10957,12 +10074,10 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 处理摇杆向下移动
-     *
-     * Y 轴正值表示向下推动摇杆。
+     * ## _handleStickDown：处理摇杆向下移动
      *
      * @private
-     * @param {number} y - Y轴偏移值（-1 到 1，1 表示推到底部）
+     * @param {number} y - Y 轴偏移值
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStickDown(y) {
@@ -10974,12 +10089,10 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 处理摇杆向左移动
-     *
-     * X 轴负值表示向左推动摇杆。
+     * ## _handleStickLeft：处理摇杆向左移动
      *
      * @private
-     * @param {number} x - X轴偏移值（-1 到 1，-1 表示推到底部）
+     * @param {number} x - X 轴偏移值
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStickLeft(x) {
@@ -10991,12 +10104,10 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 处理摇杆向右移动
-     *
-     * X 轴正值表示向右推动摇杆。
+     * ## _handleStickRight：处理摇杆向右移动
      *
      * @private
-     * @param {number} x - X轴偏移值（-1 到 1，1 表示推到底部）
+     * @param {number} x - X 轴偏移值
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStickRight(x) {
@@ -11008,13 +10119,11 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 摇杆移动处理（带防抖）
+     * ## _handleStickMove：摇杆移动处理（带防抖）
      *
-     * 处理左摇杆的四个方向移动，并触发相应的游戏动作。 四个方向独立处理，互不影响。
-     *
-     * @param {number} x - X轴偏移值（-1 到 1），负值为左，正值为右
-     * @param {number} y - Y轴偏移值（-1 到 1），负值为上，正值为下
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @param {number} x - X 轴偏移值
+     * @param {number} y - Y 轴偏移值
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleStickMove(x, y) {
       this._handleStickUp(y);
@@ -11024,14 +10133,12 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 获取向上移动的动作
-     *
-     * 在主菜单模式下用于增加关卡等级，在游戏模式下用于旋转方块。 实现了按键的上下文感知功能。
+     * ## _getMoveUpAction：获取向上移动的动作
      *
      * @private
      * @param {string} mode - 游戏模式
      * @param {string | number} level - 当前关卡等级
-     * @returns {string} 动作名称（如 'LEVEL_TWO' 或 'ROTATE'）
+     * @returns {string} 动作名称
      */
     _getMoveUpAction(mode, level) {
       const { Game: Game2 } = this;
@@ -11050,14 +10157,12 @@ var tetris = (() => {
       return action;
     }
     /**
-     * ## 获取向下移动的动作
-     *
-     * 在主菜单模式下用于减少关卡等级，在游戏模式下用于加速下落。 实现了按键的上下文感知功能。
+     * ## _getMoveDownAction：获取向下移动的动作
      *
      * @private
      * @param {string} mode - 游戏模式
      * @param {string | number} level - 当前关卡等级
-     * @returns {string} 动作名称（如 'LEVEL_ONE' 或 'MOVE_DOWN'）
+     * @returns {string} 动作名称
      */
     _getMoveDownAction(mode, level) {
       let action;
@@ -11076,14 +10181,12 @@ var tetris = (() => {
       return action;
     }
     /**
-     * ## 处理北通手柄方向键上
-     *
-     * 北通手柄的 DPAD 通过 axis[9] 传递，需要特殊处理。 使用防抖状态避免重复触发。
+     * ## _handleBetopDpadUp：处理北通手柄方向键上
      *
      * @private
      * @param {string} mode - 游戏模式
      * @param {string | number} level - 当前等级
-     * @param {object} st - 方向键状态对象（dpadAxisState）
+     * @param {object} st - 方向键状态对象
      * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleBetopDpadUp(mode, level, st) {
@@ -11102,7 +10205,7 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 处理北通手柄方向键下
+     * ## _handleBetopDpadDown：处理北通手柄方向键下
      *
      * @private
      * @param {string} mode - 游戏模式
@@ -11126,7 +10229,7 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 处理北通手柄方向键左
+     * ## _handleBetopDpadLeft：处理北通手柄方向键左
      *
      * @private
      * @param {object} st - 方向键状态对象
@@ -11140,7 +10243,6 @@ var tetris = (() => {
         this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
           action: "MOVE_LEFT",
-          // 左移方块
           payload: { Game: Game2 }
         });
       }
@@ -11148,7 +10250,7 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 处理北通手柄方向键右
+     * ## _handleBetopDpadRight：处理北通手柄方向键右
      *
      * @private
      * @param {object} st - 方向键状态对象
@@ -11162,7 +10264,6 @@ var tetris = (() => {
         this.emit(events.DISPATCH_INPUT, {
           device: "gamepad",
           action: "MOVE_RIGHT",
-          // 右移方块
           payload: { Game: Game2 }
         });
       }
@@ -11170,14 +10271,12 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## BETOP DPAD（axis9）解析
+     * ## _handleBetopDpad：BETOP DPAD（axis9）解析
      *
-     * 北通手柄的方向键通过 axis[9] 传递，不同方向对应固定浮点值。 根据这些特定值判断用户按下了哪个方向键。
-     *
-     * ### 方向对应值
+     * 北通手柄的方向键通过 axis[9] 传递， 不同方向对应固定浮点值。
      *
      * | 方向 | axis[9] 值 | 说明             |
-     * | ---- | ---------- | ---------------- |
+     * | :--- | :--------- | :--------------- |
      * | 上   | -1.00000   | 方向键上被按下   |
      * | 下   | 0.14286    | 方向键下被按下   |
      * | 左   | 0.71429    | 方向键左被按下   |
@@ -11185,8 +10284,8 @@ var tetris = (() => {
      * | 松开 | 其他值     | 没有方向键被按下 |
      *
      * @param {number} val - Axis[9] 的原始值
-     * @param {object} state - 游戏状态信息（包含 mode 和 level）
-     * @returns {GamepadController} 返回 GamepadController 对象，可链式调用
+     * @param {object} state - 游戏状态信息
+     * @returns {GamepadController} 返回自身，支持链式调用
      */
     _handleBetopDpad(val, state) {
       const { mode, level } = state;
@@ -11197,32 +10296,26 @@ var tetris = (() => {
         return this;
       }
       switch (v) {
-        // 上方向
         case "-1.00000": {
           this._handleBetopDpadUp(mode, level, st);
           this.lastDpadTime = now;
           break;
         }
-        // 下方向
         case "0.14286": {
           this._handleBetopDpadDown(mode, level, st);
           this.lastDpadTime = now;
           break;
         }
-        // 左方向
         case "0.71429": {
           this._handleBetopDpadLeft(st);
           this.lastDpadTime = now;
           break;
         }
-        // 右方向
         case "-0.42857": {
           this._handleBetopDpadRight(st);
           this.lastDpadTime = now;
           break;
         }
-        // 松开手柄，重置所有方向状态
-        // axis[9] 为其他值表示没有方向键被按下
         default: {
           st.up = st.down = st.left = st.right = false;
           break;
@@ -11231,14 +10324,12 @@ var tetris = (() => {
       return this;
     }
     /**
-     * ## 获取轴值（带 dead zone）
+     * ## _getAxis：获取轴值（带 dead zone）
      *
-     * 读取指定轴的数值，并应用死区过滤。 小于死区的值视为 0，避免摇杆漂移导致的误操作。
-     *
-     * 死区的作用：摇杆在中心位置时，由于硬件精度问题， 可能会有非常小的非零值，死区过滤可以忽略这些微小抖动。
+     * 小于死区的值视为 0，避免摇杆漂移导致的误操作。
      *
      * @param {number} index - 轴在 axes 数组中的索引
-     * @returns {number} 经过死区过滤后的轴值（范围 -1 到 1，死区范围内返回 0）
+     * @returns {number} 经过死区过滤后的轴值
      */
     _getAxis(index) {
       if (!this.activeGamepad) {
@@ -11248,22 +10339,12 @@ var tetris = (() => {
       return Math.abs(val) > this.DEAD_ZONE ? val : 0;
     }
     /**
-     * ## 判断按钮是否"刚按下"（防抖）
+     * ## _isPressed：判断按钮是否"刚按下"（防抖）
      *
-     * 检测按钮是否刚被按下（边缘触发），而不是持续按下的状态。 配合 buttonStates 实现防抖，防止长按时重复触发。
+     * 检测按钮是否刚被按下（边缘触发）， 配合 buttonStates 实现防抖，防止长按时重复触发。
      *
-     * ### 工作原理
-     *
-     * 1. 按钮按下（value > 0.5）且之前未触发 → 返回 true，标记已触发
-     * 2. 按钮按下但之前已触发 → 返回 false（长按中，忽略）
-     * 3. 按钮松开（value <= 0.5）→ 重置状态，下次按下可再次触发
-     *
-     * ### 为什么使用 0.5 作为阈值？
-     *
-     * 手柄按钮的 value 通常是 0.0（未按下）到 1.0（完全按下）的模拟值， 0.5 是一个合理的中间值，可以判断按钮是否被按下。
-     *
-     * @param {string} btnName - 按钮名称（如 'A'、'START'）
-     * @returns {boolean} 按钮刚被按下返回 true，否则返回 false
+     * @param {string} btnName - 按钮名称
+     * @returns {boolean} 按钮刚被按下返回 true
      */
     _isPressed(btnName) {
       const idx = this.curBtnMap[btnName];
@@ -11290,22 +10371,18 @@ var tetris = (() => {
   // lib/ai/core/ai-difficulty.js
   var AI_WEIGHTS = {
     holes: -8,
-    // 空洞惩罚：一个洞 ≈ 10 分
     height: -0.7,
-    // 背景压力：适中恐高
     bumpiness: -0.35,
-    // 不平整度：引导平整表面
     completeLines: 20
-    // 消行奖励缩放因子
   };
   var AIDifficulty = {
     /**
-     * ## 简单难度（EASY）
+     * 简单难度（EASY）：
      *
-     * - 前瞻 2 步，有基本规划能力
-     * - Beam 宽度 2，只保留最优 2 个候选
-     * - 8% 噪声，偶尔随机选择非最优解
-     * - 决策延迟 480ms，给玩家充足的反应时间
+     * - 前瞻 2 步；
+     * - Beam=2；
+     * - 8% 噪声；
+     * - 延迟 480ms
      */
     EASY: {
       lookahead: 2,
@@ -11315,12 +10392,12 @@ var tetris = (() => {
       delay: 480
     },
     /**
-     * ## 普通难度（NORMAL）
+     * 普通难度（NORMAL）：
      *
-     * - 前瞻 3 步，中等深度推演
-     * - Beam 宽度 3，保留更多候选路径
-     * - 5% 噪声，偶尔失误
-     * - 决策延迟 380ms，中等响应速度
+     * - 前瞻 3 步；
+     * - Beam=3；
+     * - 5% 噪声；
+     * - 延迟 380ms
      */
     NORMAL: {
       lookahead: 3,
@@ -11330,12 +10407,12 @@ var tetris = (() => {
       delay: 380
     },
     /**
-     * ## 困难难度（HARD）
+     * 困难难度（HARD）：
      *
-     * - 前瞻 4 步，达到评估函数有效预测上限
-     * - Beam 宽度 3，聚焦搜索
-     * - 0% 噪声，始终选择最优解
-     * - 决策延迟 200ms，较快响应
+     * - 前瞻 4 步；
+     * - Beam=3；
+     * - 0% 噪声；
+     * - 延迟 200ms
      */
     HARD: {
       lookahead: 4,
@@ -11345,12 +10422,12 @@ var tetris = (() => {
       delay: 200
     },
     /**
-     * ## 专家难度（EXPERT）
+     * 专家难度（EXPERT）：
      *
-     * - 前瞻 4 步，与 HARD 相同深度
-     * - Beam 宽度 4，比 HARD 更宽的搜索
-     * - 0% 噪声，始终选择最优解
-     * - 决策延迟 130ms，极速响应
+     * - 前瞻 4 步；
+     * - Beam=4；
+     * - 0% 噪声；
+     * - 延迟 130ms
      */
     EXPERT: {
       lookahead: 4,
@@ -11364,61 +10441,16 @@ var tetris = (() => {
 
   // lib/ai/snapshot/create-snapshot.js
   var createSnapshot = (state, bag) => structuredClone({
-    /*
-     * ==================== 控制者身份 ====================
-     *
-     * 标识当前由谁控制：'human' 或 'ai'。
-     * 保留此字段方便后续扩展（如根据控制者调整 AI 策略）。
-     */
     controller: state.controller,
-    /*
-     * ==================== 棋盘状态 ====================
-     *
-     * 20 行 × 10 列的二维数组。
-     * 每个格子的值为 0（空格）或颜色字符串（如 "#00c8ff"）。
-     * 这是 AI 决策的核心数据——所有候选移动都在此棋盘上模拟。
-     */
     board: state.board,
-    /*
-     * ==================== 游戏进度 ====================
-     *
-     * 保留 level、score、lines 供 AI 参考。
-     * level 影响下落速度和配色方案，score 和 lines 可用于评估游戏进程。
-     */
     level: state.level,
     score: state.score,
     lines: state.lines,
-    /*
-     * ==================== 计分状态 ====================
-     *
-     * 这些状态沿前瞻链传递，供 AI 评估 T-Spin / Combo / Back-to-Back。
-     * 使用 || 运算符提供默认值，防止 undefined 导致计算错误。
-     */
     combo: state.combo || 0,
     backToBack: state.backToBack || false,
     tSpin: state.tSpin || null,
-    /*
-     * ==================== 原始方块对象 ====================
-     *
-     * cur：当前正在下落的活动方块，包含 shape、type、color、rotation 等完整信息
-     * next：下一个预览方块，用于 Hold 槽为空时作为备选
-     *
-     * 保留原始对象方便后续扩展（如根据方块类型调整策略）。
-     */
     cur: state.curr,
     next: state.next,
-    /*
-     * ==================== AI 决策专用的方块位置信息 ====================
-     *
-     * 从 state.curr 和 state.cx/cy 中提取并结构化。
-     *
-     * piece.shape：当前方块的形状矩阵（如 [[1,1],[1,1]] 表示 O 块）
-     * piece.position.x：方块左上角在棋盘上的列坐标（0-9）
-     * piece.position.y：方块左上角在棋盘上的行坐标（0 为顶部）
-     *
-     * 这是 generateMoves 的输入——AI 基于此位置生成所有旋转和平移候选。
-     * 如果 curr 为 null（无活动方块），piece 也为 null。
-     */
     piece: state.curr ? {
       shape: state.curr.shape,
       position: {
@@ -11426,35 +10458,8 @@ var tetris = (() => {
         y: state.cy
       }
     } : null,
-    /*
-     * ==================== 游戏模式 ====================
-     *
-     * 标识游戏当前所处的阶段：'playing'、'paused'、'game-over' 等。
-     * AI 只在 'playing' 模式下进行决策。
-     */
     mode: state.mode,
-    /*
-     * ==================== 7-bag 状态 ====================
-     *
-     * 当前 Game 实例专属的 7-bag 快照。
-     *
-     * Battle 模式修复：
-     * 之前使用模块级全局变量 `getBagSnapshot()`，导致两个 Game 实例
-     * 共享同一个 bag。现在每个 Game 实例维护独立的 `this.bag`，
-     * 通过 `Game.getBagSnapshot()` 获取深拷贝快照。
-     *
-     * 此数组在 advanceSnapshot 中被 shift 消费，用于确定性前瞻——
-     * AI 可以精确知道接下来会拿到哪些方块。
-     */
     bag,
-    /*
-     * ==================== Hold 槽状态 ====================
-     *
-     * 暂存区中的方块对象。null 表示暂存区为空。
-     * generateMoves 使用此字段生成 Hold 候选——
-     * 如果 hold 有方块，AI 可以评估"换出来是否更好"。
-     * 如果 hold 为空，AI 使用 next 作为备选评估"Hold 一下值不值得"。
-     */
     hold: state.hold || null
   });
   var create_snapshot_default = createSnapshot;
@@ -11530,9 +10535,7 @@ var tetris = (() => {
       return targetBoard;
     };
     return {
-      /** 硬降终点的 Y 坐标 */
       y,
-      /** 放置函数：在分支棋盘上写入方块 */
       placeOn
     };
   };
@@ -11582,13 +10585,9 @@ var tetris = (() => {
       originalX: originalPiece.position.x
     });
     return {
-      /** 硬降终点 X 坐标（用于 advanceSnapshot 正确模拟放置位置） */
       x: targetX,
-      /** 硬降终点 Y 坐标 */
       y,
-      /** 放置函数：在分支棋盘上写入方块 */
       placeOn,
-      /** 动作序列 */
       actions
     };
   };
@@ -11678,13 +10677,9 @@ var tetris = (() => {
     const heights = [];
     const w = {
       holes: -8,
-      // 空洞惩罚：一个洞 ≈ 10 分
       height: -0.7,
-      // 背景压力：适中恐高
       bumpiness: -0.35,
-      // 不平整度：引导平整表面
       completeLines: 20,
-      // 消行奖励缩放因子
       ...weights
     };
     if (mode === "versus") {
@@ -11791,27 +10786,16 @@ var tetris = (() => {
     const allClearScore = isAllClear ? 2e3 : 0;
     const clearScore = Math.floor(baseScore * multiplier) + comboScore + allClearScore;
     return {
-      /** 消除行数 */
       cleared,
-      /** 基础分（乘倍率前） */
       baseScore,
-      /** 最终得分 */
       clearScore,
-      /** 是否为 T-Spin */
       isTSpin,
-      /** 是否为 T-Spin Mini */
       isTSpinMini,
-      /** 是否为大招（用于更新 Back-to-Back 状态） */
       isBigMove,
-      /** 是否触发了 Back-to-Back 奖励 */
       isBackToBack,
-      /** 是否触发了 All Clear */
       isAllClear,
-      /** 更新后的连击次数 */
       combo,
-      /** 本次 Combo 额外加分 */
       comboScore,
-      /** 本次 All Clear 加分 */
       allClearScore
     };
   };
@@ -11867,13 +10851,9 @@ var tetris = (() => {
       cur: nextPiece,
       next: nextNext,
       bag,
-      // 更新计分状态：combo 递增（如果有消行），否则清零
       combo: clearResult ? clearResult.combo : 0,
-      // 更新 Back-to-Back：本次是大招则保留标记，否则继承原值
       backToBack: clearResult ? clearResult.isBigMove : snapshot.backToBack,
-      // 清空 T-Spin 标记（每次锁定时重新检测）
       tSpin: null,
-      // 传递消行结果到下一层，确保深层搜索能看到消行价值
       clearResult: clearResult || null
     };
   };
@@ -11954,23 +10934,14 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收依赖配置，通过 Base.inject() 自动注入依赖，然后调用 initialize() 初始化内部状态。
-     *
      * @param {object} options - 依赖配置对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Store - 游戏状态存储
-     * @param {object} options.Scheduler - 任务调度器
-     * @param {object} options.Animations - 动画系统
-     * @param {object} options.Player - 玩家信息对象
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化内部状态
-     *
-     * 设置所有实例属性的默认值，并尝试创建 Web Worker。 当前 Worker 创建后暂未使用，think() 走同步路径。
+     * ## initialize：初始化内部状态
      *
      * @returns {void}
      */
@@ -11978,15 +10949,10 @@ var tetris = (() => {
       this._initialize();
     }
     /**
-     * ## 初始化 Web Worker
-     *
-     * 创建独立线程运行 selfPlay 决策。如果浏览器不支持 Worker， 将 this.worker 设为 null，后续 think()
-     * 降级为主线程同步模式。
-     *
-     * 当前版本统一使用主线程同步模式，Worker 代码保留备用。
+     * ## _initialize：初始化状态和 Worker
      *
      * @private
-     * @param {boolean} [terminate=false] - 是否销毁. Default is `false`
+     * @param {boolean} [terminate=false] - 是否销毁 Worker. Default is `false`
      * @returns {void}
      */
     _initialize(terminate = false) {
@@ -11998,14 +10964,9 @@ var tetris = (() => {
       this.worker = typeof Worker === "undefined" || terminate ? null : new Worker("js/ai-worker.js", { type: "module" });
     }
     /**
-     * ## 启动 AI
+     * ## start：启动 AI
      *
-     * 设置 enabled 标志并立即开始第一次循环。
-     *
-     * ### 防重入保护
-     *
-     * 如果 `this.enabled` 已经是 true，说明 AI 已经在运行中， 直接返回不重复启动。这修复了 Battle 模式下 AI
-     * 被启动两次的问题—— `Game.initialize()` 和 `_onGameStart` 各调用了一次 `start()`。
+     * 设置 enabled 标志并立即开始第一次循环。 包含防重入检查，已启动时直接返回。
      *
      * @returns {void}
      */
@@ -12017,9 +10978,9 @@ var tetris = (() => {
       this.loop();
     }
     /**
-     * ## 停止 AI
+     * ## stop：停止 AI
      *
-     * 清除 enabled 标志、清空待执行动作、重置 Worker 忙碌状态、 取消当前 Scheduler 中的调度任务。
+     * 清除 enabled 标志、清空动作队列、取消调度任务。
      *
      * @returns {void}
      */
@@ -12032,25 +10993,16 @@ var tetris = (() => {
       this.aiSchedulerId = 0;
     }
     /**
-     * ## AI 主循环
+     * ## loop：AI 主循环
      *
-     * 每帧（由 Scheduler 按难度 delay 触发）执行：
+     * 每帧由 Scheduler 按难度 delay 触发：
      *
-     * 1. 检查 enabled 标志
-     * 2. 检查游戏状态（必须为 'playing' 且无动画阻塞），否则 100ms 后重试
-     * 3. 如果动作队列为空且 Worker 空闲，调用 think() 发起决策
-     * 4. 从队列头部取出一个动作执行
-     * 5. 调度下一次循环
+     * 1. 检查 enabled 标志和游戏状态
+     * 2. 动作队列为空时调用 think() 发起决策
+     * 3. 从队列头部取出一个动作执行
+     * 4. 调度下一次循环
      *
-     * ### 动作执行时序
-     *
-     * 每帧只执行一个动作（this.actions.shift()）。 一个完整的动作序列（如 HOLD → ROTATE → MOVE →
-     * DROP）需要多帧才能执行完毕。 序列执行期间不会发起新的 think()，因为 this.actions.length > 0。
-     *
-     * ### Battle 模式事件隔离
-     *
-     * 使用 `GameEvents(Game.id).DISPATCH_INPUT` 发送事件， 事件名包含 Game 的 UUID，确保 Battle
-     * 模式下两个 Game 实例的事件不会互相干扰。
+     * 每帧只执行一个动作，完整动作序列需多帧执行完毕。
      *
      * @returns {void}
      */
@@ -12088,32 +11040,21 @@ var tetris = (() => {
       this.aiSchedulerId = Scheduler2.delay(this.loop, difficulty.delay);
     };
     /**
-     * ## AI 决策入口
+     * ## think：AI 决策入口
      *
      * 根据运行模式选择决策方式：
      *
-     * - **Worker 模式**：异步发送消息给 Worker 线程
-     * - **主线程模式**（当前使用）：同步调用 selfPlay，直接返回最佳移动对象
+     * - Worker 模式（当前未使用）：异步发送消息
+     * - 主线程模式（当前使用）：同步调用 selfPlay
      *
-     * ### mode 参数
+     * Mode 参数根据游戏模式传递：
      *
-     * 根据当前游戏模式传递不同的 mode 给 selfPlay：
+     * - Single：'survival'
+     * - Battle：'versus'
      *
-     * - Single 模式：'survival'（生存模式，只关心自己棋盘的存活）
-     * - Battle 模式：'versus'（对战模式，额外考虑攻击力奖励）
-     *
-     * Mode 参数贯穿整个决策链：selfPlay → evaluateBoard， 在 evaluateBoard 中根据 mode
-     * 使用不同的权重和奖励策略。
-     *
-     * ### bag 参数
-     *
-     * 从 Game.getBagSnapshot() 获取当前 Game 实例专属的 7-bag 快照。 每个 Game 实例维护独立的
-     * this.bag，Battle 模式下不会互相干扰。
-     *
-     * @param {object} state - 游戏状态对象（Game.Store.getState() 的返回值）
-     * @param {object} difficulty - 难度配置对象，包含 lookahead、weights、beam、delay
-     * @returns {object | void} 主线程模式返回 { x, y, placeOn, actions }，Worker 模式返回
-     *   undefined
+     * @param {object} state - 游戏状态对象
+     * @param {object} difficulty - 难度配置对象
+     * @returns {object | void} 主线程模式返回最佳移动对象，Worker 模式返回 undefined
      */
     think(state, difficulty) {
       const { Store, Game: Game2 } = this;
@@ -12140,20 +11081,11 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 获取当前难度的完整配置
+     * ## getDifficultyConfig：获取当前难度的完整配置
      *
      * 从 Store 读取当前选择的难度等级，映射到对应的 AIDifficulty 配置对象。 未知难度降级为 NORMAL。
      *
-     * ### 配置内容
-     *
-     * | 难度   | lookahead | beam | noise | delay | 特点                         |
-     * | ------ | --------- | ---- | ----- | ----- | ---------------------------- |
-     * | EASY   | 2         | 2    | 0.08  | 480ms | 多看一步，偶尔犯错，反应慢   |
-     * | NORMAL | 3         | 3    | 0.05  | 380ms | 多看两步，偶尔失误，中等速度 |
-     * | HARD   | 4         | 4    | 0     | 200ms | 多看三步，从不犯错，较快     |
-     * | EXPERT | 4         | 5    | 0     | 130ms | 多看三步，最宽搜索，极快     |
-     *
-     * @returns {object} 难度配置对象，包含 lookahead、noise、weights、delay、beam
+     * @returns {object} 难度配置对象
      */
     getDifficultyConfig() {
       const { Game: Game2 } = this;
@@ -12167,9 +11099,9 @@ var tetris = (() => {
       return map[difficulty] || ai_difficulty_default.NORMAL;
     }
     /**
-     * ## 绑定 Worker 事件监听器
+     * ## addEventListeners：绑定 Worker 事件监听器
      *
-     * 注册 Worker 的 message 和 error 事件处理函数。 当前 Worker 未使用，此方法保留备用。
+     * 当前 Worker 未使用，此方法保留备用。
      *
      * @returns {void}
      */
@@ -12181,9 +11113,7 @@ var tetris = (() => {
       this.worker.addEventListener("error", this._onWorkerError);
     }
     /**
-     * ## 移除 Worker 事件监听器
-     *
-     * 在 Game 销毁或模式切换时调用，防止内存泄漏。
+     * ## removeEventListeners：移除 Worker 事件监听器
      *
      * @returns {void}
      */
@@ -12195,9 +11125,7 @@ var tetris = (() => {
       this.worker.removeEventListener("error", this._onWorkerError);
     }
     /**
-     * ## 处理 Worker 返回的消息
-     *
-     * Worker 完成决策后，将结果写入 this.actions 队列，解除 workerBusy 锁。 当前 Worker 未使用，此方法保留备用。
+     * ## _onWorkerMessage：处理 Worker 返回的消息
      *
      * @private
      * @param {MessageEvent} e - Worker 消息事件
@@ -12217,9 +11145,7 @@ var tetris = (() => {
       }
     };
     /**
-     * ## 处理 Worker 自身错误
-     *
-     * Worker 线程崩溃时解除忙碌锁并降级为主线程模式。 当前 Worker 未使用，此方法保留备用。
+     * ## _onWorkerError：处理 Worker 自身错误
      *
      * @private
      * @param {ErrorEvent} err - Worker 错误事件
@@ -12231,10 +11157,7 @@ var tetris = (() => {
       this.worker = null;
     };
     /**
-     * ## 订阅 AI 事件
-     *
-     * 监听 `ai:<uuid>:start` 和 `ai:<uuid>:stop` 事件。 事件名包含 Game 的 UUID，确保 Battle
-     * 模式下两个 Game 实例的事件隔离。
+     * ## subscribe：订阅 AI 事件
      *
      * @returns {void}
      */
@@ -12245,9 +11168,7 @@ var tetris = (() => {
       this.on(events.STOP, this._onStop);
     }
     /**
-     * ## 取消订阅 AI 事件
-     *
-     * 在 Game 销毁或模式切换时调用，防止内存泄漏。
+     * ## unsubscribe：取消订阅 AI 事件
      *
      * @returns {void}
      */
@@ -12258,9 +11179,7 @@ var tetris = (() => {
       this.off(events.STOP, this._onStop);
     }
     /**
-     * ## 处理 AI 启动事件
-     *
-     * 当收到 `ai:<uuid>:start` 事件时调用 start()。 start() 包含防重入检查，重复调用安全。
+     * ## _onStart：处理 AI 启动事件
      *
      * @private
      * @returns {void}
@@ -12269,9 +11188,7 @@ var tetris = (() => {
       this.start();
     };
     /**
-     * ## 处理 AI 停止事件
-     *
-     * 当收到 `ai:<uuid>:stop` 事件时调用 stop()。
+     * ## _onStop：处理 AI 停止事件
      *
      * @private
      * @returns {void}
@@ -12280,9 +11197,9 @@ var tetris = (() => {
       this.stop();
     };
     /**
-     * ## 销毁 AI 的相关数据
+     * ## destroy：销毁 AI 的相关数据
      *
-     * 当玩家选择游戏模式重置界面的时候，AI 的 worker 和相关属性需要重置
+     * 当玩家选择游戏模式重置界面时，AI 的 worker 和相关属性需要重置。
      *
      * @returns {void}
      */
@@ -12328,7 +11245,7 @@ var tetris = (() => {
     "FOUR",
     // 第 4 关
     "FIX",
-    // 第 5 关（FIX 为拼写约定，等同于 FIVE）
+    // 第 5 关
     "SIX",
     // 第 6 关
     "SEVEN",
@@ -12342,46 +11259,25 @@ var tetris = (() => {
   ];
   var getActionMap = (mode, level) => {
     switch (mode) {
-      /*
-       * ==================== 简单选择界面 ====================
-       *
-       * game-mode（游戏模式选择）和 exit-game（退出菜单）共用同一套映射：
-       * - DPAD 上下键：移动选择光标
-       * - START 键：确认当前选项
-       *
-       * 这两个界面都只有两个选项，通过 ↑↓ 切换，Enter/Start 确认。
-       */
+      // 简单选择界面：game-mode 和 exit-game 共用
       case "game-mode":
       case "exit-game": {
         return {
-          DPAD_UP: `MOVE_UP`,
-          DPAD_DOWN: `MOVE_DOWN`,
+          DPAD_UP: "MOVE_UP",
+          DPAD_DOWN: "MOVE_DOWN",
           START: "CONFIRM"
         };
       }
-      /*
-       * ==================== 对战模式选择界面 ====================
-       *
-       * battle-mode 比简单选择界面多一个 BACK 键用于返回上一级。
-       * - DPAD 上下键：移动选择光标
-       * - START 键：确认当前选项
-       * - BACK 键：返回到游戏模式选择界面
-       */
+      // 对战模式选择界面：多一个 BACK 键
       case "battle-mode": {
         return {
-          DPAD_UP: `MOVE_UP`,
-          DPAD_DOWN: `MOVE_DOWN`,
+          DPAD_UP: "MOVE_UP",
+          DPAD_DOWN: "MOVE_DOWN",
           BACK: "BACK",
           START: "CONFIRM"
         };
       }
-      /**
-       * ==================== 主菜单模式（等级选择） ====================
-       *
-       * DPAD 上下键切换等级（1-10），Start 键确认并进入难度选择。 按键映射使用 LEVEL_ + 等级名称的动态 action。
-       *
-       * 例如 level=0 时 DPAD_UP 映射为 LEVEL_ONE，level=1 时映射为 LEVEL_TWO。
-       */
+      // 主菜单模式：DPAD 上下键切换等级
       case "main-menu": {
         return {
           DPAD_UP: `LEVEL_${LEVELS2[level]}`,
@@ -12389,18 +11285,7 @@ var tetris = (() => {
           START: "CONFIRM"
         };
       }
-      /**
-       * ==================== 难度选择模式 ====================
-       *
-       * ABXY 四个按钮分别对应四种难度等级：
-       *
-       * - A → EASY
-       * - B → NORMAL
-       * - Y → HARD
-       * - X → EXPERT
-       * - BACK → 返回主菜单
-       * - START → 确认难度并开始游戏
-       */
+      // 难度选择模式：ABXY 对应四种难度
       case "difficulty": {
         return {
           A: "EASY",
@@ -12411,19 +11296,7 @@ var tetris = (() => {
           START: "CONFIRM"
         };
       }
-      /**
-       * ==================== 游戏进行中模式 ====================
-       *
-       * 完整的游戏操作映射：
-       *
-       * - A：切换背景音乐
-       * - B：硬降
-       * - X：重新开始
-       * - Y：暂停/继续
-       * - BACK：退出游戏（对战模式认输 / 单人模式退出菜单）
-       * - HOLD：缓存方块
-       * - DPAD 上下左右：移动和旋转方块
-       */
+      // 游戏进行中模式：完整游戏操作映射
       case "playing": {
         return {
           A: "TOGGLE_MUSIC",
@@ -12438,11 +11311,7 @@ var tetris = (() => {
           DPAD_RIGHT: "MOVE_RIGHT"
         };
       }
-      /**
-       * ==================== 其他模式 ====================
-       *
-       * Replay、game-over、battle-over 等模式使用默认映射。
-       */
+      // 其他模式：使用默认映射
       default: {
         return TOUCH_ACTION_MAP;
       }
@@ -12453,19 +11322,15 @@ var tetris = (() => {
      * ## 构造函数
      *
      * @param {object} options - 配置对象
-     * @param {object} options.Controls - DOM 元素 ID 配置
-     * @param {object} options.Store - 游戏状态存储
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Player - 玩家信息对象（name + index）
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化触摸控制器
+     * ## initialize：初始化触摸控制器
      *
-     * 获取所有按钮 DOM 元素的引用，绑定事件监听器。 使用 Player 的 name 和 index 构建 DOM 元素的选择器， 确保 Battle
+     * 获取所有按钮 DOM 元素的引用，绑定事件监听器。 使用 Player 的 name 和 index 构建 DOM 选择器， 确保 Battle
      * 模式下两个玩家的按钮互不干扰。
      *
      * @returns {void}
@@ -12488,16 +11353,15 @@ var tetris = (() => {
       this.addEventsListeners();
     }
     /**
-     * ## 分发触摸事件为游戏输入
+     * ## dispatchTouch：分发触摸事件为游戏输入
      *
      * 根据当前游戏模式获取按键映射，将触摸按键转换为游戏 action， 通过带 Game ID scope 的 dispatch:input
      * 事件注入到命令队列中。
      *
      * ### 特殊处理
      *
-     * - **main-menu 模式**：DPAD 上下键在分发前先调整 this.level（等级索引）
-     * - **exit-game 模式**：DPAD 上下键直接映射为 MOVE_UP / MOVE_DOWN， 光标切换逻辑由
-     *   GameRouter._onUpdateExitIndex 处理
+     * - Main-menu 模式：DPAD 上下键在分发前先调整 level
+     * - Exit-game 模式：DPAD 上下键直接映射，光标切换由 Router 处理
      *
      * @param {string} key - 触摸按键标识（如 'A', 'DPAD_UP' 等）
      * @returns {void}
@@ -12517,19 +11381,16 @@ var tetris = (() => {
       if (action) {
         const events = GameEvents(Game2.id);
         this.emit(events.DISPATCH_INPUT, {
-          /** 输入设备类型：触摸屏 */
           device: "touch",
-          /** 游戏动作指令（如 MOVE_LEFT、ROTATE、CONFIRM 等） */
           action,
-          /** 传递给命令处理器的参数，包含 Game 实例引用 */
           payload: { Game: Game2 }
         });
       }
     }
     /**
-     * ## 绑定所有按钮的点击事件
+     * ## addEventsListeners：绑定所有按钮的点击事件
      *
-     * 为 DPAD（4 个方向）、ABXY（4 个按钮）、Start、Back、Hold 共 11 个按钮绑定 click 事件监听器。
+     * 为 DPAD（4 个方向）、ABXY（4 个按钮）、 Start、Back、Hold 共 11 个按钮绑定 click 事件。
      *
      * @returns {void}
      */
@@ -12547,7 +11408,7 @@ var tetris = (() => {
       this.$y.addEventListener("click", this._onControlTouch);
     }
     /**
-     * ## 移除所有按钮的点击事件
+     * ## removeEventListeners：移除所有按钮的点击事件
      *
      * 在组件销毁或切换输入模式时调用，防止内存泄漏。
      *
@@ -12567,17 +11428,9 @@ var tetris = (() => {
       this.$y.removeEventListener("click", this._onControlTouch);
     }
     /**
-     * ## 处理按钮点击事件
+     * ## _onControlTouch：处理按钮点击事件
      *
-     * 从被点击元素的 `data-key` 属性中读取按键标识， 转为大写后调用 `dispatchTouch()` 分发。
-     *
-     * ### data-key 属性
-     *
-     * 每个按钮 DOM 元素通过 `data-key` 属性标识自己的按键名称：
-     *
-     * - DPAD 方向键：`data-key="dpad_up"` / `"dpad_down"` 等
-     * - ABXY 按钮：`data-key="a"` / `"b"` 等
-     * - 系统按钮：`data-key="start"` / `"back"` / `"hold"`
+     * 从被点击元素的 data-key 属性中读取按键标识， 转为大写后调用 dispatchTouch() 分发。
      *
      * @private
      * @param {Event} evt - 点击事件对象
@@ -12797,9 +11650,9 @@ var tetris = (() => {
   // lib/runtime/replay-controller.js
   var ReplayController = class extends core_default {
     /**
-     * ## 是否有录制的回放数据
+     * ## hasData：是否有录制的回放数据
      *
-     * @returns {boolean} 有回放数据返回 true，否则返回 false
+     * @returns {boolean} 有回放数据返回 true
      */
     get hasData() {
       return this.data.length > 0;
@@ -12807,19 +11660,16 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * @param {object} options - 配置（依赖的执行上下文）对象
-     * @param {object} options.Game - 游戏主实例
-     * @param {object} options.Store - 游戏状态存储
-     * @param {object} options.Scheduler - 任务调度器
+     * @param {object} options - 配置对象
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化所有内部状态
+     * ## initialize：初始化所有内部状态
      *
-     * 重置录制/回放相关的所有标志和数据， 并创建 ReplayRouter 实例处理事件路由。
+     * 重置录制/回放相关的所有标志和数据， 创建 ReplayRouter 实例处理事件路由。
      *
      * @returns {void}
      */
@@ -12840,9 +11690,9 @@ var tetris = (() => {
       });
     }
     /**
-     * ## 获取下一个方块
+     * ## getNextPiece：获取下一个方块
      *
-     * 在回放模式下，从录制的方块序列中按顺序读取。 确保回放时的方块顺序与录制时完全一致。
+     * 在回放模式下，从录制的方块序列中按顺序读取。
      *
      * @returns {{ curr: object | null; next: object | null }} 当前方块和下一个预览方块
      */
@@ -12858,13 +11708,12 @@ var tetris = (() => {
       return { curr: piece, next };
     }
     /**
-     * ## 同步回放逻辑时钟
+     * ## syncPlayElapsed：同步回放逻辑时钟
      *
-     * 计算当前 wall-clock 时间与 startTime 的差值作为回放进度。 如果检测到时间跳跃过大（标签页切后台），限制单次跳跃上限为 1 秒，
-     * 防止切回后瞬间执行大量 command 导致爆帧。
+     * 计算当前 wall-clock 时间与 startTime 的差值作为回放进度。 时间跳跃超过 1 秒时限制为最多快进 1 秒。
      *
      * @param {object} ctx - 执行上下文对象
-     * @param {number} ctx.timestamp - 当前 requestAnimationFrame 时间戳
+     * @param {number} ctx.timestamp - 当前时间戳
      * @param {boolean} ctx.isBlocked - 是否处于暂停/阻塞状态
      * @returns {void}
      */
@@ -12881,19 +11730,18 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 每帧调用，驱动回放逻辑
+     * ## update：每帧调用，驱动回放逻辑
      *
      * 执行流程：
      *
      * 1. 更新当前 timestamp
-     * 2. 检查是否处于回放状态
-     * 3. 检查回放是否完毕（所有 command 已执行）
-     * 4. 如有需要，快进跳过长时间等待（标签页切回后）
-     * 5. 将所有逻辑时间已到的 command 逐条注入 EventBus
+     * 2. 检查回放是否完毕
+     * 3. 快进跳过长时间等待
+     * 4. 将所有逻辑时间已到的 command 逐条注入
      *
      * @param {object} ctx - 执行上下文对象
-     * @param {number} ctx.speed - 当前下落间隔（毫秒），用于快进阈值计算
-     * @param {number} ctx.timestamp - 当前 requestAnimationFrame 时间戳
+     * @param {number} ctx.speed - 当前下落间隔（毫秒）
+     * @param {number} ctx.timestamp - 当前时间戳
      * @returns {void}
      */
     update({ speed, timestamp }) {
@@ -12929,9 +11777,7 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 开始录制
-     *
-     * 开启 recording 标志，清空旧数据和方块序列， 将 startTime 设置为当前 timestamp。
+     * ## startRecord：开始录制
      *
      * @returns {void}
      */
@@ -12944,7 +11790,7 @@ var tetris = (() => {
       this.startTime = this.timestamp;
     }
     /**
-     * ## 停止录制
+     * ## stopRecord：停止录制
      *
      * @returns {void}
      */
@@ -12952,9 +11798,7 @@ var tetris = (() => {
       this.recording = false;
     }
     /**
-     * ## 开始回放
-     *
-     * 开启 playing 标志，重置 cursor 和 pieceIndex， 将 startTime 设置为当前 timestamp。
+     * ## startPlay：开始回放
      *
      * @returns {void}
      */
@@ -12965,7 +11809,7 @@ var tetris = (() => {
       this.startTime = this.timestamp;
     }
     /**
-     * ## 停止回放
+     * ## stopPlay：停止回放
      *
      * @returns {void}
      */
@@ -12973,11 +11817,11 @@ var tetris = (() => {
       this.playing = false;
     }
     /**
-     * ## 添加一条录制记录
+     * ## addRecord：添加一条录制记录
      *
-     * 只在 recording 状态下写入数据。
+     * 只在 recording 状态下写入。
      *
-     * @param {object} record - 录制数据 `{ ms, cmd }`
+     * @param {object} record - 录制数据 { ms, cmd }
      * @returns {void}
      */
     addRecord(record) {
@@ -12987,9 +11831,9 @@ var tetris = (() => {
       this.data.push(record);
     }
     /**
-     * ## 添加一个方块到序列
+     * ## addPiece：添加一个方块到序列
      *
-     * 只在 recording 状态下写入，使用深拷贝避免引用污染。
+     * 只在 recording 状态下写入，使用深拷贝。
      *
      * @param {object} piece - 方块数据
      * @returns {void}
@@ -13001,9 +11845,9 @@ var tetris = (() => {
       this.pieceSequence.push(structuredClone(piece));
     }
     /**
-     * ## 清除所有数据，重置标志位
+     * ## clear：清除所有数据，重置标志位
      *
-     * 注意：不清除事件绑定，仅重置录制/回放相关状态。
+     * 注意：不清除事件绑定。
      *
      * @returns {void}
      */
@@ -13017,9 +11861,7 @@ var tetris = (() => {
       this.startTime = 0;
     }
     /**
-     * ## 停止录制/回放并清除所有数据
-     *
-     * 等同于 `stopRecord()` + `stopPlay()` + `clear()`。 通过 `replay:<id>:reset` 事件触发。
+     * ## reset：停止录制/回放并清除所有数据
      *
      * @returns {void}
      */
@@ -13029,7 +11871,7 @@ var tetris = (() => {
       this.clear();
     }
     /**
-     * ## 绑定所有事件监听
+     * ## subscribe：绑定所有事件监听
      *
      * 委托给 ReplayRouter 处理。
      *
@@ -13039,7 +11881,7 @@ var tetris = (() => {
       this.Router.subscribe();
     }
     /**
-     * ## 取消绑定所有事件监听
+     * ## unsubscribe：取消绑定所有事件监听
      *
      * 委托给 ReplayRouter 处理。
      *
@@ -13049,9 +11891,9 @@ var tetris = (() => {
       this.Router.unsubscribe();
     }
     /**
-     * ## 销毁实例
+     * ## destroy：销毁实例
      *
-     * 停止所有录制/回放、清除数据、解绑所有事件。 主要用于 AI 对战切换对手或完全卸载 replay 模块。
+     * 停止所有录制/回放、清除数据、解绑所有事件。
      *
      * @returns {void}
      */
@@ -13303,9 +12145,9 @@ var tetris = (() => {
       this.initialize();
     }
     /**
-     * ## 初始化动画状态
+     * ## initialize：初始化动画状态
      *
-     * 设置动画属性，创建缩放和倒计时两个 Scheduler 定时器。
+     * 创建缩放和倒计时两个 Scheduler 定时器。
      *
      * @returns {void}
      */
@@ -13337,9 +12179,9 @@ var tetris = (() => {
       }, 1e3);
     }
     /**
-     * ## 清理资源
+     * ## dispose：清理资源
      *
-     * 由 AnimationSystem 在移除动画时自动调用。 取消所有 Scheduler 定时器，并触发游戏开始事件。
+     * 取消所有 Scheduler 定时器，触发游戏开始事件。
      *
      * @returns {void}
      */
@@ -13356,7 +12198,7 @@ var tetris = (() => {
       this.emit(events.BEGIN);
     }
     /**
-     * ## 渲染动画
+     * ## render：渲染动画
      *
      * 将当前状态传递给 UI 层绘制倒计时数字。
      *
@@ -13375,14 +12217,19 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 初始化暂停动画，启动滴答定时器。
-     *
      * @param {object} options - 配置对象
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
+    /**
+     * ## initialize：初始化暂停动画
+     *
+     * 启动滴答定时器。
+     *
+     * @returns {void}
+     */
     initialize() {
       this.layer = 500;
       this.blocking = true;
@@ -13392,9 +12239,9 @@ var tetris = (() => {
       this._startTick();
     }
     /**
-     * ## 启动滴答定时器
+     * ## _startTick：启动滴答定时器
      *
-     * 每 1000ms 播放一次滴答音效，提醒玩家游戏仍在暂停中。
+     * 每 1000ms 播放一次滴答音效。
      *
      * @private
      * @returns {void}
@@ -13407,9 +12254,9 @@ var tetris = (() => {
       }, 1e3);
     }
     /**
-     * ## 恢复暂停动画
+     * ## resume：恢复暂停动画
      *
-     * 将活跃状态设为 `true`，重新启动滴答定时器。 如果已经处于活跃状态则忽略。
+     * 重新启动滴答定时器。已活跃时忽略。
      *
      * @returns {void}
      */
@@ -13419,9 +12266,9 @@ var tetris = (() => {
       this._startTick();
     }
     /**
-     * ## 暂停结束处理
+     * ## stop：暂停结束处理
      *
-     * 将活跃状态设为 `false`，标记动画结束。 AnimationSystem 会在 `flush()` 时自动调用 `dispose()` 清理。
+     * 标记动画结束，AnimationSystem 会在 flush() 时清理。
      *
      * @returns {void}
      */
@@ -13430,9 +12277,9 @@ var tetris = (() => {
       this._finished = true;
     }
     /**
-     * ## 清理资源
+     * ## dispose：清理资源
      *
-     * 由 AnimationSystem 在移除动画时自动调用。 取消滴答定时器。
+     * 取消滴答定时器。
      *
      * @returns {void}
      */
@@ -13443,9 +12290,9 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 渲染暂停动画
+     * ## render：渲染暂停动画
      *
-     * 实际的渲染由 UI 层监听事件完成，此方法为空实现。
+     * 实际的渲染由 UI 层监听事件完成。
      *
      * @returns {void}
      */
@@ -13505,7 +12352,7 @@ var tetris = (() => {
     const comboScore = combo > 1 ? (combo - 1) * 50 : 0;
     return {
       /**
-       * ## 状态更新处理函数
+       * 状态更新处理函数。
        *
        * 接收当前 state，返回消行后的新 state。
        *
@@ -13514,56 +12361,30 @@ var tetris = (() => {
        */
       stateHandler: (prev) => ({
         ...prev,
-        /** 清空待消除行列表 */
         clearLines: [],
-        /** 清空 T-Spin 标记（仅当次消行有效） */
         tSpin: null,
-        /** 更新 Back-to-Back 状态 */
         backToBack: nextBackToBack,
-        /** 更新棋盘 */
         board,
-        /** 更新累计消除行数 */
         lines: nextLines,
-        /** 更新等级 */
         level: newLevel,
-        /** 更新升级步长 */
         levelUpSteps,
-        /**
-         * 更新总分
-         *
-         * 总分 = 原分数 + (基础分 × B2B倍率 × 等级) + Combo 额外加分 + All Clear 加分
-         */
+        // 总分 = 原分数 + (基础分 × B2B倍率 × 等级) + Combo 额外加分 + All Clear 加分
         score: prev.score + clearScore + comboScore + allClearScore,
-        /** 本次消行得分（用于飘字动画） */
         clearScore,
-        /** 当前连击次数（用于 HUD 显示） */
         combo,
-        /** 本次连击额外加分（用于飘字动画） */
         comboScore
       }),
-      /** 是否触发了升级 */
       levelUp,
-      /** 计算后的新等级 */
       level: newLevel,
-      /** 当前升级步长 */
       levelUpSteps,
-      /** 是否达到最大等级（256） */
       isMaxOut: newLevel >= MAX_LEVEL2,
-      /** 本次消行得分 */
       clearScore,
-      /** 消除行数 */
       cleared,
-      /** 是否为 T-Spin */
       isTSpin,
-      /** 是否为 T-Spin Mini */
       isTSpinMini,
-      /** 是否为 Back-to-Back */
       isBackToBack,
-      /** 是否为 All Clear */
       isAllClear,
-      /** 当前连击次数 */
       combo,
-      /** 本次连击额外加分 */
       comboScore
     };
   };
@@ -13581,10 +12402,9 @@ var tetris = (() => {
       this.initialize(options);
     }
     /**
-     * ## 初始化动画
+     * ## initialize：初始化动画
      *
-     * 设置动画属性，为每行创建独立的透明度状态， 调用 `applyClearLines` 获取本次消除得分供分数动画使用，
-     * 启动闪烁序列、分数动画和结束定时器，播放消行音效。
+     * 设置动画属性，为每行创建独立的透明度状态， 启动闪烁序列、分数动画和结束定时器，播放消行音效。
      *
      * @param {object} options - 配置对象
      * @param {number[]} options.lines - 待消除的行号数组
@@ -13641,12 +12461,9 @@ var tetris = (() => {
       });
     }
     /**
-     * ## 清理资源并执行收尾逻辑
+     * ## dispose：清理资源并执行收尾逻辑
      *
-     * 由 AnimationSystem 在移除动画时自动调用。 取消所有 Scheduler 定时器，重新调用 `applyClearLines`
-     * 获取最终消除结果， 依次执行升级逻辑、更新状态、保存最高分、刷新 HUD。
-     *
-     * `applyClearLines` 是纯函数，此处再次调用结果与 `initialize` 中一致。
+     * 取消所有定时器，重新计算消除结果， 依次执行升级、更新状态、保存最高分、刷新 HUD。
      *
      * @returns {void}
      */
@@ -13686,7 +12503,7 @@ var tetris = (() => {
       ]);
     }
     /**
-     * ## 渲染动画
+     * ## render：渲染动画
      *
      * 将当前闪烁状态传递给 UI 层进行绘制。
      *
@@ -13712,7 +12529,7 @@ var tetris = (() => {
       this.initialize();
     }
     /**
-     * ## 初始化动画
+     * ## initialize：初始化动画
      *
      * 设置动画属性和初始状态，启动状态更新定时器。
      *
@@ -13738,9 +12555,9 @@ var tetris = (() => {
       }, 16);
     }
     /**
-     * ## 更新动画状态
+     * ## _update：更新动画状态
      *
-     * 每 16ms 调用一次，以固定步长更新透明度和上浮偏移。 当透明度降为 0 时标记动画结束。
+     * 每 16ms 调用一次，以固定步长更新透明度和上浮偏移。
      *
      * @returns {void}
      */
@@ -13752,9 +12569,9 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 清理资源
+     * ## dispose：清理资源
      *
-     * 由 AnimationSystem 在移除动画时自动调用。取消状态更新定时器。
+     * 取消状态更新定时器。
      *
      * @returns {void}
      */
@@ -13763,9 +12580,9 @@ var tetris = (() => {
       Scheduler2.cancel(this._updateId);
     }
     /**
-     * ## 渲染动画
+     * ## render：渲染动画
      *
-     * 每帧由 AnimationSystem 调用。将当前状态传递给 UI 层绘制上浮渐隐的得分数字。
+     * 将当前状态传递给 UI 层绘制上浮渐隐的得分数字。
      *
      * @returns {void}
      */
@@ -13789,9 +12606,9 @@ var tetris = (() => {
       this.initialize(options);
     }
     /**
-     * ## 初始化动画
+     * ## initialize：初始化动画
      *
-     * 设置动画属性，创建初始烟花粒子，启动三个 Scheduler 定时器。
+     * 设置动画属性，创建初始烟花粒子，启动定时器。
      *
      * @param {object} options - 配置对象
      * @param {number} options.level - 升级后的新等级
@@ -13817,7 +12634,7 @@ var tetris = (() => {
       }, 3e3);
     }
     /**
-     * ## 创建一组烟花粒子
+     * ## createFireworks：创建一组烟花粒子
      *
      * 在画布中心上方生成 40 个随机方向和速度的粒子。
      *
@@ -13840,40 +12657,29 @@ var tetris = (() => {
         const angle = Math.random() * Math.PI * 2;
         const speed = 5 + Math.random() * 15;
         particles.push({
-          /** ## 初始 X 坐标：画布水平中心 */
           x: width / 2,
-          /** ## 初始 Y 坐标：画布中心上方 60 像素 */
           y: height / 2 - 60,
-          /** ## X 轴速度分量 */
           vx: Math.cos(angle) * speed,
-          /** ## Y 轴速度分量 */
           vy: Math.sin(angle) * speed,
-          /** ## 粒子半径（3-7 像素随机） */
           radius: 3 + Math.random() * 4,
-          /** ## 随机颜色 */
           color: FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)],
-          /** ## 初始透明度（完全不透明） */
           alpha: 1
         });
       }
       return particles;
     }
     /**
-     * ## 更新所有烟花粒子的物理状态
+     * ## updateFireworks：更新所有烟花粒子的物理状态
      *
      * 使用固定时间步长更新粒子的速度、位置、透明度和半径。
      *
      * ### 物理模拟
      *
-     * - **空气阻力**：速度每帧衰减 2%（×0.98）
-     * - **重力**：Y 轴速度增加（gravity × delta）
-     * - **位置更新**：根据速度更新坐标
-     * - **淡出**：透明度逐渐降低
-     * - **膨胀**：半径逐渐增大
-     *
-     * ### 固定步长
-     *
-     * 由于 Scheduler 以固定 16ms 间隔驱动，传入固定的 delta = 0.016， 粒子运动在不同帧率下保持一致。
+     * - 空气阻力：速度每帧衰减 2%（×0.98）
+     * - 重力：Y 轴速度增加（gravity × delta）
+     * - 位置更新：根据速度更新坐标
+     * - 淡出：透明度逐渐降低
+     * - 膨胀：半径逐渐增大
      *
      * @param {number} delta - 固定时间步长（0.016 秒）
      * @returns {void}
@@ -13892,9 +12698,9 @@ var tetris = (() => {
       this.fireworks = this.fireworks.filter((p) => p.alpha > 0);
     }
     /**
-     * ## 清理资源
+     * ## dispose：清理资源
      *
-     * 由 AnimationSystem 在移除动画时自动调用。 取消所有 Scheduler 定时器，恢复背景音乐。
+     * 取消所有 Scheduler 定时器，恢复背景音乐。
      *
      * @returns {void}
      */
@@ -13913,9 +12719,9 @@ var tetris = (() => {
       this.emit(events.RESUME_BGM, { level: this.level });
     }
     /**
-     * ## 渲染升级动画
+     * ## render：渲染升级动画
      *
-     * 将等级和粒子数据传递给 UI 层绘制 "LEVEL UP" 文字和烟花效果。
+     * 将等级和粒子数据传递给 UI 层绘制。
      *
      * @returns {void}
      */
@@ -13942,7 +12748,7 @@ var tetris = (() => {
       this.initialize();
     }
     /**
-     * ## 初始化动画
+     * ## initialize：初始化动画
      *
      * 根据方块形状和坐标收集所有落地格子的位置， 注册 150ms 结束定时器。
      *
@@ -13969,9 +12775,9 @@ var tetris = (() => {
       }, 150);
     }
     /**
-     * ## 清理资源
+     * ## dispose：清理资源
      *
-     * 由 AnimationSystem 在移除动画时自动调用。取消结束定时器。
+     * 取消结束定时器。
      *
      * @returns {void}
      */
@@ -13982,9 +12788,9 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 渲染动画
+     * ## render：渲染动画
      *
-     * 每帧由 AnimationSystem 调用。将落地格子坐标传递给 UI 层绘制白色高亮。
+     * 每帧由 AnimationSystem 调用， 将落地格子坐标传递给 UI 层绘制白色高亮。
      *
      * @returns {void}
      */
@@ -14001,21 +12807,16 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 调用父类构造函数并初始化动画。父类构造函数会完成基础的依赖注入 （如 Game、Scheduler、Battle 等实例的挂载）。
-     *
      * @param {object} options - 配置对象
-     * @param {object} options.Game - 游戏主实例，提供游戏全局状态和 ID
-     * @param {object} options.Scheduler - 调度器实例，用于管理定时任务
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化动画
+     * ## initialize：初始化动画
      *
-     * 设置动画的核心属性（层级、阻塞状态、名称等），并启动一个由 Scheduler 管理的闪烁序列。闪烁序列包含 5 次可见性切换， 每次间隔
-     * 120ms，总时长 600ms。
+     * 设置动画核心属性，启动闪烁序列。 5 次可见性切换，每次间隔 120ms，总时长 600ms。
      *
      * @returns {void}
      */
@@ -14038,23 +12839,17 @@ var tetris = (() => {
       };
       const ids = Scheduler2.sequence([
         { fn: toggle, delay: 120 },
-        // 第 1 次闪烁：120ms 后执行
         { fn: toggle, delay: 120 },
-        // 第 2 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 },
-        // 第 3 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 },
-        // 第 4 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 }
-        // 第 5 次闪烁：再等 120ms 后执行
       ]);
       this._schedulerIds = ids;
     }
     /**
-     * ## 清理资源
+     * ## dispose：清理资源
      *
-     * 由 AnimationSystem 在检测到 _finished 为 true 后自动调用。 遍历所有 Scheduler 任务 ID
-     * 并逐一取消，防止内存泄漏和 已销毁动画继续执行回调。
+     * 取消所有 Scheduler 任务。
      *
      * @returns {void}
      */
@@ -14065,13 +12860,9 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 渲染动画
+     * ## render：渲染动画
      *
-     * 在每一帧由 AnimationSystem 调用。负责：
-     *
-     * 1. 检查当前回合是否仍然有效（防止跨回合残留）
-     * 2. 检查当前帧是否应该显示（_visible 状态）
-     * 3. 向 UI 层发送渲染事件，触发红色覆盖层绘制
+     * 每帧由 AnimationSystem 调用。 检查回合有效性和可见性后，发送渲染事件给 UI 层。
      *
      * @returns {void}
      */
@@ -14096,54 +12887,19 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收垃圾行数据和游戏依赖，立即启动闪烁动画。
-     *
-     * ### 参数说明
-     *
-     * `rows` 是从新棋盘底部截取的垃圾行二维数组：
-     *
-     * - 外层数组长度 = 垃圾行数量
-     * - 内层数组长度 = 棋盘宽度
-     * - 值为 0 表示空洞（不需要闪烁）
-     * - 值为非 0 表示垃圾方块（需要闪烁）
-     *
-     * @example
-     *   const anim = new GarbagePushAnimation({
-     *     Game: gameInstance,
-     *     Scheduler: gameInstance.Scheduler,
-     *     rows: [
-     *       [0, 1, 1, 0, 1, 1, 1, 0, 1, 1], // 第 1 行垃圾（有空隙）
-     *       [1, 1, 0, 1, 1, 1, 0, 1, 1, 1], // 第 2 行垃圾
-     *     ],
-     *   });
-     *
      * @param {object} options - 配置对象
-     * @param {object} options.Game - 游戏主实例，提供游戏 ID 和状态
-     * @param {object} options.Scheduler - 调度器实例，用于管理闪烁定时器
-     * @param {number[][]} options.rows - 垃圾行数据（二维数组，0=空洞，非0=垃圾方块）
+     * @param {number[][]} options.rows - 垃圾行数据
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化动画
+     * ## initialize：初始化动画
      *
-     * 设置动画的核心属性（层级、阻塞状态、名称等）， 并启动一个由 Scheduler 管理的闪烁序列。 闪烁序列包含 5 次可见性切换，每次间隔
-     * 120ms，总时长 600ms。
+     * 启动闪烁序列：5 次可见性切换，每次间隔 120ms。
      *
-     * ### 闪烁逻辑
-     *
-     * 初始状态 `_visible = true`（显示灰色）， 每次 toggle 切换一次状态，共 5 次：
-     *
-     *     初始：true（灰色）
-     *     toggle 1：false（白色）
-     *     toggle 2：true（灰色）
-     *     toggle 3：false（白色）
-     *     toggle 4：true（灰色）
-     *     toggle 5：false（白色）→ 动画结束
-     *
-     * 动画结束时 `_visible` 为 false（白色）， 与棋盘底色一致，视觉上自然过渡回正常状态。
+     * 初始 _visible = true（灰色）， 5 次切换后停留在 false（白色），与棋盘底色一致。
      *
      * @returns {void}
      */
@@ -14167,34 +12923,17 @@ var tetris = (() => {
       };
       const ids = Scheduler2.sequence([
         { fn: toggle, delay: 120 },
-        // 第 1 次闪烁：120ms 后执行
         { fn: toggle, delay: 120 },
-        // 第 2 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 },
-        // 第 3 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 },
-        // 第 4 次闪烁：再等 120ms 后执行
         { fn: toggle, delay: 120 }
-        // 第 5 次闪烁：再等 120ms 后执行
       ]);
       this._schedulerIds = ids;
     }
     /**
-     * ## 清理资源
+     * ## dispose：清理资源
      *
-     * 由 AnimationSystem 在检测到 `_finished === true` 后自动调用。 执行以下清理操作：
-     *
-     * 1. 取消所有尚未执行的 Scheduler 定时器
-     * 2. 清空垃圾行数据引用（帮助 GC 回收）
-     * 3. 确保 _finished 标记为 true（防御性设置）
-     *
-     * ### 为什么需要取消定时器？
-     *
-     * 如果动画在闪烁序列执行完之前就被移除（如回合切换）， 必须取消剩余定时器，否则：
-     *
-     * - 定时器回调继续执行（访问已销毁的动画实例）
-     * - 造成内存泄漏（定时器持有回调引用）
-     * - 可能引发错误（访问 undefined 的属性）
+     * 取消所有 Scheduler 定时器，清空垃圾行数据。
      *
      * @returns {void}
      */
@@ -14207,32 +12946,9 @@ var tetris = (() => {
       this._finished = true;
     }
     /**
-     * ## 渲染动画
+     * ## render：渲染动画
      *
-     * 每帧由 AnimationSystem 调用（通常 60fps）。 负责向 UI 层发送渲染事件，携带垃圾行数据和当前可见状态。
-     *
-     * ### 渲染流程
-     *
-     * 1. 检查当前回合是否有效（防止跨回合残留）
-     * 2. 检查当前帧是否应该显示（_visible 状态）
-     * 3. 向 UI 层发送 RENDER_GARBAGE_PUSH 事件
-     *
-     * ### 事件数据
-     *
-     * 发送给 UI 层的数据包含：
-     *
-     * - `rows`：垃圾行二维数组（用于确定哪些格子需要绘制）
-     * - `visible`：当前可见状态（决定绘制颜色）
-     *
-     *   - True → 灰色（GRAY）
-     *   - False → 白色（WHITE）
-     *
-     * ### UI 层处理
-     *
-     * UI 层收到事件后会遍历 rows 数组：
-     *
-     * - 对于值非 0 的格子：根据 visible 绘制灰色或白色
-     * - 对于值为 0 的格子：不绘制（保持棋盘背景色）
+     * 每帧由 AnimationSystem 调用。 检查回合有效性和可见性后，发送渲染事件给 UI 层。
      *
      * @returns {void}
      */
@@ -14256,21 +12972,16 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 调用父类构造函数并初始化动画。父类构造函数会完成基础的依赖注入 （如 Game、Scheduler 等实例的挂载）。
-     *
      * @param {object} options - 配置对象
-     * @param {object} options.Game - 游戏主实例，提供游戏全局状态和 ID
-     * @param {object} options.Scheduler - 调度器实例，用于管理定时任务
-     * @param {boolean} options.connected - 手柄是否已连接
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化动画
+     * ## initialize：初始化动画
      *
-     * 设置动画的核心属性，启动闪烁序列，播放同步音效。 闪烁序列包含 6 次可见性切换，每次间隔 200ms，总时长 1200ms。
+     * 启动闪烁序列（6 次切换，每次间隔 200ms）， 播放同步音效。
      *
      * @returns {void}
      */
@@ -14293,27 +13004,20 @@ var tetris = (() => {
       };
       const ids = Scheduler2.sequence([
         { fn: toggle, delay: 200 },
-        // 第 1 次闪烁：200ms 后执行
         { fn: toggle, delay: 200 },
-        // 第 2 次闪烁：再等 200ms 后执行
         { fn: toggle, delay: 200 },
-        // 第 3 次闪烁：再等 200ms 后执行
         { fn: toggle, delay: 200 },
-        // 第 4 次闪烁：再等 200ms 后执行
         { fn: toggle, delay: 200 },
-        // 第 5 次闪烁：再等 200ms 后执行
         { fn: toggle, delay: 200 }
-        // 第 6 次闪烁：再等 200ms 后执行
       ]);
       this._schedulerIds = ids;
       const events = AudioEvents();
       this.emit(events.PLAY_SOUND, { sound: "GAMEPAD_NOTIFY" });
     }
     /**
-     * ## 清理资源
+     * ## dispose：清理资源
      *
-     * 由 AnimationSystem 在检测到 _finished 为 true 后自动调用。 遍历所有 Scheduler 任务 ID 并逐一取消，
-     * 防止内存泄漏和已销毁动画继续执行回调。
+     * 取消所有 Scheduler 定时器。
      *
      * @returns {void}
      */
@@ -14324,12 +13028,9 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 渲染动画
+     * ## render：渲染动画
      *
-     * 在每一帧由 AnimationSystem 调用。负责：
-     *
-     * 1. 检查当前帧是否应该显示（_visible 状态）
-     * 2. 向 UI 层发送渲染事件，触发通知文字绘制
+     * 每帧由 AnimationSystem 调用。 可见帧发送渲染事件给 UI 层，不可见帧跳过。
      *
      * @returns {void}
      */
@@ -14507,9 +13208,7 @@ var tetris = (() => {
 
   // lib/game/constants/color-palettes.js
   var PALETTES = [
-    /*
-     * ==================== 方案 0：基础经典（关卡 0-31） ====================
-     */
+    // 方案 0：基础经典（关卡 0-31）
     [
       colors_default.TEAL,
       colors_default.GREEN,
@@ -14520,9 +13219,7 @@ var tetris = (() => {
       colors_default.RED,
       colors_default.VIOLET
     ],
-    /*
-     * ==================== 方案 1：暖色系（关卡 32-63） ====================
-     */
+    // 方案 1：暖色系（关卡 32-63）
     [
       colors_default.WARM_TEAL,
       colors_default.WARM_GREEN,
@@ -14533,9 +13230,7 @@ var tetris = (() => {
       colors_default.WARM_RED,
       colors_default.WARM_VIOLET
     ],
-    /*
-     * ==================== 方案 2：冷色系（关卡 64-95） ====================
-     */
+    // 方案 2：冷色系（关卡 64-95）
     [
       colors_default.COOL_TEAL,
       colors_default.COOL_GREEN,
@@ -14546,9 +13241,7 @@ var tetris = (() => {
       colors_default.COOL_RED,
       colors_default.COOL_VIOLET
     ],
-    /*
-     * ==================== 方案 3：糖果色（关卡 96-127） ====================
-     */
+    // 方案 3：糖果色（关卡 96-127）
     [
       colors_default.CANDY_TEAL,
       colors_default.CANDY_GREEN,
@@ -14559,9 +13252,7 @@ var tetris = (() => {
       colors_default.CANDY_RED,
       colors_default.CANDY_VIOLET
     ],
-    /*
-     * ==================== 方案 4：森林色（关卡 128-159） ====================
-     */
+    // 方案 4：森林色（关卡 128-159）
     [
       colors_default.FOREST_TEAL,
       colors_default.FOREST_GREEN,
@@ -14572,9 +13263,7 @@ var tetris = (() => {
       colors_default.FOREST_RED,
       colors_default.FOREST_VIOLET
     ],
-    /*
-     * ==================== 方案 5：日落色（关卡 160-191） ====================
-     */
+    // 方案 5：日落色（关卡 160-191）
     [
       colors_default.SUNSET_TEAL,
       colors_default.SUNSET_GREEN,
@@ -14585,9 +13274,7 @@ var tetris = (() => {
       colors_default.SUNSET_RED,
       colors_default.SUNSET_VIOLET
     ],
-    /*
-     * ==================== 方案 6：霓虹色（关卡 192-223） ====================
-     */
+    // 方案 6：霓虹色（关卡 192-223）
     [
       colors_default.NEON_TEAL,
       colors_default.NEON_GREEN,
@@ -14598,9 +13285,7 @@ var tetris = (() => {
       colors_default.NEON_RED,
       colors_default.NEON_VIOLET
     ],
-    /*
-     * ==================== 方案 7：宝石色（关卡 224-255） ====================
-     */
+    // 方案 7：宝石色（关卡 224-255）
     [
       colors_default.JEWEL_TEAL,
       colors_default.JEWEL_GREEN,
@@ -14616,23 +13301,11 @@ var tetris = (() => {
 
   // lib/game/constants/shapes.js
   var SHAPES = [
-    /**
-     * ## I 型方块（标准长条）
-     *
-     * 形状：1 行 4 列 colorIndex: 0（TEAL 系）
-     */
+    /** I 型方块（标准长条）1×4 */
     { shape: [[1, 1, 1, 1]], colorIndex: 0, type: "I", rotation: 0 },
-    /**
-     * ## I 型方块（加长版）
-     *
-     * 形状：1 行 5 列 colorIndex: 1（GREEN 系）
-     */
+    /** I 型方块（加长版）1×5 */
     { shape: [[1, 1, 1, 1, 1]], colorIndex: 1, type: "I5", rotation: 0 },
-    /**
-     * ## O 型方块（正方形）
-     *
-     * 形状：2×2 实心方块，旋转后形状不变 colorIndex: 2（ORANGE 系）
-     */
+    /** O 型方块（正方形）2×2，旋转后形状不变 */
     {
       shape: [
         [1, 1],
@@ -14642,11 +13315,7 @@ var tetris = (() => {
       type: "O",
       rotation: 0
     },
-    /**
-     * ## T 型方块
-     *
-     * 形状：第一行中间一个，第二行三个 colorIndex: 3（YELLOW 系）
-     */
+    /** T 型方块 */
     {
       shape: [
         [0, 1, 0],
@@ -14656,11 +13325,7 @@ var tetris = (() => {
       type: "T",
       rotation: 0
     },
-    /**
-     * ## L 型方块
-     *
-     * 形状：第一行左侧一个，第二行三个 colorIndex: 4（BLUE 系）
-     */
+    /** L 型方块 */
     {
       shape: [
         [1, 0, 0],
@@ -14670,11 +13335,7 @@ var tetris = (() => {
       type: "L",
       rotation: 0
     },
-    /**
-     * ## J 型方块（反 L 型）
-     *
-     * 形状：第一行右侧一个，第二行三个 colorIndex: 5（PINK 系）
-     */
+    /** J 型方块（反 L 型） */
     {
       shape: [
         [0, 0, 1],
@@ -14684,11 +13345,7 @@ var tetris = (() => {
       type: "J",
       rotation: 0
     },
-    /**
-     * ## S 型方块（右斜）
-     *
-     * 形状：第一行右侧两个，第二行左侧两个 colorIndex: 6（RED 系）
-     */
+    /** S 型方块（右斜） */
     {
       shape: [
         [0, 1, 1],
@@ -14698,11 +13355,7 @@ var tetris = (() => {
       type: "S",
       rotation: 0
     },
-    /**
-     * ## Z 型方块（左斜）
-     *
-     * 形状：第一行左侧两个，第二行右侧两个 colorIndex: 7（VIOLET 系）
-     */
+    /** Z 型方块（左斜） */
     {
       shape: [
         [1, 1, 0],
@@ -14900,19 +13553,12 @@ var tetris = (() => {
       mode,
       baseLines: 0,
       score: 0,
-      // 分数归零
       lines: 0,
-      // 消除行数归零
       level,
-      // 设置初始等级
       combo: 0,
-      // 设置 combo 次数
       comboScore: 0,
-      // 设置 combo 得分
       next: null,
-      // 清空预览方块
       hold: null,
-      // 清空缓存方块
       backToBack: false
     });
     if (mode === "playing") {
@@ -15119,7 +13765,7 @@ var tetris = (() => {
     ]
   ];
   var KICK_I5 = [
-    // 0→R (索引 0)
+    // 0→R
     [
       [0, 0],
       [-2, 0],
@@ -15127,7 +13773,7 @@ var tetris = (() => {
       [-2, -1],
       [1, 2]
     ],
-    // R→2 (索引 1)
+    // R→2
     [
       [0, 0],
       [-1, 0],
@@ -15135,7 +13781,7 @@ var tetris = (() => {
       [-1, 2],
       [2, -1]
     ],
-    // 2→L (索引 2)
+    // 2→L
     [
       [0, 0],
       [2, 0],
@@ -15143,7 +13789,7 @@ var tetris = (() => {
       [2, 1],
       [-1, -2]
     ],
-    // L→0 (索引 3)
+    // L→0
     [
       [0, 0],
       [1, 0],
@@ -15360,12 +14006,7 @@ var tetris = (() => {
       Store.setState({
         curr: newCurr,
         hold: newHold,
-        /*
-         * ==================== 居中放置新方块 ====================
-         *
-         * X 坐标 = 棋盘宽度的一半 - 方块宽度的一半
-         * Y 坐标 = 0（从顶部开始）
-         */
+        // 居中放置新方块
         cx: Math.floor(cols / 2) - Math.floor(newCurr.shape[0].length / 2),
         cy: 0
       });
@@ -16368,21 +15009,17 @@ var tetris = (() => {
     winner: null,
     /** 双方胜场数，key: playerId, value: 胜场数 */
     scores: {},
-    /** 当前局号 每局递增，垃圾行动画通过此值判断是否过期。 reset() 不会重置此值（由 _initialize 重新初始化）。 */
+    /** 当前局号，每局递增 */
     roundId: 0,
-    /**
-     * 双方待处理垃圾行数 key: playerId（将要接收垃圾行的玩家） value: 累积的垃圾行数量
-     *
-     * 注意：pendingGarbage[playerId] 表示该玩家尚未处理的垃圾行， 在当前消行时可以被攻击力抵消。
-     */
+    /** 双方待处理垃圾行数，key: playerId */
     pendingGarbage: {},
     /**
-     * ## 对战胜利分数
+     * 对战胜利分数。
      *
-     * 先达到此分数的玩家获胜。按难度分级，难度越高所需分数越多。
+     * 先达到此分数的玩家获胜。按难度分级：
      *
      * | 难度   | 分数 | 说明                  |
-     * | ------ | ---- | --------------------- |
+     * | :----- | :--- | :-------------------- |
      * | easy   | 5    | 快速对局，约 1-2 分钟 |
      * | normal | 8    | 标准对局，约 2-3 分钟 |
      * | hard   | 12   | 较长对局，约 3-5 分钟 |
@@ -16402,40 +15039,17 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 初始化对战状态管理器，接收 Game 实例数组。 构造完成后立即调用 initialize() 初始化所有状态字段。
-     *
-     * ### 执行顺序
-     *
-     * 1. 调用父类 Base 构造函数，将配置注入实例（this.games 可用）
-     * 2. 调用 initialize() → _initialize() 深拷贝状态模板
-     * 3. 遍历 games 数组，为每个玩家初始化分数和垃圾行
-     *
-     * @example
-     *   const store = new BattleStore({
-     *     games: [
-     *       { Player: { name: 'Alice', index: 0 } },
-     *       { Player: { name: 'Bob', index: 1 } },
-     *     ],
-     *   });
-     *
      * @param {object} options - 配置选项
-     * @param {object[]} options.games - Game 实例数组，用于初始化玩家状态 每个 Game 实例需要包含
-     *   Player.name 和 Player.index
+     * @param {object[]} options.games - Game 实例数组
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化状态（公共接口）
+     * ## initialize：初始化状态
      *
-     * 公共初始化接口，内部委托给 `_initialize()` 私有方法执行实际逻辑。
-     *
-     * ### 为什么分两层？
-     *
-     * - `initialize()`：清晰的公共 API，语义明确
-     * - `_initialize()`：内部实现细节封装，可被 `reset()` 复用
-     * - 遵循"接口与实现分离"原则
+     * 深拷贝 BattleState 模板，为每个玩家初始化分数和垃圾行为 0。
      *
      * @returns {void}
      */
@@ -16443,19 +15057,7 @@ var tetris = (() => {
       this._initialize();
     }
     /**
-     * ## 内部初始化实现
-     *
-     * 执行以下步骤完成状态初始化：
-     *
-     * 1. 通过 `structuredClone(BattleState)` 深拷贝初始状态模板
-     * 2. 遍历所有 Game 实例，为每个玩家初始化分数和垃圾行数为 0
-     *
-     * ### 为什么用 structuredClone？
-     *
-     * - **深拷贝保证独立性**：每次初始化都创建全新的独立对象， 避免多个 BattleStore 实例共享同一份数据
-     * - **性能优于 JSON**：比 `JSON.parse(JSON.stringify())` 性能更好， 且支持更多数据类型（如
-     *   Date、Map、Set 等）
-     * - **浏览器原生支持**：现代浏览器内置，无需额外 polyfill
+     * ## _initialize：内部初始化实现
      *
      * @private
      * @returns {void}
@@ -16471,29 +15073,23 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 设置对战运行状态
+     * ## setRunning：设置对战运行状态
      *
-     * 控制对战的开始和结束。这是对战生命周期的核心开关。
-     *
-     * @param {boolean} running - True 表示对战进行中，false 表示已结束或暂停
+     * @param {boolean} running - True 表示对战进行中
      */
     setRunning(running) {
       this.state.running = running;
     }
     /**
-     * ## 获取对战运行状态
+     * ## isRunning：获取对战运行状态
      *
-     * 查询对战是否正在进行中。
-     *
-     * @returns {boolean} True 表示对战进行中，false 表示已结束或未开始
+     * @returns {boolean} True 表示对战进行中
      */
     isRunning() {
       return this.state.running;
     }
     /**
-     * ## 设置单局胜者
-     *
-     * 在单局游戏结束时调用，记录本局获胜的玩家。
+     * ## setWinner：设置单局胜者
      *
      * @param {object} winner - 胜者的 Game 实例
      */
@@ -16501,30 +15097,24 @@ var tetris = (() => {
       this.state.winner = winner;
     }
     /**
-     * ## 获取单局胜者
+     * ## getWinner：获取单局胜者
      *
-     * 查询当前单局的胜者。如果本局尚未结束或已重置，返回 null。
-     *
-     * @returns {object | null} 胜者的 Game 实例，未决出胜者时返回 null
+     * @returns {object | null} 胜者的 Game 实例，未决出时返回 null
      */
     getWinner() {
       return this.state.winner;
     }
     /**
-     * ## 获取指定玩家的分数
+     * ## getScore：获取指定玩家的分数
      *
-     * 查询某位玩家的累计胜场数。
-     *
-     * @param {string} id - 玩家唯一标识，格式为 `{name}-{index}`，如 "human-0"
-     * @returns {number} 玩家的胜场数，未初始化时可能为 undefined
+     * @param {string} id - 玩家唯一标识
+     * @returns {number} 玩家的胜场数
      */
     getScore(id) {
       return this.state.scores[id];
     }
     /**
-     * ## 设置指定玩家的分数
-     *
-     * 直接设置玩家的胜场数。用于认输场景中直接将对手分数设为 victoryScore。
+     * ## setScore：设置指定玩家的分数
      *
      * @param {string} id - 玩家唯一标识
      * @param {number} score - 要设置的分数值
@@ -16534,19 +15124,9 @@ var tetris = (() => {
       this.state.scores[id] = score;
     }
     /**
-     * ## 获取玩家唯一标识
+     * ## getPlayerId：获取玩家唯一标识
      *
-     * 根据 Game 实例生成玩家的唯一标识 ID。
-     *
-     * ### ID 生成规则
-     *
-     *     {Player.name}-{Player.index}
-     *
-     * | Player.name | Player.index | 生成的 ID |
-     * | ----------- | ------------ | --------- |
-     * | human       | 0            | `human-0` |
-     * | ai          | 1            | `ai-1`    |
-     * | Alice       | 0            | `Alice-0` |
+     * ID 格式：{Player.name}-{Player.index}
      *
      * @param {object} game - Game 实例
      * @returns {string} 玩家唯一标识字符串
@@ -16556,55 +15136,35 @@ var tetris = (() => {
       return `${Player.name}-${Player.index}`;
     }
     /**
-     * ## 获取对战目标分数（按难度）
+     * ## getVictoryScore：获取对战目标分数（按难度）
      *
-     * 对战模式下，先达到此分数的玩家赢得整场对战。 不同难度对应不同的目标分数，难度越高所需分数越多，对局时间越长。
+     * | 难度   | 默认分数 | 预计对局时间 |
+     * | :----- | :------- | :----------- |
+     * | easy   | 5        | ~1-2 分钟    |
+     * | normal | 8        | ~2-3 分钟    |
+     * | hard   | 12       | ~3-5 分钟    |
+     * | expert | 15       | ~5+ 分钟     |
      *
-     * ### 目标分数配置
-     *
-     * | 难度     | 默认分数 | 预计对局时间 |
-     * | -------- | -------- | ------------ |
-     * | `easy`   | 5        | ~1-2 分钟    |
-     * | `normal` | 8        | ~2-3 分钟    |
-     * | `hard`   | 12       | ~3-5 分钟    |
-     * | `expert` | 15       | ~5+ 分钟     |
-     *
-     * @example
-     *   const score = store.getVictoryScore(); // 5 (默认 easy)
-     *   const score = store.getVictoryScore('hard'); // 12
-     *   const score = store.getVictoryScore('expert'); // 15
-     *
-     * @param {string} [difficulty='easy'] - 难度等级名称。默认值 `'easy'` 可选值：`'easy'` |
-     *   `'normal'` | `'hard'` | `'expert'`. Default is `'easy'`
+     * @param {string} [difficulty='easy'] - 难度等级名称. Default is `'easy'`
      * @returns {number} 该难度对应的目标分数
      */
     getVictoryScore(difficulty = "easy") {
       return this.state.VictoryScore[difficulty];
     }
     /**
-     * ## 设置对战目标分数（按难度）
+     * ## setVictoryScore：设置对战目标分数（按难度）
      *
-     * 修改指定难度的对战目标分数。可用于自定义难度或调试。
-     *
-     * @example
-     *   // 让 normal 难度更容易
-     *   store.setVictoryScore('normal', 5);
-     *
-     *   // 让 expert 难度更极端
-     *   store.setVictoryScore('expert', 20);
-     *
-     * @param {string} difficulty - 难度等级名称 可选值：`'easy'` | `'normal'` | `'hard'` |
-     *   `'expert'`
-     * @param {number} score - 目标分数（建议使用正整数）
+     * @param {string} difficulty - 难度等级名称
+     * @param {number} score - 目标分数
      * @returns {void}
      */
     setVictoryScore(difficulty, score) {
       this.state.VictoryScore[difficulty] = score;
     }
     /**
-     * ## 更新双方胜场数
+     * ## updateScores：更新双方胜场数
      *
-     * 在一局对战结束后调用，给胜者增加 1 个胜场， 同时确保败者的胜场数不会变成负数。
+     * 在一局对战结束后调用，给胜者增加 1 个胜场。
      *
      * @param {object} options - 更新选项
      * @param {object} options.winner - 胜者的 Game 实例
@@ -16625,13 +15185,12 @@ var tetris = (() => {
       scores[loserId] = loserScore;
     }
     /**
-     * ## 累加待处理垃圾行
+     * ## addGarbage：累加待处理垃圾行
      *
-     * 当玩家受到攻击时，将攻击产生的垃圾行累加到该玩家的 `pendingGarbage` 中。这些垃圾行不会立即生效，而是等待 消行动画结束后通过
-     * `flushGarbage` 实际应用到棋盘。
+     * 当玩家受到攻击时，将攻击产生的垃圾行累加到该玩家的 pendingGarbage 中。
      *
      * @param {object} game - 受到攻击的玩家 Game 实例
-     * @param {number} amount - 要添加的垃圾行数量（正整数）
+     * @param {number} amount - 要添加的垃圾行数量
      */
     addGarbage(game, amount) {
       const { pendingGarbage } = this.state;
@@ -16639,13 +15198,13 @@ var tetris = (() => {
       pendingGarbage[playerId] = (pendingGarbage[playerId] || 0) + amount;
     }
     /**
-     * ## 用消行攻击抵消待处理垃圾行
+     * ## offsetGarbage：用消行攻击抵消待处理垃圾行
      *
-     * 当玩家消行时，用产生的攻击力抵消自己累积的待处理垃圾行。 返回实际能够发送给对手的垃圾行数量。
+     * 当玩家消行时，用产生的攻击力抵消自己累积的待处理垃圾行。
      *
      * @param {object} game - 消行的玩家 Game 实例
-     * @param {number} attackLines - 本次消行产生的攻击力（垃圾行数）
-     * @returns {number} 抵消后剩余的攻击力，即可实际发送给对手的垃圾行数
+     * @param {number} attackLines - 本次消行产生的攻击力
+     * @returns {number} 抵消后剩余的攻击力
      */
     offsetGarbage(game, attackLines) {
       const { pendingGarbage } = this.state;
@@ -16656,19 +15215,17 @@ var tetris = (() => {
       return remaining > 0 ? 0 : attackLines - pending;
     }
     /**
-     * ## 获取待处理垃圾行数
+     * ## getPendingGarbage：获取待处理垃圾行数
      *
      * @param {object} game - 要查询的玩家 Game 实例
-     * @returns {number} 待处理的垃圾行数量，未初始化时返回 0
+     * @returns {number} 待处理的垃圾行数量
      */
     getPendingGarbage(game) {
       const playerId = this.getPlayerId(game);
       return this.state.pendingGarbage[playerId] || 0;
     }
     /**
-     * ## 清空待处理垃圾行
-     *
-     * 将某位玩家的待处理垃圾行数重置为 0。
+     * ## clearGarbage：清空待处理垃圾行
      *
      * @param {object} game - 要清空垃圾行的玩家 Game 实例
      */
@@ -16676,27 +15233,19 @@ var tetris = (() => {
       const playerId = this.getPlayerId(game);
       this.state.pendingGarbage[playerId] = 0;
     }
-    /**
-     * ## 递增回合编号
-     *
-     * 每局对战结束后调用，将回合编号 +1。
-     */
+    /** ## increaseRound：递增回合编号 */
     increaseRound() {
       this.state.roundId += 1;
     }
     /**
-     * ## 获取当前回合编号
+     * ## getRoundId：获取当前回合编号
      *
      * @returns {number} 当前回合的唯一标识编号
      */
     getRoundId() {
       return this.state.roundId;
     }
-    /**
-     * ## 重置状态
-     *
-     * 将所有状态恢复到初始值。内部委托给 `_initialize()` 方法， 确保重置逻辑与初始化逻辑完全一致。
-     */
+    /** ## reset：重置状态 */
     reset() {
       this._initialize();
     }
@@ -16708,48 +15257,19 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 初始化对战 HUD，接收 Game 实例数组和 BattleStore 实例。 构造完成后立即调用 initialize() 缓存 DOM 元素。
-     *
-     * ### 参数说明
-     *
-     * - `games`：用于遍历生成 playerId，定位 DOM 元素
-     * - `store`：BattleStore 实例，提供 `getScore(playerId)` 方法获取最新分数
-     *
-     * @example
-     *   const hud = new BattleHUD({
-     *     games: [
-     *       { Player: { name: 'Alice', index: 0 } },
-     *       { Player: { name: 'Bob', index: 1 } },
-     *     ],
-     *     store: battleStore,
-     *   });
-     *
      * @param {object} options - 配置选项
-     * @param {object[]} options.games - Game 实例数组，每个实例包含 Player 信息（name + index）
-     * @param {object} options.store - BattleStore 实例，提供 getScore 等方法
+     * @param {object[]} options.games - Game 实例数组
+     * @param {object} options.store - BattleStore 实例
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化 DOM 元素缓存
+     * ## initialize：初始化 DOM 元素缓存
      *
-     * 在构造函数中自动调用，执行以下步骤：
+     * 遍历所有 Game 实例，根据命名规则查找并缓存每个玩家的分数 DOM 元素。 避免每次更新分数时都重新查询 DOM。
      *
-     * 1. 初始化空的元素缓存对象 `this.elements`
-     * 2. 遍历所有 Game 实例
-     * 3. 根据 `{PlayerName}-{PlayerIndex}-tetris-battle-score` 规则生成元素 ID
-     * 4. 通过 `document.querySelector` 查找 DOM 元素
-     * 5. 将找到的元素（或 null）缓存到 `this.elements` 中
-     *
-     * ### 为什么缓存 DOM 元素？
-     *
-     * - **性能优化**：避免每次更新分数时都重新查询 DOM
-     * - **容错处理**：如果元素不存在，缓存 null 而不是在运行时报错
-     * - **统一访问**：通过 `getEl()` 方法统一获取元素引用
-     *
-     * @private
      * @returns {void}
      */
     initialize() {
@@ -16763,53 +15283,20 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 获取玩家对应的 DOM 元素
+     * ## getEl：获取玩家对应的 DOM 元素
      *
      * 根据玩家唯一标识从缓存中获取分数 DOM 元素引用。
      *
-     * @example
-     *   const $score = hud.getEl('human-0');
-     *   if ($score) {
-     *     $score.textContent = '5'; // 更新 P1 分数为 5
-     *   }
-     *
-     * @param {string} id - 玩家唯一标识，格式为 `{name}-{index}`（如 "human-0"）
+     * @param {string} id - 玩家唯一标识，格式为 {name}-{index}
      * @returns {HTMLElement | null} 对应的 DOM 元素，不存在时返回 null
      */
     getEl(id) {
       return this.elements[id];
     }
     /**
-     * ## 更新双方分数显示
+     * ## updateScores：更新双方分数显示
      *
      * 在单局游戏结束时被调用，更新胜者和败者的分数到对应的 DOM 元素。
-     *
-     * ### 更新流程
-     *
-     *     传入 winner, loser
-     *       → 提取双方 Player 信息（name + index）
-     *         → 生成双方唯一标识 ID（如 "human-0"、"ai-1"）
-     *           → 从缓存获取对应 DOM 元素（getEl）
-     *             → 从 BattleStore 获取最新分数（store.getScore）
-     *               → 更新 DOM textContent
-     *
-     * ### 为什么需要 winner 和 loser 两个参数？
-     *
-     * - 胜者和败者的分数可能都需要更新（败者之前可能也有胜场）
-     * - 确保双方显示的分数是最新状态
-     * - 参数是 Game 实例，可以直接获取 Player 信息
-     *
-     * ### 为什么从 store 获取分数而不是直接传分数值？
-     *
-     * - BattleStore 是分数的唯一数据源（Single Source of Truth）
-     * - 避免调用方传错分数导致 UI 与实际状态不一致
-     * - 解耦：HUD 不需要知道分数如何计算，只需要从 store 读取
-     *
-     * @example
-     *   // 单局结束：human 获胜，ai 落败
-     *   hud.updateScores(humanGame, aiGame);
-     *   // → DOM 中 human-0-tetris-battle-score 显示 human 的最新胜场
-     *   // → DOM 中 ai-1-tetris-battle-score 显示 ai 的最新胜场
      *
      * @param {object} winner - 胜者 Game 实例
      * @param {object} loser - 败者 Game 实例
@@ -16841,31 +15328,16 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 接收 DOM 元素的 ID 配置和玩家列表，缓存元素引用。
-     *
      * @param {object} options - 配置选项
-     * @param {object} options.elements - DOM 元素 ID 配置
-     * @param {string} options.elements.overlay - 覆盖层容器元素 ID
-     * @param {string} options.elements.over - 胜者面板元素 ID
-     * @param {string} options.elements.winner - 胜者名称显示元素 ID
-     * @param {string} options.elements.fly - Fly canvas 元素 ID 前缀
-     * @param {string[]} options.players - 玩家名称数组（如 ['human', 'human']）
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化
+     * ## initialize：初始化
      *
-     * 根据配置中的元素 ID，通过 `document.querySelector` 查找并缓存所有 DOM 元素引用。
-     *
-     * ### 缓存内容
-     *
-     * - `$overlay`：覆盖层容器元素，控制整个结果界面的显示/隐藏
-     * - `$over`：胜者面板元素，显示 BATTLE OVER 和胜者名称
-     * - `$winner`：胜者名称显示元素，用于展示赢家名称
-     * - `$flies`：fly canvas 映射表，key 为 `{player}-{index}`，value 为对应 canvas 元素
+     * 根据配置中的元素 ID，查找并缓存所有 DOM 元素引用。
      *
      * @returns {void}
      */
@@ -16882,15 +15354,9 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 判断覆盖层是否应该隐藏
+     * ## isOverlayShouldHide：判断覆盖层是否应该隐藏
      *
-     * 覆盖层同时包含胜者面板和 fly canvas 两种内容。 只有当需要隐藏的内容（over 或 fly）已经处于隐藏状态，
-     * 且另一方（如果存在）也已隐藏时，才允许隐藏整个覆盖层。
-     *
-     * ### 判断逻辑
-     *
-     * - 隐藏 over：检查 over 是否已含 CLS_HIDDEN
-     * - 隐藏 fly：检查所有 fly canvas 是否都已含 CLS_HIDDEN
+     * 只有当需要隐藏的内容已处于隐藏状态， 且另一方也已隐藏时，才允许隐藏整个覆盖层。
      *
      * @param {object} options - 参数对象
      * @param {boolean} [options.over] - 是否隐藏胜者面板
@@ -16900,39 +15366,14 @@ var tetris = (() => {
     isOverlayShouldHide(options) {
       const { $over, $flies } = this;
       const { over: over2 } = options;
-      return over2 ? (
-        // 如果要隐藏 over，检查 over 是否已经隐藏
-        $over.classList.contains(CLS_HIDDEN)
-      ) : (
-        // 如果要隐藏 fly，检查所有 fly 是否都已经隐藏
-        Object.values($flies).every(
-          ($fly) => $fly.classList.contains(CLS_HIDDEN)
-        )
+      return over2 ? $over.classList.contains(CLS_HIDDEN) : Object.values($flies).every(
+        ($fly) => $fly.classList.contains(CLS_HIDDEN)
       );
     }
     /**
-     * ## 显示对战结果或 fly canvas
+     * ## show：显示对战结果或 fly canvas
      *
-     * 根据 options 中的参数决定显示胜者面板还是某个 fly canvas。 两者互斥：显示胜者时所有 fly 隐藏，显示 fly
-     * 时胜者面板保持隐藏。
-     *
-     * ### 显示胜者
-     *
-     * - 将胜者名称（含 1P/2P 标识）写入 $winner 元素
-     * - 显示胜者面板（$over 移除 tetris-hidden）
-     * - 显示覆盖层容器（$overlay 移除 tetris-hidden）
-     *
-     * ### 显示 fly
-     *
-     * - 显示指定玩家的 fly canvas（移除 tetris-hidden）
-     * - 显示覆盖层容器（$overlay 移除 tetris-hidden）
-     *
-     * @example
-     *   // 显示胜者
-     *   battleUI.show({ winner: { name: 'Alice', index: 0 } });
-     *
-     *   // 显示 P2 的 fly canvas
-     *   battleUI.show({ fly: 'human-1' });
+     * 根据 options 决定显示胜者面板还是某个 fly canvas。 两者互斥：显示胜者时所有 fly 隐藏，显示 fly 时胜者面板保持隐藏。
      *
      * @param {object} options - 显示的配置信息
      * @param {object} [options.winner] - 胜者信息
@@ -16954,27 +15395,9 @@ var tetris = (() => {
       $overlay.classList.remove(CLS_HIDDEN);
     }
     /**
-     * ## 隐藏对战结果或 fly canvas
+     * ## hide：隐藏对战结果或 fly canvas
      *
      * 根据 options 决定隐藏胜者面板还是某个 fly canvas。 如果所有子元素都已隐藏，则同时隐藏覆盖层容器。
-     *
-     * ### 隐藏胜者面板
-     *
-     * - 清空 $winner 文本
-     * - 隐藏胜者面板（$over 添加 tetris-hidden）
-     * - 如果所有 fly 也已隐藏 → 隐藏覆盖层
-     *
-     * ### 隐藏 fly
-     *
-     * - 隐藏指定 fly canvas（添加 tetris-hidden）
-     * - 如果所有 fly 和 over 都已隐藏 → 隐藏覆盖层
-     *
-     * @example
-     *   // 隐藏胜者面板
-     *   battleUI.hide({ over: true });
-     *
-     *   // 隐藏 P2 的 fly canvas
-     *   battleUI.hide({ fly: 'human-1' });
      *
      * @param {object} options - 参数对象
      * @param {boolean} [options.over] - 是否隐藏胜者面板
@@ -17001,22 +15424,14 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 调用父类构造函数并初始化动画。
-     *
      * @param {object} options - 配置对象
-     * @param {object} options.Scheduler - 调度器实例
-     * @param {object} options.Battle - BattleController 实例
-     * @param {number} options.roundId - 当前回合 ID
-     * @param {object} options.from - 攻击方的 Game 实例
-     * @param {object} options.to - 受攻击方的 Game 实例
-     * @param {number} [options.amount=0] - 垃圾行数量，影响粒子总数. Default is `0`
      */
     constructor(options) {
       super(options);
       this.initialize();
     }
     /**
-     * ## 初始化动画
+     * ## initialize：初始化动画
      *
      * 获取双方棋盘位置，初始化粒子，启动帧更新循环。
      *
@@ -17052,15 +15467,10 @@ var tetris = (() => {
         const fromY = fromRect.top + fromRect.height / (count - 1 || 1) * i;
         const fromX = fromCenterX + (Math.random() - 0.5) * fromRect.width * 0.6;
         this._particles.push({
-          // 粒子起始 X：攻击方棋盘中心左右散开
           fromX,
-          // 粒子起始 Y：攻击方棋盘内均匀分布的高度
           fromY,
-          // 速度系数：0.6-1.4，快慢差异明显
           speed: 0.6 + Math.random() * 0.8,
-          // 粒子半径：3-5px
           size: 3 + Math.random() * 2,
-          // 颜色：白色
           color: colors_default.WHITE
         });
       }
@@ -17075,9 +15485,9 @@ var tetris = (() => {
       this._schedulerId = Scheduler2.delay(update, 16);
     }
     /**
-     * ## 清理资源
+     * ## dispose：清理资源
      *
-     * 由 AnimationSystem 在动画结束后自动调用。 取消 Scheduler 定时器，清空 canvas。
+     * 取消 Scheduler 定时器，清空 fly canvas。
      *
      * @returns {void}
      */
@@ -17093,9 +15503,9 @@ var tetris = (() => {
       }
     }
     /**
-     * ## 渲染动画
+     * ## render：渲染动画
      *
-     * 每帧由 AnimationSystem 调用。 在 fly canvas 上绘制所有粒子的当前位置。
+     * 每帧由 AnimationSystem 调用， 在 fly canvas 上绘制所有粒子的当前位置。
      *
      * @returns {void}
      */
@@ -17131,18 +15541,15 @@ var tetris = (() => {
     /**
      * ## 构造函数
      *
-     * 初始化对战路由器，接收包含 Battle 实例的配置选项。
-     *
      * @param {object} options - 配置选项
-     * @param {object} options.battle - Battle 实例引用，用于实际执行对战逻辑
      */
     constructor(options) {
       super(options);
     }
     /**
-     * ## 订阅对战事件
+     * ## subscribe：订阅对战事件
      *
-     * 注册所有对战相关的事件处理器，建立事件到 Battle 方法的映射关系。
+     * 注册所有对战相关的事件处理器。
      *
      * @returns {void}
      */
@@ -17158,9 +15565,9 @@ var tetris = (() => {
       this.on(events.PLAYER_SURRENDER, this._onBattlePlayerSurrender);
     }
     /**
-     * ## 取消订阅对战事件
+     * ## unsubscribe：取消订阅对战事件
      *
-     * 移除所有在 subscribe() 中注册的事件处理器，防止内存泄漏。 通常在组件销毁或切换模式时调用。
+     * 移除所有已注册的事件处理器。
      *
      * @returns {void}
      */
@@ -17175,93 +15582,88 @@ var tetris = (() => {
       this.off(events.RESET, this._onBattleReset);
       this.off(events.PLAYER_SURRENDER, this._onBattlePlayerSurrender);
     }
+    /*
+     * ============================================================
+     * 事件处理器
+     * ============================================================
+     */
     /**
-     * ## 处理攻击事件
+     * ## _onBattleProcessAttack：处理攻击事件
      *
-     * 在**消行动画开始前**被调用，负责计算攻击力并抵消对方的待处理垃圾行。
+     * 在消行动画开始前被调用，计算攻击力并抵消对方的待处理垃圾行。
      *
      * @private
      * @param {object} payload - 事件负载
      * @param {object} payload.from - 发起攻击的玩家 Game 实例
-     * @param {Array} payload.lines - 消除的行数数据，用于计算攻击力
+     * @param {Array} payload.lines - 消除的行数数据
      */
     _onBattleProcessAttack = (payload) => {
-      const { battle } = this;
       const { from, lines } = payload;
-      battle.processAttack(from, lines);
+      this.battle.processAttack(from, lines);
     };
     /**
-     * ## 处理垃圾行飞行动画
+     * ## _onBattleStartGarbageFly：处理垃圾行飞行动画
      *
-     * 注册 GarbageFlyAnimation 到受攻击方的 AnimationSystem。 粒子从攻击方棋盘飞向受攻击方棋盘，持续 400ms。
+     * 注册 GarbageFlyAnimation 到受攻击方的 AnimationSystem。
      *
      * @private
      * @param {object} payload - 事件负载
      */
     _onBattleStartGarbageFly = (payload) => {
-      const { Animations } = payload.to;
-      Animations.register(new garbage_fly_animation_default(payload));
+      payload.to.Animations.register(new garbage_fly_animation_default(payload));
     };
     /**
-     * ## 处理垃圾行刷新事件
+     * ## _onBattleFlushGarbage：处理垃圾行刷新事件
      *
-     * 在**消行动画 dispose 的最后阶段**被调用， 负责将计算好的待处理垃圾行实际插入到对方棋盘。
+     * 在消行动画 dispose 的最后阶段被调用， 将计算好的待处理垃圾行实际插入到对方棋盘。
      *
      * @private
      * @param {object} payload - 事件负载
      * @param {object} payload.from - 发起攻击的玩家 Game 实例
      */
     _onBattleFlushGarbage = (payload) => {
-      const { battle } = this;
-      const { from } = payload;
-      battle.flushGarbage(from);
+      this.battle.flushGarbage(payload.from);
     };
     /**
-     * ## 处理胜者更新事件
+     * ## _onBattleUpdateWinner：处理胜者更新事件
      *
-     * 当有玩家**游戏结束（Game Over）**时被调用，更新对战结果。
+     * 当有玩家游戏结束（Game Over）时被调用，更新对战结果。
      *
      * @private
      * @param {object} payload - 事件负载
      * @param {object} payload.loser - 失败的玩家 Game 实例
      */
     _onBattleUpdateWinner = (payload) => {
-      const { battle } = this;
-      const { loser } = payload;
-      battle.update(loser);
+      this.battle.update(payload.loser);
     };
     /**
-     * ## 处理暂停同步事件
+     * ## _onBattleSyncPause：处理暂停同步事件
      *
-     * 当某玩家**暂停游戏**时被调用，将暂停状态同步给对方。
+     * 当某玩家暂停游戏时被调用，将暂停状态同步给对方。
      *
      * @private
      * @param {object} payload - 事件负载
      * @param {object} payload.from - 发起暂停的玩家 Game 实例
      */
     _onBattleSyncPause = (payload) => {
-      const { battle } = this;
-      const { from } = payload;
-      const opponent = battle.getOpponent(from);
+      const opponent = this.battle.getOpponent(payload.from);
       opponent.pause(opponent);
     };
     /**
-     * ## 处理恢复同步事件
+     * ## _onBattleSyncResume：处理恢复同步事件
      *
-     * 当某玩家**恢复游戏**时被调用，将恢复状态同步给对方。
+     * 当某玩家恢复游戏时被调用，将恢复状态同步给对方。
      *
      * @private
      * @param {object} payload - 事件负载
      * @param {object} payload.from - 发起恢复的玩家 Game 实例
      */
     _onBattleSyncResume = (payload) => {
-      const { battle } = this;
-      const { from } = payload;
-      const opponent = battle.getOpponent(from);
+      const opponent = this.battle.getOpponent(payload.from);
       opponent.resume(opponent);
     };
     /**
-     * ## 处理重置事件
+     * ## _onBattleReset：处理重置事件
      *
      * 用户按 Enter 重赛时触发。
      *
@@ -17270,24 +15672,19 @@ var tetris = (() => {
      * @param {object} payload.from - 发起重置的玩家 Game 实例
      */
     _onBattleReset = (payload) => {
-      const { battle } = this;
-      const { from } = payload;
-      battle.reset(from);
+      this.battle.reset(payload.from);
     };
     /**
-     * ## 处理玩家认输事件
+     * ## _onBattlePlayerSurrender：处理玩家认输事件
      *
-     * 当玩家在对战中按 ESC 认输时触发。 调用 BattleController.surrender() 将对手分数直接设为 victoryScore，
-     * 触发 BATTLE OVER 界面。
+     * 当玩家在对战中按 ESC 认输时触发。
      *
      * @private
      * @param {object} payload - 事件负载
      * @param {object} payload.loser - 认输的玩家 Game 实例
      */
     _onBattlePlayerSurrender = (payload) => {
-      const { battle } = this;
-      const { loser } = payload;
-      battle.surrender(loser);
+      this.battle.surrender(payload.loser);
     };
   };
   var battle_router_default = BattleRouter;
@@ -17295,25 +15692,16 @@ var tetris = (() => {
   // lib/battle/rules/garbage-system.js
   var GARBAGE_MAP = {
     1: 0,
-    // 消 1 行 → 无攻击
     2: 1,
-    // 消 2 行 → 1 行垃圾
     3: 2,
-    // 消 3 行 → 2 行垃圾
     4: 3,
-    // 消 4 行 → 3 行垃圾
     5: 4
-    // 消 5 行 → 4 行垃圾（超出常规的最大攻击）
   };
   var DIFFICULTY_HOLES = {
     easy: 1,
-    // 简单：1 个空洞
     normal: 2,
-    // 普通：2 个空洞
     hard: 3,
-    // 困难：3 个空洞
     expert: 4
-    // 专家：4 个空洞
   };
   var calculateGarbage = (lines) => GARBAGE_MAP[lines] || 0;
   var applyGarbage = (board, amount, difficulty) => {
@@ -17659,30 +16047,20 @@ var tetris = (() => {
   // lib/core/command/command.js
   var Command = class extends core_default {
     /**
-     * ## 创建一个命令实例
+     * ## 构造函数
      *
-     * 通过父类 `Base` 的构造函数注入 payload 中的依赖， 然后调用 `initialize()` 设置命令的核心属性。
-     *
-     * @example
-     *   // AI 发送左移命令
-     *   const cmd = new Command('MOVE_LEFT', { Game: gameInstance });
-     *
-     *   // 键盘发送硬降命令
-     *   const cmd = new Command('DROP', { Game: gameInstance });
-     *
-     * @param {string} action - 命令类型（如 MOVE_LEFT、ROTATE、DROP 等）
-     * @param {object} [payload={}] - 命令携带的额外参数（如 Game 实例引用等）。默认值为 `{}`. Default
-     *   is `{}`
+     * @param {string} action - 命令类型
+     * @param {object} [payload={}] - 命令携带的额外参数. Default is `{}`
      */
     constructor(action, payload) {
       super(payload);
       this.initialize(action, payload);
     }
     /**
-     * ## 初始化命令的核心属性
+     * ## initialize：初始化命令的核心属性
      *
-     * @param {string} action - 命令类型（如 MOVE_LEFT、ROTATE、DROP 等）
-     * @param {object} [payload={}] - 命令携带的额外参数（如 Game 实例引用等）. Default is `{}`
+     * @param {string} action - 命令类型
+     * @param {object} [payload={}] - 命令携带的额外参数. Default is `{}`
      * @returns {void}
      */
     initialize(action, payload = {}) {
@@ -17690,21 +16068,9 @@ var tetris = (() => {
       this.payload = payload;
     }
     /**
-     * ## 执行命令
+     * ## execute：执行命令
      *
-     * 将命令通过 `dispatch:command` 事件交给统一的 dispatch 系统处理。 Command
-     * 本身不执行业务逻辑，只负责通知调度系统"有一个操作需要执行"。
-     *
-     * ### 执行流程
-     *
-     * 1. Command 通过 EventBus 发送 `dispatch:command` 事件
-     * 2. Engine 层监听该事件，调用 `dispatchCommand` 函数
-     * 3. `dispatchCommand` 根据当前游戏模式（mode）路由到对应的 action handler
-     * 4. Action handler 执行业务逻辑（如移动方块、暂停游戏等）
-     *
-     * @example
-     *   const cmd = new Command('ROTATE', { Game: game });
-     *   cmd.execute(); // 触发一次旋转操作
+     * 将命令通过 dispatch:command 事件交给统一的 dispatch 系统处理。 Command 本身不执行业务逻辑，只负责通知调度系统。
      *
      * @returns {void}
      */
@@ -17712,10 +16078,7 @@ var tetris = (() => {
       const { action, payload } = this;
       const { Game: Game2 } = payload;
       const events = GameEvents(Game2.id);
-      this.emit(events.DISPATCH_COMMAND, {
-        action,
-        payload
-      });
+      this.emit(events.DISPATCH_COMMAND, { action, payload });
     }
   };
   var command_default = Command;
@@ -17733,29 +16096,16 @@ var tetris = (() => {
     const CE = CommandEvents(uuid);
     const RE = ReplayEvents(uuid);
     Game2.emit(CE.ENQUEUE, { cmd });
-    Game2.emit(RE.ADD_RECORD, {
-      ms,
-      cmd
-    });
+    Game2.emit(RE.ADD_RECORD, { ms, cmd });
   };
   var dispatch_input_default = dispatchInput;
 
   // lib/game/actions/game-mode-actions.js
   var GAME_MODE_ACTIONS = {
     /**
-     * ## 向下移动选择光标
-     *
-     * 在游戏模式选择界面中，将选择光标向下移动一位。 发送 UPDATE_MODE_INDEX 事件，action 为 'DOWN'。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：↓（方向键下）
-     * - 手柄：D-Pad 下
-     * - 触屏：D-Pad 下按钮
+     * 向下移动选择光标。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     MOVE_DOWN: (payload) => {
       const Game2 = payload?.Game;
@@ -17763,24 +16113,12 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.UPDATE_MODE_INDEX, {
-        action: "DOWN"
-      });
+      Game2.emit(events.UPDATE_MODE_INDEX, { action: "DOWN" });
     },
     /**
-     * ## 向上移动选择光标
-     *
-     * 在游戏模式选择界面中，将选择光标向上移动一位。 发送 UPDATE_MODE_INDEX 事件，action 为 'UP'。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：↑（方向键上）
-     * - 手柄：D-Pad 上
-     * - 触屏：D-Pad 上按钮
+     * 向上移动选择光标。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     MOVE_UP: (payload) => {
       const Game2 = payload?.Game;
@@ -17788,44 +16126,17 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.UPDATE_MODE_INDEX, {
-        action: "UP"
-      });
+      Game2.emit(events.UPDATE_MODE_INDEX, { action: "UP" });
     },
     /**
-     * ## 确认选择并进入对应模式
+     * 确认选择并进入对应模式。
      *
-     * 确认当前光标所在的游戏模式，根据选择进入不同流程：
+     * 根据当前光标位置选择单人模式或对战模式：
      *
-     * - **单人模式（single）**：更新玩家配置 → 切换到主菜单
-     * - **对战模式（versus）**：切换到对战模式选择界面
-     *
-     * ### 执行流程（单人模式）
-     *
-     * 1. 从 Store 读取当前 modeIndex
-     * 2. 从 MODE_OPTIONS 获取对应的 mode
-     * 3. 发送 UPDATE_MODE 事件更新游戏模式
-     * 4. 发送 UPDATE_PLAYERS 事件更新玩家列表
-     * 5. 发送 SWITCH_TO_MAIN_MENU 事件切换到主菜单
-     * 6. 播放场景切换音效
-     *
-     * ### 执行流程（对战模式）
-     *
-     * 1. 从 Store 读取当前 modeIndex
-     * 2. 从 MODE_OPTIONS 获取对应的 mode
-     * 3. 发送 UPDATE_MODE 事件更新游戏模式
-     * 4. 发送 SWITCH_TO_BATTLE_MODE 事件切换到对战模式选择
-     * 5. 播放场景切换音效
-     *
-     * ### 触发按键
-     *
-     * - 键盘：Enter / Space
-     * - 手柄：Start / A
-     * - 触屏：START 按钮
+     * - 单人模式：更新玩家配置 → 切换到主菜单
+     * - 对战模式：切换到对战模式选择界面
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     CONFIRM: (payload) => {
       const { Game: Game2 } = payload;
@@ -17854,19 +16165,9 @@ var tetris = (() => {
   // lib/game/actions/battle-mode-actions.js
   var BATTLE_MODE_ACTIONS = {
     /**
-     * ## 向下移动选择光标
-     *
-     * 在对战模式选择界面中，将选择光标向下移动一位。 发送 UPDATE_BATTLE_INDEX 事件，action 为 'DOWN'。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：↓（方向键下）
-     * - 手柄：D-Pad 下
-     * - 触屏：D-Pad 下按钮
+     * 向下移动选择光标。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     MOVE_DOWN: (payload) => {
       const Game2 = payload?.Game;
@@ -17874,24 +16175,12 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.UPDATE_BATTLE_INDEX, {
-        action: "DOWN"
-      });
+      Game2.emit(events.UPDATE_BATTLE_INDEX, { action: "DOWN" });
     },
     /**
-     * ## 向上移动选择光标
-     *
-     * 在对战模式选择界面中，将选择光标向上移动一位。 发送 UPDATE_BATTLE_INDEX 事件，action 为 'UP'。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：↑（方向键上）
-     * - 手柄：D-Pad 上
-     * - 触屏：D-Pad 上按钮
+     * 向上移动选择光标。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     MOVE_UP: (payload) => {
       const Game2 = payload?.Game;
@@ -17899,24 +16188,12 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.UPDATE_BATTLE_INDEX, {
-        action: "UP"
-      });
+      Game2.emit(events.UPDATE_BATTLE_INDEX, { action: "UP" });
     },
     /**
-     * ## 返回单人模式选择界面
-     *
-     * 从对战模式选择界面返回到单人模式选择界面。 发送 SWITCH_TO_GAME_MODE 事件。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：Q / Backspace
-     * - 手柄：Back
-     * - 触屏：BACK 按钮
+     * 返回单人模式选择界面。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     BACK: (payload) => {
       const Game2 = payload?.Game;
@@ -17927,27 +16204,11 @@ var tetris = (() => {
       Game2.emit(events.SWITCH_TO_GAME_MODE);
     },
     /**
-     * ## 确认选择并启动对战
+     * 确认选择并启动对战。
      *
-     * 确认当前光标所在的对战模式选项，更新玩家配置并启动游戏。
-     *
-     * ### 执行流程
-     *
-     * 1. 从 Store 读取当前 battleIndex
-     * 2. 根据 battleIndex 从 BATTLE_OPTIONS 获取对应的 players 配置
-     * 3. 发送 UPDATE_PLAYERS 事件更新玩家列表
-     * 4. 发送 START 事件启动游戏
-     * 5. 播放场景切换音效
-     *
-     * ### 触发按键
-     *
-     * - 键盘：Enter / Space
-     * - 手柄：Start / A
-     * - 触屏：START 按钮
+     * 根据当前光标位置获取玩家配置， 更新玩家列表并启动游戏。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     CONFIRM: (payload) => {
       const { Game: Game2 } = payload;
@@ -17968,19 +16229,11 @@ var tetris = (() => {
   // lib/game/actions/main-menu-actions.js
   var MAIN_MENU_ACTIONS = {
     /**
-     * ## 退出主菜单
+     * 退出主菜单。
      *
-     * 从等级选择界面退出，返回到游戏模式选择界面。 发送 engine:exit 事件通知 Engine 切换模式， 同时播放场景切换音效。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：Escape
-     * - 手柄：Back
-     * - 触屏：BACK 按钮
+     * 发送 engine:exit 事件通知 Engine 切换模式， 同时播放场景切换音效。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     EXIT: (payload) => {
       const Game2 = payload?.Game;
@@ -17993,154 +16246,139 @@ var tetris = (() => {
       Game2.emit(AE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
     },
     /**
-     * ## 选择难度 1
-     *
-     * 发送 SELECT_LEVEL 事件，通知 GameRouter 更新等级为 1。
+     * 选择等级 1。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_ONE: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 1 });
     },
     /**
-     * ## 选择难度 2
+     * 选择等级 2。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_TWO: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 2 });
     },
     /**
-     * ## 选择难度 3
+     * 选择等级 3。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_THREE: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 3 });
     },
     /**
-     * ## 选择难度 4
+     * 选择等级 4。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_FOUR: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 4 });
     },
     /**
-     * ## 选择难度 5
+     * 选择等级 5。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_FIVE: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 5 });
     },
     /**
-     * ## 选择难度 6
+     * 选择等级 6。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_SIX: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 6 });
     },
     /**
-     * ## 选择难度 7
+     * 选择等级 7。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_SEVEN: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 7 });
     },
     /**
-     * ## 选择难度 8
+     * 选择等级 8。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_EIGHT: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 8 });
     },
     /**
-     * ## 选择难度 9
+     * 选择等级 9。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_NINE: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 9 });
     },
     /**
-     * ## 选择难度 10
-     *
-     * 通过 T 键触发。
+     * 选择等级 10（通过 T 键触发）。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     LEVEL_TEN: (payload) => {
       const Game2 = payload?.Game;
-      if (!Game2) return;
+      if (!Game2) {
+        return;
+      }
       const events = GameEvents(Game2.id);
       Game2.emit(events.SELECT_LEVEL, { level: 10 });
     },
     /**
-     * ## 确认等级选择，进入难度选择界面
-     *
-     * 发送 SWITCH_TO_DIFFICULTY 事件， GameRouter
-     * 收到后切换到难度选择界面（easy/normal/hard/expert）。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：Enter
-     * - 手柄：Start / A
-     * - 触屏：START 按钮
+     * 确认等级选择，进入难度选择界面。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     CONFIRM: (payload) => {
       const Game2 = payload?.Game;
@@ -18156,7 +16394,7 @@ var tetris = (() => {
   // lib/game/actions/difficulty-actions.js
   var DIFFICULT_ACTIONS = {
     /**
-     * ## 选择难度 easy
+     * 选择难度 EASY。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18166,12 +16404,10 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.SELECT_DIFFICULTY, {
-        difficulty: "easy"
-      });
+      Game2.emit(events.SELECT_DIFFICULTY, { difficulty: "easy" });
     },
     /**
-     * ## 选择难度 normal
+     * 选择难度 NORMAL。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18184,7 +16420,7 @@ var tetris = (() => {
       Game2.emit(events.SELECT_DIFFICULTY, { difficulty: "normal" });
     },
     /**
-     * ## 选择难度 hard
+     * 选择难度 HARD。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18197,7 +16433,7 @@ var tetris = (() => {
       Game2.emit(events.SELECT_DIFFICULTY, { difficulty: "hard" });
     },
     /**
-     * ## 选择难度 expert
+     * 选择难度 EXPERT。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18210,7 +16446,7 @@ var tetris = (() => {
       Game2.emit(events.SELECT_DIFFICULTY, { difficulty: "expert" });
     },
     /**
-     * ## 返回游戏等级选择
+     * 返回游戏等级选择。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18223,7 +16459,7 @@ var tetris = (() => {
       Game2.emit(events.SWITCH_TO_MAIN_MENU);
     },
     /**
-     * ## 确认开始游戏
+     * 确认开始游戏。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18241,18 +16477,11 @@ var tetris = (() => {
   // lib/game/actions/game-playing-actions.js
   var GAME_PLAYING_ACTIONS = {
     /**
-     * ## 退出 / 认输
+     * 退出 / 认输。
      *
      * 对战模式下发送 SURRENDER 事件触发认输流程， 单人模式下发送 EXIT 事件显示退出菜单。
      *
-     * ### 触发按键
-     *
-     * - 键盘：ESC
-     * - 手柄：Back
-     *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     EXIT: (payload) => {
       const Game2 = payload?.Game;
@@ -18267,11 +16496,9 @@ var tetris = (() => {
       }
     },
     /**
-     * ## 向左移动方块
+     * 向左移动方块。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     MOVE_LEFT: (payload) => {
       const Game2 = payload?.Game;
@@ -18279,17 +16506,12 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.BLOCK_MOVE, {
-        ox: -1,
-        oy: 0
-      });
+      Game2.emit(events.BLOCK_MOVE, { ox: -1, oy: 0 });
     },
     /**
-     * ## 向右移动方块
+     * 向右移动方块。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     MOVE_RIGHT: (payload) => {
       const Game2 = payload?.Game;
@@ -18297,17 +16519,12 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.BLOCK_MOVE, {
-        ox: 1,
-        oy: 0
-      });
+      Game2.emit(events.BLOCK_MOVE, { ox: 1, oy: 0 });
     },
     /**
-     * ## 向下加速下落（软降）
+     * 向下加速下落（软降）。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     MOVE_DOWN: (payload) => {
       const Game2 = payload?.Game;
@@ -18315,19 +16532,14 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.BLOCK_MOVE, {
-        ox: 0,
-        oy: 1
-      });
+      Game2.emit(events.BLOCK_MOVE, { ox: 0, oy: 1 });
     },
     /**
-     * ## 旋转方块
+     * 旋转方块。
      *
-     * 尝试顺时针旋转当前方块，包含 SRS 墙踢检测。 O 块（正方形）旋转后形状不变，跳过旋转。
+     * 尝试顺时针旋转当前方块，包含 SRS 墙踢检测。 O 块旋转后形状不变，跳过旋转。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     ROTATE: (payload) => {
       const Game2 = payload?.Game;
@@ -18338,13 +16550,11 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_ROTATE);
     },
     /**
-     * ## 硬降（Hard Drop）
+     * 硬降（Hard Drop）。
      *
      * 将方块瞬间落到底部，触发锁定、消行检测和新方块生成。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     DROP: (payload) => {
       const Game2 = payload?.Game;
@@ -18355,13 +16565,11 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_DROP);
     },
     /**
-     * ## 缓存方块（Hold）
+     * 缓存方块（Hold）。
      *
      * 将当前活动方块存入 Hold 区，或与 Hold 区方块交换。 每个方块在一局游戏中只能被 Hold 一次。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     HOLD: (payload) => {
       const Game2 = payload?.Game;
@@ -18372,11 +16580,9 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_HOLD);
     },
     /**
-     * ## 暂停 / 继续切换
+     * 暂停 / 继续切换。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     TOGGLE_PAUSED: (payload) => {
       const Game2 = payload?.Game;
@@ -18387,11 +16593,9 @@ var tetris = (() => {
       Game2.emit(events.TOGGLE_PAUSED);
     },
     /**
-     * ## 重新开始游戏
+     * 重新开始游戏。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     RESTART: (payload) => {
       const Game2 = payload?.Game;
@@ -18402,13 +16606,11 @@ var tetris = (() => {
       Game2.emit(events.RESTART);
     },
     /**
-     * ## 强制结束游戏
+     * 强制结束游戏。
      *
      * 直接触发游戏结束流程，跳过正常消行/得分逻辑。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     QUIT: (payload) => {
       const Game2 = payload?.Game;
@@ -18419,11 +16621,9 @@ var tetris = (() => {
       Game2.emit(events.OVER);
     },
     /**
-     * ## 背景音乐开关
+     * 背景音乐开关。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     TOGGLE_MUSIC: (payload) => {
       const Game2 = payload?.Game;
@@ -18434,13 +16634,11 @@ var tetris = (() => {
       Game2.emit(events.TOGGLE_BGM);
     },
     /**
-     * ## 切换控制者（human ↔ ai）
+     * 切换控制者（human ↔ ai）。
      *
-     * 在单人模式下切换玩家控制和 AI 控制。 GameRouter 收到事件后更新 Store 并发送 AI 启停事件。
+     * 在单人模式下切换玩家控制和 AI 控制。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     SWITCH_CONTROLLER: (payload) => {
       const Game2 = payload?.Game;
@@ -18456,9 +16654,7 @@ var tetris = (() => {
   // lib/game/actions/paused-actions.js
   var PAUSED_ACTIONS = {
     /**
-     * ## 切换暂停状态
-     *
-     * 继续游戏 / 重新进入游戏循环）
+     * 切换暂停状态（继续游戏）。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18476,19 +16672,11 @@ var tetris = (() => {
   // lib/game/actions/game-over-actions.js
   var GAME_OVER_ACTIONS = {
     /**
-     * ## 退出主菜单
+     * 退出主菜单。
      *
-     * 从等级选择界面退出，返回到游戏模式选择界面。 发送 engine:exit 事件通知 Engine 切换模式， 同时播放场景切换音效。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：Escape
-     * - 手柄：Back
-     * - 触屏：BACK 按钮
+     * 发送 engine:exit 事件通知 Engine 切换模式， 同时播放场景切换音效。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     EXIT: (payload) => {
       const Game2 = payload?.Game;
@@ -18501,12 +16689,7 @@ var tetris = (() => {
       Game2.emit(AE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
     },
     /**
-     * 确认操作（例如：Enter / Space / OK）
-     *
-     * 作用：
-     *
-     * - 重置游戏状态
-     * - 返回主菜单
+     * 确认操作（重置游戏状态，返回主菜单）。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18524,7 +16707,7 @@ var tetris = (() => {
   // lib/game/actions/replay-actions.js
   var REPLAY_ACTIONS = {
     /**
-     * ## 向左移动
+     * 向左移动。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18534,13 +16717,10 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.BLOCK_MOVE, {
-        ox: -1,
-        oy: 0
-      });
+      Game2.emit(events.BLOCK_MOVE, { ox: -1, oy: 0 });
     },
     /**
-     * ## 向右移动
+     * 向右移动。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18550,13 +16730,10 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.BLOCK_MOVE, {
-        ox: 1,
-        oy: 0
-      });
+      Game2.emit(events.BLOCK_MOVE, { ox: 1, oy: 0 });
     },
     /**
-     * ## 向下移动（软降）
+     * 向下移动（软降）。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18566,13 +16743,10 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.BLOCK_MOVE, {
-        ox: 0,
-        oy: 1
-      });
+      Game2.emit(events.BLOCK_MOVE, { ox: 0, oy: 1 });
     },
     /**
-     * ## 旋转方块
+     * 旋转方块。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18585,7 +16759,7 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_ROTATE);
     },
     /**
-     * ## 硬降（直接落地）
+     * 硬降（直接落地）。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18598,7 +16772,7 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_DROP);
     },
     /**
-     * ## 缓存方块
+     * 缓存方块。
      *
      * @param {object} payload - 命令参数
      */
@@ -18611,7 +16785,7 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_HOLD);
     },
     /**
-     * ## 自动下落
+     * 自动下落。
      *
      * @param {object} payload - 命令参数
      */
@@ -18624,12 +16798,7 @@ var tetris = (() => {
       Game2.emit(events.BLOCK_TICK, payload);
     },
     /**
-     * 确认操作
-     *
-     * 作用：
-     *
-     * - 重置游戏状态
-     * - 返回主菜单
+     * 确认操作（重置游戏状态，返回主菜单）。
      *
      * @param {object} payload - 命令参数
      */
@@ -18642,19 +16811,11 @@ var tetris = (() => {
       Game2.emit(events.RESET);
     },
     /**
-     * ## 退出主菜单
+     * 退出主菜单。
      *
-     * 从等级选择界面退出，返回到游戏模式选择界面。 发送 engine:exit 事件通知 Engine 切换模式， 同时播放场景切换音效。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：Escape
-     * - 手柄：Back
-     * - 触屏：BACK 按钮
+     * 发送 engine:exit 事件通知 Engine 切换模式， 同时播放场景切换音效。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     EXIT: (payload) => {
       const Game2 = payload?.Game;
@@ -18672,19 +16833,11 @@ var tetris = (() => {
   // lib/game/actions/battle-over-actions.js
   var BATTLE_OVER_ACTIONS = {
     /**
-     * ## 退出主菜单
+     * 退出主菜单。
      *
-     * 从等级选择界面退出，返回到游戏模式选择界面。 发送 engine:exit 事件通知 Engine 切换模式， 同时播放场景切换音效。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：Escape
-     * - 手柄：Back
-     * - 触屏：BACK 按钮
+     * 发送 engine:exit 事件通知 Engine 切换模式， 同时播放场景切换音效。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     EXIT: (payload) => {
       const Game2 = payload?.Game;
@@ -18697,12 +16850,7 @@ var tetris = (() => {
       Game2.emit(AE.PLAY_SOUND, { sound: "SWITCH_SCENE" });
     },
     /**
-     * 确认操作（例如：Enter / Space / OK）
-     *
-     * 作用：
-     *
-     * - 重置游戏状态
-     * - 返回主菜单
+     * 确认操作（重置游戏状态，返回主菜单）。
      *
      * @param {object} payload - 按键事件传递的参数对象
      */
@@ -18720,19 +16868,9 @@ var tetris = (() => {
   // lib/game/actions/exit-game-actions.js
   var EXIT_GAME_ACTIONS = {
     /**
-     * ## 向下移动选择光标
-     *
-     * 在退出游戏菜单界面中，将选择光标向下移动一位。 发送 UPDATE_EXIT_INDEX 事件，action 为 'DOWN'。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：↓（方向键下）
-     * - 手柄：D-Pad 下
-     * - 触屏：D-Pad 下按钮
+     * 向下移动选择光标。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     MOVE_DOWN: (payload) => {
       const Game2 = payload?.Game;
@@ -18740,24 +16878,12 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.UPDATE_EXIT_INDEX, {
-        action: "DOWN"
-      });
+      Game2.emit(events.UPDATE_EXIT_INDEX, { action: "DOWN" });
     },
     /**
-     * ## 向上移动选择光标
-     *
-     * 在退出游戏菜单界面中，将选择光标向上移动一位。 发送 UPDATE_EXIT_INDEX 事件，action 为 'UP'。
-     *
-     * ### 触发按键
-     *
-     * - 键盘：↑（方向键上）
-     * - 手柄：D-Pad 上
-     * - 触屏：D-Pad 上按钮
+     * 向上移动选择光标。
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     MOVE_UP: (payload) => {
       const Game2 = payload?.Game;
@@ -18765,34 +16891,17 @@ var tetris = (() => {
         return;
       }
       const events = GameEvents(Game2.id);
-      Game2.emit(events.UPDATE_EXIT_INDEX, {
-        action: "UP"
-      });
+      Game2.emit(events.UPDATE_EXIT_INDEX, { action: "UP" });
     },
     /**
-     * ## 确认选择
+     * 确认选择。
      *
-     * 根据当前光标位置执行对应的操作。
+     * 根据当前光标位置执行对应操作：
      *
-     * ### 执行流程
-     *
-     * 1. 从 Store 读取当前 exitIndex
-     * 2. 从 EXIT_OPTIONS 获取对应的事件类型（RESUME 或 GIVE_UP）
-     * 3. 发送对应事件：
-     *
-     *    - RESUME → _onResume → 恢复 playing 模式
-     *    - GIVE_UP → _onGiveUp → engine:exit → 返回模式选择界面
-     * 4. 播放场景切换音效
-     *
-     * ### 触发按键
-     *
-     * - 键盘：Enter
-     * - 手柄：Start / A
-     * - 触屏：START 按钮
+     * - RESUME：恢复 playing 模式
+     * - GIVE_UP：退出到模式选择界面
      *
      * @param {object} payload - 按键事件传递的参数对象
-     * @param {object} payload.Game - 游戏主实例
-     * @returns {void}
      */
     CONFIRM: (payload) => {
       const { Game: Game2 } = payload;

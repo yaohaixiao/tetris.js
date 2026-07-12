@@ -1,16 +1,15 @@
 # [1.23.0](https://github.com/yaohaixiao/tetris.js/compare/1.22.1...1.23.0) (2026-07-11)
 
-
 ### Features
 
-* 添加 HUD 显示游戏耗时功能；添加记录玩家数据功能； ([b578fb7](https://github.com/yaohaixiao/tetris.js/commit/b578fb79a64bab0f9eac00c47875ed21c1607acc))
+- 添加 HUD 显示游戏耗时功能；添加记录玩家数据功能； ([b578fb7](https://github.com/yaohaixiao/tetris.js/commit/b578fb79a64bab0f9eac00c47875ed21c1607acc))
 
 # [1.23.0](https://github.com/yaohaixiao/tetris.js/compare/1.22.1...1.23.0) (2026-07-11)
 
-
 ### Features
 
-* 添加 HUD 显示游戏耗时功能；添加记录玩家数据功能； ([b578fb7](https://github.com/yaohaixiao/tetris.js/commit/b578fb79a64bab0f9eac00c47875ed21c1607acc))
+- 添加 HUD 显示游戏耗时功能；添加记录玩家数据功能； ([b578fb7](https://github.com/yaohaixiao/tetris.js/commit/b578fb79a64bab0f9eac00c47875ed21c1607acc))
+
 ## [1.22.1](https://github.com/yaohaixiao/tetris.js/compare/1.22.0...1.22.1) (2026-06-29)
 
 ### Bug Fixes

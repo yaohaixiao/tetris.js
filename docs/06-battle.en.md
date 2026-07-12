@@ -2,20 +2,27 @@
 
 English | [简体中文](./06-battle.md)
 
-> Battle is not another game, but multiple Runtimes working together in the same match.
+> Battle is not another game, but multiple Runtimes working together in the same
+> match.
 
 ## Battle is Not Another Game
 
-For Tetris, multiplayer battles are not just about: **displaying two boards simultaneously**. What is truly complex is:
+For Tetris, multiplayer battles are not just about: **displaying two boards
+simultaneously**. What is truly complex is:
 
 - Both sides need to run simultaneously
 - Both sides have independent states
 - Both sides need to exchange Garbage
 - Both sides still need to remain deterministic
 
-Many projects re-implement a new set of game logic for multiplayer mode. While this can achieve the functionality, single-player and multiplayer gradually evolve into two different systems. As the project continues to expand, maintenance costs increase.
+Many projects re-implement a new set of game logic for multiplayer mode. While
+this can achieve the functionality, single-player and multiplayer gradually
+evolve into two different systems. As the project continues to expand,
+maintenance costs increase.
 
-Therefore, tetris.js is not designed as two different systems. Battle does not modify Gameplay, nor does it modify Runtime. What truly changes is the number of Runtimes.
+Therefore, tetris.js is not designed as two different systems. Battle does not
+modify Gameplay, nor does it modify Runtime. What truly changes is the number of
+Runtimes.
 
 **Single-player mode:**
 
@@ -37,7 +44,10 @@ Runtime B
     <img src="assets/img/battle-runtime.png" alt="Battle Runtime">
 </p>
 
-Both sides still run their own complete games. The Battle Controller is only responsible for coordinating the information that needs to be exchanged between them. Therefore, Battle does not create new game rules; it only organizes multiple Runtimes to run together.
+Both sides still run their own complete games. The Battle Controller is only
+responsible for coordinating the information that needs to be exchanged between
+them. Therefore, Battle does not create new game rules; it only organizes
+multiple Runtimes to run together.
 
 ## Battle Controller
 
@@ -79,27 +89,29 @@ import {
 /**
  * # Battle Controller
  *
- * The core controller for battle mode, responsible for coordinating all battle subsystems,
- * including state management, HUD updates, UI display, event routing, and garbage system.
+ * The core controller for battle mode, responsible for coordinating all battle
+ * subsystems, including state management, HUD updates, UI display, event
+ * routing, and garbage system.
  *
  * ## Core Responsibilities
  *
- * | Responsibility        | Description                                                           |
- * | --------------------- | --------------------------------------------------------------------- |
- * | **Subsystem Coordination** | Creates and manages BattleStore, BattleHUD, BattleUI, BattleRouter instances |
- * | **Lifecycle Management** | Controls battle start, stop, and reset                                |
- * | **Round Win/Loss Determination** | Handles round end events, updates winners and scores                 |
- * | **Match Win/Loss Determination** | Checks if victoryScore is reached, triggers match end or next round |
- * | **Attack Processing** | Calculates clear attack power, offsets pending garbage, forwards attacks |
- * | **Garbage Generation** | Applies pending garbage to the opponent's board                       |
- * | **Surrender Handling** | Handles player surrender, opponent wins directly                     |
- * | **Event Management** | Subscribes/unsubscribes battle events through BattleRouter           |
+ * | Responsibility                   | Description                                                                  |
+ * | -------------------------------- | ---------------------------------------------------------------------------- |
+ * | **Subsystem Coordination**       | Creates and manages BattleStore, BattleHUD, BattleUI, BattleRouter instances |
+ * | **Lifecycle Management**         | Controls battle start, stop, and reset                                       |
+ * | **Round Win/Loss Determination** | Handles round end events, updates winners and scores                         |
+ * | **Match Win/Loss Determination** | Checks if victoryScore is reached, triggers match end or next round          |
+ * | **Attack Processing**            | Calculates clear attack power, offsets pending garbage, forwards attacks     |
+ * | **Garbage Generation**           | Applies pending garbage to the opponent's board                              |
+ * | **Surrender Handling**           | Handles player surrender, opponent wins directly                             |
+ * | **Event Management**             | Subscribes/unsubscribes battle events through BattleRouter                   |
  *
  * ## Match System
  *
  * ### Round vs Match
  *
- * - **Round**: A single game ends (when a player's board fills up), winner gets +1 point
+ * - **Round**: A single game ends (when a player's board fills up), winner gets
+ *   +1 point
  * - **Match**: The player who reaches `victoryScore` first wins the entire match
  *
  * ### Battle Flow
@@ -189,12 +201,15 @@ class BattleController extends Base {
   /**
    * ## Constructor
    *
-   * Initializes the battle controller and all its subsystems, automatically starts battle after completion.
+   * Initializes the battle controller and all its subsystems, automatically
+   * starts battle after completion.
    *
    * @param {object} options - Configuration options
    * @param {object[]} options.games - Game instances array (length 2)
-   * @param {number} [options.victoryScore=20] - Target score, first to reach wins the match. Default is `20`
-   * @param {object} options.elements - DOM element ID configuration required by BattleUI
+   * @param {number} [options.victoryScore=20] - Target score, first to reach
+   *   wins the match. Default is `20`
+   * @param {object} options.elements - DOM element ID configuration required by
+   *   BattleUI
    * @param {string[]} options.players - Player name array
    */
   constructor(options) {
@@ -205,8 +220,9 @@ class BattleController extends Base {
   /**
    * ## Initialize battle system
    *
-   * Creates the four core subsystems required for battle: BattleStore → BattleHUD → BattleRouter → BattleUI.
-   * Automatically calls start() to begin battle after completion.
+   * Creates the four core subsystems required for battle: BattleStore →
+   * BattleHUD → BattleRouter → BattleUI. Automatically calls start() to begin
+   * battle after completion.
    *
    * @returns {void}
    */
@@ -251,7 +267,8 @@ class BattleController extends Base {
   /**
    * ## Update battle result (round end)
    *
-   * Called when a player's game ends, executes the complete round end processing flow.
+   * Called when a player's game ends, executes the complete round end
+   * processing flow.
    *
    * @param {object} loser - The losing player's Game instance
    * @returns {void}
@@ -372,7 +389,8 @@ class BattleController extends Base {
    * ## Get specified player's fly canvas
    *
    * @param {string} index - Player identifier (e.g., "human-0")
-   * @returns {HTMLCanvasElement} The fly canvas element for the specified player
+   * @returns {HTMLCanvasElement} The fly canvas element for the specified
+   *   player
    */
   getOverlayFly(index) {
     return this.ui.$flies[index];
@@ -559,32 +577,35 @@ const Engine = {
   /**
    * ## Initialize engine
    *
-   * Creates core instances such as EngineStore, EngineRenderer, Scheduler, Audio, Game,
-   * and injects mutual dependencies. This is the first step of game startup — after all
-   * subsystems are created, Game instances automatically complete game state initialization
-   * in their constructors.
+   * Creates core instances such as EngineStore, EngineRenderer, Scheduler,
+   * Audio, Game, and injects mutual dependencies. This is the first step of
+   * game startup — after all subsystems are created, Game instances
+   * automatically complete game state initialization in their constructors.
    *
    * ### Initialization Order
    *
-   * | Step | Operation                        | Description                                       |
-   * | ---- | ------------------------------- | ------------------------------------------------- |
+   * | Step | Operation                       | Description                                                            |
+   * | ---- | ------------------------------- | ---------------------------------------------------------------------- |
    * | 1    | `new EngineStore(options)`      | Creates global state manager, merges default config and passed options |
-   * | 2    | `new EngineRenderer({ Store })` | Creates DOM interface renderer                    |
-   * | 3    | `EngineRenderer.render()`       | Renders all game DOM interfaces                   |
-   * | 4    | `new Scheduler()`               | Creates global task scheduler                     |
-   * | 5    | `new Audio(normalizedOptions)`  | Creates audio system                              |
-   * | 6    | Process Players list            | Single mode keeps only the first player          |
-   * | 7    | `new Game(...)` × N             | Creates Game instance for each player             |
-   * | 8    | `new BattleController(...)`     | Creates battle controller in versus mode          |
+   * | 2    | `new EngineRenderer({ Store })` | Creates DOM interface renderer                                         |
+   * | 3    | `EngineRenderer.render()`       | Renders all game DOM interfaces                                        |
+   * | 4    | `new Scheduler()`               | Creates global task scheduler                                          |
+   * | 5    | `new Audio(normalizedOptions)`  | Creates audio system                                                   |
+   * | 6    | Process Players list            | Single mode keeps only the first player                                |
+   * | 7    | `new Game(...)` × N             | Creates Game instance for each player                                  |
+   * | 8    | `new BattleController(...)`     | Creates battle controller in versus mode                               |
    *
    * ### Game Instance Auto-start
    *
-   * Each Game instance automatically completes the entire startup flow in its constructor:
-   * `constructor → initialize() → launch()`, no additional calls from Engine are needed.
-   * This ensures Game instances are ready to use immediately after creation.
+   * Each Game instance automatically completes the entire startup flow in its
+   * constructor: `constructor → initialize() → launch()`, no additional calls
+   * from Engine are needed. This ensures Game instances are ready to use
+   * immediately after creation.
    *
-   * @param {object} [options={}] - Configuration parameters, used to override default EngineState. Default `{}`
-   * @param {boolean} [options.isRelaunch] - Whether this is a restart after mode switching
+   * @param {object} [options={}] - Configuration parameters, used to override
+   *   default EngineState. Default `{}`. Default is `{}`
+   * @param {boolean} [options.isRelaunch] - Whether this is a restart after
+   *   mode switching
    * @returns {void}
    */
   initialize: (options = {}) => {
@@ -723,10 +744,11 @@ const Engine = {
       });
     }
   },
-}
+};
 ```
 
-That is to say, Battle does not have a "shared board." Both sides always have completely independent game states. This design allows:
+That is to say, Battle does not have a "shared board." Both sides always have
+completely independent game states. This design allows:
 
 - Player vs Player
 - Player vs AI
@@ -736,30 +758,35 @@ All to be built on the same architecture.
 
 ## How Does Garbage Synchronize?
 
-What Battle truly needs to coordinate is only the data exchanged between both sides. For example:
+What Battle truly needs to coordinate is only the data exchanged between both
+sides. For example:
 
 - Number of lines cleared
 - Combo
 - Back-to-Back
 - Garbage
 
-When one side completes an attack, the Battle Controller calculates the corresponding Garbage according to the game rules. It then sends this event to the other side's Runtime.
+When one side completes an attack, the Battle Controller calculates the
+corresponding Garbage according to the game rules. It then sends this event to
+the other side's Runtime.
 
 ### Processing Clear Attack
 
-When the Battle Controller receives an attack message from one side in a battle, it processes the attack:
+When the Battle Controller receives an attack message from one side in a battle,
+it processes the attack:
 
 ```js
 /**
  * ## Process attack event
  *
- * Called **before the clear animation starts**, responsible for calculating attack power
- * and offsetting the opponent's pending garbage.
+ * Called **before the clear animation starts**, responsible for calculating
+ * attack power and offsetting the opponent's pending garbage.
  *
  * @private
  * @param {object} payload - Event payload
  * @param {object} payload.from - The player Game instance initiating the attack
- * @param {Array} payload.lines - Cleared lines data, used to calculate attack power
+ * @param {Array} payload.lines - Cleared lines data, used to calculate attack
+ *   power
  */
 _onBattleProcessAttack = (payload) => {
   const { battle } = this;
@@ -847,7 +874,8 @@ class BattleController extends Base {
 }
 ```
 
-What truly modifies the board is still the receiving side's own Runtime. The Battle Controller never directly modifies any player's game state.
+What truly modifies the board is still the receiving side's own Runtime. The
+Battle Controller never directly modifies any player's game state.
 
 ### Flushing Garbage to Board
 
@@ -860,8 +888,8 @@ import { BattleEvents } from '@/lib/events/event-catalog.js';
 /**
  * # Lock piece to board
  *
- * Solidifies the current active piece onto the game board, making it part of the board.
- * After locking, the piece can no longer move or rotate.
+ * Solidifies the current active piece onto the game board, making it part of
+ * the board. After locking, the piece can no longer move or rotate.
  *
  * ## Processing Flow
  *
@@ -874,13 +902,15 @@ import { BattleEvents } from '@/lib/events/event-catalog.js';
  * ## Why Use Color Values Instead of Numbers?
  *
  * The board stores color strings (e.g., `"#00c8ff"`), not simple 0/1 values.
- * This allows direct reading of color values for rendering differently colored pieces.
+ * This allows direct reading of color values for rendering differently colored
+ * pieces.
  *
  * ## T-Spin Detection
  *
- * After writing to the board, calls `detectTSpin` to detect whether the T-piece's
- * last operation was a rotation and whether the 4 diagonal conditions are met.
- * The detection result is written to `state.tSpin` for use in subsequent clear scoring.
+ * After writing to the board, calls `detectTSpin` to detect whether the
+ * T-piece's last operation was a rotation and whether the 4 diagonal conditions
+ * are met. The detection result is written to `state.tSpin` for use in
+ * subsequent clear scoring.
  *
  * ## Call Timing
  *
@@ -917,18 +947,19 @@ const lock = (runtime) => {
   /**
    * ======== Deep Copy Board ========
    *
-   * Uses structuredClone to deep copy the current board,
-   * avoiding direct modification of the original state in Store.
+   * Uses structuredClone to deep copy the current board, avoiding direct
+   * modification of the original state in Store.
    */
   const board = structuredClone(state.board);
 
   /**
    * ======== Write Piece Colors ========
    *
-   * Iterates through each cell of the piece, writing solid cell color values
-   * to the corresponding board positions.
+   * Iterates through each cell of the piece, writing solid cell color values to
+   * the corresponding board positions.
    *
-   * Board coordinates = piece top-left coordinates (cx, cy) + offset within shape (x, y)
+   * Board coordinates = piece top-left coordinates (cx, cy) + offset within
+   * shape (x, y)
    */
   for (let y = 0; y < s.length; y++) {
     for (let x = 0; x < s[y].length; x++) {
@@ -955,17 +986,17 @@ const lock = (runtime) => {
   /**
    * ======== T-Spin Detection ========
    *
-   * Detects T-Spin before board update (requires reading board state before locking).
-   * Detects whether the T-piece's last operation was a rotation and whether
-   * the 4 diagonal conditions are met.
+   * Detects T-Spin before board update (requires reading board state before
+   * locking). Detects whether the T-piece's last operation was a rotation and
+   * whether the 4 diagonal conditions are met.
    */
   const tSpinResult = detectTSpin(runtime);
 
   /**
    * ======== Update Store ========
    *
-   * Writes the new board and T-Spin detection result to state.
-   * Clears _lastAction to prepare for the next piece.
+   * Writes the new board and T-Spin detection result to state. Clears
+   * _lastAction to prepare for the next piece.
    */
   Store.setState({
     board,
@@ -986,7 +1017,8 @@ const lock = (runtime) => {
 export default lock;
 ```
 
-The receiving side's own Runtime triggers the `FLUSH_GARBAGE` event to the BattleController, which eventually executes flushing garbage to the board:
+The receiving side's own Runtime triggers the `FLUSH_GARBAGE` event to the
+BattleController, which eventually executes flushing garbage to the board:
 
 ```js
 class BattleController extends Base {
@@ -1030,11 +1062,13 @@ class BattleController extends Base {
 }
 ```
 
-At this point, the `START_GARBAGE_WARNING` event is triggered, rendering a warning effect for the incoming attack.
+At this point, the `START_GARBAGE_WARNING` event is triggered, rendering a
+warning effect for the incoming attack.
 
 ## GarbageSystem
 
-In addition to the BattleController, another important component to highlight in the Battle module is `GarbageSystem`. It actually has only two responsibilities:
+In addition to the BattleController, another important component to highlight in
+the Battle module is `GarbageSystem`. It actually has only two responsibilities:
 
 - calculateGarbage(): Calculates attack power based on lines cleared
 - applyGarbage(): Applies garbage lines to the target board
@@ -1045,60 +1079,68 @@ In addition to the BattleController, another important component to highlight in
 /**
  * # Difficulty level corresponding garbage row hole count
  *
- * Controls the number of random holes in garbage rows. More holes make it harder to handle.
+ * Controls the number of random holes in garbage rows. More holes make it
+ * harder to handle.
  *
  * ## Hole Description
  *
- * Garbage rows are filled with colored blocks, but randomly leave several **holes** (cells with value 0).
- * Players need to use the current piece to fill these holes in order to clear that row.
+ * Garbage rows are filled with colored blocks, but randomly leave several
+ * **holes** (cells with value 0). Players need to use the current piece to fill
+ * these holes in order to clear that row.
  *
  * ## Difficulty Correspondence
  *
- * | Difficulty | Holes | Description                    |
- * | ---------- | ----- | ------------------------------ |
- * | easy       | 1     | 1 hole per row, easy to fill   |
- * | normal     | 2     | 2 holes per row, requires planning |
+ * | Difficulty | Holes | Description                          |
+ * | ---------- | ----- | ------------------------------------ |
+ * | easy       | 1     | 1 hole per row, easy to fill         |
+ * | normal     | 2     | 2 holes per row, requires planning   |
  * | hard       | 3     | 3 holes per row, difficult to handle |
- * | expert     | 4     | 4 holes per row, extremely hard |
+ * | expert     | 4     | 4 holes per row, extremely hard      |
  *
  * @constant {Object<string, number>}
  */
 const DIFFICULTY_HOLES = {
-    easy: 1,
-    normal: 2,
-    hard: 3,
-    expert: 4,
-  };
+  easy: 1,
+  normal: 2,
+  hard: 3,
+  expert: 4,
+};
 
 /**
  * # Calculate attack power based on lines cleared
  *
- * Converts the player's cleared line count into garbage line attack count against the opponent.
- * This is the core function for **attack calculation** in the battle system.
+ * Converts the player's cleared line count into garbage line attack count
+ * against the opponent. This is the core function for **attack calculation** in
+ * the battle system.
  *
  * ## Calculation Rules
  *
  * - Queries the `GARBAGE_MAP` mapping table
- * - If the line count is not in the mapping table (e.g., 0 lines or 6+ lines), returns 0
+ * - If the line count is not in the mapping table (e.g., 0 lines or 6+ lines),
+ *   returns 0
  *
  * @param {number} lines - Number of lines cleared by the player
- * @returns {number} Returns the number of garbage lines sent to the opponent, 0 means no attack
+ * @returns {number} Returns the number of garbage lines sent to the opponent, 0
+ *   means no attack
  */
 export const calculateGarbage = (lines) => GARBAGE_MAP[lines] || 0;
 ```
 
-`calculateGarbage` converts the player's cleared line count into garbage line attack count against the opponent. This is the core function for **attack calculation** in the battle system.
+`calculateGarbage` converts the player's cleared line count into garbage line
+attack count against the opponent. This is the core function for **attack
+calculation** in the battle system.
 
 #### Difficulty Correspondence
 
-The `calculateGarbage` method generates garbage rows with corresponding holes based on difficulty:
+The `calculateGarbage` method generates garbage rows with corresponding holes
+based on difficulty:
 
-| Difficulty | Holes | Description                    |
-| ---------- | ----- | ------------------------------ |
-| easy       | 1     | 1 hole per row, easy to fill   |
-| normal     | 2     | 2 holes per row, requires planning |
+| Difficulty | Holes | Description                          |
+| ---------- | ----- | ------------------------------------ |
+| easy       | 1     | 1 hole per row, easy to fill         |
+| normal     | 2     | 2 holes per row, requires planning   |
 | hard       | 3     | 3 holes per row, difficult to handle |
-| expert     | 4     | 4 holes per row, extremely hard |
+| expert     | 4     | 4 holes per row, extremely hard      |
 
 ### applyGarbage
 
@@ -1106,9 +1148,9 @@ The `calculateGarbage` method generates garbage rows with corresponding holes ba
 /**
  * # Apply garbage rows to the target board
  *
- * Adds the specified number of garbage rows to the bottom of the opponent's board,
- * simulating the effect of being attacked. This is the core function for **garbage generation**
- * in the battle system.
+ * Adds the specified number of garbage rows to the bottom of the opponent's
+ * board, simulating the effect of being attacked. This is the core function for
+ * **garbage generation** in the battle system.
  *
  * ## Processing Flow
  *
@@ -1128,7 +1170,8 @@ The `calculateGarbage` method generates garbage rows with corresponding holes ba
  *
  * Each garbage row is an array of length `board[0].length` (board width):
  *
- * - **Solid cells**: Filled with color value (`lighten(COLORS.BLACK, 0.6)`) - gray blocks
+ * - **Solid cells**: Filled with color value (`lighten(COLORS.BLACK, 0.6)`) -
+ *   gray blocks
  * - **Hole cells**: Value `0` - empty, can be filled by pieces
  *
  * For example (width 10, holes 2):
@@ -1141,14 +1184,16 @@ The `calculateGarbage` method generates garbage rows with corresponding holes ba
  *
  * ### Why remove rows from the top?
  *
- * When garbage rows are inserted from the bottom, the board moves **upward** overall.
- * If rows aren't removed from the top, the board would exceed its boundaries.
- * This simulates the effect of pieces being pushed up when attacked in real Tetris.
+ * When garbage rows are inserted from the bottom, the board moves **upward**
+ * overall. If rows aren't removed from the top, the board would exceed its
+ * boundaries. This simulates the effect of pieces being pushed up when attacked
+ * in real Tetris.
  *
  * ### Why use `lighten(COLORS.BLACK, 0.6)`?
  *
  * - Uses gray instead of pure black for better visual layering
- * - The `lighten()` function slightly brightens the color to distinguish from the background
+ * - The `lighten()` function slightly brightens the color to distinguish from the
+ *   background
  * - Indicates this is "garbage" rather than pieces placed by the player
  *
  * ### Randomness of Holes
@@ -1182,106 +1227,125 @@ The `calculateGarbage` method generates garbage rows with corresponding holes ba
  *   - Affects the number of holes in each garbage row
  *   - Unmatched values default to 1 hole
  *
- * @returns {number[][]} New board after applying garbage rows (does not modify original board)
+ * @returns {number[][]} New board after applying garbage rows (does not modify
+ *   original board)
  */
 export const applyGarbage = (board, amount, difficulty) => {
-    /** Boundary condition check: If the number of garbage rows is invalid (≤ 0), no operation is performed, and the original board is returned directly. This avoids unnecessary array operations and performance waste. */
-    if (amount <= 0) {
-      return board;
+  /**
+   * Boundary condition check: If the number of garbage rows is invalid (≤ 0),
+   * no operation is performed, and the original board is returned directly.
+   * This avoids unnecessary array operations and performance waste.
+   */
+  if (amount <= 0) {
+    return board;
+  }
+
+  // Get board width (number of cells per row)
+  const width = board[0].length;
+
+  /**
+   * Get hole count based on difficulty:
+   *
+   * - Queries from the DIFFICULTY_HOLES mapping table
+   * - If difficulty is undefined, defaults to 1 hole (the most lenient
+   *   difficulty)
+   */
+  const holeCount = DIFFICULTY_HOLES[difficulty] || 1;
+
+  /**
+   * Create board copy: Uses spread operator to create a shallow copy,
+   * avoiding modification of the original board array. Note: Inner arrays
+   * (rows) will be replaced in subsequent operations.
+   */
+  const next = [...board];
+
+  /**
+   * ======== Step 1: Remove rows from the top ========
+   *
+   * Simulates the effect of the board moving upward as garbage rows are
+   * pushed in from the bottom. splice(0, amount) deletes amount elements from
+   * the beginning of the array.
+   *
+   * For example:
+   *
+   * - Original board 20 rows, amount = 3
+   * - After deleting top 3 rows, 17 rows remain
+   * - Then add 3 garbage rows, restoring to 20 rows
+   */
+  next.splice(0, amount);
+
+  /**
+   * ======== Step 2: Add garbage rows to the bottom ========
+   *
+   * Loops amount times, pushing one new garbage row to the board bottom each
+   * time.
+   */
+  for (let i = 0; i < amount; i += 1) {
+    /**
+     * Create garbage row:
+     *
+     * - Uses Array.from to generate an array of length width
+     * - Initial fill color: uses the lighten function on COLORS.BLACK
+     *
+     *   - COLORS.BLACK: Base black
+     *   - Lighten(..., 0.6): Brightens the color by 60%, resulting in dark gray
+     *   - Visual effect: Garbage blocks are gray-black, distinguishing them from
+     *       player pieces
+     */
+    const row = Array.from({ length: width }).fill(lighten(COLORS.BLACK, 0.6));
+
+    /**
+     * Randomly generate hole positions:
+     *
+     * Uses Set data structure to ensure hole positions don't repeat.
+     *
+     * Generation process:
+     *
+     * 1. Create empty Set
+     * 2. Loop while Set size is less than holeCount
+     * 3. Each iteration generates a random integer from 0 to width-1
+     * 4. Set automatically deduplicates, so no two holes will be at the same
+     *    position
+     *
+     * For example holeCount = 2, width = 10: May generate Set { 3, 7 } →
+     * column 3 and column 7 are holes
+     */
+    const holes = new Set();
+
+    while (holes.size < holeCount) {
+      /*
+       * Math.random() * width → floating point from 0 to width
+       * Math.floor() → rounds down, giving integer from 0 to width-1
+       */
+      holes.add(Math.floor(Math.random() * width));
     }
 
-    // Get board width (number of cells per row)
-    const width = board[0].length;
-
     /**
-     * Get hole count based on difficulty:
+     * Set hole positions to 0 (empty):
      *
-     * - Queries from the DIFFICULTY_HOLES mapping table
-     * - If difficulty is undefined, defaults to 1 hole (the most lenient difficulty)
+     * Iterates through all hole positions in the Set, setting corresponding
+     * cells to 0.
+     *
+     * - 0 in game logic represents "empty cell"
+     * - Pieces can fall into holes to fill them
+     * - Only after all holes are filled can the row be cleared
      */
-    const holeCount = DIFFICULTY_HOLES[difficulty] || 1;
-
-    /** Create board copy: Uses spread operator to create a shallow copy, avoiding modification of the original board array. Note: Inner arrays (rows) will be replaced in subsequent operations. */
-    const next = [...board];
-
-    /**
-     * ======== Step 1: Remove rows from the top ========
-     *
-     * Simulates the effect of the board moving upward as garbage rows are pushed in from the bottom. splice(0, amount) deletes amount elements from the beginning of the array.
-     *
-     * For example:
-     *
-     * - Original board 20 rows, amount = 3
-     * - After deleting top 3 rows, 17 rows remain
-     * - Then add 3 garbage rows, restoring to 20 rows
-     */
-    next.splice(0, amount);
-
-    /**
-     * ======== Step 2: Add garbage rows to the bottom ========
-     *
-     * Loops amount times, pushing one new garbage row to the board bottom each time.
-     */
-    for (let i = 0; i < amount; i += 1) {
-      /**
-       * Create garbage row:
-       *
-       * - Uses Array.from to generate an array of length width
-       * - Initial fill color: uses the lighten function on COLORS.BLACK
-       *
-       *   - COLORS.BLACK: Base black
-       *   - lighten(..., 0.6): Brightens the color by 60%, resulting in dark gray
-       *   - Visual effect: Garbage blocks are gray-black, distinguishing them from player pieces
-       */
-      const row = Array.from({ length: width }).fill(lighten(COLORS.BLACK, 0.6));
-
-      /**
-       * Randomly generate hole positions:
-       *
-       * Uses Set data structure to ensure hole positions don't repeat.
-       *
-       * Generation process:
-       *
-       * 1. Create empty Set
-       * 2. Loop while Set size is less than holeCount
-       * 3. Each iteration generates a random integer from 0 to width-1
-       * 4. Set automatically deduplicates, so no two holes will be at the same position
-       *
-       * For example holeCount = 2, width = 10: May generate Set { 3, 7 } → column 3 and column 7 are holes
-       */
-      const holes = new Set();
-
-      while (holes.size < holeCount) {
-        /*
-         * Math.random() * width → floating point from 0 to width
-         * Math.floor() → rounds down, giving integer from 0 to width-1
-         */
-        holes.add(Math.floor(Math.random() * width));
-      }
-
-      /**
-       * Set hole positions to 0 (empty):
-       *
-       * Iterates through all hole positions in the Set, setting corresponding cells to 0.
-       *
-       * - 0 in game logic represents "empty cell"
-       * - Pieces can fall into holes to fill them
-       * - Only after all holes are filled can the row be cleared
-       */
-      for (const h of holes) {
-        row[h] = 0;
-      }
-
-      // Add the constructed garbage row to the board bottom
-      next.push(row);
+    for (const h of holes) {
+      row[h] = 0;
     }
 
-    // Return the processed new board
-    return next;
-  };
+    // Add the constructed garbage row to the board bottom
+    next.push(row);
+  }
+
+  // Return the processed new board
+  return next;
+};
 ```
 
-`applyGarbage` adds the specified number of garbage rows to the bottom of the opponent's board, simulating the effect of being attacked. This is the core function for **garbage generation** in the battle system.
+`applyGarbage` adds the specified number of garbage rows to the bottom of the
+opponent's board, simulating the effect of being attacked. This is the core
+function for **garbage generation** in the battle system.
 
 Processing Flow:
 
@@ -1293,7 +1357,8 @@ Processing Flow:
 
 ## Battle and AI
 
-AI does not know it is in a Battle. It still only thinks and outputs Commands. What truly participates in Battle is still Runtime.
+AI does not know it is in a Battle. It still only thinks and outputs Commands.
+What truly participates in Battle is still Runtime.
 
 Therefore:
 
@@ -1301,11 +1366,13 @@ Therefore:
 - Player vs AI
 - AI vs AI
 
-The entire execution flow is completely consistent. Battle does not generate new game logic just because AI joins.
+The entire execution flow is completely consistent. Battle does not generate new
+game logic just because AI joins.
 
 ## Why Can Battle Naturally Join?
 
-Battle may look like a new feature added to the project. In reality, it is just a natural result of the Runtime architecture's evolution.
+Battle may look like a new feature added to the project. In reality, it is just
+a natural result of the Runtime architecture's evolution.
 
 <p align="center">
     <img src="assets/img/battle-diagram.png" alt="Battle Diagram">
@@ -1318,13 +1385,18 @@ Because:
 - Store already centrally manages state
 - Replay already ensures determinism
 
-Battle almost doesn't need to redesign these systems. It simply makes multiple Runtimes run simultaneously. This is also a demonstration of the entire architecture's extensibility.
+Battle almost doesn't need to redesign these systems. It simply makes multiple
+Runtimes run simultaneously. This is also a demonstration of the entire
+architecture's extensibility.
 
 ## Scoped Event
 
-When discussing the Battle module, there's one related topic that needs to be addressed: **Scoped Event**.
+When discussing the Battle module, there's one related topic that needs to be
+addressed: **Scoped Event**.
 
-**Scoped Event** is an event namespace isolation mechanism in tetris.js's EventBus. Its core purpose is to ensure that the same event name does not interfere between different Game instances.
+**Scoped Event** is an event namespace isolation mechanism in tetris.js's
+EventBus. Its core purpose is to ensure that the same event name does not
+interfere between different Game instances.
 
 Let's take `GameEvents` as an example:
 
@@ -1402,11 +1474,13 @@ export const GameEvents = (uuid) => ({
 });
 ```
 
-The uuid here is generated during the initialization of each Game instance. All GameEvents event names use the **uuid** as the scope of the Scoped Event.
+The uuid here is generated during the initialization of each Game instance. All
+GameEvents event names use the **uuid** as the scope of the Scoped Event.
 
 ### Why Do We Need Scoped Events?
 
-In Battle mode, two Game instances (P1 and P2) are running simultaneously. Without event isolation, the following problems would occur:
+In Battle mode, two Game instances (P1 and P2) are running simultaneously.
+Without event isolation, the following problems would occur:
 
 ```js
 // Without isolation: P1 and P2 share the same event
@@ -1414,12 +1488,16 @@ EventBus.emit('game:start', { Game: game1 });
 EventBus.emit('game:start', { Game: game2 });
 
 // Both listeners would be triggered, causing chaos
-EventBus.on('game:start', () => { /* P1's start logic */ });
-EventBus.on('game:start', () => { /* P2's start logic */ });
+EventBus.on('game:start', () => {
+  /* P1's start logic */
+});
+EventBus.on('game:start', () => {
+  /* P2's start logic */
+});
 ```
 
-Without isolation, P1 and P2 share the same event, and both listeners would be triggered, causing confusion. With Scoped Events, this problem is eliminated:
-
+Without isolation, P1 and P2 share the same event, and both listeners would be
+triggered, causing confusion. With Scoped Events, this problem is eliminated:
 
 ```js
 // With isolation: each Game instance has its own event namespace
@@ -1427,26 +1505,36 @@ const G1 = GameEvents('uuid-p1');
 const G2 = GameEvents('uuid-p2');
 
 // P1's event
-EventBus.emit(G1.START, { Game: game1 });  // → 'game:uuid-p1:start'
+EventBus.emit(G1.START, { Game: game1 }); // → 'game:uuid-p1:start'
 // P2's event
-EventBus.emit(G2.START, { Game: game2 });  // → 'game:uuid-p2:start'
+EventBus.emit(G2.START, { Game: game2 }); // → 'game:uuid-p2:start'
 
 // P1 only listens to P1's events
-EventBus.on(G1.START, () => { /* Only handles P1's start */ });
-EventBus.on(G2.START, () => { /* Only handles P2's start */ });
+EventBus.on(G1.START, () => {
+  /* Only handles P1's start */
+});
+EventBus.on(G2.START, () => {
+  /* Only handles P2's start */
+});
 ```
 
-Scoped Events give each Game instance its own "event channel", just like each player has their own controller — operations only affect themselves and never leak to the other side.
-
+Scoped Events give each Game instance its own "event channel", just like each
+player has their own controller — operations only affect themselves and never
+leak to the other side.
 
 ## Summary
 
-Battle did not re-implement Tetris. It simply makes multiple Runtimes work together in the same match. Each player, whether human or AI, has their own Runtime. The Battle Controller coordinates the interaction between them.
+Battle did not re-implement Tetris. It simply makes multiple Runtimes work
+together in the same match. Each player, whether human or AI, has their own
+Runtime. The Battle Controller coordinates the interaction between them.
 
-Therefore, Battle is not a feature outside the architecture. It is just an application naturally extended from Runtime capabilities.
+Therefore, Battle is not a feature outside the architecture. It is just an
+application naturally extended from Runtime capabilities.
 
 ## Next Reading
 
-Up to this point, Runtime, AI, Replay, and Battle have all been covered. Next, we will enter the development guide. Learn about the entire project's directory structure, module division, and how to participate in development.
+Up to this point, Runtime, AI, Replay, and Battle have all been covered. Next,
+we will enter the development guide. Learn about the entire project's directory
+structure, module division, and how to participate in development.
 
 **Next Chapter: [07-development.en.md](./07-development.en.md)**

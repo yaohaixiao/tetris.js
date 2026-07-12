@@ -131,7 +131,10 @@ describe('ElapsedTimer', () => {
         Scheduler: mockScheduler,
       });
 
-      expect(mockScheduler.interval).toHaveBeenCalledWith(expect.any(Function), 1000);
+      expect(mockScheduler.interval).toHaveBeenCalledWith(
+        expect.any(Function),
+        1000,
+      );
     });
 
     it('会话计时器应该每秒递增 sessionSeconds', () => {

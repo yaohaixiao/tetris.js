@@ -1,6 +1,9 @@
 /** @file 垃圾行系统单元测试 - 完整修正版 */
 
-import { calculateGarbage, applyGarbage } from '@/lib/battle/rules/garbage-system.js';
+import {
+  calculateGarbage,
+  applyGarbage,
+} from '@/lib/battle/rules/garbage-system.js';
 import COLORS from '@/lib/constants/colors.js';
 import lighten from '@/lib/utils/color/lighten.js';
 
