@@ -522,9 +522,6 @@ var create_snapshot_default = createSnapshot;
 
 // lib/worker/ai-worker.js
 globalThis.addEventListener("message", (e) => {
-  if (e.origin !== globalThis.location.origin) {
-    return;
-  }
   const { type, bag, state, weights, depth, beam } = e.data;
   if (type !== "think") {
     return;

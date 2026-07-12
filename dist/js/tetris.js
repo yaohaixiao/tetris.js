@@ -118,6 +118,332 @@ var tetris = (() => {
   };
   var event_bus_default = EventBus;
 
+  // lib/core/index.js
+  var Base = class {
+    /**
+     * ## 构造函数
+     *
+     * 接收依赖对象并注入到实例上。
+     *
+     * @param {object} [deps={}] - 依赖对象. Default is `{}`
+     */
+    constructor(deps = {}) {
+      this.inject(deps);
+    }
+    /**
+     * ## inject：依赖注入
+     *
+     * 将传入对象的属性复制到当前实例上。 使用 Object.assign 进行浅拷贝。
+     *
+     * @param {object} [deps={}] - 依赖对象. Default is `{}`
+     * @returns {void}
+     */
+    inject(deps = {}) {
+      Object.assign(this, deps);
+    }
+    /**
+     * ## emit：触发事件
+     *
+     * 通知所有订阅了该事件的处理函数。
+     *
+     * @param {string} event - 事件名称
+     * @param {object} [payload] - 传递给处理函数的参数对象
+     * @returns {void}
+     */
+    emit(event, payload) {
+      event_bus_default.emit(event, payload);
+    }
+    /**
+     * ## on：订阅事件
+     *
+     * 注册一个持续监听的处理函数。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数
+     * @returns {void}
+     */
+    on(event, handler) {
+      event_bus_default.on(event, handler);
+    }
+    /**
+     * ## once：一次性订阅事件
+     *
+     * 注册的处理函数在首次触发后自动取消订阅。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 处理函数
+     * @returns {void}
+     */
+    once(event, handler) {
+      event_bus_default.once(event, handler);
+    }
+    /**
+     * ## off：取消订阅事件
+     *
+     * 从指定事件的订阅列表中移除处理函数。
+     *
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 要移除的处理函数
+     * @returns {void}
+     */
+    off(event, handler) {
+      event_bus_default.off(event, handler);
+    }
+    /**
+     * ## clear：清空所有事件
+     *
+     * 移除全局 EventBus 中的所有事件订阅。 注意：这是全局操作，会影响所有继承 Base 的实例。
+     *
+     * @returns {void}
+     */
+    clear() {
+      event_bus_default.clear();
+    }
+  };
+  var core_default = Base;
+
+  // lib/events/event-catalog.js
+  var AnimationsEvents = (uuid) => ({
+    CLEAR: `animations:${uuid}:clear`
+  });
+  var AudioEvents = () => ({
+    // 背景音乐
+    RESUME_BGM: "audio:resume:bgm",
+    STOP_BGM: "audio:stop:bgm",
+    TOGGLE_BGM: "audio:toggle:bgm",
+    // 游戏音效
+    PLAY_SOUND: "audio:play:sound"
+  });
+  var AIEvents = (uuid) => ({
+    START: `ai:${uuid}:start`,
+    STOP: `ai:${uuid}:stop`
+  });
+  var BattleEvents = () => ({
+    PROCESS_ATTACK: "battle:process:attack",
+    START_GARBAGE_FLY: "battle:start:garbage:fly",
+    FLUSH_GARBAGE: "battle:flush:garbage",
+    UPDATE_WINNER: "battle:update:winner",
+    SYNC_PAUSE: "battle:sync:pause",
+    SYNC_RESUME: "battle:sync:resume",
+    RESET: "battle:reset",
+    PLAYER_SURRENDER: "battle:player:surrender"
+  });
+  var CommandEvents = (uuid) => ({
+    CLEAR: `command:queue:${uuid}:clear`,
+    ENQUEUE: `command:queue:${uuid}:enqueue`
+  });
+  var EngineEvents = () => ({
+    EXIT: "engine:exit",
+    UPDATE_MODE: "engine:update:mode",
+    UPDATE_PLAYERS: "engine:update:players",
+    START: "engine:start"
+  });
+  var GameEvents = (uuid) => ({
+    // 状态更新
+    UPDATE_STATE: `game:${uuid}:update:state`,
+    UPDATE_MODE_INDEX: `game:${uuid}:update:mode:index`,
+    UPDATE_BATTLE_INDEX: `game:${uuid}:update:battle:index`,
+    UPDATE_MODE: `game:${uuid}:update:mode`,
+    UPDATE_LEVEL: `game:${uuid}:update:level`,
+    UPDATE_GAMEPAD_CONNECTED: `game:${uuid}:update:gamepad:connected`,
+    // HUD 更新
+    SWITCH_CONTROLLER: `game:${uuid}:swtich:controller`,
+    UPDATE_HUD: `game:${uuid}:update:hud`,
+    SAVE_HIGH_SCORE: `game:${uuid}:save:high:score`,
+    // 场景切换
+    SWITCH_TO_GAME_MODE: `game:${uuid}:switch:to:game:mode`,
+    SWITCH_TO_BATTLE_MODE: `game:${uuid}:switch:to:battle:mode`,
+    SWITCH_TO_MAIN_MENU: `game:${uuid}:switch:to:main:menu`,
+    SELECT_LEVEL: `game:${uuid}:select:level`,
+    SWITCH_TO_DIFFICULTY: `game:${uuid}:switch:difficulty`,
+    SELECT_DIFFICULTY: `game:${uuid}:select:difficulty`,
+    // 核心流程
+    BEGIN: `game:${uuid}:begin`,
+    START: `game:${uuid}:start`,
+    TOGGLE_PAUSED: `game:${uuid}:toggle:paused`,
+    RESET: `game:${uuid}:reset`,
+    RESTART: `game:${uuid}:restart`,
+    OVER: `game:${uuid}:over`,
+    // Ghost 定位
+    GET_GHOST_POSITION: `game:${uuid}:get:ghost:position`,
+    // 方块操作
+    BLOCK_MOVE: `game:${uuid}:block:move`,
+    BLOCK_ROTATE: `game:${uuid}:block:rotate`,
+    BLOCK_DROP: `game:${uuid}:block:drop`,
+    BLOCK_TICK: `game:${uuid}:block:tick`,
+    BLOCK_SPAWN: `game:${uuid}:block:spawn`,
+    BLOCK_HOLD: `game:${uuid}:block:hold`,
+    // 动画特效
+    START_COUNTDOWN: `game:${uuid}:start:countdown`,
+    START_PAUSED: `game:${uuid}:start:paused`,
+    STOP_PAUSED: `game:${uuid}:stop:paused`,
+    START_CLEAR_LINES: `game:${uuid}:start:clear:lines`,
+    START_CLEAR_SCORE: `game:${uuid}:start:clear:score`,
+    START_LEVEL_UP: `game:${uuid}:start:level:up`,
+    START_LANDING_FLASH: `game:${uuid}:start:landing:flash`,
+    START_GARBAGE_WARNING: `game:${uuid}:start:garbage:warning`,
+    START_GARBAGE_PUSH: `game:${uuid}:start:garbage:push`,
+    // 背景音乐
+    TOGGLE_BGM: `game:${uuid}:toggle:bgm`,
+    // 回放准备
+    REPLAY_PREPARE: `game:${uuid}:replay:prepare`,
+    // 对战认输
+    SURRENDER: `game:${uuid}:surrender`,
+    // 游戏计时
+    START_TIMER: `game:${uuid}:start:timer`,
+    PAUSE_TIMER: `game:${uuid}:pause:timer`,
+    RESET_TIMER: `game:${uuid}:reset:timer`,
+    // 更新游戏记录
+    UPDATE_RECORDS: `game:${uuid}:update:records`,
+    // 退出游戏
+    EXIT: `game:${uuid}:exit`,
+    UPDATE_EXIT_INDEX: `game:${uuid}:update:exit:index`,
+    GIVE_UP: `game:${uuid}:give:up`,
+    RESUME: `game:${uuid}:resume`,
+    // Input 和 Command 映射
+    DISPATCH_INPUT: `game:${uuid}:dispatch:input`,
+    DISPATCH_COMMAND: `game:${uuid}:dispatch:command`
+  });
+  var ReplayEvents = (uuid) => ({
+    // 录制操作
+    START_RECORD: `replay:${uuid}:start:record`,
+    STOP_RECORD: `replay:${uuid}:stop:record`,
+    ADD_RECORD: `replay:${uuid}:add:record`,
+    ADD_PIECE: `replay:${uuid}:add:piece`,
+    // 回放操作
+    START_PLAY: `replay:${uuid}:start:play`,
+    RESET: `replay:${uuid}:reset`,
+    // 流程控制
+    GAME_OVER: `replay:${uuid}:game:over`,
+    STOP_CLEAR_LINES: `replay:${uuid}:stop:clear:lines`
+  });
+  var UIEvents = (uuid) => ({
+    // HUD 绘制
+    UPDATE_MODE: `ui:${uuid}:update:mode`,
+    UPDATE_CONTROLLER: `ui:${uuid}:update:controller`,
+    UPDATE_HUD: `ui:${uuid}:update:hud`,
+    // 画布绘制
+    RESIZE: `ui:${uuid}:resize`,
+    RENDER_NEXT_PIECE: `ui:${uuid}:render:next:piece`,
+    RENDER_HOLD_PIECE: `ui:${uuid}:render:hold:piece`,
+    CLEAR_NEXT_PIECE: `ui:${uuid}:clear:next:piece`,
+    CLEAR_HOLD_PIECE: `ui:${uuid}:clear:hold:piece`,
+    RENDER_GHOST_PIECE: `ui:${uuid}:render:ghost:piece`,
+    // 动画特效
+    RENDER_COUNTDOWN: `ui:${uuid}:render:countdown`,
+    RENDER_CLEAR_LINES: `ui:${uuid}:render:clear:lines`,
+    RENDER_CLEAR_SCORE: `ui:${uuid}:render:clear:score`,
+    RENDER_LEVEL_UP: `ui:${uuid}:render:level:up`,
+    RENDER_LANDING_FLASH: `ui:${uuid}:render:landing:flash`,
+    RENDER_GARBAGE_WARNING: `ui:${uuid}:render:garbage:warning`,
+    RENDER_GARBAGE_PUSH: `ui:${uuid}:render:garbage:push`,
+    RENDER_GAMEPAD_NOTIFICATION: `ui:${uuid}:render:gamepad:notification`
+  });
+
+  // lib/events/router/engine-router.js
+  var EngineRouter = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * @param {object} options - 配置选项
+     */
+    constructor(options) {
+      super(options);
+    }
+    /**
+     * ## subscribe：订阅引擎事件
+     *
+     * 订阅全局 engine:* 事件。
+     *
+     * @returns {void}
+     */
+    subscribe() {
+      const events = EngineEvents();
+      this.on(events.UPDATE_MODE, this._onUpdateMode);
+      this.on(events.UPDATE_PLAYERS, this._onUpdatePlayers);
+      this.on(events.START, this._onStart);
+      this.on(events.EXIT, this._onExit);
+    }
+    /**
+     * ## unsubscribe：取消订阅引擎事件
+     *
+     * @returns {void}
+     */
+    unsubscribe() {
+      const events = EngineEvents();
+      this.off(events.UPDATE_MODE, this._onUpdateMode);
+      this.off(events.UPDATE_PLAYERS, this._onUpdatePlayers);
+      this.off(events.START, this._onStart);
+      this.off(events.EXIT, this._onExit);
+    }
+    /*
+     * ============================================================
+     * 事件处理器
+     * ============================================================
+     */
+    /**
+     * ## _onUpdateMode：处理模式更新事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {string} payload.mode - 游戏模式
+     * @returns {void}
+     */
+    _onUpdateMode = (payload) => {
+      const { Engine: Engine2 } = this;
+      Engine2.Store.setMode(payload.mode);
+    };
+    /**
+     * ## _onUpdatePlayers：处理玩家配置更新事件
+     *
+     * @private
+     * @param {object} payload - 事件参数
+     * @param {string[]} payload.players - 玩家名称数组
+     * @returns {void}
+     */
+    _onUpdatePlayers = (payload) => {
+      const { Engine: Engine2 } = this;
+      Engine2.Store.setPlayers(payload.players);
+    };
+    /**
+     * ## _onStart：处理启动事件（模式切换重启动）
+     *
+     * 销毁当前所有子系统，使用新的配置重新启动引擎。 退出模式时强制切换为单人模式。
+     *
+     * @private
+     * @param {object} [options={}] - 事件参数. Default is `{}`
+     * @param {boolean} [options.isRelaunch=true] - 是否为模式切换重启动. Default is `true`
+     * @returns {void}
+     */
+    _onStart = (options = {}) => {
+      const { Engine: Engine2 } = this;
+      const { isRelaunch = true } = options;
+      const cloned = structuredClone({
+        ...Engine2.Store.getState(),
+        isRelaunch
+      });
+      if (!isRelaunch) {
+        cloned.Mode = "single";
+      }
+      Engine2.destroy();
+      Engine2.launch(cloned);
+    };
+    /**
+     * ## _onExit：处理退出事件
+     *
+     * 从对战模式退出到单人模式选择界面。
+     *
+     * @private
+     * @returns {void}
+     */
+    _onExit = () => {
+      const { Engine: Engine2 } = this;
+      Engine2.Store.reset();
+      this._onStart({ isRelaunch: false, Mode: "single" });
+    };
+  };
+  var engine_router_default = EngineRouter;
+
   // lib/engine/state/engine-state.js
   var EngineState = {
     /**
@@ -418,90 +744,6 @@ var tetris = (() => {
     }
   };
   var engine_store_default = EngineStore;
-
-  // lib/core/index.js
-  var Base = class {
-    /**
-     * ## 构造函数
-     *
-     * 接收依赖对象并注入到实例上。
-     *
-     * @param {object} [deps={}] - 依赖对象. Default is `{}`
-     */
-    constructor(deps = {}) {
-      this.inject(deps);
-    }
-    /**
-     * ## inject：依赖注入
-     *
-     * 将传入对象的属性复制到当前实例上。 使用 Object.assign 进行浅拷贝。
-     *
-     * @param {object} [deps={}] - 依赖对象. Default is `{}`
-     * @returns {void}
-     */
-    inject(deps = {}) {
-      Object.assign(this, deps);
-    }
-    /**
-     * ## emit：触发事件
-     *
-     * 通知所有订阅了该事件的处理函数。
-     *
-     * @param {string} event - 事件名称
-     * @param {object} [payload] - 传递给处理函数的参数对象
-     * @returns {void}
-     */
-    emit(event, payload) {
-      event_bus_default.emit(event, payload);
-    }
-    /**
-     * ## on：订阅事件
-     *
-     * 注册一个持续监听的处理函数。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数
-     * @returns {void}
-     */
-    on(event, handler) {
-      event_bus_default.on(event, handler);
-    }
-    /**
-     * ## once：一次性订阅事件
-     *
-     * 注册的处理函数在首次触发后自动取消订阅。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 处理函数
-     * @returns {void}
-     */
-    once(event, handler) {
-      event_bus_default.once(event, handler);
-    }
-    /**
-     * ## off：取消订阅事件
-     *
-     * 从指定事件的订阅列表中移除处理函数。
-     *
-     * @param {string} event - 事件名称
-     * @param {Function} handler - 要移除的处理函数
-     * @returns {void}
-     */
-    off(event, handler) {
-      event_bus_default.off(event, handler);
-    }
-    /**
-     * ## clear：清空所有事件
-     *
-     * 移除全局 EventBus 中的所有事件订阅。 注意：这是全局操作，会影响所有继承 Base 的实例。
-     *
-     * @returns {void}
-     */
-    clear() {
-      event_bus_default.clear();
-    }
-  };
-  var core_default = Base;
 
   // lib/engine/core/utils/get-battle-overlay-template.js
   var getBattleOverlayTemplate = (elements, players) => {
@@ -3460,144 +3702,6 @@ var tetris = (() => {
   };
   var toggle_bgm_default = toggleBGM;
 
-  // lib/events/event-catalog.js
-  var AnimationsEvents = (uuid) => ({
-    CLEAR: `animations:${uuid}:clear`
-  });
-  var AudioEvents = () => ({
-    // 背景音乐
-    RESUME_BGM: "audio:resume:bgm",
-    STOP_BGM: "audio:stop:bgm",
-    TOGGLE_BGM: "audio:toggle:bgm",
-    // 游戏音效
-    PLAY_SOUND: "audio:play:sound"
-  });
-  var AIEvents = (uuid) => ({
-    START: `ai:${uuid}:start`,
-    STOP: `ai:${uuid}:stop`
-  });
-  var BattleEvents = () => ({
-    PROCESS_ATTACK: "battle:process:attack",
-    START_GARBAGE_FLY: "battle:start:garbage:fly",
-    FLUSH_GARBAGE: "battle:flush:garbage",
-    UPDATE_WINNER: "battle:update:winner",
-    SYNC_PAUSE: "battle:sync:pause",
-    SYNC_RESUME: "battle:sync:resume",
-    RESET: "battle:reset",
-    PLAYER_SURRENDER: "battle:player:surrender"
-  });
-  var CommandEvents = (uuid) => ({
-    CLEAR: `command:queue:${uuid}:clear`,
-    ENQUEUE: `command:queue:${uuid}:enqueue`
-  });
-  var EngineEvents = () => ({
-    EXIT: "engine:exit",
-    UPDATE_MODE: "engine:update:mode",
-    UPDATE_PLAYERS: "engine:update:players",
-    START: "engine:start"
-  });
-  var GameEvents = (uuid) => ({
-    // 状态更新
-    UPDATE_STATE: `game:${uuid}:update:state`,
-    UPDATE_MODE_INDEX: `game:${uuid}:update:mode:index`,
-    UPDATE_BATTLE_INDEX: `game:${uuid}:update:battle:index`,
-    UPDATE_MODE: `game:${uuid}:update:mode`,
-    UPDATE_LEVEL: `game:${uuid}:update:level`,
-    UPDATE_GAMEPAD_CONNECTED: `game:${uuid}:update:gamepad:connected`,
-    // HUD 更新
-    SWITCH_CONTROLLER: `game:${uuid}:swtich:controller`,
-    UPDATE_HUD: `game:${uuid}:update:hud`,
-    SAVE_HIGH_SCORE: `game:${uuid}:save:high:score`,
-    // 场景切换
-    SWITCH_TO_GAME_MODE: `game:${uuid}:switch:to:game:mode`,
-    SWITCH_TO_BATTLE_MODE: `game:${uuid}:switch:to:battle:mode`,
-    SWITCH_TO_MAIN_MENU: `game:${uuid}:switch:to:main:menu`,
-    SELECT_LEVEL: `game:${uuid}:select:level`,
-    SWITCH_TO_DIFFICULTY: `game:${uuid}:switch:difficulty`,
-    SELECT_DIFFICULTY: `game:${uuid}:select:difficulty`,
-    // 核心流程
-    BEGIN: `game:${uuid}:begin`,
-    START: `game:${uuid}:start`,
-    TOGGLE_PAUSED: `game:${uuid}:toggle:paused`,
-    RESET: `game:${uuid}:reset`,
-    RESTART: `game:${uuid}:restart`,
-    OVER: `game:${uuid}:over`,
-    // Ghost 定位
-    GET_GHOST_POSITION: `game:${uuid}:get:ghost:position`,
-    // 方块操作
-    BLOCK_MOVE: `game:${uuid}:block:move`,
-    BLOCK_ROTATE: `game:${uuid}:block:rotate`,
-    BLOCK_DROP: `game:${uuid}:block:drop`,
-    BLOCK_TICK: `game:${uuid}:block:tick`,
-    BLOCK_SPAWN: `game:${uuid}:block:spawn`,
-    BLOCK_HOLD: `game:${uuid}:block:hold`,
-    // 动画特效
-    START_COUNTDOWN: `game:${uuid}:start:countdown`,
-    START_PAUSED: `game:${uuid}:start:paused`,
-    STOP_PAUSED: `game:${uuid}:stop:paused`,
-    START_CLEAR_LINES: `game:${uuid}:start:clear:lines`,
-    START_CLEAR_SCORE: `game:${uuid}:start:clear:score`,
-    START_LEVEL_UP: `game:${uuid}:start:level:up`,
-    START_LANDING_FLASH: `game:${uuid}:start:landing:flash`,
-    START_GARBAGE_WARNING: `game:${uuid}:start:garbage:warning`,
-    START_GARBAGE_PUSH: `game:${uuid}:start:garbage:push`,
-    // 背景音乐
-    TOGGLE_BGM: `game:${uuid}:toggle:bgm`,
-    // 回放准备
-    REPLAY_PREPARE: `game:${uuid}:replay:prepare`,
-    // 对战认输
-    SURRENDER: `game:${uuid}:surrender`,
-    // 游戏计时
-    START_TIMER: `game:${uuid}:start:timer`,
-    PAUSE_TIMER: `game:${uuid}:pause:timer`,
-    RESET_TIMER: `game:${uuid}:reset:timer`,
-    // 更新游戏记录
-    UPDATE_RECORDS: `game:${uuid}:update:records`,
-    // 退出游戏
-    EXIT: `game:${uuid}:exit`,
-    UPDATE_EXIT_INDEX: `game:${uuid}:update:exit:index`,
-    GIVE_UP: `game:${uuid}:give:up`,
-    RESUME: `game:${uuid}:resume`,
-    // Input 和 Command 映射
-    DISPATCH_INPUT: `game:${uuid}:dispatch:input`,
-    DISPATCH_COMMAND: `game:${uuid}:dispatch:command`
-  });
-  var ReplayEvents = (uuid) => ({
-    // 录制操作
-    START_RECORD: `replay:${uuid}:start:record`,
-    STOP_RECORD: `replay:${uuid}:stop:record`,
-    ADD_RECORD: `replay:${uuid}:add:record`,
-    ADD_PIECE: `replay:${uuid}:add:piece`,
-    // 回放操作
-    START_PLAY: `replay:${uuid}:start:play`,
-    RESET: `replay:${uuid}:reset`,
-    // 流程控制
-    GAME_OVER: `replay:${uuid}:game:over`,
-    STOP_CLEAR_LINES: `replay:${uuid}:stop:clear:lines`
-  });
-  var UIEvents = (uuid) => ({
-    // HUD 绘制
-    UPDATE_MODE: `ui:${uuid}:update:mode`,
-    UPDATE_CONTROLLER: `ui:${uuid}:update:controller`,
-    UPDATE_HUD: `ui:${uuid}:update:hud`,
-    // 画布绘制
-    RESIZE: `ui:${uuid}:resize`,
-    RENDER_NEXT_PIECE: `ui:${uuid}:render:next:piece`,
-    RENDER_HOLD_PIECE: `ui:${uuid}:render:hold:piece`,
-    CLEAR_NEXT_PIECE: `ui:${uuid}:clear:next:piece`,
-    CLEAR_HOLD_PIECE: `ui:${uuid}:clear:hold:piece`,
-    RENDER_GHOST_PIECE: `ui:${uuid}:render:ghost:piece`,
-    // 动画特效
-    RENDER_COUNTDOWN: `ui:${uuid}:render:countdown`,
-    RENDER_CLEAR_LINES: `ui:${uuid}:render:clear:lines`,
-    RENDER_CLEAR_SCORE: `ui:${uuid}:render:clear:score`,
-    RENDER_LEVEL_UP: `ui:${uuid}:render:level:up`,
-    RENDER_LANDING_FLASH: `ui:${uuid}:render:landing:flash`,
-    RENDER_GARBAGE_WARNING: `ui:${uuid}:render:garbage:warning`,
-    RENDER_GARBAGE_PUSH: `ui:${uuid}:render:garbage:push`,
-    RENDER_GAMEPAD_NOTIFICATION: `ui:${uuid}:render:gamepad:notification`
-  });
-
   // lib/services/audio/index.js
   var Audio = class extends core_default {
     /**
@@ -5782,6 +5886,51 @@ var tetris = (() => {
   };
   var command_queue_default = CommandQueue;
 
+  // lib/events/router/animations-router.js
+  var AnimationsRouter = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * @param {object} options - 配置选项
+     */
+    constructor(options) {
+      super(options);
+    }
+    /**
+     * ## subscribe：订阅动画系统事件
+     *
+     * 监听 animations:<uuid>:clear 事件。
+     *
+     * @returns {void}
+     */
+    subscribe() {
+      const { Game: Game2 } = this;
+      const events = AnimationsEvents(Game2.id);
+      this.on(events.CLEAR, this._onClear);
+    }
+    /**
+     * ## unsubscribe：取消订阅动画系统事件
+     *
+     * @returns {void}
+     */
+    unsubscribe() {
+      const { Game: Game2 } = this;
+      const events = AnimationsEvents(Game2.id);
+      this.off(events.CLEAR, this._onClear);
+    }
+    /**
+     * ## _onClear：处理清空事件
+     *
+     * @private
+     * @returns {void}
+     */
+    _onClear = () => {
+      const { Animations } = this;
+      Animations.clear();
+    };
+  };
+  var animations_router_default = AnimationsRouter;
+
   // lib/runtime/animation-system.js
   var AnimationSystem = class extends core_default {
     /**
@@ -5831,6 +5980,18 @@ var tetris = (() => {
      */
     constructor(options) {
       super(options);
+      this.initialize();
+    }
+    /**
+     * ## initialize：初始化动画系统
+     *
+     * 创建 AnimationsRouter 实例，负责事件路由。
+     *
+     * @returns {void}
+     */
+    initialize() {
+      const { Game: Game2 } = this;
+      this.Router = new animations_router_default({ Animations: this, Game: Game2 });
     }
     /**
      * ## register：注册动画
@@ -5934,9 +6095,7 @@ var tetris = (() => {
      * @returns {void}
      */
     subscribe() {
-      const { Game: Game2 } = this;
-      const events = AnimationsEvents(Game2.id);
-      this.on(events.CLEAR, this._onClear);
+      this.Router.subscribe();
     }
     /**
      * ## unsubscribe：取消订阅动画系统事件
@@ -5944,19 +6103,8 @@ var tetris = (() => {
      * @returns {void}
      */
     unsubscribe() {
-      const { Game: Game2 } = this;
-      const events = AnimationsEvents(Game2.id);
-      this.off(events.CLEAR, this._onClear);
+      this.Router.unsubscribe();
     }
-    /**
-     * ## _onClear：处理清空事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onClear = () => {
-      this.clear();
-    };
     /**
      * 合并待注册动画到活跃队列。
      *
@@ -10439,6 +10587,63 @@ var tetris = (() => {
   };
   var ai_difficulty_default = AIDifficulty;
 
+  // lib/events/router/ai-rounter.js
+  var AIRouter = class extends core_default {
+    /**
+     * ## 构造函数
+     *
+     * @param {object} options - 配置选项
+     */
+    constructor(options) {
+      super(options);
+    }
+    /**
+     * ## subscribe：订阅 AI 事件
+     *
+     * 监听 ai:<uuid>:start 和 ai:<uuid>:stop 事件。
+     *
+     * @returns {void}
+     */
+    subscribe() {
+      const { Game: Game2 } = this;
+      const events = AIEvents(Game2.id);
+      this.on(events.START, this._onStart);
+      this.on(events.STOP, this._onStop);
+    }
+    /**
+     * ## unsubscribe：取消订阅 AI 事件
+     *
+     * @returns {void}
+     */
+    unsubscribe() {
+      const { Game: Game2 } = this;
+      const events = AIEvents(Game2.id);
+      this.off(events.START, this._onStart);
+      this.off(events.STOP, this._onStop);
+    }
+    /**
+     * ## _onStart：处理 AI 启动事件
+     *
+     * @private
+     * @returns {void}
+     */
+    _onStart = () => {
+      const { AI } = this;
+      AI.start();
+    };
+    /**
+     * ## _onStop：处理 AI 停止事件
+     *
+     * @private
+     * @returns {void}
+     */
+    _onStop = () => {
+      const { AI } = this;
+      AI.stop();
+    };
+  };
+  var ai_rounter_default = AIRouter;
+
   // lib/ai/snapshot/create-snapshot.js
   var createSnapshot = (state, bag) => structuredClone({
     controller: state.controller,
@@ -10956,12 +11161,17 @@ var tetris = (() => {
      * @returns {void}
      */
     _initialize(terminate = false) {
+      const { Game: Game2 } = this;
       this.enabled = false;
       this.actions = [];
       this.aiSchedulerId = 0;
       this.worker = null;
       this.workerBusy = false;
       this.worker = typeof Worker === "undefined" || terminate ? null : new Worker("js/ai-worker.js", { type: "module" });
+      this.Router = new ai_rounter_default({
+        AI: this,
+        Game: Game2
+      });
     }
     /**
      * ## start：启动 AI
@@ -11099,6 +11309,22 @@ var tetris = (() => {
       return map[difficulty] || ai_difficulty_default.NORMAL;
     }
     /**
+     * ## subscribe：订阅 AI 事件
+     *
+     * @returns {void}
+     */
+    subscribe() {
+      this.Router.subscribe();
+    }
+    /**
+     * ## unsubscribe：取消订阅 AI 事件
+     *
+     * @returns {void}
+     */
+    unsubscribe() {
+      this.Router.unsubscribe();
+    }
+    /**
      * ## addEventListeners：绑定 Worker 事件监听器
      *
      * 当前 Worker 未使用，此方法保留备用。
@@ -11155,46 +11381,6 @@ var tetris = (() => {
       this.workerBusy = false;
       console.error("AI Worker Error:", err);
       this.worker = null;
-    };
-    /**
-     * ## subscribe：订阅 AI 事件
-     *
-     * @returns {void}
-     */
-    subscribe() {
-      const { Game: Game2 } = this;
-      const events = AIEvents(Game2.id);
-      this.on(events.START, this._onStart);
-      this.on(events.STOP, this._onStop);
-    }
-    /**
-     * ## unsubscribe：取消订阅 AI 事件
-     *
-     * @returns {void}
-     */
-    unsubscribe() {
-      const { Game: Game2 } = this;
-      const events = AIEvents(Game2.id);
-      this.off(events.START, this._onStart);
-      this.off(events.STOP, this._onStop);
-    }
-    /**
-     * ## _onStart：处理 AI 启动事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onStart = () => {
-      this.start();
-    };
-    /**
-     * ## _onStop：处理 AI 停止事件
-     *
-     * @private
-     * @returns {void}
-     */
-    _onStop = () => {
-      this.stop();
     };
     /**
      * ## destroy：销毁 AI 的相关数据
@@ -16945,133 +17131,124 @@ var tetris = (() => {
   var Engine = {
     // ==================== 静态属性 ====================
     /**
-     * ## requestAnimationFrame 的 ID
+     * RequestAnimationFrame 的 ID。
      *
-     * 用于取消游戏循环。当值为 0 或 null 时表示循环已停止。 在 stop() 中通过 cancelAnimationFrame
-     * 取消，start() 中重新赋值。
+     * 用于取消游戏循环。当值为 0 或 null 时表示循环已停止。
      *
      * @type {number | null}
      */
     rafId: null,
     /**
-     * ## 时间累积器（逻辑时间基准）
+     * 时间累积器（逻辑时间基准）。
      *
-     * 用于固定时间步长（fixed update / tick）。 每帧更新为当前 timestamp，用于追踪全局时间流逝。
+     * 用于固定时间步长（fixed update / tick）。
      *
      * @default 0
      * @type {number}
      */
     fixedAccumulator: 0,
     /**
-     * ## 上一帧的时间戳
+     * 上一帧的时间戳。
      *
-     * 用于计算 delta time 和回放时间。 在 tick 开始时更新，_onDispatchInput 中用于计算回放时间偏移。
+     * 用于计算 delta time 和回放时间。
      *
      * @default 0
      * @type {number}
      */
     lastTickTime: 0,
     /**
-     * ## 引擎全局状态管理器
+     * 引擎全局状态管理器。
      *
-     * 管理游戏模式（single / versus）、玩家列表、对战目标分数、 方块渲染风格等全局配置。替代原来的静态 Configuration 对象，
-     * 支持运行时动态修改配置。
-     *
-     * 在 initialize() 中创建，destroy() 中置 null。
+     * 管理游戏模式、玩家列表、对战目标分数、方块渲染风格等全局配置。 在 initialize() 中创建，destroy() 中置 null。
      *
      * @type {EngineStore | null}
      */
     Store: null,
     /**
-     * ## 引擎界面渲染器
+     * 引擎界面渲染器。
      *
-     * 根据 EngineStore 中的配置动态生成完整的游戏 DOM 界面。 包括棋盘 Canvas、HUD 元素、手柄按钮等。
-     *
-     * 在 initialize() 中创建，destroy() 中销毁并置 null。
+     * 根据 EngineStore 中的配置动态生成完整的游戏 DOM 界面。 在 initialize() 中创建，destroy() 中销毁并置
+     * null。
      *
      * @type {EngineRenderer | null}
      */
     Renderer: null,
     /**
-     * ## 任务调度器实例
+     * 引擎事件路由器。
      *
-     * 管理 delay / interval / sequence 等定时任务。 是所有时间驱动逻辑的核心，包括 AI 的决策循环。
+     * 负责订阅和分发引擎级别的全局事件。 在 initialize() 中创建，destroy() 中置 null。
      *
-     * 在 initialize() 中创建，destroy() 中置 null。
+     * @type {EngineRouter | null}
+     */
+    Router: null,
+    /**
+     * 任务调度器实例。
      *
-     * @default null
+     * 管理 delay / interval / sequence 等定时任务， 是所有时间驱动逻辑的核心，包括 AI 的决策循环。 在
+     * initialize() 中创建，destroy() 中置 null。
+     *
      * @type {Scheduler | null}
      */
     Scheduler: null,
     /**
-     * ## 音频系统实例
+     * 音频系统实例。
      *
      * 管理背景音乐和音效的播放、切换。 在 initialize() 中创建，destroy() 中置 null。
      *
-     * @default null
      * @type {Audio | null}
      */
     Audio: null,
     /**
-     * ## 游戏主控实例数组
+     * 游戏主控实例数组。
      *
-     * 单人模式包含 1 个 Game 实例，对战模式包含 2 个。 每个 Game 管理独立的状态、输入、UI、回放等子系统。
+     * 单人模式包含 1 个 Game 实例，对战模式包含 2 个。 每个 Game 管理独立的状态、输入、UI、回放等子系统。 在 initialize()
+     * 中创建，destroy() 中清空。
      *
-     * 在 initialize() 中通过遍历 finalPlayers 创建，destroy() 中清空。
-     *
-     * @default [ ]
      * @type {Game[]}
      */
     Games: [],
     /**
-     * ## 对战控制器实例
+     * 对战控制器实例。
      *
-     * 仅在对战模式（versus）下创建。 管理双方的攻击计算、垃圾行发送、计分和胜负判定。
+     * 仅在对战模式（versus）下创建。 在 initialize() 中有条件创建，destroy() 中随 Games 清空。
      *
-     * 在 initialize() 中有条件创建，destroy() 中随 Games 清空。
-     *
-     * @default null
      * @type {BattleController | null}
      */
     Battle: null,
     /**
-     * ## 每个 Game 实例的时间累积器
+     * 每个 Game 实例的时间累积器。
      *
-     * Map<Game, timestamp>，用于独立控制每个 Game 的下落速度。 双人对战时两个 Game 可能有不同的速度和状态， 通过此 Map
-     * 各自独立计算下落时机，互不影响。
-     *
-     * 在 tick 首次运行时初始化，stop() 中清空。
+     * Map<Game, timestamp>，用于独立控制每个 Game 的下落速度。 双人对战时两个 Game 各自独立计算下落时机，互不影响。 在
+     * tick 首次运行时初始化，stop() 中清空。
      *
      * @type {Map<Game, number>}
      */
     gameAccumulators: /* @__PURE__ */ new Map(),
     // ==================== 生命周期方法 ====================
     /**
-     * ## 初始化引擎
+     * ## initialize：初始化引擎
      *
-     * 创建 EngineStore、EngineRenderer、Scheduler、Audio、Game 等核心实例，
-     * 并注入相互依赖关系。这是游戏启动的第一步——在所有子系统创建完成后， Game 实例在构造函数中自动完成游戏状态的初始化。
+     * 创建 EngineStore、EngineRenderer、Scheduler、Audio、Game 等核心实例， 并注入相互依赖关系。
      *
      * ### 初始化顺序
      *
-     * | 步骤 | 操作                            | 说明                                       |
-     * | ---- | ------------------------------- | ------------------------------------------ |
-     * | 1    | `new EngineStore(options)`      | 创建全局状态管理器，合并默认配置和传入选项 |
-     * | 2    | `new EngineRenderer({ Store })` | 创建 DOM 界面渲染器                        |
-     * | 3    | `EngineRenderer.render()`       | 绘制游戏的所有 DOM 界面                    |
-     * | 4    | `new Scheduler()`               | 创建全局任务调度器                         |
-     * | 5    | `new Audio(normalizedOptions)`  | 创建音频系统                               |
-     * | 6    | 处理 Players 列表               | Single 模式只保留第一个玩家                |
-     * | 7    | `new Game(...)` × N             | 为每位玩家创建 Game 实例                   |
-     * | 8    | `new BattleController(...)`     | 对战模式下创建对战控制器                   |
+     * | 步骤 | 操作                          | 说明                                       |
+     * | :--- | :---------------------------- | :----------------------------------------- |
+     * | 1    | new EngineStore(options)      | 创建全局状态管理器，合并默认配置和传入选项 |
+     * | 2    | new EngineRenderer({ Store }) | 创建 DOM 界面渲染器                        |
+     * | 3    | EngineRenderer.render()       | 绘制游戏的所有 DOM 界面                    |
+     * | 4    | new Scheduler()               | 创建全局任务调度器                         |
+     * | 5    | new Audio(normalizedOptions)  | 创建音频系统                               |
+     * | 6    | 处理 Players 列表             | Single 模式只保留第一个玩家                |
+     * | 7    | new Game(...) × N             | 为每位玩家创建 Game 实例                   |
+     * | 8    | new BattleController(...)     | 对战模式下创建对战控制器                   |
      *
      * ### Game 实例的自主启动
      *
-     * 每个 Game 实例在构造函数中自动完成全部启动流程： `constructor → initialize() → launch()`， 无需
-     * Engine 额外调用。这确保了 Game 实例创建完毕即可用。
+     * 每个 Game 实例在构造函数中自动完成全部启动流程： constructor → initialize() → launch()，无需 Engine
+     * 额外调用。
      *
-     * @param {object} [options={}] - 配置参数对象，用于覆盖默认的 EngineState。默认 `{}`. Default
-     *   is `{}`
+     * @param {object} [options={}] - 配置参数对象. Default is `{}`
      * @param {boolean} [options.isRelaunch] - 是否为模式切换后的重新启动
      * @returns {void}
      */
@@ -17079,10 +17256,9 @@ var tetris = (() => {
       const { isRelaunch = false } = options;
       const Store = new engine_store_default(options);
       Engine.Store = Store;
-      Engine.Renderer = new engine_renderer_default({
-        Store
-      });
+      Engine.Renderer = new engine_renderer_default({ Store });
       Engine.Renderer.render();
+      Engine.Router = new engine_router_default({ Engine });
       const state = Store.getState();
       const { Players, Mode, Elements } = state;
       Engine.Scheduler = new scheduler_default();
@@ -17100,10 +17276,7 @@ var tetris = (() => {
       for (const [index, player] of finalPlayers.entries()) {
         Engine.Games.push(
           new game_default2({
-            Player: {
-              index,
-              name: player
-            },
+            Player: { index, name: player },
             ...normalizedOptions
           })
         );
@@ -17117,19 +17290,11 @@ var tetris = (() => {
       }
     },
     /**
-     * ## 启动游戏（完整初始化流程）
+     * ## launch：启动游戏（完整初始化流程）
      *
-     * 执行完整的游戏启动流程：
+     * 这是游戏启动的唯一入口，外部只需调用 Engine.launch() 即可。
      *
-     * | 步骤 | 操作                         | 说明                                                              |
-     * | ---- | ---------------------------- | ----------------------------------------------------------------- |
-     * | 1    | `Engine.initialize(options)` | 创建所有子系统（Store、Renderer、Scheduler、Audio、Game、Battle） |
-     * | 2    | `Engine.subscribe()`         | 订阅各模块事件（Engine、Audio、Game、Battle）                     |
-     * | 3    | `Engine.start()`             | 启动 RAF 游戏主循环                                               |
-     *
-     * 这是游戏启动的唯一入口，外部只需调用 `Engine.launch()` 即可。
-     *
-     * @param {object} [options={}] - 配置参数对象。默认 `{}`. Default is `{}`
+     * @param {object} [options={}] - 配置参数对象. Default is `{}`
      * @returns {void}
      */
     launch: (options = {}) => {
@@ -17139,40 +17304,39 @@ var tetris = (() => {
     },
     // ==================== 游戏主循环 ====================
     /**
-     * # 带速度控制的游戏主循环（Game Loop）
+     * ## tick：带速度控制的游戏主循环
      *
-     * 使用 `requestAnimationFrame` 驱动的核心渲染循环， 控制游戏的下落节奏、输入处理、渲染和动画更新。
+     * 使用 requestAnimationFrame 驱动的核心渲染循环， 控制游戏的下落节奏、输入处理、渲染和动画更新。
      *
-     * ## 帧循环流程（每个 Game 实例）
+     * ## 帧循环流程
      *
-     * | 步骤 | 操作                       | 说明                                           |
-     * | ---- | -------------------------- | ---------------------------------------------- |
-     * | 1    | `Scheduler.tick()`         | 驱动调度器，执行到期的定时任务（含 AI loop）   |
-     * | 2    | `Replay.syncPlayElapsed()` | 同步回放逻辑时钟                               |
-     * | 3    | `Replay.update()`          | 更新回放系统，注入待重放的命令                 |
-     * | 4    | `Gamepad.update()`         | 更新手柄输入状态                               |
-     * | 5    | `Keyboard.update()`        | 更新键盘输入状态                               |
-     * | 6    | `CommandQueue.flush()`     | 执行命令队列中的所有待执行命令                 |
-     * | 7    | `Game.tick()`              | 执行游戏逻辑（下落/碰撞/消行），按速度间隔执行 |
-     * | 8    | `Animations.flush()`       | 合并/清理动画队列，移除已完成的动画            |
-     * | 9    | `UI.tickHud()`             | 更新 HUD 动画（分数跳动、连击显示）            |
-     * | 10   | `UI.render()`              | 渲染游戏画面（棋盘、方块、ghost、网格）        |
-     * | 11   | `Animations.render()`      | 叠加渲染动画特效（消行、升级、垃圾行预警等）   |
-     * | 12   | `requestAnimationFrame()`  | 请求下一帧，形成循环                           |
+     * | 步骤 | 操作                     | 说明                                           |
+     * | :--- | :----------------------- | :--------------------------------------------- |
+     * | 1    | Scheduler.tick()         | 驱动调度器，执行到期的定时任务（含 AI loop）   |
+     * | 2    | Replay.syncPlayElapsed() | 同步回放逻辑时钟                               |
+     * | 3    | Replay.update()          | 更新回放系统，注入待重放的命令                 |
+     * | 4    | Gamepad.update()         | 更新手柄输入状态                               |
+     * | 5    | Keyboard.update()        | 更新键盘输入状态                               |
+     * | 6    | CommandQueue.flush()     | 执行命令队列中的所有待执行命令                 |
+     * | 7    | Game.tick()              | 执行游戏逻辑（下落/碰撞/消行），按速度间隔执行 |
+     * | 8    | Animations.flush()       | 合并/清理动画队列，移除已完成的动画            |
+     * | 9    | UI.tickHud()             | 更新 HUD 动画（分数跳动、连击显示）            |
+     * | 10   | UI.render()              | 渲染游戏画面（棋盘、方块、ghost、网格）        |
+     * | 11   | Animations.render()      | 叠加渲染动画特效（消行、升级、垃圾行预警等）   |
+     * | 12   | requestAnimationFrame()  | 请求下一帧，形成循环                           |
      *
      * ## 固定时间步长
      *
-     * 游戏逻辑（下落）不是每帧都执行，而是根据当前等级的速度 （`Game.getSpeed()`）来控制执行频率：
+     * 游戏逻辑（下落）不是每帧都执行，而是根据当前等级的速度来控制执行频率：
      *
      * - 低等级时速度慢，下落间隔大（约 1000ms）
      * - 高等级时速度快，下落间隔小（最低 120ms）
      *
      * ## 双人对战
      *
-     * 每个 Game 使用独立的时间累积器（gameAccumulators Map）， 两个 Game 各自独立计算下落时机，互不影响。 P1 可能等级
-     * 5（快），P2 可能等级 2（慢），各自按自己的节奏下落。
+     * 每个 Game 使用独立的时间累积器（gameAccumulators Map）， 两个 Game 各自独立计算下落时机，互不影响。
      *
-     * @param {number} timestamp - RequestAnimationFrame 传入的当前时间戳（毫秒）
+     * @param {number} timestamp - 当前时间戳（毫秒）
      * @returns {void}
      */
     tick: (timestamp) => {
@@ -17193,15 +17357,9 @@ var tetris = (() => {
     },
     // ==================== 事件订阅管理 ====================
     /**
-     * ## 订阅各模块事件
+     * ## subscribe：订阅各模块事件
      *
      * 依次订阅 Engine 自身、Audio 音频系统、所有 Game 实例、 BattleController 的事件。在 launch 时调用一次。
-     *
-     * ### 订阅的内容
-     *
-     * - Engine._subscribe()：dispatch:command / dispatch:input + 全局 engine 事件
-     * - Audio.subscribe()：背景音乐、音效播放事件
-     * - Battle.subscribe()（对战模式）：攻击、垃圾行、胜负判定事件
      *
      * @returns {void}
      */
@@ -17214,9 +17372,9 @@ var tetris = (() => {
       }
     },
     /**
-     * ## 取消订阅各模块事件
+     * ## unsubscribe：取消订阅各模块事件
      *
-     * 取消所有已订阅的事件，在 destroy 时调用。 防止内存泄漏和误触发。
+     * 取消所有已订阅的事件，在 destroy 时调用，防止内存泄漏和误触发。
      *
      * @returns {void}
      */
@@ -17229,26 +17387,16 @@ var tetris = (() => {
       }
     },
     /**
-     * ## Engine 内部事件订阅
+     * ## _subscribe：Engine 内部事件订阅
      *
-     * 为每个 Game 实例订阅 `dispatch:command` 和 `dispatch:input` 两个核心事件，
-     * 它们是整个输入系统的入口。同时订阅全局 engine 事件（模式切换相关）。
-     *
-     * ### 事件名格式
-     *
-     * - `game:<uuid>:dispatch:command` — 命令执行事件
-     * - `game:<uuid>:dispatch:input` — 输入事件
-     * - `engine:update:mode` — 模式更新事件
-     * - `engine:update:players` — 玩家配置更新事件
-     * - `engine:start` — 启动/重启动事件
-     * - `engine:exit` — 退出事件
+     * 为每个 Game 实例订阅 dispatch:command 和 dispatch:input 两个核心事件， 它们是整个输入系统的入口。同时通过
+     * Router 订阅全局 engine 事件。
      *
      * ### Battle 模式事件隔离
      *
      * Dispatch:command 和 dispatch:input 事件名使用 Game 的 UUID：
-     * `game:<uuid>:dispatch:command` / `game:<uuid>:dispatch:input`。 这确保 Battle
-     * 模式下两个 Game 实例的输入事件不会互相干扰。 AI 的 AIController.loop() 使用
-     * `GameEvents(Game.id).DISPATCH_INPUT` 发送事件。
+     * game:<uuid>:dispatch:command / game:<uuid>:dispatch:input。 这确保 Battle 模式下两个
+     * Game 实例的输入事件不会互相干扰。
      *
      * @private
      * @returns {void}
@@ -17260,16 +17408,12 @@ var tetris = (() => {
         Game2.on(events.DISPATCH_COMMAND, Engine._onDispatchCommand);
         Game2.on(events.DISPATCH_INPUT, Engine._onDispatchInput);
       }
-      event_bus_default.on("engine:update:mode", Engine._onUpdateMode);
-      event_bus_default.on("engine:update:players", Engine._onUpdatePlayers);
-      event_bus_default.on("engine:start", Engine._onStart);
-      event_bus_default.on("engine:exit", Engine._onExit);
+      Engine.Router.subscribe();
     },
     /**
-     * ## Engine 内部事件取消订阅
+     * ## _unsubscribe：Engine 内部事件取消订阅
      *
-     * 取消 `dispatch:command`、`dispatch:input` 和全局 `engine:*` 事件的监听。 在 destroy
-     * 或模式切换时调用。
+     * 取消 dispatch:command、dispatch:input 和全局 engine:* 事件的监听。
      *
      * @private
      * @returns {void}
@@ -17281,36 +17425,16 @@ var tetris = (() => {
         Game2.off(events.DISPATCH_COMMAND, Engine._onDispatchCommand);
         Game2.off(events.DISPATCH_INPUT, Engine._onDispatchInput);
       }
-      event_bus_default.off("engine:update:mode", Engine._onUpdateMode);
-      event_bus_default.off("engine:update:players", Engine._onUpdatePlayers);
-      event_bus_default.off("engine:start", Engine._onStart);
-      event_bus_default.off("engine:exit", Engine._onExit);
+      Engine.Router.unsubscribe();
     },
     // ==================== 事件处理器 ====================
     /**
-     * ## 命令分发处理器
+     * ## _onDispatchCommand：命令分发处理器
      *
-     * 处理命令的执行。检查当前是否有阻塞动画， 注入阻塞状态后交由 dispatchCommand 处理。
-     *
-     * ### 阻塞动画列表
-     *
-     * 以下动画播放期间命令执行可能被限制：
-     *
-     * - `clear-lines`：消行动画播放中，不允许新的方块操作
-     * - `countdown`：倒计时动画播放中，不允许任何操作
-     * - `level-up`：升级特效播放中，不允许新的方块操作
-     *
-     * ### 处理流程
-     *
-     * 1. 从 cmd.payload 中提取 Game 实例
-     * 2. 通过 Animations.hasBlocking() 检查阻塞状态
-     * 3. 将 isBlocked 注入 payload
-     * 4. 调用 dispatchCommand(cmd, { mode }) 路由到对应处理器
+     * 检查当前是否有阻塞动画（消行、倒计时、升级）， 注入阻塞状态后交由 dispatchCommand 处理。
      *
      * @private
      * @param {object} cmd - 命令对象
-     * @param {object} cmd.payload - 命令负载
-     * @param {object} cmd.payload.Game - 目标 Game 实例
      * @returns {void}
      */
     _onDispatchCommand: (cmd) => {
@@ -17326,27 +17450,12 @@ var tetris = (() => {
       dispatch_command_default(cmd, { mode });
     },
     /**
-     * ## 输入分发处理器
+     * ## _onDispatchInput：输入分发处理器
      *
      * 处理键盘、手柄、AI 等实时输入。 检查阻塞动画状态，计算回放时间戳，交由 dispatchInput 处理。
      *
-     * ### 阻塞动画列表
-     *
-     * - `clear-lines`：消行动画播放中，输入被忽略
-     * - `countdown`：倒计时动画播放中，输入被忽略
-     * - `level-up`：升级特效播放中，输入被忽略
-     *
-     * ### 处理流程
-     *
-     * 1. 从 input.payload 中提取 Game 实例
-     * 2. 通过 Animations.hasBlocking() 检查阻塞状态
-     * 3. 计算回放时间偏移：`ms = lastTickTime - Replay.startTime`
-     * 4. 调用 dispatchInput(input, { isBlocked, ms }) 分发输入
-     *
      * @private
      * @param {object} input - 输入对象
-     * @param {object} input.payload - 输入负载
-     * @param {object} input.payload.Game - 目标 Game 实例
      * @returns {void}
      */
     _onDispatchInput: (input) => {
@@ -17361,98 +17470,9 @@ var tetris = (() => {
       const ms = Engine.lastTickTime - Replay.startTime;
       dispatch_input_default(input, { isBlocked, ms });
     },
-    /**
-     * ## 处理模式更新事件
-     *
-     * 当用户在模式选择界面确认选择后触发。 更新 EngineStore 中的 Mode（'single' | 'versus'）。
-     *
-     * 事件名：`engine:update:mode`
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {string} payload.mode - 游戏模式（'single' | 'versus'）
-     * @returns {void}
-     */
-    _onUpdateMode: (payload) => {
-      const { mode } = payload;
-      Engine.Store.setMode(mode);
-    },
-    /**
-     * ## 处理玩家配置更新事件
-     *
-     * 当用户在模式选择界面确认选择后触发。 更新 EngineStore 中的 Players 数组。
-     *
-     * 事件名：`engine:update:players`
-     *
-     * @private
-     * @param {object} payload - 事件参数
-     * @param {string[]} payload.players - 玩家名称数组（如 ['human', 'ai']）
-     * @returns {void}
-     */
-    _onUpdatePlayers: (payload) => {
-      const { players } = payload;
-      Engine.Store.setPlayers(players);
-    },
-    /**
-     * ## 处理启动事件（模式切换重启动）
-     *
-     * 销毁当前所有子系统，使用新的配置重新启动引擎。
-     *
-     * ### 执行流程
-     *
-     * 1. `structuredClone(Store.getState())` — 深拷贝当前 Store 状态
-     * 2. 如果 `isRelaunch = false`（退出到主菜单），强制 `Mode = 'single'`
-     * 3. `Engine.destroy()` — 销毁当前引擎实例（停止循环、取消订阅、清理资源）
-     * 4. `Engine.launch(cloned)` — 使用新配置重新启动
-     *
-     * ### 使用场景
-     *
-     * - 模式切换（Single ↔ Versus）：isRelaunch = true
-     * - 退出到主菜单：isRelaunch = false
-     *
-     * 事件名：`engine:start`
-     *
-     * @private
-     * @param {object} [options={}] - 事件参数。默认 `{}`. Default is `{}`
-     * @param {boolean} [options.isRelaunch=true] - 是否为模式切换重启动。默认 `true`. Default
-     *   is `true`
-     * @returns {void}
-     */
-    _onStart: (options = {}) => {
-      const { isRelaunch = true } = options;
-      const cloned = structuredClone({
-        ...Engine.Store.getState(),
-        isRelaunch
-      });
-      if (!isRelaunch) {
-        cloned.Mode = "single";
-      }
-      Engine.destroy();
-      Engine.launch(cloned);
-    },
-    /**
-     * ## 处理退出事件
-     *
-     * 从对战模式退出到单人模式选择界面。 重置 Store 状态并重新启动。
-     *
-     * ### 执行流程
-     *
-     * 1. `Store.reset()` — 重置 Store 到默认 EngineState 配置
-     * 2. `_onStart({ isRelaunch: false })` — 以单人模式重新启动
-     *
-     * 事件名：`engine:exit`
-     *
-     * @private
-     * @returns {void}
-     */
-    _onExit: () => {
-      const { Store } = Engine;
-      Store.reset();
-      Engine._onStart({ isRelaunch: false, Mode: "single" });
-    },
     // ==================== 循环控制 ====================
     /**
-     * ## 启动游戏主循环
+     * ## start：启动游戏主循环
      *
      * 使用 requestAnimationFrame 启动渲染循环。
      * 第一帧会初始化时间基准（lastTickTime、gameAccumulators）。
@@ -17463,15 +17483,9 @@ var tetris = (() => {
       Engine.rafId = requestAnimationFrame(Engine.tick);
     },
     /**
-     * ## 停止游戏循环
+     * ## stop：停止游戏循环
      *
      * 取消 requestAnimationFrame 回调，重置时间状态。 在暂停、销毁或模式切换时调用。
-     *
-     * ### 重置的状态
-     *
-     * - `rafId`：置 0
-     * - `lastTickTime`：置 0（避免恢复时出现跳帧/加速）
-     * - `gameAccumulators`：清空 Map（避免恢复时累积器残留）
      *
      * @returns {void}
      */
@@ -17485,7 +17499,7 @@ var tetris = (() => {
       Engine.gameAccumulators?.clear?.();
     },
     /**
-     * ## 重启游戏循环
+     * ## restart：重启游戏循环
      *
      * 停止当前循环后重新启动。 用于从暂停恢复或浏览器标签页切回时重置时间基准。
      *
@@ -17496,21 +17510,9 @@ var tetris = (() => {
       Engine.start();
     },
     /**
-     * ## 销毁引擎
+     * ## destroy：销毁引擎
      *
-     * 清理所有资源，将引擎恢复到初始状态。
-     *
-     * ### 清理步骤
-     *
-     * | 步骤 | 操作                   | 说明                                      |
-     * | ---- | ---------------------- | ----------------------------------------- |
-     * | 1    | `Engine.stop()`        | 停止游戏循环                              |
-     * | 2    | `Engine.unsubscribe()` | 取消所有事件订阅                          |
-     * | 3    | `Game.destroy()` × N   | 移除每个 Game 的输入设备监听和事件订阅    |
-     * | 4    | 重置引用               | Audio、Scheduler、Games、Store 置 null/[] |
-     * | 5    | `Renderer.destroy()`   | 销毁 DOM 界面渲染器                       |
-     *
-     * 通常在模式切换或完全退出游戏时调用。
+     * 清理所有资源，将引擎恢复到初始状态。 通常在模式切换或完全退出游戏时调用。
      *
      * @returns {void}
      */
@@ -17525,6 +17527,7 @@ var tetris = (() => {
       Engine.Scheduler = null;
       Engine.Games = [];
       Engine.Store = null;
+      Engine.Router = null;
       Engine.Renderer.destroy();
       Engine.Renderer = null;
     }
