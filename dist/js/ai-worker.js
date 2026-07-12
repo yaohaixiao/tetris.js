@@ -2,9 +2,8 @@
 var rotateMatrix = (matrix) => {
   const rows = matrix.length;
   const cols = matrix[0].length;
-  const next = Array.from(
-    { length: cols },
-    () => Array.from({ length: rows }).fill(0)
+  const next = Array.from({ length: cols }, () =>
+    Array.from({ length: rows }).fill(0),
   );
   for (let y = 0; y < rows; y += 1) {
     for (let x = 0; x < cols; x += 1) {
@@ -70,7 +69,7 @@ var simulateDrop = (board, shape, startX) => {
   };
   return {
     y,
-    placeOn
+    placeOn,
   };
 };
 var simulate_drop_default = simulateDrop;
@@ -78,7 +77,7 @@ var simulate_drop_default = simulateDrop;
 // lib/ai/planner/utils/add-rotate-actions.js
 var addRotateActions = (actions, count) => {
   for (let i = 0; i < count; i++) {
-    actions.push("ROTATE");
+    actions.push('ROTATE');
   }
 };
 var add_rotate_actions_default = addRotateActions;
@@ -86,7 +85,7 @@ var add_rotate_actions_default = addRotateActions;
 // lib/ai/planner/utils/add-move-actions.js
 var addMoveActions = (actions, delta) => {
   if (delta === 0) return;
-  const moveDirection = delta > 0 ? "MOVE_RIGHT" : "MOVE_LEFT";
+  const moveDirection = delta > 0 ? 'MOVE_RIGHT' : 'MOVE_LEFT';
   const moveCount = Math.abs(delta);
   for (let i = 0; i < moveCount; i++) {
     actions.push(moveDirection);
@@ -99,7 +98,7 @@ var buildActionSequence = ({ rotationCount, targetX, originalX }) => {
   const actions = [];
   add_rotate_actions_default(actions, rotationCount);
   add_move_actions_default(actions, targetX - originalX);
-  actions.push("DROP");
+  actions.push('DROP');
   return actions;
 };
 var build_action_sequence_default = buildActionSequence;
@@ -110,19 +109,19 @@ var createCandidate = ({
   currentShape,
   targetX,
   originalPiece,
-  rotationCount
+  rotationCount,
 }) => {
   const { y, placeOn } = simulate_drop_default(board, currentShape, targetX);
   const actions = build_action_sequence_default({
     rotationCount,
     targetX,
-    originalX: originalPiece.position.x
+    originalX: originalPiece.position.x,
   });
   return {
     x: targetX,
     y,
     placeOn,
-    actions
+    actions,
   };
 };
 var create_candidate_default = createCandidate;
@@ -131,11 +130,11 @@ var create_candidate_default = createCandidate;
 var generateForPiece = (board, pieceData, isHold = false) => {
   const moves = [];
   let currentShape = pieceData.shape;
-  const type = pieceData.type || "";
+  const type = pieceData.type || '';
   let uniqueRotations = 4;
-  if (type === "O") {
+  if (type === 'O') {
     uniqueRotations = 1;
-  } else if (type === "I" || type === "I5") {
+  } else if (type === 'I' || type === 'I5') {
     uniqueRotations = 2;
   }
   for (let rotation = 0; rotation < uniqueRotations; rotation++) {
@@ -146,10 +145,10 @@ var generateForPiece = (board, pieceData, isHold = false) => {
         currentShape,
         targetX,
         originalPiece: pieceData,
-        rotationCount: rotation
+        rotationCount: rotation,
       });
       if (isHold) {
-        candidate.actions = ["HOLD", ...candidate.actions];
+        candidate.actions = ['HOLD', ...candidate.actions];
       }
       moves.push(candidate);
     }
@@ -168,9 +167,11 @@ var generateMoves = (snapshot) => {
     const holdPiece = {
       shape: holdPieceSource.shape,
       position: {
-        x: Math.floor(board[0].length / 2) - Math.floor(holdPieceSource.shape[0].length / 2),
-        y: 0
-      }
+        x:
+          Math.floor(board[0].length / 2) -
+          Math.floor(holdPieceSource.shape[0].length / 2),
+        y: 0,
+      },
     };
     moves.push(...generate_for_piece_default(board, holdPiece, true));
   }
@@ -207,16 +208,16 @@ var countHoles = (board) => {
 var count_holes_default = countHoles;
 
 // lib/ai/simulator/evaluate-board.js
-var evaluateBoard = (board, weights, clearResult, mode = "survival") => {
+var evaluateBoard = (board, weights, clearResult, mode = 'survival') => {
   const heights = [];
   const w = {
     holes: -8,
     height: -0.7,
     bumpiness: -0.35,
     completeLines: 20,
-    ...weights
+    ...weights,
   };
-  if (mode === "versus") {
+  if (mode === 'versus') {
     w.height = -0.8;
     w.holes = -9;
     w.bumpiness = -0.4;
@@ -239,7 +240,12 @@ var evaluateBoard = (board, weights, clearResult, mode = "survival") => {
   const lineRewards = [0, 2, 6, 12, 40, 80];
   const linesCleared = clearResult ? clearResult.cleared : 0;
   const lineReward = lineRewards[linesCleared] || 0;
-  const staticScore = aggregateHeight * w.height + maxHeightPenalty + holes * w.holes + bumpiness * w.bumpiness + lineReward * (w.completeLines / 4);
+  const staticScore =
+    aggregateHeight * w.height +
+    maxHeightPenalty +
+    holes * w.holes +
+    bumpiness * w.bumpiness +
+    lineReward * (w.completeLines / 4);
   let scoreBonus = 0;
   if (clearResult) {
     scoreBonus += clearResult.clearScore * 0.03;
@@ -256,7 +262,7 @@ var evaluateBoard = (board, weights, clearResult, mode = "survival") => {
     }
     scoreBonus += clearResult.combo * 0.8;
   }
-  if (mode === "versus") {
+  if (mode === 'versus') {
     const garbageMap = [0, 0, 1, 2, 3, 4];
     const attackLines = garbageMap[linesCleared] || 0;
     const attackScores = [0, 0, 10, 25, 50, 80];
@@ -290,11 +296,11 @@ var simulate_placement_default = simulatePlacement;
 
 // lib/game/constants/game.js
 var AI_ALLOWED_ACTIONS = [
-  "SWITCH_CONTROLLER",
-  "TOGGLE_MUSIC",
-  "TOGGLE_PAUSED",
-  "RESTART",
-  "QUIT"
+  'SWITCH_CONTROLLER',
+  'TOGGLE_MUSIC',
+  'TOGGLE_PAUSED',
+  'RESTART',
+  'QUIT',
 ];
 var CLEAR_LINE_SCORES = [0, 100, 300, 500, 800, 1200];
 var FONT_FAMILY = `"Press Start 2P", monospace, sans-serif`;
@@ -303,7 +309,7 @@ var SPEED_STEPS = {
   EASY: 0.6,
   NORMAL: 0.4,
   HARD: 0.2,
-  EXPERT: 0.1
+  EXPERT: 0.1,
 };
 var ALL_CLEAR_SCORE = 2e3;
 var T_SPIN_SCORES = [400, 800, 1200, 1600];
@@ -316,13 +322,16 @@ var GAME = {
   SPEED_STEPS,
   ALL_CLEAR_SCORE,
   T_SPIN_SCORES,
-  T_SPIN_MINI_SCORES
+  T_SPIN_MINI_SCORES,
 };
 var game_default = GAME;
 
 // lib/game/utils/get-t-spin-score.js
 var getTSpinScore = (cleared, isTSpin, isTSpinMini) => {
-  const { T_SPIN_SCORES: T_SPIN_SCORES2, T_SPIN_MINI_SCORES: T_SPIN_MINI_SCORES2 } = game_default;
+  const {
+    T_SPIN_SCORES: T_SPIN_SCORES2,
+    T_SPIN_MINI_SCORES: T_SPIN_MINI_SCORES2,
+  } = game_default;
   if (isTSpin) {
     return T_SPIN_SCORES2[cleared] || 0;
   }
@@ -336,7 +345,9 @@ var get_t_spin_score_default = getTSpinScore;
 // lib/ai/simulator/simulate-clear-result.js
 var simulateClearResult = (board, snapshot, actualCleared) => {
   const { CLEAR_LINE_SCORES: CLEAR_LINE_SCORES2 } = game_default;
-  const cleared = actualCleared ?? board.filter((row) => row.every((cell) => cell !== 0)).length;
+  const cleared =
+    actualCleared ??
+    board.filter((row) => row.every((cell) => cell !== 0)).length;
   const { isTSpin = false, isTSpinMini = false } = snapshot.tSpin || {};
   if (cleared === 0 && !isTSpin && !isTSpinMini) {
     return null;
@@ -348,9 +359,11 @@ var simulateClearResult = (board, snapshot, actualCleared) => {
   const multiplier = isBackToBack ? 1.5 : 1;
   const combo = (snapshot.combo || 0) + 1;
   const comboScore = combo > 1 ? (combo - 1) * 50 : 0;
-  const isAllClear = cleared > 0 && board.every((row) => row.every((c) => c === 0));
+  const isAllClear =
+    cleared > 0 && board.every((row) => row.every((c) => c === 0));
   const allClearScore = isAllClear ? 2e3 : 0;
-  const clearScore = Math.floor(baseScore * multiplier) + comboScore + allClearScore;
+  const clearScore =
+    Math.floor(baseScore * multiplier) + comboScore + allClearScore;
   return {
     cleared,
     baseScore,
@@ -362,7 +375,7 @@ var simulateClearResult = (board, snapshot, actualCleared) => {
     isAllClear,
     combo,
     comboScore,
-    allClearScore
+    allClearScore,
   };
 };
 var simulate_clear_result_default = simulateClearResult;
@@ -383,22 +396,29 @@ var advanceSnapshot = (snapshot, move) => {
     snapshot.board,
     snapshot.piece.shape,
     move.x ?? snapshot.piece.position.x,
-    move.y
+    move.y,
   );
-  const beforeCleared = snapshot.board.filter(
-    (row) => row.every((c) => c !== 0)
+  const beforeCleared = snapshot.board.filter((row) =>
+    row.every((c) => c !== 0),
   ).length;
   const afterTotal = board.filter((row) => row.every((c) => c !== 0)).length;
   const newCleared = afterTotal - beforeCleared;
   const clearedBoard = clear_full_lines_default(board);
-  const clearResult = simulate_clear_result_default(clearedBoard, snapshot, newCleared);
+  const clearResult = simulate_clear_result_default(
+    clearedBoard,
+    snapshot,
+    newCleared,
+  );
   const bag = snapshot.bag ? [...snapshot.bag] : [];
-  const nextPiece = bag.length > 0 ? bag.shift() : snapshot.next || {
-    shape: [[1, 1, 1, 1]],
-    type: "I",
-    rotation: 0,
-    colorIndex: 0
-  };
+  const nextPiece =
+    bag.length > 0
+      ? bag.shift()
+      : snapshot.next || {
+          shape: [[1, 1, 1, 1]],
+          type: 'I',
+          rotation: 0,
+          colorIndex: 0,
+        };
   let nextNext = null;
   if (bag.length > 0) {
     nextNext = bag.shift();
@@ -407,8 +427,8 @@ var advanceSnapshot = (snapshot, move) => {
     shape: nextPiece.shape,
     position: {
       x: Math.floor(10 / 2) - Math.floor(nextPiece.shape[0].length / 2),
-      y: 0
-    }
+      y: 0,
+    },
   };
   return {
     ...snapshot,
@@ -420,32 +440,36 @@ var advanceSnapshot = (snapshot, move) => {
     combo: clearResult ? clearResult.combo : 0,
     backToBack: clearResult ? clearResult.isBigMove : snapshot.backToBack,
     tSpin: null,
-    clearResult: clearResult || null
+    clearResult: clearResult || null,
   };
 };
 var advance_snapshot_default = advanceSnapshot;
 
 // lib/ai/planner/self-play.js
-var selfPlay = (snapshot, weights, depth = 1, beam = 5, mode = "survival") => {
+var selfPlay = (snapshot, weights, depth = 1, beam = 5, mode = 'survival') => {
   const moves = generate_moves_default(snapshot);
   if (moves.length === 0) {
     return null;
   }
-  const baseCleared = snapshot.board.filter(
-    (row) => row.every((c) => c !== 0)
+  const baseCleared = snapshot.board.filter((row) =>
+    row.every((c) => c !== 0),
   ).length;
   if (depth > 1 && moves.length > beam) {
     const scored = moves.map((move) => {
       const board = clone_board_default(snapshot.board);
       move.placeOn(board);
-      const afterTotal = board.filter(
-        (row) => row.every((c) => c !== 0)
+      const afterTotal = board.filter((row) =>
+        row.every((c) => c !== 0),
       ).length;
       const newCleared = afterTotal - baseCleared;
       const afterBoard = clear_full_lines_default(board);
-      const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
+      const result = simulate_clear_result_default(
+        afterBoard,
+        snapshot,
+        newCleared,
+      );
       let score = evaluate_board_default(afterBoard, weights, result, mode);
-      if (move.actions.includes("HOLD")) {
+      if (move.actions.includes('HOLD')) {
         score += 2;
       }
       return { move, score };
@@ -462,7 +486,11 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5, mode = "survival") => {
     const afterTotal = board.filter((row) => row.every((c) => c !== 0)).length;
     const newCleared = afterTotal - baseCleared;
     const afterBoard = clear_full_lines_default(board);
-    const result = simulate_clear_result_default(afterBoard, snapshot, newCleared);
+    const result = simulate_clear_result_default(
+      afterBoard,
+      snapshot,
+      newCleared,
+    );
     let score;
     if (depth <= 1) {
       score = evaluate_board_default(afterBoard, weights, result, mode);
@@ -470,20 +498,25 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5, mode = "survival") => {
       const nextSnapshot = advance_snapshot_default(snapshot, move);
       const nextBest = selfPlay(nextSnapshot, weights, depth - 1, beam, mode);
       if (nextBest) {
-        const nextCleared = nextSnapshot.board.filter(
-          (r) => r.every((c) => c !== 0)
+        const nextCleared = nextSnapshot.board.filter((r) =>
+          r.every((c) => c !== 0),
         ).length;
         const nextResult = simulate_clear_result_default(
           nextSnapshot.board,
           nextSnapshot,
-          nextCleared
+          nextCleared,
         );
-        score = evaluate_board_default(nextSnapshot.board, weights, nextResult, mode);
+        score = evaluate_board_default(
+          nextSnapshot.board,
+          weights,
+          nextResult,
+          mode,
+        );
       } else {
         score = evaluate_board_default(afterBoard, weights, result, mode);
       }
     }
-    if (move.actions.includes("HOLD")) {
+    if (move.actions.includes('HOLD')) {
       score += 2;
     }
     if (score > bestScore) {
@@ -496,44 +529,47 @@ var selfPlay = (snapshot, weights, depth = 1, beam = 5, mode = "survival") => {
 var self_play_default = selfPlay;
 
 // lib/ai/snapshot/create-snapshot.js
-var createSnapshot = (state, bag) => structuredClone({
-  controller: state.controller,
-  board: state.board,
-  level: state.level,
-  score: state.score,
-  lines: state.lines,
-  combo: state.combo || 0,
-  backToBack: state.backToBack || false,
-  tSpin: state.tSpin || null,
-  cur: state.curr,
-  next: state.next,
-  piece: state.curr ? {
-    shape: state.curr.shape,
-    position: {
-      x: state.cx,
-      y: state.cy
-    }
-  } : null,
-  mode: state.mode,
-  bag,
-  hold: state.hold || null
-});
+var createSnapshot = (state, bag) =>
+  structuredClone({
+    controller: state.controller,
+    board: state.board,
+    level: state.level,
+    score: state.score,
+    lines: state.lines,
+    combo: state.combo || 0,
+    backToBack: state.backToBack || false,
+    tSpin: state.tSpin || null,
+    cur: state.curr,
+    next: state.next,
+    piece: state.curr
+      ? {
+          shape: state.curr.shape,
+          position: {
+            x: state.cx,
+            y: state.cy,
+          },
+        }
+      : null,
+    mode: state.mode,
+    bag,
+    hold: state.hold || null,
+  });
 var create_snapshot_default = createSnapshot;
 
 // lib/worker/ai-worker.js
-globalThis.addEventListener("message", (e) => {
+globalThis.addEventListener('message', (e) => {
   const { type, bag, state, weights, depth, beam } = e.data;
-  if (type !== "think") {
+  if (type !== 'think') {
     return;
   }
   try {
     const snapshot = create_snapshot_default(state, bag);
     const best = self_play_default(snapshot, weights, depth, beam);
     globalThis.postMessage({
-      type: "result",
-      best: best ? { actions: best.actions, y: best.y } : null
+      type: 'result',
+      best: best ? { actions: best.actions, y: best.y } : null,
     });
   } catch (error) {
-    globalThis.postMessage({ type: "error", error: error.message });
+    globalThis.postMessage({ type: 'error', error: error.message });
   }
 });

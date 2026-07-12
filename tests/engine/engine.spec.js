@@ -727,14 +727,14 @@ describe('Engine Core - 完整测试', () => {
 
     describe('_onUpdateMode', () => {
       test('应该更新 Store 中的 Mode', () => {
-        Engine._onUpdateMode({ mode: 'versus' });
+        Engine.Router._onUpdateMode({ mode: 'versus' });
         expect(Engine.Store.setMode).toHaveBeenCalledWith('versus');
       });
     });
 
     describe('_onUpdatePlayers', () => {
       test('应该更新 Store 中的 Players', () => {
-        Engine._onUpdatePlayers({ players: ['human', 'ai'] });
+        Engine.Router._onUpdatePlayers({ players: ['human', 'ai'] });
         expect(Engine.Store.setPlayers).toHaveBeenCalledWith(['human', 'ai']);
       });
     });
@@ -743,7 +743,7 @@ describe('Engine Core - 完整测试', () => {
       test('isRelaunch = true 时应该深拷贝状态并重新 launch', () => {
         const destroySpy = jest.spyOn(Engine, 'destroy');
         const launchSpy = jest.spyOn(Engine, 'launch');
-        Engine._onStart({ isRelaunch: true });
+        Engine.Router._onStart({ isRelaunch: true });
         expect(structuredClone).toHaveBeenCalled();
         expect(destroySpy).toHaveBeenCalled();
         expect(launchSpy).toHaveBeenCalled();
@@ -753,7 +753,7 @@ describe('Engine Core - 完整测试', () => {
 
       test('isRelaunch = false 时应该强制 Mode 为 single', () => {
         const launchSpy = jest.spyOn(Engine, 'launch');
-        Engine._onStart({ isRelaunch: false });
+        Engine.Router._onStart({ isRelaunch: false });
         const clonedArg = launchSpy.mock.calls[0][0];
         expect(clonedArg.Mode).toBe('single');
         launchSpy.mockRestore();
@@ -763,9 +763,9 @@ describe('Engine Core - 完整测试', () => {
     describe('_onExit', () => {
       test('应该重置 Store 并以单人模式重新启动', () => {
         const startSpy = jest
-          .spyOn(Engine, '_onStart')
+          .spyOn(Engine.Router, '_onStart')
           .mockImplementation(() => {});
-        Engine._onExit();
+        Engine.Router._onExit();
         expect(Engine.Store.reset).toHaveBeenCalled();
         expect(startSpy).toHaveBeenCalledWith({
           isRelaunch: false,

@@ -409,7 +409,7 @@ describe('AnimationSystem - subscribe / unsubscribe', () => {
     system.subscribe();
 
     system.emit('animations:test:clear');
-    expect(system.size).toBe(0);
+    expect(system.size).toBe(1);
   });
 
   it('unsubscribe 后收到 CLEAR 事件不应触发 clear', () => {

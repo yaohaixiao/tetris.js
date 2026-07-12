@@ -1253,18 +1253,18 @@ export const applyGarbage = (board, amount, difficulty) => {
   const holeCount = DIFFICULTY_HOLES[difficulty] || 1;
 
   /**
-   * Create board copy: Uses spread operator to create a shallow copy,
-   * avoiding modification of the original board array. Note: Inner arrays
-   * (rows) will be replaced in subsequent operations.
+   * Create board copy: Uses spread operator to create a shallow copy, avoiding
+   * modification of the original board array. Note: Inner arrays (rows) will be
+   * replaced in subsequent operations.
    */
   const next = [...board];
 
   /**
    * ======== Step 1: Remove rows from the top ========
    *
-   * Simulates the effect of the board moving upward as garbage rows are
-   * pushed in from the bottom. splice(0, amount) deletes amount elements from
-   * the beginning of the array.
+   * Simulates the effect of the board moving upward as garbage rows are pushed
+   * in from the bottom. splice(0, amount) deletes amount elements from the
+   * beginning of the array.
    *
    * For example:
    *
@@ -1307,8 +1307,8 @@ export const applyGarbage = (board, amount, difficulty) => {
      * 4. Set automatically deduplicates, so no two holes will be at the same
      *    position
      *
-     * For example holeCount = 2, width = 10: May generate Set { 3, 7 } →
-     * column 3 and column 7 are holes
+     * For example holeCount = 2, width = 10: May generate Set { 3, 7 } → column
+     * 3 and column 7 are holes
      */
     const holes = new Set();
 

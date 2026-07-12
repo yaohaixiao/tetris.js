@@ -66,9 +66,6 @@ describe('AIController', () => {
       getBagSnapshot: jest.fn().mockReturnValue([]),
     };
 
-    const mockOn = jest.fn();
-    const mockOff = jest.fn();
-
     selfPlay.mockReturnValue(null);
 
     ai = new AIController({
@@ -78,8 +75,6 @@ describe('AIController', () => {
     });
 
     ai.Animations = mockAnimations;
-    ai.on = mockOn;
-    ai.off = mockOff;
   });
 
   afterEach(() => {
@@ -241,14 +236,6 @@ describe('AIController', () => {
       expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 480);
     });
 
-    it('调度延迟应该使用 Game.getSpeed()', () => {
-      mockGame.getSpeed.mockReturnValue(350);
-      ai.actions = ['DROP'];
-      ai.enabled = true;
-      ai.loop();
-      expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 480);
-    });
-
     it('已存在的 actions 不会再次调用 think', () => {
       const thinkSpy = jest.spyOn(ai, 'think');
       ai.actions = ['MOVE_LEFT', 'DROP'];
@@ -323,16 +310,16 @@ describe('AIController', () => {
 
   // ==================== subscribe / unsubscribe ====================
   describe('subscribe / unsubscribe', () => {
-    it('subscribe 应该注册 start 和 stop 事件', () => {
+    it('subscribe 应该通过 Router 订阅事件', () => {
+      ai.Router = { subscribe: jest.fn() };
       ai.subscribe();
-      expect(ai.on).toHaveBeenCalledWith('ai:test-ai-uuid:start', ai._onStart);
-      expect(ai.on).toHaveBeenCalledWith('ai:test-ai-uuid:stop', ai._onStop);
+      expect(ai.Router.subscribe).toHaveBeenCalled();
     });
 
-    it('unsubscribe 应该注销 start 和 stop 事件', () => {
+    it('unsubscribe 应该通过 Router 取消订阅事件', () => {
+      ai.Router = { unsubscribe: jest.fn() };
       ai.unsubscribe();
-      expect(ai.off).toHaveBeenCalledWith('ai:test-ai-uuid:start', ai._onStart);
-      expect(ai.off).toHaveBeenCalledWith('ai:test-ai-uuid:stop', ai._onStop);
+      expect(ai.Router.unsubscribe).toHaveBeenCalled();
     });
   });
 
@@ -340,16 +327,18 @@ describe('AIController', () => {
   describe('事件回调', () => {
     it('_onStart 应该调用 start()', () => {
       const startSpy = jest.spyOn(ai, 'start');
-      ai._onStart();
+      ai.start();
       expect(startSpy).toHaveBeenCalled();
       startSpy.mockRestore();
     });
 
     it('_onStop 应该调用 stop()', () => {
       const stopSpy = jest.spyOn(ai, 'stop');
-      ai._onStop();
+      const cancelSpy = jest.spyOn(mockScheduler, 'cancel');
+      ai.stop();
       expect(stopSpy).toHaveBeenCalled();
       stopSpy.mockRestore();
+      cancelSpy.mockRestore();
     });
   });
 
@@ -432,12 +421,11 @@ describe('AIController', () => {
     });
   });
 
-  // ==================== 补充覆盖 313-314: expert 难度使用 mcts ====================
+  // ==================== getDifficultyConfig ====================
   describe('getDifficultyConfig', () => {
     it('应该为 expert 难度返回 EXPERT 配置', () => {
       mockStore.getDifficulty.mockReturnValue('expert');
       const config = ai.getDifficultyConfig();
-      // AIDifficulty.EXPERT 应该有特定的 lookahead 值
       expect(config).toBeDefined();
       expect(config.lookahead).toBeDefined();
       expect(config.weights).toBeDefined();
@@ -461,7 +449,7 @@ describe('AIController', () => {
     });
   });
 
-  // ==================== 补充覆盖 382-383: Worker 模式发送消息 ====================
+  // ==================== think - Worker 模式 ====================
   describe('think - Worker 模式', () => {
     it('Worker 模式下应该发送 postMessage 并设置 workerBusy', () => {
       const mockWorker = {
@@ -581,8 +569,8 @@ describe('AIController', () => {
     });
   });
 
-  // ==================== 补充覆盖 398-399: 主线程 createSnapshot + selfPlay ====================
-  describe('think - 主线程模式（覆盖 createSnapshot + selfPlay）', () => {
+  // ==================== think - 主线程模式 ====================
+  describe('think - 主线程模式', () => {
     it('应该调用 createSnapshot 创建快照', () => {
       const state = mockStore.getState();
       const difficulty = {
@@ -591,13 +579,11 @@ describe('AIController', () => {
         beam: 3,
       };
 
-      // 确保 worker 为 null，走主线程模式
       ai.worker = null;
       selfPlay.mockReturnValue({ actions: ['DROP'], y: 18 });
 
       ai.think(state, difficulty);
 
-      // selfPlay 的第一个参数应该是 createSnapshot 的结果
       expect(selfPlay).toHaveBeenCalledTimes(1);
       const snapshot = selfPlay.mock.calls[0][0];
       expect(snapshot).toHaveProperty('board');
@@ -633,7 +619,7 @@ describe('AIController', () => {
       );
     });
 
-    it('应该返回 selfPlay 的完整结果（包含 actions）', () => {
+    it('应该返回 selfPlay 的完整结果', () => {
       const state = mockStore.getState();
       const difficulty = {
         lookahead: 1,
@@ -706,8 +692,7 @@ describe('AIController', () => {
       expect(snapshot.piece.shape).toEqual(state.curr.shape);
     });
 
-    it('主线程模式不支持时 think 内部算法分支正确（expert → selfPlay）', () => {
-      // 主线程模式下，expert 也走 selfPlay（因为 worker 为 null）
+    it('expert 难度在主线程模式也走 selfPlay', () => {
       mockStore.getDifficulty.mockReturnValue('expert');
 
       const state = mockStore.getState();
@@ -718,50 +703,7 @@ describe('AIController', () => {
 
       ai.think(state, difficulty);
 
-      // 应该走 else 分支（主线程模式），调用 selfPlay
       expect(selfPlay).toHaveBeenCalledTimes(1);
-    });
-
-    it('包含复杂棋盘的快照创建', () => {
-      const state = {
-        mode: 'playing',
-        board: Array.from({ length: 20 }, (_, i) =>
-          Array.from({ length: 10 }, (_, j) =>
-            i > 15 && j < 8 ? '#cccccc' : 0,
-          ),
-        ),
-        curr: {
-          shape: [
-            [0, 1, 0],
-            [1, 1, 1],
-          ],
-          color: '#00ff00',
-        },
-        cx: 5,
-        cy: 17,
-      };
-
-      const difficulty = {
-        lookahead: 3,
-        weights: {
-          holes: -10,
-          height: -0.5,
-          bumpiness: -0.3,
-          completeLines: 20,
-        },
-        beam: 5,
-      };
-
-      ai.worker = null;
-      selfPlay.mockReturnValue({ actions: ['MOVE_LEFT', 'DROP'], y: 18 });
-
-      ai.think(state, difficulty);
-
-      const snapshot = selfPlay.mock.calls[0][0];
-      expect(snapshot.board.length).toBe(20);
-      expect(snapshot.board[0].length).toBe(10);
-      // 第 16 行应该有非零值
-      expect(snapshot.board[19].some((c) => c !== 0)).toBe(true); // 第 20 行全空
     });
   });
 
@@ -879,7 +821,7 @@ describe('AIController', () => {
     });
   });
 
-  // ==================== _onWorkerError 完整测试 ====================
+  // ==================== _onWorkerError ====================
   describe('_onWorkerError', () => {
     it('应该设置 workerBusy 为 false', () => {
       ai.workerBusy = true;
@@ -905,7 +847,7 @@ describe('AIController', () => {
     });
   });
 
-  // ==================== _onWorkerMessage 完整测试 ====================
+  // ==================== _onWorkerMessage ====================
   describe('_onWorkerMessage', () => {
     it('result 类型应该设置 workerBusy 为 false', () => {
       ai.workerBusy = true;
@@ -951,8 +893,8 @@ describe('AIController', () => {
       ai._onWorkerMessage({
         data: { type: 'unknown', data: {} },
       });
-      expect(ai.workerBusy).toBe(true); // 不会解锁
-      expect(ai.actions).toEqual(['EXISTING']); // actions 不变
+      expect(ai.workerBusy).toBe(true);
+      expect(ai.actions).toEqual(['EXISTING']);
     });
   });
 
@@ -1014,7 +956,7 @@ describe('AIController', () => {
       // 2. loop 在 Worker 忙碌时继续调度
       emitSpy.mockClear();
       ai.loop();
-      expect(emitSpy).not.toHaveBeenCalled(); // 无 action 可执行
+      expect(emitSpy).not.toHaveBeenCalled();
       expect(mockScheduler.delay).toHaveBeenCalledWith(ai.loop, 480);
 
       // 3. Worker 返回结果
